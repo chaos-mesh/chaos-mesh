@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package container
 
@@ -22,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
@@ -29,7 +32,7 @@ type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
-	pod.Option
+	generic.Option
 }
 
 type Container struct {
@@ -86,7 +89,7 @@ func New(params Params) *SelectImpl {
 	return &SelectImpl{
 		params.Client,
 		params.Reader,
-		pod.Option{
+		generic.Option{
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,

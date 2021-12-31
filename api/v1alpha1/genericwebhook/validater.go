@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package genericwebhook
 
@@ -25,7 +27,13 @@ type FieldValidator interface {
 	Validate(root interface{}, path *field.Path) field.ErrorList
 }
 
+// Validate would walk through all the fields of target struct recursively, and validate the value with validator declared with struct tag "webhook".
+//
+// Parameter obj should be a pointer to a data struct.
+//
+// Validate should return an empty field.ErrorList if all the fields are valid, or return each field.Error for every invalid values.
 func Validate(obj interface{}) field.ErrorList {
+	// TODO: how to resolve invalid input, for example: obj is a pointer to pointer
 	errorList := field.ErrorList{}
 
 	root := obj

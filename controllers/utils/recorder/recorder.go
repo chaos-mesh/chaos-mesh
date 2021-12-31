@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package recorder
 
@@ -18,6 +20,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
@@ -36,10 +40,11 @@ type ChaosRecorder interface {
 }
 
 type chaosRecorder struct {
-	log    logr.Logger
-	source v1.EventSource
-	client client.Client
-	scheme *runtime.Scheme
+	log              logr.Logger
+	source           v1.EventSource
+	client           client.Client
+	scheme           *runtime.Scheme
+	metricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
@@ -69,6 +74,8 @@ func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 		err := r.client.Create(context.TODO(), event)
 		if err != nil {
 			r.log.Error(err, "fail to submit event", "event", event)
+		} else {
+			r.metricsCollector.EmittedEvents.WithLabelValues(event.Type, event.Reason, event.Namespace).Inc()
 		}
 	}()
 }
@@ -113,9 +120,10 @@ func register(ev ...ChaosEvent) {
 }
 
 type RecorderBuilder struct {
-	c      client.Client
-	logger logr.Logger
-	scheme *runtime.Scheme
+	c                client.Client
+	logger           logr.Logger
+	scheme           *runtime.Scheme
+	metricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (b *RecorderBuilder) Build(name string) ChaosRecorder {
@@ -124,16 +132,18 @@ func (b *RecorderBuilder) Build(name string) ChaosRecorder {
 		source: v1.EventSource{
 			Component: name,
 		},
-		client: b.c,
-		scheme: b.scheme,
+		client:           b.c,
+		scheme:           b.scheme,
+		metricsCollector: b.metricsCollector,
 	}
 }
 
-func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme) *RecorderBuilder {
+func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) *RecorderBuilder {
 	return &RecorderBuilder{
 		c,
 		logger,
 		scheme,
+		metricsCollector,
 	}
 }
 

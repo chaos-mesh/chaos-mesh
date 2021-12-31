@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package bpm
 
@@ -57,7 +59,7 @@ func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime ti
 }
 
 var _ = Describe("background process manager", func() {
-	m := NewBackgroundProcessManager()
+	m := NewBackgroundProcessManager(nil)
 
 	Context("normally exited process", func() {
 		It("should work", func() {
@@ -108,7 +110,7 @@ var _ = Describe("background process manager", func() {
 			err = m.KillBackgroundProcess(context.Background(), pid, ct)
 			Expect(err).To(BeNil())
 
-			procState, err = process.NewProcess(int32(pid))
+			_, err = process.NewProcess(int32(pid))
 			Expect(err).NotTo(BeNil())
 		})
 
@@ -152,6 +154,40 @@ var _ = Describe("background process manager", func() {
 
 			err = m.KillBackgroundProcess(context.Background(), pid2, ct2)
 			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("get identifiers", func() {
+		It("should work", func() {
+			identifier := RandomeIdentifier()
+			cmd := DefaultProcessBuilder("sleep", "2").
+				SetIdentifier(identifier).
+				Build()
+
+			_, err := m.StartProcess(cmd)
+			Expect(err).To(BeNil())
+
+			ids := m.GetIdentifiers()
+			Expect(ids).To(Equal([]string{identifier}))
+
+			WaitProcess(&m, cmd, time.Second*5)
+
+			// wait for deleting identifier
+			time.Sleep(time.Second * 2)
+			ids = m.GetIdentifiers()
+			Expect(len(ids)).To(Equal(0))
+		})
+
+		It("should work with nil identifier", func() {
+			cmd := DefaultProcessBuilder("sleep", "2").Build()
+
+			_, err := m.StartProcess(cmd)
+			Expect(err).To(BeNil())
+
+			ids := m.GetIdentifiers()
+			Expect(len(ids)).To(Equal(0))
+
+			WaitProcess(&m, cmd, time.Second*5)
 		})
 	})
 })

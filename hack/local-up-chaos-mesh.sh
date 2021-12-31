@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 set -o errexit
 set -o nounset
@@ -106,16 +107,16 @@ fi
 
 if [ -z "$SKIP_IMAGE_BUILD" ]; then
     echo "info: building docker images"
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
+    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_PROJECT=chaos-mesh IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
 else
     echo "info: skip building docker images"
 fi
 
 echo "info: loading images into cluster"
 images=(
-    $DOCKER_REGISTRY_PREFIX/pingcap/chaos-mesh:${IMAGE_TAG}
-    $DOCKER_REGISTRY_PREFIX/pingcap/chaos-dashboard:${IMAGE_TAG}
-    $DOCKER_REGISTRY_PREFIX/pingcap/chaos-daemon:${IMAGE_TAG}
+    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-mesh:${IMAGE_TAG}
+    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-dashboard:${IMAGE_TAG}
+    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-daemon:${IMAGE_TAG}
 )
 for n in ${images[@]}; do
     echo "info: loading image $n"

@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package v1alpha1
 
@@ -21,7 +23,9 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
-// +chaos-mesh:base
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
+// +chaos-mesh:experiment
 
 // NetworkChaos is the Schema for the networkchaos API
 type NetworkChaos struct {
@@ -38,6 +42,7 @@ type NetworkChaos struct {
 
 var _ InnerObjectWithCustomStatus = (*NetworkChaos)(nil)
 var _ InnerObjectWithSelector = (*NetworkChaos)(nil)
+var _ InnerObject = (*NetworkChaos)(nil)
 
 // NetworkChaosAction represents the chaos action about network.
 type NetworkChaosAction string
@@ -92,6 +97,10 @@ type NetworkChaosSpec struct {
 	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	Action NetworkChaosAction `json:"action"`
 
+	// Device represents the network device to be affected.
+	// +optional
+	Device string `json:"device,omitempty"`
+
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
@@ -106,6 +115,10 @@ type NetworkChaosSpec struct {
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
 	Target *PodSelector `json:"target,omitempty" webhook:",nilable"`
+
+	// TargetDevice represents the network device to be affected in target scope.
+	// +optional
+	TargetDevice string `json:"targetDevice,omitempty"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional

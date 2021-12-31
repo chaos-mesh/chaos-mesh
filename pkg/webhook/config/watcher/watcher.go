@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package watcher
 
@@ -24,7 +26,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -54,11 +56,11 @@ var ErrWatchChannelClosed = errors.New("watcher channel has closed")
 type K8sConfigMapWatcher struct {
 	Config
 	client  k8sv1.CoreV1Interface
-	metrics *metrics.ChaosCollector
+	metrics *metrics.ChaosControllerManagerMetricsCollector
 }
 
 // New creates a new K8sConfigMapWatcher
-func New(cfg Config, metrics *metrics.ChaosCollector) (*K8sConfigMapWatcher, error) {
+func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*K8sConfigMapWatcher, error) {
 	c := K8sConfigMapWatcher{Config: cfg, metrics: metrics}
 	if strings.TrimSpace(c.TemplateNamespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md

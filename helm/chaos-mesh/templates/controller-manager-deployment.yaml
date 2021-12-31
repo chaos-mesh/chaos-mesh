@@ -1,3 +1,17 @@
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,13 +52,17 @@ spec:
       {{- end }}
       containers:
       - name: chaos-mesh
-        image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
+        image: {{template "chaos-controller-manager.image" . }}
         imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          {{- range $envKey, $envVal := .Values.controllerManager.env }}
+          - name: {{ $envKey | upper }}
+            value: {{ $envVal | quote }}
+          {{- end }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -65,6 +83,10 @@ spec:
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}
+          - name: ENABLED_CONTROLLERS
+            value: {{ .Values.controllerManager.enabledControllers | join "," | quote }}
+          - name: ENABLED_WEBHOOKS
+            value: {{ .Values.controllerManager.enabledWebhooks | join "," | quote }}
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
@@ -84,7 +106,9 @@ spec:
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str {{ .Values.dnsServer.grpcPort }}
           - name: SECURITY_MODE
-            value: "{{ .Values.dashboard.securityMode }}"
+            value: {{ .Values.dashboard.securityMode | quote }}
+          - name: CHAOSD_SECURITY_MODE
+            value: {{ .Values.controllerManager.chaosdSecurityMode | quote }}
           {{- if .Values.dashboard.securityMode}}
           - name: CHAOS_DAEMON_CLIENT_CERT
             value: /etc/chaos-daemon/cert/tls.crt
@@ -97,10 +121,26 @@ spec:
           - name: BURST
             value: "50"
           {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: CHAOSD_CA_CERT
+            value: /etc/chaosd/cert/ca.crt
+          - name: CHAOSD_CLIENT_CERT
+            value: /etc/chaosd/cert/tls.crt
+          - name: CHAOSD_CLIENT_KEY
+            value: /etc/chaosd/cert/tls.key
+          {{- end }}
           {{- if .Values.controllerManager.podChaos.podFailure.pauseImage }}
           - name: POD_FAILURE_PAUSE_IMAGE
             value: {{ .Values.controllerManager.podChaos.podFailure.pauseImage }}
           {{- end }}
+          - name: ENABLE_LEADER_ELECTION
+            value: {{ .Values.controllerManager.leaderElection.enabled | quote }}
+          - name: LEADER_ELECT_LEASE_DURATION
+            value: {{ .Values.controllerManager.leaderElection.leaseDuration | quote }}
+          - name: LEADER_ELECT_RENEW_DEADLINE
+            value: {{ .Values.controllerManager.leaderElection.renewDeadline | quote }}
+          - name: LEADER_ELECT_RETRY_PERIOD
+            value: {{ .Values.controllerManager.leaderElection.retryPeriod | quote }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -110,11 +150,16 @@ spec:
             mountPath: /etc/chaos-daemon/cert
             readOnly: true
           {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: chaosd-client-cert
+            mountPath: /etc/chaosd/cert
+            readOnly: true
+          {{- end }}
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: {{ .Values.controllerManager.env.WEBHOOK_PORT }}
           - name: http
-            containerPort: 10080
+            containerPort: {{ .Values.controllerManager.env.METRICS_PORT }}
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081
@@ -125,7 +170,7 @@ spec:
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv
-        image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+        image: {{template "chaos-dlv.image" . }}
         imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
         env:
           - name: CMD_NAME
@@ -146,6 +191,11 @@ spec:
         - name: chaos-daemon-client-cert
           secret:
             secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
+        {{- end }}
+        {{- if .Values.controllerManager.chaosdSecurityMode }}
+        - name: chaosd-client-cert
+          secret:
+            secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
         {{- end }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:

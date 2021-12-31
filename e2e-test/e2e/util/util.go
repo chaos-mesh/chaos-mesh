@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package util
 
@@ -149,6 +151,16 @@ func UnPauseChaos(ctx context.Context, cli client.Client, chaos client.Object) e
 func WaitE2EHelperReady(c http.Client, port uint16) error {
 	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
+			return false, nil
+		}
+		return true, nil
+	})
+}
+
+func WaitHTTPE2EHelperReady(c http.Client, ip string, port uint16) error {
+	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+		if _, err = c.Get(fmt.Sprintf("http://%s:%d/ping", ip, port)); err != nil {
+			framework.Logf("Err : %v , IP : %s", err, ip)
 			return false, nil
 		}
 		return true, nil

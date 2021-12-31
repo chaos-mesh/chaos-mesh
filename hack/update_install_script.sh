@@ -1,25 +1,26 @@
 #!/usr/bin/env bash
-
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 tmp_file="chaos-mesh.yaml"
 tmp_install_script="install.sh.bak"
 install_script="install.sh"
 
 helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
-      --set controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true,dashboard.securityMode=false \
-      > ${tmp_file}
+      --set controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true \
+      --set dashboard.securityMode=false,controllerManager.chaosdSecurityMode=false > ${tmp_file}
 
 sed -i.bak '/helm/d' $tmp_file
 sed -i.bak '/Helm/d' $tmp_file
@@ -32,9 +33,9 @@ sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $
 sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
 sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
 sed -i.bak 's/hostNetwork: true/hostNetwork: \$\{host_network\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-mesh:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-daemon:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-dashboard:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh:.*/\${DOCKER_REGISTRY_PREFIX}\/chaos-mesh\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-daemon:.*/\${DOCKER_REGISTRY_PREFIX}\/chaos-mesh\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-dashboard:.*/\${DOCKER_REGISTRY_PREFIX}\/chaos-mesh\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/value: UTC/value: \$\{timezone\}/g' $tmp_file
 mv $tmp_file $tmp_file.bak
 

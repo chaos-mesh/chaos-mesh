@@ -4,19 +4,20 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package httpchaos
 
 import (
 	"context"
 	"io/ioutil"
-	"net/http"
 	"strings"
 	"time"
 
@@ -36,14 +37,14 @@ import (
 func TestcaseHttpPatchThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := `{"msg":"Hello","target":"World"}`
@@ -88,10 +89,12 @@ func TestcaseHttpPatchThenRecover(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",
@@ -167,14 +170,14 @@ func TestcaseHttpPatchThenRecover(
 func TestcaseHttpPatchPauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := `{"msg":"Hello","target":"World"}`
@@ -218,10 +221,12 @@ func TestcaseHttpPatchPauseAndUnPause(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",

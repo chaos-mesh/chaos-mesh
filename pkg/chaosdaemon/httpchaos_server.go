@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package chaosdaemon
 
@@ -23,7 +25,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -35,11 +38,6 @@ const (
 
 type stdioTransport struct {
 	stdio *bpm.Stdio
-}
-
-type tproxyConfig struct {
-	ProxyPorts []uint32                        `json:"proxy_ports"`
-	Rules      []v1alpha1.PodHttpChaosBaseRule `json:"rules"`
 }
 
 func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -79,7 +77,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	transport := stdioTransport{stdio: stdio}
 
-	rules := []v1alpha1.PodHttpChaosBaseRule{}
+	var rules []tproxyconfig.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
@@ -88,8 +86,8 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	log.Info("the length of actions", "length", len(rules))
 
-	httpChaosSpec := tproxyConfig{
-		ProxyPorts: append([]uint32{}, in.ProxyPorts...),
+	httpChaosSpec := tproxyconfig.Config{
+		ProxyPorts: in.ProxyPorts,
 		Rules:      rules,
 	}
 
@@ -133,7 +131,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
-		SetIdentifier(in.ContainerId).
+		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
 		SetStdin(bpm.NewBlockingBuffer()).
 		SetStdout(bpm.NewBlockingBuffer())

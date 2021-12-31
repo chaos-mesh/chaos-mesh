@@ -38,6 +38,10 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.podAnnotations` |  Pod annotations of chaos-controller-manager | `{}`|
 | `controllerManager.enableFilterNamespace` | If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` will be injected | false |
 | `controllerManager.podChaos.podFailure.pauseImage` | Custom Pause Container Image for Pod Failure Chaos | `gcr.io/google-containers/pause:latest` |
+| `controllerManager.leaderElection.enabled` | Enable leader election for controller manager. | true |
+| `controllerManager.leaderElection.leaseDuration` | The duration that non-leader candidates will wait to force acquire leadership. This is measured against time of last observed ack. | 15s |
+| `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | 10s |
+| `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | 2s |
 | `chaosDaemon.image` | docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
@@ -134,16 +138,20 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing -f values.yaml
 
 ### Using cert-manager for certificate management
 
-[Cert-manager](https://github.com/jetstack/cert-manager) may be the default in the K8s world for certificate management now.If you want to install Cert-manager using the [Helm](https://helm.sh) package manager, please refer to the [official documents](https://github.com/jetstack/cert-manager/tree/master/deploy/charts/cert-manager).
+[Cert-manager](https://github.com/jetstack/cert-manager) may be the default in the K8s world for certificate management now. If you want to install Cert-manager using the [Helm](https://helm.sh) package manager, please refer to the [official documents](https://github.com/jetstack/cert-manager/tree/master/deploy/charts/cert-manager).
 
 Example for deploy Cert-manager
 
 ```bash
-kubectl create namespace cert-manager
-kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/v0.13.1/deploy/manifests/00-crds.yaml
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v0.13.1
+
+# if Kubernetes > 1.18/Helm 3.2
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.6.1 --set installCRDs=true
+
+# else
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.crds.yaml
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.6.1
 ```
 
 In case you want to using Cert-manager for certificate management, you can use the `webhook.certManager.enabled` property.

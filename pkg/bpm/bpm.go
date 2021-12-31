@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package bpm
 
@@ -22,6 +24,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -76,15 +79,24 @@ type BackgroundProcessManager struct {
 	deathSig    *sync.Map
 	identifiers *sync.Map
 	stdio       *sync.Map
+
+	metricsCollector *metricsCollector
 }
 
 // NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager() BackgroundProcessManager {
-	return BackgroundProcessManager{
-		deathSig:    &sync.Map{},
-		identifiers: &sync.Map{},
-		stdio:       &sync.Map{},
+func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProcessManager {
+	backgroundProcessManager := BackgroundProcessManager{
+		deathSig:         &sync.Map{},
+		identifiers:      &sync.Map{},
+		stdio:            &sync.Map{},
+		metricsCollector: nil,
 	}
+
+	if registry != nil {
+		backgroundProcessManager.metricsCollector = newMetricsCollector(backgroundProcessManager, registry)
+	}
+
+	return backgroundProcessManager
 }
 
 // StartProcess manages a process in manager
@@ -148,9 +160,8 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			err, ok := err.(*exec.ExitError)
-			if ok {
-				status := err.Sys().(syscall.WaitStatus)
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				status := exitErr.Sys().(syscall.WaitStatus)
 				if status.Signaled() && status.Signal() == syscall.SIGTERM {
 					log.Info("process stopped with SIGTERM signal")
 				}
@@ -191,6 +202,9 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 		}
 	}()
 
+	if m.metricsCollector != nil {
+		m.metricsCollector.bpmControlledProcessTotal.Inc()
+	}
 	return procState, nil
 }
 
@@ -300,6 +314,17 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 	return io.(*Stdio)
 }
 
+// GetIdentifiers finds all identifiers in BPM
+func (m *BackgroundProcessManager) GetIdentifiers() []string {
+	var identifiers []string
+	m.identifiers.Range(func(key, value interface{}) bool {
+		identifiers = append(identifiers, key.(string))
+		return true
+	})
+
+	return identifiers
+}
+
 // DefaultProcessBuilder returns the default process builder
 func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 	return &ProcessBuilder{
@@ -358,6 +383,9 @@ func (b *ProcessBuilder) SetNSOpt(options []nsOption) *ProcessBuilder {
 }
 
 // SetIdentifier sets the identifier of the process
+//
+// The identifier is used to identify the process in BPM, to confirm only one identified process is running.
+// If one identified process is already running, new processes with the same identifier will be blocked by lock.
 func (b *ProcessBuilder) SetIdentifier(id string) *ProcessBuilder {
 	b.identifier = &id
 

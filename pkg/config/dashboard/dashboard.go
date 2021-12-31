@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package config
 
@@ -25,7 +27,8 @@ import (
 type ChaosDashboardConfig struct {
 	ListenHost           string            `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
 	ListenPort           int               `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
-	MetricAddress        string            `envconfig:"METRIC_ADDRESS" json:"-"`
+	MetricHost           string            `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
+	MetricPort           int               `envconfig:"METRIC_PORT" default:"2334" json:"-"`
 	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
 	Database             *DatabaseConfig   `json:"-"`
 	PersistTTL           *PersistTTLConfig `json:"-"`
@@ -37,8 +40,15 @@ type ChaosDashboardConfig struct {
 	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 	// annotated with `chaos-mesh.org/inject=enabled` will be injected.
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
-	// If SecurityMode is set to true, then the dashboard requires token authentication.
-	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	// SecurityMode will use the token login by the user if set to true
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	// GcpSecurityMode will use the gcloud authentication to login to GKE user
+	GcpSecurityMode bool   `envconfig:"GCP_SECURITY_MODE" default:"false" json:"gcp_security_mode"`
+	GcpClientId     string `envconfig:"GCP_CLIENT_ID" default:"" json:"-"`
+	GcpClientSecret string `envconfig:"GCP_CLIENT_SECRET" default:"" json:"-"`
+
+	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
+
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
 }

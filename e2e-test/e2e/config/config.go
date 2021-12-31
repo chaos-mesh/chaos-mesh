@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package config
 
@@ -28,8 +30,10 @@ var TestConfig = test.NewDefaultConfig()
 
 // RegisterOperatorFlags registers flags for chaos-mesh.
 func RegisterOperatorFlags(flags *flag.FlagSet) {
+	flags.StringVar(&TestConfig.ManagerImage, "manager-image-registry", "localhost:5000", "chaos-mesh image registry")
 	flags.StringVar(&TestConfig.ManagerImage, "manager-image", "pingcap/chaos-mesh", "chaos-mesh image")
 	flags.StringVar(&TestConfig.ManagerTag, "manager-image-tag", "latest", "chaos-mesh image tag")
+	flags.StringVar(&TestConfig.DaemonImage, "daemon-image-registry", "localhost:5000", "chaos-daemon image registry")
 	flags.StringVar(&TestConfig.DaemonImage, "daemon-image", "pingcap/chaos-daemon", "chaos-daemon image")
 	flags.StringVar(&TestConfig.DaemonTag, "daemon-image-tag", "latest", "chaos-daemon image tag")
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "pingcap/e2e-helper:latest", "e2e helper image")

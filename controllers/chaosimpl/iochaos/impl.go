@@ -1,15 +1,17 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package iochaos
 
@@ -27,9 +29,11 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/iochaos/podiochaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const (
 	waitForApplySync   v1alpha1.Phase = "Not Injected/Wait"
@@ -43,12 +47,10 @@ type Impl struct {
 	builder *podiochaosmanager.Builder
 }
 
-var _ common.ChaosImpl = (*Impl)(nil)
-
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
 
-	impl.Log.Info("iochaos Apply", "namespace", obj.GetObjectMeta().Namespace, "name", obj.GetObjectMeta().Name)
+	impl.Log.Info("iochaos Apply", "namespace", obj.GetNamespace(), "name", obj.GetName())
 	iochaos := obj.(*v1alpha1.IOChaos)
 	if iochaos.Status.Instances == nil {
 		iochaos.Status.Instances = make(map[string]int64)
@@ -213,8 +215,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return waitForRecoverSync, nil
 }
 
-func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, b *podiochaosmanager.Builder, log logr.Logger) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "iochaos",
 		Object: &v1alpha1.IOChaos{},
 		Impl: &Impl{

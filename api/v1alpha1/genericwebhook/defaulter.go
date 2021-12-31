@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package genericwebhook
 
@@ -24,7 +26,13 @@ type Defaulter interface {
 	Default(root interface{}, field *reflect.StructField)
 }
 
+// Default would walk through all the fields of target struct recursively, and set the default value which declared with struct tag "default".
+//
+// Parameter obj should be a pointer to a data struct.
+//
+// Default should return an empty field.ErrorList.
 func Default(obj interface{}) field.ErrorList {
+	// TODO: how to resolve invalid input, for example: obj is a pointer to pointer
 	errorList := field.ErrorList{}
 
 	root := obj

@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package httpchaos
 
@@ -22,8 +24,13 @@ import (
 
 const SECRET = "Secret"
 
-func getPodHttp(c http.Client, port uint16, secret, body string) (*http.Response, error) {
-	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/http", port), strings.NewReader(body))
+type HTTPE2EClient struct {
+	IP string
+	C  *http.Client
+}
+
+func getPodHttp(c HTTPE2EClient, port uint16, secret, body string) (*http.Response, error) {
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:%d/http", c.IP, port), strings.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -35,20 +42,20 @@ func getPodHttp(c http.Client, port uint16, secret, body string) (*http.Response
 	return resp, err
 }
 
-func getPodHttpNoSecret(c http.Client, port uint16) (*http.Response, error) {
+func getPodHttpNoSecret(c HTTPE2EClient, port uint16) (*http.Response, error) {
 	return getPodHttp(c, port, "", "")
 }
 
-func getPodHttpDefaultSecret(c http.Client, port uint16, body string) (*http.Response, error) {
+func getPodHttpDefaultSecret(c HTTPE2EClient, port uint16, body string) (*http.Response, error) {
 	return getPodHttp(c, port, "foo", body)
 }
 
-func getPodHttpNoBody(c http.Client, port uint16) (*http.Response, error) {
+func getPodHttpNoBody(c HTTPE2EClient, port uint16) (*http.Response, error) {
 	return getPodHttpDefaultSecret(c, port, "")
 }
 
 // get pod http delay
-func getPodHttpDelay(c http.Client, port uint16) (*http.Response, time.Duration, error) {
+func getPodHttpDelay(c HTTPE2EClient, port uint16) (*http.Response, time.Duration, error) {
 	start := time.Now()
 	resp, err := getPodHttpNoBody(c, port)
 	if err != nil {

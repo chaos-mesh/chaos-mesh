@@ -1,15 +1,17 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package apiserver
 
@@ -22,12 +24,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
+	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apivalidator"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/uiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 var (
@@ -38,6 +43,10 @@ var (
 			newAPIRouter,
 		),
 		handlerModule,
+		fx.Provide(func() prometheus.Registerer {
+			return controllermetrics.Registry
+		}),
+		fx.Invoke(metrics.NewChaosDashboardMetricsCollector),
 		fx.Invoke(register),
 	)
 )
@@ -65,6 +74,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
 		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
 		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
+		v.RegisterValidation("PhysicalMachineValid", apivalidator.PhysicalMachineValid)
 	}
 
 	ui := uiserver.AssetsFS()
@@ -92,7 +102,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 			c.String(http.StatusOK, `Dashboard UI is not built.
 Please run UI=1 make.
 Run UI=1 make images/chaos-dashboard/bin/chaos-dashboard if you only want to build dashboard only.
-(Note: If you only want to build the binary, pass IN_DOCKER=1.)`)
+(Note: If you only want to build the binary in local, pass IN_DOCKER=1)`)
 		})
 	}
 

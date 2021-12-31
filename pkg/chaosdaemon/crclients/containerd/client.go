@@ -4,12 +4,14 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package containerd
 
@@ -25,11 +27,17 @@ import (
 
 const (
 	containerdProtocolPrefix = "containerd://"
+
+	// containerKindLabel is a label key intending to filter sandbox container
+	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L74-L80
+	containerKindLabel     = "io.cri-containerd.kind"
+	containerKindContainer = "container"
 )
 
 // ContainerdClientInterface represents the ContainerClient, it's used to simply unit test
 type ContainerdClientInterface interface {
 	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
+	Containers(ctx context.Context, filters ...string) ([]containerd.Container, error)
 }
 
 // ContainerdClient can get information from containerd
@@ -84,6 +92,44 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	err = task.Kill(ctx, syscall.SIGKILL)
 
 	return err
+}
+
+// ListContainerIDs lists all container IDs
+func (c ContainerdClient) ListContainerIDs(ctx context.Context) ([]string, error) {
+	// filter sandbox containers
+	// ref: https://github.com/containerd/containerd/blob/main/pkg/cri/server/helpers.go#L281-L285
+	filter := fmt.Sprintf("labels.%q==%q", containerKindLabel, containerKindContainer)
+	containers, err := c.client.Containers(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for _, container := range containers {
+		id := fmt.Sprintf("%s%s", containerdProtocolPrefix, container.ID())
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+// GetLabelsFromContainerID returns the labels according to container ID
+func (c ContainerdClient) GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+
+	container, err := c.client.LoadContainer(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	labels, err := container.Labels(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return labels, nil
 }
 
 func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error) {
