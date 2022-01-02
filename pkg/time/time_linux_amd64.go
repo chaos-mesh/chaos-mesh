@@ -31,9 +31,5 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 			return nil
 		}
 	}
-	timeSkew, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask)
-	if err != nil {
-		return err
-	}
-	return timeSkew.Inject(pid)
+	return Composite(pid, deltaSec, deltaNsec, clockIdsMask)
 }

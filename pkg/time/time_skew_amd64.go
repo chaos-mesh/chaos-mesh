@@ -154,3 +154,140 @@ func (it *TimeSkew) Recover(pid int) error {
 	zeroSkew := NewTimeSkewWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage)
 	return zeroSkew.Inject(pid)
 }
+
+// ============gettimeofday injector================
+
+// timeofdaySkewFakeImage is the filename of fake image after compiling
+const timeOfDaySkewFakeImage = "fake_gettimeofday.o"
+
+// vdsoEntryName is the name of the vDSO entry
+// const vdsoEntryName = "[vdso]"
+
+// getTimeOfDay is the target function would be replaced
+const getTimeOfDay = "gettimeofday"
+
+type TimeOfDaySkew struct {
+	deltaSeconds     int64
+	deltaNanoSeconds int64
+	fakeImage        *FakeImage
+}
+
+func NewTimeOfDaySkew(deltaSeconds int64, deltaNanoSeconds int64) (*TimeOfDaySkew, error) {
+	var image *FakeImage
+	var err error
+
+	if image, err = LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage); err != nil {
+		return nil, errors.Wrap(err, "load fake image")
+	}
+
+	return NewTimeOfDaySkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, image), nil
+}
+
+func NewTimeOfDaySkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, fakeImage *FakeImage) *TimeOfDaySkew {
+	return &TimeOfDaySkew{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, fakeImage: fakeImage}
+}
+
+func (it *TimeOfDaySkew) Inject(pid int) error {
+
+	runtime.LockOSThread()
+	defer func() {
+		runtime.UnlockOSThread()
+	}()
+
+	program, err := ptrace.Trace(pid)
+	if err != nil {
+		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
+	}
+	defer func() {
+		err = program.Detach()
+		if err != nil {
+			log.Error(err, "fail to detach program", "pid", program.Pid())
+		}
+	}()
+
+	var vdsoEntry *mapreader.Entry
+	for index := range program.Entries {
+		// reverse loop is faster
+		e := program.Entries[len(program.Entries)-index-1]
+		if e.Path == vdsoEntryName {
+			vdsoEntry = &e
+			break
+		}
+	}
+	if vdsoEntry == nil {
+		return errors.Errorf("cannot find [vdso] entry, pid: %d", pid)
+	}
+
+	// minus tailing variable part
+	// every variable has 8 bytes
+	constImageLen := len(it.fakeImage.content) - 8*len(it.fakeImage.offset)
+	var fakeEntry *mapreader.Entry
+
+	// find injected image to avoid redundant inject (which will lead to memory leak)
+	for _, e := range program.Entries {
+		e := e
+
+		image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))
+		if err != nil {
+			continue
+		}
+
+		if bytes.Equal(*image, it.fakeImage.content[0:constImageLen]) {
+			fakeEntry = &e
+			log.Info("found injected image", "addr", fakeEntry.StartAddress, "pid", pid)
+			break
+		}
+	}
+
+	// target process has not been injected yet
+	if fakeEntry == nil {
+		fakeEntry, err = program.MmapSlice(it.fakeImage.content)
+		if err != nil {
+			return errors.Wrapf(err, "mmap fake image, pid: %d", pid)
+		}
+
+		originAddr, err := program.FindSymbolInEntry(getTimeOfDay, vdsoEntry)
+		if err != nil {
+			return errors.Wrapf(err, "find origin gettimeofday in vdso, pid: %d", pid)
+		}
+
+		err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
+		if err != nil {
+			return errors.Wrapf(err, "override origin gettimeofday, pid: %d", pid)
+		}
+	}
+
+	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvSecDelta]), uint64(it.deltaSeconds))
+	if err != nil {
+		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarTvSecDelta, pid)
+	}
+
+	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvNsecDelta]), uint64(it.deltaNanoSeconds))
+	if err != nil {
+		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarTvNsecDelta, pid)
+	}
+	return nil
+}
+
+func (it *TimeOfDaySkew) Recover(pid int) error {
+	zeroSkew := NewTimeOfDaySkewWithCustomFakeImage(0, 0, it.fakeImage)
+	return zeroSkew.Inject(pid)
+}
+
+func Composite(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
+	timeSkew, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask)
+	if err != nil {
+		return err
+	}
+	timeOfDaySkew, err := NewTimeOfDaySkew(deltaSec, deltaNsec)
+	if err != nil {
+		return err
+	}
+	if err := timeSkew.Inject(pid); err != nil {
+		return err
+	}
+	if err := timeOfDaySkew.Inject(pid); err != nil {
+		return err
+	}
+	return nil
+}
