@@ -139,7 +139,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
-		SetIdentifier(in.ContainerId).
+		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
 		SetStdin(bpm.NewBlockingBuffer()).
 		SetStdout(bpm.NewBlockingBuffer())

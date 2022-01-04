@@ -16,6 +16,7 @@
 package label
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -38,4 +39,31 @@ func TestLabelString(t *testing.T) {
 	la[""] = "t3"
 	g.Expect(len(la.String())).To(Equal(len("test-label-1=t1,test-label-2=t2")))
 	g.Expect(strings.Contains(la.String(), "t3")).To(Equal(false))
+}
+
+func TestParseLabel(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	label1 := "k1=v1"
+	labelMap1 := Label{"k1": "v1"}
+	result, err := ParseLabel(label1)
+
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(reflect.DeepEqual(labelMap1, result)).To(Equal(true))
+
+	label2 := "k1=v1,k2=v2"
+	labelMap2 := Label{"k1": "v1", "k2": "v2"}
+	result, err = ParseLabel(label2)
+
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(reflect.DeepEqual(labelMap2, result)).To(Equal(true))
+
+	label3 := ""
+	_, err = ParseLabel(label3)
+	g.Expect(err).ToNot(HaveOccurred())
+
+	label4 := "k1=v2,,"
+	_, err = ParseLabel(label4)
+	g.Expect(err).To(HaveOccurred())
+	g.Expect(strings.Contains(err.Error(), "invalid labels")).To(BeTrue())
 }
