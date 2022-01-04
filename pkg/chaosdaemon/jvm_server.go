@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pingcap/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -93,7 +94,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		if !strings.Contains(string(output), errMsg1) && !strings.Contains(string(output), errMsg2) &&
 			!strings.Contains(string(output), errMsg3) {
 			log.Error(err, string(output))
-			return nil, err
+			return nil, errors.Wrap(err, string(output))
 		}
 		log.Info("exec comamnd", "cmd", cmd.String(), "output", string(output), "error", err.Error())
 	}
@@ -112,7 +113,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	output, err = processBuilder.Build().CombinedOutput()
 	if err != nil {
 		log.Error(err, string(output))
-		return nil, err
+		return nil, errors.Wrap(err, string(output))
 	}
 	if len(output) > 0 {
 		log.Info("submit rules", "output", string(output))
@@ -147,7 +148,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 		if strings.Contains(string(output), "No rule scripts to remove") {
 			return &empty.Empty{}, nil
 		}
-		return nil, err
+		return nil, errors.Wrap(err, string(output))
 	}
 
 	if len(output) > 0 {
