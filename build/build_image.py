@@ -43,7 +43,7 @@ def get_image_env(name, env, default):
         default_env = default
     env_mid_name = utils.underscore_uppercase(name)
 
-    env = os.getenv("IMAGE_%s_%s" % (env_mid_name, env), default_env)
+    env = os.getenv(f"IMAGE_{env_mid_name}_{env}", default_env)
     if env == "":
         env = default_env
     return env
@@ -85,7 +85,7 @@ def get_image_full_name(name):
     registry = get_image_registry(name)
     tag = get_image_tag(name)
 
-    return "%s/%s/%s:%s" % (registry, project, name, tag)
+    return f"{registry}/{project}/{name}:{tag}"
 
 
 def pass_env_to_build_arg(cmd, arg_name):
@@ -93,7 +93,7 @@ def pass_env_to_build_arg(cmd, arg_name):
     pass the environment variable to the build arguments
     """
     if os.getenv(arg_name) is not None:
-        cmd += ["--build-arg", "%s=%s" % (arg_name, os.getenv(arg_name))]
+        cmd += ["--build-arg", f"{arg_name}={os.getenv(arg_name)}"]
 
 
 def main():
@@ -126,8 +126,7 @@ def main():
             env = {"DOCKER_BUILDKIT": "1",
                    "DOCKER_CLI_EXPERIMENTAL": "enabled"}
             cache_dir = os.getenv(
-                "DOCKER_CACHE_DIR", "%s/.cache/image-%s" %
-                (os.getcwd(), name))
+                "DOCKER_CACHE_DIR", f"{os.getcwd()}/.cache/image-{name}")
             pathlib.Path(cache_dir).mkdir(parents=True, exist_ok=True)
             cmd = [
                 "docker",
@@ -135,10 +134,9 @@ def main():
                 "build",
                 "--load",
                 "--cache-to",
-                "type=local,dest=%s" %
-                cache_dir]
+                f"type=local,dest={cache_dir}"]
             if os.getenv("DISABLE_CACHE_FROM") != "1":
-                cmd += ["--cache-from", "type=local,src=%s" % cache_dir]
+                cmd += ["--cache-from", f"type=local,src={cache_dir}"]
         else:
             if os.getenv("TARGET_PLATFORM") is not None:
                 env = {"DOCKER_BUILDKIT": "1"}
@@ -159,7 +157,7 @@ def main():
             pass_env_to_build_arg(cmd, env_key)
 
         target_platform = utils.get_target_platform()
-        cmd += ["--build-arg", "%s=%s" % ("TARGET_PLATFORM", target_platform)]
+        cmd += ["--build-arg", f"TARGET_PLATFORM={target_platform}"]
         cmd += ["-t", image_full_name, args.path[0]]
     else:
         cmd = ["docker", "pull", image_full_name]

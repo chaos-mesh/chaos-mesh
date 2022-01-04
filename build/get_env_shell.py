@@ -34,7 +34,7 @@ def pass_env_to_docker_arg(cmd, arg_name):
     pass environment variable to the docker run command
     """
     if os.getenv(arg_name) is not None:
-        cmd += ["-e", "%s" % arg_name]
+        cmd += ["-e", f"{arg_name}"]
 
 
 def main():
@@ -82,26 +82,25 @@ def main():
 
     cwd = os.getcwd()
     cmd += ["--env", "IN_DOCKER=1"]
-    cmd += ["--volume", "%s:%s" % (cwd, cwd)]
-    cmd += ["--user", "%s:%s" % (os.getuid(), os.getgid())]
+    cmd += ["--volume", f"{cwd}:{cwd}" % (cwd, cwd)]
+    cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 
     target_platform = utils.get_target_platform()
     if os.getenv("TARGET_PLATFORM") is not None and os.getenv(
             "TARGET_PLATFORM") != "":
-        cmd += ["--platform", "linux/%s" % os.getenv("TARGET_PLATFORM")]
+        cmd += ["--platform", f"linux/{os.getenv('TARGET_PLATFORM')}"]
     if target_platform == "arm64":
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
 
     if os.getenv("GO_BUILD_CACHE") is not None and os.getenv(
             "GO_BUILD_CACHE") != "":
-        tmp_go_dir = "%s/chaos-mesh-gopath" % os.getenv("GO_BUILD_CACHE")
-        tmp_go_build_dir = "%s/chaos-mesh-gobuild" % os.getenv(
-            "GO_BUILD_CACHE")
+        tmp_go_dir = f"{os.getenv('GO_BUILD_CACHE')}/chaos-mesh-gopath"
+        tmp_go_build_dir = f"os.getenv('GO_BUILD_CACHE')/chaos-mesh-gobuild"
 
         pathlib.Path(tmp_go_dir).mkdir(parents=True, exist_ok=True)
         pathlib.Path(tmp_go_build_dir).mkdir(parents=True, exist_ok=True)
-        cmd += ["--volume", "%s:/tmp/go" % tmp_go_dir]
-        cmd += ["--volume", "%s:/tmp/go-build" % tmp_go_build_dir]
+        cmd += ["--volume", f"{tmp_go_dir}:/tmp/go"]
+        cmd += ["--volume", f"{tmp_go_build_dir}:/tmp/go-build"]
 
     cmd += ["--workdir", cwd]
     cmd += [env_image_full_name]
