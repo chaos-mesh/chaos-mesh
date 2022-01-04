@@ -95,7 +95,7 @@ def main():
     if os.getenv("GO_BUILD_CACHE") is not None and os.getenv(
             "GO_BUILD_CACHE") != "":
         tmp_go_dir = f"{os.getenv('GO_BUILD_CACHE')}/chaos-mesh-gopath"
-        tmp_go_build_dir = f"os.getenv('GO_BUILD_CACHE')/chaos-mesh-gobuild"
+        tmp_go_build_dir = f"{os.getenv('GO_BUILD_CACHE')}/chaos-mesh-gobuild"
 
         pathlib.Path(tmp_go_dir).mkdir(parents=True, exist_ok=True)
         pathlib.Path(tmp_go_build_dir).mkdir(parents=True, exist_ok=True)
