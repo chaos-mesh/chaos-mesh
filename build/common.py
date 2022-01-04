@@ -13,6 +13,10 @@
 # limitations under the License.
 #
 
+"""
+varaibles used commonly in multiple scripts
+"""
+
 export_env_variables = [
     "HTTP_PROXY",
     "HTTPS_PROXY",

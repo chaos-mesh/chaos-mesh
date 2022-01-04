@@ -14,6 +14,11 @@
 # limitations under the License.
 #
 
+"""
+build an image in the given path with the given name and environment
+configuration
+"""
+
 import os
 import argparse
 import subprocess
@@ -22,47 +27,95 @@ import pathlib
 import utils
 import common
 
+
 def get_image_env(name, env, default):
+    """
+    get environment variable related with an image according to the priority:
+    1. IMAGE_<name>_<env>
+    2. IMAGE_<env>
+    3. default value
+
+    the image name will be automatically converted to the unserscore_uppsercase
+    format, for example, "chaos-mesh" will be converted to "CHAOS_MESH"
+    """
     default_env = os.getenv("IMAGE_" + env, default)
     if default_env == "":
         default_env = default
     env_mid_name = utils.underscore_uppercase(name)
-    
+
     env = os.getenv("IMAGE_%s_%s" % (env_mid_name, env), default_env)
     if env == "":
         env = default_env
     return env
 
+
 def get_image_project(name):
+    """
+    get the project name of the image
+    """
     return get_image_env(name, "PROJECT", "pingcap")
 
+
 def get_image_registry(name):
+    """
+    get the registry of the image
+    """
     return get_image_env(name, "REGISTRY", "localhost:5000")
 
+
 def get_image_tag(name):
+    """
+    get the tag of the image
+    """
     return get_image_env(name, "TAG", "latest")
 
+
 def get_image_build(name):
-    print(get_image_env(name, "BUILD", "1"))
+    """
+    get whether this image should be built
+    """
     return get_image_env(name, "BUILD", "1")
 
+
 def get_image_full_name(name):
+    """
+    get the full tag of an image
+    """
     project = get_image_project(name)
     registry = get_image_registry(name)
     tag = get_image_tag(name)
 
     return "%s/%s/%s:%s" % (registry, project, name, tag)
 
+
 def pass_env_to_build_arg(cmd, arg_name):
-    if os.getenv(arg_name) != None:
+    """
+    pass the environment variable to the build arguments
+    """
+    if os.getenv(arg_name) is not None:
         cmd += ["--build-arg", "%s=%s" % (arg_name, os.getenv(arg_name))]
 
-if __name__ == '__main__':
-    cmdParser = argparse.ArgumentParser(description='Helper script to build Chaos Mesh image.')
-    cmdParser.add_argument('name', metavar="NAME", type=str, nargs=1, help="the name of image")
-    cmdParser.add_argument('path', metavar="PATH", type=str, nargs=1, help="the path of the Dockerfile build directory")
 
-    args = cmdParser.parse_args()
+def main():
+    """
+    entrypoint of this script
+    """
+    cmd_parser = argparse.ArgumentParser(
+        description='Helper script to build Chaos Mesh image.')
+    cmd_parser.add_argument(
+        'name',
+        metavar="NAME",
+        type=str,
+        nargs=1,
+        help="the name of image")
+    cmd_parser.add_argument(
+        'path',
+        metavar="PATH",
+        type=str,
+        nargs=1,
+        help="the path of the Dockerfile build directory")
+
+    args = cmd_parser.parse_args()
     name = args.name[0]
     image_full_name = get_image_full_name(name)
 
@@ -70,18 +123,35 @@ if __name__ == '__main__':
     cmd = []
     if get_image_build(name) == "1":
         if os.getenv("DOCKER_CACHE") == "1":
-            env = {"DOCKER_BUILDKIT": "1", "DOCKER_CLI_EXPERIMENTAL": "enabled"}
-            cache_dir = os.getenv("DOCKER_CACHE_DIR", "%s/.cache/image-%s" % (os.getcwd(), name))
+            env = {"DOCKER_BUILDKIT": "1",
+                   "DOCKER_CLI_EXPERIMENTAL": "enabled"}
+            cache_dir = os.getenv(
+                "DOCKER_CACHE_DIR", "%s/.cache/image-%s" %
+                (os.getcwd(), name))
             pathlib.Path(cache_dir).mkdir(parents=True, exist_ok=True)
-            cmd = ["docker", "buildx", "build", "--load", "--cache-to", "type=local,dest=%s" % cache_dir]
+            cmd = [
+                "docker",
+                "buildx",
+                "build",
+                "--load",
+                "--cache-to",
+                "type=local,dest=%s" %
+                cache_dir]
             if os.getenv("DISABLE_CACHE_FROM") != "1":
                 cmd += ["--cache-from", "type=local,src=%s" % cache_dir]
         else:
-            if os.getenv("TARGET_PLATFORM") != None:
+            if os.getenv("TARGET_PLATFORM") is not None:
                 env = {"DOCKER_BUILDKIT": "1"}
-                cmd = ["docker", "buildx", "build", "--load", "--platform", os.getenv("TARGET_PLATFORM")]
+                cmd = [
+                    "docker",
+                    "buildx",
+                    "build",
+                    "--load",
+                    "--platform",
+                    os.getenv("TARGET_PLATFORM")]
             else:
-                # This branch is split to avoid to use `buildx`, as `buildx` is not supported on some CI environment
+                # This branch is split to avoid to use `buildx`, as `buildx` is
+                # not supported on some CI environment
                 env = {"DOCKER_BUILDKIT": "1"}
                 cmd = ["docker", "build"]
 
@@ -95,4 +165,8 @@ if __name__ == '__main__':
         cmd = ["docker", "pull", image_full_name]
 
     print(" ".join(cmd))
-    subprocess.run(cmd, env=env)
+    subprocess.run(cmd, env=env, check=True)
+
+
+if __name__ == '__main__':
+    main()

@@ -13,24 +13,41 @@
 # limitations under the License.
 #
 
+"""
+functions used in multiple scripts
+"""
+
 import os
 import sys
 
+
 def underscore_uppercase(name):
+    """
+    convert the given name to the underscore_uppercase format
+    """
     return name.replace('-', '_').upper()
 
+
 def get_target_platform():
-    if os.getenv("TARGET_PLATFORM") != None:
+    """
+    get the target platform according to the `TARGET_PLATFORM` variable or the
+    `uname` syscall
+    """
+
+    if os.getenv("TARGET_PLATFORM") is not None:
         return os.getenv("TARGET_PLATFORM")
-    else:
-        machine = os.uname().machine
-        if machine == "x86_64":
-            return "amd64"
-        elif machine == "amd64":
-            return "amd64"
-        elif machine == "arm64":
-            return "arm64"
-        elif machine == "aarch64":
-            return "arm64"
-        else:
-            sys.exit("Please run this script on amd64 or arm64 machine")
+
+    machine = os.uname().machine
+    if machine == "x86_64":
+        return "amd64"
+
+    if machine == "amd64":
+        return "amd64"
+
+    if machine == "arm64":
+        return "arm64"
+
+    if machine == "aarch64":
+        return "arm64"
+
+    sys.exit("Please run this script on amd64 or arm64 machine")

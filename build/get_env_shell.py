@@ -14,6 +14,11 @@
 # limitations under the License.
 #
 
+"""
+print the `docker run` command to run `Make` commands in a container
+the arguments of `docker run` is based on the environment variables
+"""
+
 import argparse
 import os
 import sys
@@ -23,21 +28,43 @@ import build_image
 import common
 import utils
 
+
 def pass_env_to_docker_arg(cmd, arg_name):
-    if os.getenv(arg_name) != None:
+    """
+    pass environment variable to the docker run command
+    """
+    if os.getenv(arg_name) is not None:
         cmd += ["-e", "%s" % arg_name]
 
-if __name__ == '__main__':
-    cmdParser = argparse.ArgumentParser(description='Helper script to run make in docker env.')
-    cmdParser.add_argument('--interactive', action='store_true', dest='interactive', help='Run in interactive mode')
-    cmdParser.set_defaults(interactive=False)
 
-    cmdParser.add_argument('--no-check', action='store_false', dest='check', help='Check the return value and exit')
-    cmdParser.set_defaults(check=True)
+def main():
+    """
+    entrypoint of this script
+    """
+    cmd_parser = argparse.ArgumentParser(
+        description='Helper script to run make in docker env.')
+    cmd_parser.add_argument(
+        '--interactive',
+        action='store_true',
+        dest='interactive',
+        help='Run in interactive mode')
+    cmd_parser.set_defaults(interactive=False)
 
-    cmdParser.add_argument('env_name', metavar="ENV_NAME", type=str, nargs=1, help="the name of environment image")
+    cmd_parser.add_argument(
+        '--no-check',
+        action='store_false',
+        dest='check',
+        help='Check the return value and exit')
+    cmd_parser.set_defaults(check=True)
 
-    args = cmdParser.parse_args()
+    cmd_parser.add_argument(
+        'env_name',
+        metavar="ENV_NAME",
+        type=str,
+        nargs=1,
+        help="the name of environment image")
+
+    args = cmd_parser.parse_args()
 
     if os.getenv("IN_DOCKER") == "1":
         # TODO: check whether the target env is same with current env
@@ -52,29 +79,36 @@ if __name__ == '__main__':
 
     for env_key in common.export_env_variables:
         pass_env_to_docker_arg(cmd, env_key)
-    
+
     cwd = os.getcwd()
     cmd += ["--env", "IN_DOCKER=1"]
     cmd += ["--volume", "%s:%s" % (cwd, cwd)]
     cmd += ["--user", "%s:%s" % (os.getuid(), os.getgid())]
-    
+
     target_platform = utils.get_target_platform()
-    if os.getenv("TARGET_PLATFORM") != None and os.getenv("TARGET_PLATFORM") != "":
+    if os.getenv("TARGET_PLATFORM") is not None and os.getenv(
+            "TARGET_PLATFORM") != "":
         cmd += ["--platform", "linux/%s" % os.getenv("TARGET_PLATFORM")]
     if target_platform == "arm64":
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
-    
-    if os.getenv("GO_BUILD_CACHE") != None and os.getenv("GO_BUILD_CACHE") != "":
+
+    if os.getenv("GO_BUILD_CACHE") is not None and os.getenv(
+            "GO_BUILD_CACHE") != "":
         tmp_go_dir = "%s/chaos-mesh-gopath" % os.getenv("GO_BUILD_CACHE")
-        tmp_go_build_dir = "%s/chaos-mesh-gobuild" % os.getenv("GO_BUILD_CACHE")
+        tmp_go_build_dir = "%s/chaos-mesh-gobuild" % os.getenv(
+            "GO_BUILD_CACHE")
 
         pathlib.Path(tmp_go_dir).mkdir(parents=True, exist_ok=True)
         pathlib.Path(tmp_go_build_dir).mkdir(parents=True, exist_ok=True)
         cmd += ["--volume", "%s:/tmp/go" % tmp_go_dir]
         cmd += ["--volume", "%s:/tmp/go-build" % tmp_go_build_dir]
-    
+
     cmd += ["--workdir", cwd]
     cmd += [env_image_full_name]
     cmd += ["/bin/bash"]
 
-    print(" ".join(cmd));
+    print(" ".join(cmd))
+
+
+if __name__ == '__main__':
+    main()
