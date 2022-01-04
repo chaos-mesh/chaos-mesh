@@ -82,7 +82,7 @@ def main():
 
     cwd = os.getcwd()
     cmd += ["--env", "IN_DOCKER=1"]
-    cmd += ["--volume", f"{cwd}:{cwd}" % (cwd, cwd)]
+    cmd += ["--volume", f"{cwd}:{cwd}"]
     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 
     target_platform = utils.get_target_platform()
