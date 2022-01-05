@@ -87,7 +87,7 @@ func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.Ex
 func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespace, name string) ([]*core.Experiment, error) {
 	experiments := make([]*core.Experiment, 0)
 	if err := e.db.Model(core.Experiment{}).
-		Find(experiments, "namespace = ? AND name = ? AND archived = ?", namespace, name, true).Error; err != nil {
+		Find(&experiments, "namespace = ? AND name = ? AND archived = ?", namespace, name, true).Error; err != nil {
 		return nil, err
 	}
 
