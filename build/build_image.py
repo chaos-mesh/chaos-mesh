@@ -28,19 +28,16 @@ import utils
 import common
 
 
-def get_image_env(name, env, default):
+def get_image_env(name, env):
     """
     get environment variable related with an image according to the priority:
     1. IMAGE_<name>_<env>
     2. IMAGE_<env>
-    3. default value
 
     the image name will be automatically converted to the unserscore_uppsercase
     format, for example, "chaos-mesh" will be converted to "CHAOS_MESH"
     """
-    default_env = os.getenv("IMAGE_" + env, default)
-    if default_env == "":
-        default_env = default
+    default_env = os.getenv("IMAGE_" + env)
     env_mid_name = utils.underscore_uppercase(name)
 
     env = os.getenv(f"IMAGE_{env_mid_name}_{env}", default_env)
@@ -53,28 +50,28 @@ def get_image_project(name):
     """
     get the project name of the image
     """
-    return get_image_env(name, "PROJECT", "pingcap")
+    return get_image_env(name, "PROJECT")
 
 
 def get_image_registry(name):
     """
     get the registry of the image
     """
-    return get_image_env(name, "REGISTRY", "localhost:5000")
+    return get_image_env(name, "REGISTRY")
 
 
 def get_image_tag(name):
     """
     get the tag of the image
     """
-    return get_image_env(name, "TAG", "latest")
+    return get_image_env(name, "TAG")
 
 
 def get_image_build(name):
     """
     get whether this image should be built
     """
-    return get_image_env(name, "BUILD", "1")
+    return get_image_env(name, "BUILD")
 
 
 def get_image_full_name(name):

@@ -33,7 +33,7 @@ def pass_env_to_docker_arg(cmd, arg_name):
     """
     pass environment variable to the docker run command
     """
-    if os.getenv(arg_name) is not None:
+    if os.getenv(arg_name) is not None and os.getenv(arg_name) != "":
         cmd += ["-e", f"{arg_name}"]
 
 
@@ -77,15 +77,14 @@ def main():
     if args.interactive:
         cmd += ["-it"]
 
-    for env_key in common.export_env_variables:
-        pass_env_to_docker_arg(cmd, env_key)
-
     cwd = os.getcwd()
     cmd += ["--env", "IN_DOCKER=1"]
     cmd += ["--volume", f"{cwd}:{cwd}"]
     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 
     target_platform = utils.get_target_platform()
+    # if the environment variable is not set, don't pass `--platform` argument,
+    # as it's not supported on some docker build environment.
     if os.getenv("TARGET_PLATFORM") is not None and os.getenv(
             "TARGET_PLATFORM") != "":
         cmd += ["--platform", f"linux/{os.getenv('TARGET_PLATFORM')}"]

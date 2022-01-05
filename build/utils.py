@@ -34,7 +34,7 @@ def get_target_platform():
     `uname` syscall
     """
 
-    if os.getenv("TARGET_PLATFORM") is not None:
+    if os.getenv("TARGET_PLATFORM") is not None and os.getenv("TARGET_PLATFORM") != "":
         return os.getenv("TARGET_PLATFORM")
 
     machine = os.uname().machine
