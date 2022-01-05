@@ -92,7 +92,7 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 }
 
 func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	archive, err := covertInnerObjectToExperiment(obj)
+	archive, err := convertInnerObjectToExperiment(obj)
 	if err != nil {
 		r.Log.Error(err, "failed to covert InnerObject")
 		return err
@@ -150,7 +150,7 @@ func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
 	return nil
 }
 
-func covertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment, error) {
+func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment, error) {
 	chaosMeta, ok := obj.(metav1.Object)
 	if !ok {
 		return nil, errors.New("chaos meta information not found")
