@@ -27,7 +27,7 @@ ENV PATH $PATH:/usr/local/byteman/bin
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.1/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.2/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
