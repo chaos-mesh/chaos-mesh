@@ -74,7 +74,7 @@ check: fmt vet boilerplate lint generate yaml tidy check-install-script
 # Run tests
 test: ensure-kubebuilder failpoint-enable generate manifests test-utils
 	rm -rf cover.* cover
-	$(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
+	$(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
 
