@@ -2472,6 +2472,9 @@ var doc = `{
         "status.AllChaosStatus": {
             "type": "object",
             "properties": {
+                "deleting": {
+                    "type": "integer"
+                },
                 "finished": {
                     "type": "integer"
                 },
