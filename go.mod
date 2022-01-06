@@ -127,4 +127,4 @@ replace (
 	k8s.io/sample-controller => k8s.io/sample-controller v0.21.3
 )
 
-go 1.16
+go 1.17
