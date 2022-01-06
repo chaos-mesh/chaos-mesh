@@ -48,20 +48,25 @@ type BlockChaosSpec struct {
 	// IOPS defines the limit of IO frequency.
 	IOPS int `json:"iopsn,omitempty"`
 
-	// Delay defines the latency of every io request.
-	Delay string `json:"delayn,omitempty" webhook:"Duration"`
-
-	// +optional
-	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
-
-	// +optional
-	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
+	BlockDelaySpec `json:"delay,inline"`
 
 	NodeVolumePathSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action.
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+}
+
+// BlockDelaySpec describes the block delay specification
+type BlockDelaySpec struct {
+	// Delay defines the latency of every io request.
+	Delay string `json:"delay,omitempty" webhook:"Duration"`
+
+	// +optional
+	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
+
+	// +optional
+	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
 }
 
 // NodeVolumePathSelector is the selector to select a node and a PV on it

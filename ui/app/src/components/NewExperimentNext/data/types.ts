@@ -68,6 +68,15 @@ const awsCommon: Spec = {
   },
 }
 
+const blockCommon: Spec = {
+  volumeName: {
+    field: 'text',
+    label: 'Volume name',
+    value: '',
+    helperText: 'The name of the volume',
+  },
+}
+
 const dnsCommon: Spec = {
   patterns: {
     field: 'label',
@@ -323,6 +332,32 @@ const data: Record<Kind, Definition> = {
             value: '',
             helperText: 'The ID of a EBS volume',
           },
+        },
+      },
+    ],
+  },
+  BlockChaos: {
+    categories: [
+      {
+        name: 'Delay',
+        key: 'delay',
+        spec: {
+          action: 'delay' as any,
+          ...blockCommon,
+        },
+      },
+      {
+        name: 'Limit',
+        key: 'limit',
+        spec: {
+          action: 'limit' as any,
+          iops: {
+            field: 'number',
+            label: 'IOPS',
+            value: 0,
+            helperText: 'The maximum IOPS',
+          },
+          ...blockCommon,
         },
       },
     ],

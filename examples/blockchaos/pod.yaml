@@ -29,6 +29,8 @@ spec:
       ports:
         - containerPort: 80
           name: "http-server"
+      securityContext:
+        privileged: true
       volumeMounts:
         - mountPath: "/usr/share/nginx/html"
           name: hostpath-example
