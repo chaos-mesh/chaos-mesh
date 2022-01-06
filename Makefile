@@ -202,7 +202,7 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,images/chaos-mesh/bin/
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
 $(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
 $(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env))
-$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper))
+$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper,e2e-build))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
