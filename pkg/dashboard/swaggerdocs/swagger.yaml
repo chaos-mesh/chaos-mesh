@@ -327,6 +327,8 @@ definitions:
     type: object
   status.AllChaosStatus:
     properties:
+      deleting:
+        type: integer
       finished:
         type: integer
       injecting:
