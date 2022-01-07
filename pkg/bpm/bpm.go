@@ -383,6 +383,9 @@ func (b *ProcessBuilder) SetNSOpt(options []nsOption) *ProcessBuilder {
 }
 
 // SetIdentifier sets the identifier of the process
+//
+// The identifier is used to identify the process in BPM, to confirm only one identified process is running.
+// If one identified process is already running, new processes with the same identifier will be blocked by lock.
 func (b *ProcessBuilder) SetIdentifier(id string) *ProcessBuilder {
 	b.identifier = &id
 

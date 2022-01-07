@@ -42,3 +42,6 @@ e2e-test/image/e2e/manifests/
 .cache
 
 *.o
+
+__pycache__
+*.pyc
