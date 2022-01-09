@@ -37,9 +37,10 @@ jobs:
               - go.*
               - '**.go'
             ui:
-              - 'ui/**'
-              - '!ui/README.md'
-              - '!ui/.*'
+              - 'ui/yarn.lock'
+              - '**.js'
+              - '**.ts'
+              - '**.tsx'
   go:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}

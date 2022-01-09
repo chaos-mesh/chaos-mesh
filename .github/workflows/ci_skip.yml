@@ -23,12 +23,13 @@ jobs:
               - go.*
               - '**.go'
             ui:
-              - 'ui/**'
-              - '!ui/README.md'
-              - '!ui/.*'
+              - 'ui/yarn.lock'
+              - '**.js'
+              - '**.ts'
+              - '**.tsx'
   go:
     needs: skip-changes
-    if: ${{ needs.changes.outputs.go == 'false' }}
+    if: ${{ needs.changes.outputs.go != 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -40,7 +41,7 @@ jobs:
       - run: echo "Not required"
   ui:
     needs: skip-changes
-    if: ${{ needs.changes.outputs.ui == 'false' }}
+    if: ${{ needs.changes.outputs.ui != 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
