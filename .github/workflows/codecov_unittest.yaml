@@ -1,9 +1,17 @@
 name: Unit Test And Code Coverage
 
-# this workflow would work on all the branches and all the prs
+# this workflow would work on all the prs
 on:
-  push: {}
-  pull_request: {}
+  pull_request:
+    paths:
+      - Makefile
+      - go.*
+      - "**.go"
+  push:
+    paths:
+      - Makefile
+      - go.*
+      - "**.go"
 
 jobs:
   unitTestAndCodeCoverage:
