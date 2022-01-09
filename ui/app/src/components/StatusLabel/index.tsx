@@ -39,6 +39,7 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
   switch (status) {
     case 'injecting':
     case 'running':
+    case 'deleting':
       color = theme.palette.primary.main
 
       break
@@ -65,6 +66,7 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
       break
     case 'injecting':
     case 'running':
+    case 'deleting':
       icon = (
         <CircularProgress
           size={15}
