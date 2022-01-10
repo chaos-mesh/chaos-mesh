@@ -2,6 +2,7 @@ import { ExperimentKind } from 'components/NewExperiment/types'
 
 const mapping = new Map<ExperimentKind, string>([
   ['AWSChaos', 'awsChaos'],
+  ['AzureChaos', 'azureChaos'],
   ['DNSChaos', 'dnsChaos'],
   ['GCPChaos', 'gcpChaos'],
   ['HTTPChaos', 'httpChaos'],

@@ -124,6 +124,14 @@ var ChaosObjects = fx.Supply(
 			Object: &v1alpha1.PhysicalMachineChaos{},
 		},
 	},
+
+	fx.Annotated{
+		Group: "objs",
+		Target: Object{
+			Name:   "azurechaos",
+			Object: &v1alpha1.AzureChaos{},
+		},
+	},
 )
 
 type WebhookObject struct {

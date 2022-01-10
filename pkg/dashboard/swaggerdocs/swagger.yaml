@@ -439,6 +439,35 @@ definitions:
         description: +optional
         type: integer
     type: object
+  v1alpha1.AzureChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific azure chaos action.
+          Supported action: ec2-stop / vm-restart
+          Default action: ec2-stop
+          +kubebuilder:validation:Enum=ec2-stop;vm-restart
+        type: string
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      resourceGroupName:
+        description: ResourceGroupName defines the name of ResourceGroup
+        type: string
+      secretName:
+        description: |-
+          SecretName defines the name of kubernetes secret.
+          +optional
+        type: string
+      subscriptionID:
+        description: SubscriptionID defines the id of Azure subscription.
+        type: string
+      vmName:
+        description: VMName defines the name of Virtual Machine
+        type: string
+    type: object
   v1alpha1.BandwidthSpec:
     properties:
       buffer:
@@ -500,6 +529,10 @@ definitions:
     properties:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
         type: object
       concurrencyPolicy:
@@ -1995,6 +2028,10 @@ definitions:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
         type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
+        description: +optional
+        type: object
       concurrencyPolicy:
         description: |-
           +optional
@@ -2186,6 +2223,10 @@ definitions:
     properties:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
         type: object
       children:

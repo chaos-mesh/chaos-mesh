@@ -79,6 +79,38 @@ spec:
                 - awsRegion
                 - ec2Instance
                 type: object
+              azureChaos:
+                description: AzureChaosSpec is the content of the specification for
+                  an AzureChaos
+                properties:
+                  action:
+                    description: 'Action defines the specific azure chaos action.
+                      Supported action: ec2-stop / vm-restart Default action: ec2-stop'
+                    enum:
+                    - ec2-stop
+                    - vm-restart
+                    type: string
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  resourceGroupName:
+                    description: ResourceGroupName defines the name of ResourceGroup
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of kubernetes secret.
+                    type: string
+                  subscriptionID:
+                    description: SubscriptionID defines the id of Azure subscription.
+                    type: string
+                  vmName:
+                    description: VMName defines the name of Virtual Machine
+                    type: string
+                required:
+                - action
+                - resourceGroupName
+                - subscriptionID
+                - vmName
+                type: object
               children:
                 items:
                   type: string
@@ -2246,6 +2278,40 @@ spec:
                     - action
                     - awsRegion
                     - ec2Instance
+                    type: object
+                  azureChaos:
+                    description: AzureChaosSpec is the content of the specification
+                      for an AzureChaos
+                    properties:
+                      action:
+                        description: 'Action defines the specific azure chaos action.
+                          Supported action: ec2-stop / vm-restart Default action:
+                          ec2-stop'
+                        enum:
+                        - ec2-stop
+                        - vm-restart
+                        type: string
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      resourceGroupName:
+                        description: ResourceGroupName defines the name of ResourceGroup
+                        type: string
+                      secretName:
+                        description: SecretName defines the name of kubernetes secret.
+                        type: string
+                      subscriptionID:
+                        description: SubscriptionID defines the id of Azure subscription.
+                        type: string
+                      vmName:
+                        description: VMName defines the name of Virtual Machine
+                        type: string
+                    required:
+                    - action
+                    - resourceGroupName
+                    - subscriptionID
+                    - vmName
                     type: object
                   concurrencyPolicy:
                     enum:
@@ -4794,6 +4860,44 @@ spec:
                               - awsRegion
                               - ec2Instance
                               type: object
+                            azureChaos:
+                              description: AzureChaosSpec is the content of the specification
+                                for an AzureChaos
+                              properties:
+                                action:
+                                  description: 'Action defines the specific azure
+                                    chaos action. Supported action: ec2-stop / vm-restart
+                                    Default action: ec2-stop'
+                                  enum:
+                                  - ec2-stop
+                                  - vm-restart
+                                  type: string
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                resourceGroupName:
+                                  description: ResourceGroupName defines the name
+                                    of ResourceGroup
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of kubernetes
+                                    secret.
+                                  type: string
+                                subscriptionID:
+                                  description: SubscriptionID defines the id of Azure
+                                    subscription.
+                                  type: string
+                                vmName:
+                                  description: VMName defines the name of Virtual
+                                    Machine
+                                  type: string
+                              required:
+                              - action
+                              - resourceGroupName
+                              - subscriptionID
+                              - vmName
+                              type: object
                             children:
                               description: Children describes the children steps of
                                 serial or parallel node. Only used when Type is TypeSerial
@@ -7195,6 +7299,44 @@ spec:
                                   - action
                                   - awsRegion
                                   - ec2Instance
+                                  type: object
+                                azureChaos:
+                                  description: AzureChaosSpec is the content of the
+                                    specification for an AzureChaos
+                                  properties:
+                                    action:
+                                      description: 'Action defines the specific azure
+                                        chaos action. Supported action: ec2-stop /
+                                        vm-restart Default action: ec2-stop'
+                                      enum:
+                                      - ec2-stop
+                                      - vm-restart
+                                      type: string
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    resourceGroupName:
+                                      description: ResourceGroupName defines the name
+                                        of ResourceGroup
+                                      type: string
+                                    secretName:
+                                      description: SecretName defines the name of
+                                        kubernetes secret.
+                                      type: string
+                                    subscriptionID:
+                                      description: SubscriptionID defines the id of
+                                        Azure subscription.
+                                      type: string
+                                    vmName:
+                                      description: VMName defines the name of Virtual
+                                        Machine
+                                      type: string
+                                  required:
+                                  - action
+                                  - resourceGroupName
+                                  - subscriptionID
+                                  - vmName
                                   type: object
                                 concurrencyPolicy:
                                   enum:

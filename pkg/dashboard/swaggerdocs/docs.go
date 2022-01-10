@@ -2731,6 +2731,35 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.AzureChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific azure chaos action.\nSupported action: ec2-stop / vm-restart\nDefault action: ec2-stop\n+kubebuilder:validation:Enum=ec2-stop;vm-restart",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "resourceGroupName": {
+                    "description": "ResourceGroupName defines the name of ResourceGroup",
+                    "type": "string"
+                },
+                "secretName": {
+                    "description": "SecretName defines the name of kubernetes secret.\n+optional",
+                    "type": "string"
+                },
+                "subscriptionID": {
+                    "description": "SubscriptionID defines the id of Azure subscription.",
+                    "type": "string"
+                },
+                "vmName": {
+                    "description": "VMName defines the name of Virtual Machine",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.BandwidthSpec": {
             "type": "object",
             "properties": {
@@ -2783,6 +2812,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
@@ -4264,6 +4298,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
+                },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
@@ -4461,6 +4500,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "children": {
                     "description": "Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.\n+optional",

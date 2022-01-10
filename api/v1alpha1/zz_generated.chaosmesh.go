@@ -171,6 +171,143 @@ func (in *AWSChaos) Default() {
 	gw.Default(in)
 }
 
+const KindAzureChaos = "AzureChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *AzureChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *AzureChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *AzureChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *AzureChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *AzureChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *AzureChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// AzureChaosList contains a list of AzureChaos
+type AzureChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []AzureChaos `json:"items"`
+}
+
+func (in *AzureChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *AzureChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *AzureChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *AzureChaos) IsOneShot() bool {
+	if in.Spec.Action==AzureVmRestart {
+		return true
+	}
+
+	return false
+}
+
+var AzureChaosWebhookLog = logf.Log.WithName("AzureChaos-resource")
+
+func (in *AzureChaos) ValidateCreate() error {
+	AzureChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *AzureChaos) ValidateUpdate(old runtime.Object) error {
+	AzureChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*AzureChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *AzureChaos) ValidateDelete() error {
+	AzureChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &AzureChaos{}
+
+func (in *AzureChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &AzureChaos{}
+
+func (in *AzureChaos) Default() {
+	gw.Default(in)
+}
+
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1797,6 +1934,12 @@ func init() {
 		list:  &AWSChaosList{},
 	})
 
+	SchemeBuilder.Register(&AzureChaos{}, &AzureChaosList{})
+	all.register(KindAzureChaos, &ChaosKind{
+		chaos: &AzureChaos{},
+		list:  &AzureChaosList{},
+	})
+
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
 		chaos: &DNSChaos{},
@@ -1875,6 +2018,11 @@ func init() {
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		chaos: &AWSChaos{},
 		list:  &AWSChaosList{},
+	})
+
+	allScheduleItem.register(KindAzureChaos, &ChaosKind{
+		chaos: &AzureChaos{},
+		list:  &AzureChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{
