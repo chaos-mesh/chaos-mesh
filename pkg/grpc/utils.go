@@ -37,7 +37,7 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-var ChaosDaemonServerName = config.TLSConfig.ChaosDaemonCertServerName
+var ChaosDaemonServerName = config.TLSConfig.ChaosDaemonServerName
 
 type TLSRaw struct {
 	CaCert []byte
