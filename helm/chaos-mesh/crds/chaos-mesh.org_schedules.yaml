@@ -127,7 +127,7 @@ spec:
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
-                      container. If not set, all containers will be injected
+                      container. If not set, the first container will be injected
                     items:
                       type: string
                     type: array
@@ -620,7 +620,7 @@ spec:
                     type: object
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
-                      container. If not set, all containers will be injected
+                      container. If not set, the first container will be injected
                     items:
                       type: string
                     type: array
@@ -818,7 +818,7 @@ spec:
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
-                      container. If not set, all containers will be injected
+                      container. If not set, the first container will be injected
                     items:
                       type: string
                     type: array
@@ -2082,7 +2082,7 @@ spec:
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
-                      container. If not set, all containers will be injected
+                      container. If not set, the first container will be injected
                     items:
                       type: string
                     type: array
@@ -2229,7 +2229,7 @@ spec:
                 properties:
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
-                      container. If not set, all containers will be injected
+                      container. If not set, the first container will be injected
                     items:
                       type: string
                     type: array
@@ -2423,7 +2423,7 @@ spec:
                     type: array
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
-                      container. If not set, all containers will be injected
+                      container. If not set, the first container will be injected
                     items:
                       type: string
                     type: array
@@ -2684,7 +2684,7 @@ spec:
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
-                                of affected container. If not set, all containers
+                                of affected container. If not set, the first container
                                 will be injected
                               items:
                                 type: string
@@ -3209,7 +3209,7 @@ spec:
                               type: object
                             containerNames:
                               description: ContainerNames indicates list of the name
-                                of affected container. If not set, all containers
+                                of affected container. If not set, the first container
                                 will be injected
                               items:
                                 type: string
@@ -3420,7 +3420,7 @@ spec:
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
-                                of affected container. If not set, all containers
+                                of affected container. If not set, the first container
                                 will be injected
                               items:
                                 type: string
@@ -4783,7 +4783,7 @@ spec:
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
-                                of affected container. If not set, all containers
+                                of affected container. If not set, the first container
                                 will be injected
                               items:
                                 type: string
@@ -5034,8 +5034,8 @@ spec:
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
-                                    name of affected container. If not set, all containers
-                                    will be injected
+                                    name of affected container. If not set, the first
+                                    container will be injected
                                   items:
                                     type: string
                                   type: array
@@ -5573,8 +5573,8 @@ spec:
                                   type: object
                                 containerNames:
                                   description: ContainerNames indicates list of the
-                                    name of affected container. If not set, all containers
-                                    will be injected
+                                    name of affected container. If not set, the first
+                                    container will be injected
                                   items:
                                     type: string
                                   type: array
@@ -5790,8 +5790,8 @@ spec:
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
-                                    name of affected container. If not set, all containers
-                                    will be injected
+                                    name of affected container. If not set, the first
+                                    container will be injected
                                   items:
                                     type: string
                                   type: array
@@ -7192,8 +7192,8 @@ spec:
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
-                                    name of affected container. If not set, all containers
-                                    will be injected
+                                    name of affected container. If not set, the first
+                                    container will be injected
                                   items:
                                     type: string
                                   type: array
@@ -7354,8 +7354,8 @@ spec:
                               properties:
                                 containerNames:
                                   description: ContainerNames indicates list of the
-                                    name of affected container. If not set, all containers
-                                    will be injected
+                                    name of affected container. If not set, the first
+                                    container will be injected
                                   items:
                                     type: string
                                   type: array
@@ -7571,8 +7571,8 @@ spec:
                                   type: array
                                 containerNames:
                                   description: ContainerNames indicates list of the
-                                    name of affected container. If not set, all containers
-                                    will be injected
+                                    name of affected container. If not set, the first
+                                    container will be injected
                                   items:
                                     type: string
                                   type: array
@@ -7727,7 +7727,7 @@ spec:
                           properties:
                             containerNames:
                               description: ContainerNames indicates list of the name
-                                of affected container. If not set, all containers
+                                of affected container. If not set, the first container
                                 will be injected
                               items:
                                 type: string
@@ -10865,7 +10865,7 @@ spec:
                               type: array
                             containerNames:
                               description: ContainerNames indicates list of the name
-                                of affected container. If not set, all containers
+                                of affected container. If not set, the first container
                                 will be injected
                               items:
                                 type: string
