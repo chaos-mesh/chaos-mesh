@@ -1,10 +1,15 @@
 # This workflow defines the go and ui related jobs.
 #
-# We will use the `job` matrix variable to run each subjob. Currently we have:
+# First, we use [dorny/paths-filter@v2](https://github.com/dorny/paths-filter) to
+# detect changes in go and ui related files, and then run the corresponding sub-jobs
+# based on the changes.
 #
-# - verify
-# - build
-# - test
+# Please note that due to the GitHub required checks, the `go` and `ui` jobs are
+# also need to run to report the status. So here we need to define an additional
+# "skip" file to ensure that the status is reported. For details, please refer to:
+#
+# - `ci_skip.yml`
+# - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
 name: ci
 
 on:
@@ -32,9 +37,10 @@ jobs:
               - go.*
               - '**.go'
             ui:
-              - 'ui/**'
-              - '!ui/README.md'
-              - '!ui/.*'
+              - 'ui/yarn.lock'
+              - '**.js'
+              - '**.ts'
+              - '**.tsx'
   go:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
@@ -100,12 +106,12 @@ jobs:
         job:
           - build
           - test
-        node-version: ["14"] # TODO: add nodejs-16?
+        # node-version: ["14"] # TODO: add nodejs-16?
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14
           cache: "yarn"
           cache-dependency-path: "ui/yarn.lock"
 
