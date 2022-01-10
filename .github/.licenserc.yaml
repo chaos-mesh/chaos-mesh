@@ -19,6 +19,8 @@ header:
     - 'Makefile'
     - 'PROJECT'
     - 'LICENSE'
+    # build cache in dev-env
+    - '.cache'
     # reported as unsupported by skywalking-eyes as of October 4th 2021
     - 'helm/chaos-mesh/.helmignore'
     - 'helm/chaos-mesh/templates/_helpers.tpl'
