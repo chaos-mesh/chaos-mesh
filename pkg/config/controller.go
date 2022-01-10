@@ -31,7 +31,9 @@ type TLSConfig struct {
 	ChaosDaemonClientCert string `envconfig:"CHAOS_DAEMON_CLIENT_CERT" default:""`
 	// ChaosDaemonClientKey is the path of chaos daemon certificate key
 	ChaosDaemonClientKey string `envconfig:"CHAOS_DAEMON_CLIENT_KEY" default:""`
-
+	// ChaosDaemonServerName is the server name () defined in the certificate
+	ChaosDaemonServerName string `envconfig:"CHAOS_DAEMON_CERT_SERVER_NAME default:"chaos-daemon.chaos-mesh.org"`
+	
 	// ChaosdCACert is the path of chaosd ca cert
 	ChaosdCACert string `envconfig:"CHAOSD_CA_CERT" default:""`
 	// ChaosdClientCert is the path of chaosd certificate

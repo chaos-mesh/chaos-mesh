@@ -27,6 +27,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	config "github.con/chaos-mesh/chaos-mesh/pkg/config"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -35,7 +37,7 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-const ChaosDaemonServerName = "chaos-daemon.chaos-mesh.org"
+var ChaosDaemonServerName = config.TLSConfig.ChaosDaemonCertServerName
 
 type TLSRaw struct {
 	CaCert []byte
