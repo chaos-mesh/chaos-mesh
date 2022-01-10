@@ -50,7 +50,6 @@
     "build": "react-scripts build",
     "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
     "test": "react-scripts test",
-    "test:init": "./__tests__/interface-builder.sh",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -94,9 +93,7 @@
     "cross-env": "^7.0.3",
     "http-proxy-middleware": "^2.0.1",
     "redux-logger": "^3.0.6",
-    "source-map-explorer": "^2.5.2",
-    "ts-interface-builder": "^0.3.2",
-    "ts-interface-checker": "^1.0.2"
+    "source-map-explorer": "^2.5.2"
   },
   "jest": {
     "resetMocks": false
