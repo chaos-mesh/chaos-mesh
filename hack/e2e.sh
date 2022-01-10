@@ -34,7 +34,7 @@ Usage: hack/e2e.sh [-h] -- [extra test args]
     -h      show this message and exit
 Environments:
     PROVIDER                    Kubernetes provider, e.g. kind, gke, eks, defaults: kind
-    IMAGE_REGISTRY             image docker registry
+    IMAGE_REGISTRY              image docker registry
     IMAGE_TAG                   image tag
     SKIP_BUILD                  skip building binaries
     SKIP_IMAGE_BUILD            skip build and push images
