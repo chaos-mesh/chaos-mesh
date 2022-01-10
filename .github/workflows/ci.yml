@@ -63,7 +63,9 @@ jobs:
           else
             export IMAGE_BUILD_ENV_BUILD=0;
           fi
+
           make image-build-env
+
       - name: Build Chaos Mesh Dev Env
         env:
           IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
@@ -73,7 +75,9 @@ jobs:
           else
             export IMAGE_DEV_ENV_BUILD=0;
           fi
+
           make image-dev-env
+
       - name: ${{ matrix.job }}
         env:
           job: ${{ matrix.job }}
