@@ -4289,7 +4289,7 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
 # IOChaosSpec defines the desired state of IOChaos
 type IOChaosSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOChaosSpec") {
     # containerNames indicates list of the name of affected container.
-    # If not set, all containers will be injected
+    # If not set, the first container will be injected
     containerNames: [String!]
 
     # selector is used to select pods that are used to inject chaos action.
