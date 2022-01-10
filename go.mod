@@ -5,7 +5,6 @@ require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Microsoft/go-winio v0.5.0 // indirect
-	github.com/Microsoft/hcsshim v0.8.20 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go-v2 v1.3.2
@@ -16,8 +15,7 @@ require (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.0.2-0.20210605143700-23b51209bf7b
-	github.com/containerd/containerd v1.5.1
-	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
+	github.com/containerd/containerd v1.5.8
 	github.com/docker/docker v20.10.2+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/ethereum/go-ethereum v1.10.2
@@ -44,18 +42,18 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.14.0
-	github.com/opencontainers/runc v1.0.0-rc95 // indirect
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
 	github.com/pingcap/log v0.0.0-20200117041106-d28c14d3b1cd // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/pkg/sftp v1.13.4
 	github.com/prometheus/client_golang v1.11.0
 	github.com/retailnext/iptables_exporter v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/romana/ipset v1.0.0
 	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 // indirect
-	github.com/shirou/gopsutil v2.20.5+incompatible
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.1.1
@@ -64,19 +62,23 @@ require (
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/vektah/gqlparser/v2 v2.2.0
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
+	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.uber.org/atomic v1.7.0
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.18.1
+	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	golang.org/x/tools v0.1.4
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/api v0.20.0
 	google.golang.org/grpc v1.33.2
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.21.3
 	k8s.io/apimachinery v0.21.3

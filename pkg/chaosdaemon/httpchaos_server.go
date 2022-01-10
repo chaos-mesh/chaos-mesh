@@ -25,10 +25,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
 )
 
 const (
@@ -60,33 +62,39 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	return
 }
 
-func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (ret *pb.ApplyHttpChaosResponse, err error) {
+func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (resp *pb.ApplyHttpChaosResponse, err error) {
 	log := log.WithValues("Request", in)
 	log.Info("applying http chaos")
 
-	if in.Instance == 0 {
+	if s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime) == nil {
+		// chaos daemon may restart, create another tproxy instance
+		if err = s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime); err != nil {
+			return nil, err
+		}
 		if err = s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
 	}
 
-	defer func() {
-		if err != nil {
-			log.Error(err, "error while applying http chaos")
-			killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime)
-			log.Error(killError, "error while killing http chaos")
-		}
-	}()
+	resp, err = s.applyHttpChaos(ctx, log, in)
+	if err != nil {
+		log.Error(err, "error while applying http chaos")
+		killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime)
+		log.Error(killError, "error while killing http chaos")
+	}
+	return
+}
 
+func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
 	if stdio == nil {
-		return nil, fmt.Errorf("fail to get stdio of process")
+		return nil, fmt.Errorf("fail to get stdio of instance(%d)", in.Instance)
 	}
 
 	transport := stdioTransport{stdio: stdio}
 
 	var rules []tproxyconfig.PodHttpChaosBaseRule
-	err = json.Unmarshal([]byte(in.Rules), &rules)
+	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		log.Error(err, "error while unmarshal json bytes")
 		return nil, err
@@ -108,19 +116,19 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
 	if err != nil {
-		return nil, fmt.Errorf("fail to create request: %v", err)
+		return nil, errors.Wrap(err, "fail to create http request")
 	}
 
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
-		return nil, fmt.Errorf("fail to send request: %v", err)
+		return nil, errors.Wrap(err, "fail to send http request")
 	}
 
 	log.Info("http chaos applied")
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("fail to read response body: %v", err)
+		return nil, errors.Wrap(err, "fail to read response body")
 	}
 
 	return &pb.ApplyHttpChaosResponse{
@@ -139,7 +147,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
-		SetIdentifier(in.ContainerId).
+		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
 		SetEnv(pathEnv, os.Getenv(pathEnv)).
 		SetStdin(bpm.NewBlockingBuffer()).
 		SetStdout(bpm.NewBlockingBuffer())

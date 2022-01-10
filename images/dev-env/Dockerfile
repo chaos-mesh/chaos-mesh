@@ -18,7 +18,6 @@ RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
-RUN go install github.com/golang/mock/mockgen@v1.5.0
 
 FROM debian:buster-slim
 
@@ -31,7 +30,7 @@ ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
 RUN apt-get update && \ 
-    apt-get install unzip git build-essential curl python -y && \
+    apt-get install unzip git build-essential curl python musl musl-dev python3 -y && \
     rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
@@ -55,6 +54,7 @@ RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
 
+COPY --from=apache/skywalking-eyes:0.2.0 /bin/license-eye /bin/license-eye
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
