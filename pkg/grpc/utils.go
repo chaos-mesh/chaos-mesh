@@ -28,7 +28,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	config "github.con/chaos-mesh/chaos-mesh/pkg/config"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
