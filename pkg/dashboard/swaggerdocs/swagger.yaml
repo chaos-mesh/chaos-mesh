@@ -327,6 +327,8 @@ definitions:
     type: object
   status.AllChaosStatus:
     properties:
+      deleting:
+        type: integer
       finished:
         type: integer
       injecting:
@@ -615,7 +617,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -929,7 +931,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -1023,7 +1025,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -1737,7 +1739,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -2094,7 +2096,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -2279,7 +2281,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
