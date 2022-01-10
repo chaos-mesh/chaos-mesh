@@ -39,7 +39,7 @@ Environments:
     KUBECONFIG            path to the kubeconfig file, defaults: ~/.kube/config
     KUBECONTEXT           context in kubeconfig file, defaults to current context
     NAMESPACE             Kubernetes namespace in which we run our chaos-mesh.
-    IMAGE_REGISTRY       image docker registry
+    IMAGE_REGISTRY        image docker registry
     IMAGE_TAG             image tag
     SKIP_IMAGE_BUILD      skip build and push images
 
