@@ -62,27 +62,27 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	return
 }
 
-func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (resp *pb.ApplyHttpChaosResponse, err error) {
+func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := log.WithValues("Request", in)
 	log.Info("applying http chaos")
 
 	if s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime) == nil {
 		// chaos daemon may restart, create another tproxy instance
-		if err = s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime); err != nil {
+		if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime); err != nil {
 			return nil, err
 		}
-		if err = s.createHttpChaos(ctx, in); err != nil {
+		if err := s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
 	}
 
-	resp, err = s.applyHttpChaos(ctx, log, in)
+	resp, err := s.applyHttpChaos(ctx, log, in)
 	if err != nil {
 		log.Error(err, "error while applying http chaos")
 		killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime)
 		log.Error(killError, "error while killing http chaos")
 	}
-	return
+	return resp, err
 }
 
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
