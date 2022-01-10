@@ -27,12 +27,9 @@ jobs:
               - '**.js'
               - '**.ts'
               - '**.tsx'
-      - run: |
-          echo ${{ steps.filter.outputs.go }}
-          echo ${{ steps.filter.outputs.ui }}
   go:
     needs: skip-changes
-    if: ${{ needs.changes.outputs.go != 'true' }}
+    if: ${{ needs.skip-changes.outputs.go != 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -44,7 +41,7 @@ jobs:
       - run: echo "Not required"
   ui:
     needs: skip-changes
-    if: ${{ needs.changes.outputs.ui != 'true' }}
+    if: ${{ needs.skip-changes.outputs.ui != 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
