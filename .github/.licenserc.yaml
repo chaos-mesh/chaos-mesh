@@ -10,6 +10,7 @@ header:
     - '.muse.toml'
     - '**/*.md'
     - '**/*.json'
+    - '**/*.log'
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
@@ -18,6 +19,8 @@ header:
     - 'Makefile'
     - 'PROJECT'
     - 'LICENSE'
+    # build cache in dev-env
+    - '.cache'
     # reported as unsupported by skywalking-eyes as of October 4th 2021
     - 'helm/chaos-mesh/.helmignore'
     - 'helm/chaos-mesh/templates/_helpers.tpl'
@@ -53,5 +56,6 @@ header:
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
+    - 'ui/node_modules'
     # codecov configuration file
     - codecov.yml
