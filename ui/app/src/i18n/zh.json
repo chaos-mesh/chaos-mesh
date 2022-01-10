@@ -363,6 +363,7 @@
     "finished": "完成",
     "paused": "暂停",
     "failed": "失败",
+    "deleting": "删除中",
     "unknown": "未知"
   },
   "confirm": {
