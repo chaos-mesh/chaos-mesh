@@ -10,6 +10,7 @@ header:
     - '.muse.toml'
     - '**/*.md'
     - '**/*.json'
+    - '**/*.log'
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
@@ -53,5 +54,6 @@ header:
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
+    - 'ui/node_modules'
     # codecov configuration file
     - codecov.yml
