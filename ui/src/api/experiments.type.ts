@@ -5,6 +5,7 @@ export interface StatusOfExperiments {
   running: number
   finished: number
   paused: number
+  deleting: number
 }
 
 export interface Experiment {
@@ -15,7 +16,7 @@ export interface Experiment {
   name: string
   created_at: string
   // FIXME: support keyof in ts-interface-builder
-  status: 'injecting' | 'running' | 'finished' | 'paused'
+  status: 'injecting' | 'running' | 'finished' | 'paused' | 'deleting'
 }
 
 export interface ExperimentSingle extends Experiment {
