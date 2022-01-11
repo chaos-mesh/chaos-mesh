@@ -106,6 +106,7 @@ export function genForms(source) {
     })
 
     const actionFields = []
+    // filter fields by action
     actions.forEach((action) => {
       const paByAction = propertyAssignments.filter((p) => p.action === action).map((p) => p.field)
       const identifierShared = factory.createIdentifier(SHARED_KEYWORD)
@@ -120,6 +121,7 @@ export function genForms(source) {
       )
     })
 
+    // create shared field
     const shared = factory.createVariableStatement(
       undefined,
       factory.createVariableDeclarationList(

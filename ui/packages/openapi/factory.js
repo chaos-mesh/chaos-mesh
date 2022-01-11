@@ -118,6 +118,7 @@ function typeReferenceToObjectLiteralExpression(
     const { escapedName, valueDeclaration: declaration } = val
 
     if (declaration.type.kind === ts.SyntaxKind.TypeReference) {
+      // handle non-primritive array
       if (
         declaration.type.typeName.escapedText === 'Array' &&
         declaration.type.typeArguments[0].kind === ts.SyntaxKind.TypeReference
@@ -132,17 +133,12 @@ function typeReferenceToObjectLiteralExpression(
             { multiple: true }
           )
         )
-
-        return
-      }
-
-      if (isArrayString(declaration.type, sourceFile)) {
+      } else if (isArrayString(declaration.type, sourceFile)) {
+        // handle string array
         objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
-
-        return
+      } else {
+        objs.push(typeReferenceToObjectLiteralExpression(escapedName, declaration.type, [], sourceFile, checker))
       }
-
-      objs.push(typeReferenceToObjectLiteralExpression(escapedName, declaration.type, [], sourceFile, checker))
 
       return
     }
@@ -150,6 +146,13 @@ function typeReferenceToObjectLiteralExpression(
     objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
   })
 
+  // create ref field
+  //
+  // {
+  //   field: 'ref',
+  //   label: '',
+  //   children: []
+  // }
   return factory.createObjectLiteralExpression(
     [
       factory.createPropertyAssignment(factory.createIdentifier('field'), factory.createStringLiteral('ref')),
@@ -178,6 +181,12 @@ function typeReferenceToObjectLiteralExpression(
 function _nodeToField(identifier, type, comment, sourceFile) {
   const typeText = type.getText(sourceFile)
 
+  // {
+  //   field: '',
+  //   label: '',
+  //   value: '',
+  //   helperText: '',
+  // }
   return factory.createObjectLiteralExpression(
     [
       factory.createPropertyAssignment(
