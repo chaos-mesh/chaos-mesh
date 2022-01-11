@@ -54,7 +54,8 @@ func (s *fieldSelector) Match(obj client.Object) bool {
 	switch obj := obj.(type) {
 	case *v1.Pod:
 		objFields = toPodSelectableFields(obj)
-	// TODO: support physical machine field
+	case *v1alpha1.PhysicalMachine:
+		objFields = toPhysicalMachineSelectableFields(obj)
 	default:
 		// not support
 		return false
@@ -88,6 +89,13 @@ func toPodSelectableFields(pod *v1.Pod) fields.Set {
 	podSpecificFieldsSet["status.podIP"] = podIP
 	podSpecificFieldsSet["status.nominatedNodeName"] = pod.Status.NominatedNodeName
 	return addObjectMetaFieldsSet(podSpecificFieldsSet, &pod.ObjectMeta, true)
+}
+
+// toPhysicalMachineSelectableFields returns a field set that represents the object
+func toPhysicalMachineSelectableFields(physicalMachine *v1alpha1.PhysicalMachine) fields.Set {
+	pmSpecificFieldsSet := make(fields.Set, 3)
+	pmSpecificFieldsSet["spec.address"] = physicalMachine.Spec.Address
+	return addObjectMetaFieldsSet(pmSpecificFieldsSet, &physicalMachine.ObjectMeta, true)
 }
 
 // addObjectMetaFieldsSet add fields that represent the ObjectMeta to source.

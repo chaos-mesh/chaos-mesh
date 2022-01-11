@@ -29,12 +29,12 @@ var _ = Describe("netem server", func() {
 	Context("newDaemonServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd)
+			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
 			Expect(err).To(BeNil())
 		})
 
 		It("should fail on CreateContainerRuntimeInfoClient", func() {
-			_, err := newDaemonServer("invalid-runtime")
+			_, err := newDaemonServer("invalid-runtime", nil)
 			Expect(err).ToNot(BeNil())
 		})
 	})
@@ -42,7 +42,7 @@ var _ = Describe("netem server", func() {
 	Context("newGRPCServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd)
+			daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
 			Expect(err).To(BeNil())
 			_, err = newGRPCServer(daemonServer, &MockRegisterer{}, tlsConfig{})
 			Expect(err).To(BeNil())
@@ -52,7 +52,7 @@ var _ = Describe("netem server", func() {
 			Ω(func() {
 				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd)
+				daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
 				Expect(err).To(BeNil())
 				_, err = newGRPCServer(daemonServer, &MockRegisterer{}, tlsConfig{})
 				Expect(err).To(BeNil())

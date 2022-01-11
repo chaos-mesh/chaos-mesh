@@ -74,9 +74,19 @@ func Execute() {
 		os.Exit(1)
 	}
 
+	physicalMachineCommand, err := NewPhysicalMachineCommand(rootLogger.WithName("cmd-physical-machine"))
+	if err != nil {
+		rootLogger.Error(err, "failed to initialize cmd",
+			"cmd", "physicalmachine",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
+		os.Exit(1)
+	}
+
 	rootCmd.AddCommand(debugCommand)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
+	rootCmd.AddCommand(physicalMachineCommand)
 	if err := rootCmd.Execute(); err != nil {
 		rootLogger.Error(err, "failed to execute cmd",
 			"errorVerbose", fmt.Sprintf("%+v", err),

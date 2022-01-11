@@ -31,6 +31,7 @@ const (
 	Running   ChaosStatus = "running"
 	Finished  ChaosStatus = "finished"
 	Paused    ChaosStatus = "paused"
+	Deleting  ChaosStatus = "deleting"
 )
 
 type AllChaosStatus struct {
@@ -38,6 +39,7 @@ type AllChaosStatus struct {
 	Running   int `json:"running"`
 	Finished  int `json:"finished"`
 	Paused    int `json:"paused"`
+	Deleting  int `json:"deleting"`
 }
 
 type ScheduleStatus string
@@ -47,12 +49,18 @@ const (
 	SchedulePaused  ScheduleStatus = "paused"
 )
 
+// GetChaosStatus returns the status of chaos object.
 func GetChaosStatus(obj v1alpha1.InnerObject) ChaosStatus {
+	if obj.IsDeleted() {
+		return Deleting
+	}
+
 	selected := false
 	allInjected := false
 	for _, c := range obj.GetStatus().Conditions {
 		if c.Status == corev1.ConditionTrue {
 			switch c.Type {
+			// If ConditionPaused is true, represent the chaos experiment is paused.
 			case v1alpha1.ConditionPaused:
 				return Paused
 			case v1alpha1.ConditionSelected:
@@ -67,6 +75,8 @@ func GetChaosStatus(obj v1alpha1.InnerObject) ChaosStatus {
 		return Finished
 	}
 
+	// Only when the target objects are successfully selected and injected,
+	// it means that the chaos experiment is running well.
 	if selected && allInjected {
 		return Running
 	}

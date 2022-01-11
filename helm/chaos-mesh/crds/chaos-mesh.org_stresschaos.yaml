@@ -16,7 +16,11 @@ spec:
     singular: stresschaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: StressChaos is the Schema for the stresschaos API
@@ -38,7 +42,7 @@ spec:
             properties:
               containerNames:
                 description: ContainerNames indicates list of the name of affected
-                  container. If not set, all containers will be injected
+                  container. If not set, the first container will be injected
                 items:
                   type: string
                 type: array
@@ -282,6 +286,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

@@ -10,6 +10,7 @@ header:
     - '.muse.toml'
     - '**/*.md'
     - '**/*.json'
+    - '**/*.log'
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
@@ -18,15 +19,14 @@ header:
     - 'Makefile'
     - 'PROJECT'
     - 'LICENSE'
-    - 'ui/.prettierignore'
+    # build cache in dev-env
+    - '.cache'
     # reported as unsupported by skywalking-eyes as of October 4th 2021
     - 'helm/chaos-mesh/.helmignore'
     - 'helm/chaos-mesh/templates/_helpers.tpl'
     - 'pkg/chaosdaemon/pb/chaosdaemon.proto'
     - 'pkg/chaoskernel/pb/bpfki.proto'
     - 'test/integration_test/utils/check_contains'
-    - 'ui/.prettierrc'
-    - 'ui/src/setupProxy.js'
     # skip auto-generated files
     - 'manifests/crd-v1beta1.yaml'
     - 'manifests/crd.yaml'
@@ -36,7 +36,6 @@ header:
     - '**/*_generated*'
     - '**/schema.resolvers.go'
     - '**/generated.go'
-    - 'ui/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'pkg/dashboard/swaggerdocs/swagger.yaml'
     - 'pkg/dashboard/swaggerdocs/docs.go'
     - 'pkg/ctrlserver/graph/model/models_gen.go'
@@ -49,5 +48,14 @@ header:
     - 'hack/boilerplate/boilerplate.py'
     # Dockerfiles
     - '**/Dockerfile'
-    # UI SVGs
+    # UI
+    - 'ui/.husky/pre-commit'
+    - 'ui/.prettierignore'
+    - 'ui/.prettierrc'
+    - 'ui/.yarnclean'
+    - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
+    - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
+    - 'ui/node_modules'
+    # codecov configuration file
+    - codecov.yml

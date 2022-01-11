@@ -79,21 +79,21 @@ type DaemonServer struct {
 	IPSetLocker *locker.Locker
 }
 
-func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
+func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
 	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDaemonServerWithCRClient(crClient), nil
+	return NewDaemonServerWithCRClient(crClient, reg), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
 	}
 }
 
@@ -164,7 +164,7 @@ type Server struct {
 
 // BuildServer builds a chaos daemon server
 func BuildServer(conf *Config, reg RegisterGatherer) (*Server, error) {
-	daemonServer, err := newDaemonServer(conf.Runtime)
+	daemonServer, err := newDaemonServer(conf.Runtime, reg)
 	if err != nil {
 		log.Error(err, "failed to create daemon server")
 		return nil, err
@@ -190,7 +190,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	daemonServer, err := newDaemonServer(s.conf.Runtime)
+	daemonServer, err := newDaemonServer(s.conf.Runtime, s.reg)
 	if err != nil {
 		log.Error(err, "failed to create daemon server")
 		return err
