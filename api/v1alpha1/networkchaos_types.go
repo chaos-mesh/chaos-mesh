@@ -94,6 +94,7 @@ type NetworkChaosSpec struct {
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
 	// Default action: delay
+	// ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	Action NetworkChaosAction `json:"action"`
 

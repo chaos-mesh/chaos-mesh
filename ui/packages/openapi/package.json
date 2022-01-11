@@ -1,0 +1,30 @@
+{
+  "name": "@ui/openapi",
+  "version": "2.1.0",
+  "description": "generate codes from openapi",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "generate": "npm-run-all generate:internal generate:post",
+    "generate:internal": "export TS_POST_PROCESS_FILE='../../node_modules/.bin/prettier --write'; openapi-generator-cli generate -c openapiconfig.json -i ../../../pkg/dashboard/swaggerdocs/swagger.yaml -g typescript-axios -o ../../app/src/openapi --enable-post-process-file",
+    "generate:post": "rimraf ../../app/src/openapi/.[!.]*; rimraf ../../app/src/openapi/git_push.sh",
+    "codegen": "node --experimental-json-modules ./codegen.js",
+    "test": "jest",
+    "clean": "rimraf ./formik/*.ts"
+  },
+  "dependencies": {
+    "signale": "^1.4.0",
+    "typescript": "^4.5.4",
+    "yargs": "^17.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "@openapitools/openapi-generator-cli": "^2.4.21",
+    "babel-jest": "^27.4.5",
+    "jest": "^27.4.3",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2"
+  }
+}

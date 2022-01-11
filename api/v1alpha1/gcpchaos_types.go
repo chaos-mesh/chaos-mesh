@@ -57,6 +57,7 @@ type GCPChaosSpec struct {
 	// Action defines the specific gcp chaos action.
 	// Supported action: node-stop / node-reset / disk-loss
 	// Default action: node-stop
+	// ui:form:enum=node-stop;node-reset;disk-loss
 	// +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
 	Action GCPChaosAction `json:"action"`
 
@@ -83,6 +84,7 @@ type GCPSelector struct {
 
 	// The device name of disks to detach.
 	// Needed in disk-loss.
+	// ui:form:action:disk-loss
 	// +optional
 	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,nilable"`
 }

@@ -62,6 +62,7 @@ type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.
 	// Supported action: error, random
 	// Default action: error
+	// ui:form:enum=error;random
 	// +kubebuilder:validation:Enum=error;random
 	Action DNSChaosAction `json:"action"`
 

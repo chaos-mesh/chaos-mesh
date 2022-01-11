@@ -212,7 +212,7 @@ var doc = `{
                         "type": "string",
                         "description": "uid",
                         "name": "uid",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -356,7 +356,7 @@ var doc = `{
                         "type": "string",
                         "description": "uid",
                         "name": "uid",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -2642,7 +2642,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific aws chaos action.\nSupported action: ec2-stop / ec2-restart / detach-volume\nDefault action: ec2-stop\n+kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume",
+                    "description": "Action defines the specific aws chaos action.\nSupported action: ec2-stop / ec2-restart / detach-volume\nDefault action: ec2-stop\nui:form:enum=ec2-stop;ec2-restart;detach-volume\n+kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume",
                     "type": "string"
                 },
                 "awsRegion": {
@@ -2650,7 +2650,7 @@ var doc = `{
                     "type": "string"
                 },
                 "deviceName": {
-                    "description": "DeviceName indicates the name of the device.\nNeeded in detach-volume.\n+optional",
+                    "description": "DeviceName indicates the name of the device.\nNeeded in detach-volume.\nui:form:action=detach-volume\n+optional",
                     "type": "string"
                 },
                 "duration": {
@@ -2662,7 +2662,7 @@ var doc = `{
                     "type": "string"
                 },
                 "endpoint": {
-                    "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\n+optional",
+                    "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\nui:form:ignore\n+optional",
                     "type": "string"
                 },
                 "secretName": {
@@ -2670,7 +2670,7 @@ var doc = `{
                     "type": "string"
                 },
                 "volumeID": {
-                    "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\n+optional",
+                    "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\nui:form:action=detach-volume\n+optional",
                     "type": "string"
                 }
             }
@@ -2907,7 +2907,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random\nDefault action: error\n+kubebuilder:validation:Enum=error;random",
+                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random\nDefault action: error\nui:form:enum=error;random\n+kubebuilder:validation:Enum=error;random",
                     "type": "string"
                 },
                 "containerNames": {
@@ -3065,11 +3065,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific gcp chaos action.\nSupported action: node-stop / node-reset / disk-loss\nDefault action: node-stop\n+kubebuilder:validation:Enum=node-stop;node-reset;disk-loss",
+                    "description": "Action defines the specific gcp chaos action.\nSupported action: node-stop / node-reset / disk-loss\nDefault action: node-stop\nui:form:enum=node-stop;node-reset;disk-loss\n+kubebuilder:validation:Enum=node-stop;node-reset;disk-loss",
                     "type": "string"
                 },
                 "deviceNames": {
-                    "description": "The device name of disks to detach.\nNeeded in disk-loss.\n+optional",
+                    "description": "The device name of disks to detach.\nNeeded in disk-loss.\nui:form:action:disk-loss\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3175,11 +3175,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific pod chaos action.\nSupported action: latency / fault / attrOverride / mistake\n+kubebuilder:validation:Enum=latency;fault;attrOverride;mistake",
+                    "description": "Action defines the specific pod chaos action.\nSupported action: latency / fault / attrOverride / mistake\nui:form:enum=latency;fault;attrOverride;mistake\n+kubebuilder:validation:Enum=latency;fault;attrOverride;mistake",
                     "type": "string"
                 },
                 "attr": {
-                    "description": "Attr defines the overrided attribution\n+optional",
+                    "description": "Attr defines the overrided attribution\nui:form:action=attrOverride\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AttrOverrideSpec"
                 },
@@ -3191,7 +3191,7 @@ var doc = `{
                     }
                 },
                 "delay": {
-                    "description": "Delay defines the value of I/O chaos action delay.\nA delay string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "description": "Delay defines the value of I/O chaos action delay.\nA delay string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\nui:form:action=latency\n+optional",
                     "type": "string"
                 },
                 "duration": {
@@ -3199,7 +3199,7 @@ var doc = `{
                     "type": "string"
                 },
                 "errno": {
-                    "description": "Errno defines the error code that returned by I/O action.\nrefer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html\n+optional",
+                    "description": "Errno defines the error code that returned by I/O action.\nrefer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html\nui:form:action=fault\n+optional",
                     "type": "integer"
                 },
                 "methods": {
@@ -3210,7 +3210,7 @@ var doc = `{
                     }
                 },
                 "mistake": {
-                    "description": "Mistake defines what types of incorrectness are injected to IO operations\n+optional",
+                    "description": "Mistake defines what types of incorrectness are injected to IO operations\nui:form:action=mistake\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.MistakeSpec"
                 },
@@ -3245,7 +3245,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData",
+                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\nui:form:enum=latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData",
                     "type": "string"
                 },
                 "class": {
@@ -3463,12 +3463,6 @@ var doc = `{
                 }
             }
         },
-        "v1alpha1.LabelSelectorRequirements": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/metav1.LabelSelectorRequirement"
-            }
-        },
         "v1alpha1.LossSpec": {
             "type": "object",
             "properties": {
@@ -3554,7 +3548,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific network chaos action.\nSupported action: partition, netem, delay, loss, duplicate, corrupt\nDefault action: delay\n+kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth",
+                    "description": "Action defines the specific network chaos action.\nSupported action: partition, netem, delay, loss, duplicate, corrupt\nDefault action: delay\nui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth\n+kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth",
                     "type": "string"
                 },
                 "bandwidth": {
@@ -3970,11 +3964,6 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "expressionSelectors": {
-                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
-                },
                 "fieldSelectors": {
                     "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
                     "type": "object",
@@ -4012,7 +4001,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific pod chaos action.\nSupported action: pod-kill / pod-failure / container-kill\nDefault action: pod-kill\n+kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill",
+                    "description": "Action defines the specific pod chaos action.\nSupported action: pod-kill / pod-failure / container-kill\nDefault action: pod-kill\nui:form:enum=pod-kill;pod-failure;container-kill\n+kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill",
                     "type": "string"
                 },
                 "containerNames": {
@@ -4153,11 +4142,6 @@ var doc = `{
                     "additionalProperties": {
                         "type": "string"
                     }
-                },
-                "expressionSelectors": {
-                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
                 },
                 "fieldSelectors": {
                     "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
