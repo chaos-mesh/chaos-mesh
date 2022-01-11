@@ -56,6 +56,7 @@ header:
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'ui/app/src/openapi/**'
     - 'ui/app/src/setupProxy.js'
+    - 'ui/packages/openapi/formik/**'
     - 'ui/**/*.svg'
     - 'ui/node_modules'
     # codecov configuration file
