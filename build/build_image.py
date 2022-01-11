@@ -120,8 +120,8 @@ def main():
     cmd = []
     if get_image_build(name) == "1":
         if os.getenv("DOCKER_CACHE") == "1":
-            env = {"DOCKER_BUILDKIT": "1",
-                   "DOCKER_CLI_EXPERIMENTAL": "enabled"}
+            env.update({"DOCKER_BUILDKIT": "1",
+                   "DOCKER_CLI_EXPERIMENTAL": "enabled"})
             cache_dir = os.getenv(
                 "DOCKER_CACHE_DIR", f"{os.getcwd()}/.cache/image-{name}")
             pathlib.Path(cache_dir).mkdir(parents=True, exist_ok=True)
@@ -136,7 +136,7 @@ def main():
                 cmd += ["--cache-from", f"type=local,src={cache_dir}"]
         else:
             if os.getenv("TARGET_PLATFORM") is not None:
-                env = {"DOCKER_BUILDKIT": "1"}
+                env.update({"DOCKER_BUILDKIT": "1"})
                 cmd = [
                     "docker",
                     "buildx",
@@ -147,7 +147,7 @@ def main():
             else:
                 # This branch is split to avoid to use `buildx`, as `buildx` is
                 # not supported on some CI environment
-                env = {"DOCKER_BUILDKIT": "1"}
+                env.update({"DOCKER_BUILDKIT": "1"})
                 cmd = ["docker", "build"]
 
         for env_key in common.export_env_variables:
