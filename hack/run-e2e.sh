@@ -46,7 +46,7 @@ SKIP_GINKGO=${SKIP_GINKGO:-}
 # We don't finalizers namespace on failure by default for easier debugging in local development.
 # TODO support this feature
 DELETE_NAMESPACE_ON_FAILURE=${DELETE_NAMESPACE_ON_FAILURE:-false}
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
+IMAGE_REGISTRY=${IMAGE_REGISTRY:-localhost:5000}
 
 if [ -z "$KUBECONFIG" ]; then
     echo "error: KUBECONFIG is required"
@@ -62,7 +62,7 @@ echo "KUBECONTEXT: $KUBECONTEXT"
 echo "REPORT_DIR: $REPORT_DIR"
 echo "REPORT_PREFIX: $REPORT_PREFIX"
 echo "DELETE_NAMESPACE_ON_FAILURE: $DELETE_NAMESPACE_ON_FAILURE"
-echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
+echo "IMAGE_REGISTRY: $IMAGE_REGISTRY"
 
 function e2e::image_load() {
     local images=(
@@ -75,7 +75,7 @@ function e2e::image_load() {
         echo $nodes
         echo "info: load images ${images[@]}"
         for image in ${images[@]}; do
-            $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
+            $KIND_BIN load docker-image --name $CLUSTER ${IMAGE_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
         done
 
         # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
@@ -137,13 +137,13 @@ e2e_args=(
     ${ginkgo_args[@]:-}
     /usr/local/bin/e2e.test
     --
-    --manager-image-registry="${DOCKER_REGISTRY}"
+    --manager-image-registry="${IMAGE_REGISTRY}"
     --manager-image="chaos-mesh/chaos-mesh"
     --manager-image-tag="${IMAGE_TAG}"
-    --daemon-image-registry="${DOCKER_REGISTRY}"
+    --daemon-image-registry="${IMAGE_REGISTRY}"
     --daemon-image="chaos-mesh/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
-    --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
+    --e2e-image="${IMAGE_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
     --install-chaos-mesh
 )
 
