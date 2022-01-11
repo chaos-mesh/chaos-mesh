@@ -101,6 +101,9 @@ def main():
         cmd += ["--volume", f"{tmp_go_dir}:/tmp/go"]
         cmd += ["--volume", f"{tmp_go_build_dir}:/tmp/go-build"]
 
+    for env_key in common.export_env_variables:
+        pass_env_to_docker_arg(cmd, env_key)
+
     cmd += ["--workdir", cwd]
     cmd += [env_image_full_name]
     cmd += ["/bin/bash"]
