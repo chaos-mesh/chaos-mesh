@@ -45,7 +45,8 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific aws chaos action. Supported
-                  action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
+                  action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop
+                  ui:form:enum=ec2-stop;ec2-restart;detach-volume'
                 enum:
                 - ec2-stop
                 - ec2-restart
@@ -56,7 +57,7 @@ spec:
                 type: string
               deviceName:
                 description: DeviceName indicates the name of the device. Needed in
-                  detach-volume.
+                  detach-volume. ui:form:action=detach-volume
                 type: string
               duration:
                 description: Duration represents the duration of the chaos action.
@@ -66,14 +67,14 @@ spec:
                 type: string
               endpoint:
                 description: Endpoint indicates the endpoint of the aws server. Just
-                  used it in test now.
+                  used it in test now. ui:form:ignore
                 type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret.
                 type: string
               volumeID:
                 description: EbsVolume indicates the ID of the EBS volume. Needed
-                  in detach-volume.
+                  in detach-volume. ui:form:action=detach-volume
                 type: string
             required:
             - action

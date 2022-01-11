@@ -46,7 +46,7 @@ spec:
               action:
                 description: 'Action defines the specific network chaos action. Supported
                   action: partition, netem, delay, loss, duplicate, corrupt Default
-                  action: delay'
+                  action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
                 enum:
                 - netem
                 - delay

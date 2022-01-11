@@ -45,7 +45,7 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific pod chaos action. Supported
-                  action: latency / fault / attrOverride / mistake'
+                  action: latency / fault / attrOverride / mistake ui:form:enum=latency;fault;attrOverride;mistake'
                 enum:
                 - latency
                 - fault
@@ -53,7 +53,7 @@ spec:
                 - mistake
                 type: string
               attr:
-                description: Attr defines the overrided attribution
+                description: Attr defines the overrided attribution ui:form:action=attrOverride
                 properties:
                   atime:
                     description: Timespec represents a time
@@ -131,7 +131,7 @@ spec:
                 description: Delay defines the value of I/O chaos action delay. A
                   delay string is a possibly signed sequence of decimal numbers, each
                   with optional fraction and a unit suffix, such as "300ms". Valid
-                  time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:action=latency
                 type: string
               duration:
                 description: Duration represents the duration of the chaos action.
@@ -143,7 +143,8 @@ spec:
                 type: string
               errno:
                 description: 'Errno defines the error code that returned by I/O action.
-                  refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
+                  refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+                  ui:form:action=fault'
                 format: int32
                 type: integer
               methods:
@@ -154,7 +155,7 @@ spec:
                 type: array
               mistake:
                 description: Mistake defines what types of incorrectness are injected
-                  to IO operations
+                  to IO operations ui:form:action=mistake
                 properties:
                   filling:
                     description: Filling determines what is filled in the miskate

@@ -45,7 +45,7 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific DNS chaos action. Supported
-                  action: error, random Default action: error'
+                  action: error, random Default action: error ui:form:enum=error;random'
                 enum:
                 - error
                 - random
