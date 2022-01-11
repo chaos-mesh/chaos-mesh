@@ -190,13 +190,7 @@ func (s *Server) Start() error {
 		return err
 	}
 
-	daemonServer, err := newDaemonServer(s.conf.Runtime, s.reg)
-	if err != nil {
-		log.Error(err, "failed to create daemon server")
-		return err
-	}
-
-	grpcServer, err := newGRPCServer(daemonServer, s.reg, s.conf.tlsConfig)
+	grpcServer, err := newGRPCServer(s.daemonServer, s.reg, s.conf.tlsConfig)
 	if err != nil {
 		log.Error(err, "failed to create grpc server")
 		return err
