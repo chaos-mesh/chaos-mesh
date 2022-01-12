@@ -43,7 +43,7 @@ func PidPath(pid int) cgroups.Path {
 	paths, err := cgroups.ParseCgroupFile(p)
 	if err != nil {
 		return func(_ cgroups.Name) (string, error) {
-			return "", errors.Errorf("failed to parse cgroup file %s: %s", p, err.Error())
+			return "", errors.Wrapf(err, "parse cgroup file %s", p)
 		}
 	}
 

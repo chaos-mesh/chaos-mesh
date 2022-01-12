@@ -68,7 +68,7 @@ func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*
 		nsBytes, err := ioutil.ReadFile(serviceAccountNamespaceFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return nil, errors.Errorf("%s: maybe you should specify ----template-namespace if you are running outside of kubernetes", err.Error())
+				return nil, errors.Wrapf(err, "service account namespace file %s does not exist", serviceAccountNamespaceFilePath)
 			}
 			return nil, err
 		}
@@ -95,7 +95,7 @@ func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*
 
 	c.client = clientset.CoreV1()
 	if err = validate(&c); err != nil {
-		return nil, errors.Errorf("validation failed for K8sConfigMapWatcher: %s", err.Error())
+		return nil, errors.Wrap(err, "validate K8sConfigMapWatcher")
 	}
 	log.Info("Created ConfigMap watcher",
 		"apiserver", k8sConfig.Host, "template namespaces", c.TemplateNamespace,
@@ -133,7 +133,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
 		})
 	if err != nil {
-		return errors.Errorf("unable to create template watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
+		return errors.Wrap(err, "create template configmap watcher")
 	}
 
 	targetNamespace := ""
@@ -148,7 +148,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
 		})
 	if err != nil {
-		return errors.Errorf("unable to create config watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
+		return errors.Wrap(err, "create configmap watcher")
 	}
 	defer func() {
 		configWatcher.Stop()
