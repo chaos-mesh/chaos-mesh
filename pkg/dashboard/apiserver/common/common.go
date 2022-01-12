@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -293,7 +294,7 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	if len(podNamespaceList) == 0 {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList is required")))
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("podNamespaceList is required")))
 		return
 	}
 
@@ -345,7 +346,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 
 	if len(podNamespaceList) == 0 {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList is required")))
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("podNamespaceList is required")))
 		return
 	}
 
@@ -413,7 +414,7 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 		verbs = `"get", "list", "watch"`
 	} else {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(fmt.Errorf("roleType is neither manager nor viewer")))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(errors.Errorf("roleType is neither manager nor viewer")))
 		return
 	}
 
@@ -494,7 +495,7 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("physicalMachineNamespaceList is required")))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("physicalMachineNamespaceList is required")))
 		return
 	}
 
@@ -544,7 +545,7 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("physicalMachineNamespaceList is required")))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("physicalMachineNamespaceList is required")))
 		return
 	}
 	selector := v1alpha1.PhysicalMachineSelectorSpec{}

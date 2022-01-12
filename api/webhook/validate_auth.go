@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 var alwaysAllowedKind = []string{
@@ -85,7 +86,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	kind, ok := v1alpha1.AllKindsIncludeScheduleAndWorkflow()[requestKind]
 	if !ok {
-		err := fmt.Errorf("kind %s is not support", requestKind)
+		err := errors.Wrapf(errInvalidValue, "kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 	chaos := kind.SpawnObject()

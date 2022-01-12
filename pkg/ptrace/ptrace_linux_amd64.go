@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+//go:build cgo
 // +build cgo
 
 package ptrace
@@ -276,7 +277,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 		} else if index == 5 {
 			regs.R9 = arg
 		} else {
-			return 0, fmt.Errorf("too many arguments for a syscall")
+			return 0, errors.Errorf("too many arguments for a syscall")
 		}
 	}
 	err = syscall.PtraceSetRegs(p.pid, &regs)
@@ -399,7 +400,7 @@ func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 // GetLibBuffer reads an entry
 func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
 	if entry.PaddingSize > 0 {
-		return nil, fmt.Errorf("entry with padding size is not supported")
+		return nil, errors.Errorf("entry with padding size is not supported")
 	}
 
 	size := entry.EndAddress - entry.StartAddress
@@ -465,7 +466,7 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 			return entry.StartAddress + (offset - loadOffset), nil
 		}
 	}
-	return 0, fmt.Errorf("cannot find symbol")
+	return 0, errors.Errorf("cannot find symbol")
 }
 
 // WriteUint64ToAddr writes uint64 to addr

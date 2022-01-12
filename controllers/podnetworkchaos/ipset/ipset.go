@@ -24,9 +24,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pkg/errors"
 )
 
 var log = ctrl.Log.WithName("ipset")
@@ -65,7 +67,8 @@ func FlushIPSets(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuil
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
+		return err
 	}
 
 	log.Info("Flushing IP Sets....")
@@ -87,5 +90,5 @@ func FlushIPSets(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuil
 		}
 	}
 
-	return fmt.Errorf("unable to flush ip sets for pod %s", pod.Name)
+	return errors.Errorf("unable to flush ip sets for pod %s", pod.Name)
 }

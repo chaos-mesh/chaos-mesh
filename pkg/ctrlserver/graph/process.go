@@ -17,7 +17,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -35,7 +34,7 @@ func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]*model.Proc
 	}
 	outLines := strings.Split(string(out), "\n")
 	if len(outLines) < 2 {
-		return nil, fmt.Errorf("ps returns empty")
+		return nil, errors.Errorf("ps returns empty")
 	}
 	titles := strings.Fields(outLines[0])
 	var pidColumn, cmdColumn int
@@ -48,7 +47,7 @@ func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]*model.Proc
 		}
 	}
 	if pidColumn == 0 && cmdColumn == 0 {
-		return nil, fmt.Errorf("parsing ps error: could not get PID and COMMAND column")
+		return nil, errors.Errorf("parsing ps error: could not get PID and COMMAND column")
 	}
 
 	var processes []*model.Process

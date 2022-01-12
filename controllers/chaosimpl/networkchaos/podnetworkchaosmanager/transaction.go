@@ -16,9 +16,9 @@
 package podnetworkchaosmanager
 
 import (
-	"fmt"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
+	"github.com/pkg/errors"
 )
 
 // PodNetworkTransaction represents a modification on podnetwork
@@ -81,7 +81,7 @@ func (a *Append) Apply(chaos *v1alpha1.PodNetworkChaos) error {
 	case v1alpha1.RawTrafficControl:
 		chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, item)
 	default:
-		return fmt.Errorf("unknown type of item")
+		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
 
 	return nil
@@ -103,7 +103,7 @@ func (t *PodNetworkTransaction) Append(item interface{}) error {
 		})
 		return nil
 	default:
-		return fmt.Errorf("unknown type of item")
+		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
 }
 

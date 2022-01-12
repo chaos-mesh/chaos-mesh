@@ -462,7 +462,7 @@ func ParseUnit(s string) (uint64, error) {
 	if n, err := units.ParseUnit(s, decimalUnitMap); err == nil {
 		return uint64(n), nil
 	}
-	return 0, fmt.Errorf("units: unknown unit %s", s)
+	return 0, errors.Wrapf(errInvalidValue, "unknown unit %s", s)
 }
 
 func (in *NetworkBandwidthSpec) Validate(root interface{}, path *field.Path) field.ErrorList {

@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,13 @@
 // limitations under the License.
 //
 
-package time
+package v1alpha1
 
 import (
 	"github.com/pkg/errors"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-// ModifyTime modifies time of target process
-func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
-	// Mock point to return error in unit test
-	if err := mock.On("ModifyTimeError"); err != nil {
-		if e, ok := err.(error); ok {
-			return e
-		}
-		if ignore, ok := err.(bool); ok && ignore {
-			return nil
-		}
-	}
-	return errors.New("arm64 is not supported")
-}
+var (
+	errUnknownAction = errors.New("unknown action")
+	errInvalidValue  = errors.New("invalid value")
+)

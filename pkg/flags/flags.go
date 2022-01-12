@@ -18,6 +18,8 @@ package flags
 import (
 	"fmt"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // MapStringStringFlag is a flag struct for key=value pairs
@@ -42,7 +44,7 @@ func (s *MapStringStringFlag) Set(value string) error {
 	for _, p := range strings.Split(value, ",") {
 		fields := strings.Split(p, "=")
 		if len(fields) != 2 {
-			return fmt.Errorf("%s is incorrectly formatted! should be key=value[,key2=value2]", p)
+			return errors.Errorf("%s is incorrectly formatted! should be key=value[,key2=value2]", p)
 		}
 		s.Values[fields[0]] = fields[1]
 	}

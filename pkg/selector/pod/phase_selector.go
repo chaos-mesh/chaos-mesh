@@ -16,7 +16,6 @@
 package pod
 
 import (
-	"fmt"
 	"strings"
 
 	v1 "k8s.io/api/core/v1"
@@ -26,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
+	"github.com/pkg/errors"
 )
 
 const phaseSelectorName = "phase"
@@ -88,7 +88,7 @@ func newPhaseSelector(spec v1alpha1.PodSelectorSpec) (generic.Selector, error) {
 		case selection.DoesNotExist:
 			reqExcl = append(reqExcl, req)
 		default:
-			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
+			return nil, errors.Errorf("unsupported operator: %s", req.Operator())
 		}
 	}
 

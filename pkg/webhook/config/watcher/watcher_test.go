@@ -25,6 +25,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 )
 
 var _ = Describe("webhook config watcher", func() {
@@ -34,7 +35,7 @@ var _ = Describe("webhook config watcher", func() {
 			defer func() { restClusterConfig = old }()
 
 			restClusterConfig = func() (*rest.Config, error) {
-				return nil, fmt.Errorf("InClusterConfig error")
+				return nil, errors.Errorf("InClusterConfig error")
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
@@ -50,7 +51,7 @@ var _ = Describe("webhook config watcher", func() {
 			defer func() { kubernetesNewForConfig = old }()
 
 			kubernetesNewForConfig = func(c *rest.Config) (*kubernetes.Clientset, error) {
-				return nil, fmt.Errorf("NewForConfig error")
+				return nil, errors.Errorf("NewForConfig error")
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"

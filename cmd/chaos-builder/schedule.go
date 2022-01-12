@@ -89,7 +89,7 @@ func (it *scheduleCodeGenerator) Render() string {
 	}
 
 	imports := `import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 `
 
@@ -109,7 +109,7 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	switch templateType {
 %s
 	default:
-		return nil, fmt.Errorf("unsupported template type %%s", templateType)
+		return nil, errors.Wrapf(errInvalidValue, "unknown template type %%s", templateType)
 	}
 }
 
@@ -117,7 +117,7 @@ func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
 	switch chaos := root.(type) {
 %s
 	default:
-		return fmt.Errorf("unsupported chaos %%#v", root)
+		return errors.Wrapf(errInvalidValue, "unknown chaos %%#v", root)
 	}
 }
 `,

@@ -18,7 +18,6 @@ package graph
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -71,12 +70,12 @@ func exec(ctx context.Context, pod *v1.Pod, cmd string, c *kubernetes.Clientset)
 	})
 	if err != nil {
 		if stderr.String() != "" {
-			return "", fmt.Errorf("error: %s\npod: %s\ncommand: %s", strings.TrimSuffix(stderr.String(), "\n"), pod.Name, cmd)
+			return "", errors.Errorf("error: %s\npod: %s\ncommand: %s", strings.TrimSuffix(stderr.String(), "\n"), pod.Name, cmd)
 		}
 		return "", errors.Wrapf(err, "error in streaming remotecommand: pod: %s/%s, command: %s", pod.GetNamespace(), pod.Name, cmd)
 	}
 	if stderr.String() != "" {
-		return "", fmt.Errorf("error of command %s: %s", cmd, stderr.String())
+		return "", errors.Errorf("error of command %s: %s", cmd, stderr.String())
 	}
 	return stdout.String(), nil
 }

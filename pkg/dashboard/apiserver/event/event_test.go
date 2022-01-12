@@ -18,7 +18,6 @@ package event
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -28,6 +27,7 @@ import (
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
@@ -73,7 +73,7 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 		}
 		res = append(res, event)
 	} else {
-		err = fmt.Errorf("test err")
+		err = errors.Errorf("test err")
 	}
 	return res, err
 }
@@ -97,7 +97,7 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 		if id == 1 {
 			err = gorm.ErrRecordNotFound
 		} else {
-			err = fmt.Errorf("test err")
+			err = errors.Errorf("test err")
 		}
 	}
 	return res, err

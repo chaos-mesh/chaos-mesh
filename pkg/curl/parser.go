@@ -16,7 +16,6 @@
 package curl
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -42,7 +41,7 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 
 	// first non-flag arg is the command itself, use the second non-flag arg as the url.
 	if flag.NArg() > 1 {
-		return nil, fmt.Errorf("can not find the url")
+		return nil, errors.Errorf("can not find the url")
 	}
 	url := flagset.Arg(1)
 

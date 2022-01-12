@@ -16,12 +16,12 @@
 package v1alpha1
 
 import (
-	"fmt"
 	"reflect"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	"github.com/pkg/errors"
 )
 
 type EbsVolume string
@@ -33,7 +33,7 @@ func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorLis
 	awsChaos := root.(*AWSChaos)
 	if awsChaos.Spec.Action == DetachVolume {
 		if in == nil {
-			err := fmt.Errorf("the ID of EBS volume should not be empty on %s action", awsChaos.Spec.Action)
+			err := errors.Wrapf(errInvalidValue, "the ID of EBS volume is empty on %s action", awsChaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -47,7 +47,7 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 	awsChaos := root.(*AWSChaos)
 	if awsChaos.Spec.Action == DetachVolume {
 		if in == nil {
-			err := fmt.Errorf("the name of device should not be empty on %s action", awsChaos.Spec.Action)
+			err := errors.Wrapf(errInvalidValue, "the name of device is empty on %s action", awsChaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -64,7 +64,7 @@ func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.Err
 	case Ec2Stop, DetachVolume:
 	case Ec2Restart:
 	default:
-		err := fmt.Errorf("awschaos have unknown action type")
+		err := errors.WithStack(errUnknownAction)
 		log.Error(err, "Wrong AWSChaos Action type")
 
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
