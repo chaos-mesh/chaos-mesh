@@ -227,6 +227,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				iochaostestcases.TestcaseIOMistakeWithSpecifiedContainer(ns, cli, c, port)
 			})
 		})
+
+		// io chaos case in [IOGraceful] context
+		ginkgo.Context("[IOGraceful]", func() {
+			ginkgo.It("[Restart]", func() {
+				iochaostestcases.TestcaseIOErrorGracefulShutdown(ns, cli, c, port)
+			})
+		})
 	})
 
 	//http chaos case in [HTTPChaos] context
