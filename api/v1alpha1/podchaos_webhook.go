@@ -25,7 +25,7 @@ func (in *PodChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 	allErrs := field.ErrorList{}
 	if in.Action == ContainerKillAction {
 		if len(in.ContainerSelector.ContainerNames) == 0 {
-			err := errors.Wrapf(errInvalidValue, "the name of container is empty on %s action", in.Action)
+			err := errors.Wrapf(errInvalidValue, "the name of container is required on %s action", in.Action)
 			allErrs = append(allErrs, field.Invalid(path.Child("containerNames"), in.ContainerNames, err.Error()))
 		}
 	}

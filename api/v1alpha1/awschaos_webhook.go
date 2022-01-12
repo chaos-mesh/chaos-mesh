@@ -33,7 +33,7 @@ func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorLis
 	awsChaos := root.(*AWSChaos)
 	if awsChaos.Spec.Action == DetachVolume {
 		if in == nil {
-			err := errors.Wrapf(errInvalidValue, "the ID of EBS volume is empty on %s action", awsChaos.Spec.Action)
+			err := errors.Wrapf(errInvalidValue, "the ID of EBS volume is required on %s action", awsChaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -47,7 +47,7 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 	awsChaos := root.(*AWSChaos)
 	if awsChaos.Spec.Action == DetachVolume {
 		if in == nil {
-			err := errors.Wrapf(errInvalidValue, "the name of device is empty on %s action", awsChaos.Spec.Action)
+			err := errors.Wrapf(errInvalidValue, "the name of device is required on %s action", awsChaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}

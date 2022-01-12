@@ -67,7 +67,7 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		skipConfigCheck = true
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("spec"), in,
-				"the configuration corresponding to action is empty"))
+				"the configuration corresponding to action is required"))
 	}
 
 	if len(in.Address) == 0 && in.Selector.Empty() {
@@ -82,7 +82,7 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 	for _, address := range in.Address {
 		if len(address) == 0 {
 			allErrs = append(allErrs,
-				field.Invalid(path.Child("address"), in.Address, "the address is empty"))
+				field.Invalid(path.Child("address"), in.Address, "the address is required"))
 		}
 	}
 
