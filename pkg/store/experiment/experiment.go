@@ -21,13 +21,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-<<<<<<< HEAD:pkg/store/experiment/experiment.go
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-=======
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
->>>>>>> 857bcc76 (fix(chaos-dashboard): ignore the first event on `Reconcile` that triggered by deleting action (#2698)):pkg/dashboard/store/experiment/experiment.go
 )
 
 var log = ctrl.Log.WithName("store/experiment")
@@ -101,7 +96,7 @@ func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespac
 			return nil, err
 		}
 
-		if meta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
+		if meta.GetLabels()["managed-by"] != "" {
 			managedExperiments = append(managedExperiments, expr)
 		}
 	}
