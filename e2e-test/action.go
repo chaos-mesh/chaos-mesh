@@ -30,9 +30,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
+	"k8s.io/kubernetes/test/e2e/framework"
 
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	e2eutil "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -42,8 +44,42 @@ const (
 // OperatorAction describe the common operation during test (e2e/stability/etc..)
 type OperatorAction interface {
 	CleanCRDOrDie()
-	DeployOperator(config OperatorConfig) error
-	InstallCRD(config OperatorConfig) error
+	DeployOperator(config *OperatorConfig) error
+	UpgradeOperator(config *OperatorConfig) error
+	InstallCRD(config *OperatorConfig) error
+}
+
+// BuildOperatorAction build an OperatorAction interface instance or fail
+func BuildOperatorActionAndCfg(cfg *Config) (OperatorAction, *OperatorConfig, error) {
+	// Get clients
+	config, err := framework.LoadConfig()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to load config")
+	}
+	kubeCli, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to create kube client")
+	}
+	aggrCli, err := aggregatorclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to create aggr client")
+	}
+	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to create apiExt clientset")
+	}
+	oa := NewOperatorAction(kubeCli, aggrCli, apiExtCli, cfg)
+	ocfg := NewDefaultOperatorConfig()
+	ocfg.Manager.ImageRegistry = cfg.ManagerImageRegistry
+	ocfg.Manager.ImageRepository = cfg.ManagerImage
+	ocfg.Manager.ImageTag = cfg.ManagerTag
+	ocfg.Daemon.ImageRegistry = cfg.DaemonImageRegistry
+	ocfg.Daemon.ImageRepository = cfg.DaemonImage
+	ocfg.Daemon.ImageTag = cfg.DaemonTag
+	ocfg.DNSImage = cfg.ChaosDNSImage
+	ocfg.EnableDashboard = cfg.EnableDashboard
+
+	return oa, &ocfg, nil
 }
 
 // NewOperatorAction create an OperatorAction interface instance
@@ -62,7 +98,7 @@ func NewOperatorAction(
 	return oa
 }
 
-func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
+func (oa *operatorAction) DeployOperator(info *OperatorConfig) error {
 	klog.Infof("create namespace chaos-testing")
 	cmd := fmt.Sprintf(`kubectl create ns %s`, e2econst.ChaosMeshNamespace)
 	klog.Infof(cmd)
@@ -70,8 +106,12 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	if err != nil {
 		return fmt.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
 	}
+	return oa.UpgradeOperator(info)
+}
+
+func (oa *operatorAction) UpgradeOperator(info *OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh:%v", info.ReleaseName)
-	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set %s --skip-crds`,
+	cmd := fmt.Sprintf(`helm upgrade --install %s %s --namespace %s --set %s --skip-crds`,
 		info.ReleaseName,
 		oa.operatorChartPath(info.Tag),
 		info.Namespace,
@@ -83,7 +123,6 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	}
 	klog.Infof("start to waiting chaos-mesh ready")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-
 		ls := &metav1.LabelSelector{
 			MatchLabels: map[string]string{
 				"app.kubernetes.io/instance": "chaos-mesh",
@@ -112,7 +151,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
 }
 
-func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
+func (oa *operatorAction) InstallCRD(info *OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
 	if oa.apiextensionsV1Available() {
 		oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")

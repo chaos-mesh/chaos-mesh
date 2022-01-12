@@ -5,6 +5,7 @@ require (
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.14.0
+	github.com/pkg/errors v0.9.1 // indirect
 	k8s.io/api v0.21.3
 	k8s.io/apiextensions-apiserver v0.21.3
 	k8s.io/apimachinery v0.21.3
