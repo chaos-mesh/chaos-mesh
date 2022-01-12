@@ -16,9 +16,10 @@
 package podiochaosmanager
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/pkg/errors"
 )
 
 // PodIOTransaction represents a modification on podnetwork

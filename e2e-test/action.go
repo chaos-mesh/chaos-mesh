@@ -31,9 +31,10 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	e2eutil "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
-	"github.com/pkg/errors"
 )
 
 const (

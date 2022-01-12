@@ -16,9 +16,10 @@
 package podnetworkchaosmanager
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/pkg/errors"
 )
 
 // PodNetworkTransaction represents a modification on podnetwork

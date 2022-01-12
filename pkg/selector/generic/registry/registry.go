@@ -16,9 +16,10 @@
 package registry
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	"github.com/pkg/errors"
 )
 
 type Registry map[string]SelectorFactory

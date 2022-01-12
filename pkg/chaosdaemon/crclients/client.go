@@ -18,10 +18,11 @@ package crclients
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/crio"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/docker"
-	"github.com/pkg/errors"
 )
 
 const (

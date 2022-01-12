@@ -50,6 +50,7 @@ header:
     - '**/Dockerfile'
     # UI
     - 'ui/.husky/pre-commit'
+    - 'ui/.husky/_/husky.sh'
     - 'ui/.prettierignore'
     - 'ui/.prettierrc'
     - 'ui/.yarnclean'
@@ -57,5 +58,7 @@ header:
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
     - 'ui/node_modules'
+    - 'ui/app/node_modules'
+    - 'ui/packages/mui-extends/node_modules'
     # codecov configuration file
     - codecov.yml

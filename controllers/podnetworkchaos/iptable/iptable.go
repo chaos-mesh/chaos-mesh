@@ -23,12 +23,13 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pkg/errors"
 )
 
 var log = ctrl.Log.WithName("iptable")

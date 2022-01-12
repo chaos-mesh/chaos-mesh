@@ -18,8 +18,9 @@ package cron
 import (
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // Get this function from Kubernetes
