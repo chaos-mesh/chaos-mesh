@@ -105,7 +105,7 @@ var _ = Describe("webhook config watcher", func() {
 	})
 
 	Context("Watch error", func() {
-		It("should return unable to create template watcher", func() {
+		It("should return create template configmap watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.TemplateNamespace = "testNamespace"
@@ -116,7 +116,7 @@ var _ = Describe("webhook config watcher", func() {
 			controllerRuntimeSignalHandler := ctrl.SetupSignalHandler()
 			err := cmw.Watch(sigChan, controllerRuntimeSignalHandler.Done())
 			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("unable to create template watcher"))
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("create template configmap watcher"))
 		})
 	})
 
