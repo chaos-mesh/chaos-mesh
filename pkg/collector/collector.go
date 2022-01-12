@@ -41,12 +41,6 @@ type ChaosCollector struct {
 
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	var (
-		chaosMeta  metav1.Object
-		ok         bool
-		manageFlag bool
-	)
-
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
@@ -62,47 +56,21 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	err := r.Get(ctx, req.NamespacedName, obj)
 	if apierrors.IsNotFound(err) {
-		if chaosMeta, ok = obj.(metav1.Object); !ok {
-			r.Log.Error(nil, "failed to get chaos meta information")
+		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
+			r.Log.Error(err, "failed to archive experiment")
 		}
-		if chaosMeta.GetLabels()["managed-by"] != "" {
-			manageFlag = true
+
+		// If the experiment was created by schedule or workflow,
+		// it and its events will be deleted from database.
+		if err = r.deleteManagedExperiments(req.Namespace, req.Name); err != nil {
+			r.Log.Error(err, "delete managed experiments", "namespace", req.Namespace, "name", req.Name)
 		}
-		if !manageFlag {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
-		}
+
 		return ctrl.Result{}, nil
 	}
 
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
-		return ctrl.Result{}, nil
-	}
-
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		r.Log.Error(nil, "failed to get chaos meta information")
-	}
-
-	if chaosMeta.GetLabels()["managed-by"] != "" {
-		manageFlag = true
-	}
-
-	if obj.IsDeleted() {
-		if !manageFlag {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
-		}
 		return ctrl.Result{}, nil
 	}
 
@@ -124,62 +92,15 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 }
 
 func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	var (
-		chaosMeta metav1.Object
-		ok        bool
-	)
-
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		r.Log.Error(nil, "failed to get chaos meta information")
-	}
-	UID := string(chaosMeta.GetUID())
-
-	archive := &core.Experiment{
-		ExperimentMeta: core.ExperimentMeta{
-			Namespace: req.Namespace,
-			Name:      req.Name,
-			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       UID,
-			Archived:  false,
-		},
-	}
-
-	switch chaos := obj.(type) {
-	case *v1alpha1.PodChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.NetworkChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.IOChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
-		archive.Action = ""
-	case *v1alpha1.DNSChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.AWSChaos:
-		archive.Action = string(chaos.Spec.Action)
-	case *v1alpha1.GCPChaos:
-		archive.Action = string(chaos.Spec.Action)
-	default:
-		return errors.New("unsupported chaos type " + archive.Kind)
-	}
-
-	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
-	if chaosMeta.GetDeletionTimestamp() != nil {
-		archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
-	}
-
-	data, err := json.Marshal(chaosMeta)
+	archive, err := convertInnerObjectToExperiment(obj)
 	if err != nil {
-		r.Log.Error(err, "failed to marshal chaos", "kind", archive.Kind,
-			"namespace", archive.Namespace, "name", archive.Name)
+		r.Log.Error(err, "failed to covert InnerObject")
 		return err
 	}
 
-	archive.Experiment = string(data)
-
-	find, err := r.archive.FindByUID(context.Background(), UID)
+	find, err := r.archive.FindByUID(context.Background(), archive.UID)
 	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		r.Log.Error(err, "failed to find experiment", "UID", UID)
+		r.Log.Error(err, "failed to find experiment", "UID", archive.UID)
 		return err
 	}
 
@@ -204,4 +125,78 @@ func (r *ChaosCollector) archiveExperiment(ns, name string) error {
 	}
 
 	return nil
+}
+
+func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
+	archives, err := r.archive.FindManagedByNamespaceName(context.Background(), ns, name)
+	if gorm.IsRecordNotFoundError(err) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	for _, expr := range archives {
+		if err = r.event.DeleteByUID(context.Background(), expr.UID); err != nil {
+			r.Log.Error(err, "failed to delete experiment related events")
+		}
+
+		if err = r.archive.Delete(context.Background(), expr); err != nil {
+			r.Log.Error(err, "failed to delete managed experiment")
+		}
+	}
+
+	return nil
+}
+
+func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment, error) {
+	chaosMeta, ok := obj.(metav1.Object)
+	if !ok {
+		return nil, errors.New("chaos meta information not found")
+	}
+	UID := string(chaosMeta.GetUID())
+
+	archive := &core.Experiment{
+		ExperimentMeta: core.ExperimentMeta{
+			Namespace: chaosMeta.GetNamespace(),
+			Name:      chaosMeta.GetName(),
+			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
+			UID:       UID,
+			Archived:  false,
+		},
+	}
+
+	switch chaos := obj.(type) {
+	case *v1alpha1.PodChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.NetworkChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.IOChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
+		archive.Action = ""
+	case *v1alpha1.DNSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.AWSChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.GCPChaos:
+		archive.Action = string(chaos.Spec.Action)
+	default:
+		return nil, errors.New("unsupported chaos type " + archive.Kind)
+	}
+
+	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
+	if chaosMeta.GetDeletionTimestamp() != nil {
+		archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+	}
+
+	data, err := json.Marshal(chaosMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	archive.Experiment = string(data)
+
+	return archive, nil
 }
