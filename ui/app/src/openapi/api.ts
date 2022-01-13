@@ -889,7 +889,7 @@ export interface UtilsResponse {
  */
 export interface V1alpha1AWSChaosSpec {
   /**
-   * Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
+   * Action defines the specific aws chaos action. Supported action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
    * @type {string}
    * @memberof V1alpha1AWSChaosSpec
    */
@@ -901,7 +901,7 @@ export interface V1alpha1AWSChaosSpec {
    */
   awsRegion?: string
   /**
-   * DeviceName indicates the name of the device. Needed in detach-volume. ui:form:action=detach-volume +optional
+   * DeviceName indicates the name of the device. Needed in detach-volume. ui:form:when=action==\'detach-volume\' +optional
    * @type {string}
    * @memberof V1alpha1AWSChaosSpec
    */
@@ -931,7 +931,7 @@ export interface V1alpha1AWSChaosSpec {
    */
   secretName?: string
   /**
-   * EbsVolume indicates the ID of the EBS volume. Needed in detach-volume. ui:form:action=detach-volume +optional
+   * EbsVolume indicates the ID of the EBS volume. Needed in detach-volume. ui:form:when=action==\'detach-volume\' +optional
    * @type {string}
    * @memberof V1alpha1AWSChaosSpec
    */
@@ -1257,7 +1257,7 @@ export interface V1alpha1CorruptSpec {
  */
 export interface V1alpha1DNSChaosSpec {
   /**
-   * Action defines the specific DNS chaos action. Supported action: error, random Default action: error ui:form:enum=error;random +kubebuilder:validation:Enum=error;random
+   * Action defines the specific DNS chaos action. Supported action: error, random Default action: error +kubebuilder:validation:Enum=error;random
    * @type {string}
    * @memberof V1alpha1DNSChaosSpec
    */
@@ -1468,13 +1468,13 @@ export interface V1alpha1Frame {
  */
 export interface V1alpha1GCPChaosSpec {
   /**
-   * Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop ui:form:enum=node-stop;node-reset;disk-loss +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
+   * Action defines the specific gcp chaos action. Supported action: node-stop / node-reset / disk-loss Default action: node-stop +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
    * @type {string}
    * @memberof V1alpha1GCPChaosSpec
    */
   action?: string
   /**
-   * The device name of disks to detach. Needed in disk-loss. ui:form:action:disk-loss +optional
+   * The device name of disks to detach. Needed in disk-loss. ui:form:when=action==\'disk-loss\' +optional
    * @type {Array<string>}
    * @memberof V1alpha1GCPChaosSpec
    */
@@ -1595,7 +1595,7 @@ export interface V1alpha1HTTPChaosSpec {
    */
   selector?: V1alpha1PodSelectorSpec
   /**
-   * +kubebuilder:validation:Enum=Request;Response Target is the object to be selected and injected.
+   * Target is the object to be selected and injected. +kubebuilder:validation:Enum=Request;Response
    * @type {string}
    * @memberof V1alpha1HTTPChaosSpec
    */
@@ -1614,7 +1614,7 @@ export interface V1alpha1HTTPChaosSpec {
  */
 export interface V1alpha1IOChaosSpec {
   /**
-   * Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake ui:form:enum=latency;fault;attrOverride;mistake +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
+   * Action defines the specific pod chaos action. Supported action: latency / fault / attrOverride / mistake +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
    * @type {string}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -1632,7 +1632,7 @@ export interface V1alpha1IOChaosSpec {
    */
   containerNames?: Array<string>
   /**
-   * Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". ui:form:action=latency +optional
+   * Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". ui:form:when=action==\'latency\' +optional
    * @type {string}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -1644,7 +1644,7 @@ export interface V1alpha1IOChaosSpec {
    */
   duration?: string
   /**
-   * Errno defines the error code that returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html ui:form:action=fault +optional
+   * Errno defines the error code that returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html ui:form:when=action==\'fault\' +optional
    * @type {number}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -1705,7 +1705,7 @@ export interface V1alpha1IOChaosSpec {
  */
 export interface V1alpha1JVMChaosSpec {
   /**
-   * Action defines the specific jvm chaos action. Supported action: latency;return;exception;stress;gc;ruleData ui:form:enum=latency;return;exception;stress;gc;ruleData +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
+   * Action defines the specific jvm chaos action. Supported action: latency;return;exception;stress;gc;ruleData +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -2149,7 +2149,7 @@ export interface V1alpha1NetworkBandwidthSpec {
  */
 export interface V1alpha1NetworkChaosSpec {
   /**
-   * Action defines the specific network chaos action. Supported action: partition, netem, delay, loss, duplicate, corrupt Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
+   * Action defines the specific network chaos action. Supported action: partition, netem, delay, loss, duplicate, corrupt Default action: delay +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
    * @type {string}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -2746,7 +2746,7 @@ export interface V1alpha1PhysicalMachineSelectorSpec {
  */
 export interface V1alpha1PodChaosSpec {
   /**
-   * Action defines the specific pod chaos action. Supported action: pod-kill / pod-failure / container-kill Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
+   * Action defines the specific pod chaos action. Supported action: pod-kill / pod-failure / container-kill Default action: pod-kill +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
    * @type {string}
    * @memberof V1alpha1PodChaosSpec
    */

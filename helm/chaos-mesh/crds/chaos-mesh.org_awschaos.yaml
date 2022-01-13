@@ -45,8 +45,7 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific aws chaos action. Supported
-                  action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop
-                  ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                  action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
                 enum:
                 - ec2-stop
                 - ec2-restart
@@ -57,7 +56,7 @@ spec:
                 type: string
               deviceName:
                 description: DeviceName indicates the name of the device. Needed in
-                  detach-volume. ui:form:action=detach-volume
+                  detach-volume. ui:form:when=action=='detach-volume'
                 type: string
               duration:
                 description: Duration represents the duration of the chaos action.
@@ -74,7 +73,7 @@ spec:
                 type: string
               volumeID:
                 description: EbsVolume indicates the ID of the EBS volume. Needed
-                  in detach-volume. ui:form:action=detach-volume
+                  in detach-volume. ui:form:when=action=='detach-volume'
                 type: string
             required:
             - action

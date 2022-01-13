@@ -31,19 +31,19 @@ export function getUIFormEnum(s) {
   return matched ? matched[1].split(';') : []
 }
 
-const UI_FORM_ACTION = /ui:form:action=(.+)\s/
+const UI_FORM_WHEN = /ui:form:when=(.+)\s/
 
 /**
- * Get action name from jsdoc comment. If not found, return an empty string.
+ * Get when expression from jsdoc comment. If not found, return false.
  *
  * @export
  * @param {string} s
- * @return {string}
+ * @return {string|false}
  */
-export function getUIFormAction(s) {
-  const matched = s.match(UI_FORM_ACTION)
+export function getUIFormWhen(s) {
+  const matched = s.match(UI_FORM_WHEN)
 
-  return matched ? matched[1] : ''
+  return matched ? matched[1].replace(/\\/g, '') : false
 }
 
 const UI_FORM_IGNORE = /ui:form:ignore\s/
@@ -66,7 +66,7 @@ export function isUIFormIgnore(s) {
  * @param {string} s
  */
 export function cleanMarkers(s) {
-  s = s.replace(UI_FORM_ACTION, '')
+  s = s.replace(UI_FORM_WHEN, '')
 
   const reOptional = /\+optional/
   if (reOptional.test(s)) {

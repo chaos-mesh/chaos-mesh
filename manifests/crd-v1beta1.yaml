@@ -43,8 +43,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific aws chaos action. Supported
-                action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop
-                ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
               enum:
               - ec2-stop
               - ec2-restart
@@ -55,7 +54,7 @@ spec:
               type: string
             deviceName:
               description: DeviceName indicates the name of the device. Needed in
-                detach-volume. ui:form:action=detach-volume
+                detach-volume. ui:form:when=action=='detach-volume'
               type: string
             duration:
               description: Duration represents the duration of the chaos action.
@@ -72,7 +71,7 @@ spec:
               type: string
             volumeID:
               description: EbsVolume indicates the ID of the EBS volume. Needed in
-                detach-volume. ui:form:action=detach-volume
+                detach-volume. ui:form:when=action=='detach-volume'
               type: string
           required:
           - action
@@ -186,7 +185,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific DNS chaos action. Supported
-                action: error, random Default action: error ui:form:enum=error;random'
+                action: error, random Default action: error'
               enum:
               - error
               - random
@@ -430,8 +429,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific gcp chaos action. Supported
-                action: node-stop / node-reset / disk-loss Default action: node-stop
-                ui:form:enum=node-stop;node-reset;disk-loss'
+                action: node-stop / node-reset / disk-loss Default action: node-stop'
               enum:
               - node-stop
               - node-reset
@@ -439,7 +437,7 @@ spec:
               type: string
             deviceNames:
               description: The device name of disks to detach. Needed in disk-loss.
-                ui:form:action:disk-loss
+                ui:form:when=action=='disk-loss'
               items:
                 type: string
               type: array
@@ -906,7 +904,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: latency / fault / attrOverride / mistake ui:form:enum=latency;fault;attrOverride;mistake'
+                action: latency / fault / attrOverride / mistake'
               enum:
               - latency
               - fault
@@ -914,7 +912,7 @@ spec:
               - mistake
               type: string
             attr:
-              description: Attr defines the overrided attribution ui:form:action=attrOverride
+              description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
               properties:
                 atime:
                   description: Timespec represents a time
@@ -992,7 +990,7 @@ spec:
               description: Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with
                 optional fraction and a unit suffix, such as "300ms". Valid time units
-                are "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:action=latency
+                are "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:when=action=='latency'
               type: string
             duration:
               description: Duration represents the duration of the chaos action. It
@@ -1004,7 +1002,7 @@ spec:
             errno:
               description: 'Errno defines the error code that returned by I/O action.
                 refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                ui:form:action=fault'
+                ui:form:when=action==''fault'''
               format: int32
               type: integer
             methods:
@@ -1015,7 +1013,7 @@ spec:
               type: array
             mistake:
               description: Mistake defines what types of incorrectness are injected
-                to IO operations ui:form:action=mistake
+                to IO operations ui:form:when=action=='mistake'
               properties:
                 filling:
                   description: Filling determines what is filled in the miskate data.
@@ -1269,7 +1267,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific jvm chaos action. Supported
-                action: latency;return;exception;stress;gc;ruleData ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                action: latency;return;exception;stress;gc;ruleData'
               enum:
               - latency
               - return
@@ -1818,7 +1816,7 @@ spec:
             action:
               description: 'Action defines the specific network chaos action. Supported
                 action: partition, netem, delay, loss, duplicate, corrupt Default
-                action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                action: delay'
               enum:
               - netem
               - delay
@@ -2968,8 +2966,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: pod-kill / pod-failure / container-kill Default action: pod-kill
-                ui:form:enum=pod-kill;pod-failure;container-kill'
+                action: pod-kill / pod-failure / container-kill Default action: pod-kill'
               enum:
               - pod-kill
               - pod-failure
@@ -3875,7 +3872,7 @@ spec:
                 action:
                   description: 'Action defines the specific aws chaos action. Supported
                     action: ec2-stop / ec2-restart / detach-volume Default action:
-                    ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                    ec2-stop'
                   enum:
                   - ec2-stop
                   - ec2-restart
@@ -3886,7 +3883,7 @@ spec:
                   type: string
                 deviceName:
                   description: DeviceName indicates the name of the device. Needed
-                    in detach-volume. ui:form:action=detach-volume
+                    in detach-volume. ui:form:when=action=='detach-volume'
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -3903,7 +3900,7 @@ spec:
                   type: string
                 volumeID:
                   description: EbsVolume indicates the ID of the EBS volume. Needed
-                    in detach-volume. ui:form:action=detach-volume
+                    in detach-volume. ui:form:when=action=='detach-volume'
                   type: string
               required:
               - action
@@ -3920,7 +3917,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific DNS chaos action. Supported
-                    action: error, random Default action: error ui:form:enum=error;random'
+                    action: error, random Default action: error'
                   enum:
                   - error
                   - random
@@ -4065,8 +4062,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific gcp chaos action. Supported
-                    action: node-stop / node-reset / disk-loss Default action: node-stop
-                    ui:form:enum=node-stop;node-reset;disk-loss'
+                    action: node-stop / node-reset / disk-loss Default action: node-stop'
                   enum:
                   - node-stop
                   - node-reset
@@ -4074,7 +4070,7 @@ spec:
                   type: string
                 deviceNames:
                   description: The device name of disks to detach. Needed in disk-loss.
-                    ui:form:action:disk-loss
+                    ui:form:when=action=='disk-loss'
                   items:
                     type: string
                   type: array
@@ -4343,7 +4339,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
-                    action: latency / fault / attrOverride / mistake ui:form:enum=latency;fault;attrOverride;mistake'
+                    action: latency / fault / attrOverride / mistake'
                   enum:
                   - latency
                   - fault
@@ -4351,7 +4347,7 @@ spec:
                   - mistake
                   type: string
                 attr:
-                  description: Attr defines the overrided attribution ui:form:action=attrOverride
+                  description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
                   properties:
                     atime:
                       description: Timespec represents a time
@@ -4430,7 +4426,7 @@ spec:
                     A delay string is a possibly signed sequence of decimal numbers,
                     each with optional fraction and a unit suffix, such as "300ms".
                     Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-                    ui:form:action=latency
+                    ui:form:when=action=='latency'
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -4443,7 +4439,7 @@ spec:
                 errno:
                   description: 'Errno defines the error code that returned by I/O
                     action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                    ui:form:action=fault'
+                    ui:form:when=action==''fault'''
                   format: int32
                   type: integer
                 methods:
@@ -4454,7 +4450,7 @@ spec:
                   type: array
                 mistake:
                   description: Mistake defines what types of incorrectness are injected
-                    to IO operations ui:form:action=mistake
+                    to IO operations ui:form:when=action=='mistake'
                   properties:
                     filling:
                       description: Filling determines what is filled in the miskate
@@ -4606,7 +4602,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific jvm chaos action. Supported
-                    action: latency;return;exception;stress;gc;ruleData ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                    action: latency;return;exception;stress;gc;ruleData'
                   enum:
                   - latency
                   - return
@@ -4963,7 +4959,7 @@ spec:
                 action:
                   description: 'Action defines the specific network chaos action.
                     Supported action: partition, netem, delay, loss, duplicate, corrupt
-                    Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                    Default action: delay'
                   enum:
                   - netem
                   - delay
@@ -5872,7 +5868,7 @@ spec:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
                     action: pod-kill / pod-failure / container-kill Default action:
-                    pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                    pod-kill'
                   enum:
                   - pod-kill
                   - pod-failure
@@ -6365,7 +6361,7 @@ spec:
                           action:
                             description: 'Action defines the specific aws chaos action.
                               Supported action: ec2-stop / ec2-restart / detach-volume
-                              Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                              Default action: ec2-stop'
                             enum:
                             - ec2-stop
                             - ec2-restart
@@ -6376,7 +6372,7 @@ spec:
                             type: string
                           deviceName:
                             description: DeviceName indicates the name of the device.
-                              Needed in detach-volume. ui:form:action=detach-volume
+                              Needed in detach-volume. ui:form:when=action=='detach-volume'
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -6395,7 +6391,7 @@ spec:
                             type: string
                           volumeID:
                             description: EbsVolume indicates the ID of the EBS volume.
-                              Needed in detach-volume. ui:form:action=detach-volume
+                              Needed in detach-volume. ui:form:when=action=='detach-volume'
                             type: string
                         required:
                         - action
@@ -6435,8 +6431,7 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific DNS chaos action.
-                              Supported action: error, random Default action: error
-                              ui:form:enum=error;random'
+                              Supported action: error, random Default action: error'
                             enum:
                             - error
                             - random
@@ -6591,7 +6586,7 @@ spec:
                           action:
                             description: 'Action defines the specific gcp chaos action.
                               Supported action: node-stop / node-reset / disk-loss
-                              Default action: node-stop ui:form:enum=node-stop;node-reset;disk-loss'
+                              Default action: node-stop'
                             enum:
                             - node-stop
                             - node-reset
@@ -6599,7 +6594,7 @@ spec:
                             type: string
                           deviceNames:
                             description: The device name of disks to detach. Needed
-                              in disk-loss. ui:form:action:disk-loss
+                              in disk-loss. ui:form:when=action=='disk-loss'
                             items:
                               type: string
                             type: array
@@ -6881,8 +6876,7 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific pod chaos action.
-                              Supported action: latency / fault / attrOverride / mistake
-                              ui:form:enum=latency;fault;attrOverride;mistake'
+                              Supported action: latency / fault / attrOverride / mistake'
                             enum:
                             - latency
                             - fault
@@ -6890,7 +6884,7 @@ spec:
                             - mistake
                             type: string
                           attr:
-                            description: Attr defines the overrided attribution ui:form:action=attrOverride
+                            description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
                             properties:
                               atime:
                                 description: Timespec represents a time
@@ -6970,7 +6964,7 @@ spec:
                               delay. A delay string is a possibly signed sequence
                               of decimal numbers, each with optional fraction and
                               a unit suffix, such as "300ms". Valid time units are
-                              "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:action=latency
+                              "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:when=action=='latency'
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -6983,7 +6977,7 @@ spec:
                           errno:
                             description: 'Errno defines the error code that returned
                               by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                              ui:form:action=fault'
+                              ui:form:when=action==''fault'''
                             format: int32
                             type: integer
                           methods:
@@ -6994,7 +6988,7 @@ spec:
                             type: array
                           mistake:
                             description: Mistake defines what types of incorrectness
-                              are injected to IO operations ui:form:action=mistake
+                              are injected to IO operations ui:form:when=action=='mistake'
                             properties:
                               filling:
                                 description: Filling determines what is filled in
@@ -7153,8 +7147,7 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific jvm chaos action.
-                              Supported action: latency;return;exception;stress;gc;ruleData
-                              ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                              Supported action: latency;return;exception;stress;gc;ruleData'
                             enum:
                             - latency
                             - return
@@ -7538,7 +7531,7 @@ spec:
                           action:
                             description: 'Action defines the specific network chaos
                               action. Supported action: partition, netem, delay, loss,
-                              duplicate, corrupt Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                              duplicate, corrupt Default action: delay'
                             enum:
                             - netem
                             - delay
@@ -8494,7 +8487,7 @@ spec:
                           action:
                             description: 'Action defines the specific pod chaos action.
                               Supported action: pod-kill / pod-failure / container-kill
-                              Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                              Default action: pod-kill'
                             enum:
                             - pod-kill
                             - pod-failure
@@ -8654,7 +8647,7 @@ spec:
                               action:
                                 description: 'Action defines the specific aws chaos
                                   action. Supported action: ec2-stop / ec2-restart
-                                  / detach-volume Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                                  / detach-volume Default action: ec2-stop'
                                 enum:
                                 - ec2-stop
                                 - ec2-restart
@@ -8665,7 +8658,7 @@ spec:
                                 type: string
                               deviceName:
                                 description: DeviceName indicates the name of the
-                                  device. Needed in detach-volume. ui:form:action=detach-volume
+                                  device. Needed in detach-volume. ui:form:when=action=='detach-volume'
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -8685,7 +8678,7 @@ spec:
                                 type: string
                               volumeID:
                                 description: EbsVolume indicates the ID of the EBS
-                                  volume. Needed in detach-volume. ui:form:action=detach-volume
+                                  volume. Needed in detach-volume. ui:form:when=action=='detach-volume'
                                 type: string
                             required:
                             - action
@@ -8704,7 +8697,7 @@ spec:
                               action:
                                 description: 'Action defines the specific DNS chaos
                                   action. Supported action: error, random Default
-                                  action: error ui:form:enum=error;random'
+                                  action: error'
                                 enum:
                                 - error
                                 - random
@@ -8862,7 +8855,7 @@ spec:
                               action:
                                 description: 'Action defines the specific gcp chaos
                                   action. Supported action: node-stop / node-reset
-                                  / disk-loss Default action: node-stop ui:form:enum=node-stop;node-reset;disk-loss'
+                                  / disk-loss Default action: node-stop'
                                 enum:
                                 - node-stop
                                 - node-reset
@@ -8870,7 +8863,7 @@ spec:
                                 type: string
                               deviceNames:
                                 description: The device name of disks to detach. Needed
-                                  in disk-loss. ui:form:action:disk-loss
+                                  in disk-loss. ui:form:when=action=='disk-loss'
                                 items:
                                   type: string
                                 type: array
@@ -9162,7 +9155,7 @@ spec:
                               action:
                                 description: 'Action defines the specific pod chaos
                                   action. Supported action: latency / fault / attrOverride
-                                  / mistake ui:form:enum=latency;fault;attrOverride;mistake'
+                                  / mistake'
                                 enum:
                                 - latency
                                 - fault
@@ -9171,7 +9164,7 @@ spec:
                                 type: string
                               attr:
                                 description: Attr defines the overrided attribution
-                                  ui:form:action=attrOverride
+                                  ui:form:when=action=='attrOverride'
                                 properties:
                                   atime:
                                     description: Timespec represents a time
@@ -9252,7 +9245,7 @@ spec:
                                   sequence of decimal numbers, each with optional
                                   fraction and a unit suffix, such as "300ms". Valid
                                   time units are "ns", "us" (or "µs"), "ms", "s",
-                                  "m", "h". ui:form:action=latency
+                                  "m", "h". ui:form:when=action=='latency'
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -9266,7 +9259,7 @@ spec:
                               errno:
                                 description: 'Errno defines the error code that returned
                                   by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                                  ui:form:action=fault'
+                                  ui:form:when=action==''fault'''
                                 format: int32
                                 type: integer
                               methods:
@@ -9277,7 +9270,7 @@ spec:
                                 type: array
                               mistake:
                                 description: Mistake defines what types of incorrectness
-                                  are injected to IO operations ui:form:action=mistake
+                                  are injected to IO operations ui:form:when=action=='mistake'
                                 properties:
                                   filling:
                                     description: Filling determines what is filled
@@ -9441,8 +9434,7 @@ spec:
                             properties:
                               action:
                                 description: 'Action defines the specific jvm chaos
-                                  action. Supported action: latency;return;exception;stress;gc;ruleData
-                                  ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                                  action. Supported action: latency;return;exception;stress;gc;ruleData'
                                 enum:
                                 - latency
                                 - return
@@ -9833,7 +9825,7 @@ spec:
                                 description: 'Action defines the specific network
                                   chaos action. Supported action: partition, netem,
                                   delay, loss, duplicate, corrupt Default action:
-                                  delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                                  delay'
                                 enum:
                                 - netem
                                 - delay
@@ -10819,7 +10811,7 @@ spec:
                               action:
                                 description: 'Action defines the specific pod chaos
                                   action. Supported action: pod-kill / pod-failure
-                                  / container-kill Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                                  / container-kill Default action: pod-kill'
                                 enum:
                                 - pod-kill
                                 - pod-failure
@@ -15227,7 +15219,7 @@ spec:
                 action:
                   description: 'Action defines the specific aws chaos action. Supported
                     action: ec2-stop / ec2-restart / detach-volume Default action:
-                    ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                    ec2-stop'
                   enum:
                   - ec2-stop
                   - ec2-restart
@@ -15238,7 +15230,7 @@ spec:
                   type: string
                 deviceName:
                   description: DeviceName indicates the name of the device. Needed
-                    in detach-volume. ui:form:action=detach-volume
+                    in detach-volume. ui:form:when=action=='detach-volume'
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -15255,7 +15247,7 @@ spec:
                   type: string
                 volumeID:
                   description: EbsVolume indicates the ID of the EBS volume. Needed
-                    in detach-volume. ui:form:action=detach-volume
+                    in detach-volume. ui:form:when=action=='detach-volume'
                   type: string
               required:
               - action
@@ -15291,7 +15283,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific DNS chaos action. Supported
-                    action: error, random Default action: error ui:form:enum=error;random'
+                    action: error, random Default action: error'
                   enum:
                   - error
                   - random
@@ -15436,8 +15428,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific gcp chaos action. Supported
-                    action: node-stop / node-reset / disk-loss Default action: node-stop
-                    ui:form:enum=node-stop;node-reset;disk-loss'
+                    action: node-stop / node-reset / disk-loss Default action: node-stop'
                   enum:
                   - node-stop
                   - node-reset
@@ -15445,7 +15436,7 @@ spec:
                   type: string
                 deviceNames:
                   description: The device name of disks to detach. Needed in disk-loss.
-                    ui:form:action:disk-loss
+                    ui:form:when=action=='disk-loss'
                   items:
                     type: string
                   type: array
@@ -15711,7 +15702,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
-                    action: latency / fault / attrOverride / mistake ui:form:enum=latency;fault;attrOverride;mistake'
+                    action: latency / fault / attrOverride / mistake'
                   enum:
                   - latency
                   - fault
@@ -15719,7 +15710,7 @@ spec:
                   - mistake
                   type: string
                 attr:
-                  description: Attr defines the overrided attribution ui:form:action=attrOverride
+                  description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
                   properties:
                     atime:
                       description: Timespec represents a time
@@ -15798,7 +15789,7 @@ spec:
                     A delay string is a possibly signed sequence of decimal numbers,
                     each with optional fraction and a unit suffix, such as "300ms".
                     Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-                    ui:form:action=latency
+                    ui:form:when=action=='latency'
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -15811,7 +15802,7 @@ spec:
                 errno:
                   description: 'Errno defines the error code that returned by I/O
                     action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                    ui:form:action=fault'
+                    ui:form:when=action==''fault'''
                   format: int32
                   type: integer
                 methods:
@@ -15822,7 +15813,7 @@ spec:
                   type: array
                 mistake:
                   description: Mistake defines what types of incorrectness are injected
-                    to IO operations ui:form:action=mistake
+                    to IO operations ui:form:when=action=='mistake'
                   properties:
                     filling:
                       description: Filling determines what is filled in the miskate
@@ -15974,7 +15965,7 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific jvm chaos action. Supported
-                    action: latency;return;exception;stress;gc;ruleData ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                    action: latency;return;exception;stress;gc;ruleData'
                   enum:
                   - latency
                   - return
@@ -16331,7 +16322,7 @@ spec:
                 action:
                   description: 'Action defines the specific network chaos action.
                     Supported action: partition, netem, delay, loss, duplicate, corrupt
-                    Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                    Default action: delay'
                   enum:
                   - netem
                   - delay
@@ -17240,7 +17231,7 @@ spec:
                 action:
                   description: 'Action defines the specific pod chaos action. Supported
                     action: pod-kill / pod-failure / container-kill Default action:
-                    pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                    pod-kill'
                   enum:
                   - pod-kill
                   - pod-failure
@@ -17392,7 +17383,7 @@ spec:
                     action:
                       description: 'Action defines the specific aws chaos action.
                         Supported action: ec2-stop / ec2-restart / detach-volume Default
-                        action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                        action: ec2-stop'
                       enum:
                       - ec2-stop
                       - ec2-restart
@@ -17403,7 +17394,7 @@ spec:
                       type: string
                     deviceName:
                       description: DeviceName indicates the name of the device. Needed
-                        in detach-volume. ui:form:action=detach-volume
+                        in detach-volume. ui:form:when=action=='detach-volume'
                       type: string
                     duration:
                       description: Duration represents the duration of the chaos action.
@@ -17420,7 +17411,7 @@ spec:
                       type: string
                     volumeID:
                       description: EbsVolume indicates the ID of the EBS volume. Needed
-                        in detach-volume. ui:form:action=detach-volume
+                        in detach-volume. ui:form:when=action=='detach-volume'
                       type: string
                   required:
                   - action
@@ -17437,7 +17428,7 @@ spec:
                   properties:
                     action:
                       description: 'Action defines the specific DNS chaos action.
-                        Supported action: error, random Default action: error ui:form:enum=error;random'
+                        Supported action: error, random Default action: error'
                       enum:
                       - error
                       - random
@@ -17585,7 +17576,7 @@ spec:
                     action:
                       description: 'Action defines the specific gcp chaos action.
                         Supported action: node-stop / node-reset / disk-loss Default
-                        action: node-stop ui:form:enum=node-stop;node-reset;disk-loss'
+                        action: node-stop'
                       enum:
                       - node-stop
                       - node-reset
@@ -17593,7 +17584,7 @@ spec:
                       type: string
                     deviceNames:
                       description: The device name of disks to detach. Needed in disk-loss.
-                        ui:form:action:disk-loss
+                        ui:form:when=action=='disk-loss'
                       items:
                         type: string
                       type: array
@@ -17867,8 +17858,7 @@ spec:
                   properties:
                     action:
                       description: 'Action defines the specific pod chaos action.
-                        Supported action: latency / fault / attrOverride / mistake
-                        ui:form:enum=latency;fault;attrOverride;mistake'
+                        Supported action: latency / fault / attrOverride / mistake'
                       enum:
                       - latency
                       - fault
@@ -17876,7 +17866,7 @@ spec:
                       - mistake
                       type: string
                     attr:
-                      description: Attr defines the overrided attribution ui:form:action=attrOverride
+                      description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
                       properties:
                         atime:
                           description: Timespec represents a time
@@ -17955,7 +17945,7 @@ spec:
                         A delay string is a possibly signed sequence of decimal numbers,
                         each with optional fraction and a unit suffix, such as "300ms".
                         Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
-                        "h". ui:form:action=latency
+                        "h". ui:form:when=action=='latency'
                       type: string
                     duration:
                       description: Duration represents the duration of the chaos action.
@@ -17968,7 +17958,7 @@ spec:
                     errno:
                       description: 'Errno defines the error code that returned by
                         I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                        ui:form:action=fault'
+                        ui:form:when=action==''fault'''
                       format: int32
                       type: integer
                     methods:
@@ -17979,7 +17969,7 @@ spec:
                       type: array
                     mistake:
                       description: Mistake defines what types of incorrectness are
-                        injected to IO operations ui:form:action=mistake
+                        injected to IO operations ui:form:when=action=='mistake'
                       properties:
                         filling:
                           description: Filling determines what is filled in the miskate
@@ -18133,8 +18123,7 @@ spec:
                   properties:
                     action:
                       description: 'Action defines the specific jvm chaos action.
-                        Supported action: latency;return;exception;stress;gc;ruleData
-                        ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                        Supported action: latency;return;exception;stress;gc;ruleData'
                       enum:
                       - latency
                       - return
@@ -18497,7 +18486,7 @@ spec:
                     action:
                       description: 'Action defines the specific network chaos action.
                         Supported action: partition, netem, delay, loss, duplicate,
-                        corrupt Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                        corrupt Default action: delay'
                       enum:
                       - netem
                       - delay
@@ -19413,7 +19402,7 @@ spec:
                     action:
                       description: 'Action defines the specific pod chaos action.
                         Supported action: pod-kill / pod-failure / container-kill
-                        Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                        Default action: pod-kill'
                       enum:
                       - pod-kill
                       - pod-failure
@@ -19910,7 +19899,7 @@ spec:
                               action:
                                 description: 'Action defines the specific aws chaos
                                   action. Supported action: ec2-stop / ec2-restart
-                                  / detach-volume Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                                  / detach-volume Default action: ec2-stop'
                                 enum:
                                 - ec2-stop
                                 - ec2-restart
@@ -19921,7 +19910,7 @@ spec:
                                 type: string
                               deviceName:
                                 description: DeviceName indicates the name of the
-                                  device. Needed in detach-volume. ui:form:action=detach-volume
+                                  device. Needed in detach-volume. ui:form:when=action=='detach-volume'
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -19941,7 +19930,7 @@ spec:
                                 type: string
                               volumeID:
                                 description: EbsVolume indicates the ID of the EBS
-                                  volume. Needed in detach-volume. ui:form:action=detach-volume
+                                  volume. Needed in detach-volume. ui:form:when=action=='detach-volume'
                                 type: string
                             required:
                             - action
@@ -19984,7 +19973,7 @@ spec:
                               action:
                                 description: 'Action defines the specific DNS chaos
                                   action. Supported action: error, random Default
-                                  action: error ui:form:enum=error;random'
+                                  action: error'
                                 enum:
                                 - error
                                 - random
@@ -20142,7 +20131,7 @@ spec:
                               action:
                                 description: 'Action defines the specific gcp chaos
                                   action. Supported action: node-stop / node-reset
-                                  / disk-loss Default action: node-stop ui:form:enum=node-stop;node-reset;disk-loss'
+                                  / disk-loss Default action: node-stop'
                                 enum:
                                 - node-stop
                                 - node-reset
@@ -20150,7 +20139,7 @@ spec:
                                 type: string
                               deviceNames:
                                 description: The device name of disks to detach. Needed
-                                  in disk-loss. ui:form:action:disk-loss
+                                  in disk-loss. ui:form:when=action=='disk-loss'
                                 items:
                                   type: string
                                 type: array
@@ -20439,7 +20428,7 @@ spec:
                               action:
                                 description: 'Action defines the specific pod chaos
                                   action. Supported action: latency / fault / attrOverride
-                                  / mistake ui:form:enum=latency;fault;attrOverride;mistake'
+                                  / mistake'
                                 enum:
                                 - latency
                                 - fault
@@ -20448,7 +20437,7 @@ spec:
                                 type: string
                               attr:
                                 description: Attr defines the overrided attribution
-                                  ui:form:action=attrOverride
+                                  ui:form:when=action=='attrOverride'
                                 properties:
                                   atime:
                                     description: Timespec represents a time
@@ -20529,7 +20518,7 @@ spec:
                                   sequence of decimal numbers, each with optional
                                   fraction and a unit suffix, such as "300ms". Valid
                                   time units are "ns", "us" (or "µs"), "ms", "s",
-                                  "m", "h". ui:form:action=latency
+                                  "m", "h". ui:form:when=action=='latency'
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -20543,7 +20532,7 @@ spec:
                               errno:
                                 description: 'Errno defines the error code that returned
                                   by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                                  ui:form:action=fault'
+                                  ui:form:when=action==''fault'''
                                 format: int32
                                 type: integer
                               methods:
@@ -20554,7 +20543,7 @@ spec:
                                 type: array
                               mistake:
                                 description: Mistake defines what types of incorrectness
-                                  are injected to IO operations ui:form:action=mistake
+                                  are injected to IO operations ui:form:when=action=='mistake'
                                 properties:
                                   filling:
                                     description: Filling determines what is filled
@@ -20718,8 +20707,7 @@ spec:
                             properties:
                               action:
                                 description: 'Action defines the specific jvm chaos
-                                  action. Supported action: latency;return;exception;stress;gc;ruleData
-                                  ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                                  action. Supported action: latency;return;exception;stress;gc;ruleData'
                                 enum:
                                 - latency
                                 - return
@@ -21112,7 +21100,7 @@ spec:
                                 description: 'Action defines the specific network
                                   chaos action. Supported action: partition, netem,
                                   delay, loss, duplicate, corrupt Default action:
-                                  delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                                  delay'
                                 enum:
                                 - netem
                                 - delay
@@ -22098,7 +22086,7 @@ spec:
                               action:
                                 description: 'Action defines the specific pod chaos
                                   action. Supported action: pod-kill / pod-failure
-                                  / container-kill Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                                  / container-kill Default action: pod-kill'
                                 enum:
                                 - pod-kill
                                 - pod-failure
@@ -22263,7 +22251,7 @@ spec:
                                   action:
                                     description: 'Action defines the specific aws
                                       chaos action. Supported action: ec2-stop / ec2-restart
-                                      / detach-volume Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                                      / detach-volume Default action: ec2-stop'
                                     enum:
                                     - ec2-stop
                                     - ec2-restart
@@ -22274,7 +22262,7 @@ spec:
                                     type: string
                                   deviceName:
                                     description: DeviceName indicates the name of
-                                      the device. Needed in detach-volume. ui:form:action=detach-volume
+                                      the device. Needed in detach-volume. ui:form:when=action=='detach-volume'
                                     type: string
                                   duration:
                                     description: Duration represents the duration
@@ -22294,7 +22282,7 @@ spec:
                                     type: string
                                   volumeID:
                                     description: EbsVolume indicates the ID of the
-                                      EBS volume. Needed in detach-volume. ui:form:action=detach-volume
+                                      EBS volume. Needed in detach-volume. ui:form:when=action=='detach-volume'
                                     type: string
                                 required:
                                 - action
@@ -22313,7 +22301,7 @@ spec:
                                   action:
                                     description: 'Action defines the specific DNS
                                       chaos action. Supported action: error, random
-                                      Default action: error ui:form:enum=error;random'
+                                      Default action: error'
                                     enum:
                                     - error
                                     - random
@@ -22477,8 +22465,7 @@ spec:
                                   action:
                                     description: 'Action defines the specific gcp
                                       chaos action. Supported action: node-stop /
-                                      node-reset / disk-loss Default action: node-stop
-                                      ui:form:enum=node-stop;node-reset;disk-loss'
+                                      node-reset / disk-loss Default action: node-stop'
                                     enum:
                                     - node-stop
                                     - node-reset
@@ -22486,7 +22473,7 @@ spec:
                                     type: string
                                   deviceNames:
                                     description: The device name of disks to detach.
-                                      Needed in disk-loss. ui:form:action:disk-loss
+                                      Needed in disk-loss. ui:form:when=action=='disk-loss'
                                     items:
                                       type: string
                                     type: array
@@ -22788,7 +22775,7 @@ spec:
                                   action:
                                     description: 'Action defines the specific pod
                                       chaos action. Supported action: latency / fault
-                                      / attrOverride / mistake ui:form:enum=latency;fault;attrOverride;mistake'
+                                      / attrOverride / mistake'
                                     enum:
                                     - latency
                                     - fault
@@ -22797,7 +22784,7 @@ spec:
                                     type: string
                                   attr:
                                     description: Attr defines the overrided attribution
-                                      ui:form:action=attrOverride
+                                      ui:form:when=action=='attrOverride'
                                     properties:
                                       atime:
                                         description: Timespec represents a time
@@ -22879,7 +22866,7 @@ spec:
                                       sequence of decimal numbers, each with optional
                                       fraction and a unit suffix, such as "300ms".
                                       Valid time units are "ns", "us" (or "µs"), "ms",
-                                      "s", "m", "h". ui:form:action=latency
+                                      "s", "m", "h". ui:form:when=action=='latency'
                                     type: string
                                   duration:
                                     description: Duration represents the duration
@@ -22894,7 +22881,7 @@ spec:
                                   errno:
                                     description: 'Errno defines the error code that
                                       returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                                      ui:form:action=fault'
+                                      ui:form:when=action==''fault'''
                                     format: int32
                                     type: integer
                                   methods:
@@ -22906,7 +22893,7 @@ spec:
                                     type: array
                                   mistake:
                                     description: Mistake defines what types of incorrectness
-                                      are injected to IO operations ui:form:action=mistake
+                                      are injected to IO operations ui:form:when=action=='mistake'
                                     properties:
                                       filling:
                                         description: Filling determines what is filled
@@ -23075,8 +23062,7 @@ spec:
                                 properties:
                                   action:
                                     description: 'Action defines the specific jvm
-                                      chaos action. Supported action: latency;return;exception;stress;gc;ruleData
-                                      ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                                      chaos action. Supported action: latency;return;exception;stress;gc;ruleData'
                                     enum:
                                     - latency
                                     - return
@@ -23483,7 +23469,7 @@ spec:
                                     description: 'Action defines the specific network
                                       chaos action. Supported action: partition, netem,
                                       delay, loss, duplicate, corrupt Default action:
-                                      delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                                      delay'
                                     enum:
                                     - netem
                                     - delay
@@ -24506,7 +24492,7 @@ spec:
                                   action:
                                     description: 'Action defines the specific pod
                                       chaos action. Supported action: pod-kill / pod-failure
-                                      / container-kill Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                                      / container-kill Default action: pod-kill'
                                     enum:
                                     - pod-kill
                                     - pod-failure
@@ -31502,7 +31488,7 @@ spec:
                       action:
                         description: 'Action defines the specific aws chaos action.
                           Supported action: ec2-stop / ec2-restart / detach-volume
-                          Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                          Default action: ec2-stop'
                         enum:
                         - ec2-stop
                         - ec2-restart
@@ -31513,7 +31499,7 @@ spec:
                         type: string
                       deviceName:
                         description: DeviceName indicates the name of the device.
-                          Needed in detach-volume. ui:form:action=detach-volume
+                          Needed in detach-volume. ui:form:when=action=='detach-volume'
                         type: string
                       duration:
                         description: Duration represents the duration of the chaos
@@ -31531,7 +31517,7 @@ spec:
                         type: string
                       volumeID:
                         description: EbsVolume indicates the ID of the EBS volume.
-                          Needed in detach-volume. ui:form:action=detach-volume
+                          Needed in detach-volume. ui:form:when=action=='detach-volume'
                         type: string
                     required:
                     - action
@@ -31570,7 +31556,7 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific DNS chaos action.
-                          Supported action: error, random Default action: error ui:form:enum=error;random'
+                          Supported action: error, random Default action: error'
                         enum:
                         - error
                         - random
@@ -31721,7 +31707,7 @@ spec:
                       action:
                         description: 'Action defines the specific gcp chaos action.
                           Supported action: node-stop / node-reset / disk-loss Default
-                          action: node-stop ui:form:enum=node-stop;node-reset;disk-loss'
+                          action: node-stop'
                         enum:
                         - node-stop
                         - node-reset
@@ -31729,7 +31715,7 @@ spec:
                         type: string
                       deviceNames:
                         description: The device name of disks to detach. Needed in
-                          disk-loss. ui:form:action:disk-loss
+                          disk-loss. ui:form:when=action=='disk-loss'
                         items:
                           type: string
                         type: array
@@ -32004,8 +31990,7 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific pod chaos action.
-                          Supported action: latency / fault / attrOverride / mistake
-                          ui:form:enum=latency;fault;attrOverride;mistake'
+                          Supported action: latency / fault / attrOverride / mistake'
                         enum:
                         - latency
                         - fault
@@ -32013,7 +31998,7 @@ spec:
                         - mistake
                         type: string
                       attr:
-                        description: Attr defines the overrided attribution ui:form:action=attrOverride
+                        description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
                         properties:
                           atime:
                             description: Timespec represents a time
@@ -32093,7 +32078,7 @@ spec:
                           A delay string is a possibly signed sequence of decimal
                           numbers, each with optional fraction and a unit suffix,
                           such as "300ms". Valid time units are "ns", "us" (or "µs"),
-                          "ms", "s", "m", "h". ui:form:action=latency
+                          "ms", "s", "m", "h". ui:form:when=action=='latency'
                         type: string
                       duration:
                         description: Duration represents the duration of the chaos
@@ -32106,7 +32091,7 @@ spec:
                       errno:
                         description: 'Errno defines the error code that returned by
                           I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                          ui:form:action=fault'
+                          ui:form:when=action==''fault'''
                         format: int32
                         type: integer
                       methods:
@@ -32117,7 +32102,7 @@ spec:
                         type: array
                       mistake:
                         description: Mistake defines what types of incorrectness are
-                          injected to IO operations ui:form:action=mistake
+                          injected to IO operations ui:form:when=action=='mistake'
                         properties:
                           filling:
                             description: Filling determines what is filled in the
@@ -32273,8 +32258,7 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific jvm chaos action.
-                          Supported action: latency;return;exception;stress;gc;ruleData
-                          ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                          Supported action: latency;return;exception;stress;gc;ruleData'
                         enum:
                         - latency
                         - return
@@ -32646,7 +32630,7 @@ spec:
                       action:
                         description: 'Action defines the specific network chaos action.
                           Supported action: partition, netem, delay, loss, duplicate,
-                          corrupt Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                          corrupt Default action: delay'
                         enum:
                         - netem
                         - delay
@@ -33572,7 +33556,7 @@ spec:
                       action:
                         description: 'Action defines the specific pod chaos action.
                           Supported action: pod-kill / pod-failure / container-kill
-                          Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                          Default action: pod-kill'
                         enum:
                         - pod-kill
                         - pod-failure
@@ -33729,7 +33713,7 @@ spec:
                           action:
                             description: 'Action defines the specific aws chaos action.
                               Supported action: ec2-stop / ec2-restart / detach-volume
-                              Default action: ec2-stop ui:form:enum=ec2-stop;ec2-restart;detach-volume'
+                              Default action: ec2-stop'
                             enum:
                             - ec2-stop
                             - ec2-restart
@@ -33740,7 +33724,7 @@ spec:
                             type: string
                           deviceName:
                             description: DeviceName indicates the name of the device.
-                              Needed in detach-volume. ui:form:action=detach-volume
+                              Needed in detach-volume. ui:form:when=action=='detach-volume'
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -33759,7 +33743,7 @@ spec:
                             type: string
                           volumeID:
                             description: EbsVolume indicates the ID of the EBS volume.
-                              Needed in detach-volume. ui:form:action=detach-volume
+                              Needed in detach-volume. ui:form:when=action=='detach-volume'
                             type: string
                         required:
                         - action
@@ -33776,8 +33760,7 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific DNS chaos action.
-                              Supported action: error, random Default action: error
-                              ui:form:enum=error;random'
+                              Supported action: error, random Default action: error'
                             enum:
                             - error
                             - random
@@ -33932,7 +33915,7 @@ spec:
                           action:
                             description: 'Action defines the specific gcp chaos action.
                               Supported action: node-stop / node-reset / disk-loss
-                              Default action: node-stop ui:form:enum=node-stop;node-reset;disk-loss'
+                              Default action: node-stop'
                             enum:
                             - node-stop
                             - node-reset
@@ -33940,7 +33923,7 @@ spec:
                             type: string
                           deviceNames:
                             description: The device name of disks to detach. Needed
-                              in disk-loss. ui:form:action:disk-loss
+                              in disk-loss. ui:form:when=action=='disk-loss'
                             items:
                               type: string
                             type: array
@@ -34225,8 +34208,7 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific pod chaos action.
-                              Supported action: latency / fault / attrOverride / mistake
-                              ui:form:enum=latency;fault;attrOverride;mistake'
+                              Supported action: latency / fault / attrOverride / mistake'
                             enum:
                             - latency
                             - fault
@@ -34234,7 +34216,7 @@ spec:
                             - mistake
                             type: string
                           attr:
-                            description: Attr defines the overrided attribution ui:form:action=attrOverride
+                            description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
                             properties:
                               atime:
                                 description: Timespec represents a time
@@ -34314,7 +34296,7 @@ spec:
                               delay. A delay string is a possibly signed sequence
                               of decimal numbers, each with optional fraction and
                               a unit suffix, such as "300ms". Valid time units are
-                              "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:action=latency
+                              "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:when=action=='latency'
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -34327,7 +34309,7 @@ spec:
                           errno:
                             description: 'Errno defines the error code that returned
                               by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                              ui:form:action=fault'
+                              ui:form:when=action==''fault'''
                             format: int32
                             type: integer
                           methods:
@@ -34338,7 +34320,7 @@ spec:
                             type: array
                           mistake:
                             description: Mistake defines what types of incorrectness
-                              are injected to IO operations ui:form:action=mistake
+                              are injected to IO operations ui:form:when=action=='mistake'
                             properties:
                               filling:
                                 description: Filling determines what is filled in
@@ -34497,8 +34479,7 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific jvm chaos action.
-                              Supported action: latency;return;exception;stress;gc;ruleData
-                              ui:form:enum=latency;return;exception;stress;gc;ruleData'
+                              Supported action: latency;return;exception;stress;gc;ruleData'
                             enum:
                             - latency
                             - return
@@ -34880,7 +34861,7 @@ spec:
                           action:
                             description: 'Action defines the specific network chaos
                               action. Supported action: partition, netem, delay, loss,
-                              duplicate, corrupt Default action: delay ui:form:enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth'
+                              duplicate, corrupt Default action: delay'
                             enum:
                             - netem
                             - delay
@@ -35836,7 +35817,7 @@ spec:
                           action:
                             description: 'Action defines the specific pod chaos action.
                               Supported action: pod-kill / pod-failure / container-kill
-                              Default action: pod-kill ui:form:enum=pod-kill;pod-failure;container-kill'
+                              Default action: pod-kill'
                             enum:
                             - pod-kill
                             - pod-failure

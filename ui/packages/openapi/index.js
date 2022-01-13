@@ -15,7 +15,7 @@
  *
  */
 
-import { getUIFormAction, getUIFormEnum, isUIFormIgnore } from './utils.js'
+import { getUIFormEnum, isUIFormIgnore } from './utils.js'
 
 import fs from 'fs'
 import { nodeToField } from './factory.js'
@@ -30,7 +30,6 @@ const WARNING_MESSAGE = `/**
  */
 
 `
-const SHARED_KEYWORD = 'shared'
 const ignores = ['selector', 'mode', 'value', 'duration']
 
 /**
@@ -65,7 +64,7 @@ export function genForms(source) {
 
   chaos.forEach((child) => {
     let actions = []
-    const propertyAssignments = []
+    const objects = []
 
     // 2. find the corresponding spec
     //
@@ -93,10 +92,7 @@ export function genForms(source) {
               break
             }
 
-            propertyAssignments.push({
-              action: getUIFormAction(comment) || SHARED_KEYWORD,
-              field: nodeToField(identifier, node.type, comment, [], sourceFile, checker),
-            })
+            objects.push(nodeToField(identifier, node.type, comment, [], sourceFile, checker))
           }
 
           break
@@ -105,44 +101,26 @@ export function genForms(source) {
       }
     })
 
-    const actionFields = []
-    // filter fields by action
-    actions.forEach((action) => {
-      const paByAction = propertyAssignments.filter((p) => p.action === action).map((p) => p.field)
-      const identifierShared = factory.createIdentifier(SHARED_KEYWORD)
-
-      actionFields.push(
-        factory.createPropertyAssignment(
-          factory.createStringLiteral(action),
-          paByAction.length
-            ? factory.createArrayLiteralExpression([factory.createSpreadElement(identifierShared), ...paByAction], true)
-            : identifierShared
-        )
-      )
-    })
-
-    // create shared field
-    const shared = factory.createVariableStatement(
-      undefined,
+    // create data related fields
+    const data = factory.createVariableStatement(
+      [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
       factory.createVariableDeclarationList(
         [
           factory.createVariableDeclaration(
-            factory.createIdentifier(SHARED_KEYWORD),
+            factory.createIdentifier('actions'),
             undefined,
             undefined,
-            factory.createArrayLiteralExpression(
-              propertyAssignments.filter((p) => p.action === SHARED_KEYWORD).map((p) => p.field),
-              true
-            )
+            factory.createArrayLiteralExpression(actions.map(factory.createStringLiteral), false)
+          ),
+          factory.createVariableDeclaration(
+            factory.createIdentifier('data'),
+            undefined,
+            undefined,
+            factory.createArrayLiteralExpression(objects, true)
           ),
         ],
         ts.NodeFlags.Const
       )
-    )
-    const exportDefault = factory.createExportDefault(
-      actions.length
-        ? factory.createObjectLiteralExpression(actionFields, true)
-        : factory.createIdentifier(SHARED_KEYWORD)
     )
 
     const printer = ts.createPrinter({
@@ -157,11 +135,10 @@ export function genForms(source) {
     function printNode(node) {
       return printer.printNode(ts.EmitHint.Unspecified, node, sourceFile)
     }
-    const sharedPrint = printNode(shared)
-    const exportDefaultPrint = printNode(exportDefault)
+    const dataPrint = printNode(data)
 
     const file = `./formik/${child}.ts`
-    fs.writeFile(file, WARNING_MESSAGE + sharedPrint + '\n\n' + exportDefaultPrint + '\n', (err) => {
+    fs.writeFile(file, WARNING_MESSAGE + dataPrint + '\n', (err) => {
       if (err) {
         sig.error(err)
       } else {

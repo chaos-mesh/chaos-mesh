@@ -15,7 +15,8 @@
  *
  */
 
-import { cleanMarkers } from './utils.js'
+import { cleanMarkers, getUIFormWhen } from './utils.js'
+
 import ts from 'typescript'
 
 const { factory } = ts
@@ -180,6 +181,7 @@ function typeReferenceToObjectLiteralExpression(
  */
 function _nodeToField(identifier, type, comment, sourceFile) {
   const typeText = type.getText(sourceFile)
+  const when = getUIFormWhen(comment)
 
   // {
   //   field: '',
@@ -199,6 +201,9 @@ function _nodeToField(identifier, type, comment, sourceFile) {
         factory.createIdentifier('helperText'),
         factory.createStringLiteral(cleanMarkers(comment))
       ),
+      ...(when
+        ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
+        : []),
     ],
     true
   )

@@ -54,23 +54,23 @@ type IOChaosSpec struct {
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	// ui:form:action=latency
+	// ui:form:when=action=='latency'
 	// +optional
 	Delay string `json:"delay,omitempty" webhook:"Duration"`
 
 	// Errno defines the error code that returned by I/O action.
 	// refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-	// ui:form:action=fault
+	// ui:form:when=action=='fault'
 	// +optional
 	Errno uint32 `json:"errno,omitempty" webhook:"IOErrno"`
 
 	// Attr defines the overrided attribution
-	// ui:form:action=attrOverride
+	// ui:form:when=action=='attrOverride'
 	// +optional
 	Attr *AttrOverrideSpec `json:"attr,omitempty"`
 
 	// Mistake defines what types of incorrectness are injected to IO operations
-	// ui:form:action=mistake
+	// ui:form:when=action=='mistake'
 	// +optional
 	Mistake *MistakeSpec `json:"mistake,omitempty"`
 

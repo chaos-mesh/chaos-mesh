@@ -3,41 +3,37 @@
  * Do not make direct changes to the file.
  */
 
-const shared = [
-  {
-    field: 'label',
-    label: 'deviceNames',
-    value: [],
-    helperText: 'Optional. The device name of disks to detach. Needed in disk-loss. ui:form:action:disk-loss',
-  },
-  {
-    field: 'text',
-    label: 'instance',
-    value: '',
-    helperText: 'Instance defines the name of the instance',
-  },
-  {
-    field: 'text',
-    label: 'project',
-    value: '',
-    helperText: 'Project defines the name of gcp project.',
-  },
-  {
-    field: 'text',
-    label: 'secretName',
-    value: '',
-    helperText: 'Optional. SecretName defines the name of kubernetes secret. It is used for GCP credentials.',
-  },
-  {
-    field: 'text',
-    label: 'zone',
-    value: '',
-    helperText: 'Zone defines the zone of gcp project.',
-  },
-]
-
-export default {
-  'node-stop': shared,
-  'node-reset': shared,
-  'disk-loss': shared,
-}
+export const actions = [],
+  data = [
+    {
+      field: 'label',
+      label: 'deviceNames',
+      value: [],
+      helperText: 'Optional. The device name of disks to detach. Needed in disk-loss.',
+      when: "action=='disk-loss'",
+    },
+    {
+      field: 'text',
+      label: 'instance',
+      value: '',
+      helperText: 'Instance defines the name of the instance',
+    },
+    {
+      field: 'text',
+      label: 'project',
+      value: '',
+      helperText: 'Project defines the name of gcp project.',
+    },
+    {
+      field: 'text',
+      label: 'secretName',
+      value: '',
+      helperText: 'Optional. SecretName defines the name of kubernetes secret. It is used for GCP credentials.',
+    },
+    {
+      field: 'text',
+      label: 'zone',
+      value: '',
+      helperText: 'Zone defines the zone of gcp project.',
+    },
+  ]

@@ -15,7 +15,7 @@
  *
  */
 
-import { cleanMarkers, getUIFormAction, getUIFormEnum, isUIFormIgnore } from './utils'
+import { cleanMarkers, getUIFormEnum, getUIFormWhen, isUIFormIgnore } from './utils'
 
 describe('openapi => utils', () => {
   describe('getUIFormEnum', () => {
@@ -63,25 +63,25 @@ describe('openapi => utils', () => {
     })
   })
 
-  describe('getUIFormAction', () => {
-    test('returns a action', () => {
+  describe('getUIFormWhen', () => {
+    test('returns an expression string', () => {
       expect(
-        getUIFormAction(`
+        getUIFormWhen(`
         /**
-         * ui:form:action=a
+         * ui:form:when=action=='a'
          */
       `)
-      ).toBe('a')
+      ).toBe("action=='a'")
     })
 
-    test('returns an empty string', () => {
+    test('returns false', () => {
       expect(
-        getUIFormAction(`
+        getUIFormWhen(`
         /**
          *
          */
       `)
-      ).toBe('')
+      ).toBe(false)
     })
   })
 
@@ -108,8 +108,8 @@ describe('openapi => utils', () => {
   })
 
   test('cleanMarkers', () => {
-    expect(cleanMarkers('DeviceName indicates the name of the device. ui:form:action=detach-volume +optional')).toBe(
-      'Optional. DeviceName indicates the name of the device.'
-    )
+    expect(
+      cleanMarkers('DeviceName indicates the name of the device. ui:form:when=action="detach-volume" +optional')
+    ).toBe('Optional. DeviceName indicates the name of the device.')
   })
 })

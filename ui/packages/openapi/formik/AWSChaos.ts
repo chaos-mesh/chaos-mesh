@@ -3,43 +3,38 @@
  * Do not make direct changes to the file.
  */
 
-const shared = [
-  {
-    field: 'text',
-    label: 'awsRegion',
-    value: '',
-    helperText: 'AWSRegion defines the region of aws.',
-  },
-  {
-    field: 'text',
-    label: 'ec2Instance',
-    value: '',
-    helperText: 'Ec2Instance indicates the ID of the ec2 instance.',
-  },
-  {
-    field: 'text',
-    label: 'secretName',
-    value: '',
-    helperText: 'Optional. SecretName defines the name of kubernetes secret.',
-  },
-]
-
-export default {
-  'ec2-stop': shared,
-  'ec2-restart': shared,
-  'detach-volume': [
-    ...shared,
+export const actions = [],
+  data = [
+    {
+      field: 'text',
+      label: 'awsRegion',
+      value: '',
+      helperText: 'AWSRegion defines the region of aws.',
+    },
     {
       field: 'text',
       label: 'deviceName',
       value: '',
       helperText: 'Optional. DeviceName indicates the name of the device. Needed in detach-volume.',
+      when: "action=='detach-volume'",
+    },
+    {
+      field: 'text',
+      label: 'ec2Instance',
+      value: '',
+      helperText: 'Ec2Instance indicates the ID of the ec2 instance.',
+    },
+    {
+      field: 'text',
+      label: 'secretName',
+      value: '',
+      helperText: 'Optional. SecretName defines the name of kubernetes secret.',
     },
     {
       field: 'text',
       label: 'volumeID',
       value: '',
       helperText: 'Optional. EbsVolume indicates the ID of the EBS volume. Needed in detach-volume.',
+      when: "action=='detach-volume'",
     },
-  ],
-}
+  ]
