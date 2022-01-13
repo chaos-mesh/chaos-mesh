@@ -19,7 +19,9 @@ jobs:
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
-
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.15'
       - name: Install Chaos Mesh
         run: |
           export CLUSTER="chart-testing"
