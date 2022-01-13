@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	"go.uber.org/fx"
 	k8sScheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -49,16 +49,13 @@ var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
 func TestProvider(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Provider suit",
-		[]Reporter{printer.NewlineReporter{}})
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	ginkgo.RunSpecs(t, "Provider suit")
 }
 
-var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-	By("bootstrapping test environment")
+var _ = ginkgo.BeforeSuite(func() {
+	logf.SetLogger(zap.New(zap.WriteTo(ginkgo.GinkgoWriter), zap.UseDevMode(true)))
+	ginkgo.By("bootstrapping test environment")
 	t := true
 	if os.Getenv("USE_EXISTING_CLUSTER") == "true" {
 		testEnv = &envtest.Environment{
@@ -71,11 +68,11 @@ var _ = BeforeSuite(func() {
 	}
 
 	err := v1alpha1.SchemeBuilder.AddToScheme(k8sScheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
+	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 	cfg, err = testEnv.Start()
-	Expect(err).ToNot(HaveOccurred())
-	Expect(cfg).ToNot(BeNil())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	gomega.Expect(cfg).ToNot(gomega.BeNil())
 
 	app = fx.New(
 		fx.Options(
@@ -95,18 +92,18 @@ var _ = BeforeSuite(func() {
 	)
 	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
 	defer cancel()
-	Expect(err).ToNot(HaveOccurred())
-	Expect(k8sClient).ToNot(BeNil())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+	gomega.Expect(k8sClient).ToNot(gomega.BeNil())
 
 	if err := app.Start(startCtx); err != nil {
 		setupLog.Error(err, "fail to start manager")
 	}
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
-}, 60)
+})
 
-var _ = AfterSuite(func() {
-	By("tearing down the test environment")
+var _ = ginkgo.AfterSuite(func() {
+	ginkgo.By("tearing down the test environment")
 	stopCtx, cancel := context.WithTimeout(context.Background(), app.StopTimeout())
 	defer cancel()
 
@@ -114,7 +111,11 @@ var _ = AfterSuite(func() {
 		setupLog.Error(err, "fail to stop manager")
 	}
 	err := testEnv.Stop()
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
+})
+
+var _ = ginkgo.ReportAfterSuite("Print new line", func(_ ginkgo.Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
 })
 
 type RunParams struct {
