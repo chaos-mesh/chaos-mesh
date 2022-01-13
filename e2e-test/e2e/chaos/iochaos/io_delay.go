@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,10 +43,10 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("waiting on e2e helper ready")
+	ginkgo.By("waiting on e2e helper ready")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
-	By("create IO delay chaos CRD objects")
+	ginkgo.By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
@@ -73,7 +73,7 @@ func TestcaseIODelayDurationForATimeThenRecover(
 	}
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos error")
-	By("waiting for assertion IO delay")
+	ginkgo.By("waiting for assertion IO delay")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 		second := dur.Seconds()
@@ -85,13 +85,13 @@ func TestcaseIODelayDurationForATimeThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
-	By("apply io chaos successfully")
+	ginkgo.By("apply io chaos successfully")
 
-	By("delete chaos CRD objects")
+	ginkgo.By("delete chaos CRD objects")
 	// delete chaos CRD
 	err = cli.Delete(ctx, ioChaos)
 	framework.ExpectNoError(err, "failed to delete io chaos")
-	By("waiting for assertion recovering")
+	ginkgo.By("waiting for assertion recovering")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 		second := dur.Seconds()
@@ -113,11 +113,11 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	By("waiting for e2e helper ready")
+	ginkgo.By("waiting for e2e helper ready")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	By("create io chaos crd object")
+	ginkgo.By("create io chaos crd object")
 	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",
@@ -150,7 +150,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 		Name:      "io-chaos",
 	}
 
-	By("waiting for assertion io chaos")
+	ginkgo.By("waiting for assertion io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -180,12 +180,12 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-	By("pause io delay chaos experiment")
+	ginkgo.By("pause io delay chaos experiment")
 	// pause experiment
 	err = util.PauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	By("waiting for assertion about pause")
+	ginkgo.By("waiting for assertion about pause")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -221,12 +221,12 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "fail to recover io chaos")
 
-	By("resume io delay chaos experiment")
+	ginkgo.By("resume io delay chaos experiment")
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, ioChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	By("assert that io delay is effective again")
+	ginkgo.By("assert that io delay is effective again")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.IOChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -261,7 +261,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-	By("cleanup")
+	ginkgo.By("cleanup")
 	// cleanup
 	cli.Delete(ctx, ioChaos)
 }
@@ -345,10 +345,10 @@ func TestcaseIODelayWithWrongSpec(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("waiting on e2e helper ready")
+	ginkgo.By("waiting on e2e helper ready")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
-	By("create IO delay chaos CRD objects")
+	ginkgo.By("create IO delay chaos CRD objects")
 	ioChaos := &v1alpha1.IOChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "io-chaos",

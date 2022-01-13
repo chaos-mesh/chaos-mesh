@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -99,7 +99,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 	err = cli.Delete(ctx, containerKillChaos)
 	framework.ExpectNoError(err, "failed to delete container kill chaos")
 
-	By("success to perform container kill")
+	ginkgo.By("success to perform container kill")
 	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		listOption := metav1.ListOptions{
 			LabelSelector: labels.SelectorFromSet(map[string]string{

@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -42,11 +42,11 @@ func TestcaseTimeSkewOnceThenRecover(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("wait e2e helper ready")
+	ginkgo.By("wait e2e helper ready")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	By("create chaos CRD objects")
+	ginkgo.By("create chaos CRD objects")
 	initTime, err := getPodTimeNS(c, port)
 	framework.ExpectNoError(err, "failed to get pod time")
 
@@ -74,7 +74,7 @@ func TestcaseTimeSkewOnceThenRecover(
 	err = cli.Create(ctx, timeChaos)
 	framework.ExpectNoError(err, "create time chaos error")
 
-	By("waiting for assertion")
+	ginkgo.By("waiting for assertion")
 	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
@@ -85,11 +85,11 @@ func TestcaseTimeSkewOnceThenRecover(
 	})
 	framework.ExpectNoError(err, "time chaos doesn't work as expected")
 
-	By("delete chaos CRD objects")
+	ginkgo.By("delete chaos CRD objects")
 	err = cli.Delete(ctx, timeChaos)
 	framework.ExpectNoError(err, "failed to delete time chaos")
 
-	By("waiting for assertion recovering")
+	ginkgo.By("waiting for assertion recovering")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
@@ -102,7 +102,7 @@ func TestcaseTimeSkewOnceThenRecover(
 	})
 	framework.ExpectError(err, "wait no timechaos error")
 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-	By("success to perform time chaos")
+	ginkgo.By("success to perform time chaos")
 }
 
 func TestcaseTimeSkewPauseThenUnpause(
@@ -114,14 +114,14 @@ func TestcaseTimeSkewPauseThenUnpause(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("wait e2e helper ready")
+	ginkgo.By("wait e2e helper ready")
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	initTime, err := getPodTimeNS(c, port)
 	framework.ExpectNoError(err, "failed to get pod time")
 
-	By("create chaos CRD objects")
+	ginkgo.By("create chaos CRD objects")
 	timeChaos := &v1alpha1.TimeChaos{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "timer-time-chaos",
@@ -146,7 +146,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 	err = cli.Create(ctx, timeChaos)
 	framework.ExpectNoError(err, "create time chaos error")
 
-	By("waiting for assertion")
+	ginkgo.By("waiting for assertion")
 	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
@@ -162,12 +162,12 @@ func TestcaseTimeSkewPauseThenUnpause(
 		Name:      "timer-time-chaos",
 	}
 
-	By("pause time skew chaos experiment")
+	ginkgo.By("pause time skew chaos experiment")
 	// pause experiment
 	err = util.PauseChaos(ctx, cli, timeChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	By("assert pause is effective")
+	ginkgo.By("assert pause is effective")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.TimeChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -192,11 +192,11 @@ func TestcaseTimeSkewPauseThenUnpause(
 	framework.ExpectError(err, "wait time chaos paused error")
 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
-	By("resume time skew chaos experiment")
+	ginkgo.By("resume time skew chaos experiment")
 	err = util.UnPauseChaos(ctx, cli, timeChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	By("assert chaos experiment resumed")
+	ginkgo.By("assert chaos experiment resumed")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.TimeChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -220,6 +220,6 @@ func TestcaseTimeSkewPauseThenUnpause(
 	})
 	framework.ExpectNoError(err, "time chaos failed")
 
-	By("delete chaos CRD objects")
+	ginkgo.By("delete chaos CRD objects")
 	cli.Delete(ctx, timeChaos)
 }

@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -35,14 +35,14 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 	c http.Client,
 ) {
 	ctx := context.Background()
-	By("create cpu stress chaos CRD objects")
+	ginkgo.By("create cpu stress chaos CRD objects")
 	cpuStressChaos := makeCPUStressChaos(ns, "cpu-stress", ns, "stress-peer-0", 1, 100)
 	err := cli.Create(ctx, cpuStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "create stresschaos error")
 
 	lastCPUTime := make([]uint64, 2)
 	diff := make([]uint64, 2)
-	By("waiting for assertion some pods are experiencing cpu stress ")
+	ginkgo.By("waiting for assertion some pods are experiencing cpu stress ")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
 		if err != nil {
@@ -62,11 +62,11 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "cpu stress failed")
-	By("delete pod failure chaos CRD objects")
+	ginkgo.By("delete pod failure chaos CRD objects")
 
 	err = cli.Delete(ctx, cpuStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "delete stresschaos error")
-	By("waiting for assertion recovering")
+	ginkgo.By("waiting for assertion recovering")
 	lastCPUTime = make([]uint64, 2)
 	diff = make([]uint64, 2)
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {

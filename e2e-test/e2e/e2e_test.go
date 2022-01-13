@@ -17,16 +17,12 @@ package e2e
 
 import (
 	"flag"
-	"fmt"
 	"math/rand"
 	"os"
-	"path"
 	"testing"
 	"time"
 
-	"github.com/onsi/ginkgo"
-	ginkgoconfig "github.com/onsi/ginkgo/config"
-	"github.com/onsi/ginkgo/reporters"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/clientcmd"
@@ -73,15 +69,9 @@ func RunE2ETests(t *testing.T) {
 	runtimeutils.ReallyCrash = true
 	logs.InitLogs()
 	defer logs.FlushLogs()
-
 	gomega.RegisterFailHandler(framework.Fail)
-
-	// Run tests through the Ginkgo runner with output to console + JUnit for Jenkins
-	var r []ginkgo.Reporter
-	r = append(r, reporters.NewJUnitReporter(path.Join(framework.TestContext.ReportDir, fmt.Sprintf("junit_%v%02d.xml", framework.TestContext.ReportPrefix, ginkgoconfig.GinkgoConfig.ParallelNode))))
-	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, ginkgoconfig.GinkgoConfig.ParallelNode)
-
-	ginkgo.RunSpecsWithDefaultAndCustomReporters(t, "chaosmesh e2e suit", r)
+	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, ginkgo.GinkgoParallelProcess())
+	ginkgo.RunSpecs(t, "chaosmesh e2e suit")
 }
 
 // we hack framework.RegisterClusterFlags to avoid redefine flag error

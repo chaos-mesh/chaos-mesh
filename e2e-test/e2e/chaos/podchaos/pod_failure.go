@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -40,7 +40,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("preparing experiment pods")
+	ginkgo.By("preparing experiment pods")
 	appName := "timer-pod-failure1"
 	nd := fixture.NewTimerDeployment(appName, ns)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
@@ -48,7 +48,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
 
-	By("create pod failure chaos CRD objects")
+	ginkgo.By("create pod failure chaos CRD objects")
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
 			"app": appName,
@@ -82,7 +82,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	err = cli.Create(ctx, podFailureChaos)
 	framework.ExpectNoError(err, "create pod failure chaos error")
 
-	By("waiting for assertion some pod fall into failure")
+	ginkgo.By("waiting for assertion some pod fall into failure")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		if err != nil {
@@ -101,11 +101,11 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	})
 	framework.ExpectNoError(err, "failed to verify PodFailure")
 
-	By("delete pod failure chaos CRD objects")
+	ginkgo.By("delete pod failure chaos CRD objects")
 	err = cli.Delete(ctx, podFailureChaos)
 	framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
-	By("waiting for assertion recovering")
+	ginkgo.By("waiting for assertion recovering")
 	err = wait.Poll(5*time.Second, 2*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		if err != nil {
@@ -129,7 +129,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("preparing experiment pods")
+	ginkgo.By("preparing experiment pods")
 	appName := "timer-pod-failure2"
 	nd := fixture.NewTimerDeployment(appName, ns)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
@@ -137,7 +137,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
 
-	By("create pod failure chaos CRD objects")
+	ginkgo.By("create pod failure chaos CRD objects")
 	var pods *corev1.PodList
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
@@ -177,7 +177,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		Name:      "timer-failure2",
 	}
 
-	By("waiting for assertion some pod fall into failure")
+	ginkgo.By("waiting for assertion some pod fall into failure")
 	// check whether the pod failure chaos succeeded or not
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
@@ -195,11 +195,11 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	framework.ExpectNoError(err, "image not update to pause")
 
 	// pause experiment
-	By("pause pod failure chaos")
+	ginkgo.By("pause pod failure chaos")
 	err = util.PauseChaos(ctx, cli, podFailureChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	By("waiting for assertion about chaos experiment paused")
+	ginkgo.By("waiting for assertion about chaos experiment paused")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -211,7 +211,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
 
-	By("wait for 30 seconds and no pod failure")
+	ginkgo.By("wait for 30 seconds and no pod failure")
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 30*time.Second, func() (done bool, err error) {
@@ -228,11 +228,11 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
 
-	By("resume paused chaos experiment")
+	ginkgo.By("resume paused chaos experiment")
 	err = util.UnPauseChaos(ctx, cli, podFailureChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	By("waiting for assertion about pod failure happens again")
+	ginkgo.By("waiting for assertion about pod failure happens again")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.PodChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -244,7 +244,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	})
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-	By("waiting for assert pod failure happens again")
+	ginkgo.By("waiting for assert pod failure happens again")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
 		framework.ExpectNoError(err, "get timer pod error")

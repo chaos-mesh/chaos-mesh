@@ -21,7 +21,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -41,12 +41,12 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	const allowedJitter = 5 * 1024 * 1024
 
 	ctx := context.Background()
-	By("create memory stress chaos CRD objects")
+	ginkgo.By("create memory stress chaos CRD objects")
 	memoryStressChaos := makeMemoryStressChaos(ns, "memory-stress", ns, "stress-peer-0", "50M", 1)
 	err := cli.Create(ctx, memoryStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "create stresschaos error")
 
-	By("waiting for assertion some pods are experiencing memory stress ")
+	ginkgo.By("waiting for assertion some pods are experiencing memory stress ")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
 		if err != nil {
@@ -59,17 +59,17 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "memory stress failed")
-	By("delete pod failure chaos CRD objects")
+	ginkgo.By("delete pod failure chaos CRD objects")
 
 	err = cli.Delete(ctx, memoryStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "delete stresschaos error")
-	By("waiting for assertion recovering")
+	ginkgo.By("waiting for assertion recovering")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, peers, ports)
 		if err != nil {
 			return false, err
 		}
-		By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
+		ginkgo.By(fmt.Sprintf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage))
 		if conditions[0].MemoryUsage < conditions[1].MemoryUsage+allowedJitter {
 			return true, nil
 		}

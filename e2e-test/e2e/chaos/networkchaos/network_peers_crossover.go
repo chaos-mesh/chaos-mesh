@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -43,7 +43,7 @@ func TestcasePeersCrossover(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("prepare experiment playground")
+	ginkgo.By("prepare experiment playground")
 	for index := range networkPeers {
 		err := util.WaitE2EHelperReady(c, ports[index])
 
@@ -64,7 +64,7 @@ func TestcasePeersCrossover(
 		}
 	)
 
-	By("injecting network chaos between partition 0 and 1")
+	ginkgo.By("injecting network chaos between partition 0 and 1")
 	networkDelay := makeNetworkDelayChaos(
 		ns, "network-chaos-1",
 		map[string]string{"partition": "0"},
@@ -78,7 +78,7 @@ func TestcasePeersCrossover(
 	// that's important
 	networkDelay.Spec.Direction = v1alpha1.Both
 
-	By("Injecting delay between partition 0 (peer 0,2) with partition 1 (peer 1,3)")
+	ginkgo.By("Injecting delay between partition 0 (peer 0,2) with partition 1 (peer 1,3)")
 	err := cli.Create(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
@@ -94,7 +94,7 @@ func TestcasePeersCrossover(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 3}, {1, 2}, {2, 3}})
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 

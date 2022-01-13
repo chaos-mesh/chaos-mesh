@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -43,14 +43,14 @@ func TestcaseHttpPatchThenRecover(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("waiting on e2e helper ready")
+	ginkgo.By("waiting on e2e helper ready")
 	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := `{"msg":"Hello","target":"World"}`
 	secret := "Bar"
 
-	By("waiting for assertion normal behaviour")
+	ginkgo.By("waiting for assertion normal behaviour")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
@@ -72,9 +72,9 @@ func TestcaseHttpPatchThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "helper server doesn't work as expected")
-	By("deploy helper server successfully")
+	ginkgo.By("deploy helper server successfully")
 
-	By("create http patch chaos CRD objects")
+	ginkgo.By("create http patch chaos CRD objects")
 
 	patchbody := `{"target": "Chaos Mesh"}`
 	patchSecret := "Foo!"
@@ -114,7 +114,7 @@ func TestcaseHttpPatchThenRecover(
 	err = cli.Create(ctx, httpChaos)
 	framework.ExpectNoError(err, "create http chaos error")
 
-	By("waiting for assertion HTTP patch")
+	ginkgo.By("waiting for assertion HTTP patch")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
@@ -136,14 +136,14 @@ func TestcaseHttpPatchThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "http chaos doesn't work as expected")
-	By("apply http chaos successfully")
+	ginkgo.By("apply http chaos successfully")
 
-	By("delete chaos CRD objects")
+	ginkgo.By("delete chaos CRD objects")
 	// delete chaos CRD
 	err = cli.Delete(ctx, httpChaos)
 	framework.ExpectNoError(err, "failed to delete http chaos")
 
-	By("waiting for assertion recovering")
+	ginkgo.By("waiting for assertion recovering")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
@@ -176,14 +176,14 @@ func TestcaseHttpPatchPauseAndUnPause(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("waiting on e2e helper ready")
+	ginkgo.By("waiting on e2e helper ready")
 	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	body := `{"msg":"Hello","target":"World"}`
 	secret := "Bar"
 
-	By("waiting for assertion normal behaviour")
+	ginkgo.By("waiting for assertion normal behaviour")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		resp, err := getPodHttp(c, port, secret, body)
 		if err != nil {
@@ -205,9 +205,9 @@ func TestcaseHttpPatchPauseAndUnPause(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "helper server doesn't work as expected")
-	By("deploy helper server successfully")
+	ginkgo.By("deploy helper server successfully")
 
-	By("create http patch chaos CRD objects")
+	ginkgo.By("create http patch chaos CRD objects")
 	patchbody := `{"target": "Chaos Mesh"}`
 	patchSecret := "Foo!"
 	expectedSecret := "Bar; Foo!"
@@ -251,7 +251,7 @@ func TestcaseHttpPatchPauseAndUnPause(
 		Name:      "http-chaos",
 	}
 
-	By("waiting for assertion http chaos")
+	ginkgo.By("waiting for assertion http chaos")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -290,12 +290,12 @@ func TestcaseHttpPatchPauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "http chaos doesn't work as expected")
 
-	By("pause http patch chaos experiment")
+	ginkgo.By("pause http patch chaos experiment")
 	// pause experiment
 	err = util.PauseChaos(ctx, cli, httpChaos)
 	framework.ExpectNoError(err, "pause chaos error")
 
-	By("waiting for assertion about pause")
+	ginkgo.By("waiting for assertion about pause")
 	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -340,12 +340,12 @@ func TestcaseHttpPatchPauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "fail to recover http chaos")
 
-	By("resume http patch chaos experiment")
+	ginkgo.By("resume http patch chaos experiment")
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, httpChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
-	By("assert that http patch is effective again")
+	ginkgo.By("assert that http patch is effective again")
 	err = wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
 		chaos := &v1alpha1.HTTPChaos{}
 		err = cli.Get(ctx, chaosKey, chaos)
@@ -389,7 +389,7 @@ func TestcaseHttpPatchPauseAndUnPause(
 	})
 	framework.ExpectNoError(err, "HTTP chaos doesn't work as expected")
 
-	By("cleanup")
+	ginkgo.By("cleanup")
 	// cleanup
 	cli.Delete(ctx, httpChaos)
 }

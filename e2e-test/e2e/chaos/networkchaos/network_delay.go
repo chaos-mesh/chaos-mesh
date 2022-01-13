@@ -20,7 +20,7 @@ import (
 	"net/http"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -41,7 +41,7 @@ func TestcaseNetworkDelay(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("prepare experiment playground")
+	ginkgo.By("prepare experiment playground")
 	for index := range networkPeers {
 		err := util.WaitE2EHelperReady(c, ports[index])
 
@@ -82,7 +82,7 @@ func TestcaseNetworkDelay(
 		testDelayDuration = pointer.StringPtr("9m")
 	)
 
-	By("normal delay chaos")
+	ginkgo.By("normal delay chaos")
 	networkDelay := makeNetworkDelayChaos(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
@@ -93,7 +93,7 @@ func TestcaseNetworkDelay(
 		testDelayTcParam,
 		testDelayDuration,
 	)
-	By("Injecting delay for 0")
+	ginkgo.By("Injecting delay for 0")
 	err := cli.Create(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
@@ -108,7 +108,7 @@ func TestcaseNetworkDelay(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 2}, {0, 3}})
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -134,7 +134,7 @@ func TestcaseNetworkDelay(
 		testDelayDuration,
 	)
 
-	By("Injecting delay for 0 -> 1")
+	ginkgo.By("Injecting delay for 0 -> 1")
 	err = cli.Create(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
@@ -173,7 +173,7 @@ func TestcaseNetworkDelay(
 		testDelayTcParam,
 		testDelayDuration,
 	)
-	By("Injecting delay for 0 -> even partition")
+	ginkgo.By("Injecting delay for 0 -> even partition")
 	err = cli.Create(ctx, evenNetworkDelay.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
@@ -187,7 +187,7 @@ func TestcaseNetworkDelay(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 2}})
 
-	By("Injecting delay for 0 -> 1")
+	ginkgo.By("Injecting delay for 0 -> 1")
 	err = cli.Create(ctx, networkDelayWithTarget.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
@@ -237,7 +237,7 @@ func TestcaseNetworkDelay(
 		testDelayTcParamEvenMoreComplicate,
 		testDelayDuration,
 	)
-	By("Injecting complicate chaos for 0")
+	ginkgo.By("Injecting complicate chaos for 0")
 	err = cli.Create(ctx, complicateNetem.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
@@ -250,7 +250,7 @@ func TestcaseNetworkDelay(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 2}, {0, 3}})
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, complicateNetem.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -274,7 +274,7 @@ func TestcaseNetworkDelay(
 		testDelayTcParam,
 		testDelayDuration,
 	)
-	By("Injecting both direction chaos for 0")
+	ginkgo.By("Injecting both direction chaos for 0")
 	err = cli.Create(ctx, bothDirectionNetem.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
@@ -287,7 +287,7 @@ func TestcaseNetworkDelay(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 2}, {2, 0}})
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, bothDirectionNetem.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 

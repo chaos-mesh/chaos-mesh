@@ -23,7 +23,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	. "github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -47,7 +47,7 @@ func TestcaseForbidHostNetwork(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	By("preparing experiment pods")
+	ginkgo.By("preparing experiment pods")
 	name := "network-peer-4"
 	nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
 	nd.Spec.Template.Spec.HostNetwork = true
@@ -56,7 +56,7 @@ func TestcaseForbidHostNetwork(
 	err = util.WaitDeploymentReady(name, ns, kubeCli)
 	framework.ExpectNoError(err, "wait network-peer deployment ready error")
 
-	By("create network partition chaos CRD objects")
+	ginkgo.By("create network partition chaos CRD objects")
 	networkPartition := makeNetworkPartitionChaos(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-4"},
@@ -70,7 +70,7 @@ func TestcaseForbidHostNetwork(
 	err = cli.Create(ctx, networkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
-	By("waiting for rejecting for network chaos with hostNetwork")
+	ginkgo.By("waiting for rejecting for network chaos with hostNetwork")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		err = cli.Get(ctx, types.NamespacedName{
 			Namespace: ns,
@@ -105,7 +105,7 @@ func TestcaseNetworkPartition(
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	By("prepare experiment playground")
+	ginkgo.By("prepare experiment playground")
 	for index := range networkPeers {
 		err := util.WaitE2EHelperReady(c, ports[index])
 
@@ -137,7 +137,7 @@ func TestcaseNetworkPartition(
 		testDelayDuration,
 	)
 
-	By("block from peer-0 to peer-1")
+	ginkgo.By("block from peer-0 to peer-1")
 	err := cli.Create(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 
@@ -151,7 +151,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -165,7 +165,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("block both from peer-0 to peer-1 and from peer-1 to peer-0")
+	ginkgo.By("block both from peer-0 to peer-1 and from peer-1 to peer-0")
 	bothDirectionNetworkPartition := makeNetworkPartitionChaos(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
@@ -188,7 +188,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -202,7 +202,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("block from peer-1 to peer-0")
+	ginkgo.By("block from peer-1 to peer-0")
 	fromDirectionNetworkPartition := makeNetworkPartitionChaos(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
@@ -226,7 +226,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{1, 0}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -240,7 +240,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("network partition 1")
+	ginkgo.By("network partition 1")
 
 	bothDirectionWithPartitionNetworkPartition := makeNetworkPartitionChaos(
 		ns, "network-chaos-1",
@@ -264,7 +264,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 3}, {3, 0}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -278,7 +278,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("multiple network partition chaos on peer-0")
+	ginkgo.By("multiple network partition chaos on peer-0")
 	anotherNetworkPartition := makeNetworkPartitionChaos(
 		ns, "network-chaos-2",
 		map[string]string{"app": "network-peer-0"},
@@ -303,7 +303,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {0, 3}, {3, 0}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
@@ -320,7 +320,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("block from peer-0 to all")
+	ginkgo.By("block from peer-0 to all")
 	networkPartitionWithoutTarget := makeNetworkPartitionChaos(
 		ns, "network-chaos-without-target",
 		map[string]string{"app": "network-peer-0"},
@@ -344,7 +344,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {0, 2}, {0, 3}})
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
@@ -359,7 +359,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("block from peer-0 from all")
+	ginkgo.By("block from peer-0 from all")
 	networkPartitionWithoutTarget = makeNetworkPartitionChaos(
 		ns, "network-chaos-without-target",
 		map[string]string{"app": "network-peer-0"},
@@ -384,7 +384,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
-	By("recover")
+	ginkgo.By("recover")
 	err = cli.Delete(ctx, networkPartitionWithoutTarget.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 
