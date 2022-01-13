@@ -482,25 +482,30 @@ definitions:
           Supported action: limit / delay
           +kubebuilder:validation:Enum=limit;delay
         type: string
-      correlation:
-        default: "0"
-        description: +optional
-        type: string
-      delayn:
-        description: Delay defines the latency of every io request.
-        type: string
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, the first container will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      delay:
+        $ref: '#/definitions/v1alpha1.BlockDelaySpec'
+        description: |-
+          Delay defines the delay distribution.
+          +optional
+        type: object
       duration:
         description: |-
           Duration represents the duration of the chaos action.
           +optional
         type: string
-      iopsn:
-        description: IOPS defines the limit of IO frequency.
+      iops:
+        description: |-
+          IOPS defines the limit of IO frequency.
+          +optional
         type: integer
-      jitter:
-        default: 0ms
-        description: +optional
-        type: string
       mode:
         description: |-
           Mode defines the mode to run chaos action.
@@ -521,6 +526,20 @@ definitions:
           +optional
         type: string
       volumeName:
+        type: string
+    type: object
+  v1alpha1.BlockDelaySpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      jitter:
+        default: 0ms
+        description: +optional
+        type: string
+      latency:
+        description: Latency defines the latency of every io request.
         type: string
     type: object
   v1alpha1.CPUStressor:

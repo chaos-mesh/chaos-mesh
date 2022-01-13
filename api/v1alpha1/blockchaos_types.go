@@ -63,7 +63,7 @@ type BlockChaosSpec struct {
 // BlockDelaySpec describes the block delay specification
 type BlockDelaySpec struct {
 	// Latency defines the latency of every io request.
-	Latency string `json:"delay,omitempty" webhook:"Duration"`
+	Latency string `json:"latency,omitempty" webhook:"Duration"`
 
 	// +optional
 	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`

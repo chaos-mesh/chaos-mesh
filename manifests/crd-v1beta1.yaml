@@ -190,19 +190,29 @@ spec:
               - limit
               - delay
               type: string
-            correlation:
-              type: string
-            delayn:
-              description: Delay defines the latency of every io request.
-              type: string
+            containerNames:
+              description: ContainerNames indicates list of the name of affected container.
+                If not set, the first container will be injected
+              items:
+                type: string
+              type: array
+            delay:
+              description: Delay defines the delay distribution.
+              properties:
+                correlation:
+                  type: string
+                jitter:
+                  type: string
+                latency:
+                  description: Latency defines the latency of every io request.
+                  type: string
+              type: object
             duration:
               description: Duration represents the duration of the chaos action.
               type: string
-            iopsn:
+            iops:
               description: IOPS defines the limit of IO frequency.
               type: integer
-            jitter:
-              type: string
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -4161,19 +4171,29 @@ spec:
                   - limit
                   - delay
                   type: string
-                correlation:
-                  type: string
-                delayn:
-                  description: Delay defines the latency of every io request.
-                  type: string
+                containerNames:
+                  description: ContainerNames indicates list of the name of affected
+                    container. If not set, the first container will be injected
+                  items:
+                    type: string
+                  type: array
+                delay:
+                  description: Delay defines the delay distribution.
+                  properties:
+                    correlation:
+                      type: string
+                    jitter:
+                      type: string
+                    latency:
+                      description: Latency defines the latency of every io request.
+                      type: string
+                  type: object
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
-                iopsn:
+                iops:
                   description: IOPS defines the limit of IO frequency.
                   type: integer
-                jitter:
-                  type: string
                 mode:
                   description: 'Mode defines the mode to run chaos action. Supported
                     mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -6790,20 +6810,32 @@ spec:
                             - limit
                             - delay
                             type: string
-                          correlation:
-                            type: string
-                          delayn:
-                            description: Delay defines the latency of every io request.
-                            type: string
+                          containerNames:
+                            description: ContainerNames indicates list of the name
+                              of affected container. If not set, the first container
+                              will be injected
+                            items:
+                              type: string
+                            type: array
+                          delay:
+                            description: Delay defines the delay distribution.
+                            properties:
+                              correlation:
+                                type: string
+                              jitter:
+                                type: string
+                              latency:
+                                description: Latency defines the latency of every
+                                  io request.
+                                type: string
+                            type: object
                           duration:
                             description: Duration represents the duration of the chaos
                               action.
                             type: string
-                          iopsn:
+                          iops:
                             description: IOPS defines the limit of IO frequency.
                             type: integer
-                          jitter:
-                            type: string
                           mode:
                             description: 'Mode defines the mode to run chaos action.
                               Supported mode: one / all / fixed / fixed-percent /
@@ -9223,21 +9255,32 @@ spec:
                                 - limit
                                 - delay
                                 type: string
-                              correlation:
-                                type: string
-                              delayn:
-                                description: Delay defines the latency of every io
-                                  request.
-                                type: string
+                              containerNames:
+                                description: ContainerNames indicates list of the
+                                  name of affected container. If not set, the first
+                                  container will be injected
+                                items:
+                                  type: string
+                                type: array
+                              delay:
+                                description: Delay defines the delay distribution.
+                                properties:
+                                  correlation:
+                                    type: string
+                                  jitter:
+                                    type: string
+                                  latency:
+                                    description: Latency defines the latency of every
+                                      io request.
+                                    type: string
+                                type: object
                               duration:
                                 description: Duration represents the duration of the
                                   chaos action.
                                 type: string
-                              iopsn:
+                              iops:
                                 description: IOPS defines the limit of IO frequency.
                                 type: integer
-                              jitter:
-                                type: string
                               mode:
                                 description: 'Mode defines the mode to run chaos action.
                                   Supported mode: one / all / fixed / fixed-percent
@@ -15941,19 +15984,29 @@ spec:
                   - limit
                   - delay
                   type: string
-                correlation:
-                  type: string
-                delayn:
-                  description: Delay defines the latency of every io request.
-                  type: string
+                containerNames:
+                  description: ContainerNames indicates list of the name of affected
+                    container. If not set, the first container will be injected
+                  items:
+                    type: string
+                  type: array
+                delay:
+                  description: Delay defines the delay distribution.
+                  properties:
+                    correlation:
+                      type: string
+                    jitter:
+                      type: string
+                    latency:
+                      description: Latency defines the latency of every io request.
+                      type: string
+                  type: object
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
-                iopsn:
+                iops:
                   description: IOPS defines the limit of IO frequency.
                   type: integer
-                jitter:
-                  type: string
                 mode:
                   description: 'Mode defines the mode to run chaos action. Supported
                     mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -18243,19 +18296,29 @@ spec:
                       - limit
                       - delay
                       type: string
-                    correlation:
-                      type: string
-                    delayn:
-                      description: Delay defines the latency of every io request.
-                      type: string
+                    containerNames:
+                      description: ContainerNames indicates list of the name of affected
+                        container. If not set, the first container will be injected
+                      items:
+                        type: string
+                      type: array
+                    delay:
+                      description: Delay defines the delay distribution.
+                      properties:
+                        correlation:
+                          type: string
+                        jitter:
+                          type: string
+                        latency:
+                          description: Latency defines the latency of every io request.
+                          type: string
+                      type: object
                     duration:
                       description: Duration represents the duration of the chaos action.
                       type: string
-                    iopsn:
+                    iops:
                       description: IOPS defines the limit of IO frequency.
                       type: integer
-                    jitter:
-                      type: string
                     mode:
                       description: 'Mode defines the mode to run chaos action. Supported
                         mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -20902,21 +20965,32 @@ spec:
                                 - limit
                                 - delay
                                 type: string
-                              correlation:
-                                type: string
-                              delayn:
-                                description: Delay defines the latency of every io
-                                  request.
-                                type: string
+                              containerNames:
+                                description: ContainerNames indicates list of the
+                                  name of affected container. If not set, the first
+                                  container will be injected
+                                items:
+                                  type: string
+                                type: array
+                              delay:
+                                description: Delay defines the delay distribution.
+                                properties:
+                                  correlation:
+                                    type: string
+                                  jitter:
+                                    type: string
+                                  latency:
+                                    description: Latency defines the latency of every
+                                      io request.
+                                    type: string
+                                type: object
                               duration:
                                 description: Duration represents the duration of the
                                   chaos action.
                                 type: string
-                              iopsn:
+                              iops:
                                 description: IOPS defines the limit of IO frequency.
                                 type: integer
-                              jitter:
-                                type: string
                               mode:
                                 description: 'Mode defines the mode to run chaos action.
                                   Supported mode: one / all / fixed / fixed-percent
@@ -23403,21 +23477,32 @@ spec:
                                     - limit
                                     - delay
                                     type: string
-                                  correlation:
-                                    type: string
-                                  delayn:
-                                    description: Delay defines the latency of every
-                                      io request.
-                                    type: string
+                                  containerNames:
+                                    description: ContainerNames indicates list of
+                                      the name of affected container. If not set,
+                                      the first container will be injected
+                                    items:
+                                      type: string
+                                    type: array
+                                  delay:
+                                    description: Delay defines the delay distribution.
+                                    properties:
+                                      correlation:
+                                        type: string
+                                      jitter:
+                                        type: string
+                                      latency:
+                                        description: Latency defines the latency of
+                                          every io request.
+                                        type: string
+                                    type: object
                                   duration:
                                     description: Duration represents the duration
                                       of the chaos action.
                                     type: string
-                                  iopsn:
+                                  iops:
                                     description: IOPS defines the limit of IO frequency.
                                     type: integer
-                                  jitter:
-                                    type: string
                                   mode:
                                     description: 'Mode defines the mode to run chaos
                                       action. Supported mode: one / all / fixed /
@@ -32792,20 +32877,31 @@ spec:
                         - limit
                         - delay
                         type: string
-                      correlation:
-                        type: string
-                      delayn:
-                        description: Delay defines the latency of every io request.
-                        type: string
+                      containerNames:
+                        description: ContainerNames indicates list of the name of
+                          affected container. If not set, the first container will
+                          be injected
+                        items:
+                          type: string
+                        type: array
+                      delay:
+                        description: Delay defines the delay distribution.
+                        properties:
+                          correlation:
+                            type: string
+                          jitter:
+                            type: string
+                          latency:
+                            description: Latency defines the latency of every io request.
+                            type: string
+                        type: object
                       duration:
                         description: Duration represents the duration of the chaos
                           action.
                         type: string
-                      iopsn:
+                      iops:
                         description: IOPS defines the limit of IO frequency.
                         type: integer
-                      jitter:
-                        type: string
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -35161,20 +35257,32 @@ spec:
                             - limit
                             - delay
                             type: string
-                          correlation:
-                            type: string
-                          delayn:
-                            description: Delay defines the latency of every io request.
-                            type: string
+                          containerNames:
+                            description: ContainerNames indicates list of the name
+                              of affected container. If not set, the first container
+                              will be injected
+                            items:
+                              type: string
+                            type: array
+                          delay:
+                            description: Delay defines the delay distribution.
+                            properties:
+                              correlation:
+                                type: string
+                              jitter:
+                                type: string
+                              latency:
+                                description: Latency defines the latency of every
+                                  io request.
+                                type: string
+                            type: object
                           duration:
                             description: Duration represents the duration of the chaos
                               action.
                             type: string
-                          iopsn:
+                          iops:
                             description: IOPS defines the limit of IO frequency.
                             type: integer
-                          jitter:
-                            type: string
                           mode:
                             description: 'Mode defines the mode to run chaos action.
                               Supported mode: one / all / fixed / fixed-percent /

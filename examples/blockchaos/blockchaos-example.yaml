@@ -23,3 +23,5 @@ spec:
   mode: all
   volumeName: hostpath-example
   action: delay
+  delay:
+    latency: 1s

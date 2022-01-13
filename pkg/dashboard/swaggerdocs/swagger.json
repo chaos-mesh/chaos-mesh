@@ -2747,27 +2747,25 @@
                     "description": "Action defines the specific block chaos action.\nSupported action: limit / delay\n+kubebuilder:validation:Enum=limit;delay",
                     "type": "string"
                 },
-                "correlation": {
-                    "description": "+optional",
-                    "type": "string",
-                    "default": "0"
+                "containerNames": {
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "delayn": {
-                    "description": "Delay defines the latency of every io request.",
-                    "type": "string"
+                "delay": {
+                    "description": "Delay defines the delay distribution.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockDelaySpec"
                 },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action.\n+optional",
                     "type": "string"
                 },
-                "iopsn": {
-                    "description": "IOPS defines the limit of IO frequency.",
+                "iops": {
+                    "description": "IOPS defines the limit of IO frequency.\n+optional",
                     "type": "integer"
-                },
-                "jitter": {
-                    "description": "+optional",
-                    "type": "string",
-                    "default": "0ms"
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
@@ -2783,6 +2781,25 @@
                     "type": "string"
                 },
                 "volumeName": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.BlockDelaySpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0"
+                },
+                "jitter": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0ms"
+                },
+                "latency": {
+                    "description": "Latency defines the latency of every io request.",
                     "type": "string"
                 }
             }
