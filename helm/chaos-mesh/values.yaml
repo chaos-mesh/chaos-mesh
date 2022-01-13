@@ -438,6 +438,7 @@ webhook:
     - schedule
     - workflow
     - httpchaos
+    - blockchaos
     - physicalmachinechaos
     - physicalmachine
 

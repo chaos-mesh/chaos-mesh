@@ -69,6 +69,13 @@ const awsCommon: Spec = {
 }
 
 const blockCommon: Spec = {
+  containerNames: {
+    field: 'label',
+    label: 'Affected container names',
+    value: [],
+    helperText:
+      "Optional. Type string and end with a TAB to generate the container names. If it's empty, the first container will be injected",
+  },
   volumeName: {
     field: 'text',
     label: 'Volume name',
@@ -343,6 +350,24 @@ const data: Record<Kind, Definition> = {
         key: 'delay',
         spec: {
           action: 'delay' as any,
+          latency: {
+            field: 'text',
+            label: 'Latency',
+            value: '',
+            helperText: 'The latency of delay',
+          },
+          jitter: {
+            field: 'text',
+            label: 'Jitter',
+            value: '',
+            helperText: 'The jitter of delay',
+          },
+          correlation: {
+            field: 'text',
+            label: 'Correlation',
+            value: '',
+            helperText: 'The correlation of delay',
+          },
           ...blockCommon,
         },
       },

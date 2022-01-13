@@ -157,19 +157,6 @@ export interface Time {
   containerNames: string[]
 }
 
-export interface BlockDelay {
-  delay: string
-  correlation: string
-  jitter: string
-}
-
-export interface Block {
-  action: 'limit' | 'delay'
-  delay?: BlockDelay
-  iops?: number
-  volumeName: string
-}
-
 export interface ExperimentType {
   AWSChaos: AWS
   DNSChaos: DNS
@@ -183,7 +170,7 @@ export interface ExperimentType {
   StressChaos: Stress
   TimeChaos: Time
   PhysicalMachineChaos?: unknown
-  BlockChaos?: Block
+  BlockChaos?: unknown
 }
 
 export type ExperimentKind = keyof ExperimentType
