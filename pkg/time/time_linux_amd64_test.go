@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/go-logr/zapr"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -33,13 +33,10 @@ import (
 
 func TestModifyTime(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Time Suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Time Suit")
 }
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	By("change working directory")
 
 	err := os.Chdir("../../")
@@ -50,8 +47,10 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	log := zapr.NewLogger(zapLog)
 	RegisterLogger(log)
+})
 
-	close(done)
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
 })
 
 // These tests are written in BDD-style using Ginkgo framework. Refer to

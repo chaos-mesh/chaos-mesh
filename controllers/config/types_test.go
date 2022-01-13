@@ -18,7 +18,7 @@ package config
 import (
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
@@ -28,11 +28,12 @@ import (
 
 func TestValidations(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Namespace scoped",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Namespace scoped")
 }
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
+})
 
 var _ = Describe("Namespace-scoped Chaos", func() {
 	Context("Namespace-scoped Chaos Configuration Validation", func() {

@@ -20,14 +20,15 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"chaosdaemon Suite",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "chaosdaemon Suite")
 }
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
+})

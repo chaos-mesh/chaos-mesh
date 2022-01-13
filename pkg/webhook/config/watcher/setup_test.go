@@ -18,7 +18,7 @@ package watcher
 import (
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -26,11 +26,12 @@ import (
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"webhook config watcher",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "webhook config watcher")
 }
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
+})
 
 func MockClusterConfig() (*rest.Config, error) {
 	return &rest.Config{

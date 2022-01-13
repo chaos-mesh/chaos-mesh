@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
 	"k8s.io/client-go/rest"
@@ -54,10 +54,7 @@ var setupLog = ctrl.Log.WithName("setup")
 
 func TestSchedule(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Schedule suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Schedule suit")
 }
 
 var _ = BeforeSuite(func() {
@@ -101,8 +98,7 @@ var _ = BeforeSuite(func() {
 		setupLog.Error(err, "fail to start manager")
 	}
 	Expect(err).ToNot(HaveOccurred())
-
-}, 60)
+})
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
@@ -114,6 +110,10 @@ var _ = AfterSuite(func() {
 	}
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
+})
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
 })
 
 type RunParams struct {

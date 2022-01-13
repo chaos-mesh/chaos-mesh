@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
@@ -31,11 +31,12 @@ import (
 
 func TestDockerClient(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Docker Container Client Test Suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Docker Container Client Test Suit")
 }
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
+})
 
 var _ = Describe("docker client", func() {
 	Context("DockerClient GetPidFromContainerID", func() {

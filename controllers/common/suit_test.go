@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
 	"k8s.io/client-go/rest"
@@ -58,10 +58,7 @@ var setupLog = ctrl.Log.WithName("setup")
 
 func TestCommon(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Common suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Common suit")
 }
 
 var _ = BeforeSuite(func() {
@@ -112,7 +109,7 @@ var _ = BeforeSuite(func() {
 	}
 	Expect(err).ToNot(HaveOccurred())
 
-}, 60)
+})
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
@@ -124,6 +121,10 @@ var _ = AfterSuite(func() {
 	}
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
+})
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
 })
 
 type RunParams struct {

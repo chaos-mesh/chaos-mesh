@@ -26,7 +26,7 @@ import (
 	"unsafe"
 
 	"github.com/go-logr/zapr"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
@@ -36,13 +36,10 @@ import (
 
 func TestPTrace(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"PTrace Suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "PTrace Suit")
 }
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	rand.Seed(GinkgoRandomSeed())
 
 	By("change working directory")
@@ -55,8 +52,10 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	log := zapr.NewLogger(zapLog)
 	RegisterLogger(log)
+})
 
-	close(done)
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
 })
 
 // These tests are written in BDD-style using Ginkgo framework. Refer to

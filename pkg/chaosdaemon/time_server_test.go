@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
