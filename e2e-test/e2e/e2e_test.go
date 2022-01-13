@@ -17,12 +17,15 @@ package e2e
 
 import (
 	"flag"
+	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"testing"
 	"time"
 
 	"github.com/onsi/ginkgo/v2"
+	"github.com/onsi/ginkgo/v2/reporters"
 	"github.com/onsi/gomega"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/clientcmd"
@@ -73,6 +76,14 @@ func RunE2ETests(t *testing.T) {
 	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, ginkgo.GinkgoParallelProcess())
 	ginkgo.RunSpecs(t, "chaosmesh e2e suit")
 }
+
+var _ = ginkgo.ReportAfterSuite("JUnit Report", func(r ginkgo.Report) {
+	file := path.Join(framework.TestContext.ReportDir, fmt.Sprintf("junit_%v%02d.xml", framework.TestContext.ReportPrefix, ginkgo.GinkgoParallelProcess()))
+	err := reporters.GenerateJUnitReport(r, file)
+	if err != nil {
+		klog.Errorf("fail to generate JUnit report: %v", err)
+	}
+})
 
 // we hack framework.RegisterClusterFlags to avoid redefine flag error
 // caused by controller-runtime client
