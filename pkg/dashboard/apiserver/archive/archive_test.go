@@ -218,6 +218,10 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	return res, err
 }
 
+func (m *MockExperimentStore) FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*core.Experiment, error) {
+	panic("implement me")
+}
+
 func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
 	panic("implement me")
 }
