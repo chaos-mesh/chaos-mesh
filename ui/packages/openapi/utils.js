@@ -16,6 +16,7 @@
  */
 
 const UI_FORM_ENUM = /ui:form:enum=(.+)\s/
+const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s/
 
 /**
  * Get enum array from jsdoc comment.
@@ -25,7 +26,7 @@ const UI_FORM_ENUM = /ui:form:enum=(.+)\s/
  * @return {string[]}
  */
 export function getUIFormEnum(s) {
-  const matched = s.match(UI_FORM_ENUM)
+  let matched = s.match(UI_FORM_ENUM) || s.match(KUBEBUILDER_VALIDATION_ENUM)
 
   return matched ? matched[1].split(';') : []
 }

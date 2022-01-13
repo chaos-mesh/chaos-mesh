@@ -57,7 +57,6 @@ type GCPChaosSpec struct {
 	// Action defines the specific gcp chaos action.
 	// Supported action: node-stop / node-reset / disk-loss
 	// Default action: node-stop
-	// ui:form:enum=node-stop;node-reset;disk-loss
 	// +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
 	Action GCPChaosAction `json:"action"`
 

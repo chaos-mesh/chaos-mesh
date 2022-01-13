@@ -46,7 +46,6 @@ type IOChaosSpec struct {
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride / mistake
-	// ui:form:enum=latency;fault;attrOverride;mistake
 	// +kubebuilder:validation:Enum=latency;fault;attrOverride;mistake
 	Action IOChaosType `json:"action"`
 

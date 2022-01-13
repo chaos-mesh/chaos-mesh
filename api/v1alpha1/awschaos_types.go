@@ -56,7 +56,6 @@ type AWSChaosSpec struct {
 	// Action defines the specific aws chaos action.
 	// Supported action: ec2-stop / ec2-restart / detach-volume
 	// Default action: ec2-stop
-	// ui:form:enum=ec2-stop;ec2-restart;detach-volume
 	// +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
 	Action AWSChaosAction `json:"action"`
 

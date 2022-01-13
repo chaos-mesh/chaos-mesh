@@ -29,7 +29,6 @@ type JVMChaosSpec struct {
 
 	// Action defines the specific jvm chaos action.
 	// Supported action: latency;return;exception;stress;gc;ruleData
-	// ui:form:enum=latency;return;exception;stress;gc;ruleData
 	// +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
 	Action JVMChaosAction `json:"action"`
 

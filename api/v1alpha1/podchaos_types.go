@@ -59,7 +59,6 @@ type PodChaosSpec struct {
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure / container-kill
 	// Default action: pod-kill
-	// ui:form:enum=pod-kill;pod-failure;container-kill
 	// +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
 	Action PodChaosAction `json:"action"`
 

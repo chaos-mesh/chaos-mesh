@@ -29,6 +29,27 @@ describe('openapi => utils', () => {
          */
       `)
       ).toEqual(['a', 'b', 'c'])
+
+      expect(
+        getUIFormEnum(`
+        /**
+         * just a comment
+         *
+         * +kubebuilder:validation:Enum=a;b;c
+         */
+      `)
+      ).toEqual(['a', 'b', 'c'])
+
+      expect(
+        getUIFormEnum(`
+        /**
+         * just a comment
+         *
+         * +kubebuilder:validation:Enum=a;b;c
+         * ui:form:enum=a;b;c
+         */
+      `)
+      ).toEqual(['a', 'b', 'c'])
     })
 
     test('returns an empty array', () => {
