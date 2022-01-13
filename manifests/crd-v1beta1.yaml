@@ -54,7 +54,7 @@ spec:
               type: string
             deviceName:
               description: DeviceName indicates the name of the device. Needed in
-                detach-volume. ui:form:when=action=='detach-volume'
+                detach-volume.
               type: string
             duration:
               description: Duration represents the duration of the chaos action.
@@ -64,14 +64,14 @@ spec:
               type: string
             endpoint:
               description: Endpoint indicates the endpoint of the aws server. Just
-                used it in test now. ui:form:ignore
+                used it in test now.
               type: string
             secretName:
               description: SecretName defines the name of kubernetes secret.
               type: string
             volumeID:
               description: EbsVolume indicates the ID of the EBS volume. Needed in
-                detach-volume. ui:form:when=action=='detach-volume'
+                detach-volume.
               type: string
           required:
           - action
@@ -437,7 +437,6 @@ spec:
               type: string
             deviceNames:
               description: The device name of disks to detach. Needed in disk-loss.
-                ui:form:when=action=='disk-loss'
               items:
                 type: string
               type: array
@@ -912,7 +911,7 @@ spec:
               - mistake
               type: string
             attr:
-              description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+              description: Attr defines the overrided attribution
               properties:
                 atime:
                   description: Timespec represents a time
@@ -990,7 +989,7 @@ spec:
               description: Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with
                 optional fraction and a unit suffix, such as "300ms". Valid time units
-                are "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:when=action=='latency'
+                are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
             duration:
               description: Duration represents the duration of the chaos action. It
@@ -1001,8 +1000,7 @@ spec:
               type: string
             errno:
               description: 'Errno defines the error code that returned by I/O action.
-                refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                ui:form:when=action==''fault'''
+                refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
               format: int32
               type: integer
             methods:
@@ -1013,7 +1011,7 @@ spec:
               type: array
             mistake:
               description: Mistake defines what types of incorrectness are injected
-                to IO operations ui:form:when=action=='mistake'
+                to IO operations
               properties:
                 filling:
                   description: Filling determines what is filled in the miskate data.
@@ -3883,7 +3881,7 @@ spec:
                   type: string
                 deviceName:
                   description: DeviceName indicates the name of the device. Needed
-                    in detach-volume. ui:form:when=action=='detach-volume'
+                    in detach-volume.
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -3893,14 +3891,14 @@ spec:
                   type: string
                 endpoint:
                   description: Endpoint indicates the endpoint of the aws server.
-                    Just used it in test now. ui:form:ignore
+                    Just used it in test now.
                   type: string
                 secretName:
                   description: SecretName defines the name of kubernetes secret.
                   type: string
                 volumeID:
                   description: EbsVolume indicates the ID of the EBS volume. Needed
-                    in detach-volume. ui:form:when=action=='detach-volume'
+                    in detach-volume.
                   type: string
               required:
               - action
@@ -4070,7 +4068,6 @@ spec:
                   type: string
                 deviceNames:
                   description: The device name of disks to detach. Needed in disk-loss.
-                    ui:form:when=action=='disk-loss'
                   items:
                     type: string
                   type: array
@@ -4347,7 +4344,7 @@ spec:
                   - mistake
                   type: string
                 attr:
-                  description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+                  description: Attr defines the overrided attribution
                   properties:
                     atime:
                       description: Timespec represents a time
@@ -4426,7 +4423,6 @@ spec:
                     A delay string is a possibly signed sequence of decimal numbers,
                     each with optional fraction and a unit suffix, such as "300ms".
                     Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-                    ui:form:when=action=='latency'
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -4438,8 +4434,7 @@ spec:
                   type: string
                 errno:
                   description: 'Errno defines the error code that returned by I/O
-                    action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                    ui:form:when=action==''fault'''
+                    action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                   format: int32
                   type: integer
                 methods:
@@ -4450,7 +4445,7 @@ spec:
                   type: array
                 mistake:
                   description: Mistake defines what types of incorrectness are injected
-                    to IO operations ui:form:when=action=='mistake'
+                    to IO operations
                   properties:
                     filling:
                       description: Filling determines what is filled in the miskate
@@ -6372,7 +6367,7 @@ spec:
                             type: string
                           deviceName:
                             description: DeviceName indicates the name of the device.
-                              Needed in detach-volume. ui:form:when=action=='detach-volume'
+                              Needed in detach-volume.
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -6383,7 +6378,7 @@ spec:
                             type: string
                           endpoint:
                             description: Endpoint indicates the endpoint of the aws
-                              server. Just used it in test now. ui:form:ignore
+                              server. Just used it in test now.
                             type: string
                           secretName:
                             description: SecretName defines the name of kubernetes
@@ -6391,7 +6386,7 @@ spec:
                             type: string
                           volumeID:
                             description: EbsVolume indicates the ID of the EBS volume.
-                              Needed in detach-volume. ui:form:when=action=='detach-volume'
+                              Needed in detach-volume.
                             type: string
                         required:
                         - action
@@ -6594,7 +6589,7 @@ spec:
                             type: string
                           deviceNames:
                             description: The device name of disks to detach. Needed
-                              in disk-loss. ui:form:when=action=='disk-loss'
+                              in disk-loss.
                             items:
                               type: string
                             type: array
@@ -6884,7 +6879,7 @@ spec:
                             - mistake
                             type: string
                           attr:
-                            description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+                            description: Attr defines the overrided attribution
                             properties:
                               atime:
                                 description: Timespec represents a time
@@ -6964,7 +6959,7 @@ spec:
                               delay. A delay string is a possibly signed sequence
                               of decimal numbers, each with optional fraction and
                               a unit suffix, such as "300ms". Valid time units are
-                              "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:when=action=='latency'
+                              "ns", "us" (or "µs"), "ms", "s", "m", "h".
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -6976,8 +6971,7 @@ spec:
                             type: string
                           errno:
                             description: 'Errno defines the error code that returned
-                              by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                              ui:form:when=action==''fault'''
+                              by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                             format: int32
                             type: integer
                           methods:
@@ -6988,7 +6982,7 @@ spec:
                             type: array
                           mistake:
                             description: Mistake defines what types of incorrectness
-                              are injected to IO operations ui:form:when=action=='mistake'
+                              are injected to IO operations
                             properties:
                               filling:
                                 description: Filling determines what is filled in
@@ -8658,7 +8652,7 @@ spec:
                                 type: string
                               deviceName:
                                 description: DeviceName indicates the name of the
-                                  device. Needed in detach-volume. ui:form:when=action=='detach-volume'
+                                  device. Needed in detach-volume.
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -8670,7 +8664,7 @@ spec:
                                 type: string
                               endpoint:
                                 description: Endpoint indicates the endpoint of the
-                                  aws server. Just used it in test now. ui:form:ignore
+                                  aws server. Just used it in test now.
                                 type: string
                               secretName:
                                 description: SecretName defines the name of kubernetes
@@ -8678,7 +8672,7 @@ spec:
                                 type: string
                               volumeID:
                                 description: EbsVolume indicates the ID of the EBS
-                                  volume. Needed in detach-volume. ui:form:when=action=='detach-volume'
+                                  volume. Needed in detach-volume.
                                 type: string
                             required:
                             - action
@@ -8863,7 +8857,7 @@ spec:
                                 type: string
                               deviceNames:
                                 description: The device name of disks to detach. Needed
-                                  in disk-loss. ui:form:when=action=='disk-loss'
+                                  in disk-loss.
                                 items:
                                   type: string
                                 type: array
@@ -9164,7 +9158,6 @@ spec:
                                 type: string
                               attr:
                                 description: Attr defines the overrided attribution
-                                  ui:form:when=action=='attrOverride'
                                 properties:
                                   atime:
                                     description: Timespec represents a time
@@ -9245,7 +9238,7 @@ spec:
                                   sequence of decimal numbers, each with optional
                                   fraction and a unit suffix, such as "300ms". Valid
                                   time units are "ns", "us" (or "µs"), "ms", "s",
-                                  "m", "h". ui:form:when=action=='latency'
+                                  "m", "h".
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -9258,8 +9251,7 @@ spec:
                                 type: string
                               errno:
                                 description: 'Errno defines the error code that returned
-                                  by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                                  ui:form:when=action==''fault'''
+                                  by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                                 format: int32
                                 type: integer
                               methods:
@@ -9270,7 +9262,7 @@ spec:
                                 type: array
                               mistake:
                                 description: Mistake defines what types of incorrectness
-                                  are injected to IO operations ui:form:when=action=='mistake'
+                                  are injected to IO operations
                                 properties:
                                   filling:
                                     description: Filling determines what is filled
@@ -15230,7 +15222,7 @@ spec:
                   type: string
                 deviceName:
                   description: DeviceName indicates the name of the device. Needed
-                    in detach-volume. ui:form:when=action=='detach-volume'
+                    in detach-volume.
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -15240,14 +15232,14 @@ spec:
                   type: string
                 endpoint:
                   description: Endpoint indicates the endpoint of the aws server.
-                    Just used it in test now. ui:form:ignore
+                    Just used it in test now.
                   type: string
                 secretName:
                   description: SecretName defines the name of kubernetes secret.
                   type: string
                 volumeID:
                   description: EbsVolume indicates the ID of the EBS volume. Needed
-                    in detach-volume. ui:form:when=action=='detach-volume'
+                    in detach-volume.
                   type: string
               required:
               - action
@@ -15436,7 +15428,6 @@ spec:
                   type: string
                 deviceNames:
                   description: The device name of disks to detach. Needed in disk-loss.
-                    ui:form:when=action=='disk-loss'
                   items:
                     type: string
                   type: array
@@ -15710,7 +15701,7 @@ spec:
                   - mistake
                   type: string
                 attr:
-                  description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+                  description: Attr defines the overrided attribution
                   properties:
                     atime:
                       description: Timespec represents a time
@@ -15789,7 +15780,6 @@ spec:
                     A delay string is a possibly signed sequence of decimal numbers,
                     each with optional fraction and a unit suffix, such as "300ms".
                     Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-                    ui:form:when=action=='latency'
                   type: string
                 duration:
                   description: Duration represents the duration of the chaos action.
@@ -15801,8 +15791,7 @@ spec:
                   type: string
                 errno:
                   description: 'Errno defines the error code that returned by I/O
-                    action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                    ui:form:when=action==''fault'''
+                    action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                   format: int32
                   type: integer
                 methods:
@@ -15813,7 +15802,7 @@ spec:
                   type: array
                 mistake:
                   description: Mistake defines what types of incorrectness are injected
-                    to IO operations ui:form:when=action=='mistake'
+                    to IO operations
                   properties:
                     filling:
                       description: Filling determines what is filled in the miskate
@@ -17394,7 +17383,7 @@ spec:
                       type: string
                     deviceName:
                       description: DeviceName indicates the name of the device. Needed
-                        in detach-volume. ui:form:when=action=='detach-volume'
+                        in detach-volume.
                       type: string
                     duration:
                       description: Duration represents the duration of the chaos action.
@@ -17404,14 +17393,14 @@ spec:
                       type: string
                     endpoint:
                       description: Endpoint indicates the endpoint of the aws server.
-                        Just used it in test now. ui:form:ignore
+                        Just used it in test now.
                       type: string
                     secretName:
                       description: SecretName defines the name of kubernetes secret.
                       type: string
                     volumeID:
                       description: EbsVolume indicates the ID of the EBS volume. Needed
-                        in detach-volume. ui:form:when=action=='detach-volume'
+                        in detach-volume.
                       type: string
                   required:
                   - action
@@ -17584,7 +17573,6 @@ spec:
                       type: string
                     deviceNames:
                       description: The device name of disks to detach. Needed in disk-loss.
-                        ui:form:when=action=='disk-loss'
                       items:
                         type: string
                       type: array
@@ -17866,7 +17854,7 @@ spec:
                       - mistake
                       type: string
                     attr:
-                      description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+                      description: Attr defines the overrided attribution
                       properties:
                         atime:
                           description: Timespec represents a time
@@ -17945,7 +17933,7 @@ spec:
                         A delay string is a possibly signed sequence of decimal numbers,
                         each with optional fraction and a unit suffix, such as "300ms".
                         Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
-                        "h". ui:form:when=action=='latency'
+                        "h".
                       type: string
                     duration:
                       description: Duration represents the duration of the chaos action.
@@ -17957,8 +17945,7 @@ spec:
                       type: string
                     errno:
                       description: 'Errno defines the error code that returned by
-                        I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                        ui:form:when=action==''fault'''
+                        I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                       format: int32
                       type: integer
                     methods:
@@ -17969,7 +17956,7 @@ spec:
                       type: array
                     mistake:
                       description: Mistake defines what types of incorrectness are
-                        injected to IO operations ui:form:when=action=='mistake'
+                        injected to IO operations
                       properties:
                         filling:
                           description: Filling determines what is filled in the miskate
@@ -19910,7 +19897,7 @@ spec:
                                 type: string
                               deviceName:
                                 description: DeviceName indicates the name of the
-                                  device. Needed in detach-volume. ui:form:when=action=='detach-volume'
+                                  device. Needed in detach-volume.
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -19922,7 +19909,7 @@ spec:
                                 type: string
                               endpoint:
                                 description: Endpoint indicates the endpoint of the
-                                  aws server. Just used it in test now. ui:form:ignore
+                                  aws server. Just used it in test now.
                                 type: string
                               secretName:
                                 description: SecretName defines the name of kubernetes
@@ -19930,7 +19917,7 @@ spec:
                                 type: string
                               volumeID:
                                 description: EbsVolume indicates the ID of the EBS
-                                  volume. Needed in detach-volume. ui:form:when=action=='detach-volume'
+                                  volume. Needed in detach-volume.
                                 type: string
                             required:
                             - action
@@ -20139,7 +20126,7 @@ spec:
                                 type: string
                               deviceNames:
                                 description: The device name of disks to detach. Needed
-                                  in disk-loss. ui:form:when=action=='disk-loss'
+                                  in disk-loss.
                                 items:
                                   type: string
                                 type: array
@@ -20437,7 +20424,6 @@ spec:
                                 type: string
                               attr:
                                 description: Attr defines the overrided attribution
-                                  ui:form:when=action=='attrOverride'
                                 properties:
                                   atime:
                                     description: Timespec represents a time
@@ -20518,7 +20504,7 @@ spec:
                                   sequence of decimal numbers, each with optional
                                   fraction and a unit suffix, such as "300ms". Valid
                                   time units are "ns", "us" (or "µs"), "ms", "s",
-                                  "m", "h". ui:form:when=action=='latency'
+                                  "m", "h".
                                 type: string
                               duration:
                                 description: Duration represents the duration of the
@@ -20531,8 +20517,7 @@ spec:
                                 type: string
                               errno:
                                 description: 'Errno defines the error code that returned
-                                  by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                                  ui:form:when=action==''fault'''
+                                  by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                                 format: int32
                                 type: integer
                               methods:
@@ -20543,7 +20528,7 @@ spec:
                                 type: array
                               mistake:
                                 description: Mistake defines what types of incorrectness
-                                  are injected to IO operations ui:form:when=action=='mistake'
+                                  are injected to IO operations
                                 properties:
                                   filling:
                                     description: Filling determines what is filled
@@ -22262,7 +22247,7 @@ spec:
                                     type: string
                                   deviceName:
                                     description: DeviceName indicates the name of
-                                      the device. Needed in detach-volume. ui:form:when=action=='detach-volume'
+                                      the device. Needed in detach-volume.
                                     type: string
                                   duration:
                                     description: Duration represents the duration
@@ -22274,7 +22259,7 @@ spec:
                                     type: string
                                   endpoint:
                                     description: Endpoint indicates the endpoint of
-                                      the aws server. Just used it in test now. ui:form:ignore
+                                      the aws server. Just used it in test now.
                                     type: string
                                   secretName:
                                     description: SecretName defines the name of kubernetes
@@ -22282,7 +22267,7 @@ spec:
                                     type: string
                                   volumeID:
                                     description: EbsVolume indicates the ID of the
-                                      EBS volume. Needed in detach-volume. ui:form:when=action=='detach-volume'
+                                      EBS volume. Needed in detach-volume.
                                     type: string
                                 required:
                                 - action
@@ -22473,7 +22458,7 @@ spec:
                                     type: string
                                   deviceNames:
                                     description: The device name of disks to detach.
-                                      Needed in disk-loss. ui:form:when=action=='disk-loss'
+                                      Needed in disk-loss.
                                     items:
                                       type: string
                                     type: array
@@ -22784,7 +22769,6 @@ spec:
                                     type: string
                                   attr:
                                     description: Attr defines the overrided attribution
-                                      ui:form:when=action=='attrOverride'
                                     properties:
                                       atime:
                                         description: Timespec represents a time
@@ -22866,7 +22850,7 @@ spec:
                                       sequence of decimal numbers, each with optional
                                       fraction and a unit suffix, such as "300ms".
                                       Valid time units are "ns", "us" (or "µs"), "ms",
-                                      "s", "m", "h". ui:form:when=action=='latency'
+                                      "s", "m", "h".
                                     type: string
                                   duration:
                                     description: Duration represents the duration
@@ -22880,8 +22864,7 @@ spec:
                                     type: string
                                   errno:
                                     description: 'Errno defines the error code that
-                                      returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                                      ui:form:when=action==''fault'''
+                                      returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                                     format: int32
                                     type: integer
                                   methods:
@@ -22893,7 +22876,7 @@ spec:
                                     type: array
                                   mistake:
                                     description: Mistake defines what types of incorrectness
-                                      are injected to IO operations ui:form:when=action=='mistake'
+                                      are injected to IO operations
                                     properties:
                                       filling:
                                         description: Filling determines what is filled
@@ -31499,7 +31482,7 @@ spec:
                         type: string
                       deviceName:
                         description: DeviceName indicates the name of the device.
-                          Needed in detach-volume. ui:form:when=action=='detach-volume'
+                          Needed in detach-volume.
                         type: string
                       duration:
                         description: Duration represents the duration of the chaos
@@ -31510,14 +31493,14 @@ spec:
                         type: string
                       endpoint:
                         description: Endpoint indicates the endpoint of the aws server.
-                          Just used it in test now. ui:form:ignore
+                          Just used it in test now.
                         type: string
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
                         type: string
                       volumeID:
                         description: EbsVolume indicates the ID of the EBS volume.
-                          Needed in detach-volume. ui:form:when=action=='detach-volume'
+                          Needed in detach-volume.
                         type: string
                     required:
                     - action
@@ -31715,7 +31698,7 @@ spec:
                         type: string
                       deviceNames:
                         description: The device name of disks to detach. Needed in
-                          disk-loss. ui:form:when=action=='disk-loss'
+                          disk-loss.
                         items:
                           type: string
                         type: array
@@ -31998,7 +31981,7 @@ spec:
                         - mistake
                         type: string
                       attr:
-                        description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+                        description: Attr defines the overrided attribution
                         properties:
                           atime:
                             description: Timespec represents a time
@@ -32078,7 +32061,7 @@ spec:
                           A delay string is a possibly signed sequence of decimal
                           numbers, each with optional fraction and a unit suffix,
                           such as "300ms". Valid time units are "ns", "us" (or "µs"),
-                          "ms", "s", "m", "h". ui:form:when=action=='latency'
+                          "ms", "s", "m", "h".
                         type: string
                       duration:
                         description: Duration represents the duration of the chaos
@@ -32090,8 +32073,7 @@ spec:
                         type: string
                       errno:
                         description: 'Errno defines the error code that returned by
-                          I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                          ui:form:when=action==''fault'''
+                          I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                         format: int32
                         type: integer
                       methods:
@@ -32102,7 +32084,7 @@ spec:
                         type: array
                       mistake:
                         description: Mistake defines what types of incorrectness are
-                          injected to IO operations ui:form:when=action=='mistake'
+                          injected to IO operations
                         properties:
                           filling:
                             description: Filling determines what is filled in the
@@ -33724,7 +33706,7 @@ spec:
                             type: string
                           deviceName:
                             description: DeviceName indicates the name of the device.
-                              Needed in detach-volume. ui:form:when=action=='detach-volume'
+                              Needed in detach-volume.
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -33735,7 +33717,7 @@ spec:
                             type: string
                           endpoint:
                             description: Endpoint indicates the endpoint of the aws
-                              server. Just used it in test now. ui:form:ignore
+                              server. Just used it in test now.
                             type: string
                           secretName:
                             description: SecretName defines the name of kubernetes
@@ -33743,7 +33725,7 @@ spec:
                             type: string
                           volumeID:
                             description: EbsVolume indicates the ID of the EBS volume.
-                              Needed in detach-volume. ui:form:when=action=='detach-volume'
+                              Needed in detach-volume.
                             type: string
                         required:
                         - action
@@ -33923,7 +33905,7 @@ spec:
                             type: string
                           deviceNames:
                             description: The device name of disks to detach. Needed
-                              in disk-loss. ui:form:when=action=='disk-loss'
+                              in disk-loss.
                             items:
                               type: string
                             type: array
@@ -34216,7 +34198,7 @@ spec:
                             - mistake
                             type: string
                           attr:
-                            description: Attr defines the overrided attribution ui:form:when=action=='attrOverride'
+                            description: Attr defines the overrided attribution
                             properties:
                               atime:
                                 description: Timespec represents a time
@@ -34296,7 +34278,7 @@ spec:
                               delay. A delay string is a possibly signed sequence
                               of decimal numbers, each with optional fraction and
                               a unit suffix, such as "300ms". Valid time units are
-                              "ns", "us" (or "µs"), "ms", "s", "m", "h". ui:form:when=action=='latency'
+                              "ns", "us" (or "µs"), "ms", "s", "m", "h".
                             type: string
                           duration:
                             description: Duration represents the duration of the chaos
@@ -34308,8 +34290,7 @@ spec:
                             type: string
                           errno:
                             description: 'Errno defines the error code that returned
-                              by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-                              ui:form:when=action==''fault'''
+                              by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
                             format: int32
                             type: integer
                           methods:
@@ -34320,7 +34301,7 @@ spec:
                             type: array
                           mistake:
                             description: Mistake defines what types of incorrectness
-                              are injected to IO operations ui:form:when=action=='mistake'
+                              are injected to IO operations
                             properties:
                               filling:
                                 description: Filling determines what is filled in

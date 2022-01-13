@@ -2650,7 +2650,7 @@ var doc = `{
                     "type": "string"
                 },
                 "deviceName": {
-                    "description": "DeviceName indicates the name of the device.\nNeeded in detach-volume.\nui:form:when=action=='detach-volume'\n+optional",
+                    "description": "DeviceName indicates the name of the device.\nNeeded in detach-volume.\n+ui:form:when=action=='detach-volume'\n+optional",
                     "type": "string"
                 },
                 "duration": {
@@ -2662,7 +2662,7 @@ var doc = `{
                     "type": "string"
                 },
                 "endpoint": {
-                    "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\nui:form:ignore\n+optional",
+                    "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\n+ui:form:ignore\n+optional",
                     "type": "string"
                 },
                 "secretName": {
@@ -2670,7 +2670,7 @@ var doc = `{
                     "type": "string"
                 },
                 "volumeID": {
-                    "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\nui:form:when=action=='detach-volume'\n+optional",
+                    "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\n+ui:form:when=action=='detach-volume'\n+optional",
                     "type": "string"
                 }
             }
@@ -3069,7 +3069,7 @@ var doc = `{
                     "type": "string"
                 },
                 "deviceNames": {
-                    "description": "The device name of disks to detach.\nNeeded in disk-loss.\nui:form:when=action=='disk-loss'\n+optional",
+                    "description": "The device name of disks to detach.\nNeeded in disk-loss.\n+ui:form:when=action=='disk-loss'\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3179,7 +3179,7 @@ var doc = `{
                     "type": "string"
                 },
                 "attr": {
-                    "description": "Attr defines the overrided attribution\nui:form:when=action=='attrOverride'\n+optional",
+                    "description": "Attr defines the overrided attribution\n+ui:form:when=action=='attrOverride'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AttrOverrideSpec"
                 },
@@ -3191,7 +3191,7 @@ var doc = `{
                     }
                 },
                 "delay": {
-                    "description": "Delay defines the value of I/O chaos action delay.\nA delay string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\nui:form:when=action=='latency'\n+optional",
+                    "description": "Delay defines the value of I/O chaos action delay.\nA delay string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+ui:form:when=action=='latency'\n+optional",
                     "type": "string"
                 },
                 "duration": {
@@ -3199,7 +3199,7 @@ var doc = `{
                     "type": "string"
                 },
                 "errno": {
-                    "description": "Errno defines the error code that returned by I/O action.\nrefer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html\nui:form:when=action=='fault'\n+optional",
+                    "description": "Errno defines the error code that returned by I/O action.\nrefer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html\n+ui:form:when=action=='fault'\n+optional",
                     "type": "integer"
                 },
                 "methods": {
@@ -3210,7 +3210,7 @@ var doc = `{
                     }
                 },
                 "mistake": {
-                    "description": "Mistake defines what types of incorrectness are injected to IO operations\nui:form:when=action=='mistake'\n+optional",
+                    "description": "Mistake defines what types of incorrectness are injected to IO operations\n+ui:form:when=action=='mistake'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.MistakeSpec"
                 },

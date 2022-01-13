@@ -370,7 +370,7 @@ definitions:
         description: |-
           DeviceName indicates the name of the device.
           Needed in detach-volume.
-          ui:form:when=action=='detach-volume'
+          +ui:form:when=action=='detach-volume'
           +optional
         type: string
       duration:
@@ -384,7 +384,7 @@ definitions:
       endpoint:
         description: |-
           Endpoint indicates the endpoint of the aws server. Just used it in test now.
-          ui:form:ignore
+          +ui:form:ignore
           +optional
         type: string
       secretName:
@@ -396,7 +396,7 @@ definitions:
         description: |-
           EbsVolume indicates the ID of the EBS volume.
           Needed in detach-volume.
-          ui:form:when=action=='detach-volume'
+          +ui:form:when=action=='detach-volume'
           +optional
         type: string
     type: object
@@ -801,7 +801,7 @@ definitions:
         description: |-
           The device name of disks to detach.
           Needed in disk-loss.
-          ui:form:when=action=='disk-loss'
+          +ui:form:when=action=='disk-loss'
           +optional
         items:
           type: string
@@ -930,7 +930,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.AttrOverrideSpec'
         description: |-
           Attr defines the overrided attribution
-          ui:form:when=action=='attrOverride'
+          +ui:form:when=action=='attrOverride'
           +optional
         type: object
       containerNames:
@@ -948,7 +948,7 @@ definitions:
           decimal numbers, each with optional fraction and a unit suffix,
           such as "300ms".
           Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-          ui:form:when=action=='latency'
+          +ui:form:when=action=='latency'
           +optional
         type: string
       duration:
@@ -965,7 +965,7 @@ definitions:
         description: |-
           Errno defines the error code that returned by I/O action.
           refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-          ui:form:when=action=='fault'
+          +ui:form:when=action=='fault'
           +optional
         type: integer
       methods:
@@ -980,7 +980,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.MistakeSpec'
         description: |-
           Mistake defines what types of incorrectness are injected to IO operations
-          ui:form:when=action=='mistake'
+          +ui:form:when=action=='mistake'
           +optional
         type: object
       mode:

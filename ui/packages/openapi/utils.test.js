@@ -25,7 +25,7 @@ describe('openapi => utils', () => {
         /**
          * just a comment
          *
-         * ui:form:enum=a;b;c
+         * +ui:form:enum=a;b;c
          */
       `)
       ).toEqual(['a', 'b', 'c'])
@@ -46,7 +46,7 @@ describe('openapi => utils', () => {
          * just a comment
          *
          * +kubebuilder:validation:Enum=a;b;c
-         * ui:form:enum=a;b;c
+         * +ui:form:enum=a;b;c
          */
       `)
       ).toEqual(['a', 'b', 'c'])
@@ -68,7 +68,7 @@ describe('openapi => utils', () => {
       expect(
         getUIFormWhen(`
         /**
-         * ui:form:when=action=='a'
+         * +ui:form:when=action=='a'
          */
       `)
       ).toBe("action=='a'")
@@ -90,7 +90,7 @@ describe('openapi => utils', () => {
       expect(
         isUIFormIgnore(`
         /**
-         * ui:form:ignore
+         * +ui:form:ignore
          */
       `)
       ).toBe(true)
@@ -100,7 +100,7 @@ describe('openapi => utils', () => {
       expect(
         isUIFormIgnore(`
         /**
-         * ui:form:ig
+         * +ui:form:ig
          */
       `)
       ).toBe(false)
@@ -109,7 +109,7 @@ describe('openapi => utils', () => {
 
   test('cleanMarkers', () => {
     expect(
-      cleanMarkers('DeviceName indicates the name of the device. ui:form:when=action="detach-volume" +optional')
+      cleanMarkers('DeviceName indicates the name of the device. +ui:form:when=action="detach-volume" +optional')
     ).toBe('Optional. DeviceName indicates the name of the device.')
   })
 })

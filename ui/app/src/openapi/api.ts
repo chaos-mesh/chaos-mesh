@@ -901,7 +901,7 @@ export interface V1alpha1AWSChaosSpec {
    */
   awsRegion?: string
   /**
-   * DeviceName indicates the name of the device. Needed in detach-volume. ui:form:when=action==\'detach-volume\' +optional
+   * DeviceName indicates the name of the device. Needed in detach-volume. +ui:form:when=action==\'detach-volume\' +optional
    * @type {string}
    * @memberof V1alpha1AWSChaosSpec
    */
@@ -919,7 +919,7 @@ export interface V1alpha1AWSChaosSpec {
    */
   ec2Instance?: string
   /**
-   * Endpoint indicates the endpoint of the aws server. Just used it in test now. ui:form:ignore +optional
+   * Endpoint indicates the endpoint of the aws server. Just used it in test now. +ui:form:ignore +optional
    * @type {string}
    * @memberof V1alpha1AWSChaosSpec
    */
@@ -931,7 +931,7 @@ export interface V1alpha1AWSChaosSpec {
    */
   secretName?: string
   /**
-   * EbsVolume indicates the ID of the EBS volume. Needed in detach-volume. ui:form:when=action==\'detach-volume\' +optional
+   * EbsVolume indicates the ID of the EBS volume. Needed in detach-volume. +ui:form:when=action==\'detach-volume\' +optional
    * @type {string}
    * @memberof V1alpha1AWSChaosSpec
    */
@@ -1474,7 +1474,7 @@ export interface V1alpha1GCPChaosSpec {
    */
   action?: string
   /**
-   * The device name of disks to detach. Needed in disk-loss. ui:form:when=action==\'disk-loss\' +optional
+   * The device name of disks to detach. Needed in disk-loss. +ui:form:when=action==\'disk-loss\' +optional
    * @type {Array<string>}
    * @memberof V1alpha1GCPChaosSpec
    */
@@ -1632,7 +1632,7 @@ export interface V1alpha1IOChaosSpec {
    */
   containerNames?: Array<string>
   /**
-   * Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". ui:form:when=action==\'latency\' +optional
+   * Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". +ui:form:when=action==\'latency\' +optional
    * @type {string}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -1644,7 +1644,7 @@ export interface V1alpha1IOChaosSpec {
    */
   duration?: string
   /**
-   * Errno defines the error code that returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html ui:form:when=action==\'fault\' +optional
+   * Errno defines the error code that returned by I/O action. refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html +ui:form:when=action==\'fault\' +optional
    * @type {number}
    * @memberof V1alpha1IOChaosSpec
    */

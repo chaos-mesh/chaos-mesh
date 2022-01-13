@@ -15,7 +15,7 @@
  *
  */
 
-const UI_FORM_ENUM = /ui:form:enum=(.+)\s/
+const UI_FORM_ENUM = /\+ui:form:enum=(.+)\s/
 const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s/
 
 /**
@@ -31,7 +31,7 @@ export function getUIFormEnum(s) {
   return matched ? matched[1].split(';') : []
 }
 
-const UI_FORM_WHEN = /ui:form:when=(.+)\s/
+const UI_FORM_WHEN = /\+ui:form:when=(.+)\s/
 
 /**
  * Get when expression from jsdoc comment. If not found, return false.
@@ -46,7 +46,7 @@ export function getUIFormWhen(s) {
   return matched ? matched[1].replace(/\\/g, '') : false
 }
 
-const UI_FORM_IGNORE = /ui:form:ignore\s/
+const UI_FORM_IGNORE = /\+ui:form:ignore\s/
 
 /**
  * Determine if jsdoc comment contains the ignored keyword.
@@ -67,6 +67,7 @@ export function isUIFormIgnore(s) {
  */
 export function cleanMarkers(s) {
   s = s.replace(UI_FORM_WHEN, '')
+  s = s.replace(UI_FORM_IGNORE, '')
 
   const reOptional = /\+optional/
   if (reOptional.test(s)) {
