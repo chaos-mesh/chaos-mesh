@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -45,13 +45,10 @@ var testEnv *envtest.Environment
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"webhook inject",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "webhook inject")
 }
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
@@ -91,13 +88,15 @@ var _ = BeforeSuite(func(done Done) {
 
 	k8sClient = k8sManager.GetClient()
 	Expect(k8sClient).ToNot(BeNil())
-
-	close(done)
-}, 60)
+})
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	gexec.KillAndWait(5 * time.Second)
 	err := testEnv.Stop()
 	Expect(err).ToNot(HaveOccurred())
+})
+
+var _ = ReportAfterSuite("print new line", func(_ Report) {
+	printer.NewlineReporter{}.SpecSuiteDidEnd(nil)
 })
