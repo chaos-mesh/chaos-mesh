@@ -105,34 +105,34 @@ type Stressors struct {
 
 // Normalize the stressors to comply with stress-ng
 func (in *Stressors) Normalize() (string, string, error) {
-	CPUStressors := ""
-	MemoryStressors := ""
+	cpuStressors := ""
+	memoryStressors := ""
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
-		MemoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
+		memoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
-			MemoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
+			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 		}
 
 		if in.MemoryStressor.Options != nil {
 			for _, v := range in.MemoryStressor.Options {
-				MemoryStressors += fmt.Sprintf(" %v ", v)
+				memoryStressors += fmt.Sprintf(" %v ", v)
 			}
 		}
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
-		CPUStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
+		cpuStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
-			CPUStressors += fmt.Sprintf(" --cpu-load %d",
+			cpuStressors += fmt.Sprintf(" --cpu-load %d",
 				*in.CPUStressor.Load)
 		}
 
 		if in.CPUStressor.Options != nil {
 			for _, v := range in.CPUStressor.Options {
-				CPUStressors += fmt.Sprintf(" %v ", v)
+				cpuStressors += fmt.Sprintf(" %v ", v)
 			}
 		}
 	}
-	return CPUStressors, MemoryStressors, nil
+	return cpuStressors, memoryStressors, nil
 }
 
 // Stressor defines common configurations of a stressor

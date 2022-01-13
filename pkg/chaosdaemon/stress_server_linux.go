@@ -45,7 +45,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("message", "cpu", cpuInstance, "mem", memoryInstance)
+
 	return &pb.ExecStressResponse{
 		CpuInstance:     cpuInstance,
 		CpuStartTime:    cpuStartTime,
@@ -183,7 +183,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
-		log.Info(strconv.Itoa(cmd.Process.Pid))
+
 		comm, err := ReadCommName(cmd.Process.Pid)
 
 		if err != nil {
