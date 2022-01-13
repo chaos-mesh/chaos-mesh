@@ -363,6 +363,7 @@
     "finished": "Finished",
     "paused": "Paused",
     "failed": "Failed",
+    "deleting": "Deleting",
     "unknown": "Unknown"
   },
   "confirm": {

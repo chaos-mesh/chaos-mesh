@@ -30,6 +30,9 @@ type ExperimentStore interface {
 	// FindByUID returns an experiment by UID.
 	FindByUID(ctx context.Context, UID string) (*Experiment, error)
 
+	// FindManagedByNamespaceName returns experiment list which are managed by schedule or workflow.
+	FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*Experiment, error)
+
 	// FindMetaByUID returns an experiment metadata by UID.
 	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
 

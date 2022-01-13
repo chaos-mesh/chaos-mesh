@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.16 AS build-env
+FROM golang:1.17 AS build-env
 ENV GO111MODULE on
-RUN go install github.com/go-delve/delve/cmd/dlv@v1.6.1
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.8.0
 
 FROM debian:buster
 

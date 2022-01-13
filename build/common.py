@@ -1,4 +1,4 @@
-# Copyright YEAR Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,3 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+"""
+varaibles used commonly in multiple scripts
+"""
+
+export_env_variables = [
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "GOPROXY",
+    "UI",
+    "LDFLAGS",
+    "CRATES_MIRROR",
+    "GO_BUILD_CACHE",
+]

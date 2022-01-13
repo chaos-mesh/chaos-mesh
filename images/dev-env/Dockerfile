@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.16.7 AS go_install
+FROM golang:1.17 AS go_install
 
 ENV GO111MODULE=on
 ENV GOPATH /go
@@ -29,8 +29,8 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \
-    apt-get install unzip git build-essential curl python -y && \
+RUN apt-get update && \ 
+    apt-get install unzip git build-essential curl python musl musl-dev python3 -y && \
     rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
@@ -54,6 +54,7 @@ RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
 
+COPY --from=apache/skywalking-eyes:0.2.0 /bin/license-eye /bin/license-eye
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
