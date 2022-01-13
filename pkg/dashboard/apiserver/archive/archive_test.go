@@ -69,7 +69,7 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 		}
 		res = append(res, expMeta)
 	} else {
-		err = errors.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -191,7 +191,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
 	default:
-		err = errors.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -214,7 +214,7 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
 	default:
-		err = errors.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -263,7 +263,7 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 		}
 		res = append(res, schMeta)
 	} else {
-		err = errors.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -291,7 +291,7 @@ func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Sc
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
 	default:
-		err = errors.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }

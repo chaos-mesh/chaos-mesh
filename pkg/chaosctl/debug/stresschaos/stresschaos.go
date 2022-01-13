@@ -35,7 +35,7 @@ import (
 func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
 	stressChaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
-		return errors.Errorf("chaos is not stresschaos")
+		return errors.New("chaos is not stresschaos")
 	}
 	chaosStatus := stressChaos.Status.ChaosStatus
 	chaosSelector := stressChaos.Spec.Selector
@@ -72,7 +72,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	result.Items = append(result.Items, cm.ItemResult{Name: "ps", Value: string(out)})
 	stressngLine := regexp.MustCompile("(.*)(stress-ng)").FindStringSubmatch(string(out))
 	if len(stressngLine) == 0 {
-		return errors.Errorf("could not find stress-ng, StressChaos failed")
+		return errors.New("could not find stress-ng, StressChaos failed")
 	}
 
 	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)

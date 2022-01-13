@@ -363,7 +363,7 @@ func (it *ChaosNodeReconciler) fetchChildrenChaosCustomResource(ctx context.Cont
 
 func (it ChaosNodeReconciler) createSchedule(ctx context.Context, node v1alpha1.WorkflowNode) error {
 	if node.Spec.Schedule == nil {
-		return errors.Errorf("invalid workfow node, the spec of schedule is nil")
+		return errors.New("invalid workfow node, the spec of schedule is nil")
 	}
 	scheduleToCreate := v1alpha1.Schedule{
 		TypeMeta: metav1.TypeMeta{},

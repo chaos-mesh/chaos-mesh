@@ -63,7 +63,7 @@ func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*ti
 		iterateTime++
 		if iterateTime > 100 {
 			// We can't get the most recent times so just return an empty slice
-			return nil, nil, errors.Errorf("too many missed start time (> 100). Set or decrease .spec.startingDeadlineSeconds or check clock skew")
+			return nil, nil, errors.New("too many missed start time (> 100). Set or decrease .spec.startingDeadlineSeconds or check clock skew")
 		}
 	}
 

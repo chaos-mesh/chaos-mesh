@@ -45,7 +45,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 	bytemanHome := os.Getenv("BYTEMAN_HOME")
 	if len(bytemanHome) == 0 {
-		return nil, errors.Errorf("environment variable BYTEMAN_HOME not set")
+		return nil, errors.New("environment variable BYTEMAN_HOME not set")
 	}
 
 	// copy agent.jar to container's namespace

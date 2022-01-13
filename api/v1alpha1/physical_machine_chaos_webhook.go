@@ -274,7 +274,7 @@ func validateNetworkPartitionAction(spec *NetworkPartitionSpec) error {
 	}
 
 	if len(spec.AcceptTCPFlags) > 0 && spec.IPProtocol != "tcp" {
-		return errors.Errorf("protocol should be 'tcp' when set accept-tcp-flags")
+		return errors.New("protocol should be 'tcp' when set accept-tcp-flags")
 	}
 
 	return nil

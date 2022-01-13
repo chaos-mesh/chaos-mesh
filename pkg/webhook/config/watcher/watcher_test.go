@@ -35,7 +35,7 @@ var _ = Describe("webhook config watcher", func() {
 			defer func() { restClusterConfig = old }()
 
 			restClusterConfig = func() (*rest.Config, error) {
-				return nil, errors.Errorf("InClusterConfig error")
+				return nil, errors.New("InClusterConfig error")
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
@@ -51,7 +51,7 @@ var _ = Describe("webhook config watcher", func() {
 			defer func() { kubernetesNewForConfig = old }()
 
 			kubernetesNewForConfig = func(c *rest.Config) (*kubernetes.Clientset, error) {
-				return nil, errors.Errorf("NewForConfig error")
+				return nil, errors.New("NewForConfig error")
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"

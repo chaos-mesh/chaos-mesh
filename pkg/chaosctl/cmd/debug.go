@@ -167,7 +167,7 @@ Examples:
 // Run debug
 func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet) error {
 	if len(args) > 1 {
-		return errors.Errorf("only one chaos could be specified")
+		return errors.New("only one chaos could be specified")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -198,7 +198,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 		case ioChaos:
 			err = iochaos.Debug(ctx, chaos, c, &chaosResult)
 		default:
-			return errors.Errorf("chaos type not supported")
+			return errors.New("chaos type not supported")
 		}
 		result = append(result, chaosResult)
 		if err != nil {

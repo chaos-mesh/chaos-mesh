@@ -73,7 +73,7 @@ func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter)
 		}
 		res = append(res, event)
 	} else {
-		err = errors.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -97,7 +97,7 @@ func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error)
 		if id == 1 {
 			err = gorm.ErrRecordNotFound
 		} else {
-			err = errors.Errorf("test err")
+			err = errors.New("test err")
 		}
 	}
 	return res, err

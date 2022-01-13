@@ -194,20 +194,20 @@ func getType(fset *token.FileSet, node ast.Node, comment *ast.Comment) (*ast.Typ
 	log.Info("build", "pos", fset.Position(comment.Pos()))
 	decl, ok := node.(*ast.GenDecl)
 	if !ok {
-		err := errors.Errorf("node is not a *ast.GenDecl")
+		err := errors.New("node is not a *ast.GenDecl")
 		log.Error(err, "fail to get type")
 		return nil, err
 	}
 
 	if decl.Tok != token.TYPE {
-		err := errors.Errorf("node.Tok is not token.TYPE")
+		err := errors.New("node.Tok is not token.TYPE")
 		log.Error(err, "fail to get type")
 		return nil, err
 	}
 
 	baseType, ok := decl.Specs[0].(*ast.TypeSpec)
 	if !ok {
-		err := errors.Errorf("node is not a *ast.TypeSpec")
+		err := errors.New("node is not a *ast.TypeSpec")
 		log.Error(err, "fail to get type")
 		return nil, err
 	}

@@ -41,7 +41,7 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 
 	// first non-flag arg is the command itself, use the second non-flag arg as the url.
 	if flag.NArg() > 1 {
-		return nil, errors.Errorf("can not find the url")
+		return nil, errors.New("can not find the url")
 	}
 	url := flagset.Arg(1)
 
@@ -74,7 +74,7 @@ func parseCommands(command Commands) (*CommandFlags, error) {
 
 func ParseWorkflowTaskTemplate(template *v1alpha1.Template) (*RequestForm, error) {
 	if !IsValidRenderedTask(template) {
-		return nil, errors.Errorf("invalid request, this task is not rendered by curl-render")
+		return nil, errors.New("invalid request, this task is not rendered by curl-render")
 	}
 	parsedFlags, err := parseCommands(template.Task.Container.Command)
 	if err != nil {

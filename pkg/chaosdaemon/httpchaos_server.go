@@ -47,10 +47,10 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	defer t.stdio.Unlock()
 
 	if t.stdio.Stdin == nil {
-		return nil, errors.Errorf("fail to get stdin of process")
+		return nil, errors.New("fail to get stdin of process")
 	}
 	if t.stdio.Stdout == nil {
-		return nil, errors.Errorf("fail to get stdout of process")
+		return nil, errors.New("fail to get stdout of process")
 	}
 
 	err = req.Write(t.stdio.Stdin)

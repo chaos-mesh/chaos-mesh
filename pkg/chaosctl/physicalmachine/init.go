@@ -89,14 +89,14 @@ Examples:
 
 func (o *PhysicalMachineInitOptions) Validate() error {
 	if len(o.remoteIP) == 0 {
-		return errors.Errorf("--ip must be specified")
+		return errors.New("--ip must be specified")
 	}
 	return nil
 }
 
 func (o *PhysicalMachineInitOptions) Run(args []string) error {
 	if len(args) < 1 {
-		return errors.Errorf("physical machine name is required")
+		return errors.New("physical machine name is required")
 	}
 	physicalMachineName := args[0]
 

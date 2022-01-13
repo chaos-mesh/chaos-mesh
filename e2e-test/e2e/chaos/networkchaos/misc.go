@@ -103,7 +103,7 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 	}
 
 	if parts[0] != "OK" {
-		return 0, errors.Errorf("the first part of response is not OK")
+		return 0, errors.New("the first part of response is not OK")
 	}
 
 	return strconv.ParseInt(parts[1], 10, 64)

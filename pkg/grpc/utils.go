@@ -157,7 +157,7 @@ func (it *GrpcBuilder) TLSFromFile(caCertPath string, certPath string, keyPath s
 
 func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
 	if it.credentialProvider == nil {
-		return nil, errors.Errorf("an authorization method must be specified")
+		return nil, errors.New("an authorization method must be specified")
 	}
 	option, err := it.credentialProvider.getCredentialOption()
 	if err != nil {

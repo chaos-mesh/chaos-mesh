@@ -197,7 +197,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 		return errors.Errorf("jvm action %s not supported", spec.Action)
 	}
 	if t == nil {
-		return errors.Errorf("parse byeman rule template failed")
+		return errors.New("parse byeman rule template failed")
 	}
 	err := t.Execute(buf, ruleParameter)
 	if err != nil {

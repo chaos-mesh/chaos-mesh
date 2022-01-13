@@ -169,7 +169,7 @@ func InitClientSet() (*ClientSet, error) {
 	}
 	ctrlClient, err := client.New(restconfig, client.Options{Scheme: scheme})
 	if err != nil {
-		return nil, errors.Errorf("failed to create client")
+		return nil, errors.New("failed to create client")
 	}
 	kubeClient, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {
@@ -229,7 +229,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	}
 	chaosList := chaosListInterface.GetItems()
 	if len(chaosList) == 0 {
-		return nil, nil, errors.Errorf("no chaos is found, please check your input")
+		return nil, nil, errors.New("no chaos is found, please check your input")
 	}
 
 	var retList []runtime.Object
@@ -245,7 +245,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 		}
 	}
 	if len(retList) == 0 {
-		return nil, nil, errors.Errorf("no chaos is found, please check your input")
+		return nil, nil, errors.New("no chaos is found, please check your input")
 	}
 
 	return retList, retNameList, nil
@@ -273,7 +273,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 	}
 	outLines := strings.Split(string(out), "\n")
 	if len(outLines) < 2 {
-		return nil, nil, errors.Errorf("ps returns empty")
+		return nil, nil, errors.New("ps returns empty")
 	}
 	titles := strings.Fields(outLines[0])
 	var pidColumn, cmdColumn int
@@ -286,7 +286,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 		}
 	}
 	if pidColumn == 0 && cmdColumn == 0 {
-		return nil, nil, errors.Errorf("parsing ps error: could not get PID and COMMAND column")
+		return nil, nil, errors.New("parsing ps error: could not get PID and COMMAND column")
 	}
 	var pids, commands []string
 	for _, line := range outLines[1:] {

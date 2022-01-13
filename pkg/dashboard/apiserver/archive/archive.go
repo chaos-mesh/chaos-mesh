@@ -238,7 +238,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	uids := c.Query("uids")
 	if uids == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.Errorf("uids cannot be empty")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("uids cannot be empty")))
 		return
 	}
 	uidSlice = strings.Split(uids, ",")
@@ -415,7 +415,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	uids := c.Query("uids")
 	if uids == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.Errorf("uids cannot be empty")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("uids cannot be empty")))
 		return
 	}
 	uidSlice = strings.Split(uids, ",")
@@ -580,7 +580,7 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 	uids := c.Query("uids")
 	if uids == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.Errorf("uids cannot be empty")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("uids cannot be empty")))
 		return
 	}
 	uidSlice = strings.Split(uids, ",")

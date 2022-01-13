@@ -294,7 +294,7 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	if len(podNamespaceList) == 0 {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("podNamespaceList is required")))
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
 		return
 	}
 
@@ -346,7 +346,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 
 	if len(podNamespaceList) == 0 {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("podNamespaceList is required")))
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
 		return
 	}
 
@@ -414,7 +414,7 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 		verbs = `"get", "list", "watch"`
 	} else {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(errors.Errorf("roleType is neither manager nor viewer")))
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(errors.New("roleType is neither manager nor viewer")))
 		return
 	}
 
@@ -495,7 +495,7 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("physicalMachineNamespaceList is required")))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("physicalMachineNamespaceList is required")))
 		return
 	}
 
@@ -545,7 +545,7 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.Errorf("physicalMachineNamespaceList is required")))
+		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("physicalMachineNamespaceList is required")))
 		return
 	}
 	selector := v1alpha1.PhysicalMachineSelectorSpec{}
