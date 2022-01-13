@@ -52,17 +52,17 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 	var pod v1.Pod
 	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
-		err = errors.Wrapf(ErrContainerNotFound, "container %s not found", record.Id)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
-		err = errors.Wrapf(ErrContainerNotFound, "container %s not found", record.Id)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	decoded.Pod = &pod
 	if len(pod.Status.ContainerStatuses) == 0 {
-		err = errors.Wrapf(ErrContainerNotFound, "container %s not found", record.Id)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		}
 	}
 	if len(decoded.ContainerId) == 0 {
-		err = errors.Wrapf(ErrContainerNotFound, "container %s not found", record.Id)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
