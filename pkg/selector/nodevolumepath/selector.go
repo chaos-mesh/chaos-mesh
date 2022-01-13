@@ -25,18 +25,24 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/container"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/pkg/errors"
 )
+
+var errNotSupported = errors.New("not supported")
 
 type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
+	containerSelector *container.SelectImpl
 	generic.Option
 }
 
 type NodeVolumePath struct {
+	*container.Container
+
 	nodeName string
 	// volumePath is a volumePath to the block device or directory on a node
 	volumePath string
@@ -47,28 +53,29 @@ func (n *NodeVolumePath) Id() string {
 	return n.nodeName + "/" + n.volumePath
 }
 
-func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.NodeVolumePathSelector) ([]*NodeVolumePath, error) {
-	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &selector.PodSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
+func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.ContainerNodeVolumePathSelector) ([]*NodeVolumePath, error) {
+	containers, err := impl.containerSelector.Select(ctx, &selector.ContainerSelector)
 	if err != nil {
 		return nil, err
 	}
 
 	var result []*NodeVolumePath
-	for _, pod := range pods {
-		for _, volume := range pod.Spec.Volumes {
+	for _, container := range containers {
+		for _, volume := range container.Spec.Volumes {
 			if volume.Name == selector.VolumeName {
 				// Find the path of the volume
 				// If the volume is a `HostPath`, the path is the `Path` field
 				// If the volume is a `PersistentVolumeClaim`, we can get the path from the related `PersistentVolume`
 				if volume.HostPath != nil {
 					result = append(result, &NodeVolumePath{
-						nodeName:   pod.Spec.NodeName,
+						Container:  container,
+						nodeName:   container.Spec.NodeName,
 						volumePath: volume.HostPath.Path,
 					})
 				} else if volume.PersistentVolumeClaim != nil {
 					var pvc v1.PersistentVolumeClaim
 					impl.c.Get(ctx, types.NamespacedName{
-						Namespace: pod.Namespace,
+						Namespace: container.Namespace,
 						Name:      volume.PersistentVolumeClaim.ClaimName,
 					}, &pvc)
 					if pvc.Status.Phase == v1.ClaimBound {
@@ -81,25 +88,24 @@ func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.NodeVolum
 						// TODO: Possibly support more PersistentVolume source.
 						if pv.Spec.HostPath != nil {
 							result = append(result, &NodeVolumePath{
-								nodeName:   pod.Spec.NodeName,
+								Container:  container,
+								nodeName:   container.Spec.NodeName,
 								volumePath: pv.Spec.HostPath.Path,
 							})
 						} else if pv.Spec.Local != nil {
 							result = append(result, &NodeVolumePath{
-								nodeName:   pod.Spec.NodeName,
+								Container:  container,
+								nodeName:   container.Spec.NodeName,
 								volumePath: pv.Spec.Local.Path,
 							})
 						} else {
-							// TODO: handle the case when the PV source is not supported
-							continue
+							return nil, errors.Wrap(errNotSupported, "unsupported PersistentVolume source")
 						}
 					} else {
-						// TODO: handle the case that pvc is not bound
-						continue
+						return nil, errors.Wrapf(errNotSupported, "PVC is not bounded yet: pvc phase: %s", pvc.Status.Phase)
 					}
 				} else {
-					// TODO: handle the case (at least reutrn an error) that the volume source is not supported
-					continue
+					return nil, errors.Wrapf(errNotSupported, "volume source is not supported")
 				}
 			}
 		}
@@ -111,14 +117,16 @@ func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.NodeVolum
 type Params struct {
 	fx.In
 
-	Client client.Client
-	Reader client.Reader `name:"no-cache"`
+	ContainerSelector *container.SelectImpl
+	Client            client.Client
+	Reader            client.Reader `name:"no-cache"`
 }
 
 func New(params Params) *SelectImpl {
 	return &SelectImpl{
 		params.Client,
 		params.Reader,
+		params.ContainerSelector,
 		generic.Option{
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,

@@ -46,11 +46,14 @@ type BlockChaosSpec struct {
 	Action BlockChaosAction `json:"action"`
 
 	// IOPS defines the limit of IO frequency.
-	IOPS int `json:"iopsn,omitempty"`
+	// +optional
+	IOPS int `json:"iops,omitempty"`
 
-	BlockDelaySpec `json:"delay,inline"`
+	// Delay defines the delay distribution.
+	// +optional
+	Delay *BlockDelaySpec `json:"delay,omitempty"`
 
-	NodeVolumePathSelector `json:",inline"`
+	ContainerNodeVolumePathSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action.
 	// +optional
@@ -59,8 +62,8 @@ type BlockChaosSpec struct {
 
 // BlockDelaySpec describes the block delay specification
 type BlockDelaySpec struct {
-	// Delay defines the latency of every io request.
-	Delay string `json:"delay,omitempty" webhook:"Duration"`
+	// Latency defines the latency of every io request.
+	Latency string `json:"delay,omitempty" webhook:"Duration"`
 
 	// +optional
 	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
@@ -69,9 +72,9 @@ type BlockDelaySpec struct {
 	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
 }
 
-// NodeVolumePathSelector is the selector to select a node and a PV on it
-type NodeVolumePathSelector struct {
-	PodSelector `json:",inline"`
+// ContainerNodeVolumePathSelector is the selector to select a node and a PV on it
+type ContainerNodeVolumePathSelector struct {
+	ContainerSelector `json:",inline"`
 
 	VolumeName string `json:"volumeName"`
 }
@@ -87,7 +90,7 @@ type BlockChaosStatus struct {
 
 func (obj *BlockChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": &obj.Spec.NodeVolumePathSelector,
+		".": &obj.Spec.ContainerNodeVolumePathSelector,
 	}
 }
 
