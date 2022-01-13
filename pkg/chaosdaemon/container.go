@@ -17,9 +17,9 @@ package chaosdaemon
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -30,7 +30,7 @@ func (s *DaemonServer) ContainerKill(ctx context.Context, req *pb.ContainerReque
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_KILL {
-		err := fmt.Errorf("container action is %s , not kill", action)
+		err := errors.Errorf("container action is %s , not kill", action)
 		log.Error(err, "container action is not expected")
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (s *DaemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerReq
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_GETPID {
-		err := fmt.Errorf("container action is %s , not getpid", action)
+		err := errors.Errorf("container action is %s , not getpid", action)
 		log.Error(err, "container action is not expected")
 		return nil, err
 	}

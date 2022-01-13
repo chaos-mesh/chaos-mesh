@@ -21,6 +21,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
@@ -50,20 +52,17 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 	var pod v1.Pod
 	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	decoded.Pod = &pod
 	if len(pod.Status.ContainerStatuses) == 0 {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
@@ -74,8 +73,7 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		}
 	}
 	if len(decoded.ContainerId) == 0 {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 

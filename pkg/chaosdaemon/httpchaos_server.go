@@ -26,6 +26,7 @@ import (
 	"os"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -46,10 +47,10 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 	defer t.stdio.Unlock()
 
 	if t.stdio.Stdin == nil {
-		return nil, fmt.Errorf("fail to get stdin of process")
+		return nil, errors.New("fail to get stdin of process")
 	}
 	if t.stdio.Stdout == nil {
-		return nil, fmt.Errorf("fail to get stdout of process")
+		return nil, errors.New("fail to get stdout of process")
 	}
 
 	err = req.Write(t.stdio.Stdin)
@@ -80,7 +81,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
 	if stdio == nil {
-		return nil, fmt.Errorf("fail to get stdio of instance(%d)", in.Instance)
+		return nil, errors.Errorf("fail to get stdio of instance(%d)", in.Instance)
 	}
 
 	transport := stdioTransport{stdio: stdio}

@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -38,7 +39,7 @@ func (in *Workflow) ValidateCreate() error {
 	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), in.Spec.Entry, in.Spec.Templates)...)
 	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), in.Spec.Templates)...)
 	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
+		return errors.New(allErrs.ToAggregate().Error())
 	}
 	return nil
 }

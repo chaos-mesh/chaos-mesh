@@ -23,6 +23,7 @@ import (
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
@@ -112,7 +113,7 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 	}
 
 	if !response.Result {
-		return fmt.Errorf("set dns chaos to dns server error %s", response.Msg)
+		return errors.Errorf("set dns chaos to dns server error: %s", response.Msg)
 	}
 
 	return nil
@@ -124,7 +125,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		defer decodedContainer.PbClient.Close()
 	}
 	if err != nil {
-		if utils.IsFailToGet(err) {
+		if errors.Is(err, utils.ErrContainerNotFound) {
 			// pretend the disappeared container has been recovered
 			return v1alpha1.NotInjected, nil
 		}
@@ -180,7 +181,7 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	}
 
 	if !response.Result {
-		return fmt.Errorf("set dns chaos to dns server error %s", response.Msg)
+		return errors.Errorf("set dns chaos to dns server error %s", response.Msg)
 	}
 
 	return nil

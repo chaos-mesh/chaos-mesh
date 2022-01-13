@@ -16,10 +16,11 @@
 package clientpool
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/runtime"

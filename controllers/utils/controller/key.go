@@ -16,8 +16,9 @@
 package controller
 
 import (
-	"errors"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/types"
 )

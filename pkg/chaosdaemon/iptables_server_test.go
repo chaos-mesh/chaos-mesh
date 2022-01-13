@@ -17,10 +17,11 @@ package chaosdaemon
 
 import (
 	"context"
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/pkg/errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
