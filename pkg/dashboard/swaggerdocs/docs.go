@@ -2596,6 +2596,9 @@ var doc = `{
         "status.AllChaosStatus": {
             "type": "object",
             "properties": {
+                "deleting": {
+                    "type": "integer"
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -2960,7 +2963,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3233,7 +3236,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.AttrOverrideSpec"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3302,7 +3305,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4065,7 +4068,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4433,7 +4436,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4623,7 +4626,7 @@ var doc = `{
                     }
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"

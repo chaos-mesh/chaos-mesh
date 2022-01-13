@@ -89,7 +89,7 @@ const dnsCommon: Spec = {
     label: 'Affected container names',
     value: [],
     helperText:
-      "Optional. Type string and end with a TAB to generate the container names. If it's empty, all containers will be injected",
+      "Optional. Type string and end with a TAB to generate the container names. If it's empty, the first container will be injected",
   },
 }
 
@@ -796,7 +796,7 @@ const data: Record<Kind, Definition> = {
         label: 'Affected container names',
         value: [],
         helperText:
-          "Optional. Type string and end with a TAB to generate the container names. If it's empty, all containers will be injected",
+          "Optional. Type string and end with a TAB to generate the container names. If it's empty, the first container will be injected",
       },
     },
   },

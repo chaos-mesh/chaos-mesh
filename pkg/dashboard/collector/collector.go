@@ -43,18 +43,10 @@ type ChaosCollector struct {
 
 // Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	var (
-		chaosMeta  metav1.Object
-		ok         bool
-		manageFlag bool
-	)
-
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
 		return ctrl.Result{}, nil
 	}
-
-	manageFlag = false
 
 	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
 	if !ok {
@@ -64,47 +56,21 @@ func (r *ChaosCollector) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	err := r.Get(ctx, req.NamespacedName, obj)
 	if apierrors.IsNotFound(err) {
-		if chaosMeta, ok = obj.(metav1.Object); !ok {
-			r.Log.Error(nil, "failed to get chaos meta information")
+		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
+			r.Log.Error(err, "failed to archive experiment")
 		}
-		if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
-			manageFlag = true
+
+		// If the experiment was created by schedule or workflow,
+		// it and its events will be deleted from database.
+		if err = r.deleteManagedExperiments(req.Namespace, req.Name); err != nil {
+			r.Log.Error(err, "delete managed experiments", "namespace", req.Namespace, "name", req.Name)
 		}
-		if !manageFlag {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
-		}
+
 		return ctrl.Result{}, nil
 	}
 
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
-		return ctrl.Result{}, nil
-	}
-
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		r.Log.Error(nil, "failed to get chaos meta information")
-	}
-
-	if chaosMeta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
-		manageFlag = true
-	}
-
-	if obj.IsDeleted() {
-		if !manageFlag {
-			if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
-				r.Log.Error(err, "failed to archive experiment")
-			}
-		} else {
-			if err = r.event.DeleteByUID(ctx, string(chaosMeta.GetUID())); err != nil {
-				r.Log.Error(err, "failed to delete experiment related events")
-			}
-		}
 		return ctrl.Result{}, nil
 	}
 
@@ -126,20 +92,75 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType client.Object) error {
 }
 
 func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
-	var (
-		chaosMeta metav1.Object
-		ok        bool
-	)
+	archive, err := convertInnerObjectToExperiment(obj)
+	if err != nil {
+		r.Log.Error(err, "failed to covert InnerObject")
+		return err
+	}
 
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		r.Log.Error(nil, "failed to get chaos meta information")
+	find, err := r.archive.FindByUID(context.Background(), archive.UID)
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+		r.Log.Error(err, "failed to find experiment", "UID", archive.UID)
+		return err
+	}
+
+	if find != nil {
+		archive.ID = find.ID
+		archive.CreatedAt = find.CreatedAt
+		archive.UpdatedAt = find.UpdatedAt
+	}
+
+	if err := r.archive.Set(context.Background(), archive); err != nil {
+		r.Log.Error(err, "failed to update experiment", "archive", archive)
+		return err
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) archiveExperiment(ns, name string) error {
+	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
+		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
+		return err
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) deleteManagedExperiments(ns, name string) error {
+	archives, err := r.archive.FindManagedByNamespaceName(context.Background(), ns, name)
+	if gorm.IsRecordNotFoundError(err) {
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+
+	for _, expr := range archives {
+		if err = r.event.DeleteByUID(context.Background(), expr.UID); err != nil {
+			r.Log.Error(err, "failed to delete experiment related events")
+		}
+
+		if err = r.archive.Delete(context.Background(), expr); err != nil {
+			r.Log.Error(err, "failed to delete managed experiment")
+		}
+	}
+
+	return nil
+}
+
+func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment, error) {
+	chaosMeta, ok := obj.(metav1.Object)
+	if !ok {
+		return nil, errors.New("chaos meta information not found")
 	}
 	UID := string(chaosMeta.GetUID())
 
 	archive := &core.Experiment{
 		ExperimentMeta: core.ExperimentMeta{
-			Namespace: req.Namespace,
-			Name:      req.Name,
+			Namespace: chaosMeta.GetNamespace(),
+			Name:      chaosMeta.GetName(),
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
 			UID:       UID,
 			Archived:  false,
@@ -166,7 +187,7 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	case *v1alpha1.JVMChaos:
 		archive.Action = string(chaos.Spec.Action)
 	default:
-		return errors.New("unsupported chaos type " + archive.Kind)
+		return nil, errors.New("unsupported chaos type " + archive.Kind)
 	}
 
 	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
@@ -176,38 +197,10 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 
 	data, err := json.Marshal(chaosMeta)
 	if err != nil {
-		r.Log.Error(err, "failed to marshal chaos", "kind", archive.Kind,
-			"namespace", archive.Namespace, "name", archive.Name)
-		return err
+		return nil, err
 	}
 
 	archive.Experiment = string(data)
 
-	find, err := r.archive.FindByUID(context.Background(), UID)
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
-		r.Log.Error(err, "failed to find experiment", "UID", UID)
-		return err
-	}
-
-	if find != nil {
-		archive.ID = find.ID
-		archive.CreatedAt = find.CreatedAt
-		archive.UpdatedAt = find.UpdatedAt
-	}
-
-	if err := r.archive.Set(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to update experiment", "archive", archive)
-		return err
-	}
-
-	return nil
-}
-
-func (r *ChaosCollector) archiveExperiment(ns, name string) error {
-	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
-		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
-		return err
-	}
-
-	return nil
+	return archive, nil
 }
