@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = [],
+export const actions = ['pod-kill', 'pod-failure', 'container-kill'],
   data = [
     {
       field: 'label',

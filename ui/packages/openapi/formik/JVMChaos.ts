@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = [],
+export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleData'],
   data = [
     {
       field: 'text',

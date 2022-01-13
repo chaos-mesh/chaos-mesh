@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = [],
+export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'partition', 'bandwidth'],
   data = [
     {
       field: 'ref',

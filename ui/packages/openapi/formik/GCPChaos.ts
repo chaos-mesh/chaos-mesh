@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = [],
+export const actions = ['node-stop', 'node-reset', 'disk-loss'],
   data = [
     {
       field: 'label',

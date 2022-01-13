@@ -16,7 +16,7 @@
  */
 
 const UI_FORM_ENUM = /\+ui:form:enum=(.+)\s/
-const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s/
+const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s?/
 
 /**
  * Get enum array from jsdoc comment.
@@ -60,14 +60,13 @@ export function isUIFormIgnore(s) {
 }
 
 /**
- * Remove markers(ui:form..., +kubebuilder+..., +optional..., etc.) from jsdoc comment.
+ * Remove markers(+ui:form..., +kubebuilder+..., +optional..., etc.) from jsdoc comment.
  *
  * @export
  * @param {string} s
  */
 export function cleanMarkers(s) {
   s = s.replace(UI_FORM_WHEN, '')
-  s = s.replace(UI_FORM_IGNORE, '')
 
   const reOptional = /\+optional/
   if (reOptional.test(s)) {

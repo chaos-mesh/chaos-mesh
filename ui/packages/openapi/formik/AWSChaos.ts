@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export const actions = [],
+export const actions = ['ec2-stop', 'ec2-restart', 'detach-volume'],
   data = [
     {
       field: 'text',
