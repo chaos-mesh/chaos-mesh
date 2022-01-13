@@ -861,7 +861,7 @@ gen_chaos_mesh_manifests() {
     K8S_NAMESPACE="chaos-testing"
     VERSION_TAG="${version}"
 
-    DOCKER_REGISTRY_PREFIX="${docker_registry}"
+    IMAGE_REGISTRY_PREFIX="${docker_registry}"
     tmpdir=$(mktemp -d)
 
     ensure openssl genrsa -out ${tmpdir}/ca.key 2048 > /dev/null 2>&1
@@ -1297,7 +1297,7 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-daemon
-          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
+          image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1387,7 +1387,7 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-dashboard
-          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
+          image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1491,7 +1491,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
+        image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}

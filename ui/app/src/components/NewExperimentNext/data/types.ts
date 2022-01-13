@@ -80,7 +80,7 @@ const dnsCommon: Spec = {
     label: 'Affected container names',
     value: [],
     helperText:
-      "Optional. Type string and end with a TAB to generate the container names. If it's empty, all containers will be injected",
+      "Optional. Type string and end with a TAB to generate the container names. If it's empty, the first container will be injected",
   },
 }
 
@@ -761,7 +761,7 @@ const data: Record<Kind, Definition> = {
         label: 'Affected container names',
         value: [],
         helperText:
-          "Optional. Type string and end with a TAB to generate the container names. If it's empty, all containers will be injected",
+          "Optional. Type string and end with a TAB to generate the container names. If it's empty, the first container will be injected",
       },
     },
   },
@@ -1217,7 +1217,7 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         key: 'network-dns',
         spec: {
           action: 'network-dns' as any,
-          'dns-hostname': {
+          'dns-domain-name': {
             field: 'text',
             label: 'Hostname',
             value: '',

@@ -1,16 +1,14 @@
 {
   "ignorePatterns": [
     {
-      "pattern": ["^/img/"]
+      "pattern": "^http://localhost"
     },
     {
-      "pattern": ["^http://localhost"]
+      "pattern": "^https://github.com"
     },
     {
-      "pattern": ["^https://github.com"]
-    },
-    {
-      "pattern": ["url"]
+      "pattern": "url"
     }
-  ]
+  ],
+  "aliveStatusCodes": [200, 403, 500, 502, 503]
 }
