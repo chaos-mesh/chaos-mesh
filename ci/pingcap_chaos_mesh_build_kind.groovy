@@ -166,9 +166,6 @@ def build(String name, String code) {
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-e2e-helper
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-chaos-mesh-e2e
-								
-								tar czf chaos-mesh-cache-master.tar.gz ./cache
-              					curl -F builds/pingcap/chaos-mesh/cache-master.tar.gz=@chaos-mesh-cache-master.tar.gz http://fileserver.pingcap.net/upload > /dev/null
 								"""
 							}
 						}
