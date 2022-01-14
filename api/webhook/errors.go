@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//go:build tools
 
-package tools
+package webhook
 
 import (
-	_ "github.com/mgechev/revive"
-	_ "github.com/pingcap/failpoint/failpoint-ctl"
-	_ "github.com/swaggo/swag/cmd/swag"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
+	"github.com/pkg/errors"
+)
+
+var (
+	errInvalidValue error = errors.New("invalid value")
 )

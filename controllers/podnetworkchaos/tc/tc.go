@@ -23,6 +23,9 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -38,7 +41,9 @@ func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, 
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
+
+		return err
 	}
 
 	log.Info("Settings Tcs...")
@@ -61,5 +66,5 @@ func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, 
 		}
 	}
 
-	return fmt.Errorf("unable to set tcs for pod %s", pod.Name)
+	return errors.Errorf("unable to set tcs for pod %s", pod.Name)
 }

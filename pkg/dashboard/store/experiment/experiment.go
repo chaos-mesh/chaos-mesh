@@ -20,8 +20,10 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
@@ -81,15 +83,42 @@ func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.Ex
 	return experiment, nil
 }
 
+// FindManagedByNamespaceName implements the core.ExperimentStore.FindManagedByNamespaceName method.
+func (e *experimentStore) FindManagedByNamespaceName(_ context.Context, namespace, name string) ([]*core.Experiment, error) {
+	experiments := make([]*core.Experiment, 0)
+	if err := e.db.Model(core.Experiment{}).
+		Find(&experiments, "namespace = ? AND name = ? AND archived = ?", namespace, name, true).Error; err != nil {
+		return nil, err
+	}
+
+	managedExperiments := make([]*core.Experiment, 0)
+	for _, expr := range experiments {
+		meta := &unstructured.Unstructured{}
+		if err := meta.UnmarshalJSON([]byte(expr.Experiment)); err != nil {
+			return nil, err
+		}
+
+		if meta.GetLabels()[v1alpha1.LabelManagedBy] != "" {
+			managedExperiments = append(managedExperiments, expr)
+		}
+	}
+
+	if len(managedExperiments) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return managedExperiments, nil
+}
+
 // Set implements the core.ExperimentStore.Set method.
 func (e *experimentStore) Set(_ context.Context, experiment *core.Experiment) error {
 	return e.db.Model(core.Experiment{}).Save(experiment).Error
 }
 
 // Archive implements the core.ExperimentStore.Archive method.
-func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
+func (e *experimentStore) Archive(_ context.Context, namespace, name string) error {
 	if err := e.db.Model(core.Experiment{}).
-		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
+		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
 		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
 	}

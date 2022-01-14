@@ -16,8 +16,9 @@
 package crclients
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

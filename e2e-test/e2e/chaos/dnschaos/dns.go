@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
@@ -178,7 +180,7 @@ func testDNSServer(c http.Client, port uint16, url string) (string, error) {
 	result := string(out)
 	klog.Infof("testDNSServer result: %s", result)
 	if strings.Contains(result, "failed") {
-		return "", fmt.Errorf("test DNS server failed")
+		return "", errors.New("test DNS server failed")
 	}
 
 	return result, nil
