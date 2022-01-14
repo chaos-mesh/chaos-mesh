@@ -18,13 +18,13 @@ package crio
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"syscall"
 	"time"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
 )
@@ -46,10 +46,10 @@ type CrioClient struct {
 // FormatContainerID strips protocol prefix from the container ID
 func (c CrioClient) FormatContainerID(ctx context.Context, containerID string) (string, error) {
 	if len(containerID) < len(crioProtocolPrefix) {
-		return "", fmt.Errorf("container id %s is not a crio container id", containerID)
+		return "", errors.Errorf("container id %s is not a crio container id", containerID)
 	}
 	if containerID[0:len(crioProtocolPrefix)] != crioProtocolPrefix {
-		return "", fmt.Errorf("expected %s but got %s", crioProtocolPrefix, containerID[0:len(crioProtocolPrefix)])
+		return "", errors.Errorf("expected %s but got %s", crioProtocolPrefix, containerID[0:len(crioProtocolPrefix)])
 	}
 	return containerID[len(crioProtocolPrefix):], nil
 }
@@ -160,7 +160,7 @@ func New(socketPath string) (*CrioClient, error) {
 
 func configureUnixTransport(tr *http.Transport, proto, addr string) error {
 	if len(addr) > maxUnixSocketPathSize {
-		return fmt.Errorf("unix socket path %q is too long", addr)
+		return errors.Errorf("unix socket path %q is too long", addr)
 	}
 	// No need for compression in local communications.
 	tr.DisableCompression = true

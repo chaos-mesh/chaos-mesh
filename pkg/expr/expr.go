@@ -27,7 +27,7 @@ func EvalBool(expression string, env map[string]interface{}) (bool, error) {
 	}
 	result, ok := eval.(bool)
 	if !ok {
-		return false, errors.Errorf("expression result is not boolean")
+		return false, errors.New("expression result is not boolean")
 	}
 	return result, nil
 }

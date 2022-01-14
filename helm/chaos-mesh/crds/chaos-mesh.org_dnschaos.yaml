@@ -52,7 +52,7 @@ spec:
                 type: string
               containerNames:
                 description: ContainerNames indicates list of the name of affected
-                  container. If not set, all containers will be injected
+                  container. If not set, the first container will be injected
                 items:
                   type: string
                 type: array

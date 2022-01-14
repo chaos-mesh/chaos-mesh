@@ -16,12 +16,13 @@
 package iochaos
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // get pod io delay

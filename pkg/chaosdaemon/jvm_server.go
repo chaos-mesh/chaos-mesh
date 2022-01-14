@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -44,7 +45,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 	bytemanHome := os.Getenv("BYTEMAN_HOME")
 	if len(bytemanHome) == 0 {
-		return nil, fmt.Errorf("environment variable BYTEMAN_HOME not set")
+		return nil, errors.New("environment variable BYTEMAN_HOME not set")
 	}
 
 	// copy agent.jar to container's namespace
@@ -90,8 +91,12 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		// TODO: Investigate the cause of these two error
 		errMsg2 := "Provider sun.tools.attach.LinuxAttachProvider not found"
 		errMsg3 := "install java.io.IOException: Non-numeric value found"
+
+		// this error is caused by the different attach result codes in different java versions. In fact, the agent has attached success, just ignore it here.
+		// refer to https://stackoverflow.com/questions/54340438/virtualmachine-attach-throws-com-sun-tools-attach-agentloadexception-0-when-usi/54454418#54454418
+		errMsg4 := "install com.sun.tools.attach.AgentLoadException"
 		if !strings.Contains(string(output), errMsg1) && !strings.Contains(string(output), errMsg2) &&
-			!strings.Contains(string(output), errMsg3) {
+			!strings.Contains(string(output), errMsg3) && !strings.Contains(string(output), errMsg4) {
 			log.Error(err, string(output))
 			return nil, err
 		}

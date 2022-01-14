@@ -28,6 +28,7 @@ import (
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -68,7 +69,7 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 		}
 		res = append(res, expMeta)
 	} else {
-		err = fmt.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -190,7 +191,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
 	default:
-		err = fmt.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -213,9 +214,13 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
 	default:
-		err = fmt.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
+}
+
+func (m *MockExperimentStore) FindManagedByNamespaceName(ctx context.Context, namespace, name string) ([]*core.Experiment, error) {
+	panic("implement me")
 }
 
 func (m *MockExperimentStore) Set(context.Context, *core.Experiment) error {
@@ -258,7 +263,7 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 		}
 		res = append(res, schMeta)
 	} else {
-		err = fmt.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
@@ -286,7 +291,7 @@ func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Sc
 	case "testErrRecordNotFound":
 		err = gorm.ErrRecordNotFound
 	default:
-		err = fmt.Errorf("test err")
+		err = errors.New("test err")
 	}
 	return res, err
 }
