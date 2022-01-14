@@ -271,7 +271,7 @@ spec:
                     description: Instance defines the name of the instance
                     type: string
                   project:
-                    description: Project defines the name of gcp project.
+                    description: Project defines the ID of gcp project.
                     type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
@@ -2428,7 +2428,7 @@ spec:
                         description: Instance defines the name of the instance
                         type: string
                       project:
-                        description: Project defines the name of gcp project.
+                        description: Project defines the ID of gcp project.
                         type: string
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
@@ -5020,7 +5020,7 @@ spec:
                                   description: Instance defines the name of the instance
                                   type: string
                                 project:
-                                  description: Project defines the name of gcp project.
+                                  description: Project defines the ID of gcp project.
                                   type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
@@ -7403,8 +7403,7 @@ spec:
                                         instance
                                       type: string
                                     project:
-                                      description: Project defines the name of gcp
-                                        project.
+                                      description: Project defines the ID of gcp project.
                                       type: string
                                     secretName:
                                       description: SecretName defines the name of

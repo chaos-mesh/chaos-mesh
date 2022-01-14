@@ -95,7 +95,7 @@ const gcpCommon: Spec = {
     field: 'text',
     label: 'Project',
     value: '',
-    helperText: 'The name of a GCP project',
+    helperText: 'The ID of a GCP project',
   },
   zone: {
     field: 'text',
