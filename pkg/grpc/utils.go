@@ -19,12 +19,12 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -157,7 +157,7 @@ func (it *GrpcBuilder) TLSFromFile(caCertPath string, certPath string, keyPath s
 
 func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
 	if it.credentialProvider == nil {
-		return nil, fmt.Errorf("an authorization method must be specified")
+		return nil, errors.New("an authorization method must be specified")
 	}
 	option, err := it.credentialProvider.getCredentialOption()
 	if err != nil {

@@ -17,7 +17,6 @@ package podnetworkchaos
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -184,7 +183,7 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 		} else if chain.Direction == v1alpha1.Output {
 			direction = pb.Chain_OUTPUT
 		} else {
-			err := fmt.Errorf("unknown direction %s", string(chain.Direction))
+			err := errors.Errorf("unknown direction %s", string(chain.Direction))
 			r.Log.Error(err, "unknown direction")
 			return err
 		}
@@ -226,7 +225,7 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				Device: tc.Device,
 			})
 		} else {
-			return fmt.Errorf("unknown tc type")
+			return errors.New("unknown tc type")
 		}
 	}
 

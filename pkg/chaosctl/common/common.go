@@ -36,6 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -168,7 +169,7 @@ func InitClientSet() (*ClientSet, error) {
 	}
 	ctrlClient, err := client.New(restconfig, client.Options{Scheme: scheme})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client")
+		return nil, errors.New("failed to create client")
 	}
 	kubeClient, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {
@@ -191,7 +192,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 	}
 	L().WithName("GetPods").V(4).Info("select pods for chaos", "chaos", chaosName, "pods", pods)
 	if len(pods) == 0 {
-		return nil, nil, fmt.Errorf("no pods found for chaos %s, selector: %s", chaosName, selectorSpec)
+		return nil, nil, errors.Errorf("no pods found for chaos %s, selector: %s", chaosName, selectorSpec)
 	}
 
 	var chaosDaemons []v1.Pod
@@ -209,7 +210,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", chaosPod.GetName()))
 		}
 		if len(daemons) == 0 {
-			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", chaosPod.GetName(), daemonSelector)
+			return nil, nil, errors.Errorf("no daemons found for pod %s with selector: %s", chaosPod.GetName(), daemonSelector)
 		}
 		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
@@ -228,7 +229,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	}
 	chaosList := chaosListInterface.GetItems()
 	if len(chaosList) == 0 {
-		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
+		return nil, nil, errors.New("no chaos is found, please check your input")
 	}
 
 	var retList []runtime.Object
@@ -244,7 +245,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 		}
 	}
 	if len(retList) == 0 {
-		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
+		return nil, nil, errors.New("no chaos is found, please check your input")
 	}
 
 	return retList, retNameList, nil
@@ -272,7 +273,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 	}
 	outLines := strings.Split(string(out), "\n")
 	if len(outLines) < 2 {
-		return nil, nil, fmt.Errorf("ps returns empty")
+		return nil, nil, errors.New("ps returns empty")
 	}
 	titles := strings.Fields(outLines[0])
 	var pidColumn, cmdColumn int
@@ -285,7 +286,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 		}
 	}
 	if pidColumn == 0 && cmdColumn == 0 {
-		return nil, nil, fmt.Errorf("parsing ps error: could not get PID and COMMAND column")
+		return nil, nil, errors.New("parsing ps error: could not get PID and COMMAND column")
 	}
 	var pids, commands []string
 	for _, line := range outLines[1:] {
@@ -319,7 +320,8 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 	defer daemonClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return 0, fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
+		return 0, err
 	}
 
 	res, err := daemonClient.ContainerGetPid(ctx, &pb.ContainerRequest{

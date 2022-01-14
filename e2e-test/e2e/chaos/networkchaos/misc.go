@@ -29,6 +29,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
@@ -72,7 +74,7 @@ func sendUDPPacket(c http.Client, port uint16, targetIP string) error {
 
 	result := string(out)
 	if result != "send successfully\n" {
-		return fmt.Errorf("doesn't send successfully: %s", result)
+		return errors.Errorf("doesn't send successfully: %s", result)
 	}
 
 	klog.Info("send request successfully")
@@ -97,11 +99,11 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 	result := string(out)
 	parts := strings.Split(result, " ")
 	if len(parts) != 2 {
-		return 0, fmt.Errorf("the length of parts is not 2 %v", parts)
+		return 0, errors.Errorf("the length of parts is not 2 %v", parts)
 	}
 
 	if parts[0] != "OK" {
-		return 0, fmt.Errorf("the first part of response is not OK")
+		return 0, errors.New("the first part of response is not OK")
 	}
 
 	return strconv.ParseInt(parts[1], 10, 64)
