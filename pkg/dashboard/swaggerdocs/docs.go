@@ -2960,7 +2960,7 @@ var doc = `{
                     "type": "string"
                 },
                 "project": {
-                    "description": "Project defines the name of gcp project.",
+                    "description": "Project defines the ID of gcp project.",
                     "type": "string"
                 },
                 "secretName": {
