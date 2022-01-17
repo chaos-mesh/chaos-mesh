@@ -70,7 +70,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							ExpInfo: ExpInfo{},
 						},
 					},
-					"the configuration corresponding to action is empty",
+					"the configuration corresponding to action is required",
 				},
 			}
 

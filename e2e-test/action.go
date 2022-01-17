@@ -31,6 +31,8 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	e2eutil "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 )
@@ -68,7 +70,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	klog.Infof(cmd)
 	output, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
+		return errors.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
 	}
 	klog.Infof("deploying chaos-mesh:%v", info.ReleaseName)
 	cmd = fmt.Sprintf(`helm install %s %s --namespace %s --set %s --skip-crds`,
@@ -79,7 +81,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	klog.Info(cmd)
 	res, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to deploy operator: %v, %s", err, string(res))
+		return errors.Errorf("failed to deploy operator: %v, %s", err, string(res))
 	}
 	klog.Infof("start to waiting chaos-mesh ready")
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {

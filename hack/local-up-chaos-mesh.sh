@@ -39,7 +39,7 @@ Environments:
     KUBECONFIG            path to the kubeconfig file, defaults: ~/.kube/config
     KUBECONTEXT           context in kubeconfig file, defaults to current context
     NAMESPACE             Kubernetes namespace in which we run our chaos-mesh.
-    DOCKER_REGISTRY       image docker registry
+    IMAGE_REGISTRY        image docker registry
     IMAGE_TAG             image tag
     SKIP_IMAGE_BUILD      skip build and push images
 
@@ -64,7 +64,7 @@ PROVIDER=${PROVIDER:-kind}
 CLUSTER=${CLUSTER:-}
 KUBECONFIG=${KUBECONFIG:-~/.kube/config}
 KUBECONTEXT=${KUBECONTEXT:-}
-DOCKER_REGISTRY_PREFIX=${DOCKER_REGISTRY_PREFIX:-localhost:5000}
+IMAGE_REGISTRY_PREFIX=${IMAGE_REGISTRY_PREFIX:-localhost:5000}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 SKIP_IMAGE_BUILD=${SKIP_IMAGE_BUILD:-}
 NAMESPACE=${NAMESPACE:-chaos-testing}
@@ -107,16 +107,16 @@ fi
 
 if [ -z "$SKIP_IMAGE_BUILD" ]; then
     echo "info: building docker images"
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX IMAGE_PROJECT=chaos-mesh IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
+    IMAGE_REGISTRY_PREFIX=$IMAGE_REGISTRY_PREFIX IMAGE_PROJECT=chaos-mesh IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
 else
     echo "info: skip building docker images"
 fi
 
 echo "info: loading images into cluster"
 images=(
-    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-mesh:${IMAGE_TAG}
-    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-dashboard:${IMAGE_TAG}
-    $DOCKER_REGISTRY_PREFIX/chaos-mesh/chaos-daemon:${IMAGE_TAG}
+    $IMAGE_REGISTRY_PREFIX/chaos-mesh/chaos-mesh:${IMAGE_TAG}
+    $IMAGE_REGISTRY_PREFIX/chaos-mesh/chaos-dashboard:${IMAGE_TAG}
+    $IMAGE_REGISTRY_PREFIX/chaos-mesh/chaos-daemon:${IMAGE_TAG}
 )
 for n in ${images[@]}; do
     echo "info: loading image $n"
@@ -126,4 +126,4 @@ done
 $KUBECTL_BIN -n "$NAMESPACE" delete deploy -l app.kubernetes.io/name=chaos-mesh
 $KUBECTL_BIN -n "$NAMESPACE" delete pods -l app.kubernetes.io/name=chaos-mesh
 
-${ROOT}/install.sh --runtime containerd --crd ${ROOT}/manifests/crd.yaml --version ${IMAGE_TAG} --docker-registry ${DOCKER_REGISTRY_PREFIX}
+${ROOT}/install.sh --runtime containerd --crd ${ROOT}/manifests/crd.yaml --version ${IMAGE_TAG} --docker-registry ${IMAGE_REGISTRY_PREFIX}

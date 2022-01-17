@@ -17,7 +17,8 @@ package crclients
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/crio"
@@ -69,7 +70,7 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("only docker/containerd/crio is supported, but got %s", containerRuntime)
+		return nil, errors.Errorf("only docker/containerd/crio is supported, but got %s", containerRuntime)
 	}
 
 	return cli, nil

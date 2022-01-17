@@ -10,7 +10,7 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \ 
+RUN apt-get update && \
     apt-get install build-essential curl git pkg-config libfuse-dev fuse -y && \
     rm -rf /var/lib/apt/lists/*
 
@@ -25,7 +25,7 @@ RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
 
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -vvv https://dl.google.com/go/go1.16.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl -vvv https://dl.google.com/go/go1.17.5.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GO111MODULE=on
 ENV GOCACHE /tmp/go-build

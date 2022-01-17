@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -43,7 +44,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		// set dns server to the chaos dns server's address
 
 		if len(req.DnsServer) == 0 {
-			return &empty.Empty{}, fmt.Errorf("invalid set dns server request %v", req)
+			return &empty.Empty{}, errors.Errorf("invalid set dns server request %v", req)
 		}
 
 		// backup the /etc/resolv.conf

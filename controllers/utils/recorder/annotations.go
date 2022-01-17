@@ -18,9 +18,10 @@ package recorder
 import (
 	"encoding"
 	"encoding/json"
-	"errors"
 	"reflect"
 	"strconv"
+
+	"github.com/pkg/errors"
 
 	"github.com/iancoleman/strcase"
 )
