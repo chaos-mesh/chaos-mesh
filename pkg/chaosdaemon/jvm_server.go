@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -44,7 +45,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 	bytemanHome := os.Getenv("BYTEMAN_HOME")
 	if len(bytemanHome) == 0 {
-		return nil, fmt.Errorf("environment variable BYTEMAN_HOME not set")
+		return nil, errors.New("environment variable BYTEMAN_HOME not set")
 	}
 
 	// copy agent.jar to container's namespace

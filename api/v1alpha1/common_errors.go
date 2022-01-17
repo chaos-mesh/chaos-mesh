@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,17 +17,9 @@ package v1alpha1
 
 import (
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// validateContainerNames validates the ContainerNames
-func (in *PodChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-	if in.Action == ContainerKillAction {
-		if len(in.ContainerSelector.ContainerNames) == 0 {
-			err := errors.Wrapf(errInvalidValue, "the name of container is required on %s action", in.Action)
-			allErrs = append(allErrs, field.Invalid(path.Child("containerNames"), in.ContainerNames, err.Error()))
-		}
-	}
-	return allErrs
-}
+var (
+	errUnknownAction = errors.New("unknown action")
+	errInvalidValue  = errors.New("invalid value")
+)

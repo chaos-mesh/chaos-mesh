@@ -18,10 +18,10 @@ package podiochaos
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -31,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -114,7 +115,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		err = fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{}, nil
 	}
@@ -130,7 +131,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 		if len(containerID) == 0 {
-			err = fmt.Errorf("cannot find container with name %s", *obj.Spec.Container)
+			err = errors.Errorf("cannot find container with name %s", *obj.Spec.Container)
 			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 			return ctrl.Result{}, nil
 		}

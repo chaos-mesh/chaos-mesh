@@ -17,11 +17,11 @@ package generic
 
 import (
 	"crypto/rand"
-	"errors"
-	"fmt"
 	"math"
 	"math/big"
 	"strconv"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -64,7 +64,7 @@ func FilterObjectsByMode(mode v1alpha1.SelectorMode, value string, count int) ([
 		}
 
 		if percentage < 0 || percentage > 100 {
-			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be (0,100]", percentage)
+			return nil, errors.Errorf("fixed percentage value of %d is invalid, Must be (0,100]", percentage)
 		}
 
 		num := int(math.Floor(float64(count) * float64(percentage) / 100))
@@ -81,7 +81,7 @@ func FilterObjectsByMode(mode v1alpha1.SelectorMode, value string, count int) ([
 		}
 
 		if maxPercentage < 0 || maxPercentage > 100 {
-			return nil, fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
+			return nil, errors.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
 		}
 
 		percentage := getRandomNumber(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
@@ -89,7 +89,7 @@ func FilterObjectsByMode(mode v1alpha1.SelectorMode, value string, count int) ([
 
 		return RandomFixedIndexes(0, uint(count), uint(num)), nil
 	default:
-		return nil, fmt.Errorf("mode %s not supported", mode)
+		return nil, errors.Errorf("mode %s not supported", mode)
 	}
 }
 

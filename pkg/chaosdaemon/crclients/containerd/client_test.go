@@ -17,9 +17,10 @@ package containerd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/pkg/errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

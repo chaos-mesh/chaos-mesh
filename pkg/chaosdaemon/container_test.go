@@ -17,7 +17,8 @@ package chaosdaemon
 
 import (
 	"context"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -22,6 +22,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
@@ -111,5 +113,5 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 }
 
 func encodeOutputToError(output []byte, err error) error {
-	return fmt.Errorf("error code: %v, msg: %s", err, string(output))
+	return errors.Errorf("error code: %v, msg: %s", err, string(output))
 }

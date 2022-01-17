@@ -17,10 +17,10 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -167,7 +167,7 @@ Examples:
 // Run debug
 func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet) error {
 	if len(args) > 1 {
-		return fmt.Errorf("only one chaos could be specified")
+		return errors.New("only one chaos could be specified")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -198,7 +198,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *common.ClientSet)
 		case ioChaos:
 			err = iochaos.Debug(ctx, chaos, c, &chaosResult)
 		default:
-			return fmt.Errorf("chaos type not supported")
+			return errors.New("chaos type not supported")
 		}
 		result = append(result, chaosResult)
 		if err != nil {

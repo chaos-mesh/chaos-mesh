@@ -214,7 +214,7 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 
 func securityHTTPClient(url string) (*http.Client, error) {
 	if !strings.Contains(url, "https") {
-		return nil, fmt.Errorf("a secure url should begin with `https` rather than `http`, url: %s", url)
+		return nil, errors.Errorf("a secure url should begin with `https` rather than `http`, url: %s", url)
 	}
 
 	pair, err := tls.LoadX509KeyPair(config.ControllerCfg.ChaosdClientCert, config.ControllerCfg.ChaosdClientKey)
