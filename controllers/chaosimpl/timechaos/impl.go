@@ -23,7 +23,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/records"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	timeUtils "github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 )
@@ -105,8 +105,8 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 	return
 }
 
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContianerRecordDecoder) *records.ChaosImplPair {
+	return &records.ChaosImplPair{
 		Name:   "timechaos",
 		Object: &v1alpha1.TimeChaos{},
 		Impl: &Impl{

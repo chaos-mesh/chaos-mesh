@@ -139,7 +139,8 @@ type JVMChaosStatus struct {
 
 // +kubebuilder:object:root=true
 // +chaos-mesh:base
-
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // JVMChaos is the Schema for the jvmchaos API
 type JVMChaos struct {
 	metav1.TypeMeta   `json:",inline"`

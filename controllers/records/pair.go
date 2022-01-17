@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,5 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package model the basic workflow interface and structs in this package.
-package model
+package records
+
+import (
+	"k8s.io/apimachinery/pkg/runtime"
+)
+
+type ChaosImplPair struct {
+	Name   string
+	Object InnerObjectWithSelector
+	Impl   ChaosImpl
+
+	ObjectList runtime.Object
+	Controlls  []runtime.Object
+}
