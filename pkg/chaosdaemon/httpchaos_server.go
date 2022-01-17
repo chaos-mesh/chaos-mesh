@@ -69,13 +69,20 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	if s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime) == nil {
 		// chaos daemon may restart, create another tproxy instance
 		if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime); err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "kill background process(%d)", in.Instance)
 		}
 		if err := s.createHttpChaos(ctx, in); err != nil {
 			return nil, err
 		}
 	}
-	return s.applyHttpChaos(ctx, log, in)
+
+	resp, err := s.applyHttpChaos(ctx, log, in)
+	if err != nil {
+		killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(in.Instance), in.StartTime)
+		log.Error(killError, "kill tproxy", "instance", in.Instance)
+		return nil, errors.Wrap(err, "apply config")
+	}
+	return resp, err
 }
 
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
@@ -89,8 +96,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 	var rules []tproxyconfig.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
-		log.Error(err, "error while unmarshal json bytes")
-		return nil, err
+		return nil, errors.Wrap(err, "unmarshal rules")
 	}
 
 	log.Info("the length of actions", "length", len(rules))
@@ -109,19 +115,19 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 
 	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "create http request")
 	}
 
 	resp, err := transport.RoundTrip(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "send http request")
 	}
 
 	log.Info("http chaos applied")
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "read response body")
 	}
 
 	return &pb.ApplyHttpChaosResponse{
@@ -135,8 +141,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
-		return err
+		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
 	}
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
@@ -154,15 +159,14 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "execute command(%s)", cmd)
 	}
 	ct, err := procState.CreateTime()
 	if err != nil {
-		log.Error(err, "get create time failed")
 		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill tproxy failed", "request", in)
+			log.Error(kerr, "kill tproxy", "request", in)
 		}
-		return err
+		return errors.Wrap(err, "get create time")
 	}
 
 	in.Instance = int64(cmd.Process.Pid)
