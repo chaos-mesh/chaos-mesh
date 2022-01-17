@@ -151,11 +151,11 @@ enter-devenv: images/dev-env/.dockerbuilt
 	@bash
 
 images/chaos-daemon/bin/pause: SHELL:=$(RUN_IN_BUILD_SHELL)
-images/chaos-daemon/bin/pause: hack/pause.c images/dev-env/.dockerbuilt
+images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
 pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
-pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/dev-env/.dockerbuilt
+pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/build-env/.dockerbuilt
 	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
 
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o))
