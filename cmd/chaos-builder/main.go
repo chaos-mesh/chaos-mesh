@@ -182,7 +182,7 @@ func init() {
 	}
 	fmt.Fprint(file, scheduleGenerator.Render())
 
-	file, err = os.Create("./ui/src/api/zz_generated.frontend.chaos-mesh.ts")
+	file, err = os.Create("./ui/app/src/api/zz_generated.frontend.chaos-mesh.ts")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)

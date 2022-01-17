@@ -318,6 +318,8 @@ definitions:
     type: object
   status.AllChaosStatus:
     properties:
+      deleting:
+        type: integer
       finished:
         type: integer
       injecting:
@@ -800,7 +802,7 @@ definitions:
         description: Instance defines the name of the instance
         type: string
       project:
-        description: Project defines the name of gcp project.
+        description: Project defines the ID of gcp project.
         type: string
       secretName:
         description: |-

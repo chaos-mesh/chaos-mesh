@@ -2,15 +2,19 @@ name: Check Markdown links
 
 on:
   push:
+  pull_request:
     branches:
       - master
+    paths:
+      - "**.md"
+      - ".github/workflows/checklink_config.json"
 
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
-      with:
-        use-quiet-mode: 'yes'
-        config-file: '.github/workflows/checklink_config.json'
+      - uses: actions/checkout@master
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: "yes"
+          config-file: ".github/workflows/checklink_config.json"

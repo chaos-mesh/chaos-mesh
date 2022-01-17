@@ -16,7 +16,14 @@ spec:
     singular: gcpchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: GCPChaos is the Schema for the gcpchaos API
@@ -56,7 +63,7 @@ spec:
                 description: Instance defines the name of the instance
                 type: string
               project:
-                description: Project defines the name of gcp project.
+                description: Project defines the ID of gcp project.
                 type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret. It
@@ -128,6 +135,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

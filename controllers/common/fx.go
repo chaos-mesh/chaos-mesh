@@ -30,21 +30,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
-
-type ChaosImplPair struct {
-	Name   string
-	Object v1alpha1.InnerObjectWithSelector
-	Impl   ChaosImpl
-
-	ObjectList v1alpha1.GenericChaosList
-	Controlls  []client.Object
-}
 
 type Params struct {
 	fx.In
@@ -54,8 +48,9 @@ type Params struct {
 	Logger          logr.Logger
 	Selector        *selector.Selector
 	RecorderBuilder *recorder.RecorderBuilder
-	Impls           []*ChaosImplPair `group:"impl"`
-	Reader          client.Reader    `name:"no-cache"`
+	Impls           []*chaosimpltypes.ChaosImplPair `group:"impl"`
+	Reader          client.Reader                   `name:"no-cache"`
+	Steps           []pipeline.PipelineStep
 }
 
 func Bootstrap(params Params) error {
@@ -78,7 +73,7 @@ func Bootstrap(params Params) error {
 
 		builder := builder.Default(mgr).
 			For(pair.Object).
-			Named(name)
+			Named(pair.Name + "-pipeline")
 
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
@@ -127,15 +122,22 @@ func Bootstrap(params Params) error {
 			}
 		}
 
-		err := builder.Complete(&Reconciler{
-			Impl:     pair.Impl,
-			Object:   pair.Object,
-			Client:   kubeclient,
-			Reader:   reader,
-			Recorder: recorderBuilder.Build("records"),
-			Selector: selector,
-			Log:      logger.WithName("records"),
+		pipe := pipeline.NewPipeline(&pipeline.PipelineContext{
+			Logger: logger,
+			Object: &types.Object{
+				Name:   pair.Name,
+				Object: pair.Object,
+			},
+			Impl:            pair.Impl,
+			Mgr:             mgr,
+			Client:          kubeclient,
+			Reader:          reader,
+			RecorderBuilder: recorderBuilder,
+			Selector:        selector,
 		})
+
+		pipe.AddSteps(params.Steps...)
+		err := builder.Complete(pipe)
 		if err != nil {
 			return err
 		}

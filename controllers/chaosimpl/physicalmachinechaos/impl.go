@@ -30,8 +30,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 type Impl struct {
 	client.Client
@@ -159,8 +161,8 @@ func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string
 	return resp.StatusCode, string(body), nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func NewImpl(c client.Client, log logr.Logger) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "physicalmachinechaos",
 		Object: &v1alpha1.PhysicalMachineChaos{},
 		Impl: &Impl{

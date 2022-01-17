@@ -23,7 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/diskloss"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodereset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/nodestop"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
 
 type Impl struct {
@@ -34,9 +34,9 @@ type Impl struct {
 	NodeStop  *nodestop.Impl  `action:"node-stop"`
 }
 
-func NewImpl(impl Impl) *common.ChaosImplPair {
+func NewImpl(impl Impl) *impltypes.ChaosImplPair {
 	delegate := action.New(&impl)
-	return &common.ChaosImplPair{
+	return &impltypes.ChaosImplPair{
 		Name:   "gcpchaos",
 		Object: &v1alpha1.GCPChaos{},
 		Impl:   &delegate,
