@@ -57,7 +57,7 @@ func GrantAccess() error {
 	}
 
 	if len(deviceCgroupPath) == 0 {
-		return errors.Errorf("fail to find device cgroup")
+		return errors.New("fail to find device cgroup")
 	}
 
 	// It's hard to use /pkg/chaosdaemon/cgroups to wrap this logic.

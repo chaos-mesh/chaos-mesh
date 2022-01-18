@@ -72,7 +72,7 @@ type GCPChaosSpec struct {
 }
 
 type GCPSelector struct {
-	// Project defines the name of gcp project.
+	// Project defines the ID of gcp project.
 	Project string `json:"project"`
 
 	// Zone defines the zone of gcp project.

@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - "**.md"
+      - ".github/workflows/checklink_config.json"
 
 jobs:
   markdown-link-check:

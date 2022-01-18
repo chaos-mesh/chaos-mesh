@@ -18,7 +18,8 @@ package collector
 import (
 	"context"
 	"encoding/json"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
@@ -56,13 +57,6 @@ func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	if err != nil {
 		r.Log.Error(err, "failed to get schedule object", "request", req.NamespacedName)
-		return ctrl.Result{}, nil
-	}
-
-	if !schedule.DeletionTimestamp.IsZero() {
-		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive schedule")
-		}
 		return ctrl.Result{}, nil
 	}
 
