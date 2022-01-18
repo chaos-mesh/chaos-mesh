@@ -122,8 +122,10 @@ def main():
         if os.getenv("DOCKER_CACHE") == "1":
             env.update({"DOCKER_BUILDKIT": "1",
                    "DOCKER_CLI_EXPERIMENTAL": "enabled"})
-            cache_dir = os.getenv(
-                "DOCKER_CACHE_DIR", f"{os.getcwd()}/.cache/image-{name}")
+            cache_dir = os.path.join(
+                os.getenv("DOCKER_CACHE_DIR", f"{os.getcwd()}/.cache/"),
+                f"image-{name}"
+                )
             pathlib.Path(cache_dir).mkdir(parents=True, exist_ok=True)
             cmd = [
                 "docker",
