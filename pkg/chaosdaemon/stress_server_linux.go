@@ -34,8 +34,8 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log.Info("Executing stressors", "request", req)
 
-	// CpuStressors
-	cpuInstance, cpuStartTime, err := s.ExecCpuStressors(ctx, req)
+	// cpuStressors
+	cpuInstance, cpuStartTime, err := s.ExecCPUStressors(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (s *DaemonServer) CancelStressors(ctx context.Context,
 	return &empty.Empty{}, nil
 }
 
-func (s *DaemonServer) ExecCpuStressors(ctx context.Context,
+func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (string, int64, error) {
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
