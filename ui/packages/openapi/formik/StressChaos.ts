@@ -28,7 +28,7 @@ export const actions = [],
           label: 'cpu',
           children: [
             {
-              field: 'text',
+              field: 'number',
               label: 'load',
               value: 0,
               helperText:
@@ -41,7 +41,7 @@ export const actions = [],
               helperText: 'Optional. extend stress-ng options',
             },
             {
-              field: 'text',
+              field: 'number',
               label: 'workers',
               value: 0,
               helperText:
@@ -67,7 +67,7 @@ export const actions = [],
                 'Optional. Size specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB.',
             },
             {
-              field: 'text',
+              field: 'number',
               label: 'workers',
               value: 0,
               helperText:

@@ -1492,7 +1492,7 @@ export interface V1alpha1GCPChaosSpec {
    */
   instance?: string
   /**
-   * Project defines the name of gcp project.
+   * Project defines the ID of gcp project.
    * @type {string}
    * @memberof V1alpha1GCPChaosSpec
    */
@@ -2540,7 +2540,7 @@ export interface V1alpha1NetworkPartitionSpec {
  */
 export interface V1alpha1PhysicalMachineChaosSpec {
   /**
-   * the subAction, generate automatically +optional
+   * +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
    * @type {string}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
@@ -2689,12 +2689,6 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'stress-mem'?: V1alpha1StressMemorySpec
-  /**
-   * the experiment ID +optional
-   * @type {string}
-   * @memberof V1alpha1PhysicalMachineChaosSpec
-   */
-  uid?: string
   /**
    * Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide an integer of physical machines to do chaos action. If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action. IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action +optional
    * @type {string}

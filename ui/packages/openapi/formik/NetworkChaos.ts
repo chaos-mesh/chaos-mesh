@@ -10,28 +10,28 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       label: 'bandwidth',
       children: [
         {
-          field: 'text',
+          field: 'number',
           label: 'buffer',
           value: 0,
           helperText:
             'Buffer is the maximum amount of bytes that tokens can be available for instantaneously. +kubebuilder:validation:Minimum=1',
         },
         {
-          field: 'text',
+          field: 'number',
           label: 'limit',
           value: 0,
           helperText:
             'Limit is the number of bytes that can be queued waiting for tokens to become available. +kubebuilder:validation:Minimum=1',
         },
         {
-          field: 'text',
+          field: 'number',
           label: 'minburst',
           value: 0,
           helperText:
             'Optional. Minburst specifies the size of the peakrate bucket. For perfect accuracy, should be set to the MTU of the interface.  If a peakrate is needed, but some burstiness is acceptable, this size can be raised. A 3000 byte minburst allows around 3mbit/s of peakrate, given 1000 byte packets.  +kubebuilder:validation:Minimum=0',
         },
         {
-          field: 'text',
+          field: 'number',
           label: 'peakrate',
           value: 0,
           helperText:
@@ -96,7 +96,7 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
               helperText: 'Optional.',
             },
             {
-              field: 'text',
+              field: 'number',
               label: 'gap',
               value: 0,
               helperText: '',
@@ -182,23 +182,23 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           label: 'selector',
           children: [
             {
-              field: 'text',
+              field: 'string-string',
               label: 'annotationSelectors',
-              value: '',
+              value: {},
               helperText:
                 'Optional. Map of string keys and values that can be used to select objects. A selector based on annotations.',
             },
             {
-              field: 'text',
+              field: 'string-string',
               label: 'fieldSelectors',
-              value: '',
+              value: {},
               helperText:
                 'Optional. Map of string keys and values that can be used to select objects. A selector based on fields.',
             },
             {
-              field: 'text',
+              field: 'string-string',
               label: 'labelSelectors',
-              value: '',
+              value: {},
               helperText:
                 'Optional. Map of string keys and values that can be used to select objects. A selector based on labels.',
             },
@@ -209,9 +209,9 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
               helperText: 'Optional. Namespaces is a set of namespace to which objects belong.',
             },
             {
-              field: 'text',
+              field: 'string-string',
               label: 'nodeSelectors',
-              value: '',
+              value: {},
               helperText:
                 "Optional. Map of string keys and values that can be used to select nodes. Selector which must match a node\\'s labels, and objects must belong to these selected nodes.",
             },
@@ -229,9 +229,9 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
                 'Optional. PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown',
             },
             {
-              field: 'text',
+              field: 'string-label',
               label: 'pods',
-              value: '',
+              value: {},
               helperText:
                 'Optional. Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.',
             },

@@ -22,7 +22,7 @@ export const actions = ['node-stop', 'node-reset', 'disk-loss'],
       field: 'text',
       label: 'project',
       value: '',
-      helperText: 'Project defines the name of gcp project.',
+      helperText: 'Project defines the ID of gcp project.',
     },
     {
       field: 'text',

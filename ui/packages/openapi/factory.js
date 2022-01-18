@@ -32,10 +32,17 @@ export function typeTextToFieldType(type) {
     case 'string':
       return 'text'
     case 'Array<string>':
-    case 'string[]':
       return 'label'
+    case '{ [key: string]: string }':
+      return 'string-string'
+    case '{ [key: string]: Array<string> }':
+      return 'string-label'
+    case 'number':
+      return 'number'
+    case 'boolean':
+      return 'select'
     default:
-      return 'text'
+      throw new Error(`Unsupported type: ${type}`)
   }
 }
 
@@ -43,19 +50,23 @@ export function typeTextToFieldType(type) {
  * Convert typescript internal type to form field's intial value.
  *
  * @param {string} type
- * @return {ts.StringLiteral|ts.ArrayLiteralExpression|ts.NumericLiteral|null}
+ * @return {ts.StringLiteral|ts.ArrayLiteralExpression|ts.ObjectLiteralExpression|ts.NumericLiteral|null}
  */
 export function typeTextToInitialValue(type) {
   switch (type) {
     case 'string':
       return ts.factory.createStringLiteral('')
     case 'Array<string>':
-    case 'string[]':
-      return ts.factory.createArrayLiteralExpression([], false)
+      return ts.factory.createArrayLiteralExpression()
+    case '{ [key: string]: string }':
+    case '{ [key: string]: Array<string> }':
+      return ts.factory.createObjectLiteralExpression()
     case 'number':
       return ts.factory.createNumericLiteral(0)
+    case 'boolean':
+      return ts.factory.createArrayLiteralExpression([ts.factory.createTrue(), ts.factory.createFalse()])
     default:
-      return ts.factory.createStringLiteral('')
+      throw new Error(`Unsupported type: ${type}`)
   }
 }
 
@@ -66,10 +77,11 @@ export function typeTextToInitialValue(type) {
  * @param {ts.sourceFile} sourceFile
  * @return {boolean}
  */
-function isArrayString(type, sourceFile) {
+function isArrayLiteral(type, sourceFile) {
+  /** @type {string} */
   const typeText = type.getText(sourceFile)
 
-  return typeText === 'Array<string>' || typeText === 'string[]'
+  return typeText.startsWith('Array<')
 }
 
 /**
@@ -86,7 +98,7 @@ function isArrayString(type, sourceFile) {
  */
 export function nodeToField(identifier, type, comment, objs, sourceFile, checker) {
   // handle TypeReference
-  if (type.kind === ts.SyntaxKind.TypeReference && !isArrayString(type, sourceFile)) {
+  if (type.kind === ts.SyntaxKind.TypeReference && !isArrayLiteral(type, sourceFile)) {
     return typeReferenceToObjectLiteralExpression(identifier, type, objs, sourceFile, checker)
   }
 
@@ -134,8 +146,8 @@ function typeReferenceToObjectLiteralExpression(
             { multiple: true }
           )
         )
-      } else if (isArrayString(declaration.type, sourceFile)) {
-        // handle string array
+      } else if (isArrayLiteral(declaration.type, sourceFile)) {
+        // handle literal array
         objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
       } else {
         objs.push(typeReferenceToObjectLiteralExpression(escapedName, declaration.type, [], sourceFile, checker))

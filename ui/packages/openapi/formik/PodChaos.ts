@@ -13,7 +13,7 @@ export const actions = ['pod-kill', 'pod-failure', 'container-kill'],
         'Optional. ContainerNames indicates list of the name of affected container. If not set, the first container will be injected',
     },
     {
-      field: 'text',
+      field: 'number',
       label: 'gracePeriod',
       value: 0,
       helperText:

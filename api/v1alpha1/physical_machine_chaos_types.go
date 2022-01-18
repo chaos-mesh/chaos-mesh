@@ -137,69 +137,89 @@ func (spec *PhysicalMachineSelectorSpec) Empty() bool {
 type ExpInfo struct {
 	// the experiment ID
 	// +optional
-	UID string `json:"uid,omitempty"`
+	UID string `json:"uid,omitempty" swaggerignore:"true"`
 
 	// the subAction, generate automatically
 	// +optional
-	Action string `json:"action,omitempty"`
+	Action string `json:"action,omitempty" swaggerignore:"true"`
 
+	// +ui:form:when=action=='stress-cpu'
 	// +optional
 	StressCPU *StressCPUSpec `json:"stress-cpu,omitempty"`
 
+	// +ui:form:when=action=='stress-mem'
 	// +optional
 	StressMemory *StressMemorySpec `json:"stress-mem,omitempty"`
 
+	// +ui:form:when=action=='stress-mem'
 	// +optional
 	DiskReadPayload *DiskPayloadSpec `json:"disk-read-payload,omitempty"`
 
+	// +ui:form:when=action=='disk-write-payload'
 	// +optional
 	DiskWritePayload *DiskPayloadSpec `json:"disk-write-payload,omitempty"`
 
+	// +ui:form:when=action=='disk-fill'
 	// +optional
 	DiskFill *DiskFillSpec `json:"disk-fill,omitempty"`
 
+	// +ui:form:when=action=='network-corrupt'
 	// +optional
 	NetworkCorrupt *NetworkCorruptSpec `json:"network-corrupt,omitempty"`
 
+	// +ui:form:when=action=='network-duplicate'
 	// +optional
 	NetworkDuplicate *NetworkDuplicateSpec `json:"network-duplicate,omitempty"`
 
+	// +ui:form:when=action=='network-loss'
 	// +optional
 	NetworkLoss *NetworkLossSpec `json:"network-loss,omitempty"`
 
+	// +ui:form:when=action=='network-delay'
 	// +optional
 	NetworkDelay *NetworkDelaySpec `json:"network-delay,omitempty"`
 
+	// +ui:form:when=action=='network-partition'
 	// +optional
 	NetworkPartition *NetworkPartitionSpec `json:"network-partition,omitempty"`
 
+	// +ui:form:when=action=='network-dns'
 	// +optional
 	NetworkDNS *NetworkDNSSpec `json:"network-dns,omitempty"`
 
+	// +ui:form:when=action=='network-bandwidth'
 	// +optional
 	NetworkBandwidth *NetworkBandwidthSpec `json:"network-bandwidth,omitempty"`
 
+	// +ui:form:when=action=='process'
 	// +optional
 	Process *ProcessSpec `json:"process,omitempty"`
 
+	// +ui:form:when=action=='jvm-exception'
 	// +optional
 	JVMException *JVMExceptionSpec `json:"jvm-exception,omitempty"`
 
+	// +ui:form:when=action=='jvm-gc'
 	// +optional
 	JVMGC *JVMGCSpec `json:"jvm-gc,omitempty"`
 
+	// +ui:form:when=action=='jvm-latency'
 	// +optional
 	JVMLatency *JVMLatencySpec `json:"jvm-latency,omitempty"`
 
+	// +ui:form:when=action=='jvm-return'
 	// +optional
 	JVMReturn *JVMReturnSpec `json:"jvm-return,omitempty"`
 
+	// +ui:form:when=action=='jvm-stress'
 	// +optional
 	JVMStress *JVMStressSpec `json:"jvm-stress,omitempty"`
 
+	// +ui:form:when=action=='jvm-rule-data'
 	// +optional
 	JVMRuleData *JVMRuleDataSpec `json:"jvm-rule-data,omitempty"`
 
+	// +ui:form:when=action=='clock'
 	// +optional
 	Clock *ClockSpec `json:"clock,omitempty"`
 }

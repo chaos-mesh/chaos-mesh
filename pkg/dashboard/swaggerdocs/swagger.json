@@ -3805,7 +3805,7 @@
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "the subAction, generate automatically\n+optional",
+                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock",
                     "type": "string"
                 },
                 "address": {
@@ -3816,22 +3816,22 @@
                     }
                 },
                 "clock": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='clock'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ClockSpec"
                 },
                 "disk-fill": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='disk-fill'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskFillSpec"
                 },
                 "disk-read-payload": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='stress-mem'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
                 "disk-write-payload": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='disk-write-payload'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
@@ -3840,32 +3840,32 @@
                     "type": "string"
                 },
                 "jvm-exception": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-exception'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMExceptionSpec"
                 },
                 "jvm-gc": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-gc'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMGCSpec"
                 },
                 "jvm-latency": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-latency'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMLatencySpec"
                 },
                 "jvm-return": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-return'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMReturnSpec"
                 },
                 "jvm-rule-data": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-rule-data'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMRuleDataSpec"
                 },
                 "jvm-stress": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-stress'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
                 },
@@ -3874,42 +3874,42 @@
                     "type": "string"
                 },
                 "network-bandwidth": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-bandwidth'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkBandwidthSpec"
                 },
                 "network-corrupt": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-corrupt'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkCorruptSpec"
                 },
                 "network-delay": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-delay'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDelaySpec"
                 },
                 "network-dns": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-dns'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDNSSpec"
                 },
                 "network-duplicate": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-duplicate'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDuplicateSpec"
                 },
                 "network-loss": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-loss'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkLossSpec"
                 },
                 "network-partition": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-partition'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkPartitionSpec"
                 },
                 "process": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='process'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
@@ -3919,18 +3919,14 @@
                     "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
                 },
                 "stress-cpu": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='stress-cpu'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.StressCPUSpec"
                 },
                 "stress-mem": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='stress-mem'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.StressMemorySpec"
-                },
-                "uid": {
-                    "description": "the experiment ID\n+optional",
-                    "type": "string"
                 },
                 "value": {
                     "description": "Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.\nIf `FixedMode`, provide an integer of physical machines to do chaos action.\nIf `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",

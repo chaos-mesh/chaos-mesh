@@ -19,7 +19,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
         'Optional. ContainerNames indicates list of the name of affected container. If not set, the first container will be injected',
     },
     {
-      field: 'text',
+      field: 'number',
       label: 'cpuCount',
       value: 0,
       helperText: 'Optional.  the CPU core number need to use, only set it when action is stress',
@@ -31,7 +31,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       helperText: 'Optional.  the exception which needs to throw for action `exception`',
     },
     {
-      field: 'text',
+      field: 'number',
       label: 'latency',
       value: 0,
       helperText: "Optional.  the latency duration for action \\'latency\\', unit ms",
@@ -56,7 +56,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       helperText: "Optional.  byteman rule name, should be unique, and will use JVMChaos\\' name if not set",
     },
     {
-      field: 'text',
+      field: 'number',
       label: 'port',
       value: 0,
       helperText: 'Optional.  the port of agent server, default 9277',

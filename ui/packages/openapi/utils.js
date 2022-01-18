@@ -67,13 +67,12 @@ export function isUIFormIgnore(s) {
  */
 export function cleanMarkers(s) {
   s = s.replace(UI_FORM_WHEN, '')
+  s = s.replace(/\+kubebuilder\S+\s/, '')
 
   const reOptional = /\+optional/
   if (reOptional.test(s)) {
     s = 'Optional. ' + s.replace(reOptional, '')
   }
 
-  s = s.replace(/\+kubebuilder\S+\s/, '').trim()
-
-  return s
+  return s.trim()
 }

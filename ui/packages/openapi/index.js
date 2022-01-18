@@ -47,7 +47,7 @@ export function genForms(source) {
     'JVMChaos',
     'KernelChaos',
     'NetworkChaos',
-    // 'PhysicalMachineChaos',
+    'PhysicalMachineChaos',
     'PodChaos',
     'StressChaos',
     'TimeChaos',
@@ -75,7 +75,7 @@ export function genForms(source) {
       switch (node.kind) {
         case ts.SyntaxKind.PropertySignature:
           /** @type {string} */
-          const identifier = node.name.escapedText
+          const identifier = node.name.escapedText || node.name.text
           if (ignores.includes(identifier)) {
             break
           }

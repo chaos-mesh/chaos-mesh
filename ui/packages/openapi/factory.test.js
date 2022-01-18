@@ -21,15 +21,19 @@ describe('openapi => factory', () => {
   test('typeTextToFieldType', () => {
     expect(typeTextToFieldType('string')).toBe('text')
     expect(typeTextToFieldType('Array<string>')).toBe('label')
-    expect(typeTextToFieldType('string[]')).toBe('label')
-    expect(typeTextToFieldType('unknown')).toBe('text')
+    expect(typeTextToFieldType('{ [key: string]: string }')).toBe('string-string')
+    expect(typeTextToFieldType('{ [key: string]: Array<string> }')).toBe('string-label')
+    expect(typeTextToFieldType('number')).toBe('number')
+    expect(typeTextToFieldType('boolean')).toBe('select')
+    expect(() => typeTextToFieldType('unknown')).toThrowError()
   })
 
   test('typeTextToInitialValue', () => {
     expect(typeTextToInitialValue('string').text).toBe('')
     expect(typeTextToInitialValue('Array<string>').elements).toBeInstanceOf(Array)
-    expect(typeTextToInitialValue('string[]').elements).toBeInstanceOf(Array)
+    expect(typeTextToInitialValue('{ [key: string]: string }').properties.length).toBe(0)
     expect(typeTextToInitialValue('number').text).toBe('0')
-    expect(typeTextToInitialValue('other').text).toBe('')
+    expect(typeTextToInitialValue('boolean').elements).toBeInstanceOf(Array)
+    expect(() => typeTextToInitialValue('other')).toThrowError()
   })
 })

@@ -37,7 +37,7 @@ export const actions = [],
           ],
         },
         {
-          field: 'text',
+          field: 'number',
           label: 'failtype',
           value: 0,
           helperText:
@@ -51,14 +51,14 @@ export const actions = [],
             'Headers indicates the appropriate kernel headers you need. Eg: \\"linux/mmzone.h\\", \\"linux/blkdev.h\\" and so on',
         },
         {
-          field: 'text',
+          field: 'number',
           label: 'probability',
           value: 0,
           helperText:
             'Probability indicates the fails with probability. If you want 1%, please set this field with 1. +kubebuilder:validation:Maximum=100',
         },
         {
-          field: 'text',
+          field: 'number',
           label: 'times',
           value: 0,
           helperText: 'Times indicates the max times of fails. +kubebuilder:validation:Minimum=0',
