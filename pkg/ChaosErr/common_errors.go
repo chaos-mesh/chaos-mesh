@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,25 @@
 // limitations under the License.
 //
 
-package time
+package ChaosErr
 
-// FakeClockInjector could modify the time of certain process.
-// TODO: rename this interface, it brings confusing with .c files under pkg/time/fakeclock.
-//type FakeClockInjector interface {
-//	Inject(pid int) error
-//	Recover(pid int) error
-//}
+import (
+	"github.com/pkg/errors"
+)
+
+type ErrNotFound struct {
+	name string
+}
+
+func (e ErrNotFound) Error() string {
+	return e.name + "not found"
+}
+
+func NotFound(name string) error {
+	return ErrNotFound{name: name}
+}
+
+var (
+	ErrNotImplemented  = errors.New("not implement")
+	ErrDuplicateEntity = errors.New("duplicate entity")
+)

@@ -17,6 +17,7 @@ package time
 
 import (
 	"bytes"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 	"runtime"
 
 	"github.com/pkg/errors"
@@ -46,6 +47,12 @@ type TimeSkew struct {
 	deltaNanoSeconds int64
 	clockIDsMask     uint64
 	fakeImage        *FakeImage
+	originClockFunc  *OriginClockFunc
+}
+
+type OriginClockFunc struct {
+	CodeOfGetClockFunc []byte
+	OriginAddress      uint64
 }
 
 func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*TimeSkew, error) {
@@ -61,6 +68,28 @@ func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64
 
 func NewTimeSkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *TimeSkew {
 	return &TimeSkew{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage}
+}
+
+func (it TimeSkew) Assign(it_ TimeSkew) {
+	it.deltaSeconds = it_.deltaSeconds
+	it.deltaNanoSeconds = it_.deltaNanoSeconds
+}
+
+func (it TimeSkew) Add(it_ TimeSkew) {
+	it.deltaSeconds += it_.deltaSeconds
+	it.deltaNanoSeconds += it_.deltaNanoSeconds
+}
+
+func (it TimeSkew) Fork() (*TimeSkew, error) {
+	if it.fakeImage != nil {
+		return NewTimeSkewWithCustomFakeImage(
+			it.deltaSeconds,
+			it.deltaNanoSeconds,
+			it.clockIDsMask,
+			it.fakeImage,
+		), nil
+	}
+	return NewTimeSkew(it.deltaSeconds, it.deltaNanoSeconds, it.clockIDsMask)
 }
 
 func (it *TimeSkew) Inject(pid int) error {
@@ -81,6 +110,30 @@ func (it *TimeSkew) Inject(pid int) error {
 		}
 	}()
 
+	vdsoEntry, err := FindVDSOEntry(program)
+	if err != nil {
+		return errors.Wrapf(err, "PID : %d", pid)
+	}
+
+	fakeEntry := it.FindInjectedImage(program)
+
+	// target process has not been injected yet
+	if fakeEntry == nil {
+		fakeEntry, err = it.InjectFakeImage(program, vdsoEntry)
+		if err != nil {
+			return errors.Wrapf(err, "injecting fake image , PID : %d", pid)
+		}
+	}
+
+	err = it.SetFakeImageInfo(program, fakeEntry)
+	if err != nil {
+		return errors.Wrapf(err, "set fake image info , PID : %d", pid)
+	}
+
+	return nil
+}
+
+func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	var vdsoEntry *mapreader.Entry
 	for index := range program.Entries {
 		// reverse loop is faster
@@ -91,9 +144,12 @@ func (it *TimeSkew) Inject(pid int) error {
 		}
 	}
 	if vdsoEntry == nil {
-		return errors.Errorf("cannot find [vdso] entry, pid: %d", pid)
+		return nil, errors.New("cannot find [vdso] entry")
 	}
+	return vdsoEntry, nil
+}
 
+func (it *TimeSkew) FindInjectedImage(program *ptrace.TracedProgram) *mapreader.Entry {
 	// minus tailing variable part
 	// every variable has 8 bytes
 	constImageLen := len(it.fakeImage.content) - 8*len(it.fakeImage.offset)
@@ -110,47 +166,77 @@ func (it *TimeSkew) Inject(pid int) error {
 
 		if bytes.Equal(*image, it.fakeImage.content[0:constImageLen]) {
 			fakeEntry = &e
-			log.Info("found injected image", "addr", fakeEntry.StartAddress, "pid", pid)
-			break
+			log.Info("found injected image", "addr", fakeEntry.StartAddress)
+			return fakeEntry
 		}
 	}
+	return nil
+}
 
-	// target process has not been injected yet
-	if fakeEntry == nil {
-		fakeEntry, err = program.MmapSlice(it.fakeImage.content)
-		if err != nil {
-			return errors.Wrapf(err, "mmap fake image, pid: %d", pid)
-		}
-
-		originAddr, err := program.FindSymbolInEntry(clockGettime, vdsoEntry)
-		if err != nil {
-			return errors.Wrapf(err, "find origin clock_gettime in vdso, pid: %d", pid)
-		}
-
-		err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
-		if err != nil {
-			return errors.Wrapf(err, "override origin clock_gettime, pid: %d", pid)
-		}
-	}
-
-	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarClockIdsMask]), it.clockIDsMask)
+func (it TimeSkew) InjectFakeImage(program *ptrace.TracedProgram,
+	vdsoEntry *mapreader.Entry) (*mapreader.Entry, error) {
+	fakeEntry, err := program.MmapSlice(it.fakeImage.content)
 	if err != nil {
-		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarClockIdsMask, pid)
+		return nil, errors.Wrapf(err, "mmap fake image")
+	}
+
+	originAddr, size, err := program.FindSymbolInEntry(clockGettime, vdsoEntry)
+	if err != nil {
+		return nil, errors.Wrapf(err, "find origin clock_gettime in vdso")
+	}
+	funcBytes, err := program.ReadSlice(originAddr, size)
+	err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
+	if err != nil {
+		return nil, errors.Wrapf(err, "override origin clock_gettime")
+	}
+	it.originClockFunc = &OriginClockFunc{
+		CodeOfGetClockFunc: *funcBytes,
+		OriginAddress:      originAddr,
+	}
+	return fakeEntry, nil
+}
+
+func (it *TimeSkew) SetFakeImageInfo(program *ptrace.TracedProgram, fakeEntry *mapreader.Entry) error {
+	err := program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarClockIdsMask]), it.clockIDsMask)
+	if err != nil {
+		return errors.Wrapf(err, "set %s ", externVarClockIdsMask)
 	}
 
 	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvSecDelta]), uint64(it.deltaSeconds))
 	if err != nil {
-		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarTvSecDelta, pid)
+		return errors.Wrapf(err, "set %s ", externVarTvSecDelta)
 	}
 
 	err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarTvNsecDelta]), uint64(it.deltaNanoSeconds))
 	if err != nil {
-		return errors.Wrapf(err, "set %s for time skew, pid: %d", externVarTvNsecDelta, pid)
+		return errors.Wrapf(err, "set %s ", externVarTvNsecDelta)
 	}
 	return nil
 }
 
 func (it *TimeSkew) Recover(pid int) error {
-	zeroSkew := NewTimeSkewWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage)
-	return zeroSkew.Inject(pid)
+	runtime.LockOSThread()
+	defer func() {
+		runtime.UnlockOSThread()
+	}()
+
+	program, err := ptrace.Trace(pid)
+	if err != nil {
+		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
+	}
+	defer func() {
+		err = program.Detach()
+		if err != nil {
+			log.Error(err, "fail to detach program", "pid", program.Pid())
+		}
+	}()
+
+	fakeEntry := it.FindInjectedImage(program)
+
+	if fakeEntry == nil {
+		return ChaosErr.NotFound("fake entry")
+	}
+
+	err = program.PtraceWriteSlice(it.originClockFunc.OriginAddress, it.originClockFunc.CodeOfGetClockFunc)
+	return err
 }

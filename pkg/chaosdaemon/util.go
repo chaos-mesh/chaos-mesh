@@ -48,7 +48,7 @@ func ReadCommName(pid int) (string, error) {
 func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	procs, err := ioutil.ReadDir(bpm.DefaultProcPrefix)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "read /proc/pid/tasks , ppid : %d", ppid)
 	}
 
 	type processPair struct {
