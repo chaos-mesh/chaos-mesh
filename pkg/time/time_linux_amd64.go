@@ -31,5 +31,9 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 			return nil
 		}
 	}
-	return Composite(pid, deltaSec, deltaNsec, clockIdsMask)
+	compositeInjector, err := NewCompositeInjector(deltaSec, deltaNsec, clockIdsMask)
+	if err != nil {
+		return err
+	}
+	return compositeInjector.Inject(pid)
 }
