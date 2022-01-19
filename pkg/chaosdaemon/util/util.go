@@ -13,12 +13,14 @@
 // limitations under the License.
 //
 
-package chaosdaemon
+package util
 
 import (
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 	"io/ioutil"
 	"os"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"strconv"
 	"sync"
 
@@ -26,6 +28,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
+
+var log = ctrl.Log.WithName("chaos-daemon/util")
 
 // ReadCommName returns the command name of process
 func ReadCommName(pid int) (string, error) {
@@ -101,7 +105,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		done <- true
 	}()
 
-	processGraph := NewGraph()
+	processGraph := graph.NewGraph()
 	for {
 		select {
 		case pair := <-pairs:
@@ -112,6 +116,6 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	}
 }
 
-func encodeOutputToError(output []byte, err error) error {
+func EncodeOutputToError(output []byte, err error) error {
 	return errors.Errorf("error code: %v, msg: %s", err, string(output))
 }

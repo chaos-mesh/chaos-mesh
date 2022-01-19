@@ -20,17 +20,8 @@ type AssignChaosOnProcess interface {
 	Assign(ChaosOnProcess) error
 }
 
-type TaskInner interface {
+type Tasker interface {
 	Addable
 	NewChaosOnProcess
 	AssignChaosOnProcess
-}
-
-type BaseTask struct{}
-
-func (t *BaseTask) Add(a Addable) error {
-	if _, ok := a.(*BaseTask); ok {
-		return nil
-	}
-	return errors.Wrapf(ErrCanNotAdd, "type1 : %T, type2 : %T", t, a)
 }

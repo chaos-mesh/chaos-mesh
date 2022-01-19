@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
@@ -27,7 +27,7 @@ func NewGroupProcessHandler(logger logr.Logger, main ChaosOnGroupProcess) GroupP
 }
 
 func (gp *GroupProcessHandler) Inject(pid PID) error {
-	childPids, err := chaosdaemon.GetChildProcesses(uint32(pid))
+	childPids, err := util.GetChildProcesses(uint32(pid))
 	if err != nil {
 		gp.logger.Error(err, "failed to get child process")
 	}
@@ -66,7 +66,7 @@ func (gp *GroupProcessHandler) Inject(pid PID) error {
 }
 
 func (gp *GroupProcessHandler) Recover(pid PID) error {
-	childPids, err := chaosdaemon.GetChildProcesses(uint32(pid))
+	childPids, err := util.GetChildProcesses(uint32(pid))
 	if err != nil {
 		gp.logger.Error(err, "failed to get child process")
 	}

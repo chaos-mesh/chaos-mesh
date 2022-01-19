@@ -20,7 +20,15 @@ type ChaosOnProcessManager struct {
 	logger logr.Logger
 }
 
-func (cm ChaosOnProcessManager) Update(uid UID, pid PID) error {
+func NewChaosOnProcessManager(logger logr.Logger) ChaosOnProcessManager {
+	return ChaosOnProcessManager{
+		NewTaskManager(),
+		make(map[PID]ChaosOnProcess),
+		logger,
+	}
+}
+
+func (cm ChaosOnProcessManager) Commit(uid UID, pid PID) error {
 	task, err := cm.taskManager.SumTask(uid)
 	if err != nil {
 		return errors.Wrapf(err, "unknown recovering in the taskMap, UID: %v", uid)
@@ -29,7 +37,11 @@ func (cm ChaosOnProcessManager) Update(uid UID, pid PID) error {
 	if !ok {
 		return errors.Wrapf(ChaosErr.NotFound("PID"), "PID : %d", pid)
 	}
-	_ = task.Data.Assign(process)
+	tasker, ok := task.Data.(Tasker)
+	if !ok {
+		return errors.New("task.Data here must implement Tasker")
+	}
+	_ = tasker.Assign(process)
 	if err != nil {
 		return err
 	}
@@ -40,12 +52,24 @@ func (cm ChaosOnProcessManager) Update(uid UID, pid PID) error {
 	return nil
 }
 
-func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config TaskInner) error {
+func (cm ChaosOnProcessManager) Update(uid UID, pid PID, config Tasker) error {
+	err := cm.taskManager.UpdateTask(uid, GetTask(pid, config))
+	if err != nil {
+		return err
+	}
+	err = cm.Commit(uid, pid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config Tasker) error {
 	err := cm.taskManager.AddTask(uid, GetTask(pid, config))
 	if err != nil {
-		return errors.Wrapf(ChaosErr.ErrNotImplemented, err.Error())
+		return err
 	}
-	err = cm.Update(uid, pid)
+	err = cm.Commit(uid, pid)
 	if err == nil {
 		return nil
 	}
@@ -56,7 +80,7 @@ func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config TaskInner) error 
 		}
 
 		cm.processMap[pid] = processTask
-		err = cm.Update(uid, pid)
+		err = cm.Commit(uid, pid)
 		if err != nil {
 			return errors.Wrapf(err, "update new process")
 		}
@@ -90,12 +114,13 @@ func (cm ChaosOnProcessManager) Recover(uid UID, pid PID) error {
 				}
 				return errors.Wrapf(err, "error & find process success")
 			}
+			return nil
 		}
 		cm.logger.Error(ChaosErr.NotFound("process"), "recovering task")
 		return nil
 	}
 
-	err = cm.Update(uid, pid)
+	err = cm.Commit(uIDs[0], pid)
 	if err != nil {
 		return errors.Wrapf(err, "update new process")
 	}

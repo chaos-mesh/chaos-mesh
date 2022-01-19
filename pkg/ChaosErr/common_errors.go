@@ -24,7 +24,7 @@ type ErrNotFound struct {
 }
 
 func (e ErrNotFound) Error() string {
-	return e.name + "not found"
+	return e.name + " not found"
 }
 
 func NotFound(name string) error {

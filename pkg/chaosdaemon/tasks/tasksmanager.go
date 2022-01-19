@@ -33,12 +33,16 @@ type TaskManager struct {
 	TaskMap map[UID]Task
 }
 
-type Task struct {
-	Main PID
-	Data TaskInner
+func NewTaskManager() TaskManager {
+	return TaskManager{make(map[UID]Task)}
 }
 
-func GetTask(main PID, data TaskInner) Task {
+type Task struct {
+	Main PID
+	Data Addable
+}
+
+func GetTask(main PID, data Addable) Task {
 	return Task{
 		main,
 		data,
@@ -51,6 +55,17 @@ func (m TaskManager) AddTask(id UID, task Task) error {
 	}
 	if _, ok := m.TaskMap[id]; ok {
 		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
+	}
+	m.TaskMap[id] = task
+	return nil
+}
+
+func (m TaskManager) UpdateTask(id UID, task Task) error {
+	if m.TaskMap == nil {
+		return errors.New("map not init")
+	}
+	if _, ok := m.TaskMap[id]; !ok {
+		return errors.Wrapf(ChaosErr.NotFound("UID"), "uid: %s, task: %v", id, task)
 	}
 	m.TaskMap[id] = task
 	return nil
