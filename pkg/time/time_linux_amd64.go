@@ -31,9 +31,9 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 			return nil
 		}
 	}
-	compositeInjector, err := NewCompositeInjector(deltaSec, deltaNsec, clockIdsMask)
+	timeSkew, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask)
 	if err != nil {
 		return err
 	}
-	return compositeInjector.Inject(pid)
+	return timeSkew.Inject(pid)
 }

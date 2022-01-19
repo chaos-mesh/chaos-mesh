@@ -52,7 +52,7 @@ type SkewClockGetTime struct {
 	fakeImage        *FakeImage
 }
 
-func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*SkewClockGetTime, error) {
+func NewSkewClockGetTime(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*SkewClockGetTime, error) {
 	var image *FakeImage
 	var err error
 
@@ -60,10 +60,10 @@ func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64
 		return nil, errors.Wrap(err, "load fake image")
 	}
 
-	return NewTimeSkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image), nil
+	return NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image), nil
 }
 
-func NewTimeSkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *SkewClockGetTime {
+func NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *SkewClockGetTime {
 	return &SkewClockGetTime{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage}
 }
 
@@ -155,7 +155,7 @@ func (it *SkewClockGetTime) Inject(pid int) error {
 }
 
 func (it *SkewClockGetTime) Recover(pid int) error {
-	zeroSkew := NewTimeSkewWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage)
+	zeroSkew := NewSkewClockGetTimeWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage)
 	return zeroSkew.Inject(pid)
 }
 
@@ -174,7 +174,7 @@ type SkewGetTimeOfDay struct {
 	fakeImage        *FakeImage
 }
 
-func NewTimeOfDaySkew(deltaSeconds int64, deltaNanoSeconds int64) (*SkewGetTimeOfDay, error) {
+func NewSkewGetTimeOfDay(deltaSeconds int64, deltaNanoSeconds int64) (*SkewGetTimeOfDay, error) {
 	var image *FakeImage
 	var err error
 
@@ -182,10 +182,10 @@ func NewTimeOfDaySkew(deltaSeconds int64, deltaNanoSeconds int64) (*SkewGetTimeO
 		return nil, errors.Wrap(err, "load fake image")
 	}
 
-	return NewTimeOfDaySkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, image), nil
+	return NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, image), nil
 }
 
-func NewTimeOfDaySkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, fakeImage *FakeImage) *SkewGetTimeOfDay {
+func NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, fakeImage *FakeImage) *SkewGetTimeOfDay {
 	return &SkewGetTimeOfDay{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, fakeImage: fakeImage}
 }
 
@@ -272,7 +272,7 @@ func (it *SkewGetTimeOfDay) Inject(pid int) error {
 }
 
 func (it *SkewGetTimeOfDay) Recover(pid int) error {
-	zeroSkew := NewTimeOfDaySkewWithCustomFakeImage(0, 0, it.fakeImage)
+	zeroSkew := NewSkewGetTimeOfDayWithCustomFakeImage(0, 0, it.fakeImage)
 	return zeroSkew.Inject(pid)
 }
 
@@ -294,12 +294,12 @@ func (it *CompositeInjector) Recover(pid int) error {
 	return nil
 }
 
-func NewCompositeInjector(deltaSec int64, deltaNsec int64, clockIdsMask uint64) (*CompositeInjector, error) {
-	SkewClockGetTime, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask)
+func NewTimeSkew(deltaSec int64, deltaNsec int64, clockIdsMask uint64) (FakeClockInjector, error) {
+	SkewClockGetTime, err := NewSkewClockGetTime(deltaSec, deltaNsec, clockIdsMask)
 	if err != nil {
 		return nil, err
 	}
-	SkewGetTimeOfDay, err := NewTimeOfDaySkew(deltaSec, deltaNsec)
+	SkewGetTimeOfDay, err := NewSkewGetTimeOfDay(deltaSec, deltaNsec)
 	if err != nil {
 		return nil, err
 	}
