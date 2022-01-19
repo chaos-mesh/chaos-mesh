@@ -30,38 +30,68 @@ type UID = string
 type PID = int
 
 type TaskManager struct {
-	TaskIDMap map[UID]PID
+	TaskMap map[UID]Task
 }
 
-func Get() TaskManager {
-	return TaskManager{
-		make(map[UID]PID),
+type Task struct {
+	Main PID
+	Data TaskInner
+}
+
+func GetTask(main PID, data TaskInner) Task {
+	return Task{
+		main,
+		data,
 	}
 }
 
-func (m TaskManager) AddTask(id UID, task PID) error {
-	if m.TaskIDMap == nil {
+func (m TaskManager) AddTask(id UID, task Task) error {
+	if m.TaskMap == nil {
 		return errors.New("map not init")
 	}
-	if _, ok := m.TaskIDMap[id]; ok {
+	if _, ok := m.TaskMap[id]; ok {
 		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
 	}
-	m.TaskIDMap[id] = task
+	m.TaskMap[id] = task
 	return nil
 }
 
-func (m TaskManager) RecoverTask(id UID) error {
-	if _, ok := m.TaskIDMap[id]; !ok {
-		return errors.Wrapf(ChaosErr.NotFound("UID"), "UID : %v", id)
+func (m TaskManager) RecoverTask(id UID) (Task, error) {
+	task, ok := m.TaskMap[id]
+	if !ok {
+		return Task{}, errors.Wrapf(ChaosErr.NotFound("TASK"), "UID : %v", id)
 	}
-	delete(m.TaskIDMap, id)
-	return nil
+	delete(m.TaskMap, id)
+	return task, nil
+}
+
+func (m TaskManager) SumTask(uid UID) (Task, error) {
+	task, ok := m.TaskMap[uid]
+	if !ok {
+		return Task{}, ChaosErr.NotFound("UID")
+	}
+	uids := m.GetTasksUIDByPID(task.Main)
+
+	for _, uidTemp := range uids {
+		if uid == uidTemp {
+			continue
+		}
+		taskTemp, ok := m.TaskMap[uidTemp]
+		if !ok {
+			return Task{}, ChaosErr.NotFound("TASK")
+		}
+		err := task.Data.Add(taskTemp.Data)
+		if err != nil {
+			return Task{}, err
+		}
+	}
+	return task, nil
 }
 
 func (m TaskManager) GetTasksUIDByPID(id PID) []UID {
 	uIds := make([]UID, 0)
-	for uid, pid := range m.TaskIDMap {
-		if pid == id {
+	for uid, task := range m.TaskMap {
+		if task.Main == id {
 			uIds = append(uIds, uid)
 		}
 	}

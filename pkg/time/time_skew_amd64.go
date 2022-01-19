@@ -18,6 +18,7 @@ package time
 import (
 	"bytes"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"runtime"
 
 	"github.com/pkg/errors"
@@ -42,7 +43,7 @@ const (
 	externVarTvNsecDelta  = "TV_NSEC_DELTA"
 )
 
-type TimeSkew struct {
+type Skew struct {
 	deltaSeconds     int64
 	deltaNanoSeconds int64
 	clockIDsMask     uint64
@@ -55,7 +56,7 @@ type OriginClockFunc struct {
 	OriginAddress      uint64
 }
 
-func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*TimeSkew, error) {
+func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*Skew, error) {
 	var image *FakeImage
 	var err error
 
@@ -66,21 +67,11 @@ func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64
 	return NewTimeSkewWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image), nil
 }
 
-func NewTimeSkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *TimeSkew {
-	return &TimeSkew{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage}
+func NewTimeSkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *Skew {
+	return &Skew{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage}
 }
 
-func (it TimeSkew) Assign(it_ TimeSkew) {
-	it.deltaSeconds = it_.deltaSeconds
-	it.deltaNanoSeconds = it_.deltaNanoSeconds
-}
-
-func (it TimeSkew) Add(it_ TimeSkew) {
-	it.deltaSeconds += it_.deltaSeconds
-	it.deltaNanoSeconds += it_.deltaNanoSeconds
-}
-
-func (it TimeSkew) Fork() (*TimeSkew, error) {
+func (it *Skew) Fork() (tasks.ChaosOnGroupProcess, error) {
 	if it.fakeImage != nil {
 		return NewTimeSkewWithCustomFakeImage(
 			it.deltaSeconds,
@@ -92,7 +83,18 @@ func (it TimeSkew) Fork() (*TimeSkew, error) {
 	return NewTimeSkew(it.deltaSeconds, it.deltaNanoSeconds, it.clockIDsMask)
 }
 
-func (it *TimeSkew) Inject(pid int) error {
+func (it *Skew) Assign(c tasks.ChaosOnProcess) error {
+	inner, ok := c.(*Skew)
+	if !ok {
+		return errors.Wrapf(tasks.ErrCanNotAssign,
+			"expect type :%T ,got type :%T", it, c)
+	}
+	inner.deltaSeconds = it.deltaSeconds
+	inner.deltaNanoSeconds = it.deltaNanoSeconds
+	return nil
+}
+
+func (it *Skew) Inject(pid int) error {
 
 	runtime.LockOSThread()
 	defer func() {
@@ -149,7 +151,7 @@ func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	return vdsoEntry, nil
 }
 
-func (it *TimeSkew) FindInjectedImage(program *ptrace.TracedProgram) *mapreader.Entry {
+func (it *Skew) FindInjectedImage(program *ptrace.TracedProgram) *mapreader.Entry {
 	// minus tailing variable part
 	// every variable has 8 bytes
 	constImageLen := len(it.fakeImage.content) - 8*len(it.fakeImage.offset)
@@ -173,7 +175,7 @@ func (it *TimeSkew) FindInjectedImage(program *ptrace.TracedProgram) *mapreader.
 	return nil
 }
 
-func (it TimeSkew) InjectFakeImage(program *ptrace.TracedProgram,
+func (it Skew) InjectFakeImage(program *ptrace.TracedProgram,
 	vdsoEntry *mapreader.Entry) (*mapreader.Entry, error) {
 	fakeEntry, err := program.MmapSlice(it.fakeImage.content)
 	if err != nil {
@@ -196,7 +198,7 @@ func (it TimeSkew) InjectFakeImage(program *ptrace.TracedProgram,
 	return fakeEntry, nil
 }
 
-func (it *TimeSkew) SetFakeImageInfo(program *ptrace.TracedProgram, fakeEntry *mapreader.Entry) error {
+func (it *Skew) SetFakeImageInfo(program *ptrace.TracedProgram, fakeEntry *mapreader.Entry) error {
 	err := program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(it.fakeImage.offset[externVarClockIdsMask]), it.clockIDsMask)
 	if err != nil {
 		return errors.Wrapf(err, "set %s ", externVarClockIdsMask)
@@ -214,7 +216,7 @@ func (it *TimeSkew) SetFakeImageInfo(program *ptrace.TracedProgram, fakeEntry *m
 	return nil
 }
 
-func (it *TimeSkew) Recover(pid int) error {
+func (it *Skew) Recover(pid int) error {
 	runtime.LockOSThread()
 	defer func() {
 		runtime.UnlockOSThread()
