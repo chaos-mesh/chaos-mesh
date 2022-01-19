@@ -105,7 +105,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 	log.Info("the length of actions", "length", len(rules))
 
 	httpChaosSpec := tproxyConfig{
-		ProxyPorts: in.ProxyPorts,
+		ProxyPorts: append([]uint32{}, in.ProxyPorts...),
 		Rules:      rules,
 	}
 
