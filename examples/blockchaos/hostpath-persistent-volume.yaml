@@ -12,18 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-"""
-varaibles used commonly in multiple scripts
-"""
-
-export_env_variables = [
-    "HTTP_PROXY",
-    "HTTPS_PROXY",
-    "GOPROXY",
-    "UI",
-    "LDFLAGS",
-    "CRATES_MIRROR",
-    "GO_BUILD_CACHE",
-    "YARN_BUILD_CACHE",
-]
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostpath-example
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt"
