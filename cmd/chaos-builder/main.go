@@ -17,6 +17,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -25,11 +27,11 @@ import (
 	"strings"
 
 	"github.com/pingcap/errors"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
-	log = zap.New(zap.UseDevMode(true))
+	zapLogger, _ = zap.NewDevelopment()
+	log          = zapr.NewLogger(zapLogger)
 )
 
 type metadata struct {
