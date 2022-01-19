@@ -701,7 +701,7 @@ spec:
                 description: Instance defines the name of the instance
                 type: string
               project:
-                description: Project defines the name of gcp project.
+                description: Project defines the ID of gcp project.
                 type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret. It
@@ -4492,7 +4492,7 @@ spec:
                     description: Instance defines the name of the instance
                     type: string
                   project:
-                    description: Project defines the name of gcp project.
+                    description: Project defines the ID of gcp project.
                     type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
@@ -7190,7 +7190,7 @@ spec:
                               description: Instance defines the name of the instance
                               type: string
                             project:
-                              description: Project defines the name of gcp project.
+                              description: Project defines the ID of gcp project.
                               type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
@@ -9673,7 +9673,7 @@ spec:
                                   description: Instance defines the name of the instance
                                   type: string
                                 project:
-                                  description: Project defines the name of gcp project.
+                                  description: Project defines the ID of gcp project.
                                   type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
@@ -12400,11 +12400,12 @@ spec:
                                     Variable references $(VAR_NAME) are expanded using
                                     the container''s environment. If a variable cannot
                                     be resolved, the reference in the input string
-                                    will be unchanged. The $(VAR_NAME) syntax can
-                                    be escaped with a double $$, ie: $$(VAR_NAME).
-                                    Escaped references will never be expanded, regardless
-                                    of whether the variable exists or not. Cannot
-                                    be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                                    will be unchanged. Double $$ are reduced to a
+                                    single $, which allows for escaping the $(VAR_NAME)
+                                    syntax: i.e. "$$(VAR_NAME)" will produce the string
+                                    literal "$(VAR_NAME)". Escaped references will
+                                    never be expanded, regardless of whether the variable
+                                    exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                                   items:
                                     type: string
                                   type: array
@@ -12414,8 +12415,10 @@ spec:
                                     if this is not provided. Variable references $(VAR_NAME)
                                     are expanded using the container''s environment.
                                     If a variable cannot be resolved, the reference
-                                    in the input string will be unchanged. The $(VAR_NAME)
-                                    syntax can be escaped with a double $$, ie: $$(VAR_NAME).
+                                    in the input string will be unchanged. Double
+                                    $$ are reduced to a single $, which allows for
+                                    escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
+                                    will produce the string literal "$(VAR_NAME)".
                                     Escaped references will never be expanded, regardless
                                     of whether the variable exists or not. Cannot
                                     be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
@@ -12435,16 +12438,17 @@ spec:
                                         type: string
                                       value:
                                         description: 'Variable references $(VAR_NAME)
-                                          are expanded using the previous defined
+                                          are expanded using the previously defined
                                           environment variables in the container and
                                           any service environment variables. If a
                                           variable cannot be resolved, the reference
-                                          in the input string will be unchanged. The
-                                          $(VAR_NAME) syntax can be escaped with a
-                                          double $$, ie: $$(VAR_NAME). Escaped references
-                                          will never be expanded, regardless of whether
-                                          the variable exists or not. Defaults to
-                                          "".'
+                                          in the input string will be unchanged. Double
+                                          $$ are reduced to a single $, which allows
+                                          for escaping the $(VAR_NAME) syntax: i.e.
+                                          "$$(VAR_NAME)" will produce the string literal
+                                          "$(VAR_NAME)". Escaped references will never
+                                          be expanded, regardless of whether the variable
+                                          exists or not. Defaults to "".'
                                         type: string
                                       valueFrom:
                                         description: Source for the environment variable's
@@ -12618,9 +12622,8 @@ spec:
                                         More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                                       properties:
                                         exec:
-                                          description: One and only one of the following
-                                            should be specified. Exec specifies the
-                                            action to take.
+                                          description: Exec specifies the action to
+                                            take.
                                           properties:
                                             command:
                                               description: Command is the command
@@ -12691,10 +12694,12 @@ spec:
                                           - port
                                           type: object
                                         tcpSocket:
-                                          description: 'TCPSocket specifies an action
-                                            involving a TCP port. TCP hooks not yet
-                                            supported TODO: implement a realistic
-                                            TCP lifecycle hook'
+                                          description: Deprecated. TCPSocket is NOT
+                                            supported as a LifecycleHandler and kept
+                                            for the backward compatibility. There
+                                            are no validation of this field and lifecycle
+                                            hooks will fail in runtime when tcp handler
+                                            is specified.
                                           properties:
                                             host:
                                               description: 'Optional: Host name to
@@ -12719,21 +12724,19 @@ spec:
                                         API request or management event such as liveness/startup
                                         probe failure, preemption, resource contention,
                                         etc. The handler is not called if the container
-                                        crashes or exits. The reason for termination
-                                        is passed to the handler. The Pod''s termination
-                                        grace period countdown begins before the PreStop
-                                        hooked is executed. Regardless of the outcome
+                                        crashes or exits. The Pod''s termination grace
+                                        period countdown begins before the PreStop
+                                        hook is executed. Regardless of the outcome
                                         of the handler, the container will eventually
                                         terminate within the Pod''s termination grace
-                                        period. Other management of the container
-                                        blocks until the hook completes or until the
-                                        termination grace period is reached. More
-                                        info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
+                                        period (unless delayed by finalizers). Other
+                                        management of the container blocks until the
+                                        hook completes or until the termination grace
+                                        period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                                       properties:
                                         exec:
-                                          description: One and only one of the following
-                                            should be specified. Exec specifies the
-                                            action to take.
+                                          description: Exec specifies the action to
+                                            take.
                                           properties:
                                             command:
                                               description: Command is the command
@@ -12804,10 +12807,12 @@ spec:
                                           - port
                                           type: object
                                         tcpSocket:
-                                          description: 'TCPSocket specifies an action
-                                            involving a TCP port. TCP hooks not yet
-                                            supported TODO: implement a realistic
-                                            TCP lifecycle hook'
+                                          description: Deprecated. TCPSocket is NOT
+                                            supported as a LifecycleHandler and kept
+                                            for the backward compatibility. There
+                                            are no validation of this field and lifecycle
+                                            hooks will fail in runtime when tcp handler
+                                            is specified.
                                           properties:
                                             host:
                                               description: 'Optional: Host name to
@@ -12833,9 +12838,7 @@ spec:
                                     Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                   properties:
                                     exec:
-                                      description: One and only one of the following
-                                        should be specified. Exec specifies the action
-                                        to take.
+                                      description: Exec specifies the action to take.
                                       properties:
                                         command:
                                           description: Command is the command line
@@ -12859,6 +12862,26 @@ spec:
                                         1.
                                       format: int32
                                       type: integer
+                                    grpc:
+                                      description: GRPC specifies an action involving
+                                        a GRPC port. This is an alpha field and requires
+                                        enabling GRPCContainerProbe feature gate.
+                                      properties:
+                                        port:
+                                          description: Port number of the gRPC service.
+                                            Number must be in the range 1 to 65535.
+                                          format: int32
+                                          type: integer
+                                        service:
+                                          description: "Service is the name of the
+                                            service to place in the gRPC HealthCheckRequest
+                                            (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                            \n If this is not specified, the default
+                                            behavior is defined by gRPC."
+                                          type: string
+                                      required:
+                                      - port
+                                      type: object
                                     httpGet:
                                       description: HTTPGet specifies the http request
                                         to perform.
@@ -12926,10 +12949,8 @@ spec:
                                       format: int32
                                       type: integer
                                     tcpSocket:
-                                      description: 'TCPSocket specifies an action
-                                        involving a TCP port. TCP hooks not yet supported
-                                        TODO: implement a realistic TCP lifecycle
-                                        hook'
+                                      description: TCPSocket specifies an action involving
+                                        a TCP port.
                                       properties:
                                         host:
                                           description: 'Optional: Host name to connect
@@ -12961,9 +12982,10 @@ spec:
                                         the value provided by the pod spec. Value
                                         must be non-negative integer. The value zero
                                         indicates stop immediately via the kill signal
-                                        (no opportunity to shut down). This is an
-                                        alpha field and requires enabling ProbeTerminationGracePeriod
-                                        feature gate.
+                                        (no opportunity to shut down). This is a beta
+                                        field and requires enabling ProbeTerminationGracePeriod
+                                        feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds
+                                        is used if unset.
                                       format: int64
                                       type: integer
                                     timeoutSeconds:
@@ -13036,9 +13058,7 @@ spec:
                                     More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                   properties:
                                     exec:
-                                      description: One and only one of the following
-                                        should be specified. Exec specifies the action
-                                        to take.
+                                      description: Exec specifies the action to take.
                                       properties:
                                         command:
                                           description: Command is the command line
@@ -13062,6 +13082,26 @@ spec:
                                         1.
                                       format: int32
                                       type: integer
+                                    grpc:
+                                      description: GRPC specifies an action involving
+                                        a GRPC port. This is an alpha field and requires
+                                        enabling GRPCContainerProbe feature gate.
+                                      properties:
+                                        port:
+                                          description: Port number of the gRPC service.
+                                            Number must be in the range 1 to 65535.
+                                          format: int32
+                                          type: integer
+                                        service:
+                                          description: "Service is the name of the
+                                            service to place in the gRPC HealthCheckRequest
+                                            (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                            \n If this is not specified, the default
+                                            behavior is defined by gRPC."
+                                          type: string
+                                      required:
+                                      - port
+                                      type: object
                                     httpGet:
                                       description: HTTPGet specifies the http request
                                         to perform.
@@ -13129,10 +13169,8 @@ spec:
                                       format: int32
                                       type: integer
                                     tcpSocket:
-                                      description: 'TCPSocket specifies an action
-                                        involving a TCP port. TCP hooks not yet supported
-                                        TODO: implement a realistic TCP lifecycle
-                                        hook'
+                                      description: TCPSocket specifies an action involving
+                                        a TCP port.
                                       properties:
                                         host:
                                           description: 'Optional: Host name to connect
@@ -13164,9 +13202,10 @@ spec:
                                         the value provided by the pod spec. Value
                                         must be non-negative integer. The value zero
                                         indicates stop immediately via the kill signal
-                                        (no opportunity to shut down). This is an
-                                        alpha field and requires enabling ProbeTerminationGracePeriod
-                                        feature gate.
+                                        (no opportunity to shut down). This is a beta
+                                        field and requires enabling ProbeTerminationGracePeriod
+                                        feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds
+                                        is used if unset.
                                       format: int64
                                       type: integer
                                     timeoutSeconds:
@@ -13206,9 +13245,10 @@ spec:
                                       type: object
                                   type: object
                                 securityContext:
-                                  description: 'Security options the pod should run
-                                    with. More info: https://kubernetes.io/docs/concepts/policy/security-context/
-                                    More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
+                                  description: 'SecurityContext defines the security
+                                    options the container should be run with. If set,
+                                    the fields of SecurityContext override the equivalent
+                                    fields of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
                                   properties:
                                     allowPrivilegeEscalation:
                                       description: 'AllowPrivilegeEscalation controls
@@ -13217,13 +13257,16 @@ spec:
                                         controls if the no_new_privs flag will be
                                         set on the container process. AllowPrivilegeEscalation
                                         is true always when the container is: 1) run
-                                        as Privileged 2) has CAP_SYS_ADMIN'
+                                        as Privileged 2) has CAP_SYS_ADMIN Note that
+                                        this field cannot be set when spec.os.name
+                                        is windows.'
                                       type: boolean
                                     capabilities:
                                       description: The capabilities to add/drop when
                                         running containers. Defaults to the default
                                         set of capabilities granted by the container
-                                        runtime.
+                                        runtime. Note that this field cannot be set
+                                        when spec.os.name is windows.
                                       properties:
                                         add:
                                           description: Added capabilities
@@ -13244,7 +13287,8 @@ spec:
                                       description: Run container in privileged mode.
                                         Processes in privileged containers are essentially
                                         equivalent to root on the host. Defaults to
-                                        false.
+                                        false. Note that this field cannot be set
+                                        when spec.os.name is windows.
                                       type: boolean
                                     procMount:
                                       description: procMount denotes the type of proc
@@ -13252,11 +13296,14 @@ spec:
                                         is DefaultProcMount which uses the container
                                         runtime defaults for readonly paths and masked
                                         paths. This requires the ProcMountType feature
-                                        flag to be enabled.
+                                        flag to be enabled. Note that this field cannot
+                                        be set when spec.os.name is windows.
                                       type: string
                                     readOnlyRootFilesystem:
                                       description: Whether this container has a read-only
-                                        root filesystem. Default is false.
+                                        root filesystem. Default is false. Note that
+                                        this field cannot be set when spec.os.name
+                                        is windows.
                                       type: boolean
                                     runAsGroup:
                                       description: The GID to run the entrypoint of
@@ -13264,7 +13311,8 @@ spec:
                                         if unset. May also be set in PodSecurityContext.  If
                                         set in both SecurityContext and PodSecurityContext,
                                         the value specified in SecurityContext takes
-                                        precedence.
+                                        precedence. Note that this field cannot be
+                                        set when spec.os.name is windows.
                                       format: int64
                                       type: integer
                                     runAsNonRoot:
@@ -13286,6 +13334,8 @@ spec:
                                         be set in PodSecurityContext.  If set in both
                                         SecurityContext and PodSecurityContext, the
                                         value specified in SecurityContext takes precedence.
+                                        Note that this field cannot be set when spec.os.name
+                                        is windows.
                                       format: int64
                                       type: integer
                                     seLinuxOptions:
@@ -13295,7 +13345,8 @@ spec:
                                         for each container.  May also be set in PodSecurityContext.  If
                                         set in both SecurityContext and PodSecurityContext,
                                         the value specified in SecurityContext takes
-                                        precedence.
+                                        precedence. Note that this field cannot be
+                                        set when spec.os.name is windows.
                                       properties:
                                         level:
                                           description: Level is SELinux level label
@@ -13318,7 +13369,9 @@ spec:
                                       description: The seccomp options to use by this
                                         container. If seccomp options are provided
                                         at both the pod & container level, the container
-                                        options override the pod options.
+                                        options override the pod options. Note that
+                                        this field cannot be set when spec.os.name
+                                        is windows.
                                       properties:
                                         localhostProfile:
                                           description: localhostProfile indicates
@@ -13347,7 +13400,8 @@ spec:
                                         from the PodSecurityContext will be used.
                                         If set in both SecurityContext and PodSecurityContext,
                                         the value specified in SecurityContext takes
-                                        precedence.
+                                        precedence. Note that this field cannot be
+                                        set when spec.os.name is linux.
                                       properties:
                                         gmsaCredentialSpec:
                                           description: GMSACredentialSpec is where
@@ -13360,6 +13414,22 @@ spec:
                                           description: GMSACredentialSpecName is the
                                             name of the GMSA credential spec to use.
                                           type: string
+                                        hostProcess:
+                                          description: HostProcess determines if a
+                                            container should be run as a 'Host Process'
+                                            container. This field is alpha-level and
+                                            will only be honored by components that
+                                            enable the WindowsHostProcessContainers
+                                            feature flag. Setting this field without
+                                            the feature flag will result in errors
+                                            when validating the Pod. All of a Pod's
+                                            containers must have the same effective
+                                            HostProcess value (it is not allowed to
+                                            have a mix of HostProcess containers and
+                                            non-HostProcess containers).  In addition,
+                                            if HostProcess is true then HostNetwork
+                                            must also be set to true.
+                                          type: boolean
                                         runAsUserName:
                                           description: The UserName in Windows to
                                             run the entrypoint of the container process.
@@ -13385,9 +13455,7 @@ spec:
                                     cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                   properties:
                                     exec:
-                                      description: One and only one of the following
-                                        should be specified. Exec specifies the action
-                                        to take.
+                                      description: Exec specifies the action to take.
                                       properties:
                                         command:
                                           description: Command is the command line
@@ -13411,6 +13479,26 @@ spec:
                                         1.
                                       format: int32
                                       type: integer
+                                    grpc:
+                                      description: GRPC specifies an action involving
+                                        a GRPC port. This is an alpha field and requires
+                                        enabling GRPCContainerProbe feature gate.
+                                      properties:
+                                        port:
+                                          description: Port number of the gRPC service.
+                                            Number must be in the range 1 to 65535.
+                                          format: int32
+                                          type: integer
+                                        service:
+                                          description: "Service is the name of the
+                                            service to place in the gRPC HealthCheckRequest
+                                            (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                            \n If this is not specified, the default
+                                            behavior is defined by gRPC."
+                                          type: string
+                                      required:
+                                      - port
+                                      type: object
                                     httpGet:
                                       description: HTTPGet specifies the http request
                                         to perform.
@@ -13478,10 +13566,8 @@ spec:
                                       format: int32
                                       type: integer
                                     tcpSocket:
-                                      description: 'TCPSocket specifies an action
-                                        involving a TCP port. TCP hooks not yet supported
-                                        TODO: implement a realistic TCP lifecycle
-                                        hook'
+                                      description: TCPSocket specifies an action involving
+                                        a TCP port.
                                       properties:
                                         host:
                                           description: 'Optional: Host name to connect
@@ -13513,9 +13599,10 @@ spec:
                                         the value provided by the pod spec. Value
                                         must be non-negative integer. The value zero
                                         indicates stop immediately via the kill signal
-                                        (no opportunity to shut down). This is an
-                                        alpha field and requires enabling ProbeTerminationGracePeriod
-                                        feature gate.
+                                        (no opportunity to shut down). This is a beta
+                                        field and requires enabling ProbeTerminationGracePeriod
+                                        feature gate. Minimum value is 1. spec.terminationGracePeriodSeconds
+                                        is used if unset.
                                       format: int64
                                       type: integer
                                     timeoutSeconds:
@@ -14117,9 +14204,7 @@ spec:
                                       - see the documentation of the driver for more
                                       information. \n A pod can use both types of
                                       ephemeral volumes and persistent volumes at
-                                      the same time. \n This is a beta feature and
-                                      only available when the GenericEphemeralVolume
-                                      feature gate is enabled."
+                                      the same time."
                                     properties:
                                       volumeClaimTemplate:
                                         description: "Will be used to create a stand-alone
@@ -14174,16 +14259,71 @@ spec:
                                                   to specify either: * An existing
                                                   VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)
                                                   * An existing PVC (PersistentVolumeClaim)
-                                                  * An existing custom resource that
-                                                  implements data population (Alpha)
-                                                  In order to use custom resource
-                                                  types that implement data population,
+                                                  If the provisioner or an external
+                                                  controller can support the specified
+                                                  data source, it will create a new
+                                                  volume based on the contents of
+                                                  the specified data source. If the
+                                                  AnyVolumeDataSource feature gate
+                                                  is enabled, this field will always
+                                                  have the same contents as the DataSourceRef
+                                                  field.'
+                                                properties:
+                                                  apiGroup:
+                                                    description: APIGroup is the group
+                                                      for the resource being referenced.
+                                                      If APIGroup is not specified,
+                                                      the specified Kind must be in
+                                                      the core API group. For any
+                                                      other third-party types, APIGroup
+                                                      is required.
+                                                    type: string
+                                                  kind:
+                                                    description: Kind is the type
+                                                      of resource being referenced
+                                                    type: string
+                                                  name:
+                                                    description: Name is the name
+                                                      of resource being referenced
+                                                    type: string
+                                                required:
+                                                - kind
+                                                - name
+                                                type: object
+                                              dataSourceRef:
+                                                description: 'Specifies the object
+                                                  from which to populate the volume
+                                                  with data, if a non-empty volume
+                                                  is desired. This may be any local
+                                                  object from a non-empty API group
+                                                  (non core object) or a PersistentVolumeClaim
+                                                  object. When this field is specified,
+                                                  volume binding will only succeed
+                                                  if the type of the specified object
+                                                  matches some installed volume populator
+                                                  or dynamic provisioner. This field
+                                                  will replace the functionality of
+                                                  the DataSource field and as such
+                                                  if both fields are non-empty, they
+                                                  must have the same value. For backwards
+                                                  compatibility, both fields (DataSource
+                                                  and DataSourceRef) will be set to
+                                                  the same value automatically if
+                                                  one of them is empty and the other
+                                                  is non-empty. There are two important
+                                                  differences between DataSource and
+                                                  DataSourceRef: * While DataSource
+                                                  only allows two specific types of
+                                                  objects, DataSourceRef   allows
+                                                  any non-core object, as well as
+                                                  PersistentVolumeClaim objects. *
+                                                  While DataSource ignores disallowed
+                                                  values (dropping them), DataSourceRef   preserves
+                                                  all values, and generates an error
+                                                  if a disallowed value is   specified.
+                                                  (Alpha) Using this field requires
                                                   the AnyVolumeDataSource feature
-                                                  gate must be enabled. If the provisioner
-                                                  or an external controller can support
-                                                  the specified data source, it will
-                                                  create a new volume based on the
-                                                  contents of the specified data source.'
+                                                  gate to be enabled.'
                                                 properties:
                                                   apiGroup:
                                                     description: APIGroup is the group
@@ -14209,7 +14349,13 @@ spec:
                                               resources:
                                                 description: 'Resources represents
                                                   the minimum resources the volume
-                                                  should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
+                                                  should have. If RecoverVolumeExpansionFailure
+                                                  feature is enabled users are allowed
+                                                  to specify resource requirements
+                                                  that are lower than previous value
+                                                  but must still be higher than capacity
+                                                  recorded in the status field of
+                                                  the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                                 properties:
                                                   limits:
                                                     additionalProperties:
@@ -16513,7 +16659,7 @@ spec:
                     description: Instance defines the name of the instance
                     type: string
                   project:
-                    description: Project defines the name of gcp project.
+                    description: Project defines the ID of gcp project.
                     type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
@@ -18825,7 +18971,7 @@ spec:
                         description: Instance defines the name of the instance
                         type: string
                       project:
-                        description: Project defines the name of gcp project.
+                        description: Project defines the ID of gcp project.
                         type: string
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
@@ -21583,7 +21729,7 @@ spec:
                                   description: Instance defines the name of the instance
                                   type: string
                                 project:
-                                  description: Project defines the name of gcp project.
+                                  description: Project defines the ID of gcp project.
                                   type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
@@ -24137,8 +24283,7 @@ spec:
                                         instance
                                       type: string
                                     project:
-                                      description: Project defines the name of gcp
-                                        project.
+                                      description: Project defines the ID of gcp project.
                                       type: string
                                     secretName:
                                       description: SecretName defines the name of
@@ -26963,12 +27108,14 @@ spec:
                                         provided. Variable references $(VAR_NAME)
                                         are expanded using the container''s environment.
                                         If a variable cannot be resolved, the reference
-                                        in the input string will be unchanged. The
-                                        $(VAR_NAME) syntax can be escaped with a double
-                                        $$, ie: $$(VAR_NAME). Escaped references will
-                                        never be expanded, regardless of whether the
-                                        variable exists or not. Cannot be updated.
-                                        More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                                        in the input string will be unchanged. Double
+                                        $$ are reduced to a single $, which allows
+                                        for escaping the $(VAR_NAME) syntax: i.e.
+                                        "$$(VAR_NAME)" will produce the string literal
+                                        "$(VAR_NAME)". Escaped references will never
+                                        be expanded, regardless of whether the variable
+                                        exists or not. Cannot be updated. More info:
+                                        https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                                       items:
                                         type: string
                                       type: array
@@ -26979,12 +27126,13 @@ spec:
                                         references $(VAR_NAME) are expanded using
                                         the container''s environment. If a variable
                                         cannot be resolved, the reference in the input
-                                        string will be unchanged. The $(VAR_NAME)
-                                        syntax can be escaped with a double $$, ie:
-                                        $$(VAR_NAME). Escaped references will never
-                                        be expanded, regardless of whether the variable
-                                        exists or not. Cannot be updated. More info:
-                                        https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                                        string will be unchanged. Double $$ are reduced
+                                        to a single $, which allows for escaping the
+                                        $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will
+                                        produce the string literal "$(VAR_NAME)".
+                                        Escaped references will never be expanded,
+                                        regardless of whether the variable exists
+                                        or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                                       items:
                                         type: string
                                       type: array
@@ -27001,13 +27149,15 @@ spec:
                                             type: string
                                           value:
                                             description: 'Variable references $(VAR_NAME)
-                                              are expanded using the previous defined
+                                              are expanded using the previously defined
                                               environment variables in the container
                                               and any service environment variables.
                                               If a variable cannot be resolved, the
                                               reference in the input string will be
-                                              unchanged. The $(VAR_NAME) syntax can
-                                              be escaped with a double $$, ie: $$(VAR_NAME).
+                                              unchanged. Double $$ are reduced to
+                                              a single $, which allows for escaping
+                                              the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
+                                              will produce the string literal "$(VAR_NAME)".
                                               Escaped references will never be expanded,
                                               regardless of whether the variable exists
                                               or not. Defaults to "".'
@@ -27190,9 +27340,8 @@ spec:
                                             until the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                                           properties:
                                             exec:
-                                              description: One and only one of the
-                                                following should be specified. Exec
-                                                specifies the action to take.
+                                              description: Exec specifies the action
+                                                to take.
                                               properties:
                                                 command:
                                                   description: Command is the command
@@ -27265,10 +27414,12 @@ spec:
                                               - port
                                               type: object
                                             tcpSocket:
-                                              description: 'TCPSocket specifies an
-                                                action involving a TCP port. TCP hooks
-                                                not yet supported TODO: implement
-                                                a realistic TCP lifecycle hook'
+                                              description: Deprecated. TCPSocket is
+                                                NOT supported as a LifecycleHandler
+                                                and kept for the backward compatibility.
+                                                There are no validation of this field
+                                                and lifecycle hooks will fail in runtime
+                                                when tcp handler is specified.
                                               properties:
                                                 host:
                                                   description: 'Optional: Host name
@@ -27295,21 +27446,20 @@ spec:
                                             as liveness/startup probe failure, preemption,
                                             resource contention, etc. The handler
                                             is not called if the container crashes
-                                            or exits. The reason for termination is
-                                            passed to the handler. The Pod''s termination
-                                            grace period countdown begins before the
-                                            PreStop hooked is executed. Regardless
-                                            of the outcome of the handler, the container
-                                            will eventually terminate within the Pod''s
-                                            termination grace period. Other management
-                                            of the container blocks until the hook
-                                            completes or until the termination grace
-                                            period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
+                                            or exits. The Pod''s termination grace
+                                            period countdown begins before the PreStop
+                                            hook is executed. Regardless of the outcome
+                                            of the handler, the container will eventually
+                                            terminate within the Pod''s termination
+                                            grace period (unless delayed by finalizers).
+                                            Other management of the container blocks
+                                            until the hook completes or until the
+                                            termination grace period is reached. More
+                                            info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                                           properties:
                                             exec:
-                                              description: One and only one of the
-                                                following should be specified. Exec
-                                                specifies the action to take.
+                                              description: Exec specifies the action
+                                                to take.
                                               properties:
                                                 command:
                                                   description: Command is the command
@@ -27382,10 +27532,12 @@ spec:
                                               - port
                                               type: object
                                             tcpSocket:
-                                              description: 'TCPSocket specifies an
-                                                action involving a TCP port. TCP hooks
-                                                not yet supported TODO: implement
-                                                a realistic TCP lifecycle hook'
+                                              description: Deprecated. TCPSocket is
+                                                NOT supported as a LifecycleHandler
+                                                and kept for the backward compatibility.
+                                                There are no validation of this field
+                                                and lifecycle hooks will fail in runtime
+                                                when tcp handler is specified.
                                               properties:
                                                 host:
                                                   description: 'Optional: Host name
@@ -27412,9 +27564,8 @@ spec:
                                         Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                       properties:
                                         exec:
-                                          description: One and only one of the following
-                                            should be specified. Exec specifies the
-                                            action to take.
+                                          description: Exec specifies the action to
+                                            take.
                                           properties:
                                             command:
                                               description: Command is the command
@@ -27439,6 +27590,28 @@ spec:
                                             Minimum value is 1.
                                           format: int32
                                           type: integer
+                                        grpc:
+                                          description: GRPC specifies an action involving
+                                            a GRPC port. This is an alpha field and
+                                            requires enabling GRPCContainerProbe feature
+                                            gate.
+                                          properties:
+                                            port:
+                                              description: Port number of the gRPC
+                                                service. Number must be in the range
+                                                1 to 65535.
+                                              format: int32
+                                              type: integer
+                                            service:
+                                              description: "Service is the name of
+                                                the service to place in the gRPC HealthCheckRequest
+                                                (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                                \n If this is not specified, the default
+                                                behavior is defined by gRPC."
+                                              type: string
+                                          required:
+                                          - port
+                                          type: object
                                         httpGet:
                                           description: HTTPGet specifies the http
                                             request to perform.
@@ -27512,10 +27685,8 @@ spec:
                                           format: int32
                                           type: integer
                                         tcpSocket:
-                                          description: 'TCPSocket specifies an action
-                                            involving a TCP port. TCP hooks not yet
-                                            supported TODO: implement a realistic
-                                            TCP lifecycle hook'
+                                          description: TCPSocket specifies an action
+                                            involving a TCP port.
                                           properties:
                                             host:
                                               description: 'Optional: Host name to
@@ -27549,8 +27720,10 @@ spec:
                                             must be non-negative integer. The value
                                             zero indicates stop immediately via the
                                             kill signal (no opportunity to shut down).
-                                            This is an alpha field and requires enabling
+                                            This is a beta field and requires enabling
                                             ProbeTerminationGracePeriod feature gate.
+                                            Minimum value is 1. spec.terminationGracePeriodSeconds
+                                            is used if unset.
                                           format: int64
                                           type: integer
                                         timeoutSeconds:
@@ -27627,9 +27800,8 @@ spec:
                                         be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                       properties:
                                         exec:
-                                          description: One and only one of the following
-                                            should be specified. Exec specifies the
-                                            action to take.
+                                          description: Exec specifies the action to
+                                            take.
                                           properties:
                                             command:
                                               description: Command is the command
@@ -27654,6 +27826,28 @@ spec:
                                             Minimum value is 1.
                                           format: int32
                                           type: integer
+                                        grpc:
+                                          description: GRPC specifies an action involving
+                                            a GRPC port. This is an alpha field and
+                                            requires enabling GRPCContainerProbe feature
+                                            gate.
+                                          properties:
+                                            port:
+                                              description: Port number of the gRPC
+                                                service. Number must be in the range
+                                                1 to 65535.
+                                              format: int32
+                                              type: integer
+                                            service:
+                                              description: "Service is the name of
+                                                the service to place in the gRPC HealthCheckRequest
+                                                (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                                \n If this is not specified, the default
+                                                behavior is defined by gRPC."
+                                              type: string
+                                          required:
+                                          - port
+                                          type: object
                                         httpGet:
                                           description: HTTPGet specifies the http
                                             request to perform.
@@ -27727,10 +27921,8 @@ spec:
                                           format: int32
                                           type: integer
                                         tcpSocket:
-                                          description: 'TCPSocket specifies an action
-                                            involving a TCP port. TCP hooks not yet
-                                            supported TODO: implement a realistic
-                                            TCP lifecycle hook'
+                                          description: TCPSocket specifies an action
+                                            involving a TCP port.
                                           properties:
                                             host:
                                               description: 'Optional: Host name to
@@ -27764,8 +27956,10 @@ spec:
                                             must be non-negative integer. The value
                                             zero indicates stop immediately via the
                                             kill signal (no opportunity to shut down).
-                                            This is an alpha field and requires enabling
+                                            This is a beta field and requires enabling
                                             ProbeTerminationGracePeriod feature gate.
+                                            Minimum value is 1. spec.terminationGracePeriodSeconds
+                                            is used if unset.
                                           format: int64
                                           type: integer
                                         timeoutSeconds:
@@ -27807,8 +28001,10 @@ spec:
                                           type: object
                                       type: object
                                     securityContext:
-                                      description: 'Security options the pod should
-                                        run with. More info: https://kubernetes.io/docs/concepts/policy/security-context/
+                                      description: 'SecurityContext defines the security
+                                        options the container should be run with.
+                                        If set, the fields of SecurityContext override
+                                        the equivalent fields of PodSecurityContext.
                                         More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
                                       properties:
                                         allowPrivilegeEscalation:
@@ -27818,13 +28014,17 @@ spec:
                                             controls if the no_new_privs flag will
                                             be set on the container process. AllowPrivilegeEscalation
                                             is true always when the container is:
-                                            1) run as Privileged 2) has CAP_SYS_ADMIN'
+                                            1) run as Privileged 2) has CAP_SYS_ADMIN
+                                            Note that this field cannot be set when
+                                            spec.os.name is windows.'
                                           type: boolean
                                         capabilities:
                                           description: The capabilities to add/drop
                                             when running containers. Defaults to the
                                             default set of capabilities granted by
-                                            the container runtime.
+                                            the container runtime. Note that this
+                                            field cannot be set when spec.os.name
+                                            is windows.
                                           properties:
                                             add:
                                               description: Added capabilities
@@ -27845,7 +28045,9 @@ spec:
                                           description: Run container in privileged
                                             mode. Processes in privileged containers
                                             are essentially equivalent to root on
-                                            the host. Defaults to false.
+                                            the host. Defaults to false. Note that
+                                            this field cannot be set when spec.os.name
+                                            is windows.
                                           type: boolean
                                         procMount:
                                           description: procMount denotes the type
@@ -27854,12 +28056,14 @@ spec:
                                             uses the container runtime defaults for
                                             readonly paths and masked paths. This
                                             requires the ProcMountType feature flag
-                                            to be enabled.
+                                            to be enabled. Note that this field cannot
+                                            be set when spec.os.name is windows.
                                           type: string
                                         readOnlyRootFilesystem:
                                           description: Whether this container has
                                             a read-only root filesystem. Default is
-                                            false.
+                                            false. Note that this field cannot be
+                                            set when spec.os.name is windows.
                                           type: boolean
                                         runAsGroup:
                                           description: The GID to run the entrypoint
@@ -27867,7 +28071,8 @@ spec:
                                             default if unset. May also be set in PodSecurityContext.  If
                                             set in both SecurityContext and PodSecurityContext,
                                             the value specified in SecurityContext
-                                            takes precedence.
+                                            takes precedence. Note that this field
+                                            cannot be set when spec.os.name is windows.
                                           format: int64
                                           type: integer
                                         runAsNonRoot:
@@ -27890,7 +28095,8 @@ spec:
                                             May also be set in PodSecurityContext.  If
                                             set in both SecurityContext and PodSecurityContext,
                                             the value specified in SecurityContext
-                                            takes precedence.
+                                            takes precedence. Note that this field
+                                            cannot be set when spec.os.name is windows.
                                           format: int64
                                           type: integer
                                         seLinuxOptions:
@@ -27901,7 +28107,8 @@ spec:
                                             also be set in PodSecurityContext.  If
                                             set in both SecurityContext and PodSecurityContext,
                                             the value specified in SecurityContext
-                                            takes precedence.
+                                            takes precedence. Note that this field
+                                            cannot be set when spec.os.name is windows.
                                           properties:
                                             level:
                                               description: Level is SELinux level
@@ -27925,7 +28132,8 @@ spec:
                                             by this container. If seccomp options
                                             are provided at both the pod & container
                                             level, the container options override
-                                            the pod options.
+                                            the pod options. Note that this field
+                                            cannot be set when spec.os.name is windows.
                                           properties:
                                             localhostProfile:
                                               description: localhostProfile indicates
@@ -27956,7 +28164,9 @@ spec:
                                             the options from the PodSecurityContext
                                             will be used. If set in both SecurityContext
                                             and PodSecurityContext, the value specified
-                                            in SecurityContext takes precedence.
+                                            in SecurityContext takes precedence. Note
+                                            that this field cannot be set when spec.os.name
+                                            is linux.
                                           properties:
                                             gmsaCredentialSpec:
                                               description: GMSACredentialSpec is where
@@ -27970,6 +28180,22 @@ spec:
                                                 is the name of the GMSA credential
                                                 spec to use.
                                               type: string
+                                            hostProcess:
+                                              description: HostProcess determines
+                                                if a container should be run as a
+                                                'Host Process' container. This field
+                                                is alpha-level and will only be honored
+                                                by components that enable the WindowsHostProcessContainers
+                                                feature flag. Setting this field without
+                                                the feature flag will result in errors
+                                                when validating the Pod. All of a
+                                                Pod's containers must have the same
+                                                effective HostProcess value (it is
+                                                not allowed to have a mix of HostProcess
+                                                containers and non-HostProcess containers).  In
+                                                addition, if HostProcess is true then
+                                                HostNetwork must also be set to true.
+                                              type: boolean
                                             runAsUserName:
                                               description: The UserName in Windows
                                                 to run the entrypoint of the container
@@ -27996,9 +28222,8 @@ spec:
                                         More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                                       properties:
                                         exec:
-                                          description: One and only one of the following
-                                            should be specified. Exec specifies the
-                                            action to take.
+                                          description: Exec specifies the action to
+                                            take.
                                           properties:
                                             command:
                                               description: Command is the command
@@ -28023,6 +28248,28 @@ spec:
                                             Minimum value is 1.
                                           format: int32
                                           type: integer
+                                        grpc:
+                                          description: GRPC specifies an action involving
+                                            a GRPC port. This is an alpha field and
+                                            requires enabling GRPCContainerProbe feature
+                                            gate.
+                                          properties:
+                                            port:
+                                              description: Port number of the gRPC
+                                                service. Number must be in the range
+                                                1 to 65535.
+                                              format: int32
+                                              type: integer
+                                            service:
+                                              description: "Service is the name of
+                                                the service to place in the gRPC HealthCheckRequest
+                                                (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                                \n If this is not specified, the default
+                                                behavior is defined by gRPC."
+                                              type: string
+                                          required:
+                                          - port
+                                          type: object
                                         httpGet:
                                           description: HTTPGet specifies the http
                                             request to perform.
@@ -28096,10 +28343,8 @@ spec:
                                           format: int32
                                           type: integer
                                         tcpSocket:
-                                          description: 'TCPSocket specifies an action
-                                            involving a TCP port. TCP hooks not yet
-                                            supported TODO: implement a realistic
-                                            TCP lifecycle hook'
+                                          description: TCPSocket specifies an action
+                                            involving a TCP port.
                                           properties:
                                             host:
                                               description: 'Optional: Host name to
@@ -28133,8 +28378,10 @@ spec:
                                             must be non-negative integer. The value
                                             zero indicates stop immediately via the
                                             kill signal (no opportunity to shut down).
-                                            This is an alpha field and requires enabling
+                                            This is a beta field and requires enabling
                                             ProbeTerminationGracePeriod feature gate.
+                                            Minimum value is 1. spec.terminationGracePeriodSeconds
+                                            is used if unset.
                                           format: int64
                                           type: integer
                                         timeoutSeconds:
@@ -28765,10 +29012,7 @@ spec:
                                           used that way - see the documentation of
                                           the driver for more information. \n A pod
                                           can use both types of ephemeral volumes
-                                          and persistent volumes at the same time.
-                                          \n This is a beta feature and only available
-                                          when the GenericEphemeralVolume feature
-                                          gate is enabled."
+                                          and persistent volumes at the same time."
                                         properties:
                                           volumeClaimTemplate:
                                             description: "Will be used to create a
@@ -28828,17 +29072,76 @@ spec:
                                                       existing VolumeSnapshot object
                                                       (snapshot.storage.k8s.io/VolumeSnapshot)
                                                       * An existing PVC (PersistentVolumeClaim)
-                                                      * An existing custom resource
-                                                      that implements data population
-                                                      (Alpha) In order to use custom
-                                                      resource types that implement
-                                                      data population, the AnyVolumeDataSource
-                                                      feature gate must be enabled.
                                                       If the provisioner or an external
                                                       controller can support the specified
                                                       data source, it will create
                                                       a new volume based on the contents
-                                                      of the specified data source.'
+                                                      of the specified data source.
+                                                      If the AnyVolumeDataSource feature
+                                                      gate is enabled, this field
+                                                      will always have the same contents
+                                                      as the DataSourceRef field.'
+                                                    properties:
+                                                      apiGroup:
+                                                        description: APIGroup is the
+                                                          group for the resource being
+                                                          referenced. If APIGroup
+                                                          is not specified, the specified
+                                                          Kind must be in the core
+                                                          API group. For any other
+                                                          third-party types, APIGroup
+                                                          is required.
+                                                        type: string
+                                                      kind:
+                                                        description: Kind is the type
+                                                          of resource being referenced
+                                                        type: string
+                                                      name:
+                                                        description: Name is the name
+                                                          of resource being referenced
+                                                        type: string
+                                                    required:
+                                                    - kind
+                                                    - name
+                                                    type: object
+                                                  dataSourceRef:
+                                                    description: 'Specifies the object
+                                                      from which to populate the volume
+                                                      with data, if a non-empty volume
+                                                      is desired. This may be any
+                                                      local object from a non-empty
+                                                      API group (non core object)
+                                                      or a PersistentVolumeClaim object.
+                                                      When this field is specified,
+                                                      volume binding will only succeed
+                                                      if the type of the specified
+                                                      object matches some installed
+                                                      volume populator or dynamic
+                                                      provisioner. This field will
+                                                      replace the functionality of
+                                                      the DataSource field and as
+                                                      such if both fields are non-empty,
+                                                      they must have the same value.
+                                                      For backwards compatibility,
+                                                      both fields (DataSource and
+                                                      DataSourceRef) will be set to
+                                                      the same value automatically
+                                                      if one of them is empty and
+                                                      the other is non-empty. There
+                                                      are two important differences
+                                                      between DataSource and DataSourceRef:
+                                                      * While DataSource only allows
+                                                      two specific types of objects,
+                                                      DataSourceRef   allows any non-core
+                                                      object, as well as PersistentVolumeClaim
+                                                      objects. * While DataSource
+                                                      ignores disallowed values (dropping
+                                                      them), DataSourceRef   preserves
+                                                      all values, and generates an
+                                                      error if a disallowed value
+                                                      is   specified. (Alpha) Using
+                                                      this field requires the AnyVolumeDataSource
+                                                      feature gate to be enabled.'
                                                     properties:
                                                       apiGroup:
                                                         description: APIGroup is the
@@ -28865,7 +29168,14 @@ spec:
                                                   resources:
                                                     description: 'Resources represents
                                                       the minimum resources the volume
-                                                      should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
+                                                      should have. If RecoverVolumeExpansionFailure
+                                                      feature is enabled users are
+                                                      allowed to specify resource
+                                                      requirements that are lower
+                                                      than previous value but must
+                                                      still be higher than capacity
+                                                      recorded in the status field
+                                                      of the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                                     properties:
                                                       limits:
                                                         additionalProperties:
@@ -30414,10 +30724,12 @@ spec:
                           CMD is used if this is not provided. Variable references
                           $(VAR_NAME) are expanded using the container''s environment.
                           If a variable cannot be resolved, the reference in the input
-                          string will be unchanged. The $(VAR_NAME) syntax can be
-                          escaped with a double $$, ie: $$(VAR_NAME). Escaped references
-                          will never be expanded, regardless of whether the variable
-                          exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                          string will be unchanged. Double $$ are reduced to a single
+                          $, which allows for escaping the $(VAR_NAME) syntax: i.e.
+                          "$$(VAR_NAME)" will produce the string literal "$(VAR_NAME)".
+                          Escaped references will never be expanded, regardless of
+                          whether the variable exists or not. Cannot be updated. More
+                          info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                         items:
                           type: string
                         type: array
@@ -30426,11 +30738,12 @@ spec:
                           The docker image''s ENTRYPOINT is used if this is not provided.
                           Variable references $(VAR_NAME) are expanded using the container''s
                           environment. If a variable cannot be resolved, the reference
-                          in the input string will be unchanged. The $(VAR_NAME) syntax
-                          can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
-                          references will never be expanded, regardless of whether
-                          the variable exists or not. Cannot be updated. More info:
-                          https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                          in the input string will be unchanged. Double $$ are reduced
+                          to a single $, which allows for escaping the $(VAR_NAME)
+                          syntax: i.e. "$$(VAR_NAME)" will produce the string literal
+                          "$(VAR_NAME)". Escaped references will never be expanded,
+                          regardless of whether the variable exists or not. Cannot
+                          be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                         items:
                           type: string
                         type: array
@@ -30447,14 +30760,15 @@ spec:
                               type: string
                             value:
                               description: 'Variable references $(VAR_NAME) are expanded
-                                using the previous defined environment variables in
-                                the container and any service environment variables.
+                                using the previously defined environment variables
+                                in the container and any service environment variables.
                                 If a variable cannot be resolved, the reference in
-                                the input string will be unchanged. The $(VAR_NAME)
-                                syntax can be escaped with a double $$, ie: $$(VAR_NAME).
-                                Escaped references will never be expanded, regardless
-                                of whether the variable exists or not. Defaults to
-                                "".'
+                                the input string will be unchanged. Double $$ are
+                                reduced to a single $, which allows for escaping the
+                                $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce
+                                the string literal "$(VAR_NAME)". Escaped references
+                                will never be expanded, regardless of whether the
+                                variable exists or not. Defaults to "".'
                               type: string
                             valueFrom:
                               description: Source for the environment variable's value.
@@ -30615,8 +30929,7 @@ spec:
                               the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                             properties:
                               exec:
-                                description: One and only one of the following should
-                                  be specified. Exec specifies the action to take.
+                                description: Exec specifies the action to take.
                                 properties:
                                   command:
                                     description: Command is the command line to execute
@@ -30678,9 +30991,11 @@ spec:
                                 - port
                                 type: object
                               tcpSocket:
-                                description: 'TCPSocket specifies an action involving
-                                  a TCP port. TCP hooks not yet supported TODO: implement
-                                  a realistic TCP lifecycle hook'
+                                description: Deprecated. TCPSocket is NOT supported
+                                  as a LifecycleHandler and kept for the backward
+                                  compatibility. There are no validation of this field
+                                  and lifecycle hooks will fail in runtime when tcp
+                                  handler is specified.
                                 properties:
                                   host:
                                     description: 'Optional: Host name to connect to,
@@ -30703,18 +31018,17 @@ spec:
                               is terminated due to an API request or management event
                               such as liveness/startup probe failure, preemption,
                               resource contention, etc. The handler is not called
-                              if the container crashes or exits. The reason for termination
-                              is passed to the handler. The Pod''s termination grace
-                              period countdown begins before the PreStop hooked is
-                              executed. Regardless of the outcome of the handler,
+                              if the container crashes or exits. The Pod''s termination
+                              grace period countdown begins before the PreStop hook
+                              is executed. Regardless of the outcome of the handler,
                               the container will eventually terminate within the Pod''s
-                              termination grace period. Other management of the container
-                              blocks until the hook completes or until the termination
-                              grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
+                              termination grace period (unless delayed by finalizers).
+                              Other management of the container blocks until the hook
+                              completes or until the termination grace period is reached.
+                              More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                             properties:
                               exec:
-                                description: One and only one of the following should
-                                  be specified. Exec specifies the action to take.
+                                description: Exec specifies the action to take.
                                 properties:
                                   command:
                                     description: Command is the command line to execute
@@ -30776,9 +31090,11 @@ spec:
                                 - port
                                 type: object
                               tcpSocket:
-                                description: 'TCPSocket specifies an action involving
-                                  a TCP port. TCP hooks not yet supported TODO: implement
-                                  a realistic TCP lifecycle hook'
+                                description: Deprecated. TCPSocket is NOT supported
+                                  as a LifecycleHandler and kept for the backward
+                                  compatibility. There are no validation of this field
+                                  and lifecycle hooks will fail in runtime when tcp
+                                  handler is specified.
                                 properties:
                                   host:
                                     description: 'Optional: Host name to connect to,
@@ -30803,8 +31119,7 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                         properties:
                           exec:
-                            description: One and only one of the following should
-                              be specified. Exec specifies the action to take.
+                            description: Exec specifies the action to take.
                             properties:
                               command:
                                 description: Command is the command line to execute
@@ -30825,6 +31140,25 @@ spec:
                               to 3. Minimum value is 1.
                             format: int32
                             type: integer
+                          grpc:
+                            description: GRPC specifies an action involving a GRPC
+                              port. This is an alpha field and requires enabling GRPCContainerProbe
+                              feature gate.
+                            properties:
+                              port:
+                                description: Port number of the gRPC service. Number
+                                  must be in the range 1 to 65535.
+                                format: int32
+                                type: integer
+                              service:
+                                description: "Service is the name of the service to
+                                  place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                  \n If this is not specified, the default behavior
+                                  is defined by gRPC."
+                                type: string
+                            required:
+                            - port
+                            type: object
                           httpGet:
                             description: HTTPGet specifies the http request to perform.
                             properties:
@@ -30888,9 +31222,8 @@ spec:
                             format: int32
                             type: integer
                           tcpSocket:
-                            description: 'TCPSocket specifies an action involving
-                              a TCP port. TCP hooks not yet supported TODO: implement
-                              a realistic TCP lifecycle hook'
+                            description: TCPSocket specifies an action involving a
+                              TCP port.
                             properties:
                               host:
                                 description: 'Optional: Host name to connect to, defaults
@@ -30919,9 +31252,10 @@ spec:
                               Otherwise, this value overrides the value provided by
                               the pod spec. Value must be non-negative integer. The
                               value zero indicates stop immediately via the kill signal
-                              (no opportunity to shut down). This is an alpha field
+                              (no opportunity to shut down). This is a beta field
                               and requires enabling ProbeTerminationGracePeriod feature
-                              gate.
+                              gate. Minimum value is 1. spec.terminationGracePeriodSeconds
+                              is used if unset.
                             format: int64
                             type: integer
                           timeoutSeconds:
@@ -30990,8 +31324,7 @@ spec:
                           probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                         properties:
                           exec:
-                            description: One and only one of the following should
-                              be specified. Exec specifies the action to take.
+                            description: Exec specifies the action to take.
                             properties:
                               command:
                                 description: Command is the command line to execute
@@ -31012,6 +31345,25 @@ spec:
                               to 3. Minimum value is 1.
                             format: int32
                             type: integer
+                          grpc:
+                            description: GRPC specifies an action involving a GRPC
+                              port. This is an alpha field and requires enabling GRPCContainerProbe
+                              feature gate.
+                            properties:
+                              port:
+                                description: Port number of the gRPC service. Number
+                                  must be in the range 1 to 65535.
+                                format: int32
+                                type: integer
+                              service:
+                                description: "Service is the name of the service to
+                                  place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                  \n If this is not specified, the default behavior
+                                  is defined by gRPC."
+                                type: string
+                            required:
+                            - port
+                            type: object
                           httpGet:
                             description: HTTPGet specifies the http request to perform.
                             properties:
@@ -31075,9 +31427,8 @@ spec:
                             format: int32
                             type: integer
                           tcpSocket:
-                            description: 'TCPSocket specifies an action involving
-                              a TCP port. TCP hooks not yet supported TODO: implement
-                              a realistic TCP lifecycle hook'
+                            description: TCPSocket specifies an action involving a
+                              TCP port.
                             properties:
                               host:
                                 description: 'Optional: Host name to connect to, defaults
@@ -31106,9 +31457,10 @@ spec:
                               Otherwise, this value overrides the value provided by
                               the pod spec. Value must be non-negative integer. The
                               value zero indicates stop immediately via the kill signal
-                              (no opportunity to shut down). This is an alpha field
+                              (no opportunity to shut down). This is a beta field
                               and requires enabling ProbeTerminationGracePeriod feature
-                              gate.
+                              gate. Minimum value is 1. spec.terminationGracePeriodSeconds
+                              is used if unset.
                             format: int64
                             type: integer
                           timeoutSeconds:
@@ -31147,8 +31499,9 @@ spec:
                             type: object
                         type: object
                       securityContext:
-                        description: 'Security options the pod should run with. More
-                          info: https://kubernetes.io/docs/concepts/policy/security-context/
+                        description: 'SecurityContext defines the security options
+                          the container should be run with. If set, the fields of
+                          SecurityContext override the equivalent fields of PodSecurityContext.
                           More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
                         properties:
                           allowPrivilegeEscalation:
@@ -31157,12 +31510,14 @@ spec:
                               This bool directly controls if the no_new_privs flag
                               will be set on the container process. AllowPrivilegeEscalation
                               is true always when the container is: 1) run as Privileged
-                              2) has CAP_SYS_ADMIN'
+                              2) has CAP_SYS_ADMIN Note that this field cannot be
+                              set when spec.os.name is windows.'
                             type: boolean
                           capabilities:
                             description: The capabilities to add/drop when running
                               containers. Defaults to the default set of capabilities
-                              granted by the container runtime.
+                              granted by the container runtime. Note that this field
+                              cannot be set when spec.os.name is windows.
                             properties:
                               add:
                                 description: Added capabilities
@@ -31182,25 +31537,29 @@ spec:
                           privileged:
                             description: Run container in privileged mode. Processes
                               in privileged containers are essentially equivalent
-                              to root on the host. Defaults to false.
+                              to root on the host. Defaults to false. Note that this
+                              field cannot be set when spec.os.name is windows.
                             type: boolean
                           procMount:
                             description: procMount denotes the type of proc mount
                               to use for the containers. The default is DefaultProcMount
                               which uses the container runtime defaults for readonly
                               paths and masked paths. This requires the ProcMountType
-                              feature flag to be enabled.
+                              feature flag to be enabled. Note that this field cannot
+                              be set when spec.os.name is windows.
                             type: string
                           readOnlyRootFilesystem:
                             description: Whether this container has a read-only root
-                              filesystem. Default is false.
+                              filesystem. Default is false. Note that this field cannot
+                              be set when spec.os.name is windows.
                             type: boolean
                           runAsGroup:
                             description: The GID to run the entrypoint of the container
                               process. Uses runtime default if unset. May also be
                               set in PodSecurityContext.  If set in both SecurityContext
                               and PodSecurityContext, the value specified in SecurityContext
-                              takes precedence.
+                              takes precedence. Note that this field cannot be set
+                              when spec.os.name is windows.
                             format: int64
                             type: integer
                           runAsNonRoot:
@@ -31219,6 +31578,8 @@ spec:
                               if unspecified. May also be set in PodSecurityContext.  If
                               set in both SecurityContext and PodSecurityContext,
                               the value specified in SecurityContext takes precedence.
+                              Note that this field cannot be set when spec.os.name
+                              is windows.
                             format: int64
                             type: integer
                           seLinuxOptions:
@@ -31227,7 +31588,8 @@ spec:
                               allocate a random SELinux context for each container.  May
                               also be set in PodSecurityContext.  If set in both SecurityContext
                               and PodSecurityContext, the value specified in SecurityContext
-                              takes precedence.
+                              takes precedence. Note that this field cannot be set
+                              when spec.os.name is windows.
                             properties:
                               level:
                                 description: Level is SELinux level label that applies
@@ -31250,6 +31612,8 @@ spec:
                             description: The seccomp options to use by this container.
                               If seccomp options are provided at both the pod & container
                               level, the container options override the pod options.
+                              Note that this field cannot be set when spec.os.name
+                              is windows.
                             properties:
                               localhostProfile:
                                 description: localhostProfile indicates a profile
@@ -31275,7 +31639,8 @@ spec:
                               all containers. If unspecified, the options from the
                               PodSecurityContext will be used. If set in both SecurityContext
                               and PodSecurityContext, the value specified in SecurityContext
-                              takes precedence.
+                              takes precedence. Note that this field cannot be set
+                              when spec.os.name is linux.
                             properties:
                               gmsaCredentialSpec:
                                 description: GMSACredentialSpec is where the GMSA
@@ -31287,6 +31652,19 @@ spec:
                                 description: GMSACredentialSpecName is the name of
                                   the GMSA credential spec to use.
                                 type: string
+                              hostProcess:
+                                description: HostProcess determines if a container
+                                  should be run as a 'Host Process' container. This
+                                  field is alpha-level and will only be honored by
+                                  components that enable the WindowsHostProcessContainers
+                                  feature flag. Setting this field without the feature
+                                  flag will result in errors when validating the Pod.
+                                  All of a Pod's containers must have the same effective
+                                  HostProcess value (it is not allowed to have a mix
+                                  of HostProcess containers and non-HostProcess containers).  In
+                                  addition, if HostProcess is true then HostNetwork
+                                  must also be set to true.
+                                type: boolean
                               runAsUserName:
                                 description: The UserName in Windows to run the entrypoint
                                   of the container process. Defaults to the user specified
@@ -31308,8 +31686,7 @@ spec:
                           operation. This cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                         properties:
                           exec:
-                            description: One and only one of the following should
-                              be specified. Exec specifies the action to take.
+                            description: Exec specifies the action to take.
                             properties:
                               command:
                                 description: Command is the command line to execute
@@ -31330,6 +31707,25 @@ spec:
                               to 3. Minimum value is 1.
                             format: int32
                             type: integer
+                          grpc:
+                            description: GRPC specifies an action involving a GRPC
+                              port. This is an alpha field and requires enabling GRPCContainerProbe
+                              feature gate.
+                            properties:
+                              port:
+                                description: Port number of the gRPC service. Number
+                                  must be in the range 1 to 65535.
+                                format: int32
+                                type: integer
+                              service:
+                                description: "Service is the name of the service to
+                                  place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                  \n If this is not specified, the default behavior
+                                  is defined by gRPC."
+                                type: string
+                            required:
+                            - port
+                            type: object
                           httpGet:
                             description: HTTPGet specifies the http request to perform.
                             properties:
@@ -31393,9 +31789,8 @@ spec:
                             format: int32
                             type: integer
                           tcpSocket:
-                            description: 'TCPSocket specifies an action involving
-                              a TCP port. TCP hooks not yet supported TODO: implement
-                              a realistic TCP lifecycle hook'
+                            description: TCPSocket specifies an action involving a
+                              TCP port.
                             properties:
                               host:
                                 description: 'Optional: Host name to connect to, defaults
@@ -31424,9 +31819,10 @@ spec:
                               Otherwise, this value overrides the value provided by
                               the pod spec. Value must be non-negative integer. The
                               value zero indicates stop immediately via the kill signal
-                              (no opportunity to shut down). This is an alpha field
+                              (no opportunity to shut down). This is a beta field
                               and requires enabling ProbeTerminationGracePeriod feature
-                              gate.
+                              gate. Minimum value is 1. spec.terminationGracePeriodSeconds
+                              is used if unset.
                             format: int64
                             type: integer
                           timeoutSeconds:
@@ -31963,8 +32359,7 @@ spec:
                             CSI driver is meant to be used that way - see the documentation
                             of the driver for more information. \n A pod can use both
                             types of ephemeral volumes and persistent volumes at the
-                            same time. \n This is a beta feature and only available
-                            when the GenericEphemeralVolume feature gate is enabled."
+                            same time."
                           properties:
                             volumeClaimTemplate:
                               description: "Will be used to create a stand-alone PVC
@@ -32012,15 +32407,61 @@ spec:
                                       description: 'This field can be used to specify
                                         either: * An existing VolumeSnapshot object
                                         (snapshot.storage.k8s.io/VolumeSnapshot) *
-                                        An existing PVC (PersistentVolumeClaim) *
-                                        An existing custom resource that implements
-                                        data population (Alpha) In order to use custom
-                                        resource types that implement data population,
-                                        the AnyVolumeDataSource feature gate must
-                                        be enabled. If the provisioner or an external
-                                        controller can support the specified data
-                                        source, it will create a new volume based
-                                        on the contents of the specified data source.'
+                                        An existing PVC (PersistentVolumeClaim) If
+                                        the provisioner or an external controller
+                                        can support the specified data source, it
+                                        will create a new volume based on the contents
+                                        of the specified data source. If the AnyVolumeDataSource
+                                        feature gate is enabled, this field will always
+                                        have the same contents as the DataSourceRef
+                                        field.'
+                                      properties:
+                                        apiGroup:
+                                          description: APIGroup is the group for the
+                                            resource being referenced. If APIGroup
+                                            is not specified, the specified Kind must
+                                            be in the core API group. For any other
+                                            third-party types, APIGroup is required.
+                                          type: string
+                                        kind:
+                                          description: Kind is the type of resource
+                                            being referenced
+                                          type: string
+                                        name:
+                                          description: Name is the name of resource
+                                            being referenced
+                                          type: string
+                                      required:
+                                      - kind
+                                      - name
+                                      type: object
+                                    dataSourceRef:
+                                      description: 'Specifies the object from which
+                                        to populate the volume with data, if a non-empty
+                                        volume is desired. This may be any local object
+                                        from a non-empty API group (non core object)
+                                        or a PersistentVolumeClaim object. When this
+                                        field is specified, volume binding will only
+                                        succeed if the type of the specified object
+                                        matches some installed volume populator or
+                                        dynamic provisioner. This field will replace
+                                        the functionality of the DataSource field
+                                        and as such if both fields are non-empty,
+                                        they must have the same value. For backwards
+                                        compatibility, both fields (DataSource and
+                                        DataSourceRef) will be set to the same value
+                                        automatically if one of them is empty and
+                                        the other is non-empty. There are two important
+                                        differences between DataSource and DataSourceRef:
+                                        * While DataSource only allows two specific
+                                        types of objects, DataSourceRef   allows any
+                                        non-core object, as well as PersistentVolumeClaim
+                                        objects. * While DataSource ignores disallowed
+                                        values (dropping them), DataSourceRef   preserves
+                                        all values, and generates an error if a disallowed
+                                        value is   specified. (Alpha) Using this field
+                                        requires the AnyVolumeDataSource feature gate
+                                        to be enabled.'
                                       properties:
                                         apiGroup:
                                           description: APIGroup is the group for the
@@ -32043,8 +32484,12 @@ spec:
                                       type: object
                                     resources:
                                       description: 'Resources represents the minimum
-                                        resources the volume should have. More info:
-                                        https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
+                                        resources the volume should have. If RecoverVolumeExpansionFailure
+                                        feature is enabled users are allowed to specify
+                                        resource requirements that are lower than
+                                        previous value but must still be higher than
+                                        capacity recorded in the status field of the
+                                        claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                       properties:
                                         limits:
                                           additionalProperties:
@@ -33735,7 +34180,7 @@ spec:
                           description: Instance defines the name of the instance
                           type: string
                         project:
-                          description: Project defines the name of gcp project.
+                          description: Project defines the ID of gcp project.
                           type: string
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
@@ -36136,7 +36581,7 @@ spec:
                               description: Instance defines the name of the instance
                               type: string
                             project:
-                              description: Project defines the name of gcp project.
+                              description: Project defines the ID of gcp project.
                               type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
@@ -38787,11 +39232,13 @@ spec:
                                 image''s CMD is used if this is not provided. Variable
                                 references $(VAR_NAME) are expanded using the container''s
                                 environment. If a variable cannot be resolved, the
-                                reference in the input string will be unchanged. The
-                                $(VAR_NAME) syntax can be escaped with a double $$,
-                                ie: $$(VAR_NAME). Escaped references will never be
-                                expanded, regardless of whether the variable exists
-                                or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                                reference in the input string will be unchanged. Double
+                                $$ are reduced to a single $, which allows for escaping
+                                the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce
+                                the string literal "$(VAR_NAME)". Escaped references
+                                will never be expanded, regardless of whether the
+                                variable exists or not. Cannot be updated. More info:
+                                https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                               items:
                                 type: string
                               type: array
@@ -38801,11 +39248,12 @@ spec:
                                 this is not provided. Variable references $(VAR_NAME)
                                 are expanded using the container''s environment. If
                                 a variable cannot be resolved, the reference in the
-                                input string will be unchanged. The $(VAR_NAME) syntax
-                                can be escaped with a double $$, ie: $$(VAR_NAME).
-                                Escaped references will never be expanded, regardless
-                                of whether the variable exists or not. Cannot be updated.
-                                More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+                                input string will be unchanged. Double $$ are reduced
+                                to a single $, which allows for escaping the $(VAR_NAME)
+                                syntax: i.e. "$$(VAR_NAME)" will produce the string
+                                literal "$(VAR_NAME)". Escaped references will never
+                                be expanded, regardless of whether the variable exists
+                                or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
                               items:
                                 type: string
                               type: array
@@ -38822,14 +39270,16 @@ spec:
                                     type: string
                                   value:
                                     description: 'Variable references $(VAR_NAME)
-                                      are expanded using the previous defined environment
+                                      are expanded using the previously defined environment
                                       variables in the container and any service environment
                                       variables. If a variable cannot be resolved,
                                       the reference in the input string will be unchanged.
-                                      The $(VAR_NAME) syntax can be escaped with a
-                                      double $$, ie: $$(VAR_NAME). Escaped references
-                                      will never be expanded, regardless of whether
-                                      the variable exists or not. Defaults to "".'
+                                      Double $$ are reduced to a single $, which allows
+                                      for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)"
+                                      will produce the string literal "$(VAR_NAME)".
+                                      Escaped references will never be expanded, regardless
+                                      of whether the variable exists or not. Defaults
+                                      to "".'
                                     type: string
                                   valueFrom:
                                     description: Source for the environment variable's
@@ -38999,9 +39449,7 @@ spec:
                                     info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                                   properties:
                                     exec:
-                                      description: One and only one of the following
-                                        should be specified. Exec specifies the action
-                                        to take.
+                                      description: Exec specifies the action to take.
                                       properties:
                                         command:
                                           description: Command is the command line
@@ -39066,10 +39514,11 @@ spec:
                                       - port
                                       type: object
                                     tcpSocket:
-                                      description: 'TCPSocket specifies an action
-                                        involving a TCP port. TCP hooks not yet supported
-                                        TODO: implement a realistic TCP lifecycle
-                                        hook'
+                                      description: Deprecated. TCPSocket is NOT supported
+                                        as a LifecycleHandler and kept for the backward
+                                        compatibility. There are no validation of
+                                        this field and lifecycle hooks will fail in
+                                        runtime when tcp handler is specified.
                                       properties:
                                         host:
                                           description: 'Optional: Host name to connect
@@ -39094,20 +39543,17 @@ spec:
                                     or management event such as liveness/startup probe
                                     failure, preemption, resource contention, etc.
                                     The handler is not called if the container crashes
-                                    or exits. The reason for termination is passed
-                                    to the handler. The Pod''s termination grace period
-                                    countdown begins before the PreStop hooked is
-                                    executed. Regardless of the outcome of the handler,
-                                    the container will eventually terminate within
-                                    the Pod''s termination grace period. Other management
-                                    of the container blocks until the hook completes
-                                    or until the termination grace period is reached.
-                                    More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
+                                    or exits. The Pod''s termination grace period
+                                    countdown begins before the PreStop hook is executed.
+                                    Regardless of the outcome of the handler, the
+                                    container will eventually terminate within the
+                                    Pod''s termination grace period (unless delayed
+                                    by finalizers). Other management of the container
+                                    blocks until the hook completes or until the termination
+                                    grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks'
                                   properties:
                                     exec:
-                                      description: One and only one of the following
-                                        should be specified. Exec specifies the action
-                                        to take.
+                                      description: Exec specifies the action to take.
                                       properties:
                                         command:
                                           description: Command is the command line
@@ -39172,10 +39618,11 @@ spec:
                                       - port
                                       type: object
                                     tcpSocket:
-                                      description: 'TCPSocket specifies an action
-                                        involving a TCP port. TCP hooks not yet supported
-                                        TODO: implement a realistic TCP lifecycle
-                                        hook'
+                                      description: Deprecated. TCPSocket is NOT supported
+                                        as a LifecycleHandler and kept for the backward
+                                        compatibility. There are no validation of
+                                        this field and lifecycle hooks will fail in
+                                        runtime when tcp handler is specified.
                                       properties:
                                         host:
                                           description: 'Optional: Host name to connect
@@ -39201,8 +39648,7 @@ spec:
                                 be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                               properties:
                                 exec:
-                                  description: One and only one of the following should
-                                    be specified. Exec specifies the action to take.
+                                  description: Exec specifies the action to take.
                                   properties:
                                     command:
                                       description: Command is the command line to
@@ -39224,6 +39670,26 @@ spec:
                                     Defaults to 3. Minimum value is 1.
                                   format: int32
                                   type: integer
+                                grpc:
+                                  description: GRPC specifies an action involving
+                                    a GRPC port. This is an alpha field and requires
+                                    enabling GRPCContainerProbe feature gate.
+                                  properties:
+                                    port:
+                                      description: Port number of the gRPC service.
+                                        Number must be in the range 1 to 65535.
+                                      format: int32
+                                      type: integer
+                                    service:
+                                      description: "Service is the name of the service
+                                        to place in the gRPC HealthCheckRequest (see
+                                        https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                        \n If this is not specified, the default behavior
+                                        is defined by gRPC."
+                                      type: string
+                                  required:
+                                  - port
+                                  type: object
                                 httpGet:
                                   description: HTTPGet specifies the http request
                                     to perform.
@@ -39289,9 +39755,8 @@ spec:
                                   format: int32
                                   type: integer
                                 tcpSocket:
-                                  description: 'TCPSocket specifies an action involving
-                                    a TCP port. TCP hooks not yet supported TODO:
-                                    implement a realistic TCP lifecycle hook'
+                                  description: TCPSocket specifies an action involving
+                                    a TCP port.
                                   properties:
                                     host:
                                       description: 'Optional: Host name to connect
@@ -39321,8 +39786,10 @@ spec:
                                     the value provided by the pod spec. Value must
                                     be non-negative integer. The value zero indicates
                                     stop immediately via the kill signal (no opportunity
-                                    to shut down). This is an alpha field and requires
+                                    to shut down). This is a beta field and requires
                                     enabling ProbeTerminationGracePeriod feature gate.
+                                    Minimum value is 1. spec.terminationGracePeriodSeconds
+                                    is used if unset.
                                   format: int64
                                   type: integer
                                 timeoutSeconds:
@@ -39393,8 +39860,7 @@ spec:
                                 the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                               properties:
                                 exec:
-                                  description: One and only one of the following should
-                                    be specified. Exec specifies the action to take.
+                                  description: Exec specifies the action to take.
                                   properties:
                                     command:
                                       description: Command is the command line to
@@ -39416,6 +39882,26 @@ spec:
                                     Defaults to 3. Minimum value is 1.
                                   format: int32
                                   type: integer
+                                grpc:
+                                  description: GRPC specifies an action involving
+                                    a GRPC port. This is an alpha field and requires
+                                    enabling GRPCContainerProbe feature gate.
+                                  properties:
+                                    port:
+                                      description: Port number of the gRPC service.
+                                        Number must be in the range 1 to 65535.
+                                      format: int32
+                                      type: integer
+                                    service:
+                                      description: "Service is the name of the service
+                                        to place in the gRPC HealthCheckRequest (see
+                                        https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                        \n If this is not specified, the default behavior
+                                        is defined by gRPC."
+                                      type: string
+                                  required:
+                                  - port
+                                  type: object
                                 httpGet:
                                   description: HTTPGet specifies the http request
                                     to perform.
@@ -39481,9 +39967,8 @@ spec:
                                   format: int32
                                   type: integer
                                 tcpSocket:
-                                  description: 'TCPSocket specifies an action involving
-                                    a TCP port. TCP hooks not yet supported TODO:
-                                    implement a realistic TCP lifecycle hook'
+                                  description: TCPSocket specifies an action involving
+                                    a TCP port.
                                   properties:
                                     host:
                                       description: 'Optional: Host name to connect
@@ -39513,8 +39998,10 @@ spec:
                                     the value provided by the pod spec. Value must
                                     be non-negative integer. The value zero indicates
                                     stop immediately via the kill signal (no opportunity
-                                    to shut down). This is an alpha field and requires
+                                    to shut down). This is a beta field and requires
                                     enabling ProbeTerminationGracePeriod feature gate.
+                                    Minimum value is 1. spec.terminationGracePeriodSeconds
+                                    is used if unset.
                                   format: int64
                                   type: integer
                                 timeoutSeconds:
@@ -39553,9 +40040,10 @@ spec:
                                   type: object
                               type: object
                             securityContext:
-                              description: 'Security options the pod should run with.
-                                More info: https://kubernetes.io/docs/concepts/policy/security-context/
-                                More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
+                              description: 'SecurityContext defines the security options
+                                the container should be run with. If set, the fields
+                                of SecurityContext override the equivalent fields
+                                of PodSecurityContext. More info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
                               properties:
                                 allowPrivilegeEscalation:
                                   description: 'AllowPrivilegeEscalation controls
@@ -39564,12 +40052,14 @@ spec:
                                     if the no_new_privs flag will be set on the container
                                     process. AllowPrivilegeEscalation is true always
                                     when the container is: 1) run as Privileged 2)
-                                    has CAP_SYS_ADMIN'
+                                    has CAP_SYS_ADMIN Note that this field cannot
+                                    be set when spec.os.name is windows.'
                                   type: boolean
                                 capabilities:
                                   description: The capabilities to add/drop when running
                                     containers. Defaults to the default set of capabilities
-                                    granted by the container runtime.
+                                    granted by the container runtime. Note that this
+                                    field cannot be set when spec.os.name is windows.
                                   properties:
                                     add:
                                       description: Added capabilities
@@ -39589,7 +40079,9 @@ spec:
                                 privileged:
                                   description: Run container in privileged mode. Processes
                                     in privileged containers are essentially equivalent
-                                    to root on the host. Defaults to false.
+                                    to root on the host. Defaults to false. Note that
+                                    this field cannot be set when spec.os.name is
+                                    windows.
                                   type: boolean
                                 procMount:
                                   description: procMount denotes the type of proc
@@ -39597,11 +40089,13 @@ spec:
                                     DefaultProcMount which uses the container runtime
                                     defaults for readonly paths and masked paths.
                                     This requires the ProcMountType feature flag to
-                                    be enabled.
+                                    be enabled. Note that this field cannot be set
+                                    when spec.os.name is windows.
                                   type: string
                                 readOnlyRootFilesystem:
                                   description: Whether this container has a read-only
-                                    root filesystem. Default is false.
+                                    root filesystem. Default is false. Note that this
+                                    field cannot be set when spec.os.name is windows.
                                   type: boolean
                                 runAsGroup:
                                   description: The GID to run the entrypoint of the
@@ -39609,6 +40103,8 @@ spec:
                                     May also be set in PodSecurityContext.  If set
                                     in both SecurityContext and PodSecurityContext,
                                     the value specified in SecurityContext takes precedence.
+                                    Note that this field cannot be set when spec.os.name
+                                    is windows.
                                   format: int64
                                   type: integer
                                 runAsNonRoot:
@@ -39628,7 +40124,8 @@ spec:
                                     in image metadata if unspecified. May also be
                                     set in PodSecurityContext.  If set in both SecurityContext
                                     and PodSecurityContext, the value specified in
-                                    SecurityContext takes precedence.
+                                    SecurityContext takes precedence. Note that this
+                                    field cannot be set when spec.os.name is windows.
                                   format: int64
                                   type: integer
                                 seLinuxOptions:
@@ -39638,6 +40135,8 @@ spec:
                                     container.  May also be set in PodSecurityContext.  If
                                     set in both SecurityContext and PodSecurityContext,
                                     the value specified in SecurityContext takes precedence.
+                                    Note that this field cannot be set when spec.os.name
+                                    is windows.
                                   properties:
                                     level:
                                       description: Level is SELinux level label that
@@ -39660,7 +40159,8 @@ spec:
                                   description: The seccomp options to use by this
                                     container. If seccomp options are provided at
                                     both the pod & container level, the container
-                                    options override the pod options.
+                                    options override the pod options. Note that this
+                                    field cannot be set when spec.os.name is windows.
                                   properties:
                                     localhostProfile:
                                       description: localhostProfile indicates a profile
@@ -39688,6 +40188,8 @@ spec:
                                     from the PodSecurityContext will be used. If set
                                     in both SecurityContext and PodSecurityContext,
                                     the value specified in SecurityContext takes precedence.
+                                    Note that this field cannot be set when spec.os.name
+                                    is linux.
                                   properties:
                                     gmsaCredentialSpec:
                                       description: GMSACredentialSpec is where the
@@ -39699,6 +40201,20 @@ spec:
                                       description: GMSACredentialSpecName is the name
                                         of the GMSA credential spec to use.
                                       type: string
+                                    hostProcess:
+                                      description: HostProcess determines if a container
+                                        should be run as a 'Host Process' container.
+                                        This field is alpha-level and will only be
+                                        honored by components that enable the WindowsHostProcessContainers
+                                        feature flag. Setting this field without the
+                                        feature flag will result in errors when validating
+                                        the Pod. All of a Pod's containers must have
+                                        the same effective HostProcess value (it is
+                                        not allowed to have a mix of HostProcess containers
+                                        and non-HostProcess containers).  In addition,
+                                        if HostProcess is true then HostNetwork must
+                                        also be set to true.
+                                      type: boolean
                                     runAsUserName:
                                       description: The UserName in Windows to run
                                         the entrypoint of the container process. Defaults
@@ -39722,8 +40238,7 @@ spec:
                                 operation. This cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes'
                               properties:
                                 exec:
-                                  description: One and only one of the following should
-                                    be specified. Exec specifies the action to take.
+                                  description: Exec specifies the action to take.
                                   properties:
                                     command:
                                       description: Command is the command line to
@@ -39745,6 +40260,26 @@ spec:
                                     Defaults to 3. Minimum value is 1.
                                   format: int32
                                   type: integer
+                                grpc:
+                                  description: GRPC specifies an action involving
+                                    a GRPC port. This is an alpha field and requires
+                                    enabling GRPCContainerProbe feature gate.
+                                  properties:
+                                    port:
+                                      description: Port number of the gRPC service.
+                                        Number must be in the range 1 to 65535.
+                                      format: int32
+                                      type: integer
+                                    service:
+                                      description: "Service is the name of the service
+                                        to place in the gRPC HealthCheckRequest (see
+                                        https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+                                        \n If this is not specified, the default behavior
+                                        is defined by gRPC."
+                                      type: string
+                                  required:
+                                  - port
+                                  type: object
                                 httpGet:
                                   description: HTTPGet specifies the http request
                                     to perform.
@@ -39810,9 +40345,8 @@ spec:
                                   format: int32
                                   type: integer
                                 tcpSocket:
-                                  description: 'TCPSocket specifies an action involving
-                                    a TCP port. TCP hooks not yet supported TODO:
-                                    implement a realistic TCP lifecycle hook'
+                                  description: TCPSocket specifies an action involving
+                                    a TCP port.
                                   properties:
                                     host:
                                       description: 'Optional: Host name to connect
@@ -39842,8 +40376,10 @@ spec:
                                     the value provided by the pod spec. Value must
                                     be non-negative integer. The value zero indicates
                                     stop immediately via the kill signal (no opportunity
-                                    to shut down). This is an alpha field and requires
+                                    to shut down). This is a beta field and requires
                                     enabling ProbeTerminationGracePeriod feature gate.
+                                    Minimum value is 1. spec.terminationGracePeriodSeconds
+                                    is used if unset.
                                   format: int64
                                   type: integer
                                 timeoutSeconds:
@@ -40420,9 +40956,7 @@ spec:
                                   to be used that way - see the documentation of the
                                   driver for more information. \n A pod can use both
                                   types of ephemeral volumes and persistent volumes
-                                  at the same time. \n This is a beta feature and
-                                  only available when the GenericEphemeralVolume feature
-                                  gate is enabled."
+                                  at the same time."
                                 properties:
                                   volumeClaimTemplate:
                                     description: "Will be used to create a stand-alone
@@ -40474,15 +41008,64 @@ spec:
                                               specify either: * An existing VolumeSnapshot
                                               object (snapshot.storage.k8s.io/VolumeSnapshot)
                                               * An existing PVC (PersistentVolumeClaim)
-                                              * An existing custom resource that implements
-                                              data population (Alpha) In order to
-                                              use custom resource types that implement
-                                              data population, the AnyVolumeDataSource
-                                              feature gate must be enabled. If the
-                                              provisioner or an external controller
+                                              If the provisioner or an external controller
                                               can support the specified data source,
                                               it will create a new volume based on
-                                              the contents of the specified data source.'
+                                              the contents of the specified data source.
+                                              If the AnyVolumeDataSource feature gate
+                                              is enabled, this field will always have
+                                              the same contents as the DataSourceRef
+                                              field.'
+                                            properties:
+                                              apiGroup:
+                                                description: APIGroup is the group
+                                                  for the resource being referenced.
+                                                  If APIGroup is not specified, the
+                                                  specified Kind must be in the core
+                                                  API group. For any other third-party
+                                                  types, APIGroup is required.
+                                                type: string
+                                              kind:
+                                                description: Kind is the type of resource
+                                                  being referenced
+                                                type: string
+                                              name:
+                                                description: Name is the name of resource
+                                                  being referenced
+                                                type: string
+                                            required:
+                                            - kind
+                                            - name
+                                            type: object
+                                          dataSourceRef:
+                                            description: 'Specifies the object from
+                                              which to populate the volume with data,
+                                              if a non-empty volume is desired. This
+                                              may be any local object from a non-empty
+                                              API group (non core object) or a PersistentVolumeClaim
+                                              object. When this field is specified,
+                                              volume binding will only succeed if
+                                              the type of the specified object matches
+                                              some installed volume populator or dynamic
+                                              provisioner. This field will replace
+                                              the functionality of the DataSource
+                                              field and as such if both fields are
+                                              non-empty, they must have the same value.
+                                              For backwards compatibility, both fields
+                                              (DataSource and DataSourceRef) will
+                                              be set to the same value automatically
+                                              if one of them is empty and the other
+                                              is non-empty. There are two important
+                                              differences between DataSource and DataSourceRef:
+                                              * While DataSource only allows two specific
+                                              types of objects, DataSourceRef   allows
+                                              any non-core object, as well as PersistentVolumeClaim
+                                              objects. * While DataSource ignores
+                                              disallowed values (dropping them), DataSourceRef   preserves
+                                              all values, and generates an error if
+                                              a disallowed value is   specified. (Alpha)
+                                              Using this field requires the AnyVolumeDataSource
+                                              feature gate to be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -40507,7 +41090,13 @@ spec:
                                           resources:
                                             description: 'Resources represents the
                                               minimum resources the volume should
-                                              have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
+                                              have. If RecoverVolumeExpansionFailure
+                                              feature is enabled users are allowed
+                                              to specify resource requirements that
+                                              are lower than previous value but must
+                                              still be higher than capacity recorded
+                                              in the status field of the claim. More
+                                              info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                             properties:
                                               limits:
                                                 additionalProperties:

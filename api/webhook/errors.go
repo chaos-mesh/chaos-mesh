@@ -13,21 +13,12 @@
 // limitations under the License.
 //
 
-package v1alpha1
+package webhook
 
 import (
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// validateContainerNames validates the ContainerNames
-func (in *PodChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-	if in.Action == ContainerKillAction {
-		if len(in.ContainerSelector.ContainerNames) == 0 {
-			err := errors.Wrapf(errInvalidValue, "the name of container is required on %s action", in.Action)
-			allErrs = append(allErrs, field.Invalid(path.Child("containerNames"), in.ContainerNames, err.Error()))
-		}
-	}
-	return allErrs
-}
+var (
+	errInvalidValue error = errors.New("invalid value")
+)

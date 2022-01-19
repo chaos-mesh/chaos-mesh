@@ -21,6 +21,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
@@ -109,7 +111,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			result = append(result, &renderedNode)
 			continue
 		}
-		return nil, fmt.Errorf(
+		return nil, errors.Errorf(
 			"workflow %s do not contains template called %s",
 			workflow.Name,
 			name,

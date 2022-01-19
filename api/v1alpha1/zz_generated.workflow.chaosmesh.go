@@ -19,7 +19,7 @@ package v1alpha1
 
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
 
@@ -144,7 +144,7 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 		return &result, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
 	}
 }
 
@@ -191,7 +191,7 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 		return nil
 
 	default:
-		return fmt.Errorf("unsupported chaos %#v", root)
+		return errors.Wrapf(errInvalidValue, "unknown chaos %#v", root)
 	}
 }
 
@@ -238,7 +238,7 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
 	}
 }
 

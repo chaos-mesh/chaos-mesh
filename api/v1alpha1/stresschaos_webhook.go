@@ -16,10 +16,11 @@
 package v1alpha1
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
+
+	"github.com/pkg/errors"
 
 	"github.com/docker/go-units"
 	"k8s.io/apimachinery/pkg/util/validation/field"
