@@ -228,13 +228,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				iochaostestcases.TestcaseIOMistakeWithSpecifiedContainer(ns, cli, c, port)
 			})
 		})
-
-		// io chaos case in [IOGraceful] context
-		ginkgo.Context("[IOGraceful]", func() {
-			ginkgo.It("[Restart]", func() {
-				iochaostestcases.TestcaseIOErrorGracefulShutdown(ns, cli, c, port)
-			})
-		})
 	})
 
 	//http chaos case in [HTTPChaos] context
@@ -316,13 +309,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 			ginkgo.It("[Pause]", func() {
 				httpchaostestcases.TestcaseHttpPatchPauseAndUnPause(ns, cli, client, port)
-			})
-		})
-
-		// http chaos case in [HTTPGraceful] context
-		ginkgo.Context("[HTTPGraceful]", func() {
-			ginkgo.It("[Restart]", func() {
-				httpchaostestcases.TestcaseHttpGracefulRestart(ns, cli, client, port)
 			})
 		})
 	})
@@ -506,6 +492,128 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, cancel := range pfCancels {
 				cancel()
 			}
+		})
+	})
+})
+
+var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {
+	f := framework.NewDefaultFramework("chaos-mesh")
+	var ns string
+	var fwCancel context.CancelFunc
+	var fw portforward.PortForward
+	var kubeCli kubernetes.Interface
+	var config *restClient.Config
+	var cli client.Client
+	c := http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	ginkgo.BeforeEach(func() {
+		ns = f.Namespace.Name
+		ctx, cancel := context.WithCancel(context.Background())
+		clientRawConfig, err := e2econfig.LoadClientRawConfig()
+		framework.ExpectNoError(err, "failed to load raw config")
+		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true)
+		framework.ExpectNoError(err, "failed to create port forwarder")
+		fwCancel = cancel
+		kubeCli = f.ClientSet
+		config, err = framework.LoadConfig()
+		framework.ExpectNoError(err, "config error")
+		scheme := runtime.NewScheme()
+		_ = clientgoscheme.AddToScheme(scheme)
+		_ = v1alpha1.AddToScheme(scheme)
+		cli, err = client.New(config, client.Options{Scheme: scheme})
+		framework.ExpectNoError(err, "create client error")
+	})
+
+	ginkgo.AfterEach(func() {
+		if fwCancel != nil {
+			fwCancel()
+		}
+	})
+
+	// io chaos case in [IOChaos] context
+	ginkgo.Context("[IOChaos]", func() {
+		var (
+			err      error
+			port     uint16
+			pfCancel context.CancelFunc
+		)
+
+		ginkgo.JustBeforeEach(func() {
+			svc := fixture.NewE2EService("io", ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create service error")
+			nd := fixture.NewIOTestDeployment("io-test", ns)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create io-test deployment error")
+			err = util.WaitDeploymentReady("io-test", ns, kubeCli)
+			framework.ExpectNoError(err, "wait io-test deployment ready error")
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/io", 8080)
+			framework.ExpectNoError(err, "create helper io port port-forward failed")
+		})
+
+		ginkgo.JustAfterEach(func() {
+			if pfCancel != nil {
+				pfCancel()
+			}
+		})
+
+		// io chaos case in [IOFault] context
+		ginkgo.Context("[IOFault]", func() {
+			ginkgo.It("[Restart]", func() {
+				iochaostestcases.TestcaseIOErrorGracefulShutdown(ns, cli, c, port)
+			})
+		})
+	})
+
+	//http chaos case in [HTTPChaos] context
+	ginkgo.Context("[HTTPChaos]", func() {
+		var (
+			err      error
+			port     uint16
+			pfCancel context.CancelFunc
+			client   httpchaostestcases.HTTPE2EClient
+		)
+
+		ginkgo.JustBeforeEach(func() {
+			svc := fixture.NewE2EService("http", ns)
+			svc, err = kubeCli.CoreV1().Services(ns).Create(context.TODO(), svc, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create service error")
+			for _, servicePort := range svc.Spec.Ports {
+				if servicePort.Name == "http" {
+					port = uint16(servicePort.NodePort)
+					break
+				}
+			}
+			nd := fixture.NewHTTPTestDeployment("http-test", ns)
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
+			framework.ExpectNoError(err, "create http-test deployment error")
+			err = util.WaitDeploymentReady("http-test", ns, kubeCli)
+			framework.ExpectNoError(err, "wait http-test deployment ready error")
+			podlist, err := kubeCli.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{})
+			framework.ExpectNoError(err, "find pod list error")
+			for _, item := range podlist.Items {
+				if strings.Contains(item.Name, "http-test") {
+					framework.Logf("get http-test-pod %v", item)
+					client.IP = item.Status.HostIP
+					break
+				}
+			}
+			client.C = &c
+		})
+
+		ginkgo.JustAfterEach(func() {
+			if pfCancel != nil {
+				pfCancel()
+			}
+		})
+
+		// http chaos case in [HTTPGraceful] context
+		ginkgo.Context("[HTTPAbort]", func() {
+			ginkgo.It("[Restart]", func() {
+				httpchaostestcases.TestcaseHttpGracefulAbortRestart(ns, cli, client, port)
+			})
 		})
 	})
 })

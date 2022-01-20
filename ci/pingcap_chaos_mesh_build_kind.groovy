@@ -270,19 +270,19 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E on kubernetes 1.12.10"] = {
-                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic' --ginkgo.skip='\\w*Graceful'")
+                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
         builds["E2E on kubernetes 1.20.7"] = {
-                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.7 ./hack/e2e.sh -- --ginkgo.focus='Basic' --ginkgo.skip='\\w*Graceful'")
+                build("v1.20", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.20.7 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
         builds["E2E on kubernetes 1.22.1"] = {
-                build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic' --ginkgo.skip='\\w*Graceful'")
+                build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds["Graceful Shutdown on kubernetes 1.12.10"] = {
-                build("v1.12", "${GLOBALS} GINKGO_NODES=1 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='\\w*Graceful'")
+                build("v1.12", "${GLOBALS} GINKGO_NODES=1 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Graceful-Shutdown'")
         }
         builds["Graceful Shutdown on kubernetes 1.22.1"] = {
-                build("v1.22", "${GLOBALS} GINKGO_NODES=1 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='\\w*Graceful'")
+                build("v1.22", "${GLOBALS} GINKGO_NODES=1 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Graceful-Shutdown'")
         }
 		builds.failFast = false
 		if (!SKIP_TEST) {

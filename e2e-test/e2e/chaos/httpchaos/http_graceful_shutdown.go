@@ -31,7 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 )
 
-func TestcaseHttpGracefulRestart(
+func TestcaseHttpGracefulAbortRestart(
 	ns string,
 	cli client.Client,
 	c HTTPE2EClient,
