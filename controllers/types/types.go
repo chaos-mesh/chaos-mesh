@@ -128,13 +128,16 @@ var ChaosObjects = fx.Supply(
 	fx.Annotated{
 		Group: "objs",
 		Target: Object{
-<<<<<<< HEAD
 			Name:   "azurechaos",
 			Object: &v1alpha1.AzureChaos{},
-=======
+		},
+	},
+
+	fx.Annotated{
+		Group: "objs",
+		Target: Object{
 			Name:   "blockchaos",
 			Object: &v1alpha1.BlockChaos{},
->>>>>>> upstream/master
 		},
 	},
 )

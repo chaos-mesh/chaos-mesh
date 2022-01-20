@@ -2719,12 +2719,20 @@
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific azure chaos action.\nSupported action: ec2-stop / vm-restart\nDefault action: ec2-stop\n+kubebuilder:validation:Enum=ec2-stop;vm-restart",
+                    "description": "Action defines the specific azure chaos action.\nSupported action: vm-stop / vm-restart / disk-detach\nDefault action: vm-stop\n+kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach",
+                    "type": "string"
+                },
+                "diskName": {
+                    "description": "DiskName indicates the name of the disk.\nNeeded in disk-detach.\n+optional",
                     "type": "string"
                 },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action.\n+optional",
                     "type": "string"
+                },
+                "lun": {
+                    "description": "LUN indicates the Logical Unit Number of the data disk.\nNeeded in disk-detach.\n+optional",
+                    "type": "integer"
                 },
                 "resourceGroupName": {
                     "description": "ResourceGroupName defines the name of ResourceGroup",
@@ -2857,17 +2865,15 @@
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
-<<<<<<< HEAD
                 "azureChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
-=======
+                },
                 "blockChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
->>>>>>> upstream/master
                 },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
@@ -4349,17 +4355,15 @@
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
-<<<<<<< HEAD
                 "azureChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
-=======
+                },
                 "blockChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
->>>>>>> upstream/master
                 },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
@@ -4559,17 +4563,15 @@
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
-<<<<<<< HEAD
                 "azureChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
-=======
+                },
                 "blockChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
->>>>>>> upstream/master
                 },
                 "children": {
                     "description": "Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.\n+optional",
