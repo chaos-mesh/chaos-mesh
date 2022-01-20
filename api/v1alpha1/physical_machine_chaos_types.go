@@ -137,7 +137,7 @@ func (spec *PhysicalMachineSelectorSpec) Empty() bool {
 type ExpInfo struct {
 	// the experiment ID
 	// +optional
-	UID string `json:"uid,omitempty"`
+	UID string `json:"uid,omitempty" swaggerignore:"true"`
 
 	// the subAction, generate automatically
 	// +optional
