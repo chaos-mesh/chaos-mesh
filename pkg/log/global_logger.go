@@ -32,8 +32,8 @@ var (
 // that initialize the global logger by ReplaceGlobals before using it, for example, calling ReplaceGlobals at the beginning
 // of your main function.
 //
-// Do NOT save the global logger to a variable, because it is possible that the global logger is replaced by another. Keep
-// call L at each time.
+// Do NOT save the global logger to a variable for long-term using, because it is possible that the global logger is
+// replaced by another. Keep calling L at each time.
 //
 // Deprecated: Do not use global logger anymore. For more detail, see
 // https://github.com/chaos-mesh/rfcs/blob/main/text/2021-12-09-logging.md#global-logger
