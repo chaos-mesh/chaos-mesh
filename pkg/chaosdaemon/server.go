@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"io/ioutil"
 	"net"
 
@@ -77,7 +78,8 @@ type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
 
-	IPSetLocker *locker.Locker
+	IPSetLocker      *locker.Locker
+	TimeChaosManager tasks.ChaosOnProcessManager
 }
 
 func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
@@ -91,10 +93,12 @@ func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*Daemo
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
+	loggertc := log.WithName("TimeChaos")
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		TimeChaosManager:         tasks.NewChaosOnProcessManager(loggertc),
 	}
 }
 

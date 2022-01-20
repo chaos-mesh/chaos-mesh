@@ -36,7 +36,10 @@ type FakeImage struct {
 	offset map[string]int
 }
 
-// LoadFakeImageFromEmbedFs builds FakeImage from the embed filesystem. It parses the ELF file and extract the variables from the relocation section, reserves the space for them at the end of content, then calculates and saves offsets as "manually relocation"
+// LoadFakeImageFromEmbedFs builds FakeImage from the embed filesystem.
+// It parses the ELF file and extract the variables from the relocation section,
+// reserves the space for them at the end of content,
+// then calculates and saves offsets as "manually relocation"
 func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
 	path := "fakeclock/" + filename
 	object, err := fakeclock.ReadFile(path)

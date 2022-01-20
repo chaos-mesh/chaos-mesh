@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"strings"
 
 	"google.golang.org/grpc/codes"
@@ -300,7 +301,7 @@ func (c *tcClient) flush(device string) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
-			return encodeOutputToError(output, err)
+			return util.EncodeOutputToError(output, err)
 		}
 	}
 	return nil
@@ -352,7 +353,7 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(output, err)
+		return util.EncodeOutputToError(output, err)
 	}
 
 	for index := 1; index <= 3; index++ {
@@ -365,7 +366,7 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return encodeOutputToError(output, err)
+			return util.EncodeOutputToError(output, err)
 		}
 	}
 
@@ -383,7 +384,7 @@ func (c *tcClient) addNetem(device string, parent string, handle string, netem *
 	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(output, err)
+		return util.EncodeOutputToError(output, err)
 	}
 	return nil
 }
@@ -399,7 +400,7 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(output, err)
+		return util.EncodeOutputToError(output, err)
 	}
 	return nil
 }
