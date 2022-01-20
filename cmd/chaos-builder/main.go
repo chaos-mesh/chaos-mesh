@@ -17,14 +17,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
 
 	"github.com/pingcap/errors"
 )
