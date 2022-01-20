@@ -1620,7 +1620,7 @@ export interface V1alpha1IOChaosSpec {
    */
   action?: string
   /**
-   *
+   * Attr defines the overrided attribution +ui:form:when=action==\'attrOverride\' +optional
    * @type {V1alpha1AttrOverrideSpec}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -1656,7 +1656,7 @@ export interface V1alpha1IOChaosSpec {
    */
   methods?: Array<string>
   /**
-   *
+   * Mistake defines what types of incorrectness are injected to IO operations +ui:form:when=action==\'mistake\' +optional
    * @type {V1alpha1MistakeSpec}
    * @memberof V1alpha1IOChaosSpec
    */

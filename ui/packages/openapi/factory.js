@@ -99,7 +99,7 @@ function isArrayLiteral(type, sourceFile) {
 export function nodeToField(identifier, type, comment, objs, sourceFile, checker) {
   // handle TypeReference
   if (type.kind === ts.SyntaxKind.TypeReference && !isArrayLiteral(type, sourceFile)) {
-    return typeReferenceToObjectLiteralExpression(identifier, type, objs, sourceFile, checker)
+    return typeReferenceToObjectLiteralExpression(identifier, type, comment, objs, sourceFile, checker)
   }
 
   return _nodeToField(identifier, type, comment, sourceFile)
@@ -110,15 +110,17 @@ export function nodeToField(identifier, type, comment, objs, sourceFile, checker
  *
  * @param {string} identifier
  * @param {ts.TypeReference} typeRef
+ * @param {string} comment
  * @param {ts.Expression[]} objs - usually an empty array
  * @param {ts.SourceFile} sourceFile
  * @param {ts.TypeChecker} checker
- * @param {Object} options
+ * @param {object} options
  * @param {boolean} [options.multiple] - if true, the field is an array
  */
 function typeReferenceToObjectLiteralExpression(
   identifier,
   typeRef,
+  comment,
   objs,
   sourceFile,
   checker,
@@ -140,6 +142,7 @@ function typeReferenceToObjectLiteralExpression(
           typeReferenceToObjectLiteralExpression(
             escapedName,
             declaration.type.typeArguments[0],
+            declaration.jsDoc[0].comment ?? '',
             [],
             sourceFile,
             checker,
@@ -150,7 +153,16 @@ function typeReferenceToObjectLiteralExpression(
         // handle literal array
         objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
       } else {
-        objs.push(typeReferenceToObjectLiteralExpression(escapedName, declaration.type, [], sourceFile, checker))
+        objs.push(
+          typeReferenceToObjectLiteralExpression(
+            escapedName,
+            declaration.type,
+            declaration.jsDoc[0].comment ?? '',
+            [],
+            sourceFile,
+            checker
+          )
+        )
       }
 
       return
@@ -158,6 +170,8 @@ function typeReferenceToObjectLiteralExpression(
 
     objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
   })
+
+  const when = getUIFormWhen(comment)
 
   // create ref field
   //
@@ -177,6 +191,9 @@ function typeReferenceToObjectLiteralExpression(
         factory.createIdentifier('children'),
         factory.createArrayLiteralExpression(objs, true)
       ),
+      ...(when
+        ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
+        : []),
     ],
     true
   )
