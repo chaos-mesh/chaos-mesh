@@ -16,10 +16,11 @@
 package command
 
 import (
-	"fmt"
 	"os/exec"
 	"reflect"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // ExecTag stands for the path of executable file in command.
@@ -122,10 +123,10 @@ func marshal(value reflect.Value) (string, []string, error) {
 							args = append(args, slicePara...)
 						}
 					} else {
-						return "", nil, fmt.Errorf("invalid parameter slice type %s :parameter slice must be string slice", value.Field(i).String())
+						return "", nil, errors.Errorf("invalid parameter slice type %s :parameter slice must be string slice", value.Field(i).String())
 					}
 				} else {
-					return "", nil, fmt.Errorf("invalid parameter type %s : parameter must be string or string slice", value.Type().Field(i).Type.Name())
+					return "", nil, errors.Errorf("invalid parameter type %s : parameter must be string or string slice", value.Type().Field(i).Type.Name())
 				}
 			}
 		}

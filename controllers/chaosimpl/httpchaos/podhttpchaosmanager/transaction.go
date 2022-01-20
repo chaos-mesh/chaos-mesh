@@ -16,9 +16,10 @@
 package podhttpchaosmanager
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 )
 
 // PodHttpTransaction represents a modification on podhttpchaos
@@ -60,7 +61,7 @@ func (a *Append) Apply(chaos *v1alpha1.PodHttpChaos) error {
 	case v1alpha1.PodHttpChaosRule:
 		chaos.Spec.Rules = append(chaos.Spec.Rules, item)
 	default:
-		return fmt.Errorf("unknown type of item")
+		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
 
 	return nil
@@ -82,7 +83,7 @@ func (t *PodHttpTransaction) Append(item interface{}) error {
 		})
 		return nil
 	default:
-		return fmt.Errorf("unknown type of item")
+		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
 }
 

@@ -31,7 +31,7 @@ import (
 func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
 	ioChaos, ok := chaos.(*v1alpha1.IOChaos)
 	if !ok {
-		return fmt.Errorf("chaos is not iochaos")
+		return errors.New("chaos is not iochaos")
 	}
 	chaosStatus := ioChaos.Status.ChaosStatus
 	chaosSelector := ioChaos.Spec.Selector

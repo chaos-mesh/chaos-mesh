@@ -19,6 +19,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/blockchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/dnschaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/httpchaos"
@@ -46,5 +47,6 @@ var AllImpl = fx.Options(
 	jvmchaos.Module,
 	timechaos.Module,
 	physicalmachinechaos.Module,
+	blockchaos.Module,
 
 	utils.Module)

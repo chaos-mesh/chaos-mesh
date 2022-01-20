@@ -18,12 +18,13 @@ package portforward
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +35,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/polymorphichelpers"
 )
 
@@ -143,7 +144,7 @@ func (f *portForwarder) Forward(namespace, resourceName string, addresses []stri
 // ForwardPod would port-forward target Pod
 func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	if pod.Status.Phase != corev1.PodRunning {
-		return nil, nil, fmt.Errorf("unable to forward port because pod is not running. Current status=%v", pod.Status.Phase)
+		return nil, nil, errors.Errorf("unable to forward port because pod is not running. Current status=%v", pod.Status.Phase)
 	}
 
 	req := f.client.CoreV1().RESTClient().Post().

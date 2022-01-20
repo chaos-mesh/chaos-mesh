@@ -60,7 +60,7 @@ func ParseCertAndKey(certData, keyData []byte) (*x509.Certificate, crypto.Signer
 func ParsePrivateKey(data []byte) (crypto.Signer, error) {
 	privKey, err := keyutil.ParsePrivateKeyPEM(data)
 	if err != nil {
-		return nil, fmt.Errorf("error reading private key file: %v", err)
+		return nil, errors.Errorf("error reading private key file: %v", err)
 	}
 
 	var key crypto.Signer

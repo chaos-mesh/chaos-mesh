@@ -38,6 +38,7 @@ PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
 
 export GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
+export YARN_BUILD_CACHE ?= $(ROOT)/.cache/yarn
 
 BUILD_TAGS ?=
 
@@ -51,7 +52,7 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REG
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) IN_DOCKER=$(IN_DOCKER) \
 	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PROJECT=$(IMAGE_PROJECT) IMAGE_REGISTRY=$(IMAGE_REGISTRY) \
 	TARGET_PLATFORM=$(TARGET_PLATFORM) \
-	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
+	GO_BUILD_CACHE=$(GO_BUILD_CACHE) YARN_BUILD_CACHE=$(YARN_BUILD_CACHE)
 
 RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)
@@ -151,11 +152,11 @@ enter-devenv: images/dev-env/.dockerbuilt
 	@bash
 
 images/chaos-daemon/bin/pause: SHELL:=$(RUN_IN_BUILD_SHELL)
-images/chaos-daemon/bin/pause: hack/pause.c images/dev-env/.dockerbuilt
+images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
 pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
-pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/dev-env/.dockerbuilt
+pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/build-env/.dockerbuilt
 	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
 
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o))

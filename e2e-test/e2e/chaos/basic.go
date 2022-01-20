@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/onsi/ginkgo"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -522,11 +523,11 @@ func getPod(kubeCli kubernetes.Interface, ns string, appLabel string) (*v1.Pod, 
 	}
 
 	if len(pods.Items) > 1 {
-		return nil, fmt.Errorf("select more than one pod")
+		return nil, errors.New("select more than one pod")
 	}
 
 	if len(pods.Items) == 0 {
-		return nil, fmt.Errorf("cannot select any pod")
+		return nil, errors.New("cannot select any pod")
 	}
 
 	return &pods.Items[0], nil

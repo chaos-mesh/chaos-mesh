@@ -22,6 +22,7 @@ resources:
 - bases/chaos-mesh.org_schedules.yaml
 - bases/chaos-mesh.org_physicalmachinechaos.yaml
 - bases/chaos-mesh.org_physicalmachines.yaml
+- bases/chaos-mesh.org_blockchaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
