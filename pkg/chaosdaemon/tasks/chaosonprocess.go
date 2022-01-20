@@ -1,11 +1,13 @@
 package tasks
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
-	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	"os"
 	"syscall"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 )
 
 type ChaosOnProcess interface {

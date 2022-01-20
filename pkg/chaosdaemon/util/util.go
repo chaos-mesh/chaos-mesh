@@ -17,12 +17,14 @@ package util
 
 import (
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 	"io/ioutil"
 	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"strconv"
 	"sync"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 
 	"github.com/pkg/errors"
 

@@ -17,11 +17,12 @@ package chaosdaemon
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"

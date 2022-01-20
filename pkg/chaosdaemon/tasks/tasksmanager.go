@@ -16,8 +16,9 @@
 package tasks
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 )
 
 // A Manager for Chaos-Daemon.

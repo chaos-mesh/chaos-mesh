@@ -2,11 +2,12 @@ package tasks
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"testing"
 )
 
 type FakeConfig struct {

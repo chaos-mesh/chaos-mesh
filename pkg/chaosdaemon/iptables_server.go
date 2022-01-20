@@ -18,8 +18,9 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
