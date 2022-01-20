@@ -96,9 +96,6 @@ spec:
                   resourceGroupName:
                     description: ResourceGroupName defines the name of ResourceGroup
                     type: string
-                  secretName:
-                    description: SecretName defines the name of kubernetes secret.
-                    type: string
                   subscriptionID:
                     description: SubscriptionID defines the id of Azure subscription.
                     type: string
@@ -2297,9 +2294,6 @@ spec:
                         type: string
                       resourceGroupName:
                         description: ResourceGroupName defines the name of ResourceGroup
-                        type: string
-                      secretName:
-                        description: SecretName defines the name of kubernetes secret.
                         type: string
                       subscriptionID:
                         description: SubscriptionID defines the id of Azure subscription.
@@ -4886,10 +4880,6 @@ spec:
                                   description: ResourceGroupName defines the name
                                     of ResourceGroup
                                   type: string
-                                secretName:
-                                  description: SecretName defines the name of kubernetes
-                                    secret.
-                                  type: string
                                 subscriptionID:
                                   description: SubscriptionID defines the id of Azure
                                     subscription.
@@ -7325,10 +7315,6 @@ spec:
                                     resourceGroupName:
                                       description: ResourceGroupName defines the name
                                         of ResourceGroup
-                                      type: string
-                                    secretName:
-                                      description: SecretName defines the name of
-                                        kubernetes secret.
                                       type: string
                                     subscriptionID:
                                       description: SubscriptionID defines the id of

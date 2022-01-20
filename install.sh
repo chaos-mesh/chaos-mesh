@@ -1934,6 +1934,27 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-azurechaos
+    failurePolicy: Fail
+    name: mazurechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - azurechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-gcpchaos
     failurePolicy: Fail
     name: mgcpchaos.kb.io
@@ -2257,6 +2278,27 @@ webhooks:
           - UPDATE
         resources:
           - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-azurechaos
+    failurePolicy: Fail
+    name: vazurechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - azurechaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

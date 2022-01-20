@@ -45,14 +45,16 @@ const (
 	AzureVmStop AzureChaosAction = "vm-stop"
 	// AzureVmRestart represents the chaos action of restarting vm.
 	AzureVmRestart AzureChaosAction = "vm-restart"
+	// AzureDiskDetach represents the chaos action of detaching the disk from vm.
+	AzureDiskDetach AzureChaosAction = "disk-detach"
 )
 
 // AzureChaosSpec is the content of the specification for an AzureChaos
 type AzureChaosSpec struct {
 	// Action defines the specific azure chaos action.
-	// Supported action: ec2-stop / vm-restart
-	// Default action: ec2-stop
-	// +kubebuilder:validation:Enum=ec2-stop;vm-restart
+	// Supported action: vm-stop / vm-restart / disk-detach
+	// Default action: vm-stop
+	// +kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach
 	Action AzureChaosAction `json:"action"`
 
 	// Duration represents the duration of the chaos action.
@@ -76,6 +78,16 @@ type AzureSelector struct {
 
 	// VMName defines the name of Virtual Machine
 	VMName string `json:"vmName"`
+
+	// DiskName indicates the name of the disk.
+	// Needed in disk-detach.
+	// +optional
+	DiskName *string `json:"diskName,omitempty" webhook:"DiskName,nilable"`
+
+	// LUN indicates the Logical Unit Number of the data disk.
+	// Needed in disk-detach.
+	// +optional
+	LUN *int `json:"lun,omitempty" webhook:"LUN,nilable"`
 }
 
 func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {

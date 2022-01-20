@@ -2746,10 +2746,6 @@ var doc = `{
                     "description": "ResourceGroupName defines the name of ResourceGroup",
                     "type": "string"
                 },
-                "secretName": {
-                    "description": "SecretName defines the name of kubernetes secret.\n+optional",
-                    "type": "string"
-                },
                 "subscriptionID": {
                     "description": "SubscriptionID defines the id of Azure subscription.",
                     "type": "string"

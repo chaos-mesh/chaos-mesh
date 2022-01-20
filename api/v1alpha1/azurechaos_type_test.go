@@ -61,9 +61,9 @@ var _ = Describe("AzureChaos", func() {
 				Spec: AzureChaosSpec{
 					Action: AzureVmStop,
 					AzureSelector: AzureSelector{
-						SubscriptionID: testSubscriptionID,
+						SubscriptionID:    testSubscriptionID,
 						ResourceGroupName: testResourceGroupName,
-						VMName: testVMName,
+						VMName:            testVMName,
 					},
 				},
 			}

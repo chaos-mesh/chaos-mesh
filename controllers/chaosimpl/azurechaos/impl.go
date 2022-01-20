@@ -29,7 +29,7 @@ type Impl struct {
 	fx.In
 
 	VmRestart *vmrestart.Impl `action:"vm-restart"`
-	VmStop *vmstop.Impl `action:"vm-stop"`
+	VmStop    *vmstop.Impl    `action:"vm-stop"`
 }
 
 func NewImpl(impl Impl) *types.ChaosImplPair {
@@ -47,4 +47,4 @@ var Module = fx.Provide(
 		Target: NewImpl,
 	},
 	vmstop.NewImpl,
-	vmrestart.NewImpl,)
+	vmrestart.NewImpl)

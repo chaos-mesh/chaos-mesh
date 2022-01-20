@@ -35,3 +35,17 @@ func GetVMClient(azurechaos *v1alpha1.AzureChaos) (*compute.VirtualMachinesClien
 
 	return &vmClient, nil
 }
+
+// GetDiskClient is used to get the azure disk Client
+func GetDiskClient(azurechaos *v1alpha1.AzureChaos) (*compute.DisksClient, error) {
+	authorizer, err := auth.NewAuthorizerFromEnvironment()
+
+	if err != nil {
+		return nil, err
+	}
+
+	disksClient := compute.NewDisksClient(azurechaos.Spec.SubscriptionID)
+	disksClient.Authorizer = authorizer
+
+	return &disksClient, nil
+}
