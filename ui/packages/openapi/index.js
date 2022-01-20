@@ -104,6 +104,8 @@ export function genForms(source) {
     })
 
     // create data related fields
+    //
+    // export const actions = [], data = []
     const data = factory.createVariableStatement(
       [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
       factory.createVariableDeclarationList(

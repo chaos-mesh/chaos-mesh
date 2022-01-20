@@ -1056,6 +1056,92 @@ export interface V1alpha1BandwidthSpec {
 /**
  *
  * @export
+ * @interface V1alpha1BlockChaosSpec
+ */
+export interface V1alpha1BlockChaosSpec {
+  /**
+   * Action defines the specific block chaos action. Supported action: limit / delay +kubebuilder:validation:Enum=limit;delay
+   * @type {string}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  action?: string
+  /**
+   * ContainerNames indicates list of the name of affected container. If not set, the first container will be injected +optional
+   * @type {Array<string>}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  containerNames?: Array<string>
+  /**
+   *
+   * @type {V1alpha1BlockDelaySpec}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  delay?: V1alpha1BlockDelaySpec
+  /**
+   * Duration represents the duration of the chaos action. +optional
+   * @type {string}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  duration?: string
+  /**
+   * IOPS defines the limit of IO frequency. +optional
+   * @type {number}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  iops?: number
+  /**
+   * Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+   * @type {string}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  mode?: string
+  /**
+   *
+   * @type {V1alpha1PodSelectorSpec}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  selector?: V1alpha1PodSelectorSpec
+  /**
+   * Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide an integer of pods to do chaos action. If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action +optional
+   * @type {string}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  value?: string
+  /**
+   *
+   * @type {string}
+   * @memberof V1alpha1BlockChaosSpec
+   */
+  volumeName?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1BlockDelaySpec
+ */
+export interface V1alpha1BlockDelaySpec {
+  /**
+   * +optional
+   * @type {string}
+   * @memberof V1alpha1BlockDelaySpec
+   */
+  correlation?: string
+  /**
+   * +optional
+   * @type {string}
+   * @memberof V1alpha1BlockDelaySpec
+   */
+  jitter?: string
+  /**
+   * Latency defines the latency of every io request.
+   * @type {string}
+   * @memberof V1alpha1BlockDelaySpec
+   */
+  latency?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1CPUStressor
  */
 export interface V1alpha1CPUStressor {
@@ -1090,6 +1176,12 @@ export interface V1alpha1ChaosOnlyScheduleSpec {
    * @memberof V1alpha1ChaosOnlyScheduleSpec
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1BlockChaosSpec}
+   * @memberof V1alpha1ChaosOnlyScheduleSpec
+   */
+  blockChaos?: V1alpha1BlockChaosSpec
   /**
    * +optional +kubebuilder:validation:Enum=Forbid;Allow
    * @type {string}
@@ -3025,6 +3117,12 @@ export interface V1alpha1ScheduleSpec {
    */
   awsChaos?: V1alpha1AWSChaosSpec
   /**
+   *
+   * @type {V1alpha1BlockChaosSpec}
+   * @memberof V1alpha1ScheduleSpec
+   */
+  blockChaos?: V1alpha1BlockChaosSpec
+  /**
    * +optional +kubebuilder:validation:Enum=Forbid;Allow
    * @type {string}
    * @memberof V1alpha1ScheduleSpec
@@ -3289,6 +3387,12 @@ export interface V1alpha1Template {
    * @memberof V1alpha1Template
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1BlockChaosSpec}
+   * @memberof V1alpha1Template
+   */
+  blockChaos?: V1alpha1BlockChaosSpec
   /**
    * Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel. +optional
    * @type {Array<string>}

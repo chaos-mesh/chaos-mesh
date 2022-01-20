@@ -180,62 +180,7 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
         {
           field: 'ref',
           label: 'selector',
-          children: [
-            {
-              field: 'string-string',
-              label: 'annotationSelectors',
-              value: {},
-              helperText:
-                'Optional. Map of string keys and values that can be used to select objects. A selector based on annotations.',
-            },
-            {
-              field: 'string-string',
-              label: 'fieldSelectors',
-              value: {},
-              helperText:
-                'Optional. Map of string keys and values that can be used to select objects. A selector based on fields.',
-            },
-            {
-              field: 'string-string',
-              label: 'labelSelectors',
-              value: {},
-              helperText:
-                'Optional. Map of string keys and values that can be used to select objects. A selector based on labels.',
-            },
-            {
-              field: 'label',
-              label: 'namespaces',
-              value: [],
-              helperText: 'Optional. Namespaces is a set of namespace to which objects belong.',
-            },
-            {
-              field: 'string-string',
-              label: 'nodeSelectors',
-              value: {},
-              helperText:
-                "Optional. Map of string keys and values that can be used to select nodes. Selector which must match a node\\'s labels, and objects must belong to these selected nodes.",
-            },
-            {
-              field: 'label',
-              label: 'nodes',
-              value: [],
-              helperText: 'Optional. Nodes is a set of node name and objects must belong to these nodes.',
-            },
-            {
-              field: 'label',
-              label: 'podPhaseSelectors',
-              value: [],
-              helperText:
-                'Optional. PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown',
-            },
-            {
-              field: 'string-label',
-              label: 'pods',
-              value: {},
-              helperText:
-                'Optional. Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.',
-            },
-          ],
+          children: [],
         },
         {
           field: 'text',

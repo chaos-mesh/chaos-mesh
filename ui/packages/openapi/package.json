@@ -1,7 +1,7 @@
 {
   "name": "@ui/openapi",
   "version": "2.1.0",
-  "description": "generate codes from openapi",
+  "description": "Generate @ui/app needed codes from OpenAPI",
   "private": true,
   "main": "index.js",
   "type": "module",
