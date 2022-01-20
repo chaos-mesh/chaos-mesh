@@ -29,6 +29,8 @@ import (
 type UID = string
 type PID = int
 
+var ErrUpdateTaskWithPIDChanges = errors.New("update task with PID changes")
+
 type TaskManager struct {
 	TaskMap map[UID]Task
 }
@@ -64,8 +66,12 @@ func (m TaskManager) UpdateTask(id UID, task Task) error {
 	if m.TaskMap == nil {
 		return errors.New("map not init")
 	}
-	if _, ok := m.TaskMap[id]; !ok {
+	taskOld, ok := m.TaskMap[id]
+	if !ok {
 		return errors.Wrapf(ChaosErr.NotFound("UID"), "uid: %s, task: %v", id, task)
+	}
+	if taskOld.Main != task.Main {
+		return errors.Wrapf(ErrUpdateTaskWithPIDChanges, "uid: %s, task: %v", id, task)
 	}
 	m.TaskMap[id] = task
 	return nil

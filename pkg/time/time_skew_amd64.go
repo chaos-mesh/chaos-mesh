@@ -44,11 +44,9 @@ const (
 )
 
 type Skew struct {
-	deltaSeconds     int64
-	deltaNanoSeconds int64
-	clockIDsMask     uint64
-	fakeImage        *FakeImage
-	originClockFunc  *OriginClockFunc
+	SkewConfig
+	fakeImage       *FakeImage
+	originClockFunc *OriginClockFunc
 }
 
 type OriginClockFunc struct {
@@ -68,7 +66,11 @@ func NewTimeSkew(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64
 }
 
 func NewTimeSkewWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *Skew {
-	return &Skew{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage}
+	return &Skew{SkewConfig: SkewConfig{
+		deltaSeconds:     deltaSeconds,
+		deltaNanoSeconds: deltaNanoSeconds,
+		clockIDsMask:     clockIDsMask,
+	}, fakeImage: fakeImage}
 }
 
 func (it *Skew) Fork() (tasks.ChaosOnGroupProcess, error) {
@@ -221,7 +223,9 @@ func (it *Skew) Recover(pid int) error {
 	defer func() {
 		runtime.UnlockOSThread()
 	}()
-
+	if it.originClockFunc == nil {
+		return errors.Wrapf(ChaosErr.NotFound("originClockFunc"), "recovering")
+	}
 	program, err := ptrace.Trace(pid)
 	if err != nil {
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
