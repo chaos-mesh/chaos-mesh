@@ -16,8 +16,7 @@
 package v1alpha1
 
 import (
-	"fmt"
-
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -189,5 +188,5 @@ func FetchChaosByTemplateType(templateType TemplateType) (runtime.Object, error)
 	if kind, ok := all.kinds[string(templateType)]; ok {
 		return kind.SpawnObject(), nil
 	}
-	return nil, fmt.Errorf("no such kind refers to template type %s", templateType)
+	return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
 }

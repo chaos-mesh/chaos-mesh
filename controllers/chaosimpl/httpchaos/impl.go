@@ -17,8 +17,9 @@ package httpchaos
 
 import (
 	"context"
-	"errors"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"

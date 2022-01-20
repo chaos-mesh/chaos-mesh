@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
@@ -28,6 +29,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
@@ -122,7 +124,8 @@ func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
+		return err
 	}
 
 	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
@@ -172,7 +175,8 @@ func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ker
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
+		return err
 	}
 
 	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{

@@ -46,14 +46,22 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific azure chaos action. Supported
-                  action: ec2-stop / vm-restart Default action: ec2-stop'
+                  action: vm-stop / vm-restart / disk-detach Default action: vm-stop'
                 enum:
-                - ec2-stop
+                - vm-stop
                 - vm-restart
+                - disk-detach
+                type: string
+              diskName:
+                description: DiskName indicates the name of the disk. Needed in disk-detach.
                 type: string
               duration:
                 description: Duration represents the duration of the chaos action.
                 type: string
+              lun:
+                description: LUN indicates the Logical Unit Number of the data disk.
+                  Needed in disk-detach.
+                type: integer
               resourceGroupName:
                 description: ResourceGroupName defines the name of ResourceGroup
                 type: string

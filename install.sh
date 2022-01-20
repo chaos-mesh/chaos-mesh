@@ -861,7 +861,7 @@ gen_chaos_mesh_manifests() {
     K8S_NAMESPACE="chaos-testing"
     VERSION_TAG="${version}"
 
-    DOCKER_REGISTRY_PREFIX="${docker_registry}"
+    IMAGE_REGISTRY_PREFIX="${docker_registry}"
     tmpdir=$(mktemp -d)
 
     ensure openssl genrsa -out ${tmpdir}/ca.key 2048 > /dev/null 2>&1
@@ -1031,6 +1031,8 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - nodes
+      - persistentvolumes
+      - persistentvolumeclaims
       - namespaces
       - services
     verbs: [ "get", "list", "watch" ]
@@ -1297,7 +1299,7 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-daemon
-          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
+          image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1387,7 +1389,7 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-dashboard
-          image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
+          image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1491,7 +1493,7 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
+        image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}
@@ -2081,6 +2083,27 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-blockchaos
+    failurePolicy: Fail
+    name: mblockchaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - blockchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-physicalmachinechaos
     failurePolicy: Fail
     name: mphysicalmachinechaos.kb.io
@@ -2425,6 +2448,27 @@ webhooks:
           - UPDATE
         resources:
           - httpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-blockchaos
+    failurePolicy: Fail
+    name: vblockchaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - blockchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

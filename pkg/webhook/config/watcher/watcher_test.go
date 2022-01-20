@@ -25,6 +25,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 )
 
 var _ = Describe("webhook config watcher", func() {
@@ -34,7 +35,7 @@ var _ = Describe("webhook config watcher", func() {
 			defer func() { restClusterConfig = old }()
 
 			restClusterConfig = func() (*rest.Config, error) {
-				return nil, fmt.Errorf("InClusterConfig error")
+				return nil, errors.New("InClusterConfig error")
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
@@ -50,7 +51,7 @@ var _ = Describe("webhook config watcher", func() {
 			defer func() { kubernetesNewForConfig = old }()
 
 			kubernetesNewForConfig = func(c *rest.Config) (*kubernetes.Clientset, error) {
-				return nil, fmt.Errorf("NewForConfig error")
+				return nil, errors.New("NewForConfig error")
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
@@ -104,7 +105,7 @@ var _ = Describe("webhook config watcher", func() {
 	})
 
 	Context("Watch error", func() {
-		It("should return unable to create template watcher", func() {
+		It("should return create template configmap watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.TemplateNamespace = "testNamespace"
@@ -115,7 +116,7 @@ var _ = Describe("webhook config watcher", func() {
 			controllerRuntimeSignalHandler := ctrl.SetupSignalHandler()
 			err := cmw.Watch(sigChan, controllerRuntimeSignalHandler.Done())
 			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("unable to create template watcher"))
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("create template configmap watcher"))
 		})
 	})
 
