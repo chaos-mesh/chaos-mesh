@@ -26,6 +26,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -166,8 +167,7 @@ type Server struct {
 func BuildServer(conf *Config, reg RegisterGatherer) (*Server, error) {
 	daemonServer, err := newDaemonServer(conf.Runtime, reg)
 	if err != nil {
-		log.Error(err, "failed to create daemon server")
-		return nil, err
+		return nil, errors.Wrap(err, "create daemon server")
 	}
 
 	return &Server{
@@ -186,31 +186,27 @@ func (s *Server) Start() error {
 	grpcBindAddr := s.conf.GrpcAddr()
 	grpcListener, err := net.Listen("tcp", grpcBindAddr)
 	if err != nil {
-		log.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
-		return err
+		return errors.Wrapf(err, "listen grpc address %s", grpcBindAddr)
 	}
 
 	grpcServer, err := newGRPCServer(s.daemonServer, s.reg, s.conf.tlsConfig)
 	if err != nil {
-		log.Error(err, "failed to create grpc server")
-		return err
+		return errors.Wrap(err, "create grpc server")
 	}
 
 	go func() {
 		log.Info("Starting http endpoint", "address", httpBindAddr)
 		if err := httpServer.ListenAndServe(); err != nil {
-			log.Error(err, "failed to start http endpoint")
 			httpServer.Shutdown(context.Background())
-			s.errors <- err
+			s.errors <- errors.Wrap(err, "start http endpoint")
 		}
 	}()
 
 	go func() {
 		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", s.conf.Runtime)
 		if err := grpcServer.Serve(grpcListener); err != nil {
-			log.Error(err, "failed to start grpc endpoint")
 			grpcServer.Stop()
-			s.errors <- err
+			s.errors <- errors.Wrap(err, "start grpc endpoint")
 		}
 	}()
 

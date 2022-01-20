@@ -70,18 +70,18 @@ func main() {
 	log.Info("grant access to /dev/fuse")
 	err := fusedev.GrantAccess()
 	if err != nil {
-		log.Error(err, "fail to grant access to /dev/fuse")
+		log.Error(err, "grant access to /dev/fuse")
 	}
 
 	server, err := chaosdaemon.BuildServer(conf, reg)
 	if err != nil {
-		log.Error(err, "failed to build chaos-daemon server")
+		log.Error(err, "build chaos-daemon server")
 		os.Exit(1)
 	}
 
 	err = server.Start()
 	if err != nil {
-		log.Error(err, "failed to start chaos-daemon server")
+		log.Error(err, "start chaos-daemon server")
 		os.Exit(1)
 	}
 
@@ -94,7 +94,7 @@ func main() {
 	case sig := <-sigc:
 		log.Info("received signal", "signal", sig)
 	case err = <-server.Errors():
-		log.Error(err, "error from chaos-daemon server")
+		log.Error(err, "chaos-daemon server stopped")
 	}
 
 	server.Shutdown()

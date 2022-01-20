@@ -54,19 +54,19 @@ func BuildOperatorActionAndCfg(cfg *Config) (OperatorAction, *OperatorConfig, er
 	// Get clients
 	config, err := framework.LoadConfig()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to load config")
+		return nil, nil, errors.Wrap(err, "load config")
 	}
 	kubeCli, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to create kube client")
+		return nil, nil, errors.Wrap(err, "create kube client")
 	}
 	aggrCli, err := aggregatorclientset.NewForConfig(config)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to create aggr client")
+		return nil, nil, errors.Wrap(err, "create aggr client")
 	}
 	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to create apiExt clientset")
+		return nil, nil, errors.Wrap(err, "create apiExt clientset")
 	}
 	oa := NewOperatorAction(kubeCli, aggrCli, apiExtCli, cfg)
 	ocfg := NewDefaultOperatorConfig()
