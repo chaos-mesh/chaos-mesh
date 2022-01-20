@@ -431,16 +431,16 @@ func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 }
 
 // FindSymbolInEntry finds symbol in entry through parsing elf
-func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, uint64, error) {
+func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, error) {
 	libBuffer, err := p.GetLibBuffer(entry)
 	if err != nil {
-		return 0, 0, err
+		return 0, err
 	}
 
 	reader := bytes.NewReader(*libBuffer)
 	vdsoElf, err := elf.NewFile(reader)
 	if err != nil {
-		return 0, 0, errors.WithStack(err)
+		return 0, errors.WithStack(err)
 	}
 
 	loadOffset := uint64(0)
@@ -456,16 +456,16 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 
 	symbols, err := vdsoElf.DynamicSymbols()
 	if err != nil {
-		return 0, 0, errors.WithStack(err)
+		return 0, errors.WithStack(err)
 	}
 	for _, symbol := range symbols {
 		if symbol.Name == symbolName {
 			offset := symbol.Value
 
-			return entry.StartAddress + (offset - loadOffset), symbol.Size, nil
+			return entry.StartAddress + (offset - loadOffset), nil
 		}
 	}
-	return 0, 0, errors.New("cannot find symbol")
+	return 0, errors.New("cannot find symbol")
 }
 
 // WriteUint64ToAddr writes uint64 to addr
