@@ -17,9 +17,11 @@ package tasks
 
 import (
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
