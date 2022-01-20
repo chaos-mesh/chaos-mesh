@@ -295,13 +295,13 @@ func (it *CompositeInjector) Recover(pid int) error {
 }
 
 func NewTimeSkew(deltaSec int64, deltaNsec int64, clockIdsMask uint64) (FakeClockInjector, error) {
-	SkewClockGetTime, err := NewSkewClockGetTime(deltaSec, deltaNsec, clockIdsMask)
+	skewClockGetTime, err := NewSkewClockGetTime(deltaSec, deltaNsec, clockIdsMask)
 	if err != nil {
 		return nil, err
 	}
-	SkewGetTimeOfDay, err := NewSkewGetTimeOfDay(deltaSec, deltaNsec)
+	skewGetTimeOfDay, err := NewSkewGetTimeOfDay(deltaSec, deltaNsec)
 	if err != nil {
 		return nil, err
 	}
-	return &CompositeInjector{injectors: []FakeClockInjector{SkewClockGetTime, SkewGetTimeOfDay}}, nil
+	return &CompositeInjector{injectors: []FakeClockInjector{skewClockGetTime, skewGetTimeOfDay}}, nil
 }
