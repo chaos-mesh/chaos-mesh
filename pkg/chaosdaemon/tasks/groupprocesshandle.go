@@ -10,9 +10,12 @@ import (
 type ChaosOnGroupProcess interface {
 	Fork() (ChaosOnGroupProcess, error)
 	AssignChaosOnProcess
+
 	ChaosOnProcess
+	ChaosCanRecover
 }
 
+// GroupProcessHandler implements Group PID inject & recover.
 type GroupProcessHandler struct {
 	Main     ChaosOnGroupProcess
 	childMap map[PID]ChaosOnGroupProcess

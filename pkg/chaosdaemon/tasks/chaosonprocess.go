@@ -1,20 +1,51 @@
 package tasks
 
 import (
-	"os"
-	"syscall"
-
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 )
 
-type ChaosOnProcess interface {
-	Inject(pid PID) error
+var ErrCanNotAdd = errors.New("can not add")
+var ErrCanNotAssign = errors.New("can not assign")
+
+// NewChaosOnProcess init ChaosOnProcess with values can not be Assigned.
+type NewChaosOnProcess interface {
+	New(immutableValues interface{}) (ChaosOnProcess, error)
+}
+
+type AssignChaosOnProcess interface {
+	Assign(ChaosOnProcess) error
+}
+
+type TaskToProcess interface {
+	Addable
+	NewChaosOnProcess
+	AssignChaosOnProcess
+}
+
+type ChaosCanRecover interface {
 	Recover(pid PID) error
 }
 
+type ChaosOnProcess interface {
+	Inject(pid PID) error
+}
+
+// ChaosOnProcessManager is a Manager for chaos tasks base on their
+// target that marked with a PID and implement with ChaosOnProcess.
+// Since we need to :
+//	Sum tasks on same PID to one task.
+// 	Create working chaos on process called ChaosOnProcess by task info.
+// 	Assign the summed task info to the ChaosOnProcess.
+// If developers wants to use functions in ChaosOnProcessManager ,
+// their imported Task need to implement interface TaskToProcess.
+// If developers wants to totally recover task successfully
+// when no task applied on the ChaosOnProcess.
+// This ChaosOnProcess must implement ChaosCanRecover.
+// If not implement ,
+// the Recover function will return a ErrNotImplement("ChaosCanRecover") error.
 type ChaosOnProcessManager struct {
 	taskManager TaskManager
 	processMap  map[PID]ChaosOnProcess
@@ -30,7 +61,118 @@ func NewChaosOnProcessManager(logger logr.Logger) ChaosOnProcessManager {
 	}
 }
 
-func (cm ChaosOnProcessManager) Commit(uid UID, pid PID) error {
+func (cm ChaosOnProcessManager) CopyTaskManager() TaskManager {
+	tm := NewTaskManager()
+	for uid, task := range cm.taskManager.TaskMap {
+		tm.TaskMap[uid] = task
+	}
+	return tm
+}
+
+func (cm ChaosOnProcessManager) CopyProcessMap() map[PID]ChaosOnProcess {
+	pm := make(map[PID]ChaosOnProcess)
+	for pid, chaosOnProcess := range cm.processMap {
+		cm.processMap[pid] = chaosOnProcess
+	}
+	return pm
+}
+
+func (cm ChaosOnProcessManager) GetWithUID(id UID) (interface{}, error) {
+	return cm.taskManager.GetWithUID(id)
+}
+
+func (cm ChaosOnProcessManager) GetWithPID(pid PID) (ChaosOnProcess, error) {
+	p, ok := cm.processMap[pid]
+	if !ok {
+		return nil, ChaosErr.NotFound("PID")
+	}
+	return p, nil
+}
+
+func (cm ChaosOnProcessManager) GetUIDsWithPID(pid PID) []UID {
+	return cm.taskManager.GetWithPID(pid)
+}
+
+func (cm ChaosOnProcessManager) Update(uid UID, pid PID, config TaskToProcess) error {
+	oldTask, err := cm.taskManager.UpdateTask(uid, NewTask(pid, config))
+	if err != nil {
+		return err
+	}
+	err = cm.commit(uid, pid)
+	if err != nil {
+		_, _ = cm.taskManager.UpdateTask(uid, oldTask)
+		return err
+	}
+	return nil
+}
+
+func (cm ChaosOnProcessManager) Create(uid UID, pid PID, config TaskToProcess, immutableValues interface{}) error {
+	if _, ok := cm.processMap[pid]; ok {
+		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "create")
+	}
+
+	err := cm.taskManager.AddTask(uid, NewTask(pid, config))
+	if err != nil {
+		return err
+	}
+
+	processTask, err := config.New(immutableValues)
+	if err != nil {
+		_ = cm.taskManager.RecoverTask(uid)
+		return errors.Wrapf(err, "fork time skew : %v", config)
+	}
+
+	cm.processMap[pid] = processTask
+	err = cm.commit(uid, pid)
+	if err != nil {
+		_ = cm.taskManager.RecoverTask(uid)
+		delete(cm.processMap, pid)
+		return errors.Wrapf(err, "update new process")
+	}
+	return nil
+}
+
+func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config TaskToProcess) error {
+	err := cm.taskManager.AddTask(uid, NewTask(pid, config))
+	if err != nil {
+		return err
+	}
+	err = cm.commit(uid, pid)
+	if err != nil {
+		_ = cm.taskManager.RecoverTask(uid)
+		return err
+	}
+	return nil
+}
+
+func (cm ChaosOnProcessManager) Recover(uid UID, pid PID) error {
+	uIDs := cm.taskManager.GetWithPID(pid)
+	if len(uIDs) <= 1 {
+		err := cm.clearProcessChaos(pid)
+		if err != nil {
+			return err
+		}
+		err = cm.taskManager.RecoverTask(uid)
+		if err != nil {
+			cm.logger.Error(err, "recover task with error")
+		}
+		return nil
+	}
+
+	err := cm.taskManager.RecoverTask(uid)
+	if err != nil {
+		cm.logger.Error(err, "recover task with error")
+		return nil
+	}
+
+	err = cm.commit(uIDs[0], pid)
+	if err != nil {
+		return errors.Wrapf(err, "update new process")
+	}
+	return nil
+}
+
+func (cm ChaosOnProcessManager) commit(uid UID, pid PID) error {
 	task, err := cm.taskManager.SumTask(uid)
 	if err != nil {
 		return errors.Wrapf(err, "unknown recovering in the taskMap, UID: %v", uid)
@@ -39,9 +181,9 @@ func (cm ChaosOnProcessManager) Commit(uid UID, pid PID) error {
 	if !ok {
 		return errors.Wrapf(ChaosErr.NotFound("PID"), "PID : %d", pid)
 	}
-	tasker, ok := task.Data.(Tasker)
+	tasker, ok := task.Data.(TaskToProcess)
 	if !ok {
-		return errors.New("task.Data here must implement Tasker")
+		return errors.New("task.Data here must implement TaskToProcess")
 	}
 	_ = tasker.Assign(process)
 	if err != nil {
@@ -54,77 +196,18 @@ func (cm ChaosOnProcessManager) Commit(uid UID, pid PID) error {
 	return nil
 }
 
-func (cm ChaosOnProcessManager) Update(uid UID, pid PID, config Tasker) error {
-	err := cm.taskManager.UpdateTask(uid, GetTask(pid, config))
-	if err != nil {
-		return err
-	}
-	err = cm.Commit(uid, pid)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config Tasker) error {
-	err := cm.taskManager.AddTask(uid, GetTask(pid, config))
-	if err != nil {
-		return err
-	}
-	err = cm.Commit(uid, pid)
-	if err == nil {
-		return nil
-	}
-	if errors.Cause(err) == ChaosErr.NotFound("PID") {
-		processTask, err := config.New(cm.logger)
+func (cm ChaosOnProcessManager) clearProcessChaos(pid PID) error {
+	if process, ok := cm.processMap[pid]; ok {
+		pRecover, ok := process.(ChaosCanRecover)
+		if !ok {
+			return errors.Wrapf(ChaosErr.NotImplemented("ChaosCanRecover"), "process")
+		}
+		err := pRecover.Recover(pid)
 		if err != nil {
-			return errors.Wrapf(err, "fork time skew : %v", config)
+			return errors.Wrapf(err, "recover chaos")
 		}
-
-		cm.processMap[pid] = processTask
-		err = cm.Commit(uid, pid)
-		if err != nil {
-			return errors.Wrapf(err, "update new process")
-		}
+		delete(cm.processMap, pid)
 		return nil
 	}
-	return errors.Wrapf(err, "update old process")
-}
-
-func (cm ChaosOnProcessManager) Recover(uid UID, pid PID) error {
-	_, err := cm.taskManager.RecoverTask(uid)
-	if err != nil {
-		cm.logger.Error(err, "failed to recover task")
-		return nil
-	}
-
-	uIDs := cm.taskManager.GetTasksUIDByPID(pid)
-	if len(uIDs) == 0 {
-		if process, ok := cm.processMap[pid]; ok {
-			err := process.Recover(pid)
-			if err != nil {
-				// Check if pid is not exist.If true , return nil.
-				p, errf := os.FindProcess(pid)
-				if errf != nil {
-					cm.logger.Error(err, "can not find process")
-					return nil
-				}
-				errs := p.Signal(syscall.Signal(0))
-				if errs != nil {
-					cm.logger.Error(err, "can not check process with signal")
-					return nil
-				}
-				return errors.Wrapf(err, "error & find process success")
-			}
-			return nil
-		}
-		cm.logger.Error(ChaosErr.NotFound("process"), "recovering task")
-		return nil
-	}
-
-	err = cm.Commit(uIDs[0], pid)
-	if err != nil {
-		return errors.Wrapf(err, "update new process")
-	}
-	return nil
+	return errors.Wrapf(ChaosErr.NotFound("PID"), "recovering task")
 }

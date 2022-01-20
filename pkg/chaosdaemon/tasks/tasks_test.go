@@ -2,6 +2,8 @@ package tasks
 
 import (
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/go-logr/logr"
@@ -26,37 +28,40 @@ func (f *FakeConfig) Add(a Addable) error {
 func (f *FakeConfig) Assign(c ChaosOnProcess) error {
 	C, OK := c.(*FakeChaos)
 	if OK {
-		C.c = *f
+		C.C.i = f.i
 		return nil
 	}
 	return errors.Wrapf(ErrCanNotAssign, "expect type : *FakeChaos, got : %T", c)
 }
 
-func (f *FakeConfig) New(logger logr.Logger) (ChaosOnProcess, error) {
-	return &FakeChaos{
-		c:      *f,
-		logger: logger,
-		j:      1,
-	}, nil
+func (f *FakeConfig) New(immutableValues interface{}) (ChaosOnProcess, error) {
+	temp := immutableValues.(*FakeChaos)
+	f.Assign(temp)
+	return temp, nil
 }
 
 type FakeChaos struct {
-	c      FakeConfig
-	logger logr.Logger
-	j      int
+	C              FakeConfig
+	ErrWhenRecover bool
+	ErrWhenInject  bool
+	logger         logr.Logger
 }
 
 func (f *FakeChaos) Inject(pid PID) error {
-	f.logger.Info("inject", "pid", pid, "FakeChaos", f.c.i)
+	if f.ErrWhenInject {
+		return ChaosErr.NotImplemented("inject")
+	}
 	return nil
 }
 
 func (f *FakeChaos) Recover(pid PID) error {
-	f.logger.Info("recover", "pid", pid, "FakeChaos", f.c.i)
+	if f.ErrWhenRecover {
+		return ChaosErr.NotImplemented("recover")
+	}
 	return nil
 }
 
-func TestMAA(t *testing.T) {
+func TestTasks(t *testing.T) {
 	var log logr.Logger
 
 	zapLog, err := zap.NewDevelopment()
@@ -66,11 +71,40 @@ func TestMAA(t *testing.T) {
 	log = zapr.NewLogger(zapLog)
 
 	m := NewChaosOnProcessManager(log)
-	fmt.Println(m.Apply("1", 1, &FakeConfig{i: 1}))
-	fmt.Println(m.Apply("2", 1, &FakeConfig{i: 1}))
-	fmt.Println("up", m.Update("1", 1, &FakeConfig{i: 2}))
-	fmt.Println("rec", m.Recover("1", 1))
-	fmt.Println("rec", m.Recover("2", 1))
-	fmt.Println(m.Apply("1", 1, &FakeConfig{i: 1}))
-	fmt.Println(m.Recover("1", 1))
+
+	chaos := FakeChaos{
+		ErrWhenRecover: false,
+		ErrWhenInject:  false,
+		logger:         log,
+	}
+	task1 := FakeConfig{i: 1}
+	uid1 := "1"
+	err = m.Create(uid1, 1, &task1, &chaos)
+	assert.NoError(t, err)
+	err = m.Apply(uid1, 1, &task1)
+	assert.Equal(t, errors.Cause(err), ChaosErr.ErrDuplicateEntity)
+	err = m.Recover(uid1, 1)
+	assert.NoError(t, err)
+	err = m.Recover(uid1, 1)
+	assert.Equal(t, errors.Cause(err), ChaosErr.NotFound("PID"))
+
+	chaos.ErrWhenInject = true
+	tasks2 := FakeConfig{i: 1}
+	err = m.Create(uid1, 1, &tasks2, &chaos)
+	assert.Equal(t, errors.Cause(err), ChaosErr.NotImplemented("inject"))
+	_, err = m.GetWithUID(uid1)
+	assert.Equal(t, errors.Cause(err), ChaosErr.NotFound("UID"))
+
+	chaos.ErrWhenInject = false
+	chaos.ErrWhenRecover = true
+	tasks3 := FakeConfig{i: 1}
+	err = m.Create(uid1, 1, &tasks3, &chaos)
+	assert.NoError(t, err)
+	err = m.Recover(uid1, 1)
+	assert.Equal(t, errors.Cause(err), ChaosErr.NotImplemented("recover"))
+	p, err := m.GetWithPID(1)
+	inner := p.(*FakeChaos)
+	inner.ErrWhenRecover = false
+	err = m.Recover(uid1, 1)
+	assert.NoError(t, err)
 }

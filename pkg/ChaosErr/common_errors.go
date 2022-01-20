@@ -31,7 +31,18 @@ func NotFound(name string) error {
 	return ErrNotFound{name: name}
 }
 
+type ErrNotImplemented struct {
+	name string
+}
+
+func (e ErrNotImplemented) Error() string {
+	return e.name + " not implement"
+}
+
+func NotImplemented(name string) error {
+	return ErrNotImplemented{name: name}
+}
+
 var (
-	ErrNotImplemented  = errors.New("not implement")
 	ErrDuplicateEntity = errors.New("duplicate entity")
 )

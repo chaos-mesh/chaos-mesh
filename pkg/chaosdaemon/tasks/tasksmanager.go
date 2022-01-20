@@ -16,21 +16,22 @@
 package tasks
 
 import (
-	"github.com/pkg/errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
+	"github.com/pkg/errors"
 )
 
-// A Manager for Chaos-Daemon.
-// For example , Time-Chaos apply tasks on several processes.
-// Every task have its own ID and process have PID.
-// TaskManager provide some common function to solve the relationship
-// of task and process
+// A Task Manager for Chaos-Daemon.
+// What is task here :
+// Task defines a composite of flexible config with an immutable target.
+// We use PID to stand by the target.
+// TaskManager provide some basic function on Tasks.
+// If developers wants to use SumTask , they must implement Addable for the Task.
 
 type UID = string
 type PID = int
 
 var ErrUpdateTaskWithPIDChanges = errors.New("update task with PID changes")
+var ErrTaskMapNotInit = errors.New("TaskMap not init")
 
 type TaskManager struct {
 	TaskMap map[UID]Task
@@ -42,10 +43,10 @@ func NewTaskManager() TaskManager {
 
 type Task struct {
 	Main PID
-	Data Addable
+	Data interface{}
 }
 
-func GetTask(main PID, data Addable) Task {
+func NewTask(main PID, data interface{}) Task {
 	return Task{
 		main,
 		data,
@@ -54,7 +55,7 @@ func GetTask(main PID, data Addable) Task {
 
 func (m TaskManager) AddTask(id UID, task Task) error {
 	if m.TaskMap == nil {
-		return errors.New("map not init")
+		return ErrTaskMapNotInit
 	}
 	if _, ok := m.TaskMap[id]; ok {
 		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
@@ -63,36 +64,66 @@ func (m TaskManager) AddTask(id UID, task Task) error {
 	return nil
 }
 
-func (m TaskManager) UpdateTask(id UID, task Task) error {
+func (m TaskManager) UpdateTask(id UID, task Task) (Task, error) {
 	if m.TaskMap == nil {
-		return errors.New("map not init")
+		return Task{}, ErrTaskMapNotInit
 	}
 	taskOld, ok := m.TaskMap[id]
 	if !ok {
-		return errors.Wrapf(ChaosErr.NotFound("UID"), "uid: %s, task: %v", id, task)
+		return Task{}, errors.Wrapf(ChaosErr.NotFound("UID"), "uid: %s, task: %v", id, task)
 	}
 	if taskOld.Main != task.Main {
-		return errors.Wrapf(ErrUpdateTaskWithPIDChanges, "uid: %s, task: %v", id, task)
+		return Task{}, errors.Wrapf(ErrUpdateTaskWithPIDChanges, "uid: %s, task: %v", id, task)
 	}
 	m.TaskMap[id] = task
+	return taskOld, nil
+}
+
+func (m TaskManager) RecoverTask(id UID) error {
+	if m.TaskMap == nil {
+		return ErrTaskMapNotInit
+	}
+	_, ok := m.TaskMap[id]
+	if !ok {
+		return errors.Wrapf(ChaosErr.NotFound("TASK"), "UID : %v", id)
+	}
+	delete(m.TaskMap, id)
 	return nil
 }
 
-func (m TaskManager) RecoverTask(id UID) (Task, error) {
-	task, ok := m.TaskMap[id]
+func (m TaskManager) GetWithUID(id UID) (interface{}, error) {
+	t, ok := m.TaskMap[id]
 	if !ok {
-		return Task{}, errors.Wrapf(ChaosErr.NotFound("TASK"), "UID : %v", id)
+		return Task{}, ChaosErr.NotFound("UID")
 	}
-	delete(m.TaskMap, id)
-	return task, nil
+	return t.Data, nil
 }
 
+func (m TaskManager) GetWithPID(id PID) []UID {
+	uIds := make([]UID, 0)
+	for uid, task := range m.TaskMap {
+		if task.Main == id {
+			uIds = append(uIds, uid)
+		}
+	}
+	return uIds
+}
+
+type Addable interface {
+	Add(a Addable) error
+}
+
+// SumTask will add sum all the tasks that tasks pid is equal to task with input uid.
+// If developers want to use it with type T, they must implement Addable for *T.
 func (m TaskManager) SumTask(uid UID) (Task, error) {
+	if m.TaskMap == nil {
+		return Task{}, ErrTaskMapNotInit
+	}
 	task, ok := m.TaskMap[uid]
 	if !ok {
 		return Task{}, ChaosErr.NotFound("UID")
 	}
-	uids := m.GetTasksUIDByPID(task.Main)
+	uids := m.GetWithPID(task.Main)
 
 	for _, uidTemp := range uids {
 		if uid == uidTemp {
@@ -102,20 +133,18 @@ func (m TaskManager) SumTask(uid UID) (Task, error) {
 		if !ok {
 			return Task{}, ChaosErr.NotFound("TASK")
 		}
-		err := task.Data.Add(taskTemp.Data)
+		AddableData, ok := task.Data.(Addable)
+		if !ok {
+			return Task{}, errors.Wrapf(ChaosErr.NotImplemented("Addable"), "task.Data")
+		}
+		AddableTempData, ok := taskTemp.Data.(Addable)
+		if !ok {
+			return Task{}, errors.Wrapf(ChaosErr.NotImplemented("Addable"), "taskTemp.Data")
+		}
+		err := AddableData.Add(AddableTempData)
 		if err != nil {
 			return Task{}, err
 		}
 	}
 	return task, nil
-}
-
-func (m TaskManager) GetTasksUIDByPID(id PID) []UID {
-	uIds := make([]UID, 0)
-	for uid, task := range m.TaskMap {
-		if task.Main == id {
-			uIds = append(uIds, uid)
-		}
-	}
-	return uIds
 }
