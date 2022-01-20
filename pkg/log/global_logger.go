@@ -16,8 +16,9 @@
 package log
 
 import (
-	"github.com/go-logr/logr"
 	"sync"
+
+	"github.com/go-logr/logr"
 )
 
 // the way for management and access global logger is referenced from zap.
