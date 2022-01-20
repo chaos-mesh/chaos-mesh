@@ -15,8 +15,9 @@
  *
  */
 
-import { cleanMarkers, getUIFormWhen } from './utils.js'
+import { cleanMarkers, getUIFormWhen, isUIFormIgnore } from './utils.js'
 
+import { ignores } from './constants.js'
 import ts from 'typescript'
 
 const { factory } = ts
@@ -127,10 +128,19 @@ function typeReferenceToObjectLiteralExpression(
   options = { multiple: false }
 ) {
   const type = checker.getTypeAtLocation(typeRef)
+  const when = getUIFormWhen(comment)
   const members = type.symbol.members
 
   members.forEach((val) => {
     const { escapedName, valueDeclaration: declaration } = val
+    if (ignores.includes(identifier)) {
+      return
+    }
+
+    const comment = declaration.jsDoc[0].comment ?? ''
+    if (isUIFormIgnore(comment)) {
+      return
+    }
 
     if (declaration.type.kind === ts.SyntaxKind.TypeReference) {
       // handle non-primritive array
@@ -142,7 +152,7 @@ function typeReferenceToObjectLiteralExpression(
           typeReferenceToObjectLiteralExpression(
             escapedName,
             declaration.type.typeArguments[0],
-            declaration.jsDoc[0].comment ?? '',
+            comment,
             [],
             sourceFile,
             checker,
@@ -151,27 +161,18 @@ function typeReferenceToObjectLiteralExpression(
         )
       } else if (isArrayLiteral(declaration.type, sourceFile)) {
         // handle literal array
-        objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
+        objs.push(_nodeToField(escapedName, declaration.type, comment, sourceFile))
       } else {
         objs.push(
-          typeReferenceToObjectLiteralExpression(
-            escapedName,
-            declaration.type,
-            declaration.jsDoc[0].comment ?? '',
-            [],
-            sourceFile,
-            checker
-          )
+          typeReferenceToObjectLiteralExpression(escapedName, declaration.type, comment, [], sourceFile, checker)
         )
       }
 
       return
     }
 
-    objs.push(_nodeToField(escapedName, declaration.type, declaration.jsDoc[0].comment ?? '', sourceFile))
+    objs.push(_nodeToField(escapedName, declaration.type, comment, sourceFile))
   })
-
-  const when = getUIFormWhen(comment)
 
   // create ref field
   //

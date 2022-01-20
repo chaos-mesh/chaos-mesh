@@ -85,16 +85,15 @@ export function genForms(source) {
 
           /** @type {string} */
           const comment = node.jsDoc[0].comment ?? '' // prevent error when comment is undefined
+          // ignore specifc fields
+          if (isUIFormIgnore(comment)) {
+            break
+          }
 
           if (identifier === 'action') {
             // get all actions
             actions = getUIFormEnum(comment)
           } else {
-            // ignore specifc fields
-            if (isUIFormIgnore(comment)) {
-              break
-            }
-
             objects.push(nodeToField(identifier, node.type, comment, [], sourceFile, checker))
           }
 
