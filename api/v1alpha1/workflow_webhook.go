@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"sort"
 
+	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation"
@@ -263,4 +264,8 @@ func shouldBeNoSchedule(path *field.Path, template Template) field.ErrorList {
 		}
 	}
 	return nil
+}
+
+func (in *Workflow) Default() {
+	gw.Default(in)
 }
