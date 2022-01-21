@@ -58,13 +58,6 @@ func (r *ScheduleCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if !schedule.DeletionTimestamp.IsZero() {
-		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive schedule")
-		}
-		return ctrl.Result{}, nil
-	}
-
 	if err := r.setUnarchivedSchedule(req, *schedule); err != nil {
 		r.Log.Error(err, "failed to archive schedule")
 		// ignore error here

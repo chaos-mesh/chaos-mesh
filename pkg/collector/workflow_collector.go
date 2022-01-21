@@ -62,12 +62,6 @@ func (it *WorkflowCollector) Reconcile(request reconcile.Request) (reconcile.Res
 		it.Log.Error(err, "failed to get workflow object", "request", request.NamespacedName)
 		return ctrl.Result{}, nil
 	}
-	if !workflow.DeletionTimestamp.IsZero() {
-		if err = it.markAsArchived(ctx, request.Namespace, request.Name); err != nil {
-			it.Log.Error(err, "failed to archive workflow")
-		}
-		return ctrl.Result{}, nil
-	}
 
 	if err := it.persistentWorkflow(&workflow); err != nil {
 		it.Log.Error(err, "failed to archive workflow")
