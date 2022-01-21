@@ -93,7 +93,7 @@ func TestcaseHttpGracefulAbortRestart(
 	framework.ExpectNoError(err, "failed to upgrade chaos-mesh")
 
 	By("waiting for assertion HTTP abort again")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
 
 		// abort applied

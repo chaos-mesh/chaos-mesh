@@ -91,7 +91,7 @@ func TestcaseIOErrorGracefulShutdown(
 	framework.ExpectNoError(err, "failed to upgrade chaos-mesh")
 
 	By("waiting for assertion IO error again")
-	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
 		if err != nil && strings.Contains(err.Error(), "input/output error") {
