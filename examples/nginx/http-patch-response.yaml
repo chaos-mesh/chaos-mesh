@@ -16,17 +16,19 @@
 kind: HTTPChaos
 apiVersion: chaos-mesh.org/v1alpha1
 metadata:
-  namespace: nginx
+  namespace: default
   name: nginx-http-patch
 spec:
   selector:
     namespaces:
-      - nginx
+      - default
+    labelSelectors:
+      app: nginx
   mode: all
   target: Response
   patch:
     body:
       type: JSON
-      value: '{"status": "Failed", "reason":"hacked by Chaos Mesh"}'
+      value: '{"status":"Failed","reason":"hacked by Chaos Mesh"}'
   port: 80
   path: '*'
