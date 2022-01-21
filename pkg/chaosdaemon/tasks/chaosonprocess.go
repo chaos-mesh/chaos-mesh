@@ -108,6 +108,10 @@ func (cm ChaosOnProcessManager) GetUIDsWithPID(pid PID) []UID {
 	return cm.taskManager.GetWithPID(pid)
 }
 
+// Update the task config with a same UID and PID .
+// If it comes a UID not injected , Update will return ChaosErr.NotFound("UID").
+// If it comes the import PID of task do not equal to the last one,
+// Update will return ErrUpdateTaskWithPIDChanges.
 func (cm ChaosOnProcessManager) Update(uid UID, pid PID, config TaskToProcess) error {
 	oldTask, err := cm.taskManager.UpdateTask(uid, NewTask(pid, config))
 	if err != nil {
@@ -121,6 +125,11 @@ func (cm ChaosOnProcessManager) Update(uid UID, pid PID, config TaskToProcess) e
 	return nil
 }
 
+// Create the first task on a process,
+// the New function of TaskToProcess:NewChaosOnProcess will only be used here.
+// immutableValues is only the import parameter of New function in TaskToProcess:NewChaosOnProcess.
+// If it comes a PID are already be injected ,
+// Create will return ChaosErr.ErrDuplicateEntity.
 func (cm ChaosOnProcessManager) Create(uid UID, pid PID, config TaskToProcess, immutableValues interface{}) error {
 	if _, ok := cm.processMap[pid]; ok {
 		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "create")
@@ -147,6 +156,9 @@ func (cm ChaosOnProcessManager) Create(uid UID, pid PID, config TaskToProcess, i
 	return nil
 }
 
+// Apply the task when the target pid of task is already be Created.
+// If it comes a UID injected , Apply will return ChaosErr.ErrDuplicateEntity.
+// If the Process has not been Created , Apply will return ChaosErr.NotFound("PID").
 func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config TaskToProcess) error {
 	err := cm.taskManager.AddTask(uid, NewTask(pid, config))
 	if err != nil {
@@ -160,10 +172,22 @@ func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config TaskToProcess) er
 	return nil
 }
 
+// Recover the task, if there is no task on PID or recovering the last task on PID.
+// Recover in ChaosCanRecover will run, if runs failed it will just return the error.
+// If Recover will fail , but developer wants to clear it run : cm.ClearProcessChaos(pid, true).
+// If PID is already recovered successfully, Recover will return ChaosErr.NotFound("PID").
+// If UID is not Applied or Created or the target PID of UID is not the import pid,
+// Recover will return ChaosErr.NotFound("UID").
 func (cm ChaosOnProcessManager) Recover(uid UID, pid PID) error {
 	uIDs := cm.taskManager.GetWithPID(pid)
-	if len(uIDs) <= 1 {
-		err := cm.clearProcessChaos(pid)
+	if len(uIDs) == 0 {
+		return ChaosErr.NotFound("PID")
+	}
+	if len(uIDs) == 1 {
+		if uIDs[0] != uid {
+			return ChaosErr.NotFound("UID")
+		}
+		err := cm.ClearProcessChaos(pid, false)
 		if err != nil {
 			return err
 		}
@@ -211,14 +235,14 @@ func (cm ChaosOnProcessManager) commit(uid UID, pid PID) error {
 	return nil
 }
 
-func (cm ChaosOnProcessManager) clearProcessChaos(pid PID) error {
+func (cm ChaosOnProcessManager) ClearProcessChaos(pid PID, ignoreRecoverErr bool) error {
 	if process, ok := cm.processMap[pid]; ok {
 		pRecover, ok := process.(ChaosCanRecover)
 		if !ok {
 			return errors.Wrapf(ChaosErr.NotImplemented("ChaosCanRecover"), "process")
 		}
 		err := pRecover.Recover(pid)
-		if err != nil {
+		if err != nil && !ignoreRecoverErr {
 			return errors.Wrapf(err, "recover chaos")
 		}
 		delete(cm.processMap, pid)
