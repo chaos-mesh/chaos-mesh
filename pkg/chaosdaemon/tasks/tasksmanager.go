@@ -110,6 +110,9 @@ func (m TaskManager) GetWithPID(id PID) []UID {
 	return uIds
 }
 
+// If developers want to add some new behavior on Tasks Gathering,
+// add an interface like Addable , add apply it in (cm ChaosOnProcessManager) commit(uid UID, pid PID).
+
 type Addable interface {
 	Add(a Addable) error
 }
