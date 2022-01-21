@@ -117,7 +117,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="containerNames"
               label="Container Name"
-              helperText="Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected"
+              helperText="Optional. Type string and end with a space to generate the container names. If it's empty, the first container will be injected"
             />
           </OtherOptions>
 

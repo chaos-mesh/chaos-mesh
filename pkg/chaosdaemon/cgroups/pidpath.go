@@ -16,11 +16,11 @@
 package cgroups
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/containerd/cgroups"
+	"github.com/pkg/errors"
 )
 
 func V1() ([]cgroups.Subsystem, error) {
@@ -43,7 +43,7 @@ func PidPath(pid int) cgroups.Path {
 	paths, err := cgroups.ParseCgroupFile(p)
 	if err != nil {
 		return func(_ cgroups.Name) (string, error) {
-			return "", fmt.Errorf("failed to parse cgroup file %s: %s", p, err.Error())
+			return "", errors.Wrapf(err, "parse cgroup file %s", p)
 		}
 	}
 

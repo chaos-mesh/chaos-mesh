@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -97,7 +98,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		matchPart = "dst"
 		interfaceMatcher = "-o"
 	} else {
-		return fmt.Errorf("unknown chain direction %d", chain.Direction)
+		return errors.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
 	if chain.Device == "" {
@@ -162,7 +163,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("unknown direction %d", chain.Direction)
+		return errors.Errorf("unknown direction %d", chain.Direction)
 	}
 	return nil
 }

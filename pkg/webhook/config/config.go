@@ -16,12 +16,12 @@
 package config
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"sync"
 
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -29,8 +29,8 @@ import (
 )
 
 var (
-	errMissingName         = fmt.Errorf(`name field is required for template args config`)
-	errMissingTemplateName = fmt.Errorf(`template field is required for template args config`)
+	errMissingName         = errors.Errorf(`name field is required for template args config`)
+	errMissingTemplateName = errors.Errorf(`template field is required for template args config`)
 )
 
 const (
@@ -113,7 +113,7 @@ func (c *Config) GetRequestedConfig(namespace, key string) (*InjectionConfig, er
 	defer c.RUnlock()
 
 	if _, ok := c.Injections[namespace]; !ok {
-		return nil, fmt.Errorf("no injection config at ns %s", namespace)
+		return nil, errors.Errorf("no injection config at ns %s", namespace)
 	}
 
 	for _, conf := range c.Injections[namespace] {
@@ -122,7 +122,7 @@ func (c *Config) GetRequestedConfig(namespace, key string) (*InjectionConfig, er
 		}
 	}
 
-	return nil, fmt.Errorf("no injection config found for key %s at ns %s", key, namespace)
+	return nil, errors.Errorf("no injection config found for key %s at ns %s", key, namespace)
 }
 
 // LoadTemplateArgs takes an io.Reader and parses out an template args

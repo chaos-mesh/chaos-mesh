@@ -16,11 +16,12 @@
 package v1alpha1
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 

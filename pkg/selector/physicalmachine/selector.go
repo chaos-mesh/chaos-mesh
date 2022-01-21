@@ -17,7 +17,8 @@ package physicalmachine
 
 import (
 	"context"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"go.uber.org/fx"
 

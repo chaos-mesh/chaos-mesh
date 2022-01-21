@@ -28,6 +28,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // PIDFile is a file used to store the process ID of a running process.
@@ -47,7 +49,7 @@ func checkPIDFileAlreadyExists(path string) error {
 		pidString := strings.TrimSpace(string(pidByte))
 		if pid, err := strconv.Atoi(pidString); err == nil {
 			if processExists(pid) {
-				return fmt.Errorf("pid file found, ensure docker is not running or delete %s", path)
+				return errors.Errorf("pid file found, ensure docker is not running or delete %s", path)
 			}
 		}
 	}

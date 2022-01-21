@@ -72,5 +72,5 @@ export function sanitize(obj: any) {
     return false
   }
 
-  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)))
+  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)) ?? '{}')
 }

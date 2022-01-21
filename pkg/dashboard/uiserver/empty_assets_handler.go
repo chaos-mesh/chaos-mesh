@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 //go:build !ui_server
-// +build !ui_server
 
 package uiserver
 

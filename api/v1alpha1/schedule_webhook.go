@@ -18,6 +18,7 @@ package v1alpha1
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -69,7 +70,7 @@ func (in *Schedule) ValidateDelete() error {
 func (in *Schedule) Validate() error {
 	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
+		return errors.New(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
