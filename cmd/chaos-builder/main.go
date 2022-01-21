@@ -24,12 +24,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
+
 	"github.com/pingcap/errors"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
-	log = zap.New(zap.UseDevMode(true))
+	zapLogger, _ = zap.NewDevelopment()
+	log          = zapr.NewLogger(zapLogger)
 )
 
 type metadata struct {
