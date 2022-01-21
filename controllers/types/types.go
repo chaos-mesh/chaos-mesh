@@ -147,18 +147,4 @@ var WebhookObjects = fx.Supply(
 			Object: &v1alpha1.PhysicalMachine{},
 		},
 	},
-	fx.Annotated{
-		Group: "webhookObjs",
-		Target: WebhookObject{
-			Name:   "schedule",
-			Object: &v1alpha1.Schedule{},
-		},
-	},
-	fx.Annotated{
-		Group: "webhookObjs",
-		Target: WebhookObject{
-			Name:   "workflow",
-			Object: &v1alpha1.Workflow{},
-		},
-	},
 )
