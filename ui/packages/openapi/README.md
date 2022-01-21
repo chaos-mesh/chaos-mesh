@@ -103,6 +103,8 @@ We will use the `actions` and `data` fields to render the form in the interface.
 
 Pull a request or open an issue to describe your changes or problems.
 
+The recommended PR/Issue title format is `xxx(@ui/openapi): xxx`.
+
 ## License
 
 Same as Chaos Mesh
