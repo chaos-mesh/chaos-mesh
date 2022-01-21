@@ -46,6 +46,8 @@ type OperatorAction interface {
 	CleanCRDOrDie()
 	DeployOperator(config *OperatorConfig) error
 	UpgradeOperator(config *OperatorConfig) error
+	RestartDaemon(info *OperatorConfig) error
+	RestartControllerManager(info *OperatorConfig) error
 	InstallCRD(config *OperatorConfig) error
 }
 
@@ -167,6 +169,60 @@ func (oa *operatorAction) InstallCRD(info *OperatorConfig) error {
 		klog.Fatalf("Failed to run '%s': %v", strings.Join(cmdArgs, " "), err)
 	}
 	return nil
+}
+
+func (oa *operatorAction) RestartDaemon(info *OperatorConfig) error {
+	return oa.restartComponent(info, "chaos-daemon-")
+}
+
+func (oa *operatorAction) RestartControllerManager(info *OperatorConfig) error {
+	return oa.restartComponent(info, "chaos-controller-manager-")
+}
+
+func (oa *operatorAction) restartComponent(info *OperatorConfig, prefix string) error {
+	klog.Infof("klling component %v", prefix)
+	ls := &metav1.LabelSelector{
+		MatchLabels: map[string]string{
+			"app.kubernetes.io/instance": "chaos-mesh",
+		},
+	}
+	l, err := metav1.LabelSelectorAsSelector(ls)
+	if err != nil {
+		return errors.Wrap(err, "get selector")
+	}
+
+	pods, err := oa.kubeCli.CoreV1().Pods(info.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: l.String()})
+	if err != nil {
+		return errors.Wrap(err, "select pods")
+	}
+
+	for _, pod := range pods.Items {
+		if strings.HasPrefix(pod.Name, prefix) {
+			err = oa.kubeCli.CoreV1().Pods(info.Namespace).Delete(context.TODO(), pod.Name, metav1.DeleteOptions{})
+			if err != nil {
+				return errors.Wrapf(err, "delete pod(%s)", pod.Name)
+			}
+		}
+	}
+
+	klog.Infof("start to waiting chaos-mesh ready")
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		pods, err := oa.kubeCli.CoreV1().Pods(info.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: l.String()})
+		if err != nil {
+			klog.Errorf("get chaos-mesh pods: %v", err)
+			return false, nil
+		}
+		for _, pod := range pods.Items {
+			if pod.Status.Phase != corev1.PodRunning {
+				return false, nil
+			}
+		}
+		return true, nil
+	})
+	if err != nil {
+		return err
+	}
+	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
 }
 
 // check apiextensions.k8s.io/v1 CustomResourceDefinition is Availabel or not

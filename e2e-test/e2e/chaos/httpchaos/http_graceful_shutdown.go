@@ -31,6 +31,81 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 )
 
+func TestcaseHttpGracefulAbortShutdown(
+	ns string,
+	cli client.Client,
+	c HTTPE2EClient,
+	port uint16,
+) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	By("waiting on e2e helper ready")
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
+	framework.ExpectNoError(err, "wait e2e helper ready error")
+	By("create http abort chaos CRD objects")
+
+	abort := true
+
+	httpChaos := &v1alpha1.HTTPChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "http-chaos",
+			Namespace: ns,
+		},
+		Spec: v1alpha1.HTTPChaosSpec{
+			PodSelector: v1alpha1.PodSelector{
+				Selector: v1alpha1.PodSelectorSpec{
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
+				},
+				Mode: v1alpha1.OneMode,
+			},
+			Port:   8080,
+			Target: "Request",
+			PodHttpChaosActions: v1alpha1.PodHttpChaosActions{
+				Abort: &abort,
+			},
+		},
+	}
+	err = cli.Create(ctx, httpChaos)
+	framework.ExpectNoError(err, "create http chaos error")
+
+	By("waiting for assertion HTTP abort")
+	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
+		_, err := getPodHttpNoBody(c, port)
+
+		// abort applied
+		if err != nil {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectNoError(err, "http chaos doesn't work as expected")
+	By("apply http chaos successfully")
+
+	By("upgrade chaos mesh")
+	// Get clients
+	oa, ocfg, err := test.BuildOperatorActionAndCfg(e2econfig.TestConfig)
+	framework.ExpectNoError(err, "failed to create operator action")
+	err = oa.RestartDaemon(ocfg)
+	framework.ExpectNoError(err, "failed to restart chaos daemon")
+
+	By("waiting for assertion chaos recovered")
+	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+		_, err := getPodHttpNoBody(c, port)
+
+		// abort recovered
+		if err == nil {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectNoError(err, "http chaos doesn't gracefully shutdown as expected")
+	By("http chaos shutdown successfully")
+}
+
 func TestcaseHttpGracefulAbortRestart(
 	ns string,
 	cli client.Client,
@@ -89,8 +164,10 @@ func TestcaseHttpGracefulAbortRestart(
 	// Get clients
 	oa, ocfg, err := test.BuildOperatorActionAndCfg(e2econfig.TestConfig)
 	framework.ExpectNoError(err, "failed to create operator action")
-	err = oa.UpgradeOperator(ocfg)
-	framework.ExpectNoError(err, "failed to upgrade chaos-mesh")
+	err = oa.RestartDaemon(ocfg)
+	framework.ExpectNoError(err, "failed to restart chaos daemon")
+	err = oa.RestartControllerManager(ocfg)
+	framework.ExpectNoError(err, "failed to restart controller manager")
 
 	By("waiting for assertion HTTP abort again")
 	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
