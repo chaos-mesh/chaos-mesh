@@ -20,6 +20,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/action"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/azurechaos/diskdetach"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/azurechaos/vmrestart"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/azurechaos/vmstop"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
@@ -28,8 +29,9 @@ import (
 type Impl struct {
 	fx.In
 
-	VmRestart *vmrestart.Impl `action:"vm-restart"`
-	VmStop    *vmstop.Impl    `action:"vm-stop"`
+	VmRestart  *vmrestart.Impl  `action:"vm-restart"`
+	VmStop     *vmstop.Impl     `action:"vm-stop"`
+	DiskDetach *diskdetach.Impl `action:"disk-detach"`
 }
 
 func NewImpl(impl Impl) *types.ChaosImplPair {
@@ -47,4 +49,5 @@ var Module = fx.Provide(
 		Target: NewImpl,
 	},
 	vmstop.NewImpl,
-	vmrestart.NewImpl)
+	vmrestart.NewImpl,
+	diskdetach.NewImpl)
