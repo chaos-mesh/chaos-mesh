@@ -4875,8 +4875,7 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
     clusterName: String!
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
