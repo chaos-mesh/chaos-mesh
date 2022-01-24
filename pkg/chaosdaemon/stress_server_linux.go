@@ -186,7 +186,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
 
-		comm, err := ReadCommName(cmd.Process.Pid)
+		comm, err := util.ReadCommName(cmd.Process.Pid)
 
 		if err != nil {
 			return "", 0, err
