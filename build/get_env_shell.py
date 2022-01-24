@@ -101,6 +101,16 @@ def main():
         cmd += ["--volume", f"{tmp_go_dir}:/tmp/go"]
         cmd += ["--volume", f"{tmp_go_build_dir}:/tmp/go-build"]
 
+    if os.getenv("YARN_BUILD_CACHE") is not None and os.getenv(
+            "YARN_BUILD_CACHE") != "":
+        yarn_cache_dir = f"{os.getenv('YARN_BUILD_CACHE')}/cache"
+        yarn_global_folder = f"{os.getenv('YARN_BUILD_CACHE')}/global"
+
+        pathlib.Path(yarn_cache_dir).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(yarn_global_folder).mkdir(parents=True, exist_ok=True)
+        cmd += ["--volume", f"{yarn_cache_dir}:/.cache/yarn"]
+        cmd += ["--volume", f"{yarn_global_folder}:/.yarn"]
+
     for env_key in common.export_env_variables:
         pass_env_to_docker_arg(cmd, env_key)
 
