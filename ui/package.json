@@ -2,7 +2,7 @@
   "name": "@ui/root",
   "version": "2.1.0",
   "description": "A Web UI for Chaos Mesh",
-  "author": "Yue Yang <g1enyy0ung@gmail.com> (https://g1eny0ung.site)",
+  "author": "Yue Yang <g1enyy0ung@gmail.com>",
   "private": true,
   "workspaces": [
     "app",

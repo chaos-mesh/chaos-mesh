@@ -1645,7 +1645,7 @@ export interface V1alpha1HTTPChaosSpec {
    */
   mode?: string
   /**
-   *
+   * Patch is a rule to patch some contents in target. +optional
    * @type {V1alpha1PodHttpChaosPatchActions}
    * @memberof V1alpha1HTTPChaosSpec
    */
@@ -1663,7 +1663,7 @@ export interface V1alpha1HTTPChaosSpec {
    */
   port?: number
   /**
-   *
+   * Replace is a rule to replace some contents in target. +optional
    * @type {V1alpha1PodHttpChaosReplaceActions}
    * @memberof V1alpha1HTTPChaosSpec
    */
@@ -2881,7 +2881,7 @@ export interface V1alpha1PodChaosSpec {
  */
 export interface V1alpha1PodHttpChaosPatchActions {
   /**
-   *
+   * Body is a rule to patch message body of target. +optional
    * @type {V1alpha1PodHttpChaosPatchBodyAction}
    * @memberof V1alpha1PodHttpChaosPatchActions
    */

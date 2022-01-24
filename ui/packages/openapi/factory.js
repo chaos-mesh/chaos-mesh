@@ -34,10 +34,12 @@ export function typeTextToFieldType(type) {
       return 'text'
     case 'Array<string>':
       return 'label'
+    case 'Array<number>':
+      return 'numbers'
     case '{ [key: string]: string }':
-      return 'string-string'
+      return 'text-text'
     case '{ [key: string]: Array<string> }':
-      return 'string-label'
+      return 'text-label'
     case 'number':
       return 'number'
     case 'boolean':
@@ -58,6 +60,7 @@ export function typeTextToInitialValue(type) {
     case 'string':
       return ts.factory.createStringLiteral('')
     case 'Array<string>':
+    case 'Array<number>':
       return ts.factory.createArrayLiteralExpression()
     case '{ [key: string]: string }':
     case '{ [key: string]: Array<string> }':
@@ -72,7 +75,7 @@ export function typeTextToInitialValue(type) {
 }
 
 /**
- * Check if the type is a array string.
+ * Check if the type is a array literal.
  *
  * @param {any} type
  * @param {ts.sourceFile} sourceFile
@@ -133,7 +136,7 @@ function typeReferenceToObjectLiteralExpression(
 
   members.forEach((val) => {
     const { escapedName, valueDeclaration: declaration } = val
-    if (ignores.includes(identifier)) {
+    if (ignores.includes(escapedName)) {
       return
     }
 
@@ -142,7 +145,18 @@ function typeReferenceToObjectLiteralExpression(
       return
     }
 
-    if (declaration.type.kind === ts.SyntaxKind.TypeReference) {
+    if (ts.isTypeReferenceNode(declaration.type)) {
+      if (isHTTTPChaosPatchHeadersOrQueries(declaration)) {
+        objs.push(
+          factory.createObjectLiteralExpression(
+            _genBaseFieldElements(escapedName, '{ [key: string]: Array<string> }', comment),
+            true
+          )
+        )
+
+        return
+      }
+
       // handle non-primritive array
       if (
         declaration.type.typeName.escapedText === 'Array' &&
@@ -213,28 +227,60 @@ function _nodeToField(identifier, type, comment, sourceFile) {
   const typeText = type.getText(sourceFile)
   const when = getUIFormWhen(comment)
 
+  const properties = [
+    ..._genBaseFieldElements(identifier, typeText, comment),
+    ...(when
+      ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
+      : []),
+  ]
+  // {
+  //   ..._genBaseFieldElements(),
+  //   when?: '',
+  // }
+  return factory.createObjectLiteralExpression(properties, true)
+}
+
+/**
+ *
+ *
+ * @param {string} identifier
+ * @param {string} typeText
+ * @param {string} comment
+ * @return {ts.PropertyAssignment[]}
+ */
+function _genBaseFieldElements(identifier, typeText, comment) {
   // {
   //   field: '',
   //   label: '',
   //   value: '',
   //   helperText: '',
   // }
-  return factory.createObjectLiteralExpression(
-    [
-      factory.createPropertyAssignment(
-        factory.createIdentifier('field'),
-        factory.createStringLiteral(typeTextToFieldType(typeText))
-      ),
-      factory.createPropertyAssignment(factory.createIdentifier('label'), factory.createStringLiteral(identifier)),
-      factory.createPropertyAssignment(factory.createIdentifier('value'), typeTextToInitialValue(typeText)),
-      factory.createPropertyAssignment(
-        factory.createIdentifier('helperText'),
-        factory.createStringLiteral(cleanMarkers(comment))
-      ),
-      ...(when
-        ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
-        : []),
-    ],
-    true
+  return [
+    factory.createPropertyAssignment(
+      factory.createIdentifier('field'),
+      factory.createStringLiteral(typeTextToFieldType(typeText))
+    ),
+    factory.createPropertyAssignment(factory.createIdentifier('label'), factory.createStringLiteral(identifier)),
+    factory.createPropertyAssignment(factory.createIdentifier('value'), typeTextToInitialValue(typeText)),
+    factory.createPropertyAssignment(
+      factory.createIdentifier('helperText'),
+      factory.createStringLiteral(cleanMarkers(comment))
+    ),
+  ]
+}
+
+/**
+ * Find special identifiers `headers` and `queries` in HTTPChaos Patch.
+ * The type of them is `Array<Array<string>>`.
+ *
+ * @export
+ * @param {ts.Node} node
+ */
+export function isHTTTPChaosPatchHeadersOrQueries(node) {
+  const identifier = node.name.escapedText
+
+  return (
+    node.parent.name.escapedText === 'V1alpha1PodHttpChaosPatchActions' &&
+    (identifier === 'headers' || identifier === 'queries')
   )
 }

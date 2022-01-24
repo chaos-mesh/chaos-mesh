@@ -15,6 +15,30 @@
  *
  */
 
+/**
+ * @callback filterCallbackFn
+ * @param {ts.Node} node
+ * @return {boolean}
+ */
+
+/**
+ * Visit all children in given node and filter them.
+ *
+ * @export
+ * @param {ts.Node} node
+ * @param {ts.Node[]} nodes
+ * @param {filterCallbackFn} filterCallbackFn
+ */
+export function visitFilter(node, nodes, filterCallbackFn) {
+  node.forEachChild((n) => {
+    filterCallbackFn(n) && nodes.push(n)
+
+    visitFilter(n, nodes, filterCallbackFn)
+  })
+
+  return nodes
+}
+
 const UI_FORM_ENUM = /\+ui:form:enum=(.+)\s/
 const KUBEBUILDER_VALIDATION_ENUM = /\+kubebuilder:validation:Enum=(.+)\s?/
 

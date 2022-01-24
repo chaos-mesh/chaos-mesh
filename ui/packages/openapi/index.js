@@ -45,7 +45,7 @@ export function genForms(source) {
     'AWSChaos',
     'DNSChaos',
     'GCPChaos',
-    // 'HTTPChaos',
+    'HTTPChaos',
     'IOChaos',
     'JVMChaos',
     'KernelChaos',
@@ -165,9 +165,12 @@ export function swaggerRefToAllOf(source) {
   const swagger = yaml.load(fs.readFileSync(source, 'utf-8'))
 
   const properties = [
-    'definitions["v1alpha1.IOChaosSpec"].properties.attr',
-    'definitions["v1alpha1.IOChaosSpec"].properties.mistake',
-  ]
+    '["v1alpha1.HTTPChaosSpec"].properties.patch',
+    '["v1alpha1.HTTPChaosSpec"].properties.replace',
+    '["v1alpha1.IOChaosSpec"].properties.attr',
+    '["v1alpha1.IOChaosSpec"].properties.mistake',
+    '["v1alpha1.PodHttpChaosPatchActions"].properties.body',
+  ].map((s) => 'definitions' + s)
 
   properties.forEach((property) => {
     const p = _get(swagger, property)

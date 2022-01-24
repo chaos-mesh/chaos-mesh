@@ -169,27 +169,7 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
     {
       field: 'ref',
       label: 'target',
-      children: [
-        {
-          field: 'text',
-          label: 'mode',
-          value: '',
-          helperText:
-            'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent',
-        },
-        {
-          field: 'ref',
-          label: 'selector',
-          children: [],
-        },
-        {
-          field: 'text',
-          label: 'value',
-          value: '',
-          helperText:
-            'Optional. Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide an integer of pods to do chaos action. If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action',
-        },
-      ],
+      children: [],
     },
     {
       field: 'text',
