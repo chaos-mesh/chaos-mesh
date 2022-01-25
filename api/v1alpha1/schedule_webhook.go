@@ -35,6 +35,13 @@ var _ webhook.Defaulter = &Schedule{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *Schedule) Default() {
 	schedulelog.Info("default", "name", in.Name)
+	in.Spec.ConcurrencyPolicy.Default()
+}
+
+func (in *ConcurrencyPolicy) Default() {
+	if *in == "" {
+		*in = ForbidConcurrent
+	}
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-schedule,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=schedule,versions=v1alpha1,name=vschedule.kb.io
