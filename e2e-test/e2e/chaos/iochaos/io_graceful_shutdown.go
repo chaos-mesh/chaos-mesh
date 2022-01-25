@@ -40,6 +40,7 @@ func TestcaseIOErrorGracefulShutdown(
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -106,7 +107,6 @@ func TestcaseIOErrorGracefulShutdown(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't gracefully shutdown as expected")
 	By("io chaos shutdown successfully")
-	cancel()
 }
 
 func TestcaseIOErrorGracefulRestart(
@@ -116,6 +116,7 @@ func TestcaseIOErrorGracefulRestart(
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -184,5 +185,4 @@ func TestcaseIOErrorGracefulRestart(
 	})
 	framework.ExpectNoError(err, "io chaos doesn't gracefully restart as expected")
 	By("io chaos restart successfully")
-	cancel()
 }
