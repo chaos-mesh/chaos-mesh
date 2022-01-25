@@ -2035,7 +2035,7 @@ webhooks:
           - CREATE
           - UPDATE
         resources:
-          - schedule
+          - schedules
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -2056,7 +2056,7 @@ webhooks:
           - CREATE
           - UPDATE
         resources:
-          - workflow
+          - workflows
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

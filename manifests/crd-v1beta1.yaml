@@ -2165,7 +2165,6 @@ spec:
               - to
               - from
               - both
-              - ""
               type: string
             duplicate:
               description: DuplicateSpec represents the detail about loss action
@@ -5494,7 +5493,6 @@ spec:
                   - to
                   - from
                   - both
-                  - ""
                   type: string
                 duplicate:
                   description: DuplicateSpec represents the detail about loss action
@@ -8269,7 +8267,6 @@ spec:
                             - to
                             - from
                             - both
-                            - ""
                             type: string
                           duplicate:
                             description: DuplicateSpec represents the detail about
@@ -10768,7 +10765,6 @@ spec:
                                 - to
                                 - from
                                 - both
-                                - ""
                                 type: string
                               duplicate:
                                 description: DuplicateSpec represents the detail about
@@ -17598,7 +17594,6 @@ spec:
                   - to
                   - from
                   - both
-                  - ""
                   type: string
                 duplicate:
                   description: DuplicateSpec represents the detail about loss action
@@ -19952,7 +19947,6 @@ spec:
                       - to
                       - from
                       - both
-                      - ""
                       type: string
                     duplicate:
                       description: DuplicateSpec represents the detail about loss
@@ -22775,7 +22769,6 @@ spec:
                                 - to
                                 - from
                                 - both
-                                - ""
                                 type: string
                               duplicate:
                                 description: DuplicateSpec represents the detail about
@@ -25356,7 +25349,6 @@ spec:
                                     - to
                                     - from
                                     - both
-                                    - ""
                                     type: string
                                   duplicate:
                                     description: DuplicateSpec represents the detail
@@ -34992,7 +34984,6 @@ spec:
                         - to
                         - from
                         - both
-                        - ""
                         type: string
                       duplicate:
                         description: DuplicateSpec represents the detail about loss
@@ -37424,7 +37415,6 @@ spec:
                             - to
                             - from
                             - both
-                            - ""
                             type: string
                           duplicate:
                             description: DuplicateSpec represents the detail about
