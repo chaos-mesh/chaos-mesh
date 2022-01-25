@@ -106,12 +106,12 @@ var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {
 		})
 
 		// io chaos case in [IOFaultShutdown] context
-		ginkgo.Context("[IOFaultShutdown]", func() {
+		ginkgo.It("[IOFaultShutdown]", func() {
 			iochaostestcases.TestcaseIOErrorGracefulShutdown(ns, cli, c, port)
 		})
 
 		// io chaos case in [IOFaultRestart] context
-		ginkgo.Context("[IOFaultRestart]", func() {
+		ginkgo.It("[IOFaultRestart]", func() {
 			iochaostestcases.TestcaseIOErrorGracefulRestart(ns, cli, c, port)
 		})
 	})
@@ -159,12 +159,12 @@ var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {
 		})
 
 		// http chaos case in [HTTPAbortShutdown] context
-		ginkgo.Context("[HTTPAbortShutdown]", func() {
+		ginkgo.It("[HTTPAbortShutdown]", func() {
 			httpchaostestcases.TestcaseHttpGracefulAbortShutdown(ns, cli, client, port)
 		})
 
 		// http chaos case in [HTTPAbortRestart] context
-		ginkgo.Context("[HTTPAbortRestart]", func() {
+		ginkgo.It("[HTTPAbortRestart]", func() {
 			httpchaostestcases.TestcaseHttpGracefulAbortRestart(ns, cli, client, port)
 		})
 	})
