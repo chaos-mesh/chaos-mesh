@@ -261,3 +261,6 @@ func shouldBeNoSchedule(path *field.Path, template Template) field.ErrorList {
 	}
 	return nil
 }
+
+func (in *Workflow) Default() {
+}
