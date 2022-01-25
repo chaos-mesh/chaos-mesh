@@ -25,7 +25,7 @@ import (
 	"github.com/docker/go-units"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // Validate validates the scheduler and duration
