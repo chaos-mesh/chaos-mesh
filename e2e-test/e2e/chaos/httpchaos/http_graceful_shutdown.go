@@ -72,6 +72,11 @@ func TestcaseHttpGracefulAbortShutdown(
 	err = cli.Create(ctx, httpChaos)
 	framework.ExpectNoError(err, "create http chaos error")
 
+	defer func() {
+		err = cli.Delete(ctx, httpChaos)
+		framework.ExpectNoError(err, "delete http chaos")
+	}()
+
 	By("waiting for assertion HTTP abort")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {
 		_, err := getPodHttpNoBody(c, port)
@@ -146,6 +151,11 @@ func TestcaseHttpGracefulAbortRestart(
 	}
 	err = cli.Create(ctx, httpChaos)
 	framework.ExpectNoError(err, "create http chaos error")
+
+	defer func() {
+		err = cli.Delete(ctx, httpChaos)
+		framework.ExpectNoError(err, "delete http chaos")
+	}()
 
 	By("waiting for assertion HTTP abort")
 	err = wait.PollImmediate(1*time.Second, 1*time.Minute, func() (bool, error) {

@@ -73,6 +73,11 @@ func TestcaseIOErrorGracefulShutdown(
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
 
+	defer func() {
+		err = cli.Delete(ctx, ioChaos)
+		framework.ExpectNoError(err, "delete io chaos")
+	}()
+
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		_, err = getPodIODelay(c, port)
 		// input/output error is errno 5
@@ -143,6 +148,11 @@ func TestcaseIOErrorGracefulRestart(
 	}
 	err = cli.Create(ctx, ioChaos)
 	framework.ExpectNoError(err, "create io chaos")
+
+	defer func() {
+		err = cli.Delete(ctx, ioChaos)
+		framework.ExpectNoError(err, "delete io chaos")
+	}()
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		_, err = getPodIODelay(c, port)
