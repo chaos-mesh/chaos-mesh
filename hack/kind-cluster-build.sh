@@ -190,7 +190,7 @@ set -e
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 
-$KUBECTL_BIN create ns chaos-testing
+$KUBECTL_BIN create ns chaos-mesh
 
 echo "############# success create cluster:[${clusterName}] #############"
 

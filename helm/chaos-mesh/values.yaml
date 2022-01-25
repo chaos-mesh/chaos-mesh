@@ -79,7 +79,7 @@ controllerManager:
 
   # targetNamespace only works with clusterScoped is false(namespace scoped mode).
   # It means namespace which will be injected chaos
-  targetNamespace: chaos-testing
+  targetNamespace: chaos-mesh
 
   service:
     type: ClusterIP

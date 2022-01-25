@@ -88,7 +88,7 @@ const (
 )
 
 const ChaosDaemonClientCert = "chaos-mesh-daemon-client-certs"
-const ChaosDaemonNamespace = "chaos-testing"
+const ChaosDaemonNamespace = "chaos-mesh"
 
 var TLSFiles grpcUtils.TLSFile
 var Insecure bool

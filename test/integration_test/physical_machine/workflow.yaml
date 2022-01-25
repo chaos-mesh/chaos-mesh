@@ -16,7 +16,7 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: Workflow
 metadata:
   name: workflow-test
-  namespace: chaos-testing
+  namespace: chaos-mesh
 spec:
   entry: entry
   templates:

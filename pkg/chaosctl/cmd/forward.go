@@ -31,7 +31,7 @@ var forwardCmd = &cobra.Command{
 	Use:   "forward",
 	Short: "Forward ctrl api port to local",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cancel, port, err := common.ForwardSvcPorts(context.Background(), "chaos-testing", "svc/chaos-mesh-controller-manager", 10082)
+		cancel, port, err := common.ForwardSvcPorts(context.Background(), "chaos-mesh", "svc/chaos-mesh-controller-manager", 10082)
 		if err != nil {
 			return err
 		}

@@ -95,7 +95,7 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
   When the cluster is local (E.g., [kind](https://kind.sigs.k8s.io/) or [minikube](https://minikube.sigs.k8s.io/)), you can use [Port Forwarding](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/) to access it:
 
   ```sh
-  kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
+  kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
   ```
 
 - **From local dashboard server**

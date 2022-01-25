@@ -3859,7 +3859,7 @@ type Query {
 }
 
 type Logger {
-    component(ns: String! = "chaos-testing", component: Component!): String!  	@goField(forceResolver: true)
+    component(ns: String! = "chaos-mesh", component: Component!): String!  	@goField(forceResolver: true)
     pod(ns: String! = "default", name: String!): String!                		@goField(forceResolver: true)
 }
 

@@ -64,7 +64,7 @@ type DaemonConfig struct {
 // NewDefaultOperatorConfig create the default configuration for chaos-mesh test
 func NewDefaultOperatorConfig() OperatorConfig {
 	return OperatorConfig{
-		Namespace:   "chaos-testing",
+		Namespace:   "chaos-mesh",
 		ReleaseName: "chaos-mesh",
 		Tag:         "e2e",
 		Manager: ManagerConfig{
