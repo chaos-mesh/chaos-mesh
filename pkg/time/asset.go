@@ -31,7 +31,7 @@ const textSection = ".text"
 const relocationSection = ".rela.text"
 
 // LoadFakeImageFromEmbedFs builds FakeImage from the embed filesystem. It parses the ELF file and extract the variables from the relocation section, reserves the space for them at the end of content, then calculates and saves offsets as "manually relocation"
-func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
+func LoadFakeImageFromEmbedFs(filename string, symbolName string) (*FakeImage, error) {
 	path := "fakeclock/" + filename
 	object, err := fakeclock.ReadFile(path)
 	if err != nil {
@@ -49,7 +49,8 @@ func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
 	}
 
 	fakeImage := FakeImage{
-		offset: make(map[string]int),
+		symbolName: symbolName,
+		offset:     make(map[string]int),
 	}
 	for _, r := range elfFile.Sections {
 
