@@ -119,7 +119,7 @@ type ContainerSelector struct {
 	PodSelector `json:",inline"`
 
 	// ContainerNames indicates list of the name of affected container.
-	// If not set, all containers will be injected
+	// If not set, the first container will be injected
 	// +optional
 	ContainerNames []string `json:"containerNames,omitempty"`
 }

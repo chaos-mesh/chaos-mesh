@@ -1,4 +1,4 @@
-// Copyright YEAR Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,3 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+package v1alpha1
+
+import (
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+)
+
+func (in *BlockChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Action == BlockDelay {
+		if in.Delay == nil {
+			err := errors.Errorf("delay should be set on %s action", in.Action)
+			allErrs = append(allErrs, field.Invalid(path.Child("delay"), in.Delay, err.Error()))
+		}
+	}
+	return allErrs
+}

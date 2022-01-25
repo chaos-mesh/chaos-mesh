@@ -16,8 +16,9 @@
 package cron
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -30,7 +31,7 @@ import (
 func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*time.Time, *time.Time, error) {
 	sched, err := v1alpha1.StandardCronParser.Parse(schedule.Spec.Schedule)
 	if err != nil {
-		return nil, nil, fmt.Errorf("unparseable schedule: %s : %s", schedule.Spec.Schedule, err)
+		return nil, nil, errors.Errorf("unparseable schedule: %s : %s", schedule.Spec.Schedule, err)
 	}
 
 	var earliestTime time.Time
@@ -47,7 +48,7 @@ func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*ti
 		}
 	}
 	if earliestTime.After(now) {
-		return nil, nil, fmt.Errorf("earliestTime is later than now: earliestTime: %v, now: %v", earliestTime, now)
+		return nil, nil, errors.Errorf("earliestTime is later than now: earliestTime: %v, now: %v", earliestTime, now)
 	}
 
 	iterateTime := 0
@@ -62,7 +63,7 @@ func getRecentUnmetScheduleTime(schedule *v1alpha1.Schedule, now time.Time) (*ti
 		iterateTime++
 		if iterateTime > 100 {
 			// We can't get the most recent times so just return an empty slice
-			return nil, nil, fmt.Errorf("too many missed start time (> 100). Set or decrease .spec.startingDeadlineSeconds or check clock skew")
+			return nil, nil, errors.New("too many missed start time (> 100). Set or decrease .spec.startingDeadlineSeconds or check clock skew")
 		}
 	}
 

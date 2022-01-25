@@ -667,6 +667,116 @@ var doc = `{
                 }
             }
         },
+        "/common/physicalmachine-annotations": {
+            "get": {
+                "description": "Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get the annotations of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The physicalMachine's namespace list, split by ,",
+                        "name": "physicalMachineNamespaceList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.MapSlice"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/common/physicalmachine-labels": {
+            "get": {
+                "description": "Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get the labels of the physicalMachines in the specified namespace from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The physicalMachine's namespace list, split by ,",
+                        "name": "physicalMachineNamespaceList",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.MapSlice"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/common/physicalmachines": {
+            "post": {
+                "description": "Get physicalMachines from Kubernetes cluster.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "common"
+                ],
+                "summary": "Get physicalMachines from Kubernetes cluster.",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/common.PhysicalMachine"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/common/pods": {
             "post": {
                 "description": "Get pods from Kubernetes cluster.",
@@ -2027,6 +2137,20 @@ var doc = `{
                 }
             }
         },
+        "common.PhysicalMachine": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
         "common.Pod": {
             "type": "object",
             "properties": {
@@ -2472,6 +2596,9 @@ var doc = `{
         "status.AllChaosStatus": {
             "type": "object",
             "properties": {
+                "deleting": {
+                    "type": "integer"
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -2629,6 +2756,70 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.BlockChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific block chaos action.\nSupported action: limit / delay\n+kubebuilder:validation:Enum=limit;delay",
+                    "type": "string"
+                },
+                "containerNames": {
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "delay": {
+                    "description": "Delay defines the delay distribution.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockDelaySpec"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "iops": {
+                    "description": "IOPS defines the limit of IO frequency.\n+optional",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "selector": {
+                    "description": "Selector is used to select pods that are used to inject chaos action.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                },
+                "volumeName": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.BlockDelaySpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0"
+                },
+                "jitter": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0ms"
+                },
+                "latency": {
+                    "description": "Latency defines the latency of every io request.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.CPUStressor": {
             "type": "object",
             "properties": {
@@ -2656,6 +2847,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
@@ -2784,7 +2980,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -2957,7 +3153,7 @@ var doc = `{
                     "type": "string"
                 },
                 "project": {
-                    "description": "Project defines the name of gcp project.",
+                    "description": "Project defines the ID of gcp project.",
                     "type": "string"
                 },
                 "secretName": {
@@ -3057,7 +3253,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.AttrOverrideSpec"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3126,7 +3322,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3704,6 +3900,7 @@ var doc = `{
                     "type": "string"
                 },
                 "address": {
+                    "description": "DEPRECATED: Use Selector instead.\nOnly one of Address and Selector could be specified.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3763,6 +3960,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
                 },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
                 "network-bandwidth": {
                     "description": "+optional",
                     "type": "object",
@@ -3803,6 +4004,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
+                "selector": {
+                    "description": "Selector is used to select physical machines that are used to inject chaos action.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
+                },
                 "stress-cpu": {
                     "description": "+optional",
                     "type": "object",
@@ -3816,6 +4022,58 @@ var doc = `{
                 "uid": {
                     "description": "the experiment ID\n+optional",
                     "type": "string"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of physical machines to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.PhysicalMachineSelectorSpec": {
+            "type": "object",
+            "properties": {
+                "annotationSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on annotations.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
+                },
+                "fieldSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "labelSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on labels.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "namespaces": {
+                    "description": "Namespaces is a set of namespace to which objects belong.\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "physicalMachines": {
+                    "description": "PhysicalMachines is a map of string keys and a set values that used to select physical machines.\nThe key defines the namespace which physical machine belong,\nand each value is a set of physical machine names.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
@@ -3827,7 +4085,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4075,6 +4333,11 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
+                },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
@@ -4190,7 +4453,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4272,6 +4535,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
                 "children": {
                     "description": "Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.\n+optional",
@@ -4375,7 +4643,7 @@ var doc = `{
                     }
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"

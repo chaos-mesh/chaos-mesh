@@ -15,38 +15,13 @@
 
 package utils
 
-import "fmt"
+import (
+	"github.com/pkg/errors"
+)
 
-type failToFindContainer struct {
-	namespace     string
-	name          string
-	containerName string
+var (
+	ErrUnknownType   error = errors.New("unknown type")
+	ErrUnknownAction error = errors.New("unknown action")
 
-	err error
-}
-
-func NewFailToFindContainer(namespace string, name string, containerName string, err error) error {
-	return &failToFindContainer{
-		namespace,
-		name,
-		containerName,
-		err,
-	}
-}
-
-func (e *failToFindContainer) Error() string {
-	if e.err == nil {
-		return fmt.Sprintf("fail to find container %s on pod %s/%s", e.containerName, e.namespace, e.name)
-	}
-
-	return e.err.Error()
-}
-
-func IsFailToGet(e error) bool {
-	switch e.(type) {
-	case *failToFindContainer:
-		return true
-	default:
-		return false
-	}
-}
+	ErrContainerNotFound error = errors.New("container not found")
+)

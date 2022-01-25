@@ -16,8 +16,7 @@
 package controller
 
 import (
-	"fmt"
-
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -26,7 +25,7 @@ import (
 func SetOwnerReference(owner, object metav1.Object, scheme *runtime.Scheme) error {
 	ro, ok := owner.(runtime.Object)
 	if !ok {
-		return fmt.Errorf("%T is not a runtime.Object, cannot call SetControllerReference", owner)
+		return errors.Errorf("%T is not a runtime.Object, cannot call SetControllerReference", owner)
 	}
 
 	gvk, err := apiutil.GVKForObject(ro, scheme)

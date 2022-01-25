@@ -34,7 +34,7 @@ Usage: hack/e2e.sh [-h] -- [extra test args]
     -h      show this message and exit
 Environments:
     PROVIDER                    Kubernetes provider, e.g. kind, gke, eks, defaults: kind
-    DOCKER_REGISTRY             image docker registry
+    IMAGE_REGISTRY              image docker registry
     IMAGE_TAG                   image tag
     SKIP_BUILD                  skip building binaries
     SKIP_IMAGE_BUILD            skip build and push images
@@ -92,7 +92,7 @@ hack::ensure_kubetest2
 echo "ensured kubetest2"
 
 PROVIDER=${PROVIDER:-kind}
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
+IMAGE_REGISTRY=${IMAGE_REGISTRY:-localhost:5000}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 CLUSTER=${CLUSTER:-chaos-mesh}
 KUBECONFIG=${KUBECONFIG:-~/.kube/config}
@@ -112,7 +112,7 @@ RUNNER_SUITE_NAME=${RUNNER_SUITE_NAME:-}
 ARTIFACTS=${ARTIFACTS:-}
 
 echo "PROVIDER: $PROVIDER"
-echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
+echo "IMAGE_REGISTRY: $IMAGE_REGISTRY"
 echo "IMAGE_TAG: $IMAGE_TAG"
 echo "CLUSTER: $CLUSTER"
 echo "KUBECONFIG: $KUBECONFIG"
@@ -152,10 +152,10 @@ function e2e::image_build() {
         echo "info: skip building and pushing images"
         return
     fi
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make image-chaos-mesh-e2e
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-e2e-helper
+    IMAGE_REGISTRY=${IMAGE_REGISTRY} GOOS=linux GOARCH=amd64 make image-chaos-mesh-e2e
+    IMAGE_REGISTRY=${IMAGE_REGISTRY} make image-chaos-mesh
+    IMAGE_REGISTRY=${IMAGE_REGISTRY} make image-chaos-daemon
+    IMAGE_REGISTRY=${IMAGE_REGISTRY} make image-e2e-helper
 }
 
 function e2e::create_kindconfig() {
@@ -322,8 +322,8 @@ fi
 export PROVIDER
 export CLUSTER
 export KUBECONFIG
-export E2E_IMAGE=${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
-export DOCKER_REGISTRY=${DOCKER_REGISTRY}
+export E2E_IMAGE=${IMAGE_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
+export IMAGE_REGISTRY=${IMAGE_REGISTRY}
 export IMAGE_TAG=${IMAGE_TAG}
 export PATH=$OUTPUT_BIN:$PATH
 

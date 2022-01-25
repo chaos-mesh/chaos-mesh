@@ -15,7 +15,7 @@
 
 package utils
 
-import "fmt"
+import "github.com/pkg/errors"
 
 // EncodeClkIds will convert array of clk ids into a mask
 func EncodeClkIds(clkIds []string) (uint64, error) {
@@ -45,7 +45,7 @@ func EncodeClkIds(clkIds []string) (uint64, error) {
 		case "CLOCK_BOOTTIME_ALARM":
 			mask |= 1 << 9
 		default:
-			return 0, fmt.Errorf("unknown clock id %s", id)
+			return 0, errors.Errorf("unknown clock id %s", id)
 		}
 	}
 

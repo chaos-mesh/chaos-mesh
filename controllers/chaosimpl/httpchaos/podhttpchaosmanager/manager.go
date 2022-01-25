@@ -17,7 +17,8 @@ package podhttpchaosmanager
 
 import (
 	"context"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"

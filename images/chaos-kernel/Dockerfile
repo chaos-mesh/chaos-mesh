@@ -26,7 +26,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 80
 RUN update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 80
 
-RUN git clone https://github.com/iovisor/bcc.git
+RUN git clone --depth 1 --branch v0.23.0 https://github.com/iovisor/bcc.git
 WORKDIR /bcc/build
 RUN cmake .. -DCMAKE_INSTALL_PREFIX=/usr && make -j${MAKE_JOBS} && make install
 

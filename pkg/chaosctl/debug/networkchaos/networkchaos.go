@@ -37,7 +37,7 @@ import (
 func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
 	networkChaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
-		return fmt.Errorf("chaos is not network")
+		return errors.New("chaos is not network")
 	}
 	chaosStatus := networkChaos.Status.ChaosStatus
 	chaosSelector := networkChaos.Spec.Selector
@@ -97,7 +97,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 		netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
 		if len(netemCurrent) == 0 {
-			return fmt.Errorf("no NetworkChaos is applied")
+			return errors.New("no NetworkChaos is applied")
 		}
 		for i, netem := range strings.Fields(netemCurrent[1]) {
 			itemCurrent := netem

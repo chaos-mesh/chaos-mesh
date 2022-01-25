@@ -25,6 +25,7 @@ import (
 	"time"
 
 	jrpc "github.com/ethereum/go-ethereum/rpc"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -72,7 +73,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	processBuilder := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
 		EnableLocalMnt().
-		SetIdentifier(in.ContainerId)
+		SetIdentifier(fmt.Sprintf("toda-%s", in.ContainerId))
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
@@ -120,7 +121,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		if kerr := s.killIOChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
-		return nil, fmt.Errorf("toda startup takes too long or an error occurs: %s", ret)
+		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
 	}
 
 	return &pb.ApplyIOChaosResponse{
