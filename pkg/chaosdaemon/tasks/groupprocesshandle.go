@@ -46,7 +46,7 @@ func NewGroupProcessHandler(logger logr.Logger, main ChaosOnGroupProcess) GroupP
 }
 
 func (gp *GroupProcessHandler) Inject(pid PID) error {
-	childPids, err := util.GetChildProcesses(uint32(pid))
+	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
 	if err != nil {
 		gp.logger.Error(err, "failed to get child process")
 	}
@@ -85,7 +85,7 @@ func (gp *GroupProcessHandler) Inject(pid PID) error {
 }
 
 func (gp *GroupProcessHandler) Recover(pid PID) error {
-	childPids, err := util.GetChildProcesses(uint32(pid))
+	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
 	if err != nil {
 		gp.logger.Error(err, "failed to get child process")
 	}

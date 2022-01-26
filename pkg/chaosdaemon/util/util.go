@@ -17,21 +17,19 @@ package util
 
 import (
 	"fmt"
+
 	"io/ioutil"
 	"os"
 	"strconv"
 	"sync"
 
-	ctrl "sigs.k8s.io/controller-runtime"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 
-	"github.com/pkg/errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
-
-var log = ctrl.Log.WithName("chaos-daemon/util")
 
 // ReadCommName returns the command name of process
 func ReadCommName(pid int) (string, error) {
@@ -51,7 +49,7 @@ func ReadCommName(pid int) (string, error) {
 
 // GetChildProcesses will return all child processes's pid. Include all generations.
 // only return error when /proc/pid/tasks cannot be read
-func GetChildProcesses(ppid uint32) ([]uint32, error) {
+func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 	procs, err := ioutil.ReadDir(bpm.DefaultProcPrefix)
 	if err != nil {
 		return nil, errors.Wrapf(err, "read /proc/pid/tasks , ppid : %d", ppid)
@@ -82,7 +80,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
-					log.Error(err, "read status file error", "path", statusPath)
+					logger.Error(err, "read status file error", "path", statusPath)
 					return
 				}
 				defer reader.Close()
@@ -113,7 +111,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		case pair := <-pairs:
 			processGraph.Insert(pair.Ppid, pair.Pid)
 		case <-done:
-			return processGraph.Flatten(ppid), nil
+			return processGraph.Flatten(ppid, logger), nil
 		}
 	}
 }

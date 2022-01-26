@@ -36,7 +36,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	childPids, err := util.GetChildProcesses(pid)
+	childPids, err := util.GetChildProcesses(pid, log)
 	if err != nil {
 		log.Error(err, "fail to get child processes")
 	}
@@ -63,7 +63,7 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	childPids, err := util.GetChildProcesses(pid)
+	childPids, err := util.GetChildProcesses(pid, log)
 	if err != nil {
 		log.Error(err, "fail to get child processes")
 	}
