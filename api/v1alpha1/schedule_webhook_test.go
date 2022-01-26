@@ -118,4 +118,20 @@ var _ = Describe("schedule_webhook", func() {
 			}
 		})
 	})
+
+	Context("webhook.Default of schedule", func() {
+		s := Schedule{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: metav1.NamespaceDefault,
+				Name:      "foo3",
+			},
+			Spec: ScheduleSpec{
+				ScheduleItem: ScheduleItem{Workflow: &WorkflowSpec{}},
+				Type:         ScheduleTypeWorkflow,
+				Schedule:     "*/1 * * * * *",
+			},
+		}
+		s.Default()
+		Expect(s.Spec.ConcurrencyPolicy).To(Equal(ForbidConcurrent))
+	})
 })

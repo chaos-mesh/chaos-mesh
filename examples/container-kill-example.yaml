@@ -16,7 +16,6 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
   name: container-kill-example
-  namespace: chaos-testing
 spec:
   action: container-kill
   mode: one
@@ -24,4 +23,4 @@ spec:
     labelSelectors:
       app.kubernetes.io/component: monitor
   containerNames:
-  - prometheus
+    - prometheus
