@@ -15,6 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Add prefix for identifier of toda and tproxy in bpm [#2673](https://github.com/chaos-mesh/chaos-mesh/pull/2673)
+- Kill chaos-tproxy while failing to apply config [#2672](https://github.com/chaos-mesh/chaos-mesh/pull/2672)
 
 ### Deprecated
 
