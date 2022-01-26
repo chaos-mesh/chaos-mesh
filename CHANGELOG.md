@@ -18,6 +18,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump toda to v0.2.2 [#2747](https://github.com/chaos-mesh/chaos-mesh/pull/2747)
 - Bump go to 1.17 [#2754](https://github.com/chaos-mesh/chaos-mesh/pull/2754)
 - JVMChaos ignore AgentLoadException when install agent [#2701](https://github.com/chaos-mesh/chaos-mesh/pull/2701)
+- Bump container-runtime to v0.11.0 [#2807](https://github.com/chaos-mesh/chaos-mesh/pull/2807)
+- Bump kubernetes dependencies to v1.23.1 [#2807](https://github.com/chaos-mesh/chaos-mesh/pull/2807)
 
 ### Deprecated
 
