@@ -10,6 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Add status "Deleting" for chaos experiments on Chaos Dashboard [#2708](https://github.com/chaos-mesh/chaos-mesh/pull/2708)
 - Add time skew for gettimeofday [#2742](https://github.com/chaos-mesh/chaos-mesh/pull/2742)
 
 ### Changed
