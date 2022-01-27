@@ -16,7 +16,6 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: StressChaos
 metadata:
   name: burn-cpu
-  namespace: chaos-testing
 spec:
   mode: one
   selector:
@@ -28,4 +27,3 @@ spec:
       load: 100
       options: ["--cpu 2", "--timeout 600", "--hdd 1"]
   duration: "30s"
-

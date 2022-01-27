@@ -16,7 +16,6 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: JVMChaos
 metadata:
   name: modify-return
-  namespace: helloworld
 spec:
   action: ruleData
   ruleData: "RULE modify return value\nCLASS Main\nMETHOD getnum\nAT ENTRY\nIF true\nDO\n    return 9999\nENDRULE"

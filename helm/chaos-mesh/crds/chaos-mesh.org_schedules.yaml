@@ -230,6 +230,7 @@ spec:
                 - volumeName
                 type: object
               concurrencyPolicy:
+                default: Forbid
                 enum:
                 - Forbid
                 - Allow
@@ -1371,13 +1372,13 @@ spec:
                     description: Device represents the network device to be affected.
                     type: string
                   direction:
+                    default: to
                     description: Direction represents the direction, this applies
                       on netem and network partition action
                     enum:
                     - to
                     - from
                     - both
-                    - ""
                     type: string
                   duplicate:
                     description: DuplicateSpec represents the detail about loss action
@@ -4140,13 +4141,13 @@ spec:
                                 be affected.
                               type: string
                             direction:
+                              default: to
                               description: Direction represents the direction, this
                                 applies on netem and network partition action
                               enum:
                               - to
                               - from
                               - both
-                              - ""
                               type: string
                             duplicate:
                               description: DuplicateSpec represents the detail about
@@ -6650,13 +6651,13 @@ spec:
                                     to be affected.
                                   type: string
                                 direction:
+                                  default: to
                                   description: Direction represents the direction,
                                     this applies on netem and network partition action
                                   enum:
                                   - to
                                   - from
                                   - both
-                                  - ""
                                   type: string
                                 duplicate:
                                   description: DuplicateSpec represents the detail
