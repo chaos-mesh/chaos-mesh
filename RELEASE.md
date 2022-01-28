@@ -12,9 +12,9 @@ This step is required for all the releases(major, minor, bugfix/patch).
 
 - Draft a Release Notes on google docs, here is a Release Notes template: [Google Docs](https://docs.google.com/document/d/1v0P5NQyepEyT4CH8usouyJup_fvOYtsYAz8nbJfn3Jk/edit?usp=sharing)
 - Collect changelogs from each commits on the target branch into Release Notes.
-  - For Example, if you are going to release a new patch version `vx.y.z`, you should collect the commits on branch `release-x.y` which committed after tag `vx.y.z-1`.
+  - For Example, if you are going to release a new patch version `vx.y.z`, you should collect all commits on branch`release-x.y` from the commit tagged `vx.y.z-1` onwards.
   - If you are going to release a new major or minor version, you should collect the commits on branch `master`.
-- After finishing the draft, send it to Chaos Mesh Committers and Maintainers, ask them to review it.
+- After finishing the draft, send it to [Chaos Mesh Committers and Maintainers](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md), ask them to review it.
 - Once 2 (or more) of committer/maintainers left "Approve" on the draft Release Note, it's ready for making a release on GitHub.
 
 ### Step 2 Checkout New Branch
@@ -44,7 +44,7 @@ This step is required for all the releases(major, minor, bugfix/patch).
 
 Draft a new Release on GitHub Release: https://github.com/chaos-mesh/chaos-mesh/releases/new with the Release Notes from Step 1, and choose the `release-x.y` branch for release/tag `vx.y.z`.
 
-Please note that here requires prefix `v` on the tag.
+Please note that here the prefix `v` on the tag is required.
 
 ### Step 5 Build and Publish Docker Images
 
@@ -81,6 +81,6 @@ If new branches are created, you should update the TiChi Bot configuration:
 
 If some CI job failed, please profile the reason, and
 
-- if the build environment is not stable, please take a retry.
-- if it requires code changes to fix the issue, please ask any of committers or maintainers for help.
+- if the build environment is not stable, please give it another retry.
+- if code changes are required to fix the issue, please ask any of the committers or maintainers for help.
 - for other situations, please ask any of committers or maintainers for help.
