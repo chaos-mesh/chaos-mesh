@@ -22,22 +22,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"github.com/ghodss/yaml"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-
+	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")

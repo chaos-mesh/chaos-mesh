@@ -21,15 +21,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/pkg/errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-
-	"github.com/golang/protobuf/ptypes/empty"
 )
 
 const (
