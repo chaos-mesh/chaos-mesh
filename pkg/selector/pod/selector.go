@@ -19,7 +19,6 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -27,16 +26,15 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
 	genericfield "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
 	genericlabel "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/label"
 	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
 )
 
 var log = ctrl.Log.WithName("pod-selector")

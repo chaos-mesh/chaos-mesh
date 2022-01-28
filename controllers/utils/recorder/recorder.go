@@ -21,8 +21,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
-
 	"github.com/go-logr/logr"
 	"github.com/iancoleman/strcase"
 	v1 "k8s.io/api/core/v1"
@@ -33,6 +31,8 @@ import (
 	ref "k8s.io/client-go/tools/reference"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 type ChaosRecorder interface {
