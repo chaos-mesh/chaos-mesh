@@ -37,14 +37,15 @@ inline int real_gettimeofday(struct timeval *tv, struct timezone *__tz)
 }
 
 #elif defined(__aarch64__)
-inline int real_gettimeofday(struct timeval *tv)
+inline int real_gettimeofday(struct timeval *tv, struct timezone *__tz)
 {
     register struct timeval *x0 __asm__("x0") = tv;
+    register struct timezone *x1 __asm__("x1") = __tz;
     register uint64_t w8 __asm__("w8") = __NR_gettimeofday; /* syscall number */
     __asm__ __volatile__(
         "svc 0;"
         : "+r"(x0)
-        : "r"(x0), "r"(w8)
+        : "r"(x0), "r" (x1), "r"(w8)
         : "memory");
 
     return x0;
