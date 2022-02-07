@@ -96,6 +96,7 @@ export function cleanMarkers(s) {
   const reOptional = /\+optional/
   if (reOptional.test(s)) {
     s = 'Optional. ' + s.replace(reOptional, '')
+    s = s.replace(/\+kubebuilder.+$/, '') // assuming a separate marker remains
   }
 
   return s.trim()

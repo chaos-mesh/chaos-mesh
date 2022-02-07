@@ -17,6 +17,6 @@ export const actions = ['pod-kill', 'pod-failure', 'container-kill'],
       label: 'gracePeriod',
       value: 0,
       helperText:
-        'Optional. GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted. Value must be non-negative integer. The default value is zero that indicates delete immediately.  +kubebuilder:validation:Minimum=0',
+        'Optional. GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted. Value must be non-negative integer. The default value is zero that indicates delete immediately.',
     },
   ]

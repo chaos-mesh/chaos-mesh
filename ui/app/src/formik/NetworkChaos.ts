@@ -28,14 +28,14 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           label: 'minburst',
           value: 0,
           helperText:
-            'Optional. Minburst specifies the size of the peakrate bucket. For perfect accuracy, should be set to the MTU of the interface.  If a peakrate is needed, but some burstiness is acceptable, this size can be raised. A 3000 byte minburst allows around 3mbit/s of peakrate, given 1000 byte packets.  +kubebuilder:validation:Minimum=0',
+            'Optional. Minburst specifies the size of the peakrate bucket. For perfect accuracy, should be set to the MTU of the interface.  If a peakrate is needed, but some burstiness is acceptable, this size can be raised. A 3000 byte minburst allows around 3mbit/s of peakrate, given 1000 byte packets.',
         },
         {
           field: 'number',
           label: 'peakrate',
           value: 0,
           helperText:
-            'Optional. Peakrate is the maximum depletion rate of the bucket. The peakrate does not need to be set, it is only necessary if perfect millisecond timescale shaping is required.  +kubebuilder:validation:Minimum=0',
+            'Optional. Peakrate is the maximum depletion rate of the bucket. The peakrate does not need to be set, it is only necessary if perfect millisecond timescale shaping is required.',
         },
         {
           field: 'text',
@@ -121,8 +121,7 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       field: 'text',
       label: 'direction',
       value: '',
-      helperText:
-        'Optional. Direction represents the direction, this applies on netem and network partition action  +kubebuilder:validation:Enum=to;from;both;\\"\\"',
+      helperText: 'Optional. Direction represents the direction, this applies on netem and network partition action',
     },
     {
       field: 'ref',

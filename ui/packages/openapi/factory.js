@@ -17,7 +17,6 @@
 
 import { cleanMarkers, getUIFormWhen, isUIFormIgnore } from './utils.js'
 
-import { ignores } from './constants.js'
 import ts from 'typescript'
 
 const { factory } = ts
