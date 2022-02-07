@@ -19,14 +19,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
-
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
 )
 
 type FakeConfig struct {

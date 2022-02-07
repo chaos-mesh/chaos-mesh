@@ -17,7 +17,6 @@ package util
 
 import (
 	"fmt"
-
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -26,9 +25,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 )
 
 // ReadCommName returns the command name of process

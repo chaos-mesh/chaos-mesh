@@ -22,14 +22,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
-
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	daemonCgroups "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,

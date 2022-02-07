@@ -19,13 +19,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
-
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
