@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,8 +31,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
-
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	e2eutil "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"

@@ -1,4 +1,4 @@
-# Copyright 2021 Chaos Mesh Authors.
+# Copyright 2022 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+kind: HTTPChaos
 apiVersion: chaos-mesh.org/v1alpha1
-kind: IOChaos
 metadata:
-  name: io-errno-example
+  name: nginx-http-patch
 spec:
-  action: fault
-  mode: one
   selector:
+    namespaces:
+      - default
     labelSelectors:
-      app: etcd
-  volumePath: /var/run/etcd
-  path: /var/run/etcd/**/*
-  errno: 5
-  percent: 50
-  duration: "400s"
+      app: nginx
+  mode: all
+  target: Response
+  patch:
+    body:
+      type: JSON
+      value: '{"status":"Failed","reason":"hacked by Chaos Mesh"}'
+  port: 80
+  path: '*'

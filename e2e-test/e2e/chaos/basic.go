@@ -36,13 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
-	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-
-	// testcases
 	dnschaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/dnschaos"
 	httpchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/httpchaos"
 	iochaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/iochaos"
@@ -51,6 +44,11 @@ import (
 	sidecartestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/sidecar"
 	stresstestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/stresschaos"
 	timechaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/timechaos"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {
