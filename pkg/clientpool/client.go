@@ -20,9 +20,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pkg/errors"
-
 	lru "github.com/hashicorp/golang-lru"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"

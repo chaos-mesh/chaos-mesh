@@ -18,10 +18,9 @@ package crclients
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"

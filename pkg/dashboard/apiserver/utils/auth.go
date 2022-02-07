@@ -18,10 +18,9 @@ package utils
 import (
 	"net/http"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/gin-gonic/gin"
 	authorizationv1 "k8s.io/api/authorization/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
