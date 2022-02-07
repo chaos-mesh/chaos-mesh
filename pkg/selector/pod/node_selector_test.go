@@ -22,7 +22,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
-
 	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 

@@ -19,16 +19,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	. "github.com/onsi/gomega"
-
-	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
-
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestSelectPods(t *testing.T) {
