@@ -19,10 +19,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/pkg/errors"
-
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -186,6 +185,8 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 	case *v1alpha1.GCPChaos:
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.JVMChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.BlockChaos:
 		archive.Action = string(chaos.Spec.Action)
 	default:
 		return nil, errors.New("unsupported chaos type " + archive.Kind)
