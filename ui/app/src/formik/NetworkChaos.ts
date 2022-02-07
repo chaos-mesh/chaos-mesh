@@ -169,7 +169,82 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
     {
       field: 'ref',
       label: 'target',
-      children: [],
+      children: [
+        {
+          field: 'text',
+          label: 'mode',
+          value: '',
+          helperText:
+            'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent',
+        },
+        {
+          field: 'ref',
+          label: 'selector',
+          children: [
+            {
+              field: 'text-text',
+              label: 'annotationSelectors',
+              value: {},
+              helperText:
+                'Optional. Map of string keys and values that can be used to select objects. A selector based on annotations.',
+            },
+            {
+              field: 'text-text',
+              label: 'fieldSelectors',
+              value: {},
+              helperText:
+                'Optional. Map of string keys and values that can be used to select objects. A selector based on fields.',
+            },
+            {
+              field: 'text-text',
+              label: 'labelSelectors',
+              value: {},
+              helperText:
+                'Optional. Map of string keys and values that can be used to select objects. A selector based on labels.',
+            },
+            {
+              field: 'label',
+              label: 'namespaces',
+              value: [],
+              helperText: 'Optional. Namespaces is a set of namespace to which objects belong.',
+            },
+            {
+              field: 'text-text',
+              label: 'nodeSelectors',
+              value: {},
+              helperText:
+                "Optional. Map of string keys and values that can be used to select nodes. Selector which must match a node\\'s labels, and objects must belong to these selected nodes.",
+            },
+            {
+              field: 'label',
+              label: 'nodes',
+              value: [],
+              helperText: 'Optional. Nodes is a set of node name and objects must belong to these nodes.',
+            },
+            {
+              field: 'label',
+              label: 'podPhaseSelectors',
+              value: [],
+              helperText:
+                'Optional. PodPhaseSelectors is a set of condition of a pod at the current time. supported value: Pending / Running / Succeeded / Failed / Unknown',
+            },
+            {
+              field: 'text-label',
+              label: 'pods',
+              value: {},
+              helperText:
+                'Optional. Pods is a map of string keys and a set values that used to select pods. The key defines the namespace which pods belong, and the each values is a set of pod names.',
+            },
+          ],
+        },
+        {
+          field: 'text',
+          label: 'value',
+          value: '',
+          helperText:
+            'Optional. Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide an integer of pods to do chaos action. If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action',
+        },
+      ],
     },
     {
       field: 'text',

@@ -136,9 +136,6 @@ function typeReferenceToObjectLiteralExpression(
 
   members.forEach((val) => {
     const { escapedName, valueDeclaration: declaration } = val
-    if (ignores.includes(escapedName)) {
-      return
-    }
 
     const comment = declaration.jsDoc[0].comment ?? ''
     if (isUIFormIgnore(comment)) {

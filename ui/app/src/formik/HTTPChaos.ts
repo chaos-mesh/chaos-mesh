@@ -45,6 +45,12 @@ export const actions = [],
               helperText:
                 'Type represents the patch type, only support `JSON` as [merge patch json](https://tools.ietf.org/html/rfc7396) currently.',
             },
+            {
+              field: 'text',
+              label: 'value',
+              value: '',
+              helperText: 'Value is the patch contents.',
+            },
           ],
         },
         {

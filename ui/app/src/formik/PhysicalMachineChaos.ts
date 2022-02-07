@@ -253,6 +253,12 @@ export const actions = [
           value: 0,
           helperText: 'the port of agent server',
         },
+        {
+          field: 'text',
+          label: 'value',
+          value: '',
+          helperText: "the return value for action \\'return\\'",
+        },
       ],
     },
     {
