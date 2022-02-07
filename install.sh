@@ -899,6 +899,1154 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: chaos-testing
+---
+# Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: chaos-daemon
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-controller-manager
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: chaos-mesh-webhook-certs
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: webhook-secret
+type: Opaque
+data:
+  ca.crt: "${CA_BUNDLE}"
+  tls.crt: "${TLS_CRT}"
+  tls.key: "${TLS_KEY}"
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# roles
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-controller-manager-target-namespace
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "pods", "secrets"]
+    verbs: [ "get", "list", "watch", "delete", "update", "patch" ]
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - "create"
+  - apiGroups:
+      - ""
+    resources:
+      - "pods/log"
+    verbs:
+      - "get"
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - patch
+      - create
+      - watch
+      - list
+      - get
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-controller-manager-cluster-level
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources:
+      - nodes
+      - namespaces
+      - services
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# bindings cluster level
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-controller-manager-cluster-level
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh-chaos-controller-manager-cluster-level
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: "chaos-testing"
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-controller-manager-target-namespace
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh-chaos-controller-manager-target-namespace
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: "chaos-testing"
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-controller-manager-control-plane
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "configmaps", "services", "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: [ "create" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# binding for control plane namespace
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-controller-manager-control-plane
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: chaos-mesh-chaos-controller-manager-control-plane
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: "chaos-testing"
+---
+# Source: chaos-mesh/templates/chaos-daemon-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: chaos-daemon
+spec:
+  clusterIP: None
+  ports:
+    - name: grpc
+      port: 31767
+      targetPort: grpc
+      protocol: TCP
+    - name: http
+      port: 31766
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-daemon
+---
+# Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-dashboard
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dashboard
+spec:
+  selector:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dashboard
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 2333
+      targetPort: 2333
+      name: http
+---
+# Source: chaos-mesh/templates/controller-manager-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-mesh-controller-manager
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: webhook
+      protocol: TCP
+      name: webhook
+    - port: 10081
+      targetPort: pprof
+      protocol: TCP
+      name: pprof
+    - port: 10080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+---
+# Source: chaos-mesh/templates/chaos-daemon-daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/component: chaos-daemon
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/instance: chaos-mesh
+      app.kubernetes.io/component: chaos-daemon
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: 2.0.7
+        app.kubernetes.io/component: chaos-daemon
+      annotations:
+    spec:
+      hostNetwork: ${host_network}
+      serviceAccountName: chaos-daemon
+      hostIPC: true
+      hostPID: true
+      priorityClassName: 
+      containers:
+        - name: chaos-daemon
+          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
+          imagePullPolicy: IfNotPresent
+          command:
+            - /usr/local/bin/chaos-daemon
+            - --runtime
+            - ${runtime}
+            - --http-port
+            - !!str 31766
+            - --grpc-port
+            - !!str 31767
+            - --pprof
+          env:
+            - name: TZ
+              value: ${timezone}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_PTRACE
+          volumeMounts:
+            - name: socket-path
+              mountPath: ${mountPath}
+            - name: sys-path
+              mountPath: /host-sys
+          ports:
+            - name: grpc
+              containerPort: 31767
+              hostPort: 31767
+            - name: http
+              containerPort: 31766
+      volumes:
+        - name: socket-path
+          hostPath:
+            path: ${socketPath}
+        - name: sys-path
+          hostPath:
+            path: /sys
+---
+# Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-dashboard
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: chaos-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/instance: chaos-mesh
+      app.kubernetes.io/component: chaos-dashboard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: 2.0.7
+        app.kubernetes.io/component: chaos-dashboard
+      annotations:
+        rollme: "install.sh"
+    spec:
+      serviceAccountName: chaos-controller-manager
+      priorityClassName: 
+      containers:
+        - name: chaos-dashboard
+          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits: {}
+            requests:
+              cpu: 25m
+              memory: 256Mi
+          command:
+            - /usr/local/bin/chaos-dashboard
+          env:
+            - name: DATABASE_DATASOURCE
+              value: "/data/core.sqlite"
+            - name: DATABASE_DRIVER
+              value: "sqlite3"
+            - name: LISTEN_HOST
+              value: "0.0.0.0"
+            - name: LISTEN_PORT
+              value: "2333"
+            - name: TZ
+              value: ${timezone}
+            - name: CLUSTER_SCOPED
+              value: "true"
+            - name: TARGET_NAMESPACE
+              value: "chaos-testing"
+            - name: ENABLE_FILTER_NAMESPACE
+              value: "false"
+            - name: SECURITY_MODE
+              value: "false"
+            - name: DNS_SERVER_CREATE
+              value: "false"
+          volumeMounts:
+            - name: storage-volume
+              mountPath: /data
+              subPath: ""
+          ports:
+            - name: http
+              containerPort: 2333
+      volumes:
+      - name: storage-volume
+        emptyDir: {}
+---
+# Source: chaos-mesh/templates/controller-manager-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-controller-manager
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: controller-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/instance: chaos-mesh
+      app.kubernetes.io/component: controller-manager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: 2.0.7
+        app.kubernetes.io/component: controller-manager
+      annotations:
+        rollme: "install.sh"
+    spec:
+      hostNetwork: ${host_network}
+      serviceAccountName: chaos-controller-manager
+      priorityClassName: 
+      containers:
+      - name: chaos-mesh
+        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
+        imagePullPolicy: IfNotPresent
+        resources:
+            limits: {}
+            requests:
+              cpu: 25m
+              memory: 256Mi
+        command:
+          - /usr/local/bin/chaos-controller-manager
+        env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: TEMPLATE_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: ALLOW_HOST_NETWORK_TESTING
+            value: "false"
+          - name: TARGET_NAMESPACE
+            value: "chaos-testing"
+          - name: CLUSTER_SCOPED
+            value: "true"
+          - name: TZ
+            value: ${timezone}
+          - name: CHAOS_DAEMON_SERVICE_PORT
+            value: !!str 31767
+          - name: BPFKI_PORT
+            value: !!str 50051
+          - name: TEMPLATE_LABELS
+            value: "app.kubernetes.io/component:template"
+          - name: CONFIGMAP_LABELS
+            value: "app.kubernetes.io/component:webhook"
+          - name: ENABLE_FILTER_NAMESPACE
+            value: "false"
+          - name: PPROF_ADDR
+            value: ":10081"
+          - name: CHAOS_DNS_SERVICE_NAME
+            value: chaos-mesh-dns-server
+          - name: CHAOS_DNS_SERVICE_PORT
+            value: !!str 9288
+          - name: SECURITY_MODE
+            value: "false"
+          - name: POD_FAILURE_PAUSE_IMAGE
+            value: gcr.io/google-containers/pause:latest
+        volumeMounts:
+          - name: webhook-certs
+            mountPath: /etc/webhook/certs
+            readOnly: true
+        ports:
+          - name: webhook
+            containerPort: 9443 # Customize containerPort
+          - name: http
+            containerPort: 10080
+          - name: pprof
+            containerPort: 10081
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: chaos-mesh-webhook-certs
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: chaos-mesh-mutation
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - name: admission-webhook.chaos-mesh.org
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: "/inject-v1-pod"
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        admission-webhook: enabled
+    failurePolicy: Ignore
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-podchaos
+    failurePolicy: Fail
+    name: mpodchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-iochaos
+    failurePolicy: Fail
+    name: miochaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - iochaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-timechaos
+    failurePolicy: Fail
+    name: mtimechaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - timechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
+    failurePolicy: Fail
+    name: mnetworkchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - networkchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
+    failurePolicy: Fail
+    name: mkernelchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - kernelchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-stresschaos
+    failurePolicy: Fail
+    name: mstresschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-awschaos
+    failurePolicy: Fail
+    name: mawschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-gcpchaos
+    failurePolicy: Fail
+    name: mgcpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - gcpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
+    failurePolicy: Fail
+    name: mdnschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - dnschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
+    failurePolicy: Fail
+    name: mjvmchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - jvmchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-schedule
+    failurePolicy: Fail
+    name: mschedule.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - schedules
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-workflow
+    failurePolicy: Fail
+    name: mworkflow.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - workflows
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
+    failurePolicy: Fail
+    name: mhttpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - httpchaos
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: chaos-mesh-validation
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-podchaos
+    failurePolicy: Fail
+    name: vpodchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-iochaos
+    failurePolicy: Fail
+    name: viochaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - iochaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-timechaos
+    failurePolicy: Fail
+    name: vtimechaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - timechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-networkchaos
+    failurePolicy: Fail
+    name: vnetworkchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - networkchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-kernelchaos
+    failurePolicy: Fail
+    name: vkernelchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - kernelchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-stresschaos
+    failurePolicy: Fail
+    name: vstresschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-awschaos
+    failurePolicy: Fail
+    name: vawschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-gcpchaos
+    failurePolicy: Fail
+    name: vgcpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - gcpchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-dnschaos
+    failurePolicy: Fail
+    name: vdnschaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - dnschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
+    failurePolicy: Fail
+    name: vjvmchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - jvmchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-schedule
+    failurePolicy: Fail
+    name: vschedule.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - schedules
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-workflow
+    failurePolicy: Fail
+    name: vworkflow.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - workflows
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-httpchaos
+    failurePolicy: Fail
+    name: vhttpchaos.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    timeoutSeconds: 5
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - httpchaos
+---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-auth
+  labels:
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: 2.0.7
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-auth
+    failurePolicy: Fail
+    name: vauth.kb.io
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources: [ "*" ]
 EOF
     # chaos-mesh.yaml end
 }
