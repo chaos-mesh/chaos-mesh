@@ -170,18 +170,23 @@ message ExecStressRequest {
   }
   Scope scope = 1;
   string target = 2;
-  string stressors = 3;
+  string cpuStressors = 3;
+  string memoryStressors = 5;
   bool enterNS = 4;
 }
 
 message ExecStressResponse {
-  string instance = 1;
-  int64 startTime = 2;
+  string cpuInstance = 1;
+  int64 cpuStartTime = 2;
+  string memoryInstance = 3;
+  int64 memoryStartTime = 4;
 }
 
 message CancelStressRequest {
-  string instance = 1;
-  int64 startTime = 2;
+  string cpuInstance = 1;
+  int64 cpuStartTime = 2;
+  string memoryInstance = 3;
+  int64 memoryStartTime = 4;
 }
 
 message ApplyIOChaosRequest {

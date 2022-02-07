@@ -16,7 +16,6 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: IOChaos
 metadata:
   name: io-attr-example
-  namespace: chaos-testing
 spec:
   action: attrOverride
   mode: one

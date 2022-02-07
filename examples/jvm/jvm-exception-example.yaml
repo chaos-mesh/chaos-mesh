@@ -16,7 +16,6 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: JVMChaos
 metadata:
   name: exception
-  namespace: helloworld
 spec:
   action: exception
   class: Main
