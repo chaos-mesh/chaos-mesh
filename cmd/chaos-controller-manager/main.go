@@ -17,7 +17,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	stdlog "log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -71,8 +71,7 @@ func main() {
 
 	rootLogger, err := log.NewDefaultZapLogger()
 	if err != nil {
-		fmt.Printf("failed to create root logger: %v\n", err)
-		os.Exit(1)
+		stdlog.Fatal("failed to create root logger", err)
 	}
 	log.ReplaceGlobals(rootLogger)
 	ctrl.SetLogger(rootLogger.WithName("controller-runtime"))
