@@ -57,8 +57,8 @@ type ChaosOnProcess interface {
 // If developers wants to use functions in ChaosOnProcessManager ,
 // their imported Task need to implement interface TaskToProcess.
 // If developers wants to totally recover task successfully
-// when no task applied on the ChaosOnProcess.
-// This ChaosOnProcess must implement ChaosCanRecover.
+// when no task applied on the ChaosOnProcess,
+// this ChaosOnProcess must implement ChaosCanRecover.
 // If not implement ,
 // the Recover function will return a ErrNotImplement("ChaosCanRecover") error.
 type ChaosOnProcessManager struct {
@@ -242,8 +242,13 @@ func (cm ChaosOnProcessManager) ClearProcessChaos(pid PID, ignoreRecoverErr bool
 			return errors.Wrapf(ChaosErr.NotImplemented("ChaosCanRecover"), "process")
 		}
 		err := pRecover.Recover(pid)
-		if err != nil && !ignoreRecoverErr {
-			return errors.Wrapf(err, "recover chaos")
+		if err != nil {
+			if ignoreRecoverErr {
+				cm.logger.Error(errors.Wrapf(err, "recover chaos"), "ERR IGNORED")
+			} else {
+				return errors.Wrapf(err, "recover chaos")
+			}
+
 		}
 		delete(cm.processMap, pid)
 		return nil
