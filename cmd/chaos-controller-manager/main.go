@@ -74,11 +74,12 @@ func main() {
 		stdlog.Fatal("failed to create root logger", err)
 	}
 	log.ReplaceGlobals(rootLogger)
-	ctrl.SetLogger(rootLogger.WithName("controller-runtime"))
+	ctrl.SetLogger(rootLogger)
 
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
 	app := fx.New(
+		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
