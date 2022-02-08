@@ -19,8 +19,6 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	k8sTypes "k8s.io/apimachinery/pkg/types"
@@ -30,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
