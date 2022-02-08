@@ -35,7 +35,6 @@ FLAGS:
         --force-local-kube   Force reinstall local Kubernetes cluster if it is already installed
         --force-kubectl      Force reinstall kubectl client if it is already installed
         --force-kind         Force reinstall Kind if it is already installed
-        --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io; ghcr.io are NOT supported now.
         --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
@@ -74,7 +73,6 @@ main() {
     local force_local_kube=false
     local force_kubectl=false
     local force_kind=false
-    local docker_mirror=false
     local volume_provisioner=false
     local local_registry=false
     local crd=""
@@ -150,10 +148,6 @@ main() {
                 template=true
                 shift
                 ;;
-            --docker-mirror)
-                docker_mirror=true
-                shift
-                ;;
             --volume-provisioner)
                 volume_provisioner=true
                 shift
@@ -223,7 +217,7 @@ main() {
     done
 
     if [ "${runtime}" != "docker" ] && [ "${runtime}" != "containerd" ]; then
-        printf "container runtime %s is not supported\n" "${local_kube}"
+        printf "container runtime %s is not supported\n" "${runtime}"
         exit 1
     fi
 
@@ -266,7 +260,7 @@ main() {
 
         check_docker
         install_kind "${kind_version}" ${force_kind}
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube} ${docker_mirror} ${volume_provisioner} ${local_registry}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube} ${volume_provisioner} ${local_registry}
     fi
 
     if [ "${install_dependency_only}" = true ]; then
@@ -274,7 +268,7 @@ main() {
     fi
 
     check_kubernetes
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}" "${microk8s}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}" "${microk8s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -351,9 +345,8 @@ install_kubernetes_by_kind() {
     local node_num=$3
     local volume_num=$4
     local force_install=$5
-    local docker_mirror=$6
-    local volume_provisioner=$7
-    local local_registry=$8
+    local volume_provisioner=$6
+    local local_registry=$7
 
     printf "Install local Kubernetes %s\n" "${cluster_name}"
 
@@ -433,9 +426,6 @@ EOF
     done
 
     local kind_image="kindest/node:${cluster_version}"
-    if [ "$docker_mirror" == "true" ]; then
-        azk8spull "${kind_image}" || true
-    fi
 
     printf "start to create kubernetes cluster %s" "${cluster_name}"
     ensure kind create cluster --config "${config_file}" --image="${kind_image}" --name="${cluster_name}" --retain -v 1
@@ -443,20 +433,15 @@ EOF
     ensure export KUBECONFIG="${kubeconfig_path}"
 
     if [ "$volume_provisioner" == "true" ]; then
-        deploy_volume_provisioner "${work_dir}" ${docker_mirror}
+        deploy_volume_provisioner "${work_dir}"
     fi
 }
 
 deploy_volume_provisioner() {
     local data_dir=$1
-    local docker_mirror=$2
     local config_file=${data_dir}/local-volume-provisionser.yaml
 
     volume_provisioner_image="quay.io/external_storage/local-volume-provisioner:v2.3.2"
-    if [ "$docker_mirror" == "true" ]; then
-        azk8spull volume_provisioner_image || true
-        kind load docker-image ${volume_provisioner_image} > /dev/null 2>&1 || true
-    fi
 
     cat <<EOF >"${config_file}"
 apiVersion: storage.k8s.io/v1
@@ -619,30 +604,15 @@ install_chaos_mesh() {
     local namespace=$2
     local local_kube=$3
     local force_install=$4
-    local docker_mirror=$5
-    local crd=$6
-    local runtime=$7
-    local k3s=$8
-    local version=$9
-    local timezone=${10}
-    local docker_registry=${11}
-    local microk8s=${12}
+    local crd=$5
+    local runtime=$6
+    local k3s=$7
+    local version=$8
+    local timezone=$9
+    local docker_registry=${10}
+    local microk8s=${11}
+
     printf "Install Chaos Mesh %s\n" "${release_name}"
-
-    local chaos_mesh_image="${docker_registry}/chaos-mesh/chaos-mesh:${version}"
-    local chaos_daemon_image="${docker_registry}/chaos-mesh/chaos-daemon:${version}"
-    local chaos_dashboard_image="${docker_registry}/chaos-mesh/chaos-dashboard:${version}"
-
-    if [ "$docker_mirror" == "true" ]; then
-        azk8spull "${chaos_mesh_image}" || true
-        azk8spull "${chaos_daemon_image}" || true
-        azk8spull "${chaos_dashboard_image}" || true
-        if [ "${local_kube}" == "kind" ]; then
-            kind load docker-image "${chaos_mesh_image}" > /dev/null 2>&1 || true
-            kind load docker-image "${chaos_daemon_image}" > /dev/null 2>&1 || true
-            kind load docker-image "${chaos_dashboard_image}" > /dev/null 2>&1 || true
-        fi
-    fi
 
     gen_crd_manifests "${crd}" | kubectl create --validate=false -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
@@ -750,60 +720,6 @@ ensure_pods_ready() {
             exit 1
         fi
     done
-}
-
-azk8spull() {
-	image=$1
-	if [ -z $image ]; then
-		echo "## azk8spull image name cannot be null."
-	else
-		array=(`echo $image | tr '/' ' '` )
-
-		domainName=""
-		repoName=""
-		imageName=""
-
-		if [ ${#array[*]} -eq 3 ]; then
-			repoName=${array[1]}
-			imageName=${array[2]}
-			if [ "${array[0]}"x = "docker.io"x ]; then
-				domainName="dockerhub.azk8s.cn"
-			elif [ "${array[0]}"x = "gcr.io"x ]; then
-				domainName="gcr.azk8s.cn"
-			elif [ "${array[0]}"x = "quay.io"x ]; then
-				domainName="quay.azk8s.cn"
-			else
-				echo "## azk8spull can not support pulling $image right now."
-			fi
-		elif [ ${#array[*]} -eq 2 ]; then
-			if [ "${array[0]}"x = "k8s.gcr.io"x ]; then
-				domainName="gcr.azk8s.cn"
-				repoName="google_containers"
-				imageName=${array[1]}
-			else
-				domainName="dockerhub.azk8s.cn"
-				repoName=${array[0]}
-				imageName=${array[1]}
-			fi
-		elif [ ${#array[*]} -eq 1 ]; then
-				domainName="dockerhub.azk8s.cn"
-				repoName="library"
-				imageName=${array[0]}
-		else
-			echo '## azk8spull can not support pulling $image right now.'
-		fi
-		if [ "$domainName" != "" ]; then
-			echo "## azk8spull try to pull image from mirror $domainName/$repoName/$imageName."
-			docker pull  $domainName/$repoName/$imageName
-			if [ $? -eq 0 ]; then
-				echo "## azk8spull try to tag $domainName/$repoName/$imageName to $image."
-				docker tag $domainName/$repoName/$imageName $image
-				if [ $? -eq 0 ]; then
-					echo '## azk8spull finish pulling. '
-				fi
-			fi
-		fi
-	fi
 }
 
 gen_crd_manifests() {
@@ -1296,7 +1212,7 @@ spec:
       serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
@@ -1386,7 +1302,7 @@ spec:
       annotations:
     spec:
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
@@ -1490,7 +1406,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-mesh
         image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}

@@ -16,8 +16,7 @@
 package e2e
 
 import (
-	"context"
-	// load pprof
+	"context" // load pprof
 	_ "net/http/pprof"
 	"os/exec"
 	"time"
@@ -26,6 +25,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2ekubectl "k8s.io/kubernetes/test/e2e/framework/kubectl"
@@ -34,10 +34,7 @@ import (
 	utilnet "k8s.io/utils/net"
 
 	test "github.com/chaos-mesh/chaos-mesh/e2e-test"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
-
-	// ensure auth plugins are loaded
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config" // ensure auth plugins are loaded
 )
 
 const namespaceCleanupTimeout = 15 * time.Minute

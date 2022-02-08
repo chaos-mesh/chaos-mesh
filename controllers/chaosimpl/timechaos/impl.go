@@ -19,9 +19,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

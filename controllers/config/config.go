@@ -19,10 +19,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 )
