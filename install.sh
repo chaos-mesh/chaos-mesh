@@ -217,7 +217,7 @@ main() {
     done
 
     if [ "${runtime}" != "docker" ] && [ "${runtime}" != "containerd" ]; then
-        printf "container runtime %s is not supported\n" "${local_kube}"
+        printf "container runtime %s is not supported\n" "${runtime}"
         exit 1
     fi
 
@@ -431,6 +431,10 @@ EOF
     ensure kind create cluster --config "${config_file}" --image="${kind_image}" --name="${cluster_name}" --retain -v 1
     ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
     ensure export KUBECONFIG="${kubeconfig_path}"
+
+    if [ "$volume_provisioner" == "true" ]; then
+        deploy_volume_provisioner "${work_dir}"
+    fi
 }
 
 deploy_volume_provisioner() {
@@ -607,11 +611,8 @@ install_chaos_mesh() {
     local timezone=$9
     local docker_registry=${10}
     local microk8s=${11}
-    printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="${docker_registry}/chaos-mesh/chaos-mesh:${version}"
-    local chaos_daemon_image="${docker_registry}/chaos-mesh/chaos-daemon:${version}"
-    local chaos_dashboard_image="${docker_registry}/chaos-mesh/chaos-dashboard:${version}"
+    printf "Install Chaos Mesh %s\n" "${release_name}"
 
     gen_crd_manifests "${crd}" | kubectl create --validate=false -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
@@ -1211,7 +1212,7 @@ spec:
       serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
@@ -1301,7 +1302,7 @@ spec:
       annotations:
     spec:
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
@@ -1405,7 +1406,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-mesh
         image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
