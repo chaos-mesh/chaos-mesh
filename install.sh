@@ -345,8 +345,8 @@ install_kubernetes_by_kind() {
     local node_num=$3
     local volume_num=$4
     local force_install=$5
-    local volume_provisioner=$7
-    local local_registry=$8
+    local volume_provisioner=$6
+    local local_registry=$7
 
     printf "Install local Kubernetes %s\n" "${cluster_name}"
 
@@ -604,13 +604,13 @@ install_chaos_mesh() {
     local namespace=$2
     local local_kube=$3
     local force_install=$4
-    local crd=$6
-    local runtime=$7
-    local k3s=$8
-    local version=$9
-    local timezone=${10}
-    local docker_registry=${11}
-    local microk8s=${12}
+    local crd=$5
+    local runtime=$6
+    local k3s=$7
+    local version=$8
+    local timezone=${9}
+    local docker_registry=${10}
+    local microk8s=${11}
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
     local chaos_mesh_image="${docker_registry}/chaos-mesh/chaos-mesh:${version}"
