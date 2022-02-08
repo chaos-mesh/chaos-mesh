@@ -79,11 +79,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = server.Start()
-	if err != nil {
-		log.Error(err, "start chaos-daemon server")
-		os.Exit(1)
-	}
+	errs := make(chan error)
+	go func() {
+		errs <- server.Start()
+	}()
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc,
@@ -93,9 +92,12 @@ func main() {
 	select {
 	case sig := <-sigc:
 		log.Info("received signal", "signal", sig)
-	case err = <-server.Errors():
-		log.Error(err, "chaos-daemon server stopped")
+	case err = <-errs:
+		if err != nil {
+			log.Error(err, "chaos-daemon runtime")
+		}
 	}
-
-	server.Shutdown()
+	if err = server.Shutdown(); err != nil {
+		log.Error(err, "chaos-daemon shutdown")
+	}
 }

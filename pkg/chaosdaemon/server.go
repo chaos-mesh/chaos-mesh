@@ -16,18 +16,20 @@
 package chaosdaemon
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 	"net"
+	"net/http"
 
+	"github.com/docker/distribution/context"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
@@ -156,68 +158,65 @@ type RegisterGatherer interface {
 
 // Server is the server for chaos daemon
 type Server struct {
-	errors       chan error
 	daemonServer *DaemonServer
+	httpServer   *http.Server
+	grpcServer   *grpc.Server
 
 	conf *Config
-	reg  RegisterGatherer
 }
 
 // BuildServer builds a chaos daemon server
 func BuildServer(conf *Config, reg RegisterGatherer) (*Server, error) {
-	daemonServer, err := newDaemonServer(conf.Runtime, reg)
+	server := &Server{conf: conf}
+	var err error
+	server.daemonServer, err = newDaemonServer(conf.Runtime, reg)
 	if err != nil {
 		return nil, errors.Wrap(err, "create daemon server")
 	}
 
-	return &Server{
-		errors:       make(chan error),
-		daemonServer: daemonServer,
-		conf:         conf,
-		reg:          reg,
-	}, nil
+	server.httpServer = newHTTPServerBuilder().Addr(conf.HttpAddr()).Metrics(reg).Profiling(conf.Profiling).Build()
+	server.grpcServer, err = newGRPCServer(server.daemonServer, reg, conf.tlsConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "create grpc server")
+	}
+
+	return server, nil
 }
 
 // Start starts chaos-daemon.
 func (s *Server) Start() error {
-	httpBindAddr := s.conf.HttpAddr()
-	httpServer := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(s.reg).Profiling(s.conf.Profiling).Build()
-
 	grpcBindAddr := s.conf.GrpcAddr()
 	grpcListener, err := net.Listen("tcp", grpcBindAddr)
 	if err != nil {
 		return errors.Wrapf(err, "listen grpc address %s", grpcBindAddr)
 	}
 
-	grpcServer, err := newGRPCServer(s.daemonServer, s.reg, s.conf.tlsConfig)
-	if err != nil {
-		return errors.Wrap(err, "create grpc server")
-	}
+	var eg errgroup.Group
 
-	go func() {
-		log.Info("Starting http endpoint", "address", httpBindAddr)
-		if err := httpServer.ListenAndServe(); err != nil {
-			httpServer.Shutdown(context.Background())
-			s.errors <- errors.Wrap(err, "start http endpoint")
+	eg.Go(func() error {
+		log.Info("Starting http endpoint", "address", s.conf.HttpAddr())
+		if err := s.httpServer.ListenAndServe(); err != nil {
+			return errors.Wrap(err, "start http endpoint")
 		}
-	}()
+		return nil
+	})
 
-	go func() {
+	eg.Go(func() error {
 		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", s.conf.Runtime)
-		if err := grpcServer.Serve(grpcListener); err != nil {
-			grpcServer.Stop()
-			s.errors <- errors.Wrap(err, "start grpc endpoint")
+		if err := s.grpcServer.Serve(grpcListener); err != nil {
+			return errors.Wrap(err, "start grpc endpoint")
 		}
-	}()
+		return nil
+	})
 
-	return nil
+	return eg.Wait()
 }
 
-// Errors return the error channel
-func (s *Server) Errors() <-chan error {
-	return s.errors
-}
-
-func (s *Server) Shutdown() {
+func (s *Server) Shutdown() error {
+	if err := s.httpServer.Shutdown(context.TODO()); err != nil {
+		return errors.Wrap(err, "shut grpc endpoint down")
+	}
+	s.grpcServer.GracefulStop()
 	s.daemonServer.backgroundProcessManager.Shutdown()
+	return nil
 }
