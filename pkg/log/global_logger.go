@@ -44,7 +44,7 @@ func L() logr.Logger {
 	return result
 }
 
-// ReplaceGlobals would replace the global logger with the given logger.
+// ReplaceGlobals would replace the global logger with the given logger. It should be used when your application starting.
 //
 // Deprecated: Do not use global logger anymore. For more detail, see
 // https://github.com/chaos-mesh/rfcs/blob/main/text/2021-12-09-logging.md#global-logger
