@@ -431,10 +431,6 @@ EOF
     ensure kind create cluster --config "${config_file}" --image="${kind_image}" --name="${cluster_name}" --retain -v 1
     ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
     ensure export KUBECONFIG="${kubeconfig_path}"
-
-    if [ "$volume_provisioner" == "true" ]; then
-        deploy_volume_provisioner "${work_dir}"
-    fi
 }
 
 deploy_volume_provisioner() {
