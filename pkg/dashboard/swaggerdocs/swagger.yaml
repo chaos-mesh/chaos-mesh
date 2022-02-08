@@ -1397,7 +1397,8 @@ definitions:
         description: |-
           Direction represents the direction, this applies on netem and network partition action
           +optional
-          +kubebuilder:validation:Enum=to;from;both;""
+          +kubebuilder:validation:Enum=to;from;both
+          +kubebuilder:default=to
         type: string
       duplicate:
         $ref: '#/definitions/v1alpha1.DuplicateSpec'
@@ -2074,6 +2075,7 @@ definitions:
       concurrencyPolicy:
         description: |-
           +optional
+          +kubebuilder:default=Forbid
           +kubebuilder:validation:Enum=Forbid;Allow
         type: string
       dnsChaos:
