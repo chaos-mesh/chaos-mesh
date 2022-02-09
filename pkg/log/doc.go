@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,8 @@
 // limitations under the License.
 //
 
-package test
-
-import (
-	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
-)
-
-var Module = fx.Provide(
-	provider.NewOption,
-	provider.NewClient,
-	provider.NewAuthCli,
-	provider.NewScheme,
-	provider.NewNoCacheReader,
-	provider.NewGlobalCacheReader,
-	provider.NewControlPlaneCacheReader,
-	manager.NewTestManager,
-	recorder.NewRecorderBuilder,
-)
+// Package log contains series of utilities for setting up and accessing logger.
+// We use logr.Logger as the facade of each logger.
+//
+// See https://github.com/chaos-mesh/rfcs/blob/main/text/2021-12-09-logging.md for more details.
+package log
