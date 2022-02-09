@@ -41,7 +41,7 @@ func NewTaskManager() TaskManager {
 // We use PID to stand by the target.
 type Task struct {
 	main PID
-	Data interface{}
+	data interface{}
 }
 
 func NewTask(main PID, data interface{}) Task {
@@ -94,7 +94,7 @@ func (m TaskManager) GetWithUID(id UID) (interface{}, error) {
 	if !ok {
 		return Task{}, chaoserr.NotFound("UID")
 	}
-	return t.Data, nil
+	return t.data, nil
 }
 
 func (m TaskManager) GetWithPID(id PID) []UID {
@@ -132,11 +132,11 @@ func (m TaskManager) SumTask(uid UID) (Task, error) {
 		if !ok {
 			return Task{}, chaoserr.NotFound("TASK")
 		}
-		AddableData, ok := task.Data.(Addable)
+		AddableData, ok := task.data.(Addable)
 		if !ok {
 			return Task{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "task.Data")
 		}
-		AddableTempData, ok := taskTemp.Data.(Addable)
+		AddableTempData, ok := taskTemp.data.(Addable)
 		if !ok {
 			return Task{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "taskTemp.Data")
 		}

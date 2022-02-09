@@ -220,7 +220,7 @@ func (cm ChaosOnProcessManager) commit(uid UID, pid PID) error {
 	if !ok {
 		return errors.Wrapf(chaoserr.NotFound("PID"), "PID : %d", pid)
 	}
-	tasker, ok := task.Data.(TaskToProcess)
+	tasker, ok := task.data.(TaskToProcess)
 	if !ok {
 		return errors.New("task.Data here must implement TaskToProcess")
 	}
