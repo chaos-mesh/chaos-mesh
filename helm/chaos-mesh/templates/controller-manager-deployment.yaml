@@ -43,7 +43,7 @@ spec:
       {{- if .Values.controllerManager.serviceAccount }}
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       {{- end }}
-      {{ if  .Values.controllerManager.priorityClassName }}
+      {{- if  .Values.controllerManager.priorityClassName }}
       priorityClassName: {{ .Values.controllerManager.priorityClassName }}
       {{- end }}
       {{- if .Values.chaosDlv.enable }}
