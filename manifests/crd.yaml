@@ -1631,12 +1631,12 @@ spec:
                 - latency
                 type: object
               direction:
+                default: to
                 description: Direction represents the direction, this applies on netem and network partition action
                 enum:
                 - to
                 - from
                 - both
-                - ""
                 type: string
               duplicate:
                 description: DuplicateSpec represents the detail about loss action
@@ -2753,6 +2753,7 @@ spec:
                 - ec2Instance
                 type: object
               concurrencyPolicy:
+                default: Forbid
                 enum:
                 - Forbid
                 - Allow
@@ -3652,12 +3653,12 @@ spec:
                     - latency
                     type: object
                   direction:
+                    default: to
                     description: Direction represents the direction, this applies on netem and network partition action
                     enum:
                     - to
                     - from
                     - both
-                    - ""
                     type: string
                   duplicate:
                     description: DuplicateSpec represents the detail about loss action
@@ -5173,12 +5174,12 @@ spec:
                               - latency
                               type: object
                             direction:
+                              default: to
                               description: Direction represents the direction, this applies on netem and network partition action
                               enum:
                               - to
                               - from
                               - both
-                              - ""
                               type: string
                             duplicate:
                               description: DuplicateSpec represents the detail about loss action
@@ -6424,12 +6425,12 @@ spec:
                                   - latency
                                   type: object
                                 direction:
+                                  default: to
                                   description: Direction represents the direction, this applies on netem and network partition action
                                   enum:
                                   - to
                                   - from
                                   - both
-                                  - ""
                                   type: string
                                 duplicate:
                                   description: DuplicateSpec represents the detail about loss action
@@ -10229,12 +10230,12 @@ spec:
                     - latency
                     type: object
                   direction:
+                    default: to
                     description: Direction represents the direction, this applies on netem and network partition action
                     enum:
                     - to
                     - from
                     - both
-                    - ""
                     type: string
                   duplicate:
                     description: DuplicateSpec represents the detail about loss action
@@ -10581,6 +10582,7 @@ spec:
                     - ec2Instance
                     type: object
                   concurrencyPolicy:
+                    default: Forbid
                     enum:
                     - Forbid
                     - Allow
@@ -11480,12 +11482,12 @@ spec:
                         - latency
                         type: object
                       direction:
+                        default: to
                         description: Direction represents the direction, this applies on netem and network partition action
                         enum:
                         - to
                         - from
                         - both
-                        - ""
                         type: string
                       duplicate:
                         description: DuplicateSpec represents the detail about loss action
@@ -13001,12 +13003,12 @@ spec:
                                   - latency
                                   type: object
                                 direction:
+                                  default: to
                                   description: Direction represents the direction, this applies on netem and network partition action
                                   enum:
                                   - to
                                   - from
                                   - both
-                                  - ""
                                   type: string
                                 duplicate:
                                   description: DuplicateSpec represents the detail about loss action
@@ -14252,12 +14254,12 @@ spec:
                                       - latency
                                       type: object
                                     direction:
+                                      default: to
                                       description: Direction represents the direction, this applies on netem and network partition action
                                       enum:
                                       - to
                                       - from
                                       - both
-                                      - ""
                                       type: string
                                     duplicate:
                                       description: DuplicateSpec represents the detail about loss action
@@ -19442,12 +19444,12 @@ spec:
                           - latency
                           type: object
                         direction:
+                          default: to
                           description: Direction represents the direction, this applies on netem and network partition action
                           enum:
                           - to
                           - from
                           - both
-                          - ""
                           type: string
                         duplicate:
                           description: DuplicateSpec represents the detail about loss action
@@ -20693,12 +20695,12 @@ spec:
                               - latency
                               type: object
                             direction:
+                              default: to
                               description: Direction represents the direction, this applies on netem and network partition action
                               enum:
                               - to
                               - from
                               - both
-                              - ""
                               type: string
                             duplicate:
                               description: DuplicateSpec represents the detail about loss action
