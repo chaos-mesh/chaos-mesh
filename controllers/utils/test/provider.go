@@ -27,7 +27,6 @@ import (
 var Module = fx.Provide(
 	provider.NewOption,
 	provider.NewClient,
-	provider.NewLogger,
 	provider.NewAuthCli,
 	provider.NewScheme,
 	provider.NewNoCacheReader,
