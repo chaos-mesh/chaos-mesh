@@ -25,6 +25,7 @@ import Kernel from './form/Kernel'
 import Paper from '@ui/mui-extends/esm/Paper'
 import RadioButtonCheckedOutlinedIcon from '@mui/icons-material/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined'
+import React from 'react'
 import Stress from './form/Stress'
 import T from 'components/T'
 import TargetGenerated from './form/TargetGenerated'
@@ -59,6 +60,33 @@ const useStyles = makeStyles((theme) => {
 })
 
 const submitDirectly = ['pod-failure']
+
+interface TypeCardProp {
+  name: Env
+  handleSwitchEnv: any
+  env: Env
+}
+
+const TypeCard: React.FC<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
+  const classes = useStyles()
+  const title = name === 'k8s' ? 'k8s.title' : 'physics.single'
+  return (
+    <Card
+      className={clsx(classes.card, env === name ? classes.cardActive : '')}
+      variant="outlined"
+      onClick={handleSwitchEnv(name)}
+    >
+      <Box display="flex" justifyContent="center" alignItems="center" width={225} height={75}>
+        <Box display="flex" justifyContent="center" flex={1}>
+          {iconByKind(name)}
+        </Box>
+        <Box flex={1.5} textAlign="center">
+          <Typography variant="button">{T(`${title}`)}</Typography>
+        </Box>
+      </Box>
+    </Card>
+  )
+}
 
 const Step1 = () => {
   const classes = useStyles()
@@ -128,34 +156,8 @@ const Step1 = () => {
       </Box>
       <Box hidden={step1}>
         <Box display="flex">
-          <Card
-            className={clsx(classes.card, env === 'k8s' ? classes.cardActive : '')}
-            variant="outlined"
-            onClick={handleSwitchEnv('k8s')}
-          >
-            <Box display="flex" justifyContent="center" alignItems="center" width={225} height={75}>
-              <Box display="flex" justifyContent="center" flex={1}>
-                {iconByKind('k8s')}
-              </Box>
-              <Box flex={1.5} textAlign="center">
-                <Typography variant="button">{T('k8s.title')}</Typography>
-              </Box>
-            </Box>
-          </Card>
-          <Card
-            className={clsx(classes.card, env === 'physic' ? classes.cardActive : '')}
-            variant="outlined"
-            onClick={handleSwitchEnv('physic')}
-          >
-            <Box display="flex" justifyContent="center" alignItems="center" width={225} height={75}>
-              <Box display="flex" justifyContent="center" flex={1}>
-                {iconByKind('physic')}
-              </Box>
-              <Box flex={1.5} textAlign="center">
-                <Typography variant="button">{T('physics.single')}</Typography>
-              </Box>
-            </Box>
-          </Card>
+          <TypeCard name="k8s" handleSwitchEnv={handleSwitchEnv} env={env} />
+          <TypeCard name="physic" handleSwitchEnv={handleSwitchEnv} env={env} />
         </Box>
         <Divider sx={{ my: 6 }} />
       </Box>
