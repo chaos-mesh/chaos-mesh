@@ -1386,7 +1386,6 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
-      
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
