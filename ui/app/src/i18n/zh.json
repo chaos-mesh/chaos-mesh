@@ -153,7 +153,7 @@
     "node": {
       "choose": "选择任务类型",
       "single": "单一",
-      "serial": "顺序",
+      "serial": "串行",
       "parallel": "并行",
       "suspend": "暂停",
       "custom": "自定义",
@@ -194,7 +194,7 @@
       "deleteDesc": "此任务将被删除",
       "submitAll": "提交所有改动"
     },
-    "serialTitle": "填写顺序任务",
+    "serialTitle": "填写串行任务",
     "parallelTitle": "填写并行任务",
     "suspendTitle": "设置暂停",
     "customTitle": "自定义任务",
