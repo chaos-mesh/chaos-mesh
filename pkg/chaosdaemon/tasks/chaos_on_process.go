@@ -19,7 +19,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
 var ErrCanNotAdd = errors.New("can not add")
@@ -99,7 +99,7 @@ func (cm ChaosOnProcessManager) GetWithUID(id UID) (interface{}, error) {
 func (cm ChaosOnProcessManager) GetWithPID(pid PID) (ChaosOnProcess, error) {
 	p, ok := cm.processMap[pid]
 	if !ok {
-		return nil, ChaosErr.NotFound("PID")
+		return nil, chaoserr.NotFound("PID")
 	}
 	return p, nil
 }
@@ -132,7 +132,7 @@ func (cm ChaosOnProcessManager) Update(uid UID, pid PID, config TaskToProcess) e
 // Create will return ChaosErr.ErrDuplicateEntity.
 func (cm ChaosOnProcessManager) Create(uid UID, pid PID, config TaskToProcess, immutableValues interface{}) error {
 	if _, ok := cm.processMap[pid]; ok {
-		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "create")
+		return errors.Wrapf(chaoserr.ErrDuplicateEntity, "create")
 	}
 
 	err := cm.taskManager.AddTask(uid, NewTask(pid, config))
@@ -181,11 +181,11 @@ func (cm ChaosOnProcessManager) Apply(uid UID, pid PID, config TaskToProcess) er
 func (cm ChaosOnProcessManager) Recover(uid UID, pid PID) error {
 	uIDs := cm.taskManager.GetWithPID(pid)
 	if len(uIDs) == 0 {
-		return ChaosErr.NotFound("PID")
+		return chaoserr.NotFound("PID")
 	}
 	if len(uIDs) == 1 {
 		if uIDs[0] != uid {
-			return ChaosErr.NotFound("UID")
+			return chaoserr.NotFound("UID")
 		}
 		err := cm.ClearProcessChaos(pid, false)
 		if err != nil {
@@ -218,7 +218,7 @@ func (cm ChaosOnProcessManager) commit(uid UID, pid PID) error {
 	}
 	process, ok := cm.processMap[pid]
 	if !ok {
-		return errors.Wrapf(ChaosErr.NotFound("PID"), "PID : %d", pid)
+		return errors.Wrapf(chaoserr.NotFound("PID"), "PID : %d", pid)
 	}
 	tasker, ok := task.Data.(TaskToProcess)
 	if !ok {
@@ -239,7 +239,7 @@ func (cm ChaosOnProcessManager) ClearProcessChaos(pid PID, ignoreRecoverErr bool
 	if process, ok := cm.processMap[pid]; ok {
 		pRecover, ok := process.(ChaosCanRecover)
 		if !ok {
-			return errors.Wrapf(ChaosErr.NotImplemented("ChaosCanRecover"), "process")
+			return errors.Wrapf(chaoserr.NotImplemented("ChaosCanRecover"), "process")
 		}
 		err := pRecover.Recover(pid)
 		if err != nil {
@@ -253,5 +253,5 @@ func (cm ChaosOnProcessManager) ClearProcessChaos(pid PID, ignoreRecoverErr bool
 		delete(cm.processMap, pid)
 		return nil
 	}
-	return errors.Wrapf(ChaosErr.NotFound("PID"), "recovering task")
+	return errors.Wrapf(chaoserr.NotFound("PID"), "recovering task")
 }

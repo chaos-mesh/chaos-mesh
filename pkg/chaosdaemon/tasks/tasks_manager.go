@@ -18,15 +18,8 @@ package tasks
 import (
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
-
-// A Task Manager for Chaos-Daemon.
-// What is task here :
-// Task defines a composite of flexible config with an immutable target.
-// We use PID to stand by the target.
-// TaskManager provide some basic function on Tasks.
-// If developers wants to use SumTask , they must implement Addable for the Task.
 
 type UID = string
 type PID = int
@@ -34,6 +27,8 @@ type PID = int
 var ErrUpdateTaskWithPIDChanges = errors.New("update task with PID changes")
 var ErrTaskMapNotInit = errors.New("TaskMap not init")
 
+// TaskManager provides some basic function on Tasks.
+// If developers wants to use SumTask , they must implement Addable for the Task.
 type TaskManager struct {
 	TaskMap map[UID]Task
 }
@@ -42,9 +37,11 @@ func NewTaskManager() TaskManager {
 	return TaskManager{make(map[UID]Task)}
 }
 
+// Task defines a composite of flexible config with an immutable target.
+// We use PID to stand by the target.
 type Task struct {
-	Main PID
-	Data interface{}
+	main PID
+	data interface{}
 }
 
 func NewTask(main PID, data interface{}) Task {
@@ -59,7 +56,7 @@ func (m TaskManager) AddTask(id UID, task Task) error {
 		return ErrTaskMapNotInit
 	}
 	if _, ok := m.TaskMap[id]; ok {
-		return errors.Wrapf(ChaosErr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
+		return errors.Wrapf(chaoserr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
 	}
 	m.TaskMap[id] = task
 	return nil
@@ -71,9 +68,9 @@ func (m TaskManager) UpdateTask(id UID, task Task) (Task, error) {
 	}
 	taskOld, ok := m.TaskMap[id]
 	if !ok {
-		return Task{}, errors.Wrapf(ChaosErr.NotFound("UID"), "uid: %s, task: %v", id, task)
+		return Task{}, errors.Wrapf(chaoserr.NotFound("UID"), "uid: %s, task: %v", id, task)
 	}
-	if taskOld.Main != task.Main {
+	if taskOld.main != task.main {
 		return Task{}, errors.Wrapf(ErrUpdateTaskWithPIDChanges, "uid: %s, task: %v", id, task)
 	}
 	m.TaskMap[id] = task
@@ -86,7 +83,7 @@ func (m TaskManager) RecoverTask(id UID) error {
 	}
 	_, ok := m.TaskMap[id]
 	if !ok {
-		return errors.Wrapf(ChaosErr.NotFound("TASK"), "UID : %v", id)
+		return errors.Wrapf(chaoserr.NotFound("TASK"), "UID : %v", id)
 	}
 	delete(m.TaskMap, id)
 	return nil
@@ -95,24 +92,22 @@ func (m TaskManager) RecoverTask(id UID) error {
 func (m TaskManager) GetWithUID(id UID) (interface{}, error) {
 	t, ok := m.TaskMap[id]
 	if !ok {
-		return Task{}, ChaosErr.NotFound("UID")
+		return Task{}, chaoserr.NotFound("UID")
 	}
-	return t.Data, nil
+	return t.data, nil
 }
 
 func (m TaskManager) GetWithPID(id PID) []UID {
 	uIds := make([]UID, 0)
 	for uid, task := range m.TaskMap {
-		if task.Main == id {
+		if task.main == id {
 			uIds = append(uIds, uid)
 		}
 	}
 	return uIds
 }
 
-// If developers want to add some new behavior on Tasks Gathering,
-// add an interface like Addable , add apply it in (cm ChaosOnProcessManager) commit(uid UID, pid PID).
-
+// Addable introduces the data gathering ability.
 type Addable interface {
 	Add(a Addable) error
 }
@@ -125,9 +120,9 @@ func (m TaskManager) SumTask(uid UID) (Task, error) {
 	}
 	task, ok := m.TaskMap[uid]
 	if !ok {
-		return Task{}, ChaosErr.NotFound("UID")
+		return Task{}, chaoserr.NotFound("UID")
 	}
-	uids := m.GetWithPID(task.Main)
+	uids := m.GetWithPID(task.main)
 
 	for _, uidTemp := range uids {
 		if uid == uidTemp {
@@ -135,15 +130,15 @@ func (m TaskManager) SumTask(uid UID) (Task, error) {
 		}
 		taskTemp, ok := m.TaskMap[uidTemp]
 		if !ok {
-			return Task{}, ChaosErr.NotFound("TASK")
+			return Task{}, chaoserr.NotFound("TASK")
 		}
-		AddableData, ok := task.Data.(Addable)
+		AddableData, ok := task.data.(Addable)
 		if !ok {
-			return Task{}, errors.Wrapf(ChaosErr.NotImplemented("Addable"), "task.Data")
+			return Task{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "task.Data")
 		}
-		AddableTempData, ok := taskTemp.Data.(Addable)
+		AddableTempData, ok := taskTemp.data.(Addable)
 		if !ok {
-			return Task{}, errors.Wrapf(ChaosErr.NotImplemented("Addable"), "taskTemp.Data")
+			return Task{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "taskTemp.Data")
 		}
 		err := AddableData.Add(AddableTempData)
 		if err != nil {

@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package ChaosErr
+package chaoserr
 
 import (
 	"github.com/pkg/errors"

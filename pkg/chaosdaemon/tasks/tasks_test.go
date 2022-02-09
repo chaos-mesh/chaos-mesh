@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ChaosErr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
 type FakeConfig struct {
@@ -65,14 +65,14 @@ type FakeChaos struct {
 
 func (f *FakeChaos) Inject(pid PID) error {
 	if f.ErrWhenInject {
-		return ChaosErr.NotImplemented("inject")
+		return chaoserr.NotImplemented("inject")
 	}
 	return nil
 }
 
 func (f *FakeChaos) Recover(pid PID) error {
 	if f.ErrWhenRecover {
-		return ChaosErr.NotImplemented("recover")
+		return chaoserr.NotImplemented("recover")
 	}
 	return nil
 }
@@ -98,18 +98,18 @@ func TestTasks(t *testing.T) {
 	err = m.Create(uid1, 1, &task1, &chaos)
 	assert.NoError(t, err)
 	err = m.Apply(uid1, 1, &task1)
-	assert.Equal(t, errors.Cause(err), ChaosErr.ErrDuplicateEntity)
+	assert.Equal(t, errors.Cause(err), chaoserr.ErrDuplicateEntity)
 	err = m.Recover(uid1, 1)
 	assert.NoError(t, err)
 	err = m.Recover(uid1, 1)
-	assert.Equal(t, errors.Cause(err), ChaosErr.NotFound("PID"))
+	assert.Equal(t, errors.Cause(err), chaoserr.NotFound("PID"))
 
 	chaos.ErrWhenInject = true
 	tasks2 := FakeConfig{i: 1}
 	err = m.Create(uid1, 1, &tasks2, &chaos)
-	assert.Equal(t, errors.Cause(err), ChaosErr.NotImplemented("inject"))
+	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("inject"))
 	_, err = m.GetWithUID(uid1)
-	assert.Equal(t, errors.Cause(err), ChaosErr.NotFound("UID"))
+	assert.Equal(t, errors.Cause(err), chaoserr.NotFound("UID"))
 
 	chaos.ErrWhenInject = false
 	chaos.ErrWhenRecover = true
@@ -117,7 +117,7 @@ func TestTasks(t *testing.T) {
 	err = m.Create(uid1, 1, &tasks3, &chaos)
 	assert.NoError(t, err)
 	err = m.Recover(uid1, 1)
-	assert.Equal(t, errors.Cause(err), ChaosErr.NotImplemented("recover"))
+	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("recover"))
 	p, err := m.GetWithPID(1)
 	inner := p.(*FakeChaos)
 	inner.ErrWhenRecover = false
