@@ -57,6 +57,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration && obj.Status.FailedMessage == "" {
+		r.Log.Info("the target pod has been up to date", "pod", obj.Namespace+"/"+obj.Name)
+		return ctrl.Result{}, nil
+	}
+
 	r.Log.Info("updating http chaos", "pod", obj.Namespace+"/"+obj.Name, "spec", obj.Spec)
 
 	pod := &v1.Pod{}
