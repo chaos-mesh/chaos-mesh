@@ -37,13 +37,15 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
-    {{- if .Values.controllerManager.hostNetwork }}
+      {{- if .Values.controllerManager.hostNetwork }}
       hostNetwork: true
-    {{- end }}
-    {{- if .Values.controllerManager.serviceAccount }}
+      {{- end }}
+      {{- if .Values.controllerManager.serviceAccount }}
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
-    {{- end }}
-      priorityClassName: {{ .Values.controllerManager.priorityClassName}}
+      {{- end }}
+      {{- if  .Values.controllerManager.priorityClassName }}
+      priorityClassName: {{ .Values.controllerManager.priorityClassName }}
+      {{- end }}
       {{- if .Values.chaosDlv.enable }}
       shareProcessNamespace: true
       {{- end }}

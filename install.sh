@@ -1206,7 +1206,6 @@ spec:
       serviceAccountName: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName:
       containers:
         - name: chaos-daemon
           image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
@@ -1291,7 +1290,6 @@ spec:
       annotations:
     spec:
       serviceAccountName: chaos-controller-manager
-      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
@@ -1389,7 +1387,6 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
-      priorityClassName:
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
