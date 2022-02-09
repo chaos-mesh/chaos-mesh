@@ -1293,13 +1293,13 @@ spec:
                             affected.
                           type: string
                         direction:
+                          default: to
                           description: Direction represents the direction, this applies
                             on netem and network partition action
                           enum:
                           - to
                           - from
                           - both
-                          - ""
                           type: string
                         duplicate:
                           description: DuplicateSpec represents the detail about loss
@@ -3475,13 +3475,13 @@ spec:
                                 be affected.
                               type: string
                             direction:
+                              default: to
                               description: Direction represents the direction, this
                                 applies on netem and network partition action
                               enum:
                               - to
                               - from
                               - both
-                              - ""
                               type: string
                             duplicate:
                               description: DuplicateSpec represents the detail about

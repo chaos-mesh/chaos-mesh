@@ -62,6 +62,7 @@ type ScheduleSpec struct {
 	StartingDeadlineSeconds *int64 `json:"startingDeadlineSeconds"`
 
 	// +optional
+	// +kubebuilder:default=Forbid
 	// +kubebuilder:validation:Enum=Forbid;Allow
 	ConcurrencyPolicy ConcurrencyPolicy `json:"concurrencyPolicy"`
 
