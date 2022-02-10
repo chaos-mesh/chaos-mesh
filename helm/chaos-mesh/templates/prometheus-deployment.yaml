@@ -19,15 +19,17 @@ spec:
       labels:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: prometheus
-    {{- with .Values.prometheus.podAnnotations }}
+      {{- with .Values.prometheus.podAnnotations }}
       annotations:
 {{ toYaml . | indent 8 }}
-    {{- end }}
+      {{- end }}
     spec:
       {{- if .Values.prometheus.serviceAccount }}
       serviceAccount: {{ .Values.prometheus.serviceAccount }}
       {{- end }}
-      priorityClassName: {{ .Values.prometheus.priorityClassName}}
+      {{- if .Values.prometheus.priorityClassName }}
+      priorityClassName: {{ .Values.prometheus.priorityClassName }}
+      {{- end }}
       initContainers:
         - name: data-permission-fix
           image: busybox
@@ -41,7 +43,7 @@ spec:
         imagePullPolicy: {{ .Values.prometheus.imagePullPolicy | default "IfNotPresent" }}
         {{- if .Values.chaosDaemon.resources }}
         resources:
-      {{ toYaml .Values.chaosDaemon.resources | indent 12 }}
+{{ toYaml .Values.chaosDaemon.resources | indent 10 }}
         {{- end }}
         args:
           - --storage.tsdb.path=/data
