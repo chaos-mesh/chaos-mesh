@@ -18,9 +18,8 @@ package v1alpha1
 import (
 	"reflect"
 
-	"k8s.io/apimachinery/pkg/util/validation/field"
-
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )

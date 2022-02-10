@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,20 +13,8 @@
 // limitations under the License.
 //
 
-package chaosdaemon
-
-import (
-	"testing"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-)
-
-func TestAPIs(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"chaosdaemon Suite",
-		[]Reporter{printer.NewlineReporter{}})
-}
+// Package log contains series of utilities for setting up and accessing logger.
+// We use logr.Logger as the facade of each logger.
+//
+// See https://github.com/chaos-mesh/rfcs/blob/main/text/2021-12-09-logging.md for more details.
+package log

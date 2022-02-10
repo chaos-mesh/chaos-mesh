@@ -16,7 +16,6 @@
 kind: HTTPChaos
 apiVersion: chaos-mesh.org/v1alpha1
 metadata:
-  namespace: default
   name: nginx-http-patch
 spec:
   selector:
