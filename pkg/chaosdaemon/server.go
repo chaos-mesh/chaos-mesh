@@ -79,7 +79,7 @@ type DaemonServer struct {
 	backgroundProcessManager bpm.BackgroundProcessManager
 
 	IPSetLocker      *locker.Locker
-	TimeChaosManager tasks.ChaosOnProcessManager
+	TimeChaosManager tasks.TaskManager
 }
 
 func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
@@ -98,7 +98,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
-		TimeChaosManager:         tasks.NewChaosOnProcessManager(loggertc),
+		TimeChaosManager:         tasks.NewTaskManager(loggertc),
 	}
 }
 

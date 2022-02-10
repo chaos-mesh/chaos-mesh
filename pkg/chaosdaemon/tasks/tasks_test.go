@@ -41,7 +41,7 @@ func (f *FakeConfig) Add(a Addable) error {
 	return errors.Wrapf(ErrCanNotAdd, "expect type : *FakeConfig, got : %T", a)
 }
 
-func (f *FakeConfig) Assign(c ChaosOnProcess) error {
+func (f *FakeConfig) Assign(c Injectable) error {
 	C, OK := c.(*FakeChaos)
 	if OK {
 		C.C.i = f.i
@@ -50,7 +50,7 @@ func (f *FakeConfig) Assign(c ChaosOnProcess) error {
 	return errors.Wrapf(ErrCanNotAssign, "expect type : *FakeChaos, got : %T", c)
 }
 
-func (f *FakeConfig) New(immutableValues interface{}) (ChaosOnProcess, error) {
+func (f *FakeConfig) New(immutableValues interface{}) (Injectable, error) {
 	temp := immutableValues.(*FakeChaos)
 	f.Assign(temp)
 	return temp, nil
@@ -86,7 +86,7 @@ func TestTasks(t *testing.T) {
 	}
 	log = zapr.NewLogger(zapLog)
 
-	m := NewChaosOnProcessManager(log)
+	m := NewTaskManager(log)
 
 	chaos := FakeChaos{
 		ErrWhenRecover: false,
@@ -108,7 +108,7 @@ func TestTasks(t *testing.T) {
 	tasks2 := FakeConfig{i: 1}
 	err = m.Create(uid1, 1, &tasks2, &chaos)
 	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("inject"))
-	_, err = m.GetWithUID(uid1)
+	_, err = m.GetConfigWithUID(uid1)
 	assert.Equal(t, errors.Cause(err), chaoserr.NotFound("UID"))
 
 	chaos.ErrWhenInject = false
@@ -118,7 +118,7 @@ func TestTasks(t *testing.T) {
 	assert.NoError(t, err)
 	err = m.Recover(uid1, 1)
 	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("recover"))
-	p, err := m.GetWithPID(1)
+	p, err := m.GetTaskWithPID(1)
 	inner := p.(*FakeChaos)
 	inner.ErrWhenRecover = false
 	err = m.Recover(uid1, 1)

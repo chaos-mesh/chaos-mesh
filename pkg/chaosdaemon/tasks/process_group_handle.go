@@ -22,30 +22,35 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
-type ChaosOnGroupProcess interface {
-	Fork() (ChaosOnGroupProcess, error)
-	AssignChaosOnProcess
+// ChaosOnProcessGroup is used for inject a chaos on a linux process group.
+// Fork is used for create a new chaos on child process.
+// Assign is used for update a chaos on child process.
+type ChaosOnProcessGroup interface {
+	Fork() (ChaosOnProcessGroup, error)
+	Assign
 
-	ChaosOnProcess
-	ChaosCanRecover
+	Injectable
+	Recoverable
 }
 
-// GroupProcessHandler implements Group PID inject & recover.
-type GroupProcessHandler struct {
-	Main     ChaosOnGroupProcess
-	childMap map[PID]ChaosOnGroupProcess
+// ProcessGroupHandler implements injecting & recovering on a linux process group.
+type ProcessGroupHandler struct {
+	Main     ChaosOnProcessGroup
+	childMap map[PID]ChaosOnProcessGroup
 	logger   logr.Logger
 }
 
-func NewGroupProcessHandler(logger logr.Logger, main ChaosOnGroupProcess) GroupProcessHandler {
-	return GroupProcessHandler{
+func NewProcessGroupHandler(logger logr.Logger, main ChaosOnProcessGroup) ProcessGroupHandler {
+	return ProcessGroupHandler{
 		Main:     main,
-		childMap: make(map[PID]ChaosOnGroupProcess),
+		childMap: make(map[PID]ChaosOnProcessGroup),
 		logger:   logger,
 	}
 }
 
-func (gp *GroupProcessHandler) Inject(pid PID) error {
+// Inject try to inject the main process and then try to inject child process.
+// If something wrong in injecting a child process, Inject will just log error & continue.
+func (gp *ProcessGroupHandler) Inject(pid PID) error {
 	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
 	if err != nil {
 		gp.logger.Error(err, "failed to get child process")
@@ -61,7 +66,8 @@ func (gp *GroupProcessHandler) Inject(pid PID) error {
 		if childProcessChaos, ok := gp.childMap[childPID]; ok {
 			err := gp.Main.Assign(childProcessChaos)
 			if err != nil {
-				return err
+				gp.logger.Error(err, "failed to assign old child process")
+				continue
 			}
 			err = childProcessChaos.Inject(childPID)
 			if err != nil {
@@ -71,12 +77,12 @@ func (gp *GroupProcessHandler) Inject(pid PID) error {
 			childProcessChaos, err := gp.Main.Fork()
 			if err != nil {
 				gp.logger.Error(err, "failed to create child process")
-				return nil
+				continue
 			}
 			err = childProcessChaos.Inject(pid)
 			if err != nil {
 				gp.logger.Error(err, "failed to inject new child process")
-				return nil
+				continue
 			}
 			gp.childMap[childPID] = childProcessChaos
 		}
@@ -84,7 +90,8 @@ func (gp *GroupProcessHandler) Inject(pid PID) error {
 	return nil
 }
 
-func (gp *GroupProcessHandler) Recover(pid PID) error {
+// Recover try to recover the main process and then try to recover child process.
+func (gp *ProcessGroupHandler) Recover(pid PID) error {
 	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
 	if err != nil {
 		gp.logger.Error(err, "failed to get child process")
