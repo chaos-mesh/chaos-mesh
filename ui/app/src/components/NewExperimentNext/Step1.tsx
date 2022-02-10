@@ -63,7 +63,7 @@ const submitDirectly = ['pod-failure']
 
 interface TypeCardProp {
   name: Env
-  handleSwitchEnv: any
+  handleSwitchEnv: (env: Env) => () => void
   env: Env
 }
 
