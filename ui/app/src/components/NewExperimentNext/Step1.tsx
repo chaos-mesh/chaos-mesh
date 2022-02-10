@@ -81,7 +81,7 @@ const TypeCard: React.FC<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
           {iconByKind(name)}
         </Box>
         <Box flex={1.5} textAlign="center">
-          <Typography variant="button">{T(`${title}`)}</Typography>
+          <Typography variant="button">{T(title)}</Typography>
         </Box>
       </Box>
     </Card>
