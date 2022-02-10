@@ -25,10 +25,10 @@ spec:
       labels:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-dns-server
-    {{- with .Values.dnsServer.podAnnotations }}
+      {{- with .Values.dnsServer.podAnnotations }}
       annotations:
 {{ toYaml . | indent 8 }}
-    {{- end }}
+      {{- end }}
     spec:
       serviceAccountName: chaos-dns-server
       affinity:
@@ -50,7 +50,9 @@ spec:
       nodeSelector:
 {{ toYaml . | indent 8 }}
       {{- end }}
-      priorityClassName: {{ .Values.dnsServer.priorityClassName}}
+      {{- if .Values.dnsServer.priorityClassName }}
+      priorityClassName: {{ .Values.dnsServer.priorityClassName }}
+      {{- end }}
       containers:
       - name: chaos-dns-server
         image: {{template "registry-prefix" .}}{{ .Values.dnsServer.image }}

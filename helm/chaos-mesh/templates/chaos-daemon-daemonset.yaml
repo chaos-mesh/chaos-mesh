@@ -24,15 +24,17 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
-  {{- if .Values.chaosDaemon.hostNetwork }}
+      {{- if .Values.chaosDaemon.hostNetwork }}
       hostNetwork: true
-  {{- end }}
-  {{- if .Values.chaosDaemon.serviceAccount }}
+      {{- end }}
+      {{- if .Values.chaosDaemon.serviceAccount }}
       serviceAccountName: {{ .Values.chaosDaemon.serviceAccount }}
-  {{- end }}
+      {{- end }}
       hostIPC: true
       hostPID: true
-      priorityClassName: {{ .Values.chaosDaemon.priorityClassName}}
+      {{- if .Values.chaosDaemon.priorityClassName }}
+      priorityClassName: {{ .Values.chaosDaemon.priorityClassName }}
+      {{- end }}
       containers:
         - name: chaos-daemon
           image: {{template "registry-prefix" .}}{{ .Values.chaosDaemon.image }}

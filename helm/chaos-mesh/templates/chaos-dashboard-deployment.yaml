@@ -30,7 +30,9 @@ spec:
       {{- if .Values.dashboard.serviceAccount }}
       serviceAccountName: {{ .Values.dashboard.serviceAccount }}
       {{- end }}
-      priorityClassName: {{ .Values.dashboard.priorityClassName}}
+      {{- if .Values.dashboard.priorityClassName }}
+      priorityClassName: {{ .Values.dashboard.priorityClassName }}
+      {{- end }}
       containers:
         - name: chaos-dashboard
           image: {{template "registry-prefix" .}}{{ .Values.dashboard.image }}
@@ -65,7 +67,7 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
-        {{- with .Values.dashboard.nodeSelector }}
+      {{- with .Values.dashboard.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
       {{- end }}
