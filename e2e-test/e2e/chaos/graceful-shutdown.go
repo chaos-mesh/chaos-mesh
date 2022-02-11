@@ -31,15 +31,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	httpchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/httpchaos"
+	iochaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/iochaos"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
-	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-
-	// testcases
-
-	httpchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/httpchaos"
-	iochaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
 )
 
 var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {

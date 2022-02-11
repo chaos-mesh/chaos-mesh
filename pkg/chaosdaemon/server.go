@@ -16,6 +16,7 @@
 package chaosdaemon
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -23,7 +24,6 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/docker/distribution/context"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"

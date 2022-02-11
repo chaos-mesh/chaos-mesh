@@ -81,8 +81,6 @@ require (
 	sigs.k8s.io/controller-tools v0.4.1
 )
 
-require github.com/gorilla/mux v1.8.0 // indirect
-
 require (
 	cloud.google.com/go v0.81.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
@@ -113,7 +111,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v0.0.0-20180603214616-504e848d77ea // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20191124224453-732737034ffd // indirect
-	github.com/docker/distribution v2.7.1+incompatible
+	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
 	github.com/docker/go-units v0.4.0 // indirect
