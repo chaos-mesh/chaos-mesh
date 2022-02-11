@@ -20,27 +20,27 @@ import (
 )
 
 type ErrNotFound struct {
-	name string
+	Name string
 }
 
 func (e ErrNotFound) Error() string {
-	return e.name + " not found"
+	return e.Name + " not found"
 }
 
 func NotFound(name string) error {
-	return ErrNotFound{name: name}
+	return ErrNotFound{Name: name}
 }
 
 type ErrNotImplemented struct {
-	name string
+	Name string
 }
 
 func (e ErrNotImplemented) Error() string {
-	return e.name + " not implement"
+	return e.Name + " not implement"
 }
 
 func NotImplemented(name string) error {
-	return ErrNotImplemented{name: name}
+	return ErrNotImplemented{Name: name}
 }
 
 var (
