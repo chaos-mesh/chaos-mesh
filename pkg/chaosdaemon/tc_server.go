@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -93,12 +94,12 @@ func getAllInterfaces(pid uint32) ([]string, error) {
 		ifaces = append(ifaces, name.(string))
 	}
 
-	log.Info("get interfaces from ip command", "ifaces", ifaces)
+	log.L().WithName(loggerNameDaemonServer).Info("get interfaces from ip command", "ifaces", ifaces)
 	return ifaces, nil
 }
 
 func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Empty, error) {
-	log.Info("handling tc request", "tcs", in)
+	log.L().WithName(loggerNameDaemonServer).Info("handling tc request", "tcs", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
@@ -109,13 +110,13 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	ifaces, err := getAllInterfaces(pid)
 	if err != nil {
-		log.Error(err, "error while getting interfaces")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting interfaces")
 		return nil, err
 	}
 	for _, iface := range ifaces {
 		err = tcCli.flush(iface)
 		if err != nil {
-			log.Error(err, "fail to flush tc rules on device", "device", iface)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "fail to flush tc rules on device", "device", iface)
 		}
 	}
 	if err != nil {
@@ -161,7 +162,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 		if len(globalTc) > 0 {
 			if err := s.setGlobalTcs(tcCli, globalTc, device); err != nil {
-				log.Error(err, "error while setting global tc")
+				log.L().WithName(loggerNameDaemonServer).Error(err, "error while setting global tc")
 				return &empty.Empty{}, err
 			}
 		}
@@ -169,7 +170,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		if len(filterTc) > 0 {
 			iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
 			if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, device, len(globalTc)); err != nil {
-				log.Error(err, "error while setting filter tc")
+				log.L().WithName(loggerNameDaemonServer).Error(err, "error while setting filter tc")
 				return &empty.Empty{}, err
 			}
 		}
@@ -200,7 +201,7 @@ func (s *DaemonServer) setGlobalTcs(cli tcClient, tcs []*pb.Tc, device string) e
 
 		err := cli.addTc(device, parentArg, handleArg, tc)
 		if err != nil {
-			log.Error(err, "error while adding tc")
+			log.L().WithName(loggerNameDaemonServer).Error(err, "error while adding tc")
 			return err
 		}
 	}
@@ -218,7 +219,7 @@ func (s *DaemonServer) setFilterTcs(
 	parent := baseIndex
 	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
 	if err := tcCli.addPrio(device, parent, band); err != nil {
-		log.Error(err, "error while adding prio")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while adding prio")
 		return err
 	}
 
@@ -242,7 +243,7 @@ func (s *DaemonServer) setFilterTcs(
 
 			err := tcCli.addTc(device, parentArg, handleArg, tc)
 			if err != nil {
-				log.Error(err, "error while adding tc")
+				log.L().WithName(loggerNameDaemonServer).Error(err, "error while adding tc")
 				return err
 			}
 		}
@@ -268,7 +269,7 @@ func (s *DaemonServer) setFilterTcs(
 		index++
 	}
 	if err := iptablesCli.setIptablesChains(chains); err != nil {
-		log.Error(err, "error while setting iptables")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while setting iptables")
 		return err
 	}
 
@@ -305,7 +306,7 @@ func (c *tcClient) flush(device string) error {
 }
 
 func (c *tcClient) addTc(device string, parentArg string, handleArg string, tc *pb.Tc) error {
-	log.Info("add tc", "tc", tc)
+	log.L().WithName(loggerNameDaemonServer).Info("add tc", "tc", tc)
 
 	if tc.Type == pb.Tc_BANDWIDTH {
 
@@ -335,7 +336,7 @@ func (c *tcClient) addTc(device string, parentArg string, handleArg string, tc *
 }
 
 func (c *tcClient) addPrio(device string, parent int, band int) error {
-	log.Info("adding prio", "parent", parent)
+	log.L().WithName(loggerNameDaemonServer).Info("adding prio", "parent", parent)
 
 	parentArg := "root"
 	if parent > 0 {
@@ -371,7 +372,7 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 }
 
 func (c *tcClient) addNetem(device string, parent string, handle string, netem *pb.Netem) error {
-	log.Info("adding netem", "device", device, "parent", parent, "handle", handle)
+	log.L().WithName(loggerNameDaemonServer).Info("adding netem", "device", device, "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev %s %s %s netem %s", device, parent, handle, convertNetemToArgs(netem))
 	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
@@ -387,7 +388,7 @@ func (c *tcClient) addNetem(device string, parent string, handle string, netem *
 }
 
 func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.Tbf) error {
-	log.Info("adding tbf", "device", device, "parent", parent, "handle", handle)
+	log.L().WithName(loggerNameDaemonServer).Info("adding tbf", "device", device, "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev %s %s %s tbf %s", device, parent, handle, convertTbfToArgs(tbf))
 	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)

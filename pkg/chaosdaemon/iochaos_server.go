@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"io"
 	"os"
 	"strings"
@@ -37,7 +38,7 @@ const (
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
-	log.Info("applying io chaos", "Request", in)
+	log.L().WithName(loggerNameDaemonServer).Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
 		err := s.killIOChaos(ctx, in.Instance, in.StartTime)
@@ -49,11 +50,11 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	actions := []v1alpha1.IOChaosAction{}
 	err := json.Unmarshal([]byte(in.Actions), &actions)
 	if err != nil {
-		log.Error(err, "error while unmarshal json bytes")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while unmarshal json bytes")
 		return nil, err
 	}
 
-	log.Info("the length of actions", "length", len(actions))
+	log.L().WithName(loggerNameDaemonServer).Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
 		return &pb.ApplyIOChaosResponse{
 			Instance:  0,
@@ -63,13 +64,13 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting PID")
 		return nil, err
 	}
 
 	// TODO: make this log level configurable
 	args := fmt.Sprintf("--path %s --verbose info", in.Volume)
-	log.Info("executing", "cmd", todaBin+" "+args)
+	log.L().WithName(loggerNameDaemonServer).Info("executing", "cmd", todaBin+" "+args)
 
 	processBuilder := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
 		EnableLocalMnt().
@@ -100,14 +101,14 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	var ret string
 	ct, err := procState.CreateTime()
 	if err != nil {
-		log.Error(err, "get create time failed")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "get create time failed")
 		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill toda failed", "request", in)
+			log.L().WithName(loggerNameDaemonServer).Error(kerr, "kill toda failed", "request", in)
 		}
 		return nil, err
 	}
 
-	log.Info("Waiting for toda to start")
+	log.L().WithName(loggerNameDaemonServer).Info("Waiting for toda to start")
 	var rpcError error
 	maxWaitTime := time.Millisecond * 2000
 	timeOut, cancel := context.WithTimeout(ctx, maxWaitTime)
@@ -115,11 +116,11 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	_ = client.CallContext(timeOut, &ret, "update", actions)
 	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
 	if rpcError != nil || ret != "ok" {
-		log.Info("Starting toda takes too long or encounter an error")
+		log.L().WithName(loggerNameDaemonServer).Info("Starting toda takes too long or encounter an error")
 		caller.Close()
 		receiver.Close()
 		if kerr := s.killIOChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
-			log.Error(kerr, "kill toda failed", "request", in)
+			log.L().WithName(loggerNameDaemonServer).Error(kerr, "kill toda failed", "request", in)
 		}
 		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
 	}
@@ -131,12 +132,12 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 }
 
 func (s *DaemonServer) killIOChaos(ctx context.Context, pid int64, startTime int64) error {
-	log.Info("killing toda", "pid", pid)
+	log.L().WithName(loggerNameDaemonServer).Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)
 	if err != nil {
 		return err
 	}
-	log.Info("kill toda successfully")
+	log.L().WithName(loggerNameDaemonServer).Info("kill toda successfully")
 	return nil
 }

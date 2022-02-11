@@ -20,9 +20,15 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"io/ioutil"
 	"net"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
@@ -31,16 +37,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
-
-var log = ctrl.Log.WithName("chaos-daemon-server")
 
 //go:generate protoc -I pb pb/chaosdaemon.proto --go_out=plugins=grpc:pb
 
@@ -159,6 +156,13 @@ type RegisterGatherer interface {
 	prometheus.Gatherer
 }
 
+const (
+	// loggerNameChaosDaemon is the logger name used when initialize chaos daemon
+	loggerNameChaosDaemon = "chaos-daemon"
+	// loggerNameDaemonServer is the logger name used in component DaemonServer
+	loggerNameDaemonServer = "chaos-daemon.daemon-server"
+)
+
 // StartServer starts chaos-daemon.
 func StartServer(conf *Config, reg RegisterGatherer) error {
 	g := &errgroup.Group{}
@@ -169,20 +173,20 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 	grpcBindAddr := conf.GrpcAddr()
 	grpcListener, err := net.Listen("tcp", grpcBindAddr)
 	if err != nil {
-		log.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
+		log.L().WithName(loggerNameChaosDaemon).Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
 		return err
 	}
 
 	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig)
 	if err != nil {
-		log.Error(err, "failed to create grpc server")
+		log.L().WithName(loggerNameChaosDaemon).Error(err, "failed to create grpc server")
 		return err
 	}
 
 	g.Go(func() error {
-		log.Info("Starting http endpoint", "address", httpBindAddr)
+		log.L().WithName(loggerNameChaosDaemon).Info("Starting http endpoint", "address", httpBindAddr)
 		if err := httpServer.ListenAndServe(); err != nil {
-			log.Error(err, "failed to start http endpoint")
+			log.L().WithName(loggerNameChaosDaemon).Error(err, "failed to start http endpoint")
 			httpServer.Shutdown(context.Background())
 			return err
 		}
@@ -190,9 +194,9 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 	})
 
 	g.Go(func() error {
-		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
+		log.L().WithName(loggerNameChaosDaemon).Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
 		if err := grpcServer.Serve(grpcListener); err != nil {
-			log.Error(err, "failed to start grpc endpoint")
+			log.L().WithName(loggerNameChaosDaemon).Error(err, "failed to start grpc endpoint")
 			grpcServer.Stop()
 			return err
 		}

@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -34,24 +35,24 @@ const (
 )
 
 func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
-	log.Info("Set iptables chains", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("Set iptables chains", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting PID")
 		return nil, err
 	}
 
 	iptables := buildIptablesClient(ctx, req.EnterNS, pid)
 	err = iptables.initializeEnv()
 	if err != nil {
-		log.Error(err, "error while initializing iptables")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while initializing iptables")
 		return nil, err
 	}
 
 	err = iptables.setIptablesChains(req.Chains)
 	if err != nil {
-		log.Error(err, "error while setting iptables chains")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while setting iptables chains")
 		return nil, err
 	}
 

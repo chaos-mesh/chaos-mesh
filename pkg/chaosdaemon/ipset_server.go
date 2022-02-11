@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -33,11 +34,11 @@ const (
 )
 
 func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
-	log.Info("flush ipset", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("flush ipset", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting PID")
 		return nil, err
 	}
 
@@ -98,13 +99,13 @@ func createIPSet(ctx context.Context, enterNS bool, pid uint32, name string) err
 	}
 
 	cmd := processBuilder.Build()
-	log.Info("create ipset", "command", cmd.String())
+	log.L().WithName(loggerNameDaemonServer).Info("create ipset", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		output := string(out)
 		if !strings.Contains(output, ipsetExistErr) {
-			log.Error(err, "ipset create error", "command", cmd.String(), "output", output)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "ipset create error", "command", cmd.String(), "output", output)
 			return encodeOutputToError(out, err)
 		}
 
@@ -114,11 +115,11 @@ func createIPSet(ctx context.Context, enterNS bool, pid uint32, name string) err
 		}
 
 		cmd = processBuilder.Build()
-		log.Info("flush ipset", "command", cmd.String())
+		log.L().WithName(loggerNameDaemonServer).Info("flush ipset", "command", cmd.String())
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "ipset flush error", "command", cmd.String(), "output", string(out))
+			log.L().WithName(loggerNameDaemonServer).Error(err, "ipset flush error", "command", cmd.String(), "output", string(out))
 			return encodeOutputToError(out, err)
 		}
 	}
@@ -133,13 +134,13 @@ func addCIDRsToIPSet(ctx context.Context, enterNS bool, pid uint32, name string,
 			processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 		}
 		cmd := processBuilder.Build()
-		log.Info("add CIDR to ipset", "command", cmd.String())
+		log.L().WithName(loggerNameDaemonServer).Info("add CIDR to ipset", "command", cmd.String())
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			output := string(out)
 			if !strings.Contains(output, ipExistErr) {
-				log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
+				log.L().WithName(loggerNameDaemonServer).Error(err, "ipset add error", "command", cmd.String(), "output", output)
 				return encodeOutputToError(out, err)
 			}
 		}
@@ -155,13 +156,13 @@ func renameIPSet(ctx context.Context, enterNS bool, pid uint32, oldName string, 
 	}
 
 	cmd := processBuilder.Build()
-	log.Info("rename ipset", "command", cmd.String())
+	log.L().WithName(loggerNameDaemonServer).Info("rename ipset", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		output := string(out)
 		if !strings.Contains(output, ipsetNewNameExistErr) {
-			log.Error(err, "rename ipset failed", "command", cmd.String(), "output", output)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "rename ipset failed", "command", cmd.String(), "output", output)
 			return encodeOutputToError(out, err)
 		}
 
@@ -171,11 +172,11 @@ func renameIPSet(ctx context.Context, enterNS bool, pid uint32, oldName string, 
 			processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 		}
 		cmd := processBuilder.Build()
-		log.Info("swap ipset", "command", cmd.String())
+		log.L().WithName(loggerNameDaemonServer).Info("swap ipset", "command", cmd.String())
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "swap ipset failed", "command", cmd.String(), "output", string(out))
+			log.L().WithName(loggerNameDaemonServer).Error(err, "swap ipset failed", "command", cmd.String(), "output", string(out))
 			return encodeOutputToError(out, err)
 		}
 	}

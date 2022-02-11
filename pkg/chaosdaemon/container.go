@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -26,18 +27,18 @@ import (
 
 // ContainerKill kills container according to container id in the req
 func (s *DaemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
-	log.Info("Container Kill", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("Container Kill", "request", req)
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_KILL {
 		err := errors.Errorf("container action is %s , not kill", action)
-		log.Error(err, "container action is not expected")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "container action is not expected")
 		return nil, err
 	}
 
 	err := s.crClient.ContainerKillByContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while killing container")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while killing container")
 		return nil, err
 	}
 
@@ -45,18 +46,18 @@ func (s *DaemonServer) ContainerKill(ctx context.Context, req *pb.ContainerReque
 }
 
 func (s *DaemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerRequest) (*pb.ContainerResponse, error) {
-	log.Info("container GetPid", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("container GetPid", "request", req)
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_GETPID {
 		err := errors.Errorf("container action is %s , not getpid", action)
-		log.Error(err, "container action is not expected")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "container action is not expected")
 		return nil, err
 	}
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting pid from container")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting pid from container")
 		return nil, err
 	}
 

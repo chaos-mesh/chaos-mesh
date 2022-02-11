@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -33,10 +34,10 @@ const (
 
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
-	log.Info("SetDNSServer", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "GetPidFromContainerID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "GetPidFromContainerID")
 		return nil, err
 	}
 
@@ -56,11 +57,11 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "execute command error", "command", cmd.String(), "output", output)
 			return nil, encodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
-			log.Info("command output", "output", string(output))
+			log.L().WithName(loggerNameDaemonServer).Info("command output", "output", string(output))
 		}
 
 		// add chaos dns server to the first line of /etc/resolv.conf
@@ -73,11 +74,11 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		cmd = processBuilder.Build()
 		output, err = cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "execute command error", "command", cmd.String(), "output", output)
 			return nil, encodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
-			log.Info("command output", "output", string(output))
+			log.L().WithName(loggerNameDaemonServer).Info("command output", "output", string(output))
 		}
 	} else {
 		// recover the dns server's address
@@ -89,11 +90,11 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "execute command error", "command", cmd.String(), "output", output)
 			return nil, encodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
-			log.Info("command output", "output", string(output))
+			log.L().WithName(loggerNameDaemonServer).Info("command output", "output", string(output))
 		}
 	}
 

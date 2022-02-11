@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -36,10 +37,10 @@ const (
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	req *pb.InstallJVMRulesRequest) (*empty.Empty, error) {
-	log.Info("InstallJVMRules", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "GetPidFromContainerID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "GetPidFromContainerID")
 		return nil, err
 	}
 
@@ -56,7 +57,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 			return nil, err
 		}
 		if len(output) > 0 {
-			log.Info("mkdir", "output", string(output))
+			log.L().WithName(loggerNameDaemonServer).Info("mkdir", "output", string(output))
 		}
 
 		agentFile, err := os.Open(fmt.Sprintf("%s/lib/byteman.jar", bytemanHome))
@@ -70,7 +71,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 			return nil, err
 		}
 		if len(output) > 0 {
-			log.Info("copy agent.jar", "output", string(output))
+			log.L().WithName(loggerNameDaemonServer).Info("copy agent.jar", "output", string(output))
 		}
 	}
 
@@ -97,10 +98,10 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		errMsg4 := "install com.sun.tools.attach.AgentLoadException"
 		if !strings.Contains(string(output), errMsg1) && !strings.Contains(string(output), errMsg2) &&
 			!strings.Contains(string(output), errMsg3) && !strings.Contains(string(output), errMsg4) {
-			log.Error(err, string(output))
+			log.L().WithName(loggerNameDaemonServer).Error(err, string(output))
 			return nil, err
 		}
-		log.Info("exec comamnd", "cmd", cmd.String(), "output", string(output), "error", err.Error())
+		log.L().WithName(loggerNameDaemonServer).Info("exec comamnd", "cmd", cmd.String(), "output", string(output), "error", err.Error())
 	}
 
 	// submit rules
@@ -116,11 +117,11 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	}
 	output, err = processBuilder.Build().CombinedOutput()
 	if err != nil {
-		log.Error(err, string(output))
+		log.L().WithName(loggerNameDaemonServer).Error(err, string(output))
 		return nil, err
 	}
 	if len(output) > 0 {
-		log.Info("submit rules", "output", string(output))
+		log.L().WithName(loggerNameDaemonServer).Info("submit rules", "output", string(output))
 	}
 
 	return &empty.Empty{}, nil
@@ -128,10 +129,10 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	req *pb.UninstallJVMRulesRequest) (*empty.Empty, error) {
-	log.Info("InstallJVMRules", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "GetPidFromContainerID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "GetPidFromContainerID")
 		return nil, err
 	}
 
@@ -139,7 +140,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("create btm file", "file", filename)
+	log.L().WithName(loggerNameDaemonServer).Info("create btm file", "file", filename)
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
@@ -148,7 +149,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	}
 	output, err := processBuilder.Build().CombinedOutput()
 	if err != nil {
-		log.Error(err, string(output))
+		log.L().WithName(loggerNameDaemonServer).Error(err, string(output))
 		if strings.Contains(string(output), "No rule scripts to remove") {
 			return &empty.Empty{}, nil
 		}
@@ -156,7 +157,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	}
 
 	if len(output) > 0 {
-		log.Info(string(output))
+		log.L().WithName(loggerNameDaemonServer).Info(string(output))
 	}
 
 	return &empty.Empty{}, nil

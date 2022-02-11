@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/golang/protobuf/ptypes/empty"
 
@@ -25,25 +26,25 @@ import (
 )
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log.Info("Shift time", "Request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("Shift time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting PID")
 		return nil, err
 	}
 
 	childPids, err := GetChildProcesses(pid)
 	if err != nil {
-		log.Error(err, "fail to get child processes")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "fail to get child processes")
 	}
 	allPids := append(childPids, pid)
-	log.Info("all related processes found", "pids", allPids)
+	log.L().WithName(loggerNameDaemonServer).Info("all related processes found", "pids", allPids)
 
 	for _, pid := range allPids {
 		err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)
 		if err != nil {
-			log.Error(err, "error while modifying time", "pid", pid)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "error while modifying time", "pid", pid)
 			return nil, err
 		}
 	}
@@ -52,26 +53,26 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 }
 
 func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log.Info("Recover time", "Request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("Recover time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "error while getting PID")
 		return nil, err
 	}
 
 	childPids, err := GetChildProcesses(pid)
 	if err != nil {
-		log.Error(err, "fail to get child processes")
+		log.L().WithName(loggerNameDaemonServer).Error(err, "fail to get child processes")
 	}
 	allPids := append(childPids, pid)
-	log.Info("get all related process pids", "pids", allPids)
+	log.L().WithName(loggerNameDaemonServer).Info("get all related process pids", "pids", allPids)
 
 	for _, pid := range allPids {
 		// FIXME: if the process has halted and no process with this pid exists, we will get an error.
 		err = time.ModifyTime(int(pid), int64(0), int64(0), 0)
 		if err != nil {
-			log.Error(err, "error while recovering", "pid", pid)
+			log.L().WithName(loggerNameDaemonServer).Error(err, "error while recovering", "pid", pid)
 			return nil, err
 		}
 	}

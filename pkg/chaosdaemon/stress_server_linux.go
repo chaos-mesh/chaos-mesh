@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"strconv"
 	"strings"
 	"syscall"
@@ -32,7 +33,7 @@ import (
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
-	log.Info("Executing stressors", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("Executing stressors", "request", req)
 
 	// cpuStressors
 	cpuInstance, cpuStartTime, err := s.ExecCPUStressors(ctx, req)
@@ -66,7 +67,7 @@ func (s *DaemonServer) CancelStressors(ctx context.Context,
 		return nil, err
 	}
 
-	log.Info("Canceling stressors", "request", req)
+	log.L().WithName(loggerNameDaemonServer).Info("Canceling stressors", "request", req)
 
 	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, CpuPid, req.CpuStartTime)
 	if err != nil {
@@ -78,7 +79,7 @@ func (s *DaemonServer) CancelStressors(ctx context.Context,
 		return nil, err
 	}
 
-	log.Info("killing stressor successfully")
+	log.L().WithName(loggerNameDaemonServer).Info("killing stressor successfully")
 	return &empty.Empty{}, nil
 }
 
@@ -104,7 +105,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	if err != nil {
 		return "", 0, err
 	}
-	log.Info("Start stress-ng successfully")
+	log.L().WithName(loggerNameDaemonServer).Info("Start stress-ng successfully")
 	ct, err := procState.CreateTime()
 	if err != nil {
 		return "", 0, err
@@ -112,7 +113,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill stress-ng failed", "request", req)
+			log.L().WithName(loggerNameDaemonServer).Error(kerr, "kill stress-ng failed", "request", req)
 		}
 		return "", 0, err
 	}
@@ -123,7 +124,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 			return "", 0, err
 		}
 
-		log.Info("send signal to resume process")
+		log.L().WithName(loggerNameDaemonServer).Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
 
 		comm, err := ReadCommName(cmd.Process.Pid)
@@ -131,10 +132,10 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 			return "", 0, err
 		}
 		if comm != "pause\n" {
-			log.Info("pause has been resumed", "comm", comm)
+			log.L().WithName(loggerNameDaemonServer).Info("pause has been resumed", "comm", comm)
 			break
 		}
-		log.Info("the process hasn't resumed, step into the following loop", "comm", comm)
+		log.L().WithName(loggerNameDaemonServer).Info("the process hasn't resumed, step into the following loop", "comm", comm)
 	}
 
 	return strconv.Itoa(cmd.Process.Pid), ct, nil
@@ -162,7 +163,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	if err != nil {
 		return "", 0, err
 	}
-	log.Info("Start memStress successfully")
+	log.L().WithName(loggerNameDaemonServer).Info("Start memStress successfully")
 	ct, err := procState.CreateTime()
 	if err != nil {
 		return "", 0, err
@@ -170,7 +171,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill memStress failed", "request", req)
+			log.L().WithName(loggerNameDaemonServer).Error(kerr, "kill memStress failed", "request", req)
 		}
 		return "", 0, err
 	}
@@ -181,7 +182,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 			return "", 0, err
 		}
 
-		log.Info("send signal to resume process")
+		log.L().WithName(loggerNameDaemonServer).Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
 
 		comm, err := ReadCommName(cmd.Process.Pid)
@@ -190,10 +191,10 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 			return "", 0, err
 		}
 		if comm != "pause\n" {
-			log.Info("pause has been resumed", "comm", comm)
+			log.L().WithName(loggerNameDaemonServer).Info("pause has been resumed", "comm", comm)
 			break
 		}
-		log.Info("the process hasn't resumed, step into the following loop", "comm", comm)
+		log.L().WithName(loggerNameDaemonServer).Info("the process hasn't resumed, step into the following loop", "comm", comm)
 	}
 
 	return strconv.Itoa(cmd.Process.Pid), ct, nil
