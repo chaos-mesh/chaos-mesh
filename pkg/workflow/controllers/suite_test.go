@@ -36,6 +36,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 var app *fx.App
@@ -79,8 +80,12 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(kubeClient).ToNot(BeNil())
 
+	rootLogger, err := log.NewDefaultZapLogger()
+	Expect(err).ToNot(HaveOccurred())
+
 	app = fx.New(
 		fx.Options(
+			fx.Supply(rootLogger),
 			test.Module,
 			fx.Supply(restConfig),
 			types.ChaosObjects,
