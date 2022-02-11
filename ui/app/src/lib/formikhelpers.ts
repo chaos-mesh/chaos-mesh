@@ -176,17 +176,18 @@ export function parseSubmit<K extends ExperimentKind>(
 
   function parsePhysicalMachineChaos(spec: any) {
     delete spec.selector
-    delete spec.mode
 
-    const { action, address, duration } = spec as any
+    const { action, address, duration, mode } = spec as any
 
     delete spec.action
     delete spec.address
     delete spec.duration
+    delete spec.mode
 
     return {
       address,
       action,
+      mode,
       [action]: spec,
       duration,
     }
