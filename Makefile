@@ -6,12 +6,8 @@ export IMAGE_REGISTRY ?= localhost:5000
 IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
 
 export IMAGE_TAG ?= latest
-export IMAGE_PROJECT ?= pingcap
+export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
-
-export IMAGE_CHAOS_MESH_PROJECT ?= chaos-mesh
-export IMAGE_CHAOS_DAEMON_PROJECT ?= chaos-mesh
-export IMAGE_CHAOS_DASHBOARD_PROJECT ?= chaos-mesh
 
 ROOT=$(shell pwd)
 HELM_BIN=$(ROOT)/output/bin/helm
