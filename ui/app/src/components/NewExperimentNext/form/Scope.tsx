@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  */
-import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
-import { Divider, InputAdornment, MenuItem, Typography } from '@mui/material'
+import { AutocompleteMultipleField, SelectField } from 'components/FormField'
+import { Divider, MenuItem, Typography } from '@mui/material'
 import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
@@ -27,6 +27,7 @@ import { getIn, useFormikContext } from 'formik'
 import { useEffect, useMemo } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import Mode from './Mode'
 import OtherOptions from 'components/OtherOptions'
 import ScopePodsTable from './ScopePodsTable'
 import Space from '@ui/mui-extends/esm/Space'
@@ -41,13 +42,6 @@ interface ScopeProps {
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
-const modes = [
-  { name: 'Random One', value: 'one' },
-  { name: 'Fixed Number', value: 'fixed' },
-  { name: 'Fixed Percent', value: 'fixed-percent' },
-  { name: 'Random Max Percent', value: 'random-max-percent' },
-]
-const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const Scope: React.FC<ScopeProps> = ({
   namespaces,
@@ -171,35 +165,7 @@ const Scope: React.FC<ScopeProps> = ({
 
       <Divider />
       <Typography>{T('newE.scope.mode')}</Typography>
-
-      <SelectField
-        name={`${modeScope}.mode`}
-        label={T('newE.scope.mode')}
-        helperText={T('newE.scope.modeHelper')}
-        disabled={disabled}
-      >
-        <MenuItem value="all">All</MenuItem>
-        {modes.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.name}
-          </MenuItem>
-        ))}
-      </SelectField>
-
-      {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
-        <TextField
-          name={`${modeScope}.value`}
-          label={T('newE.scope.modeValue')}
-          helperText={T('newE.scope.modeValueHelper')}
-          InputProps={{
-            endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
-              <InputAdornment position="end">%</InputAdornment>
-            ),
-          }}
-          disabled={disabled}
-        />
-      )}
-
+      <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
       <Divider />
 
       <div>
