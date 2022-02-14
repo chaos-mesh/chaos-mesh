@@ -17,6 +17,7 @@ package main
 
 import (
 	"flag"
+	stdlog "log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -31,7 +32,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -44,6 +44,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -68,12 +69,19 @@ func main() {
 		os.Exit(0)
 	}
 
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+	log.ReplaceGlobals(rootLogger)
+	ctrl.SetLogger(rootLogger)
+
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
-
 	app := fx.New(
+		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
 		fx.Supply(controllermetrics.Registry),
+		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
 		fx.Options(
 			provider.Module,

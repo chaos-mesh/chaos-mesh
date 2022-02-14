@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +13,22 @@
 // limitations under the License.
 //
 
-package time
+package log
 
 import (
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
 )
 
-var log = ctrl.Log.WithName("time")
-
-// RegisterLogger registers a logger on time pkg
-func RegisterLogger(logger logr.Logger) {
-	log = logger
+// NewDefaultZapLogger is the recommended way to create a new logger, you could call this function to initialize the root
+// logger of your application, and provide it to your components, by fx or manually.
+func NewDefaultZapLogger() (logr.Logger, error) {
+	// change the configuration in the future if needed.
+	zapLogger, err := zap.NewDevelopment()
+	if err != nil {
+		return logr.Discard(), err
+	}
+	logger := zapr.NewLogger(zapLogger)
+	return logger, nil
 }
