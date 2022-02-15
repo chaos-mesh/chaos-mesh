@@ -19,16 +19,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ErrNotFound struct {
-	name string
-}
-
-func (e ErrNotFound) Error() string {
-	return e.name + " not found"
-}
-
 func NotFound(name string) error {
-	return ErrNotFound{name: name}
+	return errors.Errorf("%s not found.", name)
 }
 
 type ErrNotImplemented struct {
