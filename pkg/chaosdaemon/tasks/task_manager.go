@@ -56,6 +56,7 @@ type Assign interface {
 // which can Inject on PID.
 // Assign means we can use the task config to update an existing running task.
 type TaskExecutor interface {
+	Object
 	Addable
 	Creator
 	Assign

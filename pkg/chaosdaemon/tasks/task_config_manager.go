@@ -30,15 +30,21 @@ var ErrTaskConfigNotFound = chaoserr.NotFound("task config")
 var ErrUpdateTaskConfigWithPIDChanges = errors.New("update task config with PID changes")
 var ErrTaskConfigMapNotInit = errors.New("TaskConfigMap not init")
 
+// Object ensure the outer config change will not change
+// the data inside the TaskManager.
+type Object interface {
+	DeepCopy() Object
+}
+
 // TaskConfig defines a composite of flexible config with an immutable target.
 // TaskConfig.main is the ID of task.
 // TaskConfig.data is the config provided by developer.
 type TaskConfig struct {
 	main PID
-	data interface{}
+	data Object
 }
 
-func NewTaskConfig(main PID, data interface{}) TaskConfig {
+func NewTaskConfig(main PID, data Object) TaskConfig {
 	return TaskConfig{
 		main,
 		data,
@@ -120,14 +126,19 @@ type Addable interface {
 // SumTaskConfig will sum the TaskConfig with a same TaskConfig.main.
 // If developers want to use it with type T, they must implement Addable for *T.
 // IMPORTANT: Just here , we do not assume A.Add(B) == B.Add(A).
-// What SumTaskConfig do : A.Add(B).Add(C).Add(D)... , A marked as uid.
+// What SumTaskConfig do : A := new(TaskConfig), A.Add(B).Add(C).Add(D)... , A marked as uid.
 func (m TaskConfigManager) SumTaskConfig(uid UID) (TaskConfig, error) {
 	if m.TaskConfigMap == nil {
 		return TaskConfig{}, ErrTaskConfigMapNotInit
 	}
-	task, ok := m.TaskConfigMap[uid]
+	taskRaw, ok := m.TaskConfigMap[uid]
 	if !ok {
 		return TaskConfig{}, ErrUIDNotFound
+	}
+
+	task := TaskConfig{
+		main: taskRaw.main,
+		data: taskRaw.data.DeepCopy(),
 	}
 	uids := m.GetUIDsWithPID(task.main)
 

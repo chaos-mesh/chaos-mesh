@@ -41,6 +41,11 @@ func (f *FakeConfig) Add(a Addable) error {
 	return errors.Wrapf(ErrCanNotAdd, "expect type : *FakeConfig, got : %T", a)
 }
 
+func (f *FakeConfig) DeepCopy() Object {
+	temp := *f
+	return &temp
+}
+
 func (f *FakeConfig) Assign(c Injectable) error {
 	C, OK := c.(*FakeChaos)
 	if OK {
@@ -77,7 +82,45 @@ func (f *FakeChaos) Recover(pid PID) error {
 	return nil
 }
 
-func TestTasks(t *testing.T) {
+func TestTasksManager(t *testing.T) {
+	var log logr.Logger
+
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		panic(fmt.Sprintf("who watches the watchmen (%v)?", err))
+	}
+	log = zapr.NewLogger(zapLog)
+
+	m := NewTaskManager(log)
+
+	chaos := FakeChaos{
+		ErrWhenRecover: false,
+		ErrWhenInject:  false,
+		logger:         log,
+	}
+	task1 := FakeConfig{i: 1}
+	uid1 := "1"
+	err = m.Create(uid1, 1, &task1, &chaos)
+	chaosInterface, err := m.GetTaskWithPID(1)
+	assert.NoError(t, err)
+	chaoso := chaosInterface.(*FakeChaos)
+	assert.Equal(t, chaoso.C, task1)
+	assert.Equal(t, chaoso, &chaos)
+
+	task2 := FakeConfig{i: 1}
+	uid2 := "2"
+	err = m.Apply(uid2, 1, &task2)
+	chaosInterface, err = m.GetTaskWithPID(1)
+	assert.NoError(t, err)
+	chaoso = chaosInterface.(*FakeChaos)
+	assert.Equal(t, chaoso.C, FakeConfig{i: 2})
+	assert.Equal(t, chaos.C, FakeConfig{i: 2})
+
+	assert.Equal(t, task1, FakeConfig{1})
+	assert.Equal(t, task2, FakeConfig{1})
+}
+
+func TestTasksManagerError(t *testing.T) {
 	var log logr.Logger
 
 	zapLog, err := zap.NewDevelopment()
