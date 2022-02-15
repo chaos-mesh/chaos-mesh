@@ -114,7 +114,7 @@ func (cm TaskManager) GetConfigWithUID(id UID) (interface{}, error) {
 func (cm TaskManager) GetTaskWithPID(pid PID) (Injectable, error) {
 	p, ok := cm.taskMap[pid]
 	if !ok {
-		return nil, chaoserr.NotFound("PID")
+		return nil, ErrPIDNotFound
 	}
 	return p, nil
 }
@@ -128,13 +128,13 @@ func (cm TaskManager) GetUIDsWithPID(pid PID) []UID {
 // If it comes the import PID of task do not equal to the last one,
 // Update will return ErrUpdateTaskConfigWithPIDChanges.
 func (cm TaskManager) Update(uid UID, pid PID, config TaskExecutor) error {
-	oldTask, err := cm.taskConfigManager.UpdateTask(uid, NewTaskConfig(pid, config))
+	oldTask, err := cm.taskConfigManager.UpdateTaskConfig(uid, NewTaskConfig(pid, config))
 	if err != nil {
 		return err
 	}
 	err = cm.commit(uid, pid)
 	if err != nil {
-		_, _ = cm.taskConfigManager.UpdateTask(uid, oldTask)
+		_, _ = cm.taskConfigManager.UpdateTaskConfig(uid, oldTask)
 		return err
 	}
 	return nil
@@ -150,21 +150,21 @@ func (cm TaskManager) Create(uid UID, pid PID, config TaskExecutor, values inter
 		return errors.Wrapf(chaoserr.ErrDuplicateEntity, "create")
 	}
 
-	err := cm.taskConfigManager.AddTask(uid, NewTaskConfig(pid, config))
+	err := cm.taskConfigManager.AddTaskConfig(uid, NewTaskConfig(pid, config))
 	if err != nil {
 		return err
 	}
 
 	processTask, err := config.New(values)
 	if err != nil {
-		_ = cm.taskConfigManager.RecoverTask(uid)
+		_ = cm.taskConfigManager.DeleteTaskConfig(uid)
 		return errors.Wrapf(err, "New task: %v", config)
 	}
 
 	cm.taskMap[pid] = processTask
 	err = cm.commit(uid, pid)
 	if err != nil {
-		_ = cm.taskConfigManager.RecoverTask(uid)
+		_ = cm.taskConfigManager.DeleteTaskConfig(uid)
 		delete(cm.taskMap, pid)
 		return errors.Wrapf(err, "update new task")
 	}
@@ -175,13 +175,13 @@ func (cm TaskManager) Create(uid UID, pid PID, config TaskExecutor, values inter
 // If it comes a UID injected , Apply will return ChaosErr.ErrDuplicateEntity.
 // If the Process has not been Created , Apply will return ChaosErr.NotFound("PID").
 func (cm TaskManager) Apply(uid UID, pid PID, config TaskExecutor) error {
-	err := cm.taskConfigManager.AddTask(uid, NewTaskConfig(pid, config))
+	err := cm.taskConfigManager.AddTaskConfig(uid, NewTaskConfig(pid, config))
 	if err != nil {
 		return err
 	}
 	err = cm.commit(uid, pid)
 	if err != nil {
-		_ = cm.taskConfigManager.RecoverTask(uid)
+		_ = cm.taskConfigManager.DeleteTaskConfig(uid)
 		return err
 	}
 	return nil
@@ -199,24 +199,24 @@ func (cm TaskManager) Apply(uid UID, pid PID, config TaskExecutor) error {
 func (cm TaskManager) Recover(uid UID, pid PID) error {
 	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
 	if len(uIDs) == 0 {
-		return chaoserr.NotFound("PID")
+		return ErrPIDNotFound
 	}
 	if len(uIDs) == 1 {
 		if uIDs[0] != uid {
-			return chaoserr.NotFound("UID")
+			return ErrUIDNotFound
 		}
 		err := cm.ClearTask(pid, false)
 		if err != nil {
 			return err
 		}
-		err = cm.taskConfigManager.RecoverTask(uid)
+		err = cm.taskConfigManager.DeleteTaskConfig(uid)
 		if err != nil {
 			cm.logger.Error(err, "recover task with error")
 		}
 		return nil
 	}
 
-	err := cm.taskConfigManager.RecoverTask(uid)
+	err := cm.taskConfigManager.DeleteTaskConfig(uid)
 	if err != nil {
 		cm.logger.Error(err, "recover task with error")
 		return nil
@@ -230,13 +230,13 @@ func (cm TaskManager) Recover(uid UID, pid PID) error {
 }
 
 func (cm TaskManager) commit(uid UID, pid PID) error {
-	task, err := cm.taskConfigManager.SumTask(uid)
+	task, err := cm.taskConfigManager.SumTaskConfig(uid)
 	if err != nil {
 		return errors.Wrapf(err, "unknown recovering in the taskConfigManager, UID: %v", uid)
 	}
 	process, ok := cm.taskMap[pid]
 	if !ok {
-		return errors.Wrapf(chaoserr.NotFound("PID"), "PID : %d", pid)
+		return errors.Wrapf(ErrPIDNotFound, "PID : %d", pid)
 	}
 	tasker, ok := task.data.(TaskExecutor)
 	if !ok {
@@ -274,5 +274,5 @@ func (cm TaskManager) ClearTask(pid PID, ignoreRecoverErr bool) error {
 		delete(cm.taskMap, pid)
 		return nil
 	}
-	return errors.Wrapf(chaoserr.NotFound("PID"), "recovering task")
+	return errors.Wrapf(ErrPIDNotFound, "recovering task")
 }

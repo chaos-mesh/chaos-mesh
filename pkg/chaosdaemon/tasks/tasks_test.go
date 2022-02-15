@@ -102,14 +102,14 @@ func TestTasks(t *testing.T) {
 	err = m.Recover(uid1, 1)
 	assert.NoError(t, err)
 	err = m.Recover(uid1, 1)
-	assert.Equal(t, errors.Cause(err), chaoserr.NotFound("PID"))
+	assert.Equal(t, errors.Cause(err), ErrPIDNotFound)
 
 	chaos.ErrWhenInject = true
 	tasks2 := FakeConfig{i: 1}
 	err = m.Create(uid1, 1, &tasks2, &chaos)
 	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("inject"))
 	_, err = m.GetConfigWithUID(uid1)
-	assert.Equal(t, errors.Cause(err), chaoserr.NotFound("UID"))
+	assert.Equal(t, errors.Cause(err), ErrUIDNotFound)
 
 	chaos.ErrWhenInject = false
 	chaos.ErrWhenRecover = true

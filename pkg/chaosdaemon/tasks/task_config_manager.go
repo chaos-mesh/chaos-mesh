@@ -24,6 +24,9 @@ import (
 type UID = string
 type PID = int
 
+var ErrPIDNotFound = chaoserr.NotFound("PID")
+var ErrUIDNotFound = chaoserr.NotFound("UID")
+var ErrTaskConfigNotFound = chaoserr.NotFound("task config")
 var ErrUpdateTaskConfigWithPIDChanges = errors.New("update task config with PID changes")
 var ErrTaskConfigMapNotInit = errors.New("TaskConfigMap not init")
 
@@ -43,7 +46,7 @@ func NewTaskConfig(main PID, data interface{}) TaskConfig {
 }
 
 // TaskConfigManager provides some basic methods on TaskConfig.
-// If developers wants to use SumTask, they must implement Addable for the TaskConfig.
+// If developers wants to use SumTaskConfig, they must implement Addable for the TaskConfig.
 type TaskConfigManager struct {
 	TaskConfigMap map[UID]TaskConfig
 }
@@ -52,7 +55,7 @@ func NewTaskConfigManager() TaskConfigManager {
 	return TaskConfigManager{make(map[UID]TaskConfig)}
 }
 
-func (m TaskConfigManager) AddTask(id UID, task TaskConfig) error {
+func (m TaskConfigManager) AddTaskConfig(id UID, task TaskConfig) error {
 	if m.TaskConfigMap == nil {
 		return ErrTaskConfigMapNotInit
 	}
@@ -63,13 +66,13 @@ func (m TaskConfigManager) AddTask(id UID, task TaskConfig) error {
 	return nil
 }
 
-func (m TaskConfigManager) UpdateTask(id UID, task TaskConfig) (TaskConfig, error) {
+func (m TaskConfigManager) UpdateTaskConfig(id UID, task TaskConfig) (TaskConfig, error) {
 	if m.TaskConfigMap == nil {
 		return TaskConfig{}, ErrTaskConfigMapNotInit
 	}
 	taskOld, ok := m.TaskConfigMap[id]
 	if !ok {
-		return TaskConfig{}, errors.Wrapf(chaoserr.NotFound("UID"), "uid: %s, task: %v", id, task)
+		return TaskConfig{}, errors.Wrapf(ErrUIDNotFound, "uid: %s, task: %v", id, task)
 	}
 	if taskOld.main != task.main {
 		return TaskConfig{}, errors.Wrapf(ErrUpdateTaskConfigWithPIDChanges, "uid: %s, task: %v", id, task)
@@ -78,14 +81,14 @@ func (m TaskConfigManager) UpdateTask(id UID, task TaskConfig) (TaskConfig, erro
 	return taskOld, nil
 }
 
-// RecoverTask Delete task inside the TaskConfigManager
-func (m TaskConfigManager) RecoverTask(id UID) error {
+// DeleteTaskConfig Delete task inside the TaskConfigManager
+func (m TaskConfigManager) DeleteTaskConfig(id UID) error {
 	if m.TaskConfigMap == nil {
 		return ErrTaskConfigMapNotInit
 	}
 	_, ok := m.TaskConfigMap[id]
 	if !ok {
-		return errors.Wrapf(chaoserr.NotFound("Task Config"), "UID : %v", id)
+		return errors.Wrapf(ErrTaskConfigNotFound, "UID : %v", id)
 	}
 	delete(m.TaskConfigMap, id)
 	return nil
@@ -94,7 +97,7 @@ func (m TaskConfigManager) RecoverTask(id UID) error {
 func (m TaskConfigManager) GetConfigWithUID(id UID) (interface{}, error) {
 	t, ok := m.TaskConfigMap[id]
 	if !ok {
-		return TaskConfig{}, chaoserr.NotFound("UID")
+		return TaskConfig{}, ErrUIDNotFound
 	}
 	return t.data, nil
 }
@@ -114,17 +117,17 @@ type Addable interface {
 	Add(a Addable) error
 }
 
-// SumTask will sum the TaskConfig with a same TaskConfig.main.
+// SumTaskConfig will sum the TaskConfig with a same TaskConfig.main.
 // If developers want to use it with type T, they must implement Addable for *T.
 // IMPORTANT: Just here , we do not assume A.Add(B) == B.Add(A).
-// What SumTask do : A.Add(B).Add(C).Add(D)... , A marked as uid.
-func (m TaskConfigManager) SumTask(uid UID) (TaskConfig, error) {
+// What SumTaskConfig do : A.Add(B).Add(C).Add(D)... , A marked as uid.
+func (m TaskConfigManager) SumTaskConfig(uid UID) (TaskConfig, error) {
 	if m.TaskConfigMap == nil {
 		return TaskConfig{}, ErrTaskConfigMapNotInit
 	}
 	task, ok := m.TaskConfigMap[uid]
 	if !ok {
-		return TaskConfig{}, chaoserr.NotFound("UID")
+		return TaskConfig{}, ErrUIDNotFound
 	}
 	uids := m.GetUIDsWithPID(task.main)
 
@@ -134,7 +137,7 @@ func (m TaskConfigManager) SumTask(uid UID) (TaskConfig, error) {
 		}
 		taskTemp, ok := m.TaskConfigMap[uidTemp]
 		if !ok {
-			return TaskConfig{}, chaoserr.NotFound("Task Config")
+			return TaskConfig{}, ErrTaskConfigNotFound
 		}
 		AddableData, ok := task.data.(Addable)
 		if !ok {
