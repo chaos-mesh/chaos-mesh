@@ -47,7 +47,7 @@ type TaskConfig struct {
 func NewTaskConfig(main PID, data Object) TaskConfig {
 	return TaskConfig{
 		main,
-		data,
+		data.DeepCopy(),
 	}
 }
 
