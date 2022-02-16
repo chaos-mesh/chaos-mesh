@@ -24,12 +24,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator

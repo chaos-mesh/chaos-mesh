@@ -24,10 +24,11 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 type NsType string
