@@ -16,6 +16,11 @@
 package log
 
 import (
+	"fmt"
+	"go.uber.org/zap/zapcore"
+	"bufio"
+	"bytes"
+	
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
@@ -32,3 +37,21 @@ func NewDefaultZapLogger() (logr.Logger, error) {
 	logger := zapr.NewLogger(zapLogger)
 	return logger, nil
 }
+
+func NewZapLoggerWithWriter() logr.Logger {
+
+	var b bytes.Buffer
+	bWriter := bufio.NewWriter(&b)
+	
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	config.EncoderConfig.FunctionKey = "function"
+	
+	core := zapcore.NewCore(zapcore.NewJSONEncoder(config.EncoderConfig), zapcore.AddSync(bWriter), config.Level)
+	zapLogger := zap.New(core)
+	zapLogger.Error("an error")
+	logger := zapr.NewLogger(zapLogger)
+	bWriter.Flush()
+	fmt.Println(b.String())
+	return logger
+	}
