@@ -27,16 +27,19 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
@@ -98,8 +101,8 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig, log logr.Logger) (*grpc.Server, error) {
-	ds, err := newDaemonServer(containerRuntime, reg, log)
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig, logger logr.Logger) (*grpc.Server, error) {
+	ds, err := newDaemonServer(containerRuntime, reg, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +121,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 		grpc_middleware.WithUnaryServerChain(
 			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
+			MetadataExtractor(log.MetaNamespacedName),
 		),
 	}
 
@@ -151,6 +155,24 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	reflection.Register(s)
 
 	return s, nil
+}
+
+func MetadataExtractor(keys ...log.Metadatkey) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		// Get the metadata from the incoming context
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return nil, errors.New("couldn't parse incoming context metadata")
+		}
+		for _, key := range keys {
+			values := md.Get(string(key))
+			if len(values) > 0 {
+				ctx = context.WithValue(ctx, key, values[0])
+			}
+		}
+
+		return handler(ctx, req)
+	}
 }
 
 // RegisterGatherer combine prometheus.Registerer and prometheus.Gatherer

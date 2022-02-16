@@ -28,7 +28,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
-	"google.golang.org/grpc/metadata"
 )
 
 type NsType string
@@ -103,7 +102,7 @@ func NewBackgroundProcessManager(registry prometheus.Registerer, rootLogger logr
 
 // StartProcess manages a process in manager
 func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *ManagedProcess) (*process.Process, error) {
-	log := m.getLoggerFromGrpcContext(ctx)
+	log := m.getLoggerFromContext(ctx)
 	var identifierLock *sync.Mutex
 	if cmd.Identifier != nil {
 		lock, _ := m.identifiers.LoadOrStore(*cmd.Identifier, &sync.Mutex{})
@@ -213,7 +212,7 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pid int, startTime int64) error {
-	log := m.getLoggerFromGrpcContext(ctx)
+	log := m.getLoggerFromContext(ctx)
 	log = log.WithValues("pid", pid)
 
 	p, err := os.FindProcess(int(pid))
@@ -280,7 +279,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 }
 
 func (m *BackgroundProcessManager) Stdio(ctx context.Context, pid int, startTime int64) *Stdio {
-	log := m.getLoggerFromGrpcContext(ctx)
+	log := m.getLoggerFromContext(ctx)
 	log = log.WithValues("pid", pid)
 
 	procState, err := process.NewProcess(int32(pid))
@@ -330,18 +329,8 @@ func (m *BackgroundProcessManager) GetIdentifiers() []string {
 	return identifiers
 }
 
-func (m *BackgroundProcessManager) getLoggerFromGrpcContext(ctx context.Context) logr.Logger {
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return m.rootLogger
-	}
-
-	namespacedNames := metadata.Get("namespacedName")
-	if len(namespacedNames) == 0 {
-		return m.rootLogger
-	}
-
-	return m.rootLogger.WithValues("namespacedName", namespacedNames[0])
+func (m *BackgroundProcessManager) getLoggerFromContext(ctx context.Context) logr.Logger {
+	return log.EnrichLoggerWithContext(ctx, m.rootLogger)
 }
 
 // DefaultProcessBuilder returns the default process builder
@@ -452,22 +441,11 @@ func (b *ProcessBuilder) SetStderr(stderr io.ReadWriteCloser) *ProcessBuilder {
 	return b
 }
 
-func (b *ProcessBuilder) getLoggerFromGrpcContext(ctx context.Context) logr.Logger {
+func (b *ProcessBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
 	// this logger is inherited from the global one
 	// TODO: replace it with a specific logger by passing in one or creating a new one
-	log := log.L().WithName("background-process-manager.process-builder")
-
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return log
-	}
-
-	namespacedNames := metadata.Get("namespacedName")
-	if len(namespacedNames) == 0 {
-		return log
-	}
-
-	return log.WithValues("namespacedName", namespacedNames[0])
+	logger := log.L().WithName("background-process-manager.process-builder")
+	return log.EnrichLoggerWithContext(ctx, logger)
 }
 
 type nsOption struct {

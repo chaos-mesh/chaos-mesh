@@ -36,7 +36,7 @@ const (
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	req *pb.InstallJVMRulesRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -129,7 +129,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	req *pb.UninstallJVMRulesRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {

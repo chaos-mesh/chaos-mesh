@@ -38,7 +38,7 @@ const (
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {

@@ -25,7 +25,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"google.golang.org/grpc/metadata"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
@@ -116,18 +115,8 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	}
 }
 
-func (s *DaemonServer) getLoggerFromGrpcContext(ctx context.Context) logr.Logger {
-	metadata, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return s.rootLogger
-	}
-
-	namespacedNames := metadata.Get("namespacedName")
-	if len(namespacedNames) == 0 {
-		return s.rootLogger
-	}
-
-	return s.rootLogger.WithValues("namespacedName", namespacedNames[0])
+func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
+	return log.EnrichLoggerWithContext(ctx, s.rootLogger)
 }
 
 func encodeOutputToError(output []byte, err error) error {

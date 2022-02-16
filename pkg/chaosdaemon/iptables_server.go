@@ -34,7 +34,7 @@ const (
 )
 
 func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Set iptables chains", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)

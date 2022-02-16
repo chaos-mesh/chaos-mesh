@@ -33,7 +33,7 @@ const (
 
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)

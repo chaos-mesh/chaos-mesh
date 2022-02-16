@@ -34,7 +34,7 @@ const (
 )
 
 func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("flush ipset", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)

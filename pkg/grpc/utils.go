@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -131,7 +132,7 @@ func (it *GrpcBuilder) WithTimeout(timeout time.Duration) *GrpcBuilder {
 
 func namespacedNameInterceptor(id types.NamespacedName) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, conn *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		ctx = metadata.AppendToOutgoingContext(ctx, "namespacedName", id.String())
+		ctx = metadata.AppendToOutgoingContext(ctx, string(log.MetaNamespacedName), id.String())
 
 		return invoker(ctx, method, req, reply, conn, opts...)
 	}

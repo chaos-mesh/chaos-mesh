@@ -99,7 +99,7 @@ func getAllInterfaces(ctx context.Context, log logr.Logger, pid uint32) ([]strin
 }
 
 func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromGrpcContext(ctx)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("handling tc request", "tcs", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
