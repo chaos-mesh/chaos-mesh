@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"net"
 
+	"github.com/go-logr/logr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
@@ -31,7 +32,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
@@ -39,8 +39,6 @@ import (
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
-
-var log = ctrl.Log.WithName("chaos-daemon-server")
 
 //go:generate protoc -I pb pb/chaosdaemon.proto --go_out=plugins=grpc:pb
 
@@ -76,30 +74,32 @@ func (c *Config) GrpcAddr() string {
 type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
+	rootLogger               logr.Logger
 
 	IPSetLocker *locker.Locker
 }
 
-func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
+func newDaemonServer(containerRuntime string, reg prometheus.Registerer, log logr.Logger) (*DaemonServer, error) {
 	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDaemonServerWithCRClient(crClient, reg), nil
+	return NewDaemonServerWithCRClient(crClient, reg, log), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer, log logr.Logger) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg, log),
+		rootLogger:               log,
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
-	ds, err := newDaemonServer(containerRuntime, reg)
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig, log logr.Logger) (*grpc.Server, error) {
+	ds, err := newDaemonServer(containerRuntime, reg, log)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ type RegisterGatherer interface {
 }
 
 // StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg RegisterGatherer) error {
+func StartServer(conf *Config, reg RegisterGatherer, log logr.Logger) error {
 	g := &errgroup.Group{}
 
 	httpBindAddr := conf.HttpAddr()
@@ -173,7 +173,7 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 		return err
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig)
+	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig, log)
 	if err != nil {
 		log.Error(err, "failed to create grpc server")
 		return err

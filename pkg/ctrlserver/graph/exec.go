@@ -104,5 +104,5 @@ func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string) (str
 		EnableLocalMnt().
 		SetContext(ctx)
 
-	return exec(ctx, daemon, cmdBuilder.Build().Cmd.String(), r.Clientset)
+	return exec(ctx, daemon, cmdBuilder.Build(ctx).Cmd.String(), r.Clientset)
 }

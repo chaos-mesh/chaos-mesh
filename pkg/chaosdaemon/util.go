@@ -16,15 +16,19 @@
 package chaosdaemon
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"sync"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 // ReadCommName returns the command name of process
@@ -76,7 +80,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
-					log.Error(err, "read status file error", "path", statusPath)
+					log.L().Error(err, "read status file error", "path", statusPath)
 					return
 				}
 				defer reader.Close()
@@ -110,6 +114,20 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 			return processGraph.Flatten(ppid), nil
 		}
 	}
+}
+
+func (s *DaemonServer) getLoggerFromGrpcContext(ctx context.Context) logr.Logger {
+	metadata, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return s.rootLogger
+	}
+
+	namespacedNames := metadata.Get("namespacedName")
+	if len(namespacedNames) == 0 {
+		return s.rootLogger
+	}
+
+	return s.rootLogger.WithValues("namespacedName", namespacedNames[0])
 }
 
 func encodeOutputToError(output []byte, err error) error {

@@ -33,6 +33,8 @@ const (
 
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromGrpcContext(ctx)
+
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -53,7 +55,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
 
-		cmd := processBuilder.Build()
+		cmd := processBuilder.Build(ctx)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
@@ -70,7 +72,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
 
-		cmd = processBuilder.Build()
+		cmd = processBuilder.Build(ctx)
 		output, err = cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
@@ -86,7 +88,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
 
-		cmd := processBuilder.Build()
+		cmd := processBuilder.Build(ctx)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)

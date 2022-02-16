@@ -25,7 +25,11 @@ import (
 )
 
 // Build builds the process
-func (b *ProcessBuilder) Build() *ManagedProcess {
+// the ctx argument passes the context information to this function
+// e.g. the corresponding resource name
+func (b *ProcessBuilder) Build(ctx context.Context) *ManagedProcess {
+	log := b.getLoggerFromGrpcContext(ctx)
+
 	args := b.args
 	cmd := b.cmd
 

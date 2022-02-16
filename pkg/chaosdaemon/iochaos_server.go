@@ -25,6 +25,7 @@ import (
 	"time"
 
 	jrpc "github.com/ethereum/go-ethereum/rpc"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -37,10 +38,11 @@ const (
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
+	log := s.getLoggerFromGrpcContext(ctx)
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
-		err := s.killIOChaos(ctx, in.Instance, in.StartTime)
+		err := s.killIOChaos(ctx, log, in.Instance, in.StartTime)
 		if err != nil {
 			return nil, err
 		}
@@ -89,11 +91,11 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		return nil, err
 	}
 
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 	cmd.Stdin = caller
 	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
 	cmd.Stderr = os.Stderr
-	procState, err := s.backgroundProcessManager.StartProcess(cmd)
+	procState, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +120,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		log.Info("Starting toda takes too long or encounter an error")
 		caller.Close()
 		receiver.Close()
-		if kerr := s.killIOChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
+		if kerr := s.killIOChaos(ctx, log, int64(cmd.Process.Pid), ct); kerr != nil {
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
 		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
@@ -130,7 +132,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	}, nil
 }
 
-func (s *DaemonServer) killIOChaos(ctx context.Context, pid int64, startTime int64) error {
+func (s *DaemonServer) killIOChaos(ctx context.Context, log logr.Logger, pid int64, startTime int64) error {
 	log.Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)
