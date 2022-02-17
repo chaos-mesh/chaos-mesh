@@ -19,9 +19,10 @@ import (
 	"context"
 
 	"github.com/chaos-mesh/chaos-driver/pkg/client"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 const ioemPeriodUs = 10000
@@ -82,6 +83,18 @@ func normalizeVolumePath(volumePath string) (string, error) {
 	return volumePath, nil
 }
 
-func (s *DaemonServer) RecoverBlockChaos(context.Context, *pb.RecoverBlockChaosRequest) (*empty.Empty, error) {
+func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest) (*empty.Empty, error) {
+	c, err := client.New()
+	if err != nil {
+		log.Error(err, "create chaos-driver client")
+		return nil, err
+	}
+
+	err = c.Recover(int(req.InjectionId))
+	if err != nil {
+		log.Error(err, "recover injection", "id", req.InjectionId)
+		return nil, err
+	}
+
 	return &empty.Empty{}, nil
 }
