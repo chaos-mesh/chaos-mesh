@@ -33,6 +33,7 @@ var (
 	PMNetworkLossAction      PhysicalMachineChaosAction = "network-loss"
 	PMNetworkDelayAction     PhysicalMachineChaosAction = "network-delay"
 	PMNetworkPartitionAction PhysicalMachineChaosAction = "network-partition"
+	PMNetworkBandwidthAction PhysicalMachineChaosAction = "network-bandwidth"
 	PMNetworkDNSAction       PhysicalMachineChaosAction = "network-dns"
 	PMProcessAction          PhysicalMachineChaosAction = "process"
 	PMJVMExceptionAction     PhysicalMachineChaosAction = "jvm-exception"
