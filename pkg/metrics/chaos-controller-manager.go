@@ -19,6 +19,7 @@ import (
 	"context"
 	"reflect"
 
+	z "github.com/chaos-mesh/chaosmonkey/pkg/log"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -53,8 +54,10 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 		store = manager.GetCache()
 	}
 
+	logger, _ := z.NewDefaultZapLogger()
+
 	c := &ChaosControllerManagerMetricsCollector{
-		log:   ctrl.Log.WithName("chaos-controller-manager-metrics-collector"),
+		log:   logger,
 		store: store,
 		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_controller_manager_chaos_experiments",
