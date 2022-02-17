@@ -53,3 +53,18 @@ func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, 
 	}, "", errors.New("too few parts of namespacedname")
 
 }
+
+func ParseNamespacedNameContainerVolumePath(record string) (types.NamespacedName, string, string, error) {
+	parts := strings.Split(record, "/")
+	if len(parts) > 3 {
+		return types.NamespacedName{
+			Namespace: parts[0],
+			Name:      parts[1],
+		}, parts[2], strings.Join(parts[3:], ""), nil
+	}
+
+	return types.NamespacedName{
+		Namespace: "",
+		Name:      "",
+	}, "", "", errors.New("too few parts of namespacedname")
+}

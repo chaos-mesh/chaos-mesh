@@ -45,13 +45,13 @@ type BlockChaosSpec struct {
 	// +kubebuilder:validation:Enum=limit;delay
 	Action BlockChaosAction `json:"action"`
 
-	// IOPS defines the limit of IO frequency.
-	// +optional
-	IOPS int `json:"iops,omitempty"`
-
 	// Delay defines the delay distribution.
 	// +optional
 	Delay *BlockDelaySpec `json:"delay,omitempty"`
+
+	// IOPS defines the limit of IO frequency.
+	// +optional
+	IOPS int `json:"iops,omitempty"`
 
 	ContainerNodeVolumePathSelector `json:",inline"`
 
