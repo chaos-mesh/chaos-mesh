@@ -19,6 +19,7 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -27,10 +28,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
-var log = ctrl.Log.WithName("chaos-controller-manager-metrics-collector")
-
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
+	log                 logr.Logger
 	store               cache.Cache
 	chaosExperiments    *prometheus.GaugeVec
 	SidecarTemplates    prometheus.Gauge
@@ -54,6 +54,7 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 	}
 
 	c := &ChaosControllerManagerMetricsCollector{
+		log:   ctrl.Log.WithName("chaos-controller-manager-metrics-collector"),
 		store: store,
 		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_controller_manager_chaos_experiments",
@@ -155,7 +156,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 		expCache := map[string]map[string]int{}
 		chaosList := obj.SpawnList()
 		if err := collector.store.List(context.TODO(), chaosList); err != nil {
-			log.Error(err, "failed to list chaos", "kind", kind)
+			collector.log.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
 
@@ -182,7 +183,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosSchedules()
 
 	schedules := &v1alpha1.ScheduleList{}
 	if err := collector.store.List(context.TODO(), schedules); err != nil {
-		log.Error(err, "failed to list schedules")
+		collector.log.Error(err, "failed to list schedules")
 		return
 	}
 
@@ -202,7 +203,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosWorkflows()
 
 	workflows := &v1alpha1.WorkflowList{}
 	if err := collector.store.List(context.TODO(), workflows); err != nil {
-		log.Error(err, "failed to list workflows")
+		collector.log.Error(err, "failed to list workflows")
 		return
 	}
 
