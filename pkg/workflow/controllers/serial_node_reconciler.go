@@ -128,12 +128,14 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 
 		// TODO: also check the consistent between spec in task and the spec in child node
 		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
+			if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
+			}
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
-			it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
