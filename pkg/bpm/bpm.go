@@ -19,17 +19,17 @@ import (
 	"context"
 	"fmt"
 	"io"
+	stdlog "log"
 	"os"
 	"os/exec"
 	"sync"
 	"syscall"
 
+	clog "github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-var log = ctrl.Log.WithName("background-process-manager")
 
 type NsType string
 
@@ -76,20 +76,25 @@ type Stdio struct {
 
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
-	deathSig    *sync.Map
-	identifiers *sync.Map
-	stdio       *sync.Map
-
+	deathSig         *sync.Map
+	identifiers      *sync.Map
+	stdio            *sync.Map
 	metricsCollector *metricsCollector
+	log              logr.Logger
 }
 
 // NewBackgroundProcessManager creates a background process manager
 func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProcessManager {
+	rootLogger, err := clog.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
 	backgroundProcessManager := BackgroundProcessManager{
 		deathSig:         &sync.Map{},
 		identifiers:      &sync.Map{},
 		stdio:            &sync.Map{},
 		metricsCollector: nil,
+		log:              rootLogger,
 	}
 
 	if registry != nil {
@@ -112,7 +117,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 	err := cmd.Start()
 	if err != nil {
-		log.Error(err, "fail to start process")
+		m.log.Error(err, "fail to start process")
 		return nil, err
 	}
 
@@ -155,7 +160,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 	m.stdio.Store(pair, stdio)
 
-	log := log.WithValues("pid", pid)
+	log := m.log.WithValues("pid", pid)
 
 	go func() {
 		err := cmd.Wait()
@@ -213,7 +218,7 @@ func (m *BackgroundProcessManager) Shutdown() {
 	m.deathSig.Range(func(key, value interface{}) bool {
 		pair := key.(ProcessPair)
 		deathChannel := value.(chan bool)
-		log := log.WithValues("pid", pair.Pid)
+		log := m.log.WithValues("pid", pair.Pid)
 
 		p, err := os.FindProcess(pair.Pid)
 		if err != nil {
@@ -258,7 +263,7 @@ func (m *BackgroundProcessManager) Shutdown() {
 
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pid int, startTime int64) error {
-	log := log.WithValues("pid", pid)
+	log := m.log.WithValues("pid", pid)
 
 	p, err := os.FindProcess(int(pid))
 	if err != nil {
@@ -324,7 +329,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 }
 
 func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
-	log := log.WithValues("pid", pid)
+	log := m.log.WithValues("pid", pid)
 
 	procState, err := process.NewProcess(int32(pid))
 	if err != nil {
@@ -375,6 +380,10 @@ func (m *BackgroundProcessManager) GetIdentifiers() []string {
 
 // DefaultProcessBuilder returns the default process builder
 func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
+	rootLogger, err := clog.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
 	return &ProcessBuilder{
 		cmd:        cmd,
 		args:       args,
@@ -382,6 +391,7 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 		pause:      false,
 		identifier: nil,
 		ctx:        context.Background(),
+		log:        rootLogger,
 	}
 }
 
@@ -402,6 +412,7 @@ type ProcessBuilder struct {
 	stderr     io.ReadWriteCloser
 
 	ctx context.Context
+	log logr.Logger
 }
 
 // GetNsPath returns corresponding namespace path
