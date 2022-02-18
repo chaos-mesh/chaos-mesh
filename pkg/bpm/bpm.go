@@ -410,6 +410,8 @@ type ProcessBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
+	// the context is used to kill the process and will be passed into
+	// `exec.CommandContext`
 	ctx context.Context
 }
 
@@ -463,6 +465,7 @@ func (b *ProcessBuilder) EnableLocalMnt() *ProcessBuilder {
 }
 
 // SetContext sets context for process
+// if the context ended, the process will be killed
 func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
 	b.ctx = ctx
 

@@ -26,7 +26,7 @@ import (
 
 // Build builds the process
 // the ctx argument passes the context information to this function
-// e.g. the corresponding resource name
+// e.g. the corresponding resource name.
 func (b *ProcessBuilder) Build(ctx context.Context) *ManagedProcess {
 	log := b.getLoggerFromContext(ctx)
 
