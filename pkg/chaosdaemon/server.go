@@ -77,7 +77,7 @@ func (c *Config) GrpcAddr() string {
 // DaemonServer represents a grpc server for tc daemon
 type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
-	backgroundProcessManager bpm.BackgroundProcessManager
+	backgroundProcessManager *bpm.BackgroundProcessManager
 
 	IPSetLocker *locker.Locker
 }
