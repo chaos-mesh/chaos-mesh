@@ -19,6 +19,8 @@ import (
 	"flag"
 	stdlog "log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -74,11 +76,34 @@ func main() {
 	rootLogger.Info("grant access to /dev/fuse")
 	err = fusedev.GrantAccess()
 	if err != nil {
-		rootLogger.Error(err, "fail to grant access to /dev/fuse")
+		rootLogger.Error(err, "grant access to /dev/fuse")
 	}
 
-	if err = chaosdaemon.StartServer(conf, reg, rootLogger); err != nil {
-		rootLogger.Error(err, "failed to start chaos-daemon server")
+	server, err := chaosdaemon.BuildServer(conf, reg, rootLogger)
+	if err != nil {
+		rootLogger.Error(err, "build chaos-daemon server")
 		os.Exit(1)
+	}
+
+	errs := make(chan error)
+	go func() {
+		errs <- server.Start()
+	}()
+
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc,
+		syscall.SIGINT,
+		syscall.SIGTERM)
+
+	select {
+	case sig := <-sigc:
+		rootLogger.Info("received signal", "signal", sig)
+	case err = <-errs:
+		if err != nil {
+			rootLogger.Error(err, "chaos-daemon runtime")
+		}
+	}
+	if err = server.Shutdown(); err != nil {
+		rootLogger.Error(err, "chaos-daemon shutdown")
 	}
 }

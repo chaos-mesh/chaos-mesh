@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"net/http"
 
 	"github.com/go-logr/logr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -101,12 +102,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig, logger logr.Logger) (*grpc.Server, error) {
-	ds, err := newDaemonServer(containerRuntime, reg, logger)
-	if err != nil {
-		return nil, err
-	}
-
+func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram(
 		grpc_prometheus.WithHistogramBuckets(metrics.ChaosDaemonGrpcServerBuckets),
@@ -114,7 +110,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	)
 	reg.MustRegister(
 		grpcMetrics,
-		metrics.DefaultChaosDaemonMetricsCollector.InjectCrClient(ds.crClient),
+		metrics.DefaultChaosDaemonMetricsCollector.InjectCrClient(daemonServer.crClient),
 	)
 
 	grpcOpts := []grpc.ServerOption{
@@ -151,7 +147,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	s := grpc.NewServer(grpcOpts...)
 	grpcMetrics.InitializeMetrics(s)
 
-	pb.RegisterChaosDaemonServer(s, ds)
+	pb.RegisterChaosDaemonServer(s, daemonServer)
 	reflection.Register(s)
 
 	return s, nil
@@ -181,45 +177,68 @@ type RegisterGatherer interface {
 	prometheus.Gatherer
 }
 
-// StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg RegisterGatherer, log logr.Logger) error {
-	g := &errgroup.Group{}
+// Server is the server for chaos daemon
+type Server struct {
+	daemonServer *DaemonServer
+	httpServer   *http.Server
+	grpcServer   *grpc.Server
 
-	httpBindAddr := conf.HttpAddr()
-	httpServer := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(reg).Profiling(conf.Profiling).Build()
+	conf   *Config
+	logger logr.Logger
+}
 
-	grpcBindAddr := conf.GrpcAddr()
+// BuildServer builds a chaos daemon server
+func BuildServer(conf *Config, reg RegisterGatherer, log logr.Logger) (*Server, error) {
+	server := &Server{conf: conf, logger: log}
+	var err error
+	server.daemonServer, err = newDaemonServer(conf.Runtime, reg, log)
+	if err != nil {
+		return nil, errors.Wrap(err, "create daemon server")
+	}
+
+	server.httpServer = newHTTPServerBuilder().Addr(conf.HttpAddr()).Metrics(reg).Profiling(conf.Profiling).Build()
+	server.grpcServer, err = newGRPCServer(server.daemonServer, reg, conf.tlsConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "create grpc server")
+	}
+
+	return server, nil
+}
+
+// Start starts chaos-daemon.
+func (s *Server) Start() error {
+	grpcBindAddr := s.conf.GrpcAddr()
 	grpcListener, err := net.Listen("tcp", grpcBindAddr)
 	if err != nil {
-		log.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
-		return err
+		return errors.Wrapf(err, "listen grpc address %s", grpcBindAddr)
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig, log)
-	if err != nil {
-		log.Error(err, "failed to create grpc server")
-		return err
-	}
+	var eg errgroup.Group
 
-	g.Go(func() error {
-		log.Info("Starting http endpoint", "address", httpBindAddr)
-		if err := httpServer.ListenAndServe(); err != nil {
-			log.Error(err, "failed to start http endpoint")
-			httpServer.Shutdown(context.Background())
-			return err
+	eg.Go(func() error {
+		s.logger.Info("Starting http endpoint", "address", s.conf.HttpAddr())
+		if err := s.httpServer.ListenAndServe(); err != nil {
+			return errors.Wrap(err, "start http endpoint")
 		}
 		return nil
 	})
 
-	g.Go(func() error {
-		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
-		if err := grpcServer.Serve(grpcListener); err != nil {
-			log.Error(err, "failed to start grpc endpoint")
-			grpcServer.Stop()
-			return err
+	eg.Go(func() error {
+		s.logger.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", s.conf.Runtime)
+		if err := s.grpcServer.Serve(grpcListener); err != nil {
+			return errors.Wrap(err, "start grpc endpoint")
 		}
 		return nil
 	})
 
-	return g.Wait()
+	return eg.Wait()
+}
+
+func (s *Server) Shutdown() error {
+	if err := s.httpServer.Shutdown(context.TODO()); err != nil {
+		return errors.Wrap(err, "shut grpc endpoint down")
+	}
+	s.grpcServer.GracefulStop()
+	s.daemonServer.backgroundProcessManager.Shutdown()
+	return nil
 }

@@ -211,6 +211,54 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 	return procState, nil
 }
 
+func (m *BackgroundProcessManager) Shutdown() {
+	wg := sync.WaitGroup{}
+	m.deathSig.Range(func(key, value interface{}) bool {
+		pair := key.(ProcessPair)
+		deathChannel := value.(chan bool)
+		log := m.rootLogger.WithValues("pid", pair.Pid)
+
+		p, err := os.FindProcess(pair.Pid)
+		if err != nil {
+			log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
+			return true
+		}
+
+		procState, err := process.NewProcess(int32(pair.Pid))
+		if err != nil {
+			// return successfully as the process has exited
+			return true
+		}
+
+		ppid, err := procState.Ppid()
+		if err != nil {
+			log.Error(err, "fail to read parent id")
+			// return successfully as the process has exited
+			return true
+		}
+
+		if ppid != int32(os.Getpid()) {
+			log.Info("process has already been killed", "ppid", ppid)
+			// return successfully as the process has exited
+			return true
+		}
+
+		if err = p.Signal(syscall.SIGTERM); err != nil {
+			log.Error(err, "fail to kill process")
+			return true
+		}
+
+		wg.Add(1)
+		go func() {
+			<-deathChannel
+			wg.Done()
+		}()
+
+		return true
+	})
+	wg.Wait()
+}
+
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pid int, startTime int64) error {
 	log := m.getLoggerFromContext(ctx)
