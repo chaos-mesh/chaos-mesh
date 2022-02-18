@@ -308,8 +308,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, ui
 	}
 
 	if err := proc.cmd.Process.Signal(syscall.SIGTERM); err != nil {
-		// ignore this error
-		log.Error(err, "send SIGTERM to process")
+		return errors.Wrap(err, "send SIGTERM to process")
 	}
 
 	select {
