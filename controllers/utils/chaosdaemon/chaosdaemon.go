@@ -71,6 +71,9 @@ func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod
 	return daemonIP, nil
 }
 
+// Build will construct a ChaosDaemonClient
+// The `id` parameter is the namespacedName of current handling resource,
+// which will be printed in the log of the chaos-daemon
 func (b *ChaosDaemonClientBuilder) Build(ctx context.Context, pod *v1.Pod, id *types.NamespacedName) (chaosdaemonclient.ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(chaosdaemonclient.ChaosDaemonClientInterface), nil
