@@ -43,6 +43,24 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		return nil, err
 	}
 
+	containerPids := []uint32{pid}
+	childPids, err := GetChildProcesses(pid)
+	if err != nil {
+		log.Error(err, "GetChildProcesses")
+	}
+	containerPids = append(containerPids, childPids...)
+	for _, containerPid := range containerPids {
+		name, err := ReadCommName(int(containerPid))
+		if err != nil {
+			log.Error(err, "ReadCommName")
+			continue
+		}
+		if name == "java\n" {
+			pid = containerPid
+			break
+		}
+	}
+
 	bytemanHome := os.Getenv("BYTEMAN_HOME")
 	if len(bytemanHome) == 0 {
 		return nil, errors.New("environment variable BYTEMAN_HOME not set")
