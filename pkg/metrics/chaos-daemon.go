@@ -18,10 +18,10 @@ package metrics
 import (
 	"context"
 
+	z "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/go-logr/logr"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics/utils"
@@ -61,8 +61,9 @@ type ChaosDaemonMetricsCollector struct {
 
 // NewChaosDaemonMetricsCollector initializes metrics for each chaos daemon
 func NewChaosDaemonMetricsCollector() *ChaosDaemonMetricsCollector {
+	logger, _ := z.NewDefaultZapLogger()
 	return &ChaosDaemonMetricsCollector{
-		log: ctrl.Log.WithName("chaos-daemon-metrics-collector"),
+		log: logger,
 		iptablesPackets: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_daemon_iptables_packets",
 			Help: "Total number of iptables packets",

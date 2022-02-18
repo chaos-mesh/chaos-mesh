@@ -19,7 +19,7 @@ import (
 	"context"
 	"reflect"
 
-	z "github.com/chaos-mesh/chaosmonkey/pkg/log"
+	z "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
