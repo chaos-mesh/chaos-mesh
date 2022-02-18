@@ -36,6 +36,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -77,14 +78,17 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
+	rootLogger, err := log.NewDefaultZapLogger()
+	Expect(err).ToNot(HaveOccurred())
+
 	app = fx.New(
 		fx.Options(
 			fx.Supply(cfg),
+			fx.Supply(rootLogger),
 			fx.Provide(
 				NewOption,
 				NewClient,
 				manager.NewTestManager,
-				NewLogger,
 				NewAuthCli,
 				NewScheme,
 			),
