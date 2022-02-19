@@ -100,7 +100,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	stdio := s.backgroundProcessManager.Stdio(in.InstanceUid)
 	if stdio == nil {
-		return nil, errors.Errorf("fail to get stdio of instance(%d)", in.InstanceUid)
+		return nil, errors.Errorf("fail to get stdio of instance(%s)", in.InstanceUid)
 	}
 
 	transport := stdioTransport{stdio: stdio}
