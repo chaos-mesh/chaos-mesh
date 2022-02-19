@@ -96,7 +96,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg),
 	}
 }
 
