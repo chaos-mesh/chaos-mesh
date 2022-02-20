@@ -17,7 +17,6 @@ package test
 
 import (
 	"fmt"
-	"k8s.io/klog"
 	"os/exec"
 	"path/filepath"
 	"strings"
