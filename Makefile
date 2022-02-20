@@ -1,6 +1,6 @@
 # Set DEBUGGER=1 to build debug symbols
 export LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
-export IMAGE_REGISTRY ?= localhost:5000
+export IMAGE_REGISTRY ?= ghcr.io
 
 # SET IMAGE_REGISTRY to change the docker registry
 IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
