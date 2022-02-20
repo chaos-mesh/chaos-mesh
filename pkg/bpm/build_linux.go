@@ -54,7 +54,7 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		}
 	}
 
-	b.log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
+	b.logger.Info("build command", "command", cmd+" "+strings.Join(args, " "))
 
 	command := exec.CommandContext(b.ctx, cmd, args...)
 	command.Env = b.env

@@ -81,21 +81,17 @@ type BackgroundProcessManager struct {
 	identifiers      *sync.Map
 	stdio            *sync.Map
 	metricsCollector *metricsCollector
-	log              logr.Logger
+	logger           logr.Logger
 }
 
 // NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProcessManager {
-	rootLogger, err := clog.NewDefaultZapLogger()
-	if err != nil {
-		stdlog.Fatal("failed to create root logger", err)
-	}
+func NewBackgroundProcessManager(registry prometheus.Registerer, logger logr.Logger) BackgroundProcessManager {
 	backgroundProcessManager := BackgroundProcessManager{
 		deathSig:         &sync.Map{},
 		identifiers:      &sync.Map{},
 		stdio:            &sync.Map{},
 		metricsCollector: nil,
-		log:              rootLogger,
+		logger:           logger,
 	}
 
 	if registry != nil {
@@ -118,7 +114,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 	err := cmd.Start()
 	if err != nil {
-		m.log.Error(err, "fail to start process")
+		m.logger.Error(err, "fail to start process")
 		return nil, err
 	}
 
@@ -161,7 +157,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 	m.stdio.Store(pair, stdio)
 
-	log := m.log.WithValues("pid", pid)
+	log := m.logger.WithValues("pid", pid)
 
 	go func() {
 		err := cmd.Wait()
@@ -219,7 +215,7 @@ func (m *BackgroundProcessManager) Shutdown() {
 	m.deathSig.Range(func(key, value interface{}) bool {
 		pair := key.(ProcessPair)
 		deathChannel := value.(chan bool)
-		log := m.log.WithValues("pid", pair.Pid)
+		log := m.logger.WithValues("pid", pair.Pid)
 
 		p, err := os.FindProcess(pair.Pid)
 		if err != nil {
@@ -264,7 +260,7 @@ func (m *BackgroundProcessManager) Shutdown() {
 
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pid int, startTime int64) error {
-	log := m.log.WithValues("pid", pid)
+	log := m.logger.WithValues("pid", pid)
 
 	p, err := os.FindProcess(int(pid))
 	if err != nil {
@@ -330,7 +326,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 }
 
 func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
-	log := m.log.WithValues("pid", pid)
+	log := m.logger.WithValues("pid", pid)
 
 	procState, err := process.NewProcess(int32(pid))
 	if err != nil {
@@ -392,7 +388,7 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 		pause:      false,
 		identifier: nil,
 		ctx:        context.Background(),
-		log:        rootLogger,
+		logger:     rootLogger,
 	}
 }
 
@@ -412,8 +408,8 @@ type ProcessBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
-	ctx context.Context
-	log logr.Logger
+	ctx    context.Context
+	logger logr.Logger
 }
 
 // GetNsPath returns corresponding namespace path

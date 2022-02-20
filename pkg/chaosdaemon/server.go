@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/go-logr/logr"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -78,25 +79,26 @@ func (c *Config) GrpcAddr() string {
 type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
-
-	IPSetLocker *locker.Locker
+	IPSetLocker              *locker.Locker
+	logger                   logr.Logger
 }
 
-func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
+func newDaemonServer(containerRuntime string, reg prometheus.Registerer, logger logr.Logger) (*DaemonServer, error) {
 	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDaemonServerWithCRClient(crClient, reg), nil
+	return NewDaemonServerWithCRClient(crClient, reg, logger), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer, logger logr.Logger) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg, logger),
+		logger:                   logger,
 	}
 }
 
@@ -161,15 +163,15 @@ type Server struct {
 	daemonServer *DaemonServer
 	httpServer   *http.Server
 	grpcServer   *grpc.Server
-
-	conf *Config
+	logger       logr.Logger
+	conf         *Config
 }
 
 // BuildServer builds a chaos daemon server
-func BuildServer(conf *Config, reg RegisterGatherer) (*Server, error) {
+func BuildServer(conf *Config, reg RegisterGatherer, logger logr.Logger) (*Server, error) {
 	server := &Server{conf: conf}
 	var err error
-	server.daemonServer, err = newDaemonServer(conf.Runtime, reg)
+	server.daemonServer, err = newDaemonServer(conf.Runtime, reg, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "create daemon server")
 	}
@@ -179,7 +181,7 @@ func BuildServer(conf *Config, reg RegisterGatherer) (*Server, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "create grpc server")
 	}
-
+	server.logger = logger
 	return server, nil
 }
 

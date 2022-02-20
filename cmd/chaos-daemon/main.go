@@ -17,22 +17,21 @@ package main
 
 import (
 	"flag"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	stdlog "log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
-	log  = ctrl.Log.WithName("chaos-daemon")
 	conf = &chaosdaemon.Config{Host: "0.0.0.0"}
 
 	printVersion bool
@@ -57,8 +56,12 @@ func main() {
 	if printVersion {
 		os.Exit(0)
 	}
-
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+	log.ReplaceGlobals(rootLogger)
+	ctrl.SetLogger(rootLogger)
 
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(
@@ -67,15 +70,15 @@ func main() {
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 
-	log.Info("grant access to /dev/fuse")
-	err := fusedev.GrantAccess()
+	rootLogger.Info("grant access to /dev/fuse")
+	err = fusedev.GrantAccess()
 	if err != nil {
-		log.Error(err, "grant access to /dev/fuse")
+		rootLogger.Error(err, "grant access to /dev/fuse")
 	}
 
-	server, err := chaosdaemon.BuildServer(conf, reg)
+	server, err := chaosdaemon.BuildServer(conf, reg, rootLogger)
 	if err != nil {
-		log.Error(err, "build chaos-daemon server")
+		rootLogger.Error(err, "build chaos-daemon server")
 		os.Exit(1)
 	}
 
@@ -91,13 +94,13 @@ func main() {
 
 	select {
 	case sig := <-sigc:
-		log.Info("received signal", "signal", sig)
+		rootLogger.Info("received signal", "signal", sig)
 	case err = <-errs:
 		if err != nil {
-			log.Error(err, "chaos-daemon runtime")
+			rootLogger.Error(err, "chaos-daemon runtime")
 		}
 	}
 	if err = server.Shutdown(); err != nil {
-		log.Error(err, "chaos-daemon shutdown")
+		rootLogger.Error(err, "chaos-daemon shutdown")
 	}
 }
