@@ -83,7 +83,7 @@ type DaemonServer struct {
 
 	IPSetLocker      *locker.Locker
 	TimeChaosManager tasks.TaskManager
-	logger                   logr.Logger
+	logger           logr.Logger
 }
 
 func newDaemonServer(containerRuntime string, reg prometheus.Registerer, logger logr.Logger) (*DaemonServer, error) {
@@ -96,12 +96,12 @@ func newDaemonServer(containerRuntime string, reg prometheus.Registerer, logger 
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer,logger logr.Logger) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer, logger logr.Logger) *DaemonServer {
 	loggertc := log.WithName("TimeChaos")
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg,logger),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg, logger),
 		TimeChaosManager:         tasks.NewTaskManager(loggertc),
 		logger:                   logger,
 	}
