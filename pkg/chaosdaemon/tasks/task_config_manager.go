@@ -36,6 +36,11 @@ type Object interface {
 	DeepCopy() Object
 }
 
+// Addable introduces the data gathering ability.
+type Addable interface {
+	Add(a Addable) error
+}
+
 // TaskConfig defines a composite of flexible config with an immutable target.
 // TaskConfig.main is the ID of task.
 // TaskConfig.data is the config provided by developer.
@@ -116,11 +121,6 @@ func (m TaskConfigManager) GetUIDsWithPID(id PID) []UID {
 		}
 	}
 	return uIds
-}
-
-// Addable introduces the data gathering ability.
-type Addable interface {
-	Add(a Addable) error
 }
 
 // SumTaskConfig will sum the TaskConfig with a same TaskConfig.main.
