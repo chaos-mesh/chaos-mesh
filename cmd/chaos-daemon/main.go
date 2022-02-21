@@ -17,7 +17,6 @@ package main
 
 import (
 	"flag"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	stdlog "log"
 	"os"
 	"os/signal"
@@ -25,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"

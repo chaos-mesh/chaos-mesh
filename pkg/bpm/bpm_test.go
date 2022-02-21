@@ -21,10 +21,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/shirou/gopsutil/process"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 func RandomeIdentifier() string {

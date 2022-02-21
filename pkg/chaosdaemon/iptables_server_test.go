@@ -39,7 +39,7 @@ var _ = Describe("iptables server", func() {
 		stdlog.Fatal("failed to create root logger", err)
 	}
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil,rootLogger)
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil, rootLogger)
 
 	Context("FlushIptables", func() {
 		It("should work", func() {
