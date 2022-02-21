@@ -22,13 +22,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
