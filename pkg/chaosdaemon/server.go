@@ -38,6 +38,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
@@ -79,7 +80,8 @@ type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
 
-	IPSetLocker *locker.Locker
+	IPSetLocker      *locker.Locker
+	TimeChaosManager tasks.TaskManager
 }
 
 func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
@@ -93,10 +95,12 @@ func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*Daemo
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
+	loggertc := log.WithName("TimeChaos")
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		TimeChaosManager:         tasks.NewTaskManager(loggertc),
 	}
 }
 
