@@ -17,9 +17,11 @@ package bpm
 
 import (
 	"context"
+	stdlog "log"
 	"math/rand"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/shirou/gopsutil/process"
@@ -59,7 +61,11 @@ func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime ti
 }
 
 var _ = Describe("background process manager", func() {
-	m := NewBackgroundProcessManager(nil)
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+	m := NewBackgroundProcessManager(nil, rootLogger)
 
 	Context("normally exited process", func() {
 		It("should work", func() {
