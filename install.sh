@@ -615,8 +615,8 @@ install_chaos_mesh() {
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
     gen_crd_manifests "${crd}"
-    if ! $KUBECTL_BIN create -f "${crd}" &>/dev/null; then
-        $KUBECTL_BIN replace -f "${crd}"
+    if ! kubectl create -f "${crd}" &>/dev/null; then
+        kubectl replace -f "${crd}"
     fi
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
 }
