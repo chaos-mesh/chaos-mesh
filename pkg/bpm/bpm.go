@@ -66,6 +66,11 @@ const (
 // ProcessPair is an identifier for process
 // Keep compatible with v2.x
 // TODO: remove in v3.x
+//
+// Currently, the bpm locate managed processes by both PID and create time, because the OS may reuse PID, we must check the create time to avoid locating the wrong process.
+//
+// However, the two-step locating is messy and the create time may be imprecise (we have fixed a [relevant bug](https://github.com/shirou/gopsutil/pull/1204)).
+// In future version, we should completely remove the two-step locating and identify managed processes by UID only.
 type ProcessPair struct {
 	Pid        int
 	CreateTime int64
@@ -82,7 +87,7 @@ type Process struct {
 	stdio *Stdio
 
 	ctx     context.Context
-	stopped func()
+	stopped context.CancelFunc
 }
 
 // Stdio contains stdin, stdout and stderr
