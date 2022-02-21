@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"context"
+	stdlog "log"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -25,16 +26,17 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	logutil "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("container kill", func() {
-	rootLogger, err := log.NewDefaultZapLogger()
+	rootLogger, err := logutil.NewDefaultZapLogger()
 	if err != nil {
 		stdlog.Fatal("failed to create root logger", err)
 	}
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil,rootLogger)
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil, rootLogger)
 
 	Context("ContainerKill", func() {
 		It("should work", func() {
