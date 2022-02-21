@@ -17,6 +17,8 @@ package chaosdaemon
 
 import (
 	"context"
+	logutil "github.com/chaos-mesh/chaos-mesh/pkg/log"
+	stdlog "log"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,8 +31,12 @@ import (
 )
 
 var _ = Describe("time server", func() {
+	rootLogger, err := logutil.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil,rootLogger)
 
 	Context("SetTimeOffset", func() {
 		It("should work", func() {

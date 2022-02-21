@@ -19,22 +19,28 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
+	stdlog "log"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
+	logutil "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("netem server", func() {
+	rootLogger, err := logutil.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
 	Context("newDaemonServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
+			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil,rootLogger)
 			Expect(err).To(BeNil())
 		})
 
 		It("should fail on CreateContainerRuntimeInfoClient", func() {
-			_, err := newDaemonServer("invalid-runtime", nil)
+			_, err := newDaemonServer("invalid-runtime", nil,rootLogger)
 			Expect(err).ToNot(BeNil())
 		})
 	})
@@ -42,7 +48,7 @@ var _ = Describe("netem server", func() {
 	Context("newGRPCServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
+			daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil,rootLogger)
 			Expect(err).To(BeNil())
 			_, err = newGRPCServer(daemonServer, &MockRegisterer{}, tlsConfig{})
 			Expect(err).To(BeNil())
@@ -52,7 +58,7 @@ var _ = Describe("netem server", func() {
 			Ω(func() {
 				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
+				daemonServer, err := newDaemonServer(crclients.ContainerRuntimeContainerd, nil,rootLogger)
 				Expect(err).To(BeNil())
 				_, err = newGRPCServer(daemonServer, &MockRegisterer{}, tlsConfig{})
 				Expect(err).To(BeNil())
