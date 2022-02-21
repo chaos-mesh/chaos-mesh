@@ -16,10 +16,10 @@
 package chaosdaemon
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	stdlog "log"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
