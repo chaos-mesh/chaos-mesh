@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	daemonCgroups "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
@@ -136,7 +137,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
 
-		comm, err := ReadCommName(cmd.Process.Pid)
+		comm, err := util.ReadCommName(cmd.Process.Pid)
 		if err != nil {
 			return nil, err
 		}
@@ -189,8 +190,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
-
-		comm, err := ReadCommName(proc.Pair.Pid)
+		comm, err := util.ReadCommName(proc.Pair.Pid)
 
 		if err != nil {
 			return nil, err
