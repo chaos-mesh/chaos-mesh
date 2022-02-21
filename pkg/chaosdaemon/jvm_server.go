@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -44,13 +45,13 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	}
 
 	containerPids := []uint32{pid}
-	childPids, err := GetChildProcesses(pid)
+	childPids, err := util.GetChildProcesses(pid, log)
 	if err != nil {
 		log.Error(err, "GetChildProcesses")
 	}
 	containerPids = append(containerPids, childPids...)
 	for _, containerPid := range containerPids {
-		name, err := ReadCommName(int(containerPid))
+		name, err := util.ReadCommName(int(containerPid))
 		if err != nil {
 			log.Error(err, "ReadCommName")
 			continue
