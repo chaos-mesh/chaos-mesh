@@ -87,6 +87,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.env.LISTEN_PORT` | | `2333` |
 | `dashboard.env.DATABASE_DRIVER`| The db drive used for Chaos Dashboard, support db: sqlite3, mysql| `sqlite3` |
 | `dashboard.env.DATABASE_DATASOURCE`| The db dsn used for Chaos Dashboard | `/data/core.sqlite` |
+| `dashboard.env.CLEAN_SYNC_PERIOD`| Set the sync period to clean up archived data | `12h` |
+| `dashboard.env.TTL_EVENT`| Set TTL of archived event data | `168h` |
+| `dashboard.env.TTL_EXPERIMENT`| Set TTL of archived experiment data | `336` |
 | `dashboard.ingress.enabled`                   | Enable the use of the ingress controller to access the dashboard                         | `false`             |
 | `dashboard.ingress.certManager`               | Enable Cert-Manager for ingress                                                      | `false`             |
 | `dashboard.ingress.annotations`               | Annotations for the dashboard Ingress                                                   | `{}`                |
