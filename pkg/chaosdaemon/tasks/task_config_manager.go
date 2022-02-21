@@ -94,7 +94,7 @@ func (m TaskConfigManager) DeleteTaskConfig(id UID) error {
 	}
 	_, ok := m.TaskConfigMap[id]
 	if !ok {
-		return errors.Wrapf(ErrTaskConfigNotFound, "UID : %v", id)
+		return errors.Wrapf(ErrTaskConfigNotFound, "UID : %s", id)
 	}
 	delete(m.TaskConfigMap, id)
 	return nil

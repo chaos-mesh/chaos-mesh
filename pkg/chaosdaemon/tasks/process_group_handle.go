@@ -16,11 +16,14 @@
 package tasks
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
+
+var ErrNotFoundChildProcess = chaoserr.NotFound("child process")
 
 // ChaosOnProcessGroup is used for inject a chaos on a linux process group.
 // Fork is used for create a new chaos on child process.
@@ -51,14 +54,14 @@ func NewProcessGroupHandler(logger logr.Logger, main ChaosOnProcessGroup) Proces
 // Inject try to inject the main process and then try to inject child process.
 // If something wrong in injecting a child process, Inject will just log error & continue.
 func (gp *ProcessGroupHandler) Inject(pid PID) error {
-	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
-	if err != nil {
-		gp.logger.Error(err, "failed to get child process")
-	}
-
-	err = gp.Main.Inject(pid)
+	err := gp.Main.Inject(pid)
 	if err != nil {
 		return errors.Wrapf(err, "inject main process : %d", pid)
+	}
+
+	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
+	if err != nil {
+		return errors.Wrapf(ErrNotFoundChildProcess, "cause : %v", err)
 	}
 
 	for _, childPid := range childPids {
@@ -92,14 +95,14 @@ func (gp *ProcessGroupHandler) Inject(pid PID) error {
 
 // Recover try to recover the main process and then try to recover child process.
 func (gp *ProcessGroupHandler) Recover(pid PID) error {
-	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
-	if err != nil {
-		gp.logger.Error(err, "failed to get child process")
-	}
-
-	err = gp.Main.Recover(pid)
+	err := gp.Main.Recover(pid)
 	if err != nil {
 		return errors.Wrapf(err, "recovery main process : %d", pid)
+	}
+
+	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
+	if err != nil {
+		return errors.Wrapf(ErrNotFoundChildProcess, "cause : %v", err)
 	}
 
 	for _, childPid := range childPids {

@@ -243,7 +243,7 @@ func (cm TaskManager) commit(uid UID, pid PID) error {
 	if !ok {
 		return errors.New("task.Data here must implement TaskExecutor")
 	}
-	_ = tasker.Assign(process)
+	err = tasker.Assign(process)
 	if err != nil {
 		return err
 	}
