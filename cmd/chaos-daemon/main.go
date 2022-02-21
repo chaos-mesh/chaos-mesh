@@ -57,13 +57,15 @@ func main() {
 	if printVersion {
 		os.Exit(0)
 	}
+
+	ctrl.Log.WithName("chaos-daemon")
 	rootLogger, err := log.NewDefaultZapLogger()
 	if err != nil {
 		stdlog.Fatal("failed to create root logger", err)
 	}
 	log.ReplaceGlobals(rootLogger)
 	ctrl.SetLogger(rootLogger)
-	ctrl.Log.WithName("chaos-daemon")
+
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(
 		// Use collectors as prometheus functions deprecated
