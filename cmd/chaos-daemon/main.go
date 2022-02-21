@@ -63,7 +63,7 @@ func main() {
 	}
 	log.ReplaceGlobals(rootLogger)
 	ctrl.SetLogger(rootLogger)
-
+	ctrl.Log.WithName("chaos-daemon")
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(
 		// Use collectors as prometheus functions deprecated
