@@ -18,7 +18,6 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
