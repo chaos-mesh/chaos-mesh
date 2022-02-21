@@ -20,11 +20,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/go-logr/logr"
 	"io/ioutil"
 	"net"
 	"net/http"
 
+	"github.com/go-logr/logr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
