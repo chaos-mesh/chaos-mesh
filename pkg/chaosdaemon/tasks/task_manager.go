@@ -223,6 +223,7 @@ func (cm TaskManager) Recover(uid UID, pid PID) error {
 		return nil
 	}
 
+	uIDs = cm.taskConfigManager.GetUIDsWithPID(pid)
 	err = cm.commit(uIDs[0], pid)
 	if err != nil {
 		return errors.Wrapf(err, "update new task")
