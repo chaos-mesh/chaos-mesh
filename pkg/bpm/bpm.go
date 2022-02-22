@@ -83,17 +83,17 @@ type Process struct {
 	// store create time, to keep compatible with v2.x
 	Pair ProcessPair
 
-	cmd   *ManagedCommand
-	stdio *Stdio
+	Cmd   *ManagedCommand
+	Pipes Pipes
 
 	ctx     context.Context
 	stopped context.CancelFunc
 }
 
-// Stdio contains stdin, stdout and stderr
-type Stdio struct {
-	sync.Locker
-	Stdin, Stdout, Stderr io.ReadWriteCloser
+// pipes that will be connected to the command's stdin/stdout
+type Pipes struct {
+	Stdin  io.WriteCloser
+	Stdout io.ReadCloser
 }
 
 // BackgroundProcessManager manages all background processes
@@ -118,34 +118,25 @@ type BackgroundProcessManager struct {
 }
 
 func startProcess(cmd *ManagedCommand) (*Process, error) {
-	err := cmd.Start()
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "create stdin pipe")
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "create stdout pipe")
+	}
+
+	err = cmd.Start()
 	if err != nil {
 		return nil, errors.Wrapf(err, "start command `%s`", cmd.String())
 	}
 
-	stdio := &Stdio{Locker: &sync.Mutex{}}
-	if cmd.Stdin != nil {
-		if stdin, ok := cmd.Stdin.(io.ReadWriteCloser); ok {
-			stdio.Stdin = stdin
-		}
-	}
-
-	if cmd.Stdout != nil {
-		if stdout, ok := cmd.Stdout.(io.ReadWriteCloser); ok {
-			stdio.Stdout = stdout
-		}
-	}
-
-	if cmd.Stderr != nil {
-		if stderr, ok := cmd.Stderr.(io.ReadWriteCloser); ok {
-			stdio.Stderr = stderr
-		}
-	}
-
 	newProcess := &Process{
 		Uid:   uuid.NewString(),
-		cmd:   cmd,
-		stdio: stdio,
+		Cmd:   cmd,
+		Pipes: Pipes{Stdin: stdin, Stdout: stdout},
 	}
 
 	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
@@ -192,27 +183,8 @@ func StartBackgroundProcessManager(registry prometheus.Registerer) *BackgroundPr
 			if loaded {
 				proc := process.(*Process)
 				backgroundProcessManager.pidPairToUid.Delete(proc.Pair)
-				if proc.stdio != nil {
-					proc.stdio.Lock()
-					if proc.stdio.Stdin != nil {
-						if err := proc.stdio.Stdin.Close(); err != nil {
-							log.Error(err, "stdin fails to be closed")
-						}
-					}
-					if proc.stdio.Stdout != nil {
-						if err := proc.stdio.Stdout.Close(); err != nil {
-							log.Error(err, "stdout fails to be closed")
-						}
-					}
-					if proc.stdio.Stderr != nil {
-						if err := proc.stdio.Stderr.Close(); err != nil {
-							log.Error(err, "stderr fails to be closed")
-						}
-					}
-					proc.stdio.Unlock()
-				}
-				if proc.cmd.Identifier != nil {
-					backgroundProcessManager.identifiers.Delete(*proc.cmd.Identifier)
+				if proc.Cmd.Identifier != nil {
+					backgroundProcessManager.identifiers.Delete(*proc.Cmd.Identifier)
 				}
 				proc.stopped()
 			}
@@ -279,7 +251,7 @@ func (m *BackgroundProcessManager) Shutdown() {
 	m.processes.Range(func(_, value interface{}) bool {
 		process := value.(*Process)
 		log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
-		if err := process.cmd.Process.Signal(syscall.SIGTERM); err != nil {
+		if err := process.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
 			log.Error(err, "send SIGTERM to process")
 			return true
 		}
@@ -303,6 +275,14 @@ func (m *BackgroundProcessManager) getProc(uid string) (*Process, bool) {
 	return nil, false
 }
 
+func (m *BackgroundProcessManager) GetPipes(uid string) (Pipes, bool) {
+	proc, ok := m.getProc(uid)
+	if !ok {
+		return Pipes{}, false
+	}
+	return proc.Pipes, true
+}
+
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, uid string) error {
 	log := log.WithValues("uid", uid)
@@ -312,7 +292,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, ui
 		return errors.Errorf("failed to find process with uid %s", uid)
 	}
 
-	if err := proc.cmd.Process.Signal(syscall.SIGTERM); err != nil {
+	if err := proc.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
 		return errors.Wrap(err, "send SIGTERM to process")
 	}
 
@@ -325,15 +305,6 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, ui
 		}
 	}
 	return nil
-}
-
-func (m *BackgroundProcessManager) Stdio(uid string) *Stdio {
-	proc, loaded := m.getProc(uid)
-	if !loaded {
-		return nil
-	}
-
-	return proc.stdio
 }
 
 // GetIdentifiers finds all identifiers in BPM

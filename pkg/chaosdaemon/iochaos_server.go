@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"time"
@@ -85,21 +84,16 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	caller, receiver := bpm.NewBlockingBuffer(), bpm.NewBlockingBuffer()
-	defer caller.Close()
-	defer receiver.Close()
-	client, err := jrpc.DialIO(ctx, receiver, caller)
-	if err != nil {
-		return nil, errors.Wrapf(err, "dialing rpc client")
-	}
-
 	cmd := processBuilder.Build()
-	cmd.Stdin = caller
-	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
 	cmd.Stderr = os.Stderr
 	proc, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
 		return nil, errors.Wrapf(err, "start process `%s`", cmd)
+	}
+
+	client, err := jrpc.DialIO(ctx, proc.Pipes.Stdout, proc.Pipes.Stdin)
+	if err != nil {
+		return nil, errors.Wrapf(err, "dialing rpc client")
 	}
 
 	var ret string
@@ -112,8 +106,6 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
 	if rpcError != nil || ret != "ok" {
 		log.Info("Starting toda takes too long or encounter an error")
-		caller.Close()
-		receiver.Close()
 		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
 			log.Error(kerr, "kill toda", "request", in)
 		}

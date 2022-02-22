@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -39,26 +40,34 @@ const (
 )
 
 type stdioTransport struct {
-	stdio *bpm.Stdio
+	uid    string
+	locker *sync.Map
+	pipes  bpm.Pipes
 }
 
-func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	t.stdio.Lock()
-	defer t.stdio.Unlock()
-
-	if t.stdio.Stdin == nil {
+func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	if _, loaded := t.locker.LoadOrStore(t.uid, true); loaded {
+		return &http.Response{
+			StatusCode: http.StatusLocked,
+			Status:     http.StatusText(http.StatusLocked),
+			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			Request:    req,
+		}, nil
+	}
+	defer t.locker.Delete(t.uid)
+	if t.pipes.Stdin == nil {
 		return nil, errors.New("fail to get stdin of process")
 	}
-	if t.stdio.Stdout == nil {
+	if t.pipes.Stdout == nil {
 		return nil, errors.New("fail to get stdout of process")
 	}
 
-	err = req.Write(t.stdio.Stdin)
+	err = req.Write(t.pipes.Stdin)
 	if err != nil {
 		return
 	}
 
-	resp, err = http.ReadResponse(bufio.NewReader(t.stdio.Stdout), req)
+	resp, err = http.ReadResponse(bufio.NewReader(t.pipes.Stdout), req)
 	return
 }
 
@@ -72,7 +81,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 	}
 
-	if s.backgroundProcessManager.Stdio(in.InstanceUid) == nil {
+	if _, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid); !ok {
 		if in.InstanceUid != "" {
 			// chaos daemon may restart, create another tproxy instance
 			if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); err != nil {
@@ -98,12 +107,16 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 }
 
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
-	stdio := s.backgroundProcessManager.Stdio(in.InstanceUid)
-	if stdio == nil {
-		return nil, errors.Errorf("fail to get stdio of instance(%s)", in.InstanceUid)
+	pipes, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid)
+	if !ok {
+		return nil, errors.Errorf("fail to get process(%s)", in.InstanceUid)
 	}
 
-	transport := stdioTransport{stdio: stdio}
+	transport := &stdioTransport{
+		uid:    in.InstanceUid,
+		locker: s.tproxyLocker,
+		pipes:  pipes,
+	}
 
 	var rules []tproxyconfig.PodHttpChaosBaseRule
 	err := json.Unmarshal([]byte(in.Rules), &rules)
@@ -159,9 +172,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
 		EnableLocalMnt().
 		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
-		SetEnv(pathEnv, os.Getenv(pathEnv)).
-		SetStdin(bpm.NewBlockingBuffer()).
-		SetStdout(bpm.NewBlockingBuffer())
+		SetEnv(pathEnv, os.Getenv(pathEnv))
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
