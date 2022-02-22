@@ -308,7 +308,7 @@ generate-deepcopy: images/dev-env/.dockerbuilt chaos-build
 
 generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
 
-check: generate yaml vet boilerplate lint tidy install.sh fmt
+check: generate yaml vet lint tidy install.sh fmt
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 e2e-test/image/e2e/bin/ginkgo: SHELL:=$(RUN_IN_DEV_SHELL)

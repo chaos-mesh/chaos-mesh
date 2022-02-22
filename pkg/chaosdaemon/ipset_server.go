@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -107,7 +108,7 @@ func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 		output := string(out)
 		if !strings.Contains(output, ipsetExistErr) {
 			log.Error(err, "ipset create error", "command", cmd.String(), "output", output)
-			return encodeOutputToError(out, err)
+			return util.EncodeOutputToError(out, err)
 		}
 
 		processBuilder = bpm.DefaultProcessBuilder("ipset", "flush", name).SetContext(ctx)
@@ -121,7 +122,7 @@ func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "ipset flush error", "command", cmd.String(), "output", string(out))
-			return encodeOutputToError(out, err)
+			return util.EncodeOutputToError(out, err)
 		}
 	}
 
@@ -142,7 +143,7 @@ func addCIDRsToIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uin
 			output := string(out)
 			if !strings.Contains(output, ipExistErr) {
 				log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
-				return encodeOutputToError(out, err)
+				return util.EncodeOutputToError(out, err)
 			}
 		}
 	}
@@ -164,7 +165,7 @@ func renameIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 		output := string(out)
 		if !strings.Contains(output, ipsetNewNameExistErr) {
 			log.Error(err, "rename ipset failed", "command", cmd.String(), "output", output)
-			return encodeOutputToError(out, err)
+			return util.EncodeOutputToError(out, err)
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
@@ -178,7 +179,7 @@ func renameIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "swap ipset failed", "command", cmd.String(), "output", string(out))
-			return encodeOutputToError(out, err)
+			return util.EncodeOutputToError(out, err)
 		}
 	}
 	return nil

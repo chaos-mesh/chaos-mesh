@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -205,7 +206,7 @@ func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
 		return iptables.deleteAndWriteRules(chain)
 	}
 
-	return encodeOutputToError(out, err)
+	return util.EncodeOutputToError(out, err)
 }
 
 // deleteAndWriteRules will remove all existing function in the chain
@@ -236,7 +237,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	cmd := processBuilder.Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(out, err)
+		return util.EncodeOutputToError(out, err)
 	}
 
 	if strings.Contains(string(out), rule) {
@@ -252,7 +253,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	cmd = processBuilder.Build(iptables.ctx)
 	out, err = cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(out, err)
+		return util.EncodeOutputToError(out, err)
 	}
 
 	return nil
@@ -266,7 +267,7 @@ func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
 	cmd := processBuilder.Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(out, err)
+		return util.EncodeOutputToError(out, err)
 	}
 
 	return nil

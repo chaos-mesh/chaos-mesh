@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -59,7 +60,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -76,7 +77,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err = cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -92,7 +93,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))

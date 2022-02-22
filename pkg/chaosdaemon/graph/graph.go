@@ -13,9 +13,11 @@
 // limitations under the License.
 //
 
-package chaosdaemon
+package graph
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/log"
+import (
+	"github.com/go-logr/logr"
+)
 
 // Edge represents an edge in graph
 type Edge struct {
@@ -52,7 +54,7 @@ func (g *Graph) IterFrom(source uint32) *Edge {
 }
 
 // Flatten flattens the subtree from source (without checking whether it's a tree)
-func (g *Graph) Flatten(source uint32) []uint32 {
+func (g *Graph) Flatten(source uint32, log logr.Logger) []uint32 {
 	current := g.head[source]
 
 	var flatTree []uint32
@@ -61,13 +63,13 @@ func (g *Graph) Flatten(source uint32) []uint32 {
 			break
 		}
 
-		children := g.Flatten(current.Target)
+		children := g.Flatten(current.Target, log)
 		flatTree = append(flatTree, current.Target)
 		flatTree = append(flatTree, children...)
 
 		current = current.Next
 	}
 
-	log.L().Info("get flatTree", "source", source, "flatTree", flatTree)
+	log.Info("get flatTree", "source", source, "flatTree", flatTree)
 	return flatTree
 }

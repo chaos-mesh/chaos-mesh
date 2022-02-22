@@ -27,6 +27,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -42,6 +43,24 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	if err != nil {
 		log.Error(err, "GetPidFromContainerID")
 		return nil, err
+	}
+
+	containerPids := []uint32{pid}
+	childPids, err := util.GetChildProcesses(pid, log)
+	if err != nil {
+		log.Error(err, "GetChildProcesses")
+	}
+	containerPids = append(containerPids, childPids...)
+	for _, containerPid := range containerPids {
+		name, err := util.ReadCommName(int(containerPid))
+		if err != nil {
+			log.Error(err, "ReadCommName")
+			continue
+		}
+		if name == "java\n" {
+			pid = containerPid
+			break
+		}
 	}
 
 	bytemanHome := os.Getenv("BYTEMAN_HOME")
