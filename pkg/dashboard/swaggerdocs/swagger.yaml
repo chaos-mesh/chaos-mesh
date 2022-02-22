@@ -1654,7 +1654,7 @@ definitions:
       disk-read-payload:
         $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
         description: |-
-          +ui:form:when=action=='stress-mem'
+          +ui:form:when=action=='disk-read-payload'
           +optional
         type: object
       disk-write-payload:

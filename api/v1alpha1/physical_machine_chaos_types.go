@@ -151,7 +151,7 @@ type ExpInfo struct {
 	// +optional
 	StressMemory *StressMemorySpec `json:"stress-mem,omitempty"`
 
-	// +ui:form:when=action=='stress-mem'
+	// +ui:form:when=action=='disk-read-payload'
 	// +optional
 	DiskReadPayload *DiskPayloadSpec `json:"disk-read-payload,omitempty"`
 

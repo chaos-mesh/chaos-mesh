@@ -2271,7 +2271,7 @@ export interface V1alpha1NetworkChaosSpec {
    */
   device?: string
   /**
-   * Direction represents the direction, this applies on netem and network partition action +optional +kubebuilder:validation:Enum=to;from;both;\"\"
+   * Direction represents the direction, this applies on netem and network partition action +optional +kubebuilder:validation:Enum=to;from;both +kubebuilder:default=to
    * @type {string}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -3123,7 +3123,7 @@ export interface V1alpha1ScheduleSpec {
    */
   blockChaos?: V1alpha1BlockChaosSpec
   /**
-   * +optional +kubebuilder:validation:Enum=Forbid;Allow
+   * +optional +kubebuilder:default=Forbid +kubebuilder:validation:Enum=Forbid;Allow
    * @type {string}
    * @memberof V1alpha1ScheduleSpec
    */

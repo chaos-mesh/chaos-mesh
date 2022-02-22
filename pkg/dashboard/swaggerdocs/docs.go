@@ -3911,7 +3911,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.DiskFillSpec"
                 },
                 "disk-read-payload": {
-                    "description": "+ui:form:when=action=='stress-mem'\n+optional",
+                    "description": "+ui:form:when=action=='disk-read-payload'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
