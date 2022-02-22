@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
+
 import { Box, Grid, Grow } from '@mui/material'
+import { CoreEvent, PkgDashboardApiserverArchiveDetail } from 'openapi'
 import { useCallback, useEffect, useState } from 'react'
 
-import { ArchiveSingle } from 'api/archives.type'
-import { Event } from 'api/events.type'
 import EventsTimeline from 'components/EventsTimeline'
 import Loading from '@ui/mui-extends/esm/Loading'
 import ObjectConfiguration from 'components/ObjectConfiguration'
@@ -40,25 +40,30 @@ const Single = () => {
   let kind = query.get('kind') || 'experiment'
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<{ kind: string; data: ArchiveSingle | null }>({ kind, data: null })
-  const [events, setEvents] = useState<Event[]>([])
+  const [single, setSingle] = useState<{ kind: string; data: PkgDashboardApiserverArchiveDetail | null }>({
+    kind,
+    data: null,
+  })
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchSingle = useCallback(() => {
     let request
     switch (kind) {
       case 'workflow':
-        request = api.workflows.singleArchive
+        request = api.archives.archivesWorkflowsUidGet
         break
       case 'schedule':
-        request = api.schedules.singleArchive
+        request = api.archives.archivesSchedulesUidGet
         break
       case 'experiment':
       default:
-        request = api.archives.single
+        request = api.archives.archivesUidGet
         break
     }
 
-    request(uuid!)
+    request({
+      uid: uuid!,
+    })
       .then(({ data }) => {
         setSingle({ kind, data })
       })
@@ -77,7 +82,10 @@ const Single = () => {
 
     const fetchEvents = () => {
       api.events
-        .events({ object_id: uuid, limit: 999 })
+        .eventsGet({
+          objectId: uuid,
+          limit: 999,
+        })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {

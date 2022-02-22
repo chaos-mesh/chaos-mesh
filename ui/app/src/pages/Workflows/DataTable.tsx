@@ -19,18 +19,18 @@ import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+import { CoreWorkflowMeta } from 'openapi'
 import DateTime from 'lib/luxon'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 import StatusLabel from 'components/StatusLabel'
 import T from 'components/T'
-import { Workflow } from 'api/workflows.type'
 import api from 'api'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
 interface DataTableProps {
-  data: Workflow[]
+  data: CoreWorkflowMeta[]
   fetchData: () => void
 }
 
@@ -54,7 +54,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.workflows.del
+        actionFunc = api.workflows.workflowsUidDelete
 
         break
       default:
@@ -62,7 +62,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({
@@ -92,14 +92,13 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
 
         <TableBody>
           {data.map((d) => (
-            <TableRow key={d.uid} hover sx={{ cursor: 'pointer' }} onClick={handleJumpTo(d.uid)}>
+            <TableRow key={d.uid} hover sx={{ cursor: 'pointer' }} onClick={handleJumpTo(d.uid!)}>
               <TableCell>{d.name}</TableCell>
-              {/* <TableCell></TableCell> */}
               <TableCell>
-                <StatusLabel status={d.status} />
+                <StatusLabel status={d.status as any} />
               </TableCell>
               <TableCell>
-                {DateTime.fromISO(d.created_at, {
+                {DateTime.fromISO(d.created_at!, {
                   locale: lang,
                 }).toRelative()}
               </TableCell>
@@ -113,7 +112,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                     onClick={handleSelect({
                       title: `${T('archives.single', intl)} ${d.name}`,
                       description: T('workflows.deleteDesc', intl),
-                      handle: handleAction('archive', d.uid),
+                      handle: handleAction('archive', d.uid!),
                     })}
                   >
                     <ArchiveOutlinedIcon />

@@ -16,12 +16,12 @@
  */
 
 import { Box, Button, Grid, Grow } from '@mui/material'
+import { CoreEvent, PkgDashboardApiserverScheduleDetail } from 'openapi'
 import { setAlert, setConfirm } from 'slices/globalStatus'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { Event } from 'api/events.type'
 import EventsTimeline from 'components/EventsTimeline'
 import Loading from '@ui/mui-extends/esm/Loading'
 import ObjectConfiguration from 'components/ObjectConfiguration'
@@ -29,7 +29,6 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import { ScheduleSingle } from 'api/schedules.type'
 import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
 import api from 'api'
@@ -49,12 +48,14 @@ const Single = () => {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<ScheduleSingle>()
-  const [events, setEvents] = useState<Event[]>([])
+  const [single, setSingle] = useState<PkgDashboardApiserverScheduleDetail>()
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchSchedule = () => {
     api.schedules
-      .single(uuid!)
+      .schedulesUidGet({
+        uid: uuid!,
+      })
       .then(({ data }) => setSingle(data))
       .catch(console.error)
   }
@@ -67,7 +68,7 @@ const Single = () => {
   useEffect(() => {
     const fetchEvents = () => {
       api.events
-        .events({ object_id: uuid, limit: 999 })
+        .eventsGet({ objectId: uuid, limit: 999 })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {
@@ -120,15 +121,15 @@ const Single = () => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.schedules.del
+        actionFunc = api.schedules.schedulesUidDelete
 
         break
       case 'pause':
-        actionFunc = api.schedules.pause
+        actionFunc = api.schedules.schedulesPauseUidPut
 
         break
       case 'start':
-        actionFunc = api.schedules.start
+        actionFunc = api.schedules.schedulesStartUidPut
 
         break
       default:
@@ -136,7 +137,7 @@ const Single = () => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({

@@ -29,7 +29,7 @@ import {
 } from '@mui/material'
 import { comparator, format } from 'lib/luxon'
 
-import { Event } from 'api/events.type'
+import { CoreEvent as Event } from 'openapi'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
@@ -126,11 +126,11 @@ interface EventsTableRowProps {
 
 const Row: React.FC<EventsTableRowProps> = ({ event: e }) => (
   <TableRow hover>
-    <TableCell>{truncate(e.object_id)}</TableCell>
+    <TableCell>{truncate(e.object_id!)}</TableCell>
     <TableCell>{e.namespace}</TableCell>
     <TableCell>{e.name}</TableCell>
     <TableCell>{e.kind}</TableCell>
-    <TableCell>{format(e.created_at)}</TableCell>
+    <TableCell>{format(e.created_at!)}</TableCell>
     <TableCell>{e.message}</TableCell>
   </TableRow>
 )

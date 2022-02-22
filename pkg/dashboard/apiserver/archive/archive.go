@@ -100,7 +100,7 @@ type Detail struct {
 // @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Success 200 {array} Archive
 // @Router /archives [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
@@ -138,8 +138,8 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "the archive uid"
 // @Success 200 {object} Detail
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /archives/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
@@ -186,8 +186,8 @@ func (s *Service) get(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
@@ -226,8 +226,8 @@ func (s *Service) delete(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
@@ -265,7 +265,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 // @Param name query string false "name"
 // @Success 200 {array} Archive
 // @Router /archives/schedules [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) listSchedule(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
@@ -298,7 +298,7 @@ func (s *Service) listSchedule(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "uid"
 // @Success 200 {object} Detail
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 // @Router /archives/schedules/{uid} [get]
 func (s *Service) detailSchedule(c *gin.Context) {
 	var (
@@ -363,8 +363,8 @@ func (s *Service) detailSchedule(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/schedules/{uid} [delete]
 func (s *Service) deleteSchedule(c *gin.Context) {
 	var (
@@ -403,8 +403,8 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/schedules [delete]
 func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	var (
@@ -442,7 +442,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 // @Param name query string false "name"
 // @Success 200 {array} Archive
 // @Router /archives/workflows [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) listWorkflow(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
@@ -475,7 +475,7 @@ func (s *Service) listWorkflow(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "uid"
 // @Success 200 {object} Detail
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 // @Router /archives/workflows/{uid} [get]
 func (s *Service) detailWorkflow(c *gin.Context) {
 	var (
@@ -540,8 +540,8 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/workflows/{uid} [delete]
 func (s *Service) deleteWorkflow(c *gin.Context) {
 	var (
@@ -568,8 +568,8 @@ func (s *Service) deleteWorkflow(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/workflows [delete]
 func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 	var (

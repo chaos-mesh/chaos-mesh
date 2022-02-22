@@ -16,26 +16,28 @@
  */
 
 import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
+import {
+  CoreEvent,
+  CoreWorkflowMeta,
+  PkgDashboardApiserverExperimentExperiment,
+  PkgDashboardApiserverScheduleSchedule,
+} from 'openapi'
 import { useEffect, useState } from 'react'
 
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
-import { Event } from 'api/events.type'
 import EventsChart from 'components/EventsChart'
 import EventsTimeline from 'components/EventsTimeline'
-import { Experiment } from 'api/experiments.type'
 import ExperimentIcon from '@ui/mui-extends/esm/Icons/Experiment'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Predefined from './Predefined'
-import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import T from 'components/T'
 import TotalStatus from './TotalStatus'
 import { TourProvider } from '@reactour/tour'
 import Welcome from './Welcome'
-import { Workflow } from 'api/workflows.type'
 import api from 'api'
 import { useTheme } from '@mui/material/styles'
 
@@ -59,10 +61,10 @@ const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Elem
 
 export default function Dashboard() {
   const [data, setData] = useState<{
-    workflows: Workflow[]
-    schedules: Schedule[]
-    experiments: Experiment[]
-    events: Event[]
+    workflows: CoreWorkflowMeta[]
+    schedules: PkgDashboardApiserverScheduleSchedule[]
+    experiments: PkgDashboardApiserverExperimentExperiment[]
+    events: CoreEvent[]
   }>({
     workflows: [],
     schedules: [],
@@ -71,10 +73,10 @@ export default function Dashboard() {
   })
 
   useEffect(() => {
-    const fetchExperiments = api.experiments.experiments()
-    const fetchSchedules = api.schedules.schedules()
-    const fetchWorkflows = api.workflows.workflows()
-    const fetchEvents = api.events.events({ limit: 216 })
+    const fetchExperiments = api.experiments.experimentsGet()
+    const fetchSchedules = api.schedules.schedulesGet()
+    const fetchWorkflows = api.workflows.workflowsGet()
+    const fetchEvents = api.events.eventsGet({ limit: 216 })
     const fetchAll = () => {
       Promise.all([fetchSchedules, fetchWorkflows, fetchExperiments, fetchEvents])
         .then((data) =>

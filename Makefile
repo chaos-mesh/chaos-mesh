@@ -349,7 +349,7 @@ install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
 install.sh: images/dev-env/.dockerbuilt
 	./hack/update_install_script.sh
 
-swagger_spec:SHELL:=$(RUN_IN_DEV_SHELL)
+swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt
 	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
 

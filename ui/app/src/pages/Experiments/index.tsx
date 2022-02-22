@@ -22,11 +22,11 @@ import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponen
 import AddIcon from '@mui/icons-material/Add'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import CloseIcon from '@mui/icons-material/Close'
-import { Experiment } from 'api/experiments.type'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import Loading from '@ui/mui-extends/esm/Loading'
 import NotFound from 'components/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
+import { PkgDashboardApiserverExperimentExperiment } from 'openapi'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
@@ -55,14 +55,14 @@ export default function Experiments() {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [experiments, setExperiments] = useState<Experiment[]>([])
+  const [experiments, setExperiments] = useState<PkgDashboardApiserverExperimentExperiment[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
   const fetchExperiments = (intervalID?: number) => {
     api.experiments
-      .experiments()
+      .experimentsGet()
       .then(({ data }) => {
         setExperiments(data)
 
@@ -92,25 +92,25 @@ export default function Experiments() {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.experiments.del
-        arg = uuid
+        actionFunc = api.experiments.experimentsUidDelete
+        arg = { uid: uuid }
 
         break
       case 'archiveMulti':
         action = 'archive'
-        actionFunc = api.experiments.delMulti
-        arg = Object.keys(batch)
+        actionFunc = api.experiments.experimentsDelete
+        arg = { uids: Object.keys(batch).join(',') }
         setBatch({})
 
         break
       case 'pause':
-        actionFunc = api.experiments.pause
-        arg = uuid
+        actionFunc = api.experiments.experimentsPauseUidPut
+        arg = { uid: uuid }
 
         break
       case 'start':
-        actionFunc = api.experiments.start
-        arg = uuid
+        actionFunc = api.experiments.experimentsStartUidPut
+        arg = { uid: uuid }
 
         break
     }
@@ -131,13 +131,13 @@ export default function Experiments() {
     }
   }
 
-  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [experiments[0].uid]: true } : {})
+  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [experiments[0].uid!]: true } : {})
 
   const handleBatchSelectAll = () =>
     setBatch(
       batchLength <= experiments.length
         ? experiments.reduce<Record<uuid, boolean>>((acc, d) => {
-            acc[d.uid] = true
+            acc[d.uid!] = true
 
             return acc
           }, {})

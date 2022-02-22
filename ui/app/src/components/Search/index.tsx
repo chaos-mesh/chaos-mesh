@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import {
   Autocomplete,
   Box,
@@ -24,19 +25,21 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import {
+  CoreWorkflowMeta,
+  PkgDashboardApiserverArchiveArchive,
+  PkgDashboardApiserverExperimentExperiment,
+  PkgDashboardApiserverScheduleSchedule,
+} from 'openapi'
 import { useMemo, useState } from 'react'
 
-import { Archive } from 'api/archives.type'
-import { Experiment } from 'api/experiments.type'
 import FingerprintIcon from '@mui/icons-material/Fingerprint'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import Paper from '@ui/mui-extends/esm/Paper'
-import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import SearchIcon from '@mui/icons-material/Search'
 import T from 'components/T'
 import Tooltip from '@ui/mui-extends/esm/Tooltip'
-import { Workflow } from 'api/workflows.type'
 import _debounce from 'lodash.debounce'
 import api from 'api'
 import { format } from 'lib/luxon'
@@ -66,7 +69,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-type Option = Workflow | Schedule | Experiment | Archive
+type OptionCategory =
+  | CoreWorkflowMeta
+  | PkgDashboardApiserverScheduleSchedule
+  | PkgDashboardApiserverExperimentExperiment
+  | PkgDashboardApiserverArchiveArchive
+type Option = OptionCategory & { is?: string }
 
 const Search: React.FC = () => {
   const classes = useStyles()
@@ -85,16 +93,16 @@ const Search: React.FC = () => {
         setOpen(true)
 
         const [workflows, schedules, experiments, archives, archivedWorkflows, archivedSchedules] = [
-          (await api.workflows.workflows()).data.map((d) => ({
+          (await api.workflows.workflowsGet()).data.map((d) => ({
             ...d,
             is: 'workflow' as 'workflow',
             kind: 'Workflow',
           })),
-          (await api.schedules.schedules()).data.map((d) => ({ ...d, is: 'schedule' as 'schedule' })),
-          (await api.experiments.experiments()).data.map((d) => ({ ...d, is: 'experiment' as 'experiment' })),
-          (await api.archives.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
-          (await api.workflows.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
-          (await api.schedules.archives()).data.map((d) => ({ ...d, is: 'archive' as 'archive' })),
+          (await api.schedules.schedulesGet()).data.map((d) => ({ ...d, is: 'schedule' })),
+          (await api.experiments.experimentsGet()).data.map((d) => ({ ...d, is: 'experiment' })),
+          (await api.archives.archivesGet()).data.map((d) => ({ ...d, is: 'archive' })),
+          (await api.archives.archivesWorkflowsGet()).data.map((d) => ({ ...d, is: 'archive' })),
+          (await api.archives.archivesSchedulesGet()).data.map((d) => ({ ...d, is: 'archive' })),
         ]
 
         const result = search(
@@ -112,7 +120,7 @@ const Search: React.FC = () => {
   )
 
   const groupBy = (option: Option) => T(`${option.is}s.title`, intl)
-  const getOptionLabel = (option: Option) => option.name
+  const getOptionLabel = (option: Option) => option.name!
   const isOptionEqualToValue = (option: Option, value: Option) => option.uid === value.uid
   const filterOptions = (options: Option[]) => options
 
@@ -140,10 +148,10 @@ const Search: React.FC = () => {
   const renderOption = (props: any, option: Option) => {
     const type = option.is
 
-    const uuid = option.uid
+    const uuid = option.uid!
     const name = option.name
     const kind = determineKind(option)
-    const time = option.created_at
+    const time = option.created_at!
 
     const onClick = () => {
       navigate(determineLink(uuid, type, kind))
@@ -166,9 +174,9 @@ const Search: React.FC = () => {
     )
   }
 
-  const onChange = (_: any, value: Option | null, reason: string) => {
+  const onChange = (_: any, value: Option, reason: string) => {
     if (reason === 'selectOption') {
-      navigate(determineLink(value!.uid, value!.is, determineKind(value!)))
+      navigate(determineLink(value.uid!, value.is, determineKind(value!)))
     }
   }
 

@@ -393,7 +393,9 @@ func (s *Service) getConfig(c *gin.Context) {
 // @Description Get the rbac config according to the user's choice.
 // @Tags common
 // @Produce json
-// @Success 200 {object} MapSlice
+// @Param namespace query string false "The namespace of RBAC"
+// @Param role query string false "The role of RBAC"
+// @Success 200 {object} map[string]string
 // @Router /common/rbac-config [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getRbacConfig(c *gin.Context) {

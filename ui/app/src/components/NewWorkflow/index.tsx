@@ -171,14 +171,16 @@ const NewWorkflow = () => {
   const onValidate = setWorkflowBasic
 
   const submitWorkflow = () => {
-    const workflow = yamlEditor?.getValue()
+    const workflow = yamlEditor?.getValue()!
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('Debug workflow:', workflow)
     }
 
     api.workflows
-      .newWorkflow(yaml.load(workflow!))
+      .workflowsNewPost({
+        request: yaml.load(workflow) as any,
+      })
       .then(() => {
         dispatch(resetWorkflow())
 

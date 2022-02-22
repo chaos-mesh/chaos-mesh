@@ -14,19 +14,19 @@
  * limitations under the License.
  *
  */
+
 import { Chip, CircularProgress, useTheme } from '@mui/material'
 
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
-import { Experiment } from 'api/experiments.type'
 import HelpIcon from '@mui/icons-material/Help'
 import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled'
+import { StatusAllChaosStatus } from 'openapi'
 import T from 'components/T'
-import { Workflow } from 'api/workflows.type'
 import { useIntl } from 'react-intl'
 
 interface StatusLabelProps {
-  status: Workflow['status'] | Experiment['status']
+  status: keyof StatusAllChaosStatus | 'unknown' | 'failed'
 }
 
 const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {

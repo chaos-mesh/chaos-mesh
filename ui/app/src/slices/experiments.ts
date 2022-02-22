@@ -18,28 +18,48 @@
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
-import { Scope } from 'components/NewExperiment/types'
+import { V1alpha1PodSelectorSpec } from 'openapi'
 import api from 'api'
 
 export const getNamespaces = createAsyncThunk(
   'common/chaos-available-namespaces',
-  async () => (await api.common.chaosAvailableNamespaces()).data
+  async () => (await api.common.commonChaosAvailableNamespacesGet()).data
 )
 export const getLabels = createAsyncThunk(
   'common/labels',
-  async (podNamespaceList: string[]) => (await api.common.labels(podNamespaceList)).data
+  async (podNamespaceList: string[]) =>
+    (
+      await api.common.commonLabelsGet({
+        podNamespaceList: podNamespaceList.join(','),
+      })
+    ).data
 )
 export const getAnnotations = createAsyncThunk(
   'common/annotations',
-  async (podNamespaceList: string[]) => (await api.common.annotations(podNamespaceList)).data
+  async (podNamespaceList: string[]) =>
+    (
+      await api.common.commonAnnotationsGet({
+        podNamespaceList: podNamespaceList.join(','),
+      })
+    ).data
 )
 export const getCommonPodsByNamespaces = createAsyncThunk(
   'common/pods',
-  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
+  async (data: V1alpha1PodSelectorSpec) =>
+    (
+      await api.common.commonPodsPost({
+        request: data,
+      })
+    ).data
 )
 export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
   'network/target/pods',
-  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
+  async (data: V1alpha1PodSelectorSpec) =>
+    (
+      await api.common.commonPodsPost({
+        request: data,
+      })
+    ).data
 )
 
 export type Env = 'k8s' | 'physic'

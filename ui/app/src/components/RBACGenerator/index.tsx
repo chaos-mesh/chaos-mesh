@@ -19,7 +19,7 @@ import { Field, Form, Formik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { RBACConfigParams } from 'api/common.type'
+import { CommonApiCommonRbacConfigGetRequest } from 'openapi'
 import { SelectField } from 'components/FormField'
 import Space from '@ui/mui-extends/esm/Space'
 import T from 'components/T'
@@ -58,9 +58,9 @@ const RBACGenerator = () => {
 
   const containerRef = useRef(null)
 
-  const fetchRBACConfig = (values: RBACConfigParams) =>
-    api.common.rbacConfig(values).then(({ data }) => {
-      const entries = Object.entries<string>(data)
+  const fetchRBACConfig = (values: CommonApiCommonRbacConfigGetRequest) =>
+    api.common.commonRbacConfigGet(values).then(({ data }) => {
+      const entries = Object.entries(data)
       const [name, yaml] = entries[0]
 
       setRBAC(yaml)
@@ -71,7 +71,7 @@ const RBACGenerator = () => {
     fetchRBACConfig({ namespace: 'default', role: 'viewer' })
   }, [])
 
-  const onValidate = ({ namespace, role, clustered }: RBACConfigParams & { clustered: boolean }) => {
+  const onValidate = ({ namespace, role, clustered }: CommonApiCommonRbacConfigGetRequest & { clustered: boolean }) => {
     fetchRBACConfig({
       namespace: clustered ? '' : namespace,
       role,

@@ -14,14 +14,15 @@
  * limitations under the License.
  *
  */
+
 import { Box, Button, Grow, Typography } from '@mui/material'
 
 import AddIcon from '@mui/icons-material/Add'
+import { CoreWorkflowMeta } from 'openapi'
 import DataTable from './DataTable'
 import Loading from '@ui/mui-extends/esm/Loading'
 import NotFound from 'components/NotFound'
 import T from 'components/T'
-import { Workflow } from 'api/workflows.type'
 import api from 'api'
 import { comparator } from 'lib/luxon'
 import { useIntervalFetch } from 'lib/hooks'
@@ -32,13 +33,13 @@ const Workflows = () => {
   const navigate = useNavigate()
 
   const [loading, setLoading] = useState(true)
-  const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const [workflows, setWorkflows] = useState<CoreWorkflowMeta[]>([])
 
   const fetchWorkflows = (intervalID?: number) => {
     api.workflows
-      .workflows()
+      .workflowsGet()
       .then(({ data }) => {
-        setWorkflows(data.sort((a, b) => comparator(b.created_at, a.created_at)))
+        setWorkflows(data.sort((a, b) => comparator(b.created_at!, a.created_at!)))
 
         if (data.every((d) => d.status === 'finished')) {
           clearInterval(intervalID)
