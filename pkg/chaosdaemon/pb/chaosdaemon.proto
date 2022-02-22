@@ -153,6 +153,7 @@ message TimeRequest {
   int64 sec = 2;
   int64 nsec = 3;
   uint64 clk_ids_mask = 4;
+  string uid = 5;
 }
 
 message ContainerAction {
