@@ -23,12 +23,10 @@ import (
 
 	"github.com/onsi/ginkgo"
 	v1 "k8s.io/api/core/v1"
-	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
-	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2ekubectl "k8s.io/kubernetes/test/e2e/framework/kubectl"
 	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
@@ -133,25 +131,8 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		setupSuite()
 
 		// Get clients
-		config, err := framework.LoadConfig()
-		framework.ExpectNoError(err, "failed to load config")
-		kubeCli, err := kubernetes.NewForConfig(config)
-		framework.ExpectNoError(err, "failed to create clientset")
-		aggrCli, err := aggregatorclientset.NewForConfig(config)
-		framework.ExpectNoError(err, "failed to create clientset")
-		apiExtCli, err := apiextensionsclientset.NewForConfig(config)
-		framework.ExpectNoError(err, "failed to create clientset")
-		oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
-		ocfg := test.NewDefaultOperatorConfig()
-		ocfg.Manager.ImageRegistry = e2econfig.TestConfig.ManagerImageRegistry
-		ocfg.Manager.ImageRepository = e2econfig.TestConfig.ManagerImage
-		ocfg.Manager.ImageTag = e2econfig.TestConfig.ManagerTag
-		ocfg.Daemon.ImageRegistry = e2econfig.TestConfig.DaemonImageRegistry
-		ocfg.Daemon.ImageRepository = e2econfig.TestConfig.DaemonImage
-		ocfg.Daemon.ImageTag = e2econfig.TestConfig.DaemonTag
-		ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
-		ocfg.EnableDashboard = e2econfig.TestConfig.EnableDashboard
-
+		oa, ocfg, err := test.BuildOperatorActionAndCfg(e2econfig.TestConfig)
+		framework.ExpectNoError(err, "failed to create operator action")
 		oa.CleanCRDOrDie()
 		err = oa.InstallCRD(ocfg)
 		framework.ExpectNoError(err, "failed to install crd")
