@@ -55,7 +55,6 @@ require (
 	github.com/swaggo/swag v1.6.7
 	github.com/vektah/gqlparser/v2 v2.2.0
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
-	go.uber.org/atomic v1.7.0
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
@@ -206,6 +205,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/dig v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/mod v0.4.2 // indirect
