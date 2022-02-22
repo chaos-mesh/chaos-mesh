@@ -27,7 +27,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 // ReadCommName returns the command name of process
@@ -79,7 +78,7 @@ func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
-					log.L().Error(err, "read status file error", "path", statusPath)
+					logger.Error(err, "read status file error", "path", statusPath)
 					return
 				}
 				defer reader.Close()
