@@ -5903,7 +5903,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
         "500":
           description: Internal Server Error
           schema:
@@ -5985,7 +5985,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
         "500":
           description: Internal Server Error
           schema:
@@ -6030,7 +6030,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
         "500":
           description: Internal Server Error
           schema:
@@ -6055,7 +6055,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
         "500":
           description: Internal Server Error
           schema:
@@ -6081,7 +6081,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/pkg_dashboard_apiserver_common.PhysicalMachine'
+              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine'
             type: array
         "500":
           description: Internal Server Error
@@ -6107,7 +6107,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/pkg_dashboard_apiserver_common.Pod'
+              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod'
             type: array
         "500":
           description: Internal Server Error
@@ -6344,7 +6344,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Experiment'
+              $ref: '#/definitions/pkg_dashboard_apiserver_experiment.Experiment'
             type: array
         "400":
           description: Bad Request
@@ -6441,7 +6441,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Detail'
+            $ref: '#/definitions/pkg_dashboard_apiserver_experiment.Detail'
         "400":
           description: Bad Request
           schema:
