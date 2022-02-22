@@ -56,6 +56,7 @@ export const actions = [
           helperText: 'specifies the length of time offset.',
         },
       ],
+      when: "action=='clock'",
     },
     {
       field: 'ref',
@@ -82,6 +83,7 @@ export const actions = [
             'specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB',
         },
       ],
+      when: "action=='disk-fill'",
     },
     {
       field: 'ref',
@@ -108,6 +110,7 @@ export const actions = [
             'specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB',
         },
       ],
+      when: "action=='disk-read-payload'",
     },
     {
       field: 'ref',
@@ -134,6 +137,7 @@ export const actions = [
             'specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB',
         },
       ],
+      when: "action=='disk-write-payload'",
     },
     {
       field: 'ref',
@@ -170,6 +174,7 @@ export const actions = [
           helperText: 'the port of agent server',
         },
       ],
+      when: "action=='jvm-exception'",
     },
     {
       field: 'ref',
@@ -188,6 +193,7 @@ export const actions = [
           helperText: 'the port of agent server',
         },
       ],
+      when: "action=='jvm-gc'",
     },
     {
       field: 'ref',
@@ -224,6 +230,7 @@ export const actions = [
           helperText: 'the port of agent server',
         },
       ],
+      when: "action=='jvm-latency'",
     },
     {
       field: 'ref',
@@ -260,6 +267,7 @@ export const actions = [
           helperText: "the return value for action \\'return\\'",
         },
       ],
+      when: "action=='jvm-return'",
     },
     {
       field: 'ref',
@@ -284,6 +292,7 @@ export const actions = [
           helperText: "RuleData used to save the rule file\\'s data, will use it when recover",
         },
       ],
+      when: "action=='jvm-rule-data'",
     },
     {
       field: 'ref',
@@ -315,6 +324,7 @@ export const actions = [
           helperText: 'the port of agent server',
         },
       ],
+      when: "action=='jvm-stress'",
     },
     {
       field: 'ref',
@@ -369,6 +379,7 @@ export const actions = [
           helperText: '',
         },
       ],
+      when: "action=='network-bandwidth'",
     },
     {
       field: 'ref',
@@ -425,6 +436,7 @@ export const actions = [
             "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
+      when: "action=='network-corrupt'",
     },
     {
       field: 'ref',
@@ -487,6 +499,7 @@ export const actions = [
             "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
+      when: "action=='network-delay'",
     },
     {
       field: 'ref',
@@ -511,6 +524,7 @@ export const actions = [
           helperText: 'update the DNS server in /etc/resolv.conf with this value',
         },
       ],
+      when: "action=='network-dns'",
     },
     {
       field: 'ref',
@@ -567,6 +581,7 @@ export const actions = [
             "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
+      when: "action=='network-duplicate'",
     },
     {
       field: 'ref',
@@ -623,6 +638,7 @@ export const actions = [
             "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
+      when: "action=='network-loss'",
     },
     {
       field: 'ref',
@@ -667,6 +683,7 @@ export const actions = [
           helperText: 'only impact egress traffic to these IP addresses',
         },
       ],
+      when: "action=='network-partition'",
     },
     {
       field: 'ref',
@@ -685,6 +702,7 @@ export const actions = [
           helperText: 'the signal number to send',
         },
       ],
+      when: "action=='process'",
     },
     {
       field: 'ref',
@@ -710,6 +728,7 @@ export const actions = [
           helperText: 'specifies N workers to apply the stressor.',
         },
       ],
+      when: "action=='stress-cpu'",
     },
     {
       field: 'ref',
@@ -729,5 +748,6 @@ export const actions = [
             'specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..',
         },
       ],
+      when: "action=='stress-mem'",
     },
   ]

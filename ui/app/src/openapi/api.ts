@@ -2644,25 +2644,25 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   address?: Array<string>
   /**
-   *
+   * +ui:form:when=action==\'clock\' +optional
    * @type {V1alpha1ClockSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   clock?: V1alpha1ClockSpec
   /**
-   *
+   * +ui:form:when=action==\'disk-fill\' +optional
    * @type {V1alpha1DiskFillSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'disk-fill'?: V1alpha1DiskFillSpec
   /**
-   *
+   * +ui:form:when=action==\'disk-read-payload\' +optional
    * @type {V1alpha1DiskPayloadSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'disk-read-payload'?: V1alpha1DiskPayloadSpec
   /**
-   *
+   * +ui:form:when=action==\'disk-write-payload\' +optional
    * @type {V1alpha1DiskPayloadSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
@@ -2674,37 +2674,37 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   duration?: string
   /**
-   *
+   * +ui:form:when=action==\'jvm-exception\' +optional
    * @type {V1alpha1JVMExceptionSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'jvm-exception'?: V1alpha1JVMExceptionSpec
   /**
-   *
+   * +ui:form:when=action==\'jvm-gc\' +optional
    * @type {V1alpha1JVMGCSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'jvm-gc'?: V1alpha1JVMGCSpec
   /**
-   *
+   * +ui:form:when=action==\'jvm-latency\' +optional
    * @type {V1alpha1JVMLatencySpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'jvm-latency'?: V1alpha1JVMLatencySpec
   /**
-   *
+   * +ui:form:when=action==\'jvm-return\' +optional
    * @type {V1alpha1JVMReturnSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'jvm-return'?: V1alpha1JVMReturnSpec
   /**
-   *
+   * +ui:form:when=action==\'jvm-rule-data\' +optional
    * @type {V1alpha1JVMRuleDataSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'jvm-rule-data'?: V1alpha1JVMRuleDataSpec
   /**
-   *
+   * +ui:form:when=action==\'jvm-stress\' +optional
    * @type {V1alpha1JVMStressSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
@@ -2716,49 +2716,49 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   mode?: string
   /**
-   *
+   * +ui:form:when=action==\'network-bandwidth\' +optional
    * @type {V1alpha1NetworkBandwidthSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-bandwidth'?: V1alpha1NetworkBandwidthSpec
   /**
-   *
+   * +ui:form:when=action==\'network-corrupt\' +optional
    * @type {V1alpha1NetworkCorruptSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-corrupt'?: V1alpha1NetworkCorruptSpec
   /**
-   *
+   * +ui:form:when=action==\'network-delay\' +optional
    * @type {V1alpha1NetworkDelaySpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-delay'?: V1alpha1NetworkDelaySpec
   /**
-   *
+   * +ui:form:when=action==\'network-dns\' +optional
    * @type {V1alpha1NetworkDNSSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-dns'?: V1alpha1NetworkDNSSpec
   /**
-   *
+   * +ui:form:when=action==\'network-duplicate\' +optional
    * @type {V1alpha1NetworkDuplicateSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-duplicate'?: V1alpha1NetworkDuplicateSpec
   /**
-   *
+   * +ui:form:when=action==\'network-loss\' +optional
    * @type {V1alpha1NetworkLossSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-loss'?: V1alpha1NetworkLossSpec
   /**
-   *
+   * +ui:form:when=action==\'network-partition\' +optional
    * @type {V1alpha1NetworkPartitionSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-partition'?: V1alpha1NetworkPartitionSpec
   /**
-   *
+   * +ui:form:when=action==\'process\' +optional
    * @type {V1alpha1ProcessSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
@@ -2770,13 +2770,13 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   selector?: V1alpha1PhysicalMachineSelectorSpec
   /**
-   *
+   * +ui:form:when=action==\'stress-cpu\' +optional
    * @type {V1alpha1StressCPUSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'stress-cpu'?: V1alpha1StressCPUSpec
   /**
-   *
+   * +ui:form:when=action==\'stress-mem\' +optional
    * @type {V1alpha1StressMemorySpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
