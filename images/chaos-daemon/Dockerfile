@@ -45,3 +45,4 @@ RUN case "$TARGET_PLATFORM" in \
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause
+COPY bin/cdh /usr/local/bin/cdh

@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"context"
+	"os"
 
 	"github.com/chaos-mesh/chaos-driver/pkg/client"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -28,10 +29,17 @@ import (
 const ioemPeriodUs = 10000
 
 func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockChaosRequest) (*pb.ApplyBlockChaosResponse, error) {
-	volumePath, err := normalizeVolumePath(req.VolumePath)
+	volumeName, err := normalizeVolumeName(req.VolumePath)
 	if err != nil {
-		log.Error(err, "normalize volume path", "volumePath", req.VolumePath)
+		log.Error(err, "normalize volume name", "volumePath", req.VolumePath)
 		return nil, err
+	}
+
+	// TODO: automatically modify the elevator to the `ioem` or `ioem-mq`
+
+	volumePath := "/dev/" + volumeName
+	if _, err := os.Stat(volumePath); err != nil {
+		return nil, errors.Wrapf(err, "volume path %s does not exist", volumePath)
 	}
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -70,17 +78,6 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 	} else {
 		return nil, errors.New("unknown action")
 	}
-}
-
-func normalizeVolumePath(volumePath string) (string, error) {
-	// the volumePath inside the request have two possible situations:
-	// 1. the volumePath is a block device path, e.g. /dev/sda
-	// 2. the volumePath is a directory path, e.g. /var/lib/docker/volumes/my-volume
-	// if it's a block device, the client library of chaos-driver can handle it
-	// but if it's a directory, chaos-daemon should automatically convert it to the corresponding block device path
-
-	// TODO: implement
-	return volumePath, nil
 }
 
 func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest) (*empty.Empty, error) {
