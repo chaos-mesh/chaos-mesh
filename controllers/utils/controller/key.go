@@ -63,7 +63,7 @@ func ParseNamespacedNameContainerVolumePath(record string) (types.NamespacedName
 		return types.NamespacedName{
 			Namespace: parts[0],
 			Name:      parts[1],
-		}, parts[2], strings.Join(parts[3:], ""), nil
+		}, parts[2], "/" + strings.Join(parts[3:], "/"), nil
 	}
 
 	return types.NamespacedName{

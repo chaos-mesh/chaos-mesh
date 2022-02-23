@@ -44,7 +44,7 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("blockchaos apply", "record", records[index])
 
-	_, _, volume_path, err := controller.ParseNamespacedNameContainerVolumePath(records[index].Id)
+	_, _, volumePath, err := controller.ParseNamespacedNameContainerVolumePath(records[index].Id)
 	if err != nil {
 		return v1alpha1.NotInjected, errors.Wrapf(err, "parse container and volumePath %s", records[index].Id)
 	}
@@ -88,7 +88,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 		res, err = pbClient.ApplyBlockChaos(ctx, &pb.ApplyBlockChaosRequest{
 			ContainerId: containerId,
-			VolumePath:  volume_path,
+			VolumePath:  volumePath,
 			Action:      pb.ApplyBlockChaosRequest_Delay,
 			Delay: &pb.BlockDelaySpec{
 				Delay:       int32(delay.Nanoseconds()),
@@ -104,7 +104,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	} else if blockchaos.Spec.Action == v1alpha1.BlockLimit {
 		res, err = pbClient.ApplyBlockChaos(ctx, &pb.ApplyBlockChaosRequest{
 			ContainerId: containerId,
-			VolumePath:  volume_path,
+			VolumePath:  volumePath,
 			Action:      pb.ApplyBlockChaosRequest_Limit,
 			Iops:        int32(blockchaos.Spec.IOPS),
 			EnterNS:     true,
