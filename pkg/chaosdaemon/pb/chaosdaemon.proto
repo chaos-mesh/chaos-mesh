@@ -122,8 +122,15 @@ message IPSetsRequest {
 }
 
 message IPSet {
-  string name = 1;
-  repeated string cidrs = 2;
+  string set_name = 1;
+  string net_port_name = 2;
+  string net_name = 3;
+  repeated CidrAndPort cidrs = 4;
+}
+
+message CidrAndPort {
+  string cidr = 1;
+  uint32 port = 2;
 }
 
 message IptablesChainsRequest {

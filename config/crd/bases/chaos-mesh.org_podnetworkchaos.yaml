@@ -44,16 +44,33 @@ spec:
                     cidrs:
                       description: The contents of ipset
                       items:
-                        type: string
+                        description: CidrAndPort represents CIDR and port pair
+                        properties:
+                          cidr:
+                            type: string
+                          port:
+                            maximum: 65535
+                            type: integer
+                        required:
+                        - cidr
+                        type: object
                       type: array
-                    name:
-                      description: The name of ipset
+                    netName:
+                      description: The name of net ipset
+                      type: string
+                    netPortName:
+                      description: The name of net,port ipset
+                      type: string
+                    setName:
+                      description: The name of set ipset
                       type: string
                     source:
                       type: string
                   required:
                   - cidrs
-                  - name
+                  - netName
+                  - netPortName
+                  - setName
                   - source
                   type: object
                 type: array

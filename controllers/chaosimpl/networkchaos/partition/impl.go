@@ -365,7 +365,7 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	m.T.Append(v1alpha1.RawIptables{
 		Name:      iptable.GenerateName(pbChainDirection, networkchaos),
 		Direction: chainDirection,
-		IPSets:    []string{dstIpset.Name},
+		IPSets:    []string{dstIpset.SetName},
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: m.Source,
 		},

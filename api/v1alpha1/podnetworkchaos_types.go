@@ -57,14 +57,29 @@ type PodNetworkChaosSpec struct {
 
 // RawIPSet represents an ipset on specific pod
 type RawIPSet struct {
-	// The name of ipset
-	Name string `json:"name"`
+	// The name of set ipset
+	SetName string `json:"setName"`
+
+	// The name of net,port ipset
+	NetPortName string `json:"netPortName"`
+
+	// The name of net ipset
+	NetName string `json:"netName"`
 
 	// The contents of ipset
-	Cidrs []string `json:"cidrs"`
+	Cidrs []CidrAndPort `json:"cidrs"`
 
 	// The name and namespace of the source network chaos
 	RawRuleSource `json:",inline"`
+}
+
+// CidrAndPort represents CIDR and port pair
+type CidrAndPort struct {
+	Cidr string `json:"cidr"`
+
+	// +optional
+	// +kubebuilder:validation:Maximum=65535
+	Port uint16 `json:"port,omitempty"`
 }
 
 // ChainDirection represents the direction of chain

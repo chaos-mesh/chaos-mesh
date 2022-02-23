@@ -307,7 +307,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		Type:        tcType,
 		TcParameter: spec.TcParameter,
 		Source:      m.Source,
-		IPSet:       dstIpset.Name,
+		IPSet:       dstIpset.SetName,
 		Device:      device,
 	})
 

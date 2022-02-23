@@ -1001,6 +1001,14 @@ func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Nam
 	return []*model.Namespace{{Ns: *ns}}, nil
 }
 
+func (r *rawIPSetResolver) Name(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *rawIPSetResolver) Cidrs(ctx context.Context, obj *v1alpha1.RawIPSet) ([]string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
 	return string(obj.Direction), nil
 }
@@ -1161,6 +1169,9 @@ func (r *Resolver) Process() generated.ProcessResolver { return &processResolver
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// RawIPSet returns generated.RawIPSetResolver implementation.
+func (r *Resolver) RawIPSet() generated.RawIPSetResolver { return &rawIPSetResolver{r} }
+
 // RawIptables returns generated.RawIptablesResolver implementation.
 func (r *Resolver) RawIptables() generated.RawIptablesResolver { return &rawIptablesResolver{r} }
 
@@ -1207,6 +1218,7 @@ type podSelectorSpecResolver struct{ *Resolver }
 type podStatusResolver struct{ *Resolver }
 type processResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type rawIPSetResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }

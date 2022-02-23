@@ -93,10 +93,10 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	var matchPart string
 	var interfaceMatcher string
 	if chain.Direction == pb.Chain_INPUT {
-		matchPart = "src"
+		matchPart = "src,dst"
 		interfaceMatcher = "-i"
 	} else if chain.Direction == pb.Chain_OUTPUT {
-		matchPart = "dst"
+		matchPart = "dst,dst"
 		interfaceMatcher = "-o"
 	} else {
 		return errors.Errorf("unknown chain direction %d", chain.Direction)
