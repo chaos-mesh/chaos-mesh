@@ -22,8 +22,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
@@ -79,14 +77,14 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 				Name: podNetworkChaos.Name,
 			}
 
-			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "ipset list", Value: podNetworkChaos.Pod.Ipset})
-			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "tc qdisc list", Value: podNetworkChaos.Pod.TcQdisc})
-			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "iptables list", Value: podNetworkChaos.Pod.Iptables})
-			output, err := cm.MarshalChaos(podNetworkChaos.Spec)
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "ipset list", Value: podNetworkChaos.Pod.Ipset})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "tc qdisc list", Value: podNetworkChaos.Pod.TcQdisc})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "iptables list", Value: podNetworkChaos.Pod.Iptables})
+			output, err := common.MarshalChaos(podNetworkChaos.Spec)
 			if err != nil {
 				return nil, err
 			}
-			podResult.Items = append(podResult.Items, cm.ItemResult{Name: "podnetworkchaos", Value: output})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "podnetworkchaos", Value: output})
 			result.Pods = append(result.Pods, podResult)
 		}
 

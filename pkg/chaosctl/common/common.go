@@ -143,7 +143,7 @@ func InitClientSet() (*ClientSet, error) {
 	}
 	ctrlClient, err := client.New(restconfig, client.Options{Scheme: scheme})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client")
+		return nil, errors.New("failed to create client")
 	}
 	kubeClient, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {

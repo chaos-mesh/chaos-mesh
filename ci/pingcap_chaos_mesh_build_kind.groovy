@@ -161,7 +161,7 @@ def build(String name, String code) {
 							ansiColor('xterm') {
 								sh """
 								curl http://fileserver.pingcap.net/download/builds/pingcap/chaos-mesh/cache-${ghprbTargetBranch}.tar.gz > cache-${ghprbTargetBranch}.tar.gz
-								tar xvf cache-${ghprbTargetBranch}.tar.gz
+								tar xf cache-${ghprbTargetBranch}.tar.gz
 								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder --config ./ci/builder.toml
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image
 								make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-e2e-helper
@@ -277,6 +277,12 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
         }
         builds["E2E on kubernetes 1.22.1"] = {
                 build("v1.22", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+        }
+		builds["Graceful Shutdown on kubernetes 1.12.10"] = {
+                build("v1.12", "${GLOBALS} GINKGO_NODES=1 KUBE_VERSION=v1.12.10 KIND_VERSION=0.8.1 ./hack/e2e.sh -- --ginkgo.focus='Graceful-Shutdown'")
+        }
+        builds["Graceful Shutdown on kubernetes 1.22.1"] = {
+                build("v1.22", "${GLOBALS} GINKGO_NODES=1 KUBE_VERSION=v1.22.1 ./hack/e2e.sh -- --ginkgo.focus='Graceful-Shutdown'")
         }
 		builds.failFast = false
 		if (!SKIP_TEST) {

@@ -21,9 +21,11 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -97,7 +99,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		matchPart = "dst"
 		interfaceMatcher = "-o"
 	} else {
-		return fmt.Errorf("unknown chain direction %d", chain.Direction)
+		return errors.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
 	if chain.Device == "" {
@@ -162,7 +164,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("unknown direction %d", chain.Direction)
+		return errors.Errorf("unknown direction %d", chain.Direction)
 	}
 	return nil
 }
@@ -203,7 +205,7 @@ func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
 		return iptables.deleteAndWriteRules(chain)
 	}
 
-	return encodeOutputToError(out, err)
+	return util.EncodeOutputToError(out, err)
 }
 
 // deleteAndWriteRules will remove all existing function in the chain
@@ -234,7 +236,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	cmd := processBuilder.Build()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(out, err)
+		return util.EncodeOutputToError(out, err)
 	}
 
 	if strings.Contains(string(out), rule) {
@@ -250,7 +252,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	cmd = processBuilder.Build()
 	out, err = cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(out, err)
+		return util.EncodeOutputToError(out, err)
 	}
 
 	return nil
@@ -264,7 +266,7 @@ func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
 	cmd := processBuilder.Build()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(out, err)
+		return util.EncodeOutputToError(out, err)
 	}
 
 	return nil

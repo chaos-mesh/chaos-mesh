@@ -28,21 +28,73 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	daemonCgroups "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log.Info("Executing stressors", "request", req)
-	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
-	if err != nil {
-		return nil, err
-	}
-	control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
+
+	// cpuStressors
+	cpuInstance, cpuStartTime, err := s.ExecCPUStressors(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	processBuilder := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
+	// memoryStressor
+	memoryInstance, memoryStartTime, err := s.ExecMemoryStressors(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ExecStressResponse{
+		CpuInstance:     cpuInstance,
+		CpuStartTime:    cpuStartTime,
+		MemoryInstance:  memoryInstance,
+		MemoryStartTime: memoryStartTime,
+	}, nil
+}
+
+func (s *DaemonServer) CancelStressors(ctx context.Context,
+	req *pb.CancelStressRequest) (*empty.Empty, error) {
+	CpuPid, err := strconv.Atoi(req.CpuInstance)
+	if err != nil {
+		return nil, err
+	}
+
+	MemoryPid, err := strconv.Atoi(req.MemoryInstance)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("Canceling stressors", "request", req)
+
+	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, CpuPid, req.CpuStartTime)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, MemoryPid, req.MemoryStartTime)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("killing stressor successfully")
+	return &empty.Empty{}, nil
+}
+
+func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
+	req *pb.ExecStressRequest) (string, int64, error) {
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
+	if err != nil {
+		return "", 0, err
+	}
+	control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
+	if err != nil {
+		return "", 0, err
+	}
+
+	processBuilder := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.CpuStressors)...).
 		EnablePause()
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
@@ -51,33 +103,33 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
-		return nil, err
+		return "", 0, err
 	}
-	log.Info("Start process successfully")
+	log.Info("Start stress-ng successfully")
 	ct, err := procState.CreateTime()
 	if err != nil {
-		return nil, err
+		return "", 0, err
 	}
 
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill stressors failed", "request", req)
+			log.Error(kerr, "kill stress-ng failed", "request", req)
 		}
-		return nil, err
+		return "", 0, err
 	}
 
 	for {
 		// TODO: find a better way to resume pause process
 		if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
-			return nil, err
+			return "", 0, err
 		}
 
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
 
-		comm, err := ReadCommName(cmd.Process.Pid)
+		comm, err := util.ReadCommName(cmd.Process.Pid)
 		if err != nil {
-			return nil, err
+			return "", 0, err
 		}
 		if comm != "pause\n" {
 			log.Info("pause has been resumed", "comm", comm)
@@ -86,24 +138,64 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 		log.Info("the process hasn't resumed, step into the following loop", "comm", comm)
 	}
 
-	return &pb.ExecStressResponse{
-		Instance:  strconv.Itoa(cmd.Process.Pid),
-		StartTime: ct,
-	}, nil
+	return strconv.Itoa(cmd.Process.Pid), ct, nil
 }
 
-func (s *DaemonServer) CancelStressors(ctx context.Context,
-	req *pb.CancelStressRequest) (*empty.Empty, error) {
-	pid, err := strconv.Atoi(req.Instance)
+func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
+	req *pb.ExecStressRequest) (string, int64, error) {
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
-		return nil, err
+		return "", 0, err
 	}
-	log.Info("Canceling stressors", "request", req)
+	control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
+	if err != nil {
+		return "", 0, err
+	}
+	processBuilder := bpm.DefaultProcessBuilder("memStress", strings.Fields(req.MemoryStressors)...).
+		EnablePause()
 
-	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, pid, req.StartTime)
-	if err != nil {
-		return nil, err
+	if req.EnterNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	log.Info("killing stressor successfully")
-	return &empty.Empty{}, nil
+	cmd := processBuilder.Build()
+
+	procState, err := s.backgroundProcessManager.StartProcess(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+	log.Info("Start memStress successfully")
+	ct, err := procState.CreateTime()
+	if err != nil {
+		return "", 0, err
+	}
+
+	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
+		if kerr := cmd.Process.Kill(); kerr != nil {
+			log.Error(kerr, "kill memStress failed", "request", req)
+		}
+		return "", 0, err
+	}
+
+	for {
+		// TODO: find a better way to resume pause process
+		if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
+			return "", 0, err
+		}
+
+		log.Info("send signal to resume process")
+		time.Sleep(time.Millisecond)
+
+		comm, err := util.ReadCommName(cmd.Process.Pid)
+
+		if err != nil {
+			return "", 0, err
+		}
+		if comm != "pause\n" {
+			log.Info("pause has been resumed", "comm", comm)
+			break
+		}
+		log.Info("the process hasn't resumed, step into the following loop", "comm", comm)
+	}
+
+	return strconv.Itoa(cmd.Process.Pid), ct, nil
 }

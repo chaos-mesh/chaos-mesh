@@ -21,9 +21,8 @@ import (
 	"reflect"
 	"strings"
 
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var physicalMachineLog = logf.Log.WithName("physical-machine-resource")

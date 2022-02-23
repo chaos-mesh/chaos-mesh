@@ -17,8 +17,8 @@ package namespace
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,10 +66,10 @@ func (s *namespaceSelector) Match(obj client.Object) bool {
 func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Selector, error) {
 	if !option.ClusterScoped {
 		if len(spec.Namespaces) > 1 {
-			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
+			return nil, errors.New("could NOT use more than 1 namespace selector within namespace scoped mode")
 		} else if len(spec.Namespaces) == 1 {
 			if spec.Namespaces[0] != option.TargetNamespace {
-				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", spec.Namespaces[0])
+				return nil, errors.Errorf("could NOT list pods from out of scoped namespace: %s", spec.Namespaces[0])
 			}
 		}
 	}

@@ -17,10 +17,10 @@ package httpchaos
 
 import (
 	"context"
-	"errors"
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"

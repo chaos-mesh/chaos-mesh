@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -84,7 +85,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		defer pbClient.Close()
 	}
 	if err != nil {
-		if utils.IsFailToGet(err) {
+		if errors.Is(err, utils.ErrContainerNotFound) {
 			// pretend the disappeared container has been recovered
 			return v1alpha1.NotInjected, nil
 		}

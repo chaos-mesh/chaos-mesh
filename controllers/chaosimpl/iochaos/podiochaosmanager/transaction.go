@@ -16,9 +16,10 @@
 package podiochaosmanager
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 )
 
 // PodIOTransaction represents a modification on podnetwork
@@ -61,7 +62,7 @@ func (a *Append) Apply(chaos *v1alpha1.PodIOChaos) error {
 	case v1alpha1.IOChaosAction:
 		chaos.Spec.Actions = append(chaos.Spec.Actions, item)
 	default:
-		return fmt.Errorf("unknown type of item")
+		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
 
 	return nil
@@ -107,7 +108,7 @@ func (t *PodIOTransaction) Append(item interface{}) error {
 		})
 		return nil
 	default:
-		return fmt.Errorf("unknown type of item")
+		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
 }
 

@@ -20,9 +20,11 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -43,7 +45,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		// set dns server to the chaos dns server's address
 
 		if len(req.DnsServer) == 0 {
-			return &empty.Empty{}, fmt.Errorf("invalid set dns server request %v", req)
+			return &empty.Empty{}, errors.Errorf("invalid set dns server request %v", req)
 		}
 
 		// backup the /etc/resolv.conf
@@ -56,7 +58,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -73,7 +75,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err = cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -89,7 +91,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))

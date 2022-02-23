@@ -18,6 +18,7 @@ package utils
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -50,20 +51,17 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 	var pod v1.Pod
 	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	decoded.Pod = &pod
 	if len(pod.Status.ContainerStatuses) == 0 {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
@@ -74,8 +72,7 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		}
 	}
 	if len(decoded.ContainerId) == 0 {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 

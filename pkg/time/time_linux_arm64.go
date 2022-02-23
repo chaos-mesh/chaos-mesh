@@ -16,7 +16,7 @@
 package time
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )

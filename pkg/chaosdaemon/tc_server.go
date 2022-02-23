@@ -21,13 +21,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-
-	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -39,11 +40,11 @@ const (
 
 func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
 	if qdisc == nil {
-		return nil, fmt.Errorf("qdisc is required")
+		return nil, errors.New("qdisc is required")
 	}
 
 	if qdisc.Type == "" {
-		return nil, fmt.Errorf("qdisc.Type is required")
+		return nil, errors.New("qdisc.Type is required")
 	}
 
 	args := []string{"qdisc", action, "dev", "eth0"}
@@ -87,7 +88,7 @@ func getAllInterfaces(pid uint32) ([]string, error) {
 	for _, iface := range data {
 		name, ok := iface["ifname"]
 		if !ok {
-			return []string{}, fmt.Errorf("fail to read ifname from ip -j addr show")
+			return []string{}, errors.New("fail to read ifname from ip -j addr show")
 		}
 
 		ifaces = append(ifaces, name.(string))
@@ -298,7 +299,7 @@ func (c *tcClient) flush(device string) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
-			return encodeOutputToError(output, err)
+			return util.EncodeOutputToError(output, err)
 		}
 	}
 	return nil
@@ -310,7 +311,7 @@ func (c *tcClient) addTc(device string, parentArg string, handleArg string, tc *
 	if tc.Type == pb.Tc_BANDWIDTH {
 
 		if tc.Tbf == nil {
-			return fmt.Errorf("tbf is nil while type is BANDWIDTH")
+			return errors.New("tbf is nil while type is BANDWIDTH")
 		}
 		err := c.addTbf(device, parentArg, handleArg, tc.Tbf)
 		if err != nil {
@@ -320,7 +321,7 @@ func (c *tcClient) addTc(device string, parentArg string, handleArg string, tc *
 	} else if tc.Type == pb.Tc_NETEM {
 
 		if tc.Netem == nil {
-			return fmt.Errorf("netem is nil while type is NETEM")
+			return errors.New("netem is nil while type is NETEM")
 		}
 		err := c.addNetem(device, parentArg, handleArg, tc.Netem)
 		if err != nil {
@@ -328,7 +329,7 @@ func (c *tcClient) addTc(device string, parentArg string, handleArg string, tc *
 		}
 
 	} else {
-		return fmt.Errorf("unknown tc qdisc type")
+		return errors.New("unknown tc qdisc type")
 	}
 
 	return nil
@@ -350,7 +351,7 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(output, err)
+		return util.EncodeOutputToError(output, err)
 	}
 
 	for index := 1; index <= 3; index++ {
@@ -363,7 +364,7 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return encodeOutputToError(output, err)
+			return util.EncodeOutputToError(output, err)
 		}
 	}
 
@@ -381,7 +382,7 @@ func (c *tcClient) addNetem(device string, parent string, handle string, netem *
 	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(output, err)
+		return util.EncodeOutputToError(output, err)
 	}
 	return nil
 }
@@ -397,7 +398,7 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return encodeOutputToError(output, err)
+		return util.EncodeOutputToError(output, err)
 	}
 	return nil
 }

@@ -18,10 +18,9 @@ package diskloss
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	compute "google.golang.org/api/compute/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -80,12 +79,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 	}
 	if len(notFound) != 0 {
-		err = fmt.Errorf("instance (%s) does not have the disk (%s)", selected.Instance, notFound)
+		err = errors.Errorf("instance (%s) does not have the disk (%s)", selected.Instance, notFound)
 		impl.Log.Error(err, "the instance does not have the disk")
 		return v1alpha1.NotInjected, err
 	}
 	if len(marshalErr) != 0 {
-		err = fmt.Errorf("instance (%s), marshal disk info error (%s)", selected.Instance, marshalErr)
+		err = errors.Errorf("instance (%s), marshal disk info error (%s)", selected.Instance, marshalErr)
 		impl.Log.Error(err, "marshal disk info error")
 		return v1alpha1.NotInjected, err
 	}

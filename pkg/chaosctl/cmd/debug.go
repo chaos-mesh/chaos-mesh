@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
@@ -106,7 +107,7 @@ func debugResouceCommand(option *DebugOptions, chaosType string, debugger Debugg
 // Run debug
 func (o *DebugOptions) Run(debugger Debugger, args []string, client *ctrlclient.CtrlClient) error {
 	if len(args) > 1 {
-		return fmt.Errorf("only one chaos could be specified")
+		return errors.New("only one chaos could be specified")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

@@ -31,15 +31,13 @@ import (
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/kubernetes/test/e2e/framework/config"
 	"k8s.io/kubernetes/test/e2e/framework/testfiles"
 
-	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
-
-	// test sources
 	_ "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config" // test sources
 )
 
 // handleFlags sets up all flags and parses the command line.

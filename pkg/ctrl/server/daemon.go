@@ -17,11 +17,11 @@ package server
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -39,7 +39,8 @@ func (h *DaemonHelper) GetPidFromPod(ctx context.Context, pod *v1.Pod) (uint32, 
 	defer daemonClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return 0, fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
+		return 0, err
 	}
 
 	res, err := daemonClient.ContainerGetPid(ctx, &pb.ContainerRequest{

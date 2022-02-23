@@ -16,10 +16,10 @@
 package genericwebhook
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -67,11 +67,11 @@ func Validate(obj interface{}) field.ErrorList {
 	return errorList
 }
 
-func Aggregate(errors field.ErrorList) error {
-	if errors == nil || len(errors) == 0 {
+func Aggregate(errs field.ErrorList) error {
+	if errs == nil || len(errs) == 0 {
 		return nil
 	}
-	return fmt.Errorf(errors.ToAggregate().Error())
+	return errors.New(errs.ToAggregate().Error())
 }
 
 func getValidator(obj interface{}, webhook string, nilable bool) FieldValidator {

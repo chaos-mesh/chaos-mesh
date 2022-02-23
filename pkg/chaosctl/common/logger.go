@@ -17,8 +17,8 @@ package common
 
 import (
 	"github.com/go-logr/logr"
-	"k8s.io/klog"
-	"k8s.io/klog/klogr"
+	"k8s.io/klog/v2"
+	"k8s.io/klog/v2/klogr"
 )
 
 type LoggerFlushFunc func()
@@ -35,7 +35,7 @@ func SetupGlobalLogger(logger logr.Logger) {
 }
 
 func L() logr.Logger {
-	if globalLogger == nil {
+	if globalLogger.GetSink() == nil {
 		panic("global logger not initialized")
 	}
 	return globalLogger

@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pkg/errors"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -85,7 +86,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	kind, ok := v1alpha1.AllKindsIncludeScheduleAndWorkflow()[requestKind]
 	if !ok {
-		err := fmt.Errorf("kind %s is not support", requestKind)
+		err := errors.Wrapf(errInvalidValue, "kind %s is not support", requestKind)
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 	chaos := kind.SpawnObject()

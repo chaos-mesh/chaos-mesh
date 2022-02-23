@@ -18,10 +18,10 @@ package collector
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
