@@ -122,8 +122,6 @@ func enableIOEMElevator(volumeName string) error {
 		// the default scheduler is none, and it's fine to keep ioem without
 		// significant overhead.
 
-		// The current scheduler should be surrounded by "[]"
-
 		if strings.HasPrefix(scheduler, "ioem") {
 			choosenScheduler = scheduler // it's either ioem or ioem-mq
 		}
