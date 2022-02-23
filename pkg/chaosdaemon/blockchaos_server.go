@@ -104,7 +104,7 @@ func normalizeVolumeName(ctx context.Context, volumePath string) (string, error)
 }
 
 func enableIOEMElevator(volumeName string) error {
-	schedulerPath := "/sys/block/" + volumeName + "/queue/scheduler"
+	schedulerPath := "/host-sys/block/" + volumeName + "/queue/scheduler"
 	rawSchedulers, err := os.ReadFile(schedulerPath)
 	if err != nil {
 		return errors.Wrapf(err, "reading schedulers %s", schedulerPath)
