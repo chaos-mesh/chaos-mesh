@@ -19,8 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/helper"
 	"github.com/spf13/cobra"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/helper"
 )
 
 var rootCmd = &cobra.Command{

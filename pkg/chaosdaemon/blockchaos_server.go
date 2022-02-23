@@ -129,6 +129,8 @@ func enableIOEMElevator(volumeName string) error {
 	if err != nil {
 		return errors.Wrapf(err, "writing %s to %s", choosenScheduler, schedulerPath)
 	}
+
+	return nil
 }
 
 func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest) (*empty.Empty, error) {
