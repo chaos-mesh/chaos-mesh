@@ -90,7 +90,12 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 }
 
 func normalizeVolumeName(ctx context.Context, volumePath string) (string, error) {
-	volumeName, err := bpm.DefaultProcessBuilder(chaosDaemonHelperCommand, "normalize-volume-name", volumePath).SetContext(ctx).SetNS(1, bpm.PidNS).Build().Output()
+	volumeName, err := bpm.DefaultProcessBuilder(chaosDaemonHelperCommand, "normalize-volume-name", volumePath).
+		SetContext(ctx).
+		SetNS(1, bpm.MountNS).
+		EnableLocalMnt().
+		Build().
+		Output()
 	if err != nil {
 		return "", errors.Wrapf(err, "normalize volume name %s", volumePath)
 	}
