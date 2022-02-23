@@ -42,7 +42,7 @@ interface ScopeProps {
   podsPreviewDesc?: string | JSX.Element
 }
 
-const phases = ['all', 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
+const phases = [{ label: 'All', value: 'all' }, 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
 const Scope: React.FC<ScopeProps> = ({
   namespaces,
@@ -156,11 +156,17 @@ const Scope: React.FC<ScopeProps> = ({
           onChange={handleChangeIncludeAll}
           disabled={disabled}
         >
-          {phases.map((option: string) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
+          {phases.map((option) =>
+            typeof option === 'string' ? (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ) : (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            )
+          )}
         </SelectField>
       </OtherOptions>
 
