@@ -41,10 +41,13 @@ func ParseNamespacedName(namespacedName string) (types.NamespacedName, error) {
 func ParseNamespacedNameContainer(namespacedName string) (types.NamespacedName, string, error) {
 	parts := strings.Split(namespacedName, "/")
 	if len(parts) > 2 {
+		//  a lowercase RFC 1123 label must consist of lower case alphanumeric
+		//  characters or '-', and must start and end with an alphanumeric
+		//  character, so the container name can never have "/"
 		return types.NamespacedName{
 			Namespace: parts[0],
 			Name:      parts[1],
-		}, strings.Join(parts[2:], ""), nil
+		}, parts[2], nil
 	}
 
 	return types.NamespacedName{
