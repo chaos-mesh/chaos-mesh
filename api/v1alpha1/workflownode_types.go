@@ -113,6 +113,7 @@ const (
 	ConditionAccomplished   WorkflowNodeConditionType = "Accomplished"
 	ConditionDeadlineExceed WorkflowNodeConditionType = "DeadlineExceed"
 	ConditionChaosInjected  WorkflowNodeConditionType = "ChaosInjected"
+	ConditionAborted        WorkflowNodeConditionType = "Aborted"
 )
 
 type WorkflowNodeCondition struct {
