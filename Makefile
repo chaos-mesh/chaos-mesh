@@ -6,8 +6,12 @@ export IMAGE_REGISTRY ?= localhost:5000
 IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
 
 export IMAGE_TAG ?= latest
-export IMAGE_PROJECT ?= chaos-mesh
+export IMAGE_PROJECT ?= pingcap
 export IMAGE_BUILD ?= 1
+
+export IMAGE_CHAOS_MESH_PROJECT ?= chaos-mesh
+export IMAGE_CHAOS_DAEMON_PROJECT ?= chaos-mesh
+export IMAGE_CHAOS_DASHBOARD_PROJECT ?= chaos-mesh
 
 ROOT=$(shell pwd)
 HELM_BIN=$(ROOT)/output/bin/helm
@@ -19,9 +23,6 @@ export IMAGE_BUILD_ENV_BUILD ?= 0
 export IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 export IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 export IMAGE_DEV_ENV_BUILD ?= 0
-
-export IMAGE_CHAOS_MESH_E2E_PROJECT ?= pingcap
-export IMAGE_E2E_HELPER_PROJECT ?= pingcap
 
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
 GOENV  	:= CGO_ENABLED=0
