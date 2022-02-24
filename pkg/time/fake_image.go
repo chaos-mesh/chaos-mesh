@@ -17,6 +17,7 @@ package time
 
 import (
 	"bytes"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"runtime"
 
 	"github.com/pkg/errors"
@@ -38,6 +39,10 @@ type FakeImage struct {
 	// offset stores the table with variable name, and it's address in content.
 	// the key presents extern variable name, ths value is the address/offset within the content.
 	offset map[string]int
+	// OriginFuncCode stores the raw func code like getTimeOfDay & ClockGetTime.
+	OriginFuncCode []byte
+	// OriginAddress stores the origin address of OriginFuncCode.
+	OriginAddress uint64
 }
 
 func NewFakeImage(symbolName string, content []byte, offset map[string]int) *FakeImage {
@@ -46,7 +51,7 @@ func NewFakeImage(symbolName string, content []byte, offset map[string]int) *Fak
 
 // AttachToProcess would use ptrace to replace the VDSO ELF entry with FakeImage.
 // Each item in parameter "variables" needs a corresponding entry in FakeImage.offset.
-func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error {
+func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err error) {
 	if len(variables) != len(it.offset) {
 		return errors.New("fake image: extern variable number not match")
 	}
@@ -67,6 +72,44 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error
 		}
 	}()
 
+	vdsoEntry, err := FindVDSOEntry(program)
+	if err != nil {
+		return errors.Wrapf(err, "PID : %d", pid)
+	}
+
+	fakeEntry := it.FindInjectedImage(program)
+
+	// target process has not been injected yet
+	if fakeEntry == nil {
+		fakeEntry, err = it.InjectFakeImage(program, vdsoEntry)
+		if err != nil {
+			return errors.Wrapf(err, "injecting fake image , PID : %d", pid)
+		}
+		defer func() {
+			if err != nil {
+				errIn := it.TryReWriteFakeImage(program)
+				if errIn != nil {
+					log.Error(errIn, "rewrite fail, recover fail")
+				}
+			}
+		}()
+	}
+
+	for k, v := range variables {
+		if offset, ok := it.offset[k]; ok {
+			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(offset), v)
+			if err != nil {
+				return errors.Wrapf(err, "set %s for time skew, pid: %d", k, pid)
+			}
+		} else {
+			return errors.Errorf("no such extern variable in fake image: %s", k)
+		}
+	}
+
+	return
+}
+
+func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	var vdsoEntry *mapreader.Entry
 	for index := range program.Entries {
 		// reverse loop is faster
@@ -77,9 +120,12 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error
 		}
 	}
 	if vdsoEntry == nil {
-		return errors.Errorf("cannot find [vdso] entry, pid: %d", pid)
+		return nil, chaoserr.NotFound("VDSOEntry")
 	}
+	return vdsoEntry, nil
+}
 
+func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram) *mapreader.Entry {
 	// minus tailing variable part
 	// every variable has 8 bytes
 	constImageLen := len(it.content) - 8*len(it.offset)
@@ -96,39 +142,78 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error
 
 		if bytes.Equal(*image, it.content[0:constImageLen]) {
 			fakeEntry = &e
-			log.Info("found injected image", "addr", fakeEntry.StartAddress, "pid", pid)
-			break
+			log.Info("found injected image", "addr", fakeEntry.StartAddress)
+			return fakeEntry
 		}
 	}
-
-	// target process has not been injected yet
-	if fakeEntry == nil {
-		fakeEntry, err = program.MmapSlice(it.content)
-		if err != nil {
-			return errors.Wrapf(err, "mmap fake image, pid: %d", pid)
-		}
-
-		originAddr, err := program.FindSymbolInEntry(it.symbolName, vdsoEntry)
-		if err != nil {
-			return errors.Wrapf(err, "find origin clock_gettime in vdso, pid: %d", pid)
-		}
-
-		err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
-		if err != nil {
-			return errors.Wrapf(err, "override origin clock_gettime, pid: %d", pid)
-		}
-	}
-
-	for k, v := range variables {
-		if offset, ok := it.offset[k]; ok {
-			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(offset), v)
-			if err != nil {
-				return errors.Wrapf(err, "set %s for time skew, pid: %d", k, pid)
-			}
-		} else {
-			return errors.Errorf("no such extern variable in fake image: %s", k)
-		}
-	}
-
 	return nil
+}
+
+// InjectFakeImage Usage CheckList:
+// When error : TryReWriteFakeImage after InjectFakeImage.
+func (it *FakeImage) InjectFakeImage(program *ptrace.TracedProgram,
+	vdsoEntry *mapreader.Entry) (*mapreader.Entry, error) {
+	fakeEntry, err := program.MmapSlice(it.content)
+	if err != nil {
+		return nil, errors.Wrapf(err, "mmap fake image")
+	}
+
+	originAddr, size, err := program.FindSymbolInEntry(it.symbolName, vdsoEntry)
+	if err != nil {
+		return nil, errors.Wrapf(err, "find origin %s in vdso", it.symbolName)
+	}
+	funcBytes, err := program.ReadSlice(originAddr, size)
+	err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
+	if err != nil {
+		errIn := it.TryReWriteFakeImage(program)
+		if errIn != nil {
+			log.Error(errIn, "rewrite fail, recover fail")
+		}
+		return nil, errors.Wrapf(err, "override origin %s", it.symbolName)
+	}
+
+	it.OriginFuncCode = *funcBytes
+	it.OriginAddress = originAddr
+	return fakeEntry, nil
+}
+
+func (it *FakeImage) TryReWriteFakeImage(program *ptrace.TracedProgram) error {
+	if it.OriginFuncCode != nil {
+		err := program.PtraceWriteSlice(it.OriginAddress, it.OriginFuncCode)
+		if err != nil {
+			return err
+		}
+		it.OriginFuncCode = nil
+		it.OriginAddress = 0
+	}
+	return nil
+}
+
+func (it *FakeImage) Recover(pid int) error {
+	runtime.LockOSThread()
+	defer func() {
+		runtime.UnlockOSThread()
+	}()
+	if it.OriginFuncCode == nil {
+		return nil
+	}
+	program, err := ptrace.Trace(pid)
+	if err != nil {
+		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
+	}
+	defer func() {
+		err = program.Detach()
+		if err != nil {
+			log.Error(err, "fail to detach program", "pid", program.Pid())
+		}
+	}()
+
+	fakeEntry := it.FindInjectedImage(program)
+
+	if fakeEntry == nil {
+		return nil
+	}
+
+	err = it.TryReWriteFakeImage(program)
+	return err
 }

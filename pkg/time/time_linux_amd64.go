@@ -31,7 +31,7 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 			return nil
 		}
 	}
-	timeSkew, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask)
+	timeSkew, err := NewTimekew(deltaSec, deltaNsec, clockIdsMask)
 	if err != nil {
 		return err
 	}
