@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package chaosdaemon
+package util
 
 import (
 	"fmt"
@@ -22,9 +22,11 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 )
 
 // ReadCommName returns the command name of process
@@ -45,10 +47,10 @@ func ReadCommName(pid int) (string, error) {
 
 // GetChildProcesses will return all child processes's pid. Include all generations.
 // only return error when /proc/pid/tasks cannot be read
-func GetChildProcesses(ppid uint32) ([]uint32, error) {
+func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 	procs, err := ioutil.ReadDir(bpm.DefaultProcPrefix)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "read /proc/pid/tasks , ppid : %d", ppid)
 	}
 
 	type processPair struct {
@@ -76,7 +78,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
-					log.Error(err, "read status file error", "path", statusPath)
+					logger.Error(err, "read status file error", "path", statusPath)
 					return
 				}
 				defer reader.Close()
@@ -101,17 +103,17 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		done <- true
 	}()
 
-	processGraph := NewGraph()
+	processGraph := graph.NewGraph()
 	for {
 		select {
 		case pair := <-pairs:
 			processGraph.Insert(pair.Ppid, pair.Pid)
 		case <-done:
-			return processGraph.Flatten(ppid), nil
+			return processGraph.Flatten(ppid, logger), nil
 		}
 	}
 }
 
-func encodeOutputToError(output []byte, err error) error {
+func EncodeOutputToError(output []byte, err error) error {
 	return errors.Errorf("error code: %v, msg: %s", err, string(output))
 }
