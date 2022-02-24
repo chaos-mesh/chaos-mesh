@@ -25,25 +25,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
-// vdsoEntryName is the name of the vDSO entry
-const vdsoEntryName = "[vdso]"
-
-// FakeImage introduce the replacement of VDSO ELF entry and customizable variables.
-// FakeImage could be constructed by LoadFakeImageFromEmbedFs(), and then used by FakeClockInjector.
-type FakeImage struct {
-	// symbolName is the name of the symbol to be replaced.
-	symbolName string
-	// content presents .text section which has been "manually relocation", the address of extern variables have been calculated manually
-	content []byte
-	// offset stores the table with variable name, and it's address in content.
-	// the key presents extern variable name, ths value is the address/offset within the content.
-	offset map[string]int
-}
-
-func NewFakeImage(symbolName string, content []byte, offset map[string]int) *FakeImage {
-	return &FakeImage{symbolName: symbolName, content: content, offset: offset}
-}
-
 // AttachToProcess would use ptrace to replace the VDSO ELF entry with FakeImage.
 // Each item in parameter "variables" needs a corresponding entry in FakeImage.offset.
 func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error {
