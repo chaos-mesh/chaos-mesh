@@ -20,6 +20,9 @@ export IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
 export IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 export IMAGE_DEV_ENV_BUILD ?= 0
 
+export IMAGE_CHAOS_MESH_E2E_PROJECT ?= pingcap
+export IMAGE_E2E_HELPER_PROJECT ?= pingcap
+
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
 GOENV  	:= CGO_ENABLED=0
 CGOENV 	:= CGO_ENABLED=1
