@@ -16,13 +16,10 @@
 package time
 
 import (
-	"github.com/go-logr/logr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/pkg/errors"
+	"sync"
 )
-
-type CompositeInjector struct {
-	injectors []FakeClockInjector
-}
 
 // clockGettimeSkewFakeImage is the filename of fake image after compiling
 const clockGettimeSkewFakeImage = "fake_clock_gettime.o"
@@ -37,108 +34,116 @@ const (
 	externVarTvNsecDelta  = "TV_NSEC_DELTA"
 )
 
-type SkewClockGetTime struct {
-	deltaSeconds     int64
-	deltaNanoSeconds int64
-	clockIDsMask     uint64
-	fakeImage        *FakeImage
-	logger           logr.Logger
-}
-
-func NewSkewClockGetTime(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, logger logr.Logger) (*SkewClockGetTime, error) {
-	var image *FakeImage
-	var err error
-
-	if image, err = LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime, logger); err != nil {
-		return nil, errors.Wrap(err, "load fake image")
-	}
-
-	return NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image, logger), nil
-}
-
-func NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage, logger logr.Logger) *SkewClockGetTime {
-	return &SkewClockGetTime{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage, logger: logger}
-}
-
-func (it *SkewClockGetTime) Inject(pid int) error {
-	return it.fakeImage.AttachToProcess(pid, map[string]uint64{
-		externVarClockIdsMask: it.clockIDsMask,
-		externVarTvSecDelta:   uint64(it.deltaSeconds),
-		externVarTvNsecDelta:  uint64(it.deltaNanoSeconds),
-	})
-}
-
-func (it *SkewClockGetTime) Recover(pid int) error {
-	zeroSkew := NewSkewClockGetTimeWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage, it.logger)
-	return zeroSkew.Inject(pid)
-}
-
 // timeofdaySkewFakeImage is the filename of fake image after compiling
 const timeOfDaySkewFakeImage = "fake_gettimeofday.o"
 
 // getTimeOfDay is the target function would be replaced
 const getTimeOfDay = "gettimeofday"
 
-type SkewGetTimeOfDay struct {
+type Config struct {
 	deltaSeconds     int64
 	deltaNanoSeconds int64
-	fakeImage        *FakeImage
-	logger           logr.Logger
+	clockIDsMask     uint64
 }
 
-func NewSkewGetTimeOfDay(deltaSeconds int64, deltaNanoSeconds int64, logger logr.Logger) (*SkewGetTimeOfDay, error) {
-	var image *FakeImage
-	var err error
+func (c *Config) DeepCopy() tasks.Object {
+	return &Config{
+		c.deltaSeconds,
+		c.deltaNanoSeconds,
+		c.clockIDsMask,
+	}
+}
 
-	if image, err = LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay, logger); err != nil {
+func (c *Config) Add(a tasks.Addable) error {
+	A, OK := a.(*Config)
+	if OK {
+		c.deltaSeconds += A.deltaSeconds
+		c.deltaNanoSeconds += A.deltaNanoSeconds
+		c.clockIDsMask |= A.clockIDsMask
+		return nil
+	}
+	return errors.Wrapf(tasks.ErrCanNotAdd, "expect type : *time.Config, got : %T", a)
+}
+
+func (c *Config) New(values interface{}) (tasks.Injectable, error) {
+	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime)
+	if err != nil {
 		return nil, errors.Wrap(err, "load fake image")
 	}
 
-	return NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, image, logger), nil
+	getTimeOfDayimage, err := LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay)
+	if err != nil {
+		return nil, errors.Wrap(err, "load fake image")
+	}
+
+	return &Skew{
+		SkewConfig:   *c.DeepCopy().(*Config),
+		clockGetTime: clockGetTimeImage,
+		getTimeOfDay: getTimeOfDayimage,
+	}, nil
 }
 
-func NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, fakeImage *FakeImage, logger logr.Logger) *SkewGetTimeOfDay {
-	return &SkewGetTimeOfDay{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, fakeImage: fakeImage}
+func (c *Config) Assign(injectable tasks.Injectable) error {
+	I, OK := injectable.(*Skew)
+	if OK {
+		I.SkewConfig = *c
+		return nil
+	}
+	return errors.Wrapf(tasks.ErrCanNotAssign, "expect type : *time.Skew, got : %T", injectable)
 }
 
-func (it *SkewGetTimeOfDay) Inject(pid int) error {
-	return it.fakeImage.AttachToProcess(pid, map[string]uint64{
-		externVarTvSecDelta:  uint64(it.deltaSeconds),
-		externVarTvNsecDelta: uint64(it.deltaNanoSeconds),
+type Skew struct {
+	SkewConfig   Config
+	clockGetTime *FakeImage
+	getTimeOfDay *FakeImage
+
+	locker sync.Mutex
+	logger           logr.Logger
+}
+
+func (s *Skew) Fork() (tasks.ChaosOnProcessGroup, error) {
+	// TODO : to KEAO can I share FakeImage between threads?
+	injectable, err := s.SkewConfig.New(nil)
+	if err != nil {
+		return nil, err
+	}
+	return injectable.(*Skew), nil
+}
+
+func (s *Skew) Assign(injectable tasks.Injectable) error {
+	I, OK := injectable.(*Skew)
+	if OK {
+		I.SkewConfig = s.SkewConfig
+		return nil
+	}
+	return errors.Wrapf(tasks.ErrCanNotAssign, "expect type : *time.Skew, got : %T", injectable)
+}
+
+func (s *Skew) Inject(pid tasks.PID) error {
+	s.locker.Lock()
+	defer s.locker.Unlock()
+	err := s.clockGetTime.AttachToProcess(pid, map[string]uint64{
+		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
+		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
+		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
 	})
-}
-
-func (it *SkewGetTimeOfDay) Recover(pid int) error {
-	zeroSkew := NewSkewGetTimeOfDayWithCustomFakeImage(0, 0, it.fakeImage, it.logger)
-	return zeroSkew.Inject(pid)
-}
-
-func (it *CompositeInjector) Inject(pid int) error {
-	for _, injector := range it.injectors {
-		if err := injector.Inject(pid); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (it *CompositeInjector) Recover(pid int) error {
-	for _, injector := range it.injectors {
-		if err := injector.Recover(pid); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func NewTimeSkew(deltaSec int64, deltaNsec int64, clockIdsMask uint64, logger logr.Logger) (FakeClockInjector, error) {
-	skewClockGetTime, err := NewSkewClockGetTime(deltaSec, deltaNsec, clockIdsMask, logger)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	skewGetTimeOfDay, err := NewSkewGetTimeOfDay(deltaSec, deltaNsec, logger)
+
+	err := s.getTimeOfDay.AttachToProcess(pid, map[string]uint64{
+		externVarTvSecDelta:  uint64(s.SkewConfig.deltaSeconds),
+		externVarTvNsecDelta: uint64(s.SkewConfig.deltaNanoSeconds),
+	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &CompositeInjector{injectors: []FakeClockInjector{skewClockGetTime, skewGetTimeOfDay}}, nil
+	panic("implement me")
+}
+
+func (s *Skew) Recover(pid tasks.PID) error {
+	s.locker.Lock()
+	defer s.locker.Unlock()
+	//TODO implement me
+	panic("implement me")
 }

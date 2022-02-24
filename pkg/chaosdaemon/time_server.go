@@ -17,6 +17,8 @@ package chaosdaemon
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
 
@@ -24,6 +26,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 )
+
+type TimeChaosManager struct {
+	TimeChaosManager tasks.TaskManager
+	ShutdownLocker   sync.RWMutex
+}
+
+func (c *TimeChaosManager) SetTimeOffset() {
+
+}
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
