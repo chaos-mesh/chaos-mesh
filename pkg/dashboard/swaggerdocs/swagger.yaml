@@ -370,6 +370,7 @@ definitions:
         description: |-
           DeviceName indicates the name of the device.
           Needed in detach-volume.
+          +ui:form:when=action=='detach-volume'
           +optional
         type: string
       duration:
@@ -383,6 +384,7 @@ definitions:
       endpoint:
         description: |-
           Endpoint indicates the endpoint of the aws server. Just used it in test now.
+          +ui:form:ignore
           +optional
         type: string
       secretName:
@@ -394,6 +396,7 @@ definitions:
         description: |-
           EbsVolume indicates the ID of the EBS volume.
           Needed in detach-volume.
+          +ui:form:when=action=='detach-volume'
           +optional
         type: string
     type: object
@@ -870,6 +873,7 @@ definitions:
         description: |-
           The device name of disks to detach.
           Needed in disk-loss.
+          +ui:form:when=action=='disk-loss'
           +optional
         items:
           type: string
@@ -974,8 +978,8 @@ definitions:
         type: object
       target:
         description: |-
-          +kubebuilder:validation:Enum=Request;Response
           Target is the object to be selected and injected.
+          +kubebuilder:validation:Enum=Request;Response
         type: string
       value:
         description: |-
@@ -998,6 +1002,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.AttrOverrideSpec'
         description: |-
           Attr defines the overrided attribution
+          +ui:form:when=action=='attrOverride'
           +optional
         type: object
       containerNames:
@@ -1015,6 +1020,7 @@ definitions:
           decimal numbers, each with optional fraction and a unit suffix,
           such as "300ms".
           Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +ui:form:when=action=='latency'
           +optional
         type: string
       duration:
@@ -1031,6 +1037,7 @@ definitions:
         description: |-
           Errno defines the error code that returned by I/O action.
           refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+          +ui:form:when=action=='fault'
           +optional
         type: integer
       methods:
@@ -1045,6 +1052,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.MistakeSpec'
         description: |-
           Mistake defines what types of incorrectness are injected to IO operations
+          +ui:form:when=action=='mistake'
           +optional
         type: object
       mode:
@@ -1283,10 +1291,6 @@ definitions:
           +optional
         type: string
     type: object
-  v1alpha1.LabelSelectorRequirements:
-    items:
-      $ref: '#/definitions/metav1.LabelSelectorRequirement'
-    type: array
   v1alpha1.LossSpec:
     properties:
       correlation:
@@ -1625,9 +1629,7 @@ definitions:
   v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
-        description: |-
-          the subAction, generate automatically
-          +optional
+        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
         type: string
       address:
         description: |-
@@ -1639,19 +1641,27 @@ definitions:
         type: array
       clock:
         $ref: '#/definitions/v1alpha1.ClockSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='clock'
+          +optional
         type: object
       disk-fill:
         $ref: '#/definitions/v1alpha1.DiskFillSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='disk-fill'
+          +optional
         type: object
       disk-read-payload:
         $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='disk-read-payload'
+          +optional
         type: object
       disk-write-payload:
         $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='disk-write-payload'
+          +optional
         type: object
       duration:
         description: |-
@@ -1660,27 +1670,39 @@ definitions:
         type: string
       jvm-exception:
         $ref: '#/definitions/v1alpha1.JVMExceptionSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-exception'
+          +optional
         type: object
       jvm-gc:
         $ref: '#/definitions/v1alpha1.JVMGCSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-gc'
+          +optional
         type: object
       jvm-latency:
         $ref: '#/definitions/v1alpha1.JVMLatencySpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-latency'
+          +optional
         type: object
       jvm-return:
         $ref: '#/definitions/v1alpha1.JVMReturnSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-return'
+          +optional
         type: object
       jvm-rule-data:
         $ref: '#/definitions/v1alpha1.JVMRuleDataSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-rule-data'
+          +optional
         type: object
       jvm-stress:
         $ref: '#/definitions/v1alpha1.JVMStressSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-stress'
+          +optional
         type: object
       mode:
         description: |-
@@ -1690,35 +1712,51 @@ definitions:
         type: string
       network-bandwidth:
         $ref: '#/definitions/v1alpha1.NetworkBandwidthSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-bandwidth'
+          +optional
         type: object
       network-corrupt:
         $ref: '#/definitions/v1alpha1.NetworkCorruptSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-corrupt'
+          +optional
         type: object
       network-delay:
         $ref: '#/definitions/v1alpha1.NetworkDelaySpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-delay'
+          +optional
         type: object
       network-dns:
         $ref: '#/definitions/v1alpha1.NetworkDNSSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-dns'
+          +optional
         type: object
       network-duplicate:
         $ref: '#/definitions/v1alpha1.NetworkDuplicateSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-duplicate'
+          +optional
         type: object
       network-loss:
         $ref: '#/definitions/v1alpha1.NetworkLossSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-loss'
+          +optional
         type: object
       network-partition:
         $ref: '#/definitions/v1alpha1.NetworkPartitionSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-partition'
+          +optional
         type: object
       process:
         $ref: '#/definitions/v1alpha1.ProcessSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='process'
+          +optional
         type: object
       selector:
         $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
@@ -1728,17 +1766,16 @@ definitions:
         type: object
       stress-cpu:
         $ref: '#/definitions/v1alpha1.StressCPUSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='stress-cpu'
+          +optional
         type: object
       stress-mem:
         $ref: '#/definitions/v1alpha1.StressMemorySpec'
-        description: +optional
-        type: object
-      uid:
         description: |-
-          the experiment ID
+          +ui:form:when=action=='stress-mem'
           +optional
-        type: string
+        type: object
       value:
         description: |-
           Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -1756,13 +1793,6 @@ definitions:
         description: |-
           Map of string keys and values that can be used to select objects.
           A selector based on annotations.
-          +optional
-        type: object
-      expressionSelectors:
-        $ref: '#/definitions/v1alpha1.LabelSelectorRequirements'
-        description: |-
-          a slice of label selector expressions that can be used to select objects.
-          A list of selectors based on set-based label expressions.
           +optional
         type: object
       fieldSelectors:
@@ -1964,13 +1994,6 @@ definitions:
         description: |-
           Map of string keys and values that can be used to select objects.
           A selector based on annotations.
-          +optional
-        type: object
-      expressionSelectors:
-        $ref: '#/definitions/v1alpha1.LabelSelectorRequirements'
-        description: |-
-          a slice of label selector expressions that can be used to select objects.
-          A list of selectors based on set-based label expressions.
           +optional
         type: object
       fieldSelectors:
@@ -2661,7 +2684,7 @@ paths:
       description: Get the detail of an archived schedule experiment.
       parameters:
       - description: uid
-        in: query
+        in: path
         name: uid
         required: true
         type: string
@@ -2756,7 +2779,7 @@ paths:
       description: Get the detail of an archived workflow.
       parameters:
       - description: uid
-        in: query
+        in: path
         name: uid
         required: true
         type: string
