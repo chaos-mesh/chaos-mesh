@@ -1,0 +1,28 @@
+{
+  "name": "@ui/openapi",
+  "version": "2.1.0",
+  "description": "Generate @ui/app needed codes from OpenAPI",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "codegen": "node --experimental-json-modules ./codegen.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
+    "rimraf": "^3.0.2",
+    "signale": "^1.4.0",
+    "typescript": "^4.5.4",
+    "yargs": "^17.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "@openapitools/openapi-generator-cli": "^2.4.25",
+    "babel-jest": "^27.4.5",
+    "jest": "^27.4.3"
+  }
+}
