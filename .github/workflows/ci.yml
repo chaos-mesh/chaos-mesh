@@ -36,6 +36,7 @@ jobs:
               - Makefile
               - go.*
               - '**.go'
+              - 'helm/**'
             ui:
               - 'ui/yarn.lock'
               - '**.js'

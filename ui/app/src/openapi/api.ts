@@ -8548,7 +8548,10 @@ export const CommonApiFp = function (configuration?: Configuration) {
       request: V1alpha1PhysicalMachineSelectorSpec,
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverCommonPhysicalMachine>>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPhysicalMachine>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.commonPhysicalmachinesPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -8563,7 +8566,12 @@ export const CommonApiFp = function (configuration?: Configuration) {
     async commonPodsPost(
       request: V1alpha1PodSelectorSpec,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverCommonPod>>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPod>>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.commonPodsPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -8690,7 +8698,7 @@ export const CommonApiFactory = function (configuration?: Configuration, basePat
     commonPhysicalmachinesPost(
       request: V1alpha1PhysicalMachineSelectorSpec,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverCommonPhysicalMachine>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPhysicalMachine>> {
       return localVarFp.commonPhysicalmachinesPost(request, options).then((request) => request(axios, basePath))
     },
     /**
@@ -8703,7 +8711,7 @@ export const CommonApiFactory = function (configuration?: Configuration, basePat
     commonPodsPost(
       request: V1alpha1PodSelectorSpec,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverCommonPod>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPod>> {
       return localVarFp.commonPodsPost(request, options).then((request) => request(axios, basePath))
     },
     /**
@@ -10635,7 +10643,10 @@ export const SchedulesApiFp = function (configuration?: Configuration) {
       name?: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverScheduleSchedule>>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedule>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesGet(namespace, name, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -10706,7 +10717,12 @@ export const SchedulesApiFp = function (configuration?: Configuration) {
     async schedulesUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverScheduleDetail>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleDetail>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -10742,7 +10758,7 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
       namespace?: string,
       name?: string,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverScheduleSchedule>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedule>> {
       return localVarFp.schedulesGet(namespace, name, options).then((request) => request(axios, basePath))
     },
     /**
@@ -10792,7 +10808,10 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    schedulesUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverScheduleDetail> {
+    schedulesUidGet(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleDetail> {
       return localVarFp.schedulesUidGet(uid, options).then((request) => request(axios, basePath))
     },
   }
@@ -11390,7 +11409,10 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       uid: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverWorkflowStatusResponse>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsUidDelete(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -11501,7 +11523,10 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsUidDelete(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverWorkflowStatusResponse> {
+    workflowsUidDelete(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse> {
       return localVarFp.workflowsUidDelete(uid, options).then((request) => request(axios, basePath))
     },
     /**

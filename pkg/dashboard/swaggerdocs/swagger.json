@@ -490,7 +490,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -609,7 +609,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -674,7 +674,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -709,7 +709,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -748,7 +748,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/pkg_dashboard_apiserver_common.PhysicalMachine"
+                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine"
                             }
                         }
                     },
@@ -788,7 +788,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/pkg_dashboard_apiserver_common.Pod"
+                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod"
                             }
                         }
                     },
@@ -1466,7 +1466,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/pkg_dashboard_apiserver_schedule.Schedule"
+                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Schedule"
                             }
                         }
                     },
@@ -1691,7 +1691,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_schedule.Detail"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Detail"
                         }
                     },
                     "400": {
