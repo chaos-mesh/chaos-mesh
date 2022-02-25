@@ -57,6 +57,8 @@ jobs:
             IMAGE_DEV_ENV_BUILD=1 \
             IMAGE_BUILD_ENV_BUILD=1 \
             IMAGE_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            IMAGE_BUILD_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            IMAGE_DEV_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
             IMAGE_REGISTRY=ghcr.io \
             UI=$UI \
             image-$IMAGE
