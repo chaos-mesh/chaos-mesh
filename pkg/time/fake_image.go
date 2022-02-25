@@ -92,6 +92,8 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 				if errIn != nil {
 					log.Error(errIn, "rewrite fail, recover fail")
 				}
+				it.OriginFuncCode = nil
+				it.OriginAddress = 0
 			}
 		}()
 	}
