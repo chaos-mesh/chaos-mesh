@@ -1,0 +1,57 @@
+name: Upload Image
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  build-for-pr:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request && startsWith( github.event.comment.body, '/build-image') }}
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install zstd
+        run: |
+          sudo apt-get install zstd jq -y
+
+      - name: Build Chaos Mesh
+        run: |
+          make -B \
+            IMAGE_TAG=latest \
+            IMAGE_DEV_ENV_BUILD=1 \
+            IMAGE_BUILD_ENV_BUILD=1 \
+            IMAGE_PROJECT=chaos-mesh \
+            IMAGE_REGISTRY=ghcr.io \
+            UI=1 \
+            image
+          
+          for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
+          do
+            docker image save ghcr.io/chaos-mesh/$IMAGE | zstd > $IMAGE.tar
+          done
+
+      - name: Upload Chaos Mesh Image to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: chaos-mesh-images
+          path: |
+            *.tar.zst
+
+      - name: Get Artifact URL
+        id: get_artifact_url
+        env:
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          ARTIFACT_URL=$(curl \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$GITHUB_REPOSITORY_OWNER/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts | jq ".artifacts[0].archive_download_url")
+          
+          echo "::set-output name=artifact_url::$ARTIFACT_URL"
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            You can download the image from:
+            ${{ steps.get_artifact_url.outputs.artifact_url }}
