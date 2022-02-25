@@ -39,8 +39,8 @@ var _ InnerObject = (*HTTPChaos)(nil)
 type HTTPChaosSpec struct {
 	PodSelector `json:",inline"`
 
-	// +kubebuilder:validation:Enum=Request;Response
 	// Target is the object to be selected and injected.
+	// +kubebuilder:validation:Enum=Request;Response
 	Target PodHttpChaosTarget `json:"target"`
 
 	PodHttpChaosActions `json:",inline"`
