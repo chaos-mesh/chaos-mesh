@@ -1,4 +1,4 @@
-name: Upload Image
+name: Upload Image for PR
 on:
   issue_comment:
     types: [created]
