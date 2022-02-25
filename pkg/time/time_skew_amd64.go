@@ -101,7 +101,7 @@ type Skew struct {
 }
 
 func (s *Skew) Fork() (tasks.ChaosOnProcessGroup, error) {
-	// TODO : to KEAO can I share FakeImage between threads?
+	// TODO : to KEAO , can I share FakeImage between threads?
 	injectable, err := s.SkewConfig.New(nil)
 	if err != nil {
 		return nil, err
@@ -130,19 +130,30 @@ func (s *Skew) Inject(pid tasks.PID) error {
 		return err
 	}
 
-	err := s.getTimeOfDay.AttachToProcess(pid, map[string]uint64{
+	err = s.getTimeOfDay.AttachToProcess(pid, map[string]uint64{
 		externVarTvSecDelta:  uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta: uint64(s.SkewConfig.deltaNanoSeconds),
 	})
 	if err != nil {
 		return err
 	}
-	panic("implement me")
+	return err
 }
 
 func (s *Skew) Recover(pid tasks.PID) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()
-	//TODO implement me
-	panic("implement me")
+
+	err0 := s.clockGetTime.Recover(pid)
+	err1 := s.getTimeOfDay.Recover(pid)
+	if err0 != nil && err1 != nil {
+		return errors.Wrapf(err0, ",%v", err1)
+	}
+	if err0 != nil {
+		return err0
+	}
+	if err1 != nil {
+		return err1
+	}
+	return nil
 }
