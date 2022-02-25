@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	bmInstallCommand = "bminstall.sh -b -Dorg.jboss.byteman.transform.all -Dorg.jboss.byteman.verbose -p %d %d"
+	bmInstallCommand = "bminstall.sh -b -Dorg.jboss.byteman.transform.all -Dorg.jboss.byteman.verbose -Dorg.jboss.byteman.compileToBytecode -p %d %d"
 	bmSubmitCommand  = "bmsubmit.sh -p %d -%s %s"
 )
 
