@@ -505,7 +505,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -624,7 +624,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -689,7 +689,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -724,7 +724,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_common.MapSlice"
                         }
                     },
                     "500": {
@@ -763,7 +763,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine"
+                                "$ref": "#/definitions/pkg_dashboard_apiserver_common.PhysicalMachine"
                             }
                         }
                     },
@@ -803,7 +803,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod"
+                                "$ref": "#/definitions/pkg_dashboard_apiserver_common.Pod"
                             }
                         }
                     },
@@ -1095,7 +1095,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/pkg_dashboard_apiserver_experiment.Experiment"
+                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Experiment"
                             }
                         }
                     },
@@ -1372,7 +1372,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_experiment.Detail"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Detail"
                         }
                     },
                     "400": {
@@ -2106,7 +2106,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_workflow.StatusResponse"
+                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse"
                         }
                     },
                     "400": {
