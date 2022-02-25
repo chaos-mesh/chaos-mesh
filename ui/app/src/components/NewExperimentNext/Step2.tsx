@@ -25,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckIcon from '@mui/icons-material/Check'
+import Mode from './form/Mode'
 import Nodes from './form/Nodes'
 import OtherOptions from 'components/OtherOptions'
 import Paper from '@ui/mui-extends/esm/Paper'
@@ -48,7 +49,6 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const schema = basicSchema({ env, scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
   const dispatch = useStoreDispatch()
-
   const originalInit = useMemo(
     () =>
       inSchedule
@@ -133,7 +133,12 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                         <SkeletonN n={6} />
                       )
                     ) : (
-                      <Nodes />
+                      <>
+                        <Nodes />
+                        <Divider />
+                        <Typography>{T('newE.scope.mode')}</Typography>
+                        <Mode disabled={false} modeScope={'spec'} scope={'spec.selector'} />
+                      </>
                     )}
                   </Space>
                 </Grid>

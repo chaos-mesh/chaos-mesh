@@ -131,10 +131,6 @@ func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) 
 	}, nil
 }
 
-func NewLogger() logr.Logger {
-	return ctrl.Log
-}
-
 type noCacheReader struct {
 	fx.Out
 
@@ -212,12 +208,12 @@ func NewClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
+// Module would provide objects to fx for dependency injection.
 var Module = fx.Provide(
 	NewOption,
 	NewClient,
 	NewClientSet,
 	NewManager,
-	NewLogger,
 	NewAuthCli,
 	NewScheme,
 	NewConfig,
