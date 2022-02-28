@@ -14,12 +14,34 @@ jobs:
         run: |
           sudo apt-get install zstd jq -y
 
+      - name: Build Chaos Mesh Build Env
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
+          fi
+
+          make image-build-env
+
+      - name: Build Chaos Mesh Dev Env
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
+          fi
+
+          make image-dev-env
+      
       - name: Build Chaos Mesh
         run: |
-          make -B \
+          make \
             IMAGE_TAG=latest \
-            IMAGE_DEV_ENV_BUILD=1 \
-            IMAGE_BUILD_ENV_BUILD=1 \
             IMAGE_PROJECT=chaos-mesh \
             IMAGE_REGISTRY=ghcr.io \
             UI=1 \
