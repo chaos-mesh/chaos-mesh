@@ -20,6 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -112,6 +113,43 @@ func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
 			return processGraph.Flatten(ppid, logger), nil
 		}
 	}
+}
+
+func GetLinuxVersion() (string, error) {
+	f, err := os.Open("/proc/version")
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+func CompareLinuxVersion(major, revision int) (bool, error) {
+	linuxVersion, err := GetLinuxVersion()
+	versionNum := strings.Split(linuxVersion[len("linux version"):], "-")
+
+	versions := strings.Split(strings.TrimSpace(versionNum[0]), ".")
+	majorVersionNumber, err := strconv.Atoi(versions[0])
+	if err != nil {
+		return false, err
+	}
+	revisionNumber, err := strconv.Atoi(versions[1])
+	if err != nil {
+		return false, err
+	}
+	if majorVersionNumber >= major {
+		if majorVersionNumber == 4 {
+			if revisionNumber < revision {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
 
 func EncodeOutputToError(output []byte, err error) error {
