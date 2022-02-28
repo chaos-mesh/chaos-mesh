@@ -20,6 +20,10 @@ jobs:
           path: |
             cache
           key: chaos-mesh-build-${{ github.event.issue.number }}
+      
+      - name: Enable docker builder
+        run: |
+          DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder
 
       - name: Build Chaos Mesh Build Env
         env:
