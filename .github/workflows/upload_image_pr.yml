@@ -27,7 +27,7 @@ jobs:
           
           for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
           do
-            docker image save ghcr.io/chaos-mesh/$IMAGE | zstd > $IMAGE.tar
+            docker image save ghcr.io/chaos-mesh/$IMAGE | zstd > $IMAGE.tar.zst
           done
 
       - name: Upload Chaos Mesh Image to Artifacts
