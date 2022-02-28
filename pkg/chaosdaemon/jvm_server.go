@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -61,21 +60,21 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		}
 	}
 
-	bytemanHome := os.Getenv("BYTEMAN_HOME")
-	if len(bytemanHome) == 0 {
-		return nil, errors.New("environment variable BYTEMAN_HOME not set")
-	}
-
-	// copy agent.jar to container's namespace
-	//if req.EnterNS {
-	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
-	output, err := processBuilder.Build().CombinedOutput()
-	if err != nil {
-		return nil, err
-	}
-	if len(output) > 0 {
-		log.Info("mkdir", "output", string(output))
-	}
+	//bytemanHome := os.Getenv("BYTEMAN_HOME")
+	//if len(bytemanHome) == 0 {
+	//	return nil, errors.New("environment variable BYTEMAN_HOME not set")
+	//}
+	//
+	//// copy agent.jar to container's namespace
+	////if req.EnterNS {
+	//processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
+	//output, err := processBuilder.Build().CombinedOutput()
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if len(output) > 0 {
+	//	log.Info("mkdir", "output", string(output))
+	//}
 
 	// todo: Need to write the BYTEMAN_HOME environment variable in bminstall.sh and bmsubmit.sh
 	// or do this in code ?
@@ -84,9 +83,9 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		return nil, err
 	}
 	//processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
+	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-	output, err = processBuilder.Build().CombinedOutput()
+	output, err := processBuilder.Build().CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
