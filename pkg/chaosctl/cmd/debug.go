@@ -24,10 +24,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
-
-type Debugger func(ctx context.Context, namespace, chaosName string, client *ctrlclient.CtrlClient) ([]*common.ChaosResult, error)
 
 type DebugOptions struct {
 	namespace string
@@ -40,14 +39,14 @@ const (
 	httpChaos    = "httpchaos"
 )
 
-func NewDebugCommand(logger logr.Logger, debuggers map[string]Debugger) (*cobra.Command, error) {
+func NewDebugCommand(logger logr.Logger, debugs map[string]debug.Debug) (*cobra.Command, error) {
 	o := &DebugOptions{}
 
 	debugCmd := &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
 		Short: `Print the debug information for certain chaos`,
 		Long: `Print the debug information for certain chaos.
-Currently support networkchaos, stresschaos and iochaos.
+Currently support networkchaos, stresschaos, iochaos and httpchaos.
 
 Examples:
   # Return debug information from all networkchaos in default namespace
@@ -58,13 +57,13 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	for chaosType, debugger := range debuggers {
-		debugCmd.AddCommand(debugResouceCommand(o, chaosType, debugger))
+	for chaosType, debug := range debugs {
+		debugCmd.AddCommand(debugResourceCommand(o, chaosType, debug))
 	}
 
 	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
 	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		client, cancel, err := createClient(context.TODO(), managerNamespace)
+		client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 		if err != nil {
 			logger.Error(err, "fail to create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -82,30 +81,37 @@ Examples:
 	return debugCmd, err
 }
 
-func debugResouceCommand(option *DebugOptions, chaosType string, debugger Debugger) *cobra.Command {
+func debugResourceCommand(option *DebugOptions, chaosType string, debug debug.Debug) *cobra.Command {
 	return &cobra.Command{
 		Use:   fmt.Sprintf(`%s (CHAOSNAME) [-n NAMESPACE]`, chaosType),
 		Short: fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
 		Long:  fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctrlclient.DisableRuntimeErrorHandler()
-			client, cancel, err := createClient(context.TODO(), managerNamespace)
+			client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 			if err != nil {
 				return err
 			}
 			defer cancel()
-			return option.Run(debugger, args, client)
+			return option.Run(debug(client), args)
 		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return validArgsChaos(chaosType, option.namespace, args, toComplete)
+			ctrlclient.DisableRuntimeErrorHandler()
+			client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
+			if err != nil {
+				common.PrettyPrint(errors.Wrap(err, "create client").Error(), 0, common.Red)
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			defer cancel()
+			return option.List(debug(client))
 		},
 	}
 }
 
 // Run debug
-func (o *DebugOptions) Run(debugger Debugger, args []string, client *ctrlclient.CtrlClient) error {
+func (o *DebugOptions) Run(debugger debug.Debugger, args []string) error {
 	if len(args) > 1 {
 		return errors.New("only one chaos could be specified")
 	}
@@ -120,7 +126,7 @@ func (o *DebugOptions) Run(debugger Debugger, args []string, client *ctrlclient.
 	var result []*common.ChaosResult
 	var err error
 
-	result, err = debugger(ctx, o.namespace, chaosName, client)
+	result, err = debugger.Run(ctx, o.namespace, chaosName)
 	if err != nil {
 		return err
 	}
@@ -129,24 +135,16 @@ func (o *DebugOptions) Run(debugger Debugger, args []string, client *ctrlclient.
 	return nil
 }
 
-func listChaos(ctx context.Context, chaosType, namespace, toComplete string, c *ctrlclient.CtrlClient) ([]string, error) {
-	return c.ListArguments(ctx, []string{fmt.Sprintf("%s:%s", ctrlclient.NamespaceKey, namespace), chaosType}, "name", toComplete)
-}
-
-func validArgsChaos(chaosType, namespace string, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	if len(args) != 0 {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-
-	client, cancel, err := createClient(context.TODO(), managerNamespace)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
+// Run debug
+func (o *DebugOptions) List(debugger debug.Debugger) ([]string, cobra.ShellCompDirective) {
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	list, err := listChaos(context.TODO(), chaosType, namespace, toComplete, client)
-	if err != nil || len(list) == 0 {
+	chaos, err := debugger.List(ctx, o.namespace)
+	if err != nil {
+		common.PrettyPrint(errors.Wrap(err, "list chaos").Error(), 0, common.Red)
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
-	return list, cobra.ShellCompDirectiveDefault
+
+	return chaos, cobra.ShellCompDirectiveDefault
 }

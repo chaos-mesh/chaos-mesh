@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package iochaos
+package debug
 
 import (
 	"context"
@@ -27,8 +27,18 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-// Debug get chaos debug information
-func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.CtrlClient) ([]*common.ChaosResult, error) {
+type ioDebugger struct {
+	client *ctrlclient.CtrlClient
+}
+
+func IODebug(client *ctrlclient.CtrlClient) Debugger {
+	return &ioDebugger{
+		client: client,
+	}
+}
+
+// Run get chaos debug information
+func (d *ioDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
 	var name *graphql.String
@@ -90,7 +100,7 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 		"name":      name,
 	}
 
-	err := client.Client.Query(ctx, &query, variables)
+	err := d.client.QueryClient.Query(ctx, &query, variables)
 	if err != nil {
 		return nil, err
 	}
@@ -131,4 +141,34 @@ func Debug(ctx context.Context, namespace, chaosName string, client *ctrlclient.
 		results = append(results, result)
 	}
 	return results, nil
+}
+
+// List list chaos
+func (d *ioDebugger) List(ctx context.Context, namespace string) ([]string, error) {
+	var query struct {
+		Namespace []struct {
+			IOChaos []struct {
+				Name string
+			} `graphql:"iochaos(name: $name)"`
+		}
+	}
+
+	variables := map[string]interface{}{
+		"namespace": graphql.String(namespace),
+	}
+
+	err := d.client.QueryClient.Query(ctx, &query, variables)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(query.Namespace) == 0 {
+		return nil, nil
+	}
+
+	var names []string
+	for _, ioChaos := range query.Namespace[0].IOChaos {
+		names = append(names, string(ioChaos.Name))
+	}
+	return names, nil
 }

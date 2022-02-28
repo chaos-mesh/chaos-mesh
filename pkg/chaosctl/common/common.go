@@ -130,7 +130,7 @@ func PrintResult(result []*ChaosResult) {
 func MarshalChaos(s interface{}) (string, error) {
 	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to marshal indent")
+		return "", errors.Wrap(err, "failed to marshal indent")
 	}
 	return string(b), nil
 }

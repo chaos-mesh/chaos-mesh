@@ -26,6 +26,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
@@ -84,7 +85,7 @@ Examples:
 
 // Run logs
 func (o *logsOptions) Run(args []string) error {
-	client, cancel, err := createClient(context.TODO(), managerNamespace)
+	client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize clientset")
 	}
@@ -109,7 +110,7 @@ func (o *logsOptions) Run(args []string) error {
 			"component": name,
 		}
 
-		err := client.Client.Query(context.TODO(), &query, variables)
+		err := client.QueryClient.Query(context.TODO(), &query, variables)
 		if err != nil {
 			return err
 		}
