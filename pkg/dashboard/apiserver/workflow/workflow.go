@@ -254,7 +254,7 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 // @Success 200 {object} core.WorkflowDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /workflows/new [post]
+// @Router /workflows [post]
 func (it *Service) createWorkflow(c *gin.Context) {
 	payload := v1alpha1.Workflow{}
 
