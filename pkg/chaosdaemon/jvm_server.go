@@ -18,21 +18,20 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"strings"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
+	"github.com/golang/protobuf/ptypes/empty"
 )
 
 const (
-	bmInstallCommand = "bminstall.sh -b -Dorg.jboss.byteman.transform.all -Dorg.jboss.byteman.verbose -Dorg.jboss.byteman.compileToBytecode -p %d %d"
-	bmSubmitCommand  = "bmsubmit.sh -p %d -%s %s"
+	bmInstallCommand = "/usr/local/byteman/bin/bminstall.sh -b -Dorg.jboss.byteman.transform.all -Dorg.jboss.byteman.verbose -Dorg.jboss.byteman.compile.to.bytecode -p %d %d"
+	bmSubmitCommand  = "/usr/local/byteman/bin/bmsubmit.sh -p %d -%s %s"
 )
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
@@ -68,39 +67,46 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	}
 
 	// copy agent.jar to container's namespace
-	if req.EnterNS {
-		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
-		output, err := processBuilder.Build().CombinedOutput()
-		if err != nil {
-			return nil, err
-		}
-		if len(output) > 0 {
-			log.Info("mkdir", "output", string(output))
-		}
+	//if req.EnterNS {
+	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
+	output, err := processBuilder.Build().CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	if len(output) > 0 {
+		log.Info("mkdir", "output", string(output))
+	}
 
-		agentFile, err := os.Open(fmt.Sprintf("%s/lib/byteman.jar", bytemanHome))
-		if err != nil {
-			return nil, err
-		}
-		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
-		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-		output, err = processBuilder.Build().CombinedOutput()
-		if err != nil {
-			return nil, err
-		}
-		if len(output) > 0 {
-			log.Info("copy agent.jar", "output", string(output))
-		}
+	// todo: Need to write the BYTEMAN_HOME environment variable in bminstall.sh and bmsubmit.sh
+	// or do this in code ?
+	agentFile, err := os.Open("/usr/local/bin/byteman.tar.gz")
+	if err != nil {
+		return nil, err
+	}
+	//processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
+	output, err = processBuilder.Build().CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	if len(output) > 0 {
+		log.Info("copy byteman.tar.gz", "output", string(output))
+	}
+	// uncompress byteman.tar.gz
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "tar -zxf /usr/local/byteman.tar.gz -C /usr/local").SetContext(ctx).SetNS(pid, bpm.MountNS)
+	output, err = processBuilder.Build().CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	if len(output) > 0 {
+		log.Info("tar byteman.tar.gz", "output", string(output))
 	}
 
 	bmInstallCmd := fmt.Sprintf(bmInstallCommand, req.Port, pid)
-	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", bmInstallCmd).SetContext(ctx)
-	if req.EnterNS {
-		processBuilder = processBuilder.EnableLocalMnt()
-	}
 
-	cmd := processBuilder.Build()
-	output, err := cmd.CombinedOutput()
+	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmInstallCmd})
+
 	if err != nil {
 		// this error will occured when install agent more than once, and will ignore this error and continue to submit rule
 		errMsg1 := "Agent JAR loaded but agent failed to initialize"
@@ -110,30 +116,33 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		// TODO: Investigate the cause of these two error
 		errMsg2 := "Provider sun.tools.attach.LinuxAttachProvider not found"
 		errMsg3 := "install java.io.IOException: Non-numeric value found"
-
-		// this error is caused by the different attach result codes in different java versions. In fact, the agent has attached success, just ignore it here.
-		// refer to https://stackoverflow.com/questions/54340438/virtualmachine-attach-throws-com-sun-tools-attach-agentloadexception-0-when-usi/54454418#54454418
-		errMsg4 := "install com.sun.tools.attach.AgentLoadException"
 		if !strings.Contains(string(output), errMsg1) && !strings.Contains(string(output), errMsg2) &&
-			!strings.Contains(string(output), errMsg3) && !strings.Contains(string(output), errMsg4) {
+			!strings.Contains(string(output), errMsg3) {
 			log.Error(err, string(output))
 			return nil, err
 		}
-		log.Info("exec comamnd", "cmd", cmd.String(), "output", string(output), "error", err.Error())
+		log.Info("exec comamnd", "cmd", bmInstallCmd, "output", string(output), "error", err.Error())
 	}
+	log.Info("exec comamnd", "cmd", bmInstallCmd, "output", string(output))
 
-	// submit rules
 	filename, err := writeDataIntoFile(req.Rule, "rule.btm")
 	if err != nil {
 		return nil, err
 	}
+	ruleFile, err := os.Open(filename)
+
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > "+filename).SetContext(ctx)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(ruleFile)
+	output, err = processBuilder.Build().CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+	if len(output) > 0 {
+		log.Info("copy ruleFile", "output", string(output))
+	}
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
-	if req.EnterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
-	}
-	output, err = processBuilder.Build().CombinedOutput()
+	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
 	if err != nil {
 		log.Error(err, string(output))
 		return nil, err
@@ -143,6 +152,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	}
 
 	return &empty.Empty{}, nil
+
 }
 
 func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
@@ -158,24 +168,26 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("create btm file", "file", filename)
+	ruleFile, err := os.Open(filename)
 
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
-	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
-	if req.EnterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
-	}
+	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "cat > "+filename).SetContext(ctx)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(ruleFile)
 	output, err := processBuilder.Build().CombinedOutput()
 	if err != nil {
-		log.Error(err, string(output))
-		if strings.Contains(string(output), "No rule scripts to remove") {
-			return &empty.Empty{}, nil
-		}
 		return nil, err
 	}
-
 	if len(output) > 0 {
-		log.Info(string(output))
+		log.Info("copy ruleFile", "output", string(output))
+	}
+
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
+	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
+	if err != nil {
+		log.Error(err, string(output))
+		return nil, err
+	}
+	if len(output) > 0 {
+		log.Info("submit rules", "output", string(output))
 	}
 
 	return &empty.Empty{}, nil

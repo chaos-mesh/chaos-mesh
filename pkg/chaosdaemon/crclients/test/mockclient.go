@@ -59,6 +59,19 @@ func (m *MockClient) ContainerKill(ctx context.Context, containerID, signal stri
 	return nil
 }
 
+func (m *MockClient) ContainerExecCreate(ctx context.Context, container string, config types.ExecConfig) (types.IDResponse, error) {
+	if err := mock.On("ContainerExecCreateError"); err != nil {
+		return types.IDResponse{}, err.(error)
+	}
+	return types.IDResponse{}, nil
+}
+func (m *MockClient) ContainerExecAttach(ctx context.Context, execID string, config types.ExecStartCheck) (types.HijackedResponse, error) {
+	if err := mock.On("ContainerExecAttachError"); err != nil {
+		return types.HijackedResponse{}, err.(error)
+	}
+	return types.HijackedResponse{}, nil
+}
+
 func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
 	if err := mock.On("LoadContainerError"); err != nil {
 		return nil, err.(error)

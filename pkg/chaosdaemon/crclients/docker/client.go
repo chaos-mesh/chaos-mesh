@@ -16,8 +16,11 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"github.com/docker/docker/pkg/stdcopy"
+	"log"
 	"net/http"
 
 	"github.com/docker/docker/api/types"
@@ -41,6 +44,8 @@ const (
 type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 	ContainerKill(ctx context.Context, containerID, signal string) error
+	ContainerExecCreate(ctx context.Context, container string, config types.ExecConfig) (types.IDResponse, error)
+	ContainerExecAttach(ctx context.Context, execID string, config types.ExecStartCheck) (types.HijackedResponse, error)
 	ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error)
 }
 
@@ -76,6 +81,57 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	}
 
 	return uint32(container.State.Pid), nil
+}
+
+// ExecCommandByContainerID by container id to perform the shell command
+func (c DockerClient) ExecCommandByContainerID(ctx context.Context, containerID string, cmd []string) ([]byte, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return []byte{}, err
+	}
+	execResp, err := c.client.ContainerExecCreate(ctx, id, types.ExecConfig{
+		AttachStdin:  true,
+		AttachStdout: true,
+		Cmd:          cmd,
+		Tty:          false,
+	})
+	if err != nil {
+		return []byte{}, err
+	}
+
+	resp, err := c.client.ContainerExecAttach(context.Background(), execResp.ID, types.ExecStartCheck{
+		Detach: false,
+		Tty:    false,
+	})
+	if err != nil {
+		return []byte{}, err
+	}
+
+	defer resp.Close()
+	// read the output
+	var outBuf, errBuf bytes.Buffer
+	outputDone := make(chan error)
+
+	go func() {
+		// StdCopy demultiplexes the stream into two buffers，split stdout and stderr from stream reader:
+		_, err = stdcopy.StdCopy(&outBuf, &errBuf, resp.Reader)
+		outputDone <- err
+	}()
+
+	select {
+	case err := <-outputDone:
+		if err != nil {
+			log.Println(err)
+			return []byte{}, err
+		}
+		break
+
+	case <-ctx.Done():
+		log.Println(ctx.Err())
+		return []byte{}, ctx.Err()
+	}
+
+	return []byte("stdout: " + outBuf.String() + "stderr: " + errBuf.String()), nil
 }
 
 // ContainerKillByContainerID kills container according to container id

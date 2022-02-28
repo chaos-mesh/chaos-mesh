@@ -118,6 +118,15 @@ var _ = Describe("docker client", func() {
 		})
 	})
 
+	Context("DockerClient ExecCommandByContainerID", func() {
+		It("should work", func() {
+			m := &test.MockClient{}
+			c := DockerClient{client: m}
+			_, err := c.ExecCommandByContainerID(context.Background(), "docker://valid-container-id", []string{"sh", "-c", "ls /"})
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("DockerClient GetLabelsFromContainerID", func() {
 		It("should work", func() {
 			sampleLabels := map[string]string{
