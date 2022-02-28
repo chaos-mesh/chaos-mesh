@@ -149,8 +149,8 @@ func (d *ioDebugger) List(ctx context.Context, namespace string) ([]string, erro
 		Namespace []struct {
 			IOChaos []struct {
 				Name string
-			} `graphql:"iochaos(name: $name)"`
-		}
+			} `graphql:"iochaos"`
+		} `graphql:"namespace(ns: $namespace)"`
 	}
 
 	variables := map[string]interface{}{

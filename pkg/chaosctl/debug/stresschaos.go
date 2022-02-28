@@ -138,8 +138,8 @@ func (d *stressDebugger) List(ctx context.Context, namespace string) ([]string, 
 		Namespace []struct {
 			StressChaos []struct {
 				Name string
-			} `graphql:"stressChaos(name: $name)"`
-		}
+			} `graphql:"stresschaos"`
+		} `graphql:"namespace(ns: $namespace)"`
 	}
 
 	variables := map[string]interface{}{

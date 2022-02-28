@@ -124,8 +124,8 @@ func (d *httpDebugger) List(ctx context.Context, namespace string) ([]string, er
 		Namespace []struct {
 			HTTPChaos []struct {
 				Name string
-			} `graphql:"httpchaos(name: $name)"`
-		}
+			} `graphql:"httpchaos"`
+		} `graphql:"namespace(ns: $namespace)"`
 	}
 
 	variables := map[string]interface{}{

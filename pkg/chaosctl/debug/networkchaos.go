@@ -109,8 +109,8 @@ func (d *networkDebugger) List(ctx context.Context, namespace string) ([]string,
 		Namespace []struct {
 			NetworkChaos []struct {
 				Name string
-			} `graphql:"networkchaos(name: $name)"`
-		}
+			} `graphql:"networkchaos"`
+		} `graphql:"namespace(ns: $namespace)"`
 	}
 
 	variables := map[string]interface{}{

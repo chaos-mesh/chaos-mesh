@@ -146,5 +146,5 @@ func (o *DebugOptions) List(debugger debug.Debugger) ([]string, cobra.ShellCompD
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
 
-	return chaos, cobra.ShellCompDirectiveDefault
+	return chaos, cobra.ShellCompDirectiveNoFileComp
 }
