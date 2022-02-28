@@ -35,26 +35,6 @@ func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
 	return client, nil
 }
 
-func (c *CtrlClient) ListChaos(ctx context.Context, namespace string, chaosType string) ([]string, error) {
-	namespaceQuery := new(struct {
-		Namespace []struct {
-			Ns string
-		}
-	})
-
-	err := c.QueryClient.Query(ctx, namespaceQuery, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var namespaces []string
-	for _, ns := range namespaceQuery.Namespace {
-		namespaces = append(namespaces, ns.Ns)
-	}
-
-	return namespaces, nil
-}
-
 func (c *CtrlClient) ListNamespace(ctx context.Context) ([]string, error) {
 	namespaceQuery := new(struct {
 		Namespace []struct {
