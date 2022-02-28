@@ -56,7 +56,7 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 
 	// todo: Need to write the BYTEMAN_HOME environment variable in bminstall.sh and bmsubmit.sh
 	// or do this in code ?
-	agentFile, err := os.Open("/usr/local/byteman.tar.gz")
+	agentFile, err := os.Open("/usr/local/bin/byteman.tar.gz")
 	if err != nil {
 		return nil, err
 	}
