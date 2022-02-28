@@ -36,6 +36,7 @@ jobs:
               - Makefile
               - go.*
               - '**.go'
+              - 'helm/**'
             ui:
               - 'ui/yarn.lock'
               - '**.js'
@@ -133,6 +134,4 @@ jobs:
 
       - name: Run UT
         if: ${{ matrix.job == 'test' }}
-        run: |
-          yarn workspace @ui/mui-extends build
-          yarn workspace @ui/app test
+        run: yarn test
