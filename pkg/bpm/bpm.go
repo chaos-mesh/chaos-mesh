@@ -19,11 +19,12 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"sync"
 	"syscall"
 
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -63,34 +64,133 @@ const (
 )
 
 // ProcessPair is an identifier for process
+// Keep compatible with v2.x
+// TODO: remove in v3.x
+//
+// Currently, the bpm locate managed processes by both PID and create time, because the OS may reuse PID, we must check the create time to avoid locating the wrong process.
+//
+// However, the two-step locating is messy and the create time may be imprecise (we have fixed a [relevant bug](https://github.com/shirou/gopsutil/pull/1204)).
+// In future version, we should completely remove the two-step locating and identify managed processes by UID only.
 type ProcessPair struct {
 	Pid        int
 	CreateTime int64
 }
 
-// Stdio contains stdin, stdout and stderr
-type Stdio struct {
-	sync.Locker
-	Stdin, Stdout, Stderr io.ReadWriteCloser
+type Process struct {
+	Uid string
+
+	// TODO: remove in v3.x
+	// store create time, to keep compatible with v2.x
+	Pair ProcessPair
+
+	Cmd   *ManagedCommand
+	Pipes Pipes
+
+	ctx     context.Context
+	stopped context.CancelFunc
+}
+
+// pipes that will be connected to the command's stdin/stdout
+type Pipes struct {
+	Stdin  io.WriteCloser
+	Stdout io.ReadCloser
 }
 
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
-	deathSig    *sync.Map
+	// deathChannel is a channel to receive Uid of dead processes
+	deathChannel chan string
+
+	// wait group to await all processes exit
+	wg *sync.WaitGroup
+
+	// identifiers is a map to prevent duplicated processes
 	identifiers *sync.Map
-	stdio       *sync.Map
+
+	// Uid -> Process
+	processes *sync.Map
+
+	// TODO: remove in v3.x
+	// PidPair -> Uid, to keep compatible with v2.x
+	pidPairToUid *sync.Map
 
 	metricsCollector *metricsCollector
 }
 
-// NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProcessManager {
-	backgroundProcessManager := BackgroundProcessManager{
-		deathSig:         &sync.Map{},
+func startProcess(cmd *ManagedCommand) (*Process, error) {
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "create stdin pipe")
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, errors.Wrap(err, "create stdout pipe")
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return nil, errors.Wrapf(err, "start command `%s`", cmd.String())
+	}
+
+	newProcess := &Process{
+		Uid:   uuid.NewString(),
+		Cmd:   cmd,
+		Pipes: Pipes{Stdin: stdin, Stdout: stdout},
+	}
+
+	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
+
+	// keep compatible with v2.x
+	// TODO: remove in v3.x
+	pid := cmd.Process.Pid
+	proc, err := process.NewProcess(int32(cmd.Process.Pid))
+	if err != nil {
+		return nil, errors.Wrapf(err, "get process state for pid %d", pid)
+	}
+
+	ct, err := proc.CreateTime()
+	if err != nil {
+		return nil, errors.Wrapf(err, "get process create time for pid %d", pid)
+	}
+
+	newProcess.Pair = ProcessPair{
+		Pid:        int(proc.Pid),
+		CreateTime: ct,
+	}
+	return newProcess, nil
+}
+
+func (p *Process) Stopped() <-chan struct{} {
+	return p.ctx.Done()
+}
+
+// StartBackgroundProcessManager creates a background process manager
+func StartBackgroundProcessManager(registry prometheus.Registerer) *BackgroundProcessManager {
+	backgroundProcessManager := &BackgroundProcessManager{
+		deathChannel:     make(chan string, 1),
+		wg:               &sync.WaitGroup{},
 		identifiers:      &sync.Map{},
-		stdio:            &sync.Map{},
+		processes:        &sync.Map{},
+		pidPairToUid:     &sync.Map{},
 		metricsCollector: nil,
 	}
+
+	go func() {
+		// return if deathChannel is closed
+		for uid := range backgroundProcessManager.deathChannel {
+			process, loaded := backgroundProcessManager.processes.LoadAndDelete(uid)
+			if loaded {
+				proc := process.(*Process)
+				backgroundProcessManager.pidPairToUid.Delete(proc.Pair)
+				if proc.Cmd.Identifier != nil {
+					backgroundProcessManager.identifiers.Delete(*proc.Cmd.Identifier)
+				}
+				proc.stopped()
+			}
+			backgroundProcessManager.wg.Done()
+		}
+	}()
 
 	if registry != nil {
 		backgroundProcessManager.metricsCollector = newMetricsCollector(backgroundProcessManager, registry)
@@ -99,63 +199,34 @@ func NewBackgroundProcessManager(registry prometheus.Registerer) BackgroundProce
 	return backgroundProcessManager
 }
 
+func (m *BackgroundProcessManager) recycle(uid string) {
+	m.deathChannel <- uid
+}
+
 // StartProcess manages a process in manager
-func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.Process, error) {
-	var identifierLock *sync.Mutex
+func (m *BackgroundProcessManager) StartProcess(cmd *ManagedCommand) (*Process, error) {
 	if cmd.Identifier != nil {
-		lock, _ := m.identifiers.LoadOrStore(*cmd.Identifier, &sync.Mutex{})
-
-		identifierLock = lock.(*sync.Mutex)
-
-		identifierLock.Lock()
+		_, loaded := m.identifiers.LoadOrStore(*cmd.Identifier, true)
+		if loaded {
+			return nil, errors.Errorf("process with identifier %s is running", *cmd.Identifier)
+		}
 	}
 
-	err := cmd.Start()
-	if err != nil {
-		log.Error(err, "fail to start process")
-		return nil, err
-	}
-
-	pid := cmd.Process.Pid
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		return nil, err
-	}
-	ct, err := procState.CreateTime()
+	process, err := startProcess(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	pair := ProcessPair{
-		Pid:        pid,
-		CreateTime: ct,
+	m.processes.Store(process.Uid, process)
+	m.pidPairToUid.Store(process.Pair, process.Uid)
+	// end
+
+	if m.metricsCollector != nil {
+		m.metricsCollector.bpmControlledProcessTotal.Inc()
 	}
 
-	channel, _ := m.deathSig.LoadOrStore(pair, make(chan bool, 1))
-	deathChannel := channel.(chan bool)
-
-	stdio := &Stdio{Locker: &sync.Mutex{}}
-	if cmd.Stdin != nil {
-		if stdin, ok := cmd.Stdin.(io.ReadWriteCloser); ok {
-			stdio.Stdin = stdin
-		}
-	}
-
-	if cmd.Stdout != nil {
-		if stdout, ok := cmd.Stdout.(io.ReadWriteCloser); ok {
-			stdio.Stdout = stdout
-		}
-	}
-
-	if cmd.Stderr != nil {
-		if stderr, ok := cmd.Stderr.(io.ReadWriteCloser); ok {
-			stdio.Stderr = stderr
-		}
-	}
-
-	m.stdio.Store(pair, stdio)
-
-	log := log.WithValues("pid", pid)
+	m.wg.Add(1)
+	log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
 
 	go func() {
 		err := cmd.Wait()
@@ -169,197 +240,71 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 				log.Error(err, "process exited accidentally")
 			}
 		}
-
 		log.Info("process stopped")
-
-		deathChannel <- true
-		m.deathSig.Delete(pair)
-		if io, loaded := m.stdio.LoadAndDelete(pair); loaded {
-			if stdio, ok := io.(*Stdio); ok {
-				stdio.Lock()
-				if stdio.Stdin != nil {
-					if err = stdio.Stdin.Close(); err != nil {
-						log.Error(err, "stdin fails to be closed")
-					}
-				}
-				if stdio.Stdout != nil {
-					if err = stdio.Stdout.Close(); err != nil {
-						log.Error(err, "stdout fails to be closed")
-					}
-				}
-				if stdio.Stderr != nil {
-					if err = stdio.Stderr.Close(); err != nil {
-						log.Error(err, "stderr fails to be closed")
-					}
-				}
-				stdio.Unlock()
-			}
-		}
-
-		if identifierLock != nil {
-			identifierLock.Unlock()
-			m.identifiers.Delete(*cmd.Identifier)
-		}
+		m.recycle(process.Uid)
 	}()
 
-	if m.metricsCollector != nil {
-		m.metricsCollector.bpmControlledProcessTotal.Inc()
-	}
-	return procState, nil
+	return process, nil
 }
 
 func (m *BackgroundProcessManager) Shutdown() {
-	wg := sync.WaitGroup{}
-	m.deathSig.Range(func(key, value interface{}) bool {
-		pair := key.(ProcessPair)
-		deathChannel := value.(chan bool)
-		log := log.WithValues("pid", pair.Pid)
-
-		p, err := os.FindProcess(pair.Pid)
-		if err != nil {
-			log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
+	m.processes.Range(func(_, value interface{}) bool {
+		process := value.(*Process)
+		log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+		if err := process.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
+			log.Error(err, "send SIGTERM to process")
 			return true
 		}
-
-		procState, err := process.NewProcess(int32(pair.Pid))
-		if err != nil {
-			// return successfully as the process has exited
-			return true
-		}
-
-		ppid, err := procState.Ppid()
-		if err != nil {
-			log.Error(err, "fail to read parent id")
-			// return successfully as the process has exited
-			return true
-		}
-
-		if ppid != int32(os.Getpid()) {
-			log.Info("process has already been killed", "ppid", ppid)
-			// return successfully as the process has exited
-			return true
-		}
-
-		if err = p.Signal(syscall.SIGTERM); err != nil {
-			log.Error(err, "fail to kill process")
-			return true
-		}
-
-		wg.Add(1)
-		go func() {
-			<-deathChannel
-			wg.Done()
-		}()
-
 		return true
 	})
-	wg.Wait()
+	m.wg.Wait()
+	close(m.deathChannel)
+}
+
+func (m *BackgroundProcessManager) GetUID(pair ProcessPair) (string, bool) {
+	if uid, loaded := m.pidPairToUid.Load(pair); loaded {
+		return uid.(string), true
+	}
+	return "", false
+}
+
+func (m *BackgroundProcessManager) getProc(uid string) (*Process, bool) {
+	if proc, loaded := m.processes.Load(uid); loaded {
+		return proc.(*Process), true
+	}
+	return nil, false
+}
+
+func (m *BackgroundProcessManager) GetPipes(uid string) (Pipes, bool) {
+	proc, ok := m.getProc(uid)
+	if !ok {
+		return Pipes{}, false
+	}
+	return proc.Pipes, true
 }
 
 // KillBackgroundProcess sends SIGTERM to process
-func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pid int, startTime int64) error {
-	log := log.WithValues("pid", pid)
+func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, uid string) error {
+	log := log.WithValues("uid", uid)
 
-	p, err := os.FindProcess(int(pid))
-	if err != nil {
-		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
-		return err
-	}
-
-	procState, err := process.NewProcess(int32(pid))
-	if err != nil {
-		// return successfully as the process has exited
-		return nil
-	}
-	ct, err := procState.CreateTime()
-	if err != nil {
-		log.Error(err, "fail to read create time")
-		// return successfully as the process has exited
-		return nil
+	proc, loaded := m.getProc(uid)
+	if !loaded {
+		return errors.Errorf("failed to find process with uid %s", uid)
 	}
 
-	// There is a bug in calculating CreateTime in the new version of
-	// gopsutils. This is a temporary solution before the upstream fixes it.
-	if startTime-ct > 1000 || ct-startTime > 1000 {
-		log.Info("process has already been killed", "startTime", ct, "expectedStartTime", startTime)
-		// return successfully as the process has exited
-		return nil
+	if err := proc.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
+		return errors.Wrap(err, "send SIGTERM to process")
 	}
 
-	ppid, err := procState.Ppid()
-	if err != nil {
-		log.Error(err, "fail to read parent id")
-		// return successfully as the process has exited
-		return nil
-	}
-	if ppid != int32(os.Getpid()) {
-		log.Info("process has already been killed", "ppid", ppid)
-		// return successfully as the process has exited
-		return nil
-	}
-
-	err = p.Signal(syscall.SIGTERM)
-
-	if err != nil && err.Error() != "os: process already finished" {
-		log.Error(err, "error while killing process")
-		return err
-	}
-
-	pair := ProcessPair{
-		Pid:        pid,
-		CreateTime: startTime,
-	}
-	channel, ok := m.deathSig.Load(pair)
-	if ok {
-		deathChannel := channel.(chan bool)
-		select {
-		case <-deathChannel:
-		case <-ctx.Done():
-			return ctx.Err()
+	select {
+	case <-proc.Stopped():
+		log.Info("Successfully killed process")
+	case <-ctx.Done():
+		if err := ctx.Err(); err != nil {
+			return errors.Wrap(err, "context closed")
 		}
 	}
-
-	log.Info("Successfully killed process")
 	return nil
-}
-
-func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
-	log := log.WithValues("pid", pid)
-
-	procState, err := process.NewProcess(int32(pid))
-	if err != nil {
-		log.Info("fail to get process information", "pid", pid)
-		// return successfully as the process has exited
-		return nil
-	}
-	ct, err := procState.CreateTime()
-	if err != nil {
-		log.Error(err, "fail to read create time")
-		// return successfully as the process has exited
-		return nil
-	}
-
-	// There is a bug in calculating CreateTime in the new version of
-	// gopsutils. This is a temporary solution before the upstream fixes it.
-	if startTime-ct > 1000 || ct-startTime > 1000 {
-		log.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
-		// return successfully as the process has exited
-		return nil
-	}
-
-	pair := ProcessPair{
-		Pid:        pid,
-		CreateTime: startTime,
-	}
-
-	io, ok := m.stdio.Load(pair)
-	if !ok {
-		log.Info("fail to load with pair", "pair", pair)
-		// stdio is not stored
-		return nil
-	}
-
-	return io.(*Stdio)
 }
 
 // GetIdentifiers finds all identifiers in BPM
@@ -374,8 +319,8 @@ func (m *BackgroundProcessManager) GetIdentifiers() []string {
 }
 
 // DefaultProcessBuilder returns the default process builder
-func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
-	return &ProcessBuilder{
+func DefaultProcessBuilder(cmd string, args ...string) *CommandBuilder {
+	return &CommandBuilder{
 		cmd:        cmd,
 		args:       args,
 		nsOptions:  []nsOption{},
@@ -385,8 +330,8 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 	}
 }
 
-// ProcessBuilder builds a exec.Cmd for daemon
-type ProcessBuilder struct {
+// CommandBuilder builds a exec.Cmd for daemon
+type CommandBuilder struct {
 	cmd  string
 	args []string
 	env  []string
@@ -410,13 +355,13 @@ func GetNsPath(pid uint32, typ NsType) string {
 }
 
 // SetEnv sets the environment variables of the process
-func (b *ProcessBuilder) SetEnv(key, value string) *ProcessBuilder {
+func (b *CommandBuilder) SetEnv(key, value string) *CommandBuilder {
 	b.env = append(b.env, fmt.Sprintf("%s=%s", key, value))
 	return b
 }
 
 // SetNS sets the namespace of the process
-func (b *ProcessBuilder) SetNS(pid uint32, typ NsType) *ProcessBuilder {
+func (b *CommandBuilder) SetNS(pid uint32, typ NsType) *CommandBuilder {
 	return b.SetNSOpt([]nsOption{{
 		Typ:  typ,
 		Path: GetNsPath(pid, typ),
@@ -424,7 +369,7 @@ func (b *ProcessBuilder) SetNS(pid uint32, typ NsType) *ProcessBuilder {
 }
 
 // SetNSOpt sets the namespace of the process
-func (b *ProcessBuilder) SetNSOpt(options []nsOption) *ProcessBuilder {
+func (b *CommandBuilder) SetNSOpt(options []nsOption) *CommandBuilder {
 	b.nsOptions = append(b.nsOptions, options...)
 
 	return b
@@ -434,48 +379,48 @@ func (b *ProcessBuilder) SetNSOpt(options []nsOption) *ProcessBuilder {
 //
 // The identifier is used to identify the process in BPM, to confirm only one identified process is running.
 // If one identified process is already running, new processes with the same identifier will be blocked by lock.
-func (b *ProcessBuilder) SetIdentifier(id string) *ProcessBuilder {
+func (b *CommandBuilder) SetIdentifier(id string) *CommandBuilder {
 	b.identifier = &id
 
 	return b
 }
 
 // EnablePause enables pause for process
-func (b *ProcessBuilder) EnablePause() *ProcessBuilder {
+func (b *CommandBuilder) EnablePause() *CommandBuilder {
 	b.pause = true
 
 	return b
 }
 
-func (b *ProcessBuilder) EnableLocalMnt() *ProcessBuilder {
+func (b *CommandBuilder) EnableLocalMnt() *CommandBuilder {
 	b.localMnt = true
 
 	return b
 }
 
 // SetContext sets context for process
-func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
+func (b *CommandBuilder) SetContext(ctx context.Context) *CommandBuilder {
 	b.ctx = ctx
 
 	return b
 }
 
 // SetStdin sets stdin for process
-func (b *ProcessBuilder) SetStdin(stdin io.ReadWriteCloser) *ProcessBuilder {
+func (b *CommandBuilder) SetStdin(stdin io.ReadWriteCloser) *CommandBuilder {
 	b.stdin = stdin
 
 	return b
 }
 
 // SetStdout sets stdout for process
-func (b *ProcessBuilder) SetStdout(stdout io.ReadWriteCloser) *ProcessBuilder {
+func (b *CommandBuilder) SetStdout(stdout io.ReadWriteCloser) *CommandBuilder {
 	b.stdout = stdout
 
 	return b
 }
 
 // SetStderr sets stderr for process
-func (b *ProcessBuilder) SetStderr(stderr io.ReadWriteCloser) *ProcessBuilder {
+func (b *CommandBuilder) SetStderr(stderr io.ReadWriteCloser) *CommandBuilder {
 	b.stderr = stderr
 
 	return b
@@ -486,8 +431,8 @@ type nsOption struct {
 	Path string
 }
 
-// ManagedProcess is a process which can be managed by backgroundProcessManager
-type ManagedProcess struct {
+// ManagedCommand is a process which can be managed by backgroundProcessManager
+type ManagedCommand struct {
 	*exec.Cmd
 
 	// If the identifier is not nil, process manager should make sure no other

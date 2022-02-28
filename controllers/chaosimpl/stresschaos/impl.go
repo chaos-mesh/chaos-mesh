@@ -129,7 +129,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		MemoryInstance:  instance.MemoryUID,
 		MemoryStartTime: instance.MemoryStartTime.UnixNano() / int64(time.Millisecond),
 	}); err != nil {
-		// TODO: check whether the erorr still exists
+		impl.Log.Error(err, "cancel stressors")
 		return v1alpha1.Injected, nil
 	}
 	delete(stresschaos.Status.Instances, records[index].Id)
