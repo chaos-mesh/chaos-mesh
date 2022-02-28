@@ -1,4 +1,4 @@
-module github.com/chaos-mesh/chaos-mesh/api/v1alpha1
+module github.com/chaos-mesh/chaos-mesh/api
 
 go 1.17
 
