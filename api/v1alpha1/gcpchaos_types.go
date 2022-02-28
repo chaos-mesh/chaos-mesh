@@ -83,6 +83,7 @@ type GCPSelector struct {
 
 	// The device name of disks to detach.
 	// Needed in disk-loss.
+	// +ui:form:when=action=='disk-loss'
 	// +optional
 	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,nilable"`
 }
