@@ -80,26 +80,14 @@ jobs:
           name: chaos-mesh-images
           path: |
             *.tar
-
-      - name: Get Artifact URL
-        id: get_artifact_url
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          ARTIFACT_URL=$(curl \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts | jq ".artifacts[0].archive_download_url")
-          
-          echo "::set-output name=artifact_url::$ARTIFACT_URL"
-          echo "ARTIFACT_URL: $ARTIFACT_URL"
-          curl \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts
         
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            You can download the image from:
-            ${{ steps.get_artifact_url.outputs.artifact_url }}
+            You can download and import the image with following commands:
+
+            ```bash
+            ./hack/download-image.sh -r ${{ github.repository }} -i ${{ github.run_id }}
+            ```
