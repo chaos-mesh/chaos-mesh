@@ -13,6 +13,13 @@ jobs:
       - name: Install jq
         run: |
           sudo apt-get install jq -y
+      
+      - name: Cache multiple paths
+        uses: actions/cache@v2
+        with:
+          path: |
+            cache
+          key: chaos-mesh-build-${{ github.event.issue.number }}
 
       - name: Build Chaos Mesh Build Env
         env:
@@ -24,7 +31,7 @@ jobs:
             export IMAGE_BUILD_ENV_BUILD=0;
           fi
 
-          make image-build-env
+          make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-build-env
 
       - name: Build Chaos Mesh Dev Env
         env:
@@ -36,7 +43,7 @@ jobs:
             export IMAGE_DEV_ENV_BUILD=0;
           fi
 
-          make image-dev-env
+          make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-dev-env
       
       - name: Build Chaos Mesh
         run: |
@@ -45,6 +52,9 @@ jobs:
             IMAGE_PROJECT=chaos-mesh \
             IMAGE_REGISTRY=ghcr.io \
             UI=1 \
+            DOCKER_CACHE=1 \
+            DOCKER_CACHE_DIR=\$(pwd)/cache \
+            GO_BUILD_CACHE=\$(pwd)/cache \
             image
           
           for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
@@ -70,10 +80,9 @@ jobs:
           
           echo "::set-output name=artifact_url::$ARTIFACT_URL"
           echo "ARTIFACT_URL: $ARTIFACT_URL"
-      
-      - name: Debug
-        run: |
-          echo '${{ toJSON(steps) }}'
+          curl \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts
         
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
