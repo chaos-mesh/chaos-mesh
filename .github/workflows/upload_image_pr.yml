@@ -69,6 +69,12 @@ jobs:
             https://api.github.com/repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts | jq ".artifacts[0].archive_download_url")
           
           echo "::set-output name=artifact_url::$ARTIFACT_URL"
+          echo "ARTIFACT_URL: $ARTIFACT_URL"
+      
+      - name: Debug
+        run: |
+          echo '${{ toJSON(steps) }}'
+        
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
         with:
