@@ -148,6 +148,8 @@ func CompareLinuxVersion(major, revision int) (bool, error) {
 				return true, nil
 			}
 		}
+	} else {
+		return true, nil
 	}
 	return false, nil
 }

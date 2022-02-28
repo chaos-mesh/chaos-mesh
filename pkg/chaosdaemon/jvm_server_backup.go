@@ -18,8 +18,8 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -35,41 +35,35 @@ const (
 
 func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 	req *pb.InstallJVMRulesRequest) (*empty.Empty, error) {
-	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "GetPidFromContainerID")
 		return nil, err
 	}
 
-	containerPids := []uint32{pid}
-	childPids, err := util.GetChildProcesses(pid, log)
+	//todo get pid in the container，
+	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "ps -ef | grep java | grep -v grep | awk 'NR==1 {print $2}'").SetContext(ctx).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	output, err := processBuilder.Build().Output()
 	if err != nil {
-		log.Error(err, "GetChildProcesses")
+		return nil, err
 	}
-	containerPids = append(containerPids, childPids...)
-	for _, containerPid := range containerPids {
-		name, err := util.ReadCommName(int(containerPid))
-		if err != nil {
-			log.Error(err, "ReadCommName")
-			continue
-		}
-		if name == "java\n" {
-			pid = containerPid
-			break
-		}
+	log.Info("get java pid", "output", string(output))
+
+	javaPid, err := strconv.Atoi(strings.Replace(string(output), "\n", "", -1))
+	if err != nil {
+		return nil, err
 	}
 
 	// todo: Need to write the BYTEMAN_HOME environment variable in bminstall.sh and bmsubmit.sh
 	// or do this in code ?
-	agentFile, err := os.Open("/usr/local/bin/byteman.tar.gz")
+	agentFile, err := os.Open("/usr/local/byteman.tar.gz")
 	if err != nil {
 		return nil, err
 	}
 	//processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
-	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-	output, err := processBuilder.Build().CombinedOutput()
+	output, err = processBuilder.Build().CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +80,7 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		log.Info("tar byteman.tar.gz", "output", string(output))
 	}
 
-	bmInstallCmd := fmt.Sprintf(bmInstallCommand, req.Port, pid)
+	bmInstallCmd := fmt.Sprintf(bmInstallCommandBackUp, req.Port, javaPid)
 
 	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmInstallCmd})
 
@@ -124,7 +118,7 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		log.Info("copy ruleFile", "output", string(output))
 	}
 
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "l", filename)
 	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
 	if err != nil {
 		log.Error(err, string(output))
@@ -163,7 +157,7 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 		log.Info("copy ruleFile", "output", string(output))
 	}
 
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "u", filename)
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "u", filename)
 	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
 	if err != nil {
 		log.Error(err, string(output))

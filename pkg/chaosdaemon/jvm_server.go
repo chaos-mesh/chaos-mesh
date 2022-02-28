@@ -37,6 +37,7 @@ const (
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	req *pb.InstallJVMRulesRequest) (*empty.Empty, error) {
+	log.Info("InstallJVMRules", "request", req)
 	// Use an backup version for linux versions less than 4.1
 	less, err := util.CompareLinuxVersion(4, 1)
 	if err != nil {
@@ -46,8 +47,6 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	if less {
 		return s.InstallJVMRulesBackUp(ctx, req)
 	}
-
-	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "GetPidFromContainerID")
