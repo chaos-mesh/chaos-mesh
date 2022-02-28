@@ -31,7 +31,11 @@ jobs:
             export IMAGE_BUILD_ENV_BUILD=0;
           fi
 
-          make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-build-env
+          make \
+            DOCKER_CACHE=1 \
+            DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \
+            GO_BUILD_CACHE=$GITHUB_WORKSPACE/cache \
+            image-build-env
 
       - name: Build Chaos Mesh Dev Env
         env:
@@ -43,7 +47,11 @@ jobs:
             export IMAGE_DEV_ENV_BUILD=0;
           fi
 
-          make DOCKER_CACHE=1 DOCKER_CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-dev-env
+          make \
+            DOCKER_CACHE=1 \
+            DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \
+            GO_BUILD_CACHE=$GITHUB_WORKSPACE/cache \
+            image-dev-env
       
       - name: Build Chaos Mesh
         run: |
@@ -53,8 +61,8 @@ jobs:
             IMAGE_REGISTRY=ghcr.io \
             UI=1 \
             DOCKER_CACHE=1 \
-            DOCKER_CACHE_DIR=\$(pwd)/cache \
-            GO_BUILD_CACHE=\$(pwd)/cache \
+            DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \
+            GO_BUILD_CACHE=$GITHUB_WORKSPACE/cache \
             image
           
           for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
