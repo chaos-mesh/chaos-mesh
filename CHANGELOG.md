@@ -28,6 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Fix default value for concurrencyPolicy [#2836](https://github.com/chaos-mesh/chaos-mesh/pull/2836)
 - Fix PhysicalMachineChaos to make it able to create network bandwidth experiment. [#2850](https://github.com/chaos-mesh/chaos-mesh/pull/2850)
+- Fix workflow emit new events after accomplished [#2911](https://github.com/chaos-mesh/chaos-mesh/pull/2911)
 
 ### Security
 
