@@ -130,7 +130,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	}
 	cmd := processBuilder.Build(ctx)
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}

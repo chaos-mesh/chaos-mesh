@@ -166,8 +166,6 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 }
 
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
-	log := s.getLoggerFromContext(ctx)
-
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
 		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
@@ -184,7 +182,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 	cmd := processBuilder.Build(ctx)
 	cmd.Stderr = os.Stderr
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return errors.Wrapf(err, "execute command(%s)", cmd)
 	}

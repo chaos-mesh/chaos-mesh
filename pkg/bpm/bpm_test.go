@@ -51,7 +51,7 @@ func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Dur
 var _ = Describe("background process manager", func() {
 	log, err := log.NewDefaultZapLogger()
 	Expect(err).To(BeNil())
-	m := StartBackgroundProcessManager(nil)
+	m := StartBackgroundProcessManager(nil, log)
 
 	Context("normally exited process", func() {
 		It("should work", func() {
@@ -75,7 +75,7 @@ var _ = Describe("background process manager", func() {
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
 				Build(context.Background())
-			_, err = m.StartProcess(cmd2)
+			_, err = m.StartProcess(context.Background(), cmd2)
 			Expect(err).NotTo(BeNil())
 			Expect(strings.Contains(err.Error(), fmt.Sprintf("process with identifier %s is running", identifier))).To(BeTrue())
 
