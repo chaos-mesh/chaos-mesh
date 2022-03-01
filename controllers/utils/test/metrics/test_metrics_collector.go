@@ -15,9 +15,12 @@
 
 package metrics
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+	"github.com/go-logr/logr"
+)
 
 // NewTestChaosControllerManagerMetricsCollector provides metrics collector for testing
-func NewTestChaosControllerManagerMetricsCollector() *metrics.ChaosControllerManagerMetricsCollector {
-	return metrics.NewChaosControllerManagerMetricsCollector(nil, nil)
+func NewTestChaosControllerManagerMetricsCollector(logger logr.Logger) *metrics.ChaosControllerManagerMetricsCollector {
+	return metrics.NewChaosControllerManagerMetricsCollector(nil, nil, logger)
 }

@@ -19,7 +19,6 @@ import (
 	"context"
 	"reflect"
 
-	z "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,7 +30,7 @@ import (
 
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
-	log                 logr.Logger
+	logger              logr.Logger
 	store               cache.Cache
 	chaosExperiments    *prometheus.GaugeVec
 	SidecarTemplates    prometheus.Gauge
@@ -48,17 +47,15 @@ type ChaosControllerManagerMetricsCollector struct {
 }
 
 // NewChaosControllerManagerMetricsCollector initializes metrics and collector
-func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer *prometheus.Registry) *ChaosControllerManagerMetricsCollector {
+func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer *prometheus.Registry, logger logr.Logger) *ChaosControllerManagerMetricsCollector {
 	var store cache.Cache
 	if manager != nil {
 		store = manager.GetCache()
 	}
 
-	logger, _ := z.NewDefaultZapLogger()
-
 	c := &ChaosControllerManagerMetricsCollector{
-		log:   logger,
-		store: store,
+		logger: logger,
+		store:  store,
 		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_controller_manager_chaos_experiments",
 			Help: "Total number of chaos experiments and their phases",
@@ -159,7 +156,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 		expCache := map[string]map[string]int{}
 		chaosList := obj.SpawnList()
 		if err := collector.store.List(context.TODO(), chaosList); err != nil {
-			collector.log.Error(err, "failed to list chaos", "kind", kind)
+			collector.logger.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
 
@@ -186,7 +183,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosSchedules()
 
 	schedules := &v1alpha1.ScheduleList{}
 	if err := collector.store.List(context.TODO(), schedules); err != nil {
-		collector.log.Error(err, "failed to list schedules")
+		collector.logger.Error(err, "failed to list schedules")
 		return
 	}
 
@@ -206,7 +203,7 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosWorkflows()
 
 	workflows := &v1alpha1.WorkflowList{}
 	if err := collector.store.List(context.TODO(), workflows); err != nil {
-		collector.log.Error(err, "failed to list workflows")
+		collector.logger.Error(err, "failed to list workflows")
 		return
 	}
 
