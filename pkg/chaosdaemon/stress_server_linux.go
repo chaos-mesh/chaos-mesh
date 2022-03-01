@@ -34,69 +34,59 @@ import (
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log.Info("Executing stressors", "request", req)
-
+	var (
+		cpuInstance     string
+		cpuStartTime    int64
+		memoryInstance  string
+		memoryStartTime int64
+		err             error
+	)
 	// cpuStressors
-	cpuProc, err := s.ExecCPUStressors(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	// memoryStressor
-	memoryProc, err := s.ExecMemoryStressors(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := new(pb.ExecStressResponse)
-	if cpuProc != nil {
-		resp.CpuInstance = strconv.Itoa(cpuProc.Pair.Pid)
-		resp.CpuStartTime = cpuProc.Pair.CreateTime
-		resp.CpuInstanceUid = cpuProc.Uid
-	}
-	if memoryProc != nil {
-		resp.MemoryInstance = strconv.Itoa(memoryProc.Pair.Pid)
-		resp.MemoryStartTime = memoryProc.Pair.CreateTime
-		resp.MemoryInstanceUid = memoryProc.Uid
-	}
-
-	return resp, nil
-}
-
-func (s *DaemonServer) CancelStressors(ctx context.Context,
-	req *pb.CancelStressRequest) (*empty.Empty, error) {
-	CpuPid, err := strconv.Atoi(req.CpuInstance)
-	if req.CpuInstance != "" && err != nil {
-		return nil, err
-	}
-
-	MemoryPid, err := strconv.Atoi(req.MemoryInstance)
-	if req.MemoryInstance != "" && err != nil {
-		return nil, err
-	}
-
-	if req.CpuInstanceUid == "" && CpuPid != 0 {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: CpuPid, CreateTime: req.CpuStartTime}); ok {
-			req.CpuInstanceUid = uid
-		}
-	}
-
-	if req.MemoryInstanceUid == "" && MemoryPid != 0 {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: MemoryPid, CreateTime: req.MemoryStartTime}); ok {
-			req.MemoryInstanceUid = uid
-		}
-	}
-
-	log.Info("Canceling stressors", "request", req)
-
-	if req.CpuInstanceUid != "" {
-		err = s.backgroundProcessManager.KillBackgroundProcess(ctx, req.CpuInstanceUid)
+	if len(req.CpuStressors) != 0 {
+		cpuInstance, cpuStartTime, err = s.ExecCPUStressors(ctx, req)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if req.MemoryInstanceUid != "" {
-		err = s.backgroundProcessManager.KillBackgroundProcess(ctx, req.MemoryInstanceUid)
+	// memoryStressor
+	if len(req.MemoryStressors) != 0 {
+		memoryInstance, memoryStartTime, err = s.ExecMemoryStressors(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &pb.ExecStressResponse{
+		CpuInstance:     cpuInstance,
+		CpuStartTime:    cpuStartTime,
+		MemoryInstance:  memoryInstance,
+		MemoryStartTime: memoryStartTime,
+	}, nil
+}
+
+func (s *DaemonServer) CancelStressors(ctx context.Context,
+	req *pb.CancelStressRequest) (*empty.Empty, error) {
+	log.Info("Canceling stressors", "request", req)
+
+	if req.CpuInstance != "" {
+		CpuPid, err := strconv.Atoi(req.CpuInstance)
+		if err != nil {
+			return nil, err
+		}
+		err = s.backgroundProcessManager.KillBackgroundProcess(ctx, CpuPid, req.CpuStartTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if req.MemoryInstance != "" {
+		MemoryPid, err := strconv.Atoi(req.MemoryInstance)
+		if err != nil {
+			return nil, err
+		}
+
+		err = s.backgroundProcessManager.KillBackgroundProcess(ctx, MemoryPid, req.MemoryStartTime)
 		if err != nil {
 			return nil, err
 		}
