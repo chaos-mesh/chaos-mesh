@@ -24,6 +24,7 @@ import (
 
 var ErrCanNotAdd = errors.New("can not add")
 var ErrCanNotAssign = errors.New("can not assign")
+var ErrCanNotNew = errors.New("can not new")
 
 // Injectable stand for the base behavior of task : inject a process with PID.
 type Injectable interface {
@@ -37,13 +38,13 @@ type Recoverable interface {
 }
 
 // Creator init an Injectable with values.
-// We use it in a case that TaskConfig.data init an Injectable task here.
+// We use it in a case that TaskConfig.Data init an Injectable task here.
 type Creator interface {
 	New(values interface{}) (Injectable, error)
 }
 
 // Assign change some of an Injectable task with its own values.
-// We use it in a case that we use TaskConfig.data
+// We use it in a case that we use TaskConfig.Data
 // to update an Injectable task.
 type Assign interface {
 	Assign(Injectable) error
@@ -65,7 +66,7 @@ type TaskExecutor interface {
 // TaskManager is a Manager for chaos tasks.
 // A task base on a target marked with its PID.
 // We assume task should implement Injectable.
-// We use TaskConfig.data which implement TaskExecutor to:
+// We use TaskConfig.Data which implement TaskExecutor to:
 //	Sum task configs on same PID into one.
 // 	Create task.
 // 	Assign or update task.
@@ -75,7 +76,7 @@ type TaskExecutor interface {
 // the task must implement Recoverable.
 // If not implement ,
 // the Recover function will return a ErrNotImplement("Recoverable") error.
-// IMPORTANT: We assume task config obey that TaskConfig.data A,B. A.Add(B)
+// IMPORTANT: We assume task config obey that TaskConfig.Data A,B. A.Add(B)
 // is approximately equal to B.Add(A)
 type TaskManager struct {
 	taskConfigManager TaskConfigManager
@@ -108,7 +109,7 @@ func (cm TaskManager) CopyTaskMap() map[PID]Injectable {
 	return pm
 }
 
-func (cm TaskManager) GetConfigWithUID(id UID) (interface{}, error) {
+func (cm TaskManager) GetConfigWithUID(id UID) (TaskConfig, error) {
 	return cm.taskConfigManager.GetConfigWithUID(id)
 }
 
@@ -124,19 +125,13 @@ func (cm TaskManager) GetUIDsWithPID(pid PID) []UID {
 	return cm.taskConfigManager.GetUIDsWithPID(pid)
 }
 
-// Update the task with a same UID, PID and new task config.
-// If it comes a UID not injected , Update will return ChaosErr.NotFound("UID").
-// If it comes the import PID of task do not equal to the last one,
-// Update will return ErrUpdateTaskConfigWithPIDChanges.
-func (cm TaskManager) Update(uid UID, pid PID, config TaskExecutor) error {
-	oldTask, err := cm.taskConfigManager.UpdateTaskConfig(uid, NewTaskConfig(pid, config))
+func (cm TaskManager) CheckTasks(uid UID, pid PID) error {
+	config, err := cm.GetConfigWithUID(uid)
 	if err != nil {
 		return err
 	}
-	err = cm.commit(uid, pid)
-	if err != nil {
-		_, _ = cm.taskConfigManager.UpdateTaskConfig(uid, oldTask)
-		return err
+	if config.Main != pid {
+		return ErrDiffPID
 	}
 	return nil
 }
@@ -183,6 +178,23 @@ func (cm TaskManager) Apply(uid UID, pid PID, config TaskExecutor) error {
 	err = cm.commit(uid, pid)
 	if err != nil {
 		_ = cm.taskConfigManager.DeleteTaskConfig(uid)
+		return err
+	}
+	return nil
+}
+
+// Update the task with a same UID, PID and new task config.
+// If it comes a UID not injected , Update will return ChaosErr.NotFound("UID").
+// If it comes the import PID of task do not equal to the last one,
+// Update will return ErrDiffPID.
+func (cm TaskManager) Update(uid UID, pid PID, config TaskExecutor) error {
+	oldTask, err := cm.taskConfigManager.UpdateTaskConfig(uid, NewTaskConfig(pid, config))
+	if err != nil {
+		return err
+	}
+	err = cm.commit(uid, pid)
+	if err != nil {
+		_, _ = cm.taskConfigManager.UpdateTaskConfig(uid, oldTask)
 		return err
 	}
 	return nil
@@ -238,9 +250,9 @@ func (cm TaskManager) commit(uid UID, pid PID) error {
 	}
 	process, ok := cm.taskMap[pid]
 	if !ok {
-		return errors.Wrapf(ErrPIDNotFound, "PID : %d", pid)
+		return errors.Wrapf(ErrPIDNotFound, "PID : %v", pid)
 	}
-	tasker, ok := task.data.(TaskExecutor)
+	tasker, ok := task.Data.(TaskExecutor)
 	if !ok {
 		return errors.New("task.Data here must implement TaskExecutor")
 	}
@@ -250,7 +262,7 @@ func (cm TaskManager) commit(uid UID, pid PID) error {
 	}
 	err = process.Inject(pid)
 	if err != nil {
-		return errors.Wrapf(err, "inject existing process PID : %d", pid)
+		return errors.Wrapf(err, "inject existing process PID : %v", pid)
 	}
 	return nil
 }

@@ -100,8 +100,8 @@ func TestTasksManager(t *testing.T) {
 	}
 	task1 := FakeConfig{i: 1}
 	uid1 := "1"
-	err = m.Create(uid1, 1, &task1, &chaos)
-	chaosInterface, err := m.GetTaskWithPID(1)
+	err = m.Create(uid1, SysPID(1), &task1, &chaos)
+	chaosInterface, err := m.GetTaskWithPID(SysPID(1))
 	assert.NoError(t, err)
 	chaoso := chaosInterface.(*FakeChaos)
 	assert.Equal(t, chaoso.C, task1)
@@ -109,8 +109,8 @@ func TestTasksManager(t *testing.T) {
 
 	task2 := FakeConfig{i: 1}
 	uid2 := "2"
-	err = m.Apply(uid2, 1, &task2)
-	chaosInterface, err = m.GetTaskWithPID(1)
+	err = m.Apply(uid2, SysPID(1), &task2)
+	chaosInterface, err = m.GetTaskWithPID(SysPID(1))
 	assert.NoError(t, err)
 	chaoso = chaosInterface.(*FakeChaos)
 	assert.Equal(t, chaoso.C, FakeConfig{i: 2})
@@ -138,18 +138,18 @@ func TestTasksManagerError(t *testing.T) {
 	}
 	task1 := FakeConfig{i: 1}
 	uid1 := "1"
-	err = m.Create(uid1, 1, &task1, &chaos)
+	err = m.Create(uid1, SysPID(1), &task1, &chaos)
 	assert.NoError(t, err)
-	err = m.Apply(uid1, 1, &task1)
+	err = m.Apply(uid1, SysPID(1), &task1)
 	assert.Equal(t, errors.Cause(err), chaoserr.ErrDuplicateEntity)
-	err = m.Recover(uid1, 1)
+	err = m.Recover(uid1, SysPID(1))
 	assert.NoError(t, err)
-	err = m.Recover(uid1, 1)
+	err = m.Recover(uid1, SysPID(1))
 	assert.Equal(t, errors.Cause(err), ErrPIDNotFound)
 
 	chaos.ErrWhenInject = true
 	tasks2 := FakeConfig{i: 1}
-	err = m.Create(uid1, 1, &tasks2, &chaos)
+	err = m.Create(uid1, SysPID(1), &tasks2, &chaos)
 	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("inject"))
 	_, err = m.GetConfigWithUID(uid1)
 	assert.Equal(t, errors.Cause(err), ErrUIDNotFound)
@@ -157,13 +157,13 @@ func TestTasksManagerError(t *testing.T) {
 	chaos.ErrWhenInject = false
 	chaos.ErrWhenRecover = true
 	tasks3 := FakeConfig{i: 1}
-	err = m.Create(uid1, 1, &tasks3, &chaos)
+	err = m.Create(uid1, SysPID(1), &tasks3, &chaos)
 	assert.NoError(t, err)
-	err = m.Recover(uid1, 1)
+	err = m.Recover(uid1, SysPID(1))
 	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("recover"))
-	p, err := m.GetTaskWithPID(1)
+	p, err := m.GetTaskWithPID(SysPID(1))
 	inner := p.(*FakeChaos)
 	inner.ErrWhenRecover = false
-	err = m.Recover(uid1, 1)
+	err = m.Recover(uid1, SysPID(1))
 	assert.NoError(t, err)
 }

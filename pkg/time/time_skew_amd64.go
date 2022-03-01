@@ -16,6 +16,7 @@
 package time
 
 import (
+	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/pkg/errors"
 	"sync"
@@ -66,30 +67,48 @@ func (c *Config) Add(a tasks.Addable) error {
 }
 
 func (c *Config) New(values interface{}) (tasks.Injectable, error) {
-	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime)
+	skew, err := NewSkew()
 	if err != nil {
-		return nil, errors.Wrap(err, "load fake image")
+		return nil, err
+	}
+	skew.SkewConfig = *c.DeepCopy().(*Config)
+
+	podHandler, ok := values.(*tasks.PodHandler)
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("type %t is not *tasks.PodHandler", values))
+	}
+	groupProcessHandler, ok := podHandler.Main.(*tasks.ProcessGroupHandler)
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("type %t is not *tasks.ProcessGroupHandler", podHandler.Main))
+	}
+	_, ok = groupProcessHandler.Main.(*Skew)
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("type %t is not *Skew", groupProcessHandler.Main))
 	}
 
-	getTimeOfDayimage, err := LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay)
-	if err != nil {
-		return nil, errors.Wrap(err, "load fake image")
-	}
-
-	return &Skew{
-		SkewConfig:   *c.DeepCopy().(*Config),
-		clockGetTime: clockGetTimeImage,
-		getTimeOfDay: getTimeOfDayimage,
-	}, nil
+	newGroupProcessHandler :=
+		tasks.NewProcessGroupHandler(groupProcessHandler.Logger, &skew)
+	newPodHandler := tasks.NewPodHandler(podHandler.Logger,
+		&newGroupProcessHandler)
+	return &newPodHandler, nil
 }
 
 func (c *Config) Assign(injectable tasks.Injectable) error {
-	I, OK := injectable.(*Skew)
-	if OK {
-		I.SkewConfig = *c
-		return nil
+	podHandler, ok := injectable.(*tasks.PodHandler)
+	if !ok {
+		return errors.New(fmt.Sprintf("type %t is not *tasks.PodHandler", injectable))
 	}
-	return errors.Wrapf(tasks.ErrCanNotAssign, "expect type : *time.Skew, got : %T", injectable)
+	groupProcessHandler, ok := podHandler.Main.(*tasks.ProcessGroupHandler)
+	if !ok {
+		return errors.New(fmt.Sprintf("type %t is not *tasks.ProcessGroupHandler", podHandler.Main))
+	}
+	I, ok := groupProcessHandler.Main.(*Skew)
+	if !ok {
+		return errors.New(fmt.Sprintf("type %t is not *Skew", groupProcessHandler.Main))
+	}
+
+	I.SkewConfig = *c
+	return nil
 }
 
 type Skew struct {
@@ -100,19 +119,40 @@ type Skew struct {
 	locker sync.Mutex
 }
 
+func NewSkew() (Skew, error) {
+	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime)
+	if err != nil {
+		return Skew{}, errors.Wrap(err, "load fake image")
+	}
+
+	getTimeOfDayimage, err := LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay)
+	if err != nil {
+		return Skew{}, errors.Wrap(err, "load fake image")
+	}
+
+	return Skew{
+		SkewConfig:   Config{},
+		clockGetTime: clockGetTimeImage,
+		getTimeOfDay: getTimeOfDayimage,
+		locker:       sync.Mutex{},
+	}, nil
+}
+
 func (s *Skew) Fork() (tasks.ChaosOnProcessGroup, error) {
 	// TODO : to KEAO can I share FakeImage between threads?
-	injectable, err := s.SkewConfig.New(nil)
+	skew, err := NewSkew()
 	if err != nil {
 		return nil, err
 	}
-	return injectable.(*Skew), nil
+	skew.SkewConfig = *s.SkewConfig.DeepCopy().(*Config)
+
+	return &skew, nil
 }
 
 func (s *Skew) Assign(injectable tasks.Injectable) error {
 	I, OK := injectable.(*Skew)
 	if OK {
-		I.SkewConfig = s.SkewConfig
+		I.SkewConfig = *s.SkewConfig.DeepCopy().(*Config)
 		return nil
 	}
 	return errors.Wrapf(tasks.ErrCanNotAssign, "expect type : *time.Skew, got : %T", injectable)
@@ -121,7 +161,11 @@ func (s *Skew) Assign(injectable tasks.Injectable) error {
 func (s *Skew) Inject(pid tasks.PID) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()
-	err := s.clockGetTime.AttachToProcess(pid, map[string]uint64{
+	sysPID, ok := pid.(tasks.SysPID)
+	if !ok {
+		return tasks.ErrNotSysPID
+	}
+	err := s.clockGetTime.AttachToProcess(int(sysPID), map[string]uint64{
 		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
 		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
@@ -130,19 +174,36 @@ func (s *Skew) Inject(pid tasks.PID) error {
 		return err
 	}
 
-	err := s.getTimeOfDay.AttachToProcess(pid, map[string]uint64{
+	err = s.getTimeOfDay.AttachToProcess(int(sysPID), map[string]uint64{
 		externVarTvSecDelta:  uint64(s.SkewConfig.deltaSeconds),
 		externVarTvNsecDelta: uint64(s.SkewConfig.deltaNanoSeconds),
 	})
 	if err != nil {
 		return err
 	}
-	panic("implement me")
+	return nil
 }
 
 func (s *Skew) Recover(pid tasks.PID) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()
-	//TODO implement me
-	panic("implement me")
+	sysPID, ok := pid.(tasks.SysPID)
+	if !ok {
+		return tasks.ErrNotSysPID
+	}
+	err1 := s.clockGetTime.Recover(int(sysPID))
+	if err1 != nil {
+		err2 := s.getTimeOfDay.Recover(int(sysPID))
+		if err2 != nil {
+			return errors.Wrapf(err1, "time skew all failed %v", err2)
+		}
+		return err1
+	}
+
+	err2 := s.getTimeOfDay.Recover(int(sysPID))
+	if err2 != nil {
+		return err2
+	}
+
+	return nil
 }
