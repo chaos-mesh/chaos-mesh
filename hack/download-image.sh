@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+# This script should work with the github action in `.github/workflows/upload_image_pr.yml`
+
 set -e
 
 function usage() {
@@ -23,7 +25,7 @@ This command downloads and imports the chaos-mesh image from the github artifact
 Usage: hack/download-image.sh
 
     -h show this message and exit
-    -r the github repository which running the
+    -r the github repository which running the github actions
     -i download the artifact related with this action run id
 
 EOF
