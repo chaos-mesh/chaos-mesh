@@ -22,6 +22,7 @@ import (
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +chaos-mesh:base
 type StatusCheck struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -75,12 +76,35 @@ type StatusCheckSpec struct {
 	// +kubebuilder:validation:Maximum=1000
 	HistoryLimit int `json:"historyLimit"`
 
+	// +optional
 	// +kubebuilder:default=true
 	AbortIfFailed bool `json:"abortIfFailed"`
 }
 
 type StatusCheckStatus struct {
-	Conditions []StatusCheckCondition `json:"conditions"`
+	// Conditions represents the latest available observations of a StatusCheck's current state.
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	Conditions []StatusCheckCondition `json:"conditions" patchStrategy:"merge" patchMergeKey:"type"`
+
+	// Records represents the latest available observations of a StatusCheck's current state.
+	// +optional
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	Records []StatusCheckRecord `json:"records" patchStrategy:"merge" patchMergeKey:"type"`
+}
+
+type StatusCheckOutcome string
+
+const (
+	StatusCheckOutcomeSuccess StatusCheckOutcome = "Success"
+	StatusCheckOutcomeFailure StatusCheckOutcome = "Failure"
+)
+
+type StatusCheckRecord struct {
+	ProbeTime *metav1.Time       `json:"probeTime"`
+	Outcome   StatusCheckOutcome `json:"outcome"`
 }
 
 type StatusCheckConditionType string
@@ -103,6 +127,23 @@ type StatusCheckCondition struct {
 const (
 	StatusCheckSuccess string = "StatusCheckSuccess"
 )
+
+type HTTPHeaderPair struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type HTTPCriteria struct {
+	ResponseCode string `json:"responseCode"`
+	// TODO: support response body
+}
+
+type HTTPStatusCheck struct {
+	RequestUrl     string           `json:"requestUrl"`
+	RequestMethod  string           `json:"requestMethod"`
+	RequestHeaders []HTTPHeaderPair `json:"requestHeaders"`
+	Criteria       HTTPCriteria     `json:"criteria"`
+}
 
 // +kubebuilder:object:root=true
 
