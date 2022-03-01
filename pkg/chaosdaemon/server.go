@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"sync"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -78,7 +79,10 @@ func (c *Config) GrpcAddr() string {
 // DaemonServer represents a grpc server for tc daemon
 type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
-	backgroundProcessManager bpm.BackgroundProcessManager
+	backgroundProcessManager *bpm.BackgroundProcessManager
+
+	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
+	tproxyLocker *sync.Map
 
 	IPSetLocker      *locker.Locker
 	TimeChaosManager tasks.TaskManager
@@ -99,7 +103,8 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg),
+		tproxyLocker:             new(sync.Map),
 		TimeChaosManager:         tasks.NewTaskManager(loggertc),
 	}
 }

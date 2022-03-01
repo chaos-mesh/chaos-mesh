@@ -30,10 +30,10 @@ var TestConfig = test.NewDefaultConfig()
 
 // RegisterOperatorFlags registers flags for chaos-mesh.
 func RegisterOperatorFlags(flags *flag.FlagSet) {
-	flags.StringVar(&TestConfig.ManagerImage, "manager-image-registry", "localhost:5000", "chaos-mesh image registry")
+	flags.StringVar(&TestConfig.ManagerImage, "manager-image-registry", "ghcr.io", "chaos-mesh image registry")
 	flags.StringVar(&TestConfig.ManagerImage, "manager-image", "pingcap/chaos-mesh", "chaos-mesh image")
 	flags.StringVar(&TestConfig.ManagerTag, "manager-image-tag", "latest", "chaos-mesh image tag")
-	flags.StringVar(&TestConfig.DaemonImage, "daemon-image-registry", "localhost:5000", "chaos-daemon image registry")
+	flags.StringVar(&TestConfig.DaemonImage, "daemon-image-registry", "ghcr.io", "chaos-daemon image registry")
 	flags.StringVar(&TestConfig.DaemonImage, "daemon-image", "pingcap/chaos-daemon", "chaos-daemon image")
 	flags.StringVar(&TestConfig.DaemonTag, "daemon-image-tag", "latest", "chaos-daemon image tag")
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "pingcap/e2e-helper:latest", "e2e helper image")

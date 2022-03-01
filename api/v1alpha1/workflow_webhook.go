@@ -27,7 +27,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // log is for logging in this package.
