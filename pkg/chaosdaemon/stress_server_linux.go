@@ -32,6 +32,7 @@ import (
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Executing stressors", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
@@ -47,7 +48,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
@@ -94,6 +95,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	pid, err := strconv.Atoi(req.Instance)
 	if err != nil {
 		return nil, err

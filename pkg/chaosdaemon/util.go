@@ -17,6 +17,7 @@ package chaosdaemon
 
 import (
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -74,7 +75,8 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
-					log.Error(err, "read status file error", "path", statusPath)
+					// TODO: replace this usage of global logger
+					log.L().WithName("chaos-daemon.util.GetChildProcesses").Error(err, "read status file error", "path", statusPath)
 					return
 				}
 				defer reader.Close()

@@ -18,6 +18,8 @@ package bpm
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/go-logr/logr"
 	"io"
 	"os"
 	"os/exec"
@@ -25,10 +27,7 @@ import (
 	"syscall"
 
 	"github.com/shirou/gopsutil/process"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-var log = ctrl.Log.WithName("background-process-manager")
 
 type NsType string
 
@@ -78,14 +77,17 @@ type BackgroundProcessManager struct {
 	deathSig    *sync.Map
 	identifiers *sync.Map
 	stdio       *sync.Map
+
+	rootLogger logr.Logger
 }
 
 // NewBackgroundProcessManager creates a background process manager
-func NewBackgroundProcessManager() BackgroundProcessManager {
+func NewBackgroundProcessManager(rootLogger logr.Logger) BackgroundProcessManager {
 	return BackgroundProcessManager{
 		deathSig:    &sync.Map{},
 		identifiers: &sync.Map{},
 		stdio:       &sync.Map{},
+		rootLogger:  rootLogger,
 	}
 }
 
@@ -102,7 +104,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 	err := cmd.Start()
 	if err != nil {
-		log.Error(err, "fail to start process")
+		m.rootLogger.Error(err, "fail to start process")
 		return nil, err
 	}
 
@@ -145,7 +147,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 	m.stdio.Store(pair, stdio)
 
-	log := log.WithValues("pid", pid)
+	logger := m.rootLogger.WithValues("pid", pid)
 
 	go func() {
 		err := cmd.Wait()
@@ -153,14 +155,14 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 			if exitErr, ok := err.(*exec.ExitError); ok {
 				status := exitErr.Sys().(syscall.WaitStatus)
 				if status.Signaled() && status.Signal() == syscall.SIGTERM {
-					log.Info("process stopped with SIGTERM signal")
+					logger.Info("process stopped with SIGTERM signal")
 				}
 			} else {
-				log.Error(err, "process exited accidentally")
+				logger.Error(err, "process exited accidentally")
 			}
 		}
 
-		log.Info("process stopped")
+		logger.Info("process stopped")
 
 		deathChannel <- true
 		m.deathSig.Delete(pair)
@@ -169,17 +171,17 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 				stdio.Lock()
 				if stdio.Stdin != nil {
 					if err = stdio.Stdin.Close(); err != nil {
-						log.Error(err, "stdin fails to be closed")
+						logger.Error(err, "stdin fails to be closed")
 					}
 				}
 				if stdio.Stdout != nil {
 					if err = stdio.Stdout.Close(); err != nil {
-						log.Error(err, "stdout fails to be closed")
+						logger.Error(err, "stdout fails to be closed")
 					}
 				}
 				if stdio.Stderr != nil {
 					if err = stdio.Stderr.Close(); err != nil {
-						log.Error(err, "stderr fails to be closed")
+						logger.Error(err, "stderr fails to be closed")
 					}
 				}
 				stdio.Unlock()
@@ -197,11 +199,11 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) (*process.P
 
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pid int, startTime int64) error {
-	log := log.WithValues("pid", pid)
+	logger := m.rootLogger.WithValues("pid", pid)
 
 	p, err := os.FindProcess(int(pid))
 	if err != nil {
-		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
+		logger.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix")
 		return err
 	}
 
@@ -212,7 +214,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 	}
 	ct, err := procState.CreateTime()
 	if err != nil {
-		log.Error(err, "fail to read create time")
+		logger.Error(err, "fail to read create time")
 		// return successfully as the process has exited
 		return nil
 	}
@@ -220,19 +222,19 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 	// There is a bug in calculating CreateTime in the new version of
 	// gopsutils. This is a temporary solution before the upstream fixes it.
 	if startTime-ct > 1000 || ct-startTime > 1000 {
-		log.Info("process has already been killed", "startTime", ct, "expectedStartTime", startTime)
+		logger.Info("process has already been killed", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
 	}
 
 	ppid, err := procState.Ppid()
 	if err != nil {
-		log.Error(err, "fail to read parent id")
+		logger.Error(err, "fail to read parent id")
 		// return successfully as the process has exited
 		return nil
 	}
 	if ppid != int32(os.Getpid()) {
-		log.Info("process has already been killed", "ppid", ppid)
+		logger.Info("process has already been killed", "ppid", ppid)
 		// return successfully as the process has exited
 		return nil
 	}
@@ -240,7 +242,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 	err = p.Signal(syscall.SIGTERM)
 
 	if err != nil && err.Error() != "os: process already finished" {
-		log.Error(err, "error while killing process")
+		logger.Error(err, "error while killing process")
 		return err
 	}
 
@@ -258,22 +260,22 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, pi
 		}
 	}
 
-	log.Info("Successfully killed process")
+	logger.Info("Successfully killed process")
 	return nil
 }
 
 func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
-	log := log.WithValues("pid", pid)
+	logger := m.rootLogger.WithValues("pid", pid)
 
 	procState, err := process.NewProcess(int32(pid))
 	if err != nil {
-		log.Info("fail to get process information", "pid", pid)
+		logger.Info("fail to get process information", "pid", pid)
 		// return successfully as the process has exited
 		return nil
 	}
 	ct, err := procState.CreateTime()
 	if err != nil {
-		log.Error(err, "fail to read create time")
+		logger.Error(err, "fail to read create time")
 		// return successfully as the process has exited
 		return nil
 	}
@@ -281,7 +283,7 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 	// There is a bug in calculating CreateTime in the new version of
 	// gopsutils. This is a temporary solution before the upstream fixes it.
 	if startTime-ct > 1000 || ct-startTime > 1000 {
-		log.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
+		logger.Info("process has exited", "startTime", ct, "expectedStartTime", startTime)
 		// return successfully as the process has exited
 		return nil
 	}
@@ -293,7 +295,7 @@ func (m *BackgroundProcessManager) Stdio(pid int, startTime int64) *Stdio {
 
 	io, ok := m.stdio.Load(pair)
 	if !ok {
-		log.Info("fail to load with pair", "pair", pair)
+		logger.Info("fail to load with pair", "pair", pair)
 		// stdio is not stored
 		return nil
 	}
@@ -329,7 +331,8 @@ type ProcessBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
-	ctx context.Context
+	ctx    context.Context
+	logger logr.Logger
 }
 
 // GetNsPath returns corresponding namespace path
@@ -407,6 +410,13 @@ func (b *ProcessBuilder) SetStderr(stderr io.ReadWriteCloser) *ProcessBuilder {
 	b.stderr = stderr
 
 	return b
+}
+
+func (b *ProcessBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
+	// this logger is inherited from the global one
+	// TODO: replace it with a specific logger by passing in one or creating a new one
+	logger := log.L().WithName("background-process-manager.process-builder")
+	return log.EnrichLoggerWithContext(ctx, logger)
 }
 
 type nsOption struct {

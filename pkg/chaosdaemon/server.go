@@ -20,9 +20,17 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"net"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/moby/locker"
@@ -31,15 +39,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
-
-var log = ctrl.Log.WithName("chaos-daemon-server")
 
 //go:generate protoc -I pb pb/chaosdaemon.proto --go_out=plugins=grpc:pb
 
@@ -77,28 +77,35 @@ type DaemonServer struct {
 	backgroundProcessManager bpm.BackgroundProcessManager
 
 	IPSetLocker *locker.Locker
+
+	rootLogger logr.Logger
 }
 
-func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
+func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
+	return log.EnrichLoggerWithContext(ctx, s.rootLogger)
+}
+
+func newDaemonServer(containerRuntime string, logger logr.Logger) (*DaemonServer, error) {
 	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewDaemonServerWithCRClient(crClient), nil
+	return NewDaemonServerWithCRClient(crClient, logger), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
-func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) *DaemonServer {
+func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, logger logr.Logger) *DaemonServer {
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(logger),
+		rootLogger:               logger,
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
-	ds, err := newDaemonServer(containerRuntime)
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig, logger logr.Logger) (*grpc.Server, error) {
+	ds, err := newDaemonServer(containerRuntime, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +120,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 		grpc_middleware.WithUnaryServerChain(
 			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
+			MetadataExtractor(log.MetaNamespacedName),
 		),
 	}
 
@@ -148,6 +156,24 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf t
 	return s, nil
 }
 
+func MetadataExtractor(keys ...log.Metadatkey) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+		// Get the metadata from the incoming context
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return nil, errors.New("couldn't parse incoming context metadata")
+		}
+		for _, key := range keys {
+			values := md.Get(string(key))
+			if len(values) > 0 {
+				ctx = context.WithValue(ctx, key, values[0])
+			}
+		}
+
+		return handler(ctx, req)
+	}
+}
+
 // RegisterGatherer combine prometheus.Registerer and prometheus.Gatherer
 type RegisterGatherer interface {
 	prometheus.Registerer
@@ -155,7 +181,7 @@ type RegisterGatherer interface {
 }
 
 // StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg RegisterGatherer) error {
+func StartServer(conf *Config, reg RegisterGatherer, logger logr.Logger) error {
 	g := &errgroup.Group{}
 
 	httpBindAddr := conf.HttpAddr()
@@ -164,20 +190,20 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 	grpcBindAddr := conf.GrpcAddr()
 	grpcListener, err := net.Listen("tcp", grpcBindAddr)
 	if err != nil {
-		log.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
+		logger.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
 		return err
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig)
+	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig, logger)
 	if err != nil {
-		log.Error(err, "failed to create grpc server")
+		logger.Error(err, "failed to create grpc server")
 		return err
 	}
 
 	g.Go(func() error {
-		log.Info("Starting http endpoint", "address", httpBindAddr)
+		logger.Info("Starting http endpoint", "address", httpBindAddr)
 		if err := httpServer.ListenAndServe(); err != nil {
-			log.Error(err, "failed to start http endpoint")
+			logger.Error(err, "failed to start http endpoint")
 			httpServer.Shutdown(context.Background())
 			return err
 		}
@@ -185,9 +211,9 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 	})
 
 	g.Go(func() error {
-		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
+		logger.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
 		if err := grpcServer.Serve(grpcListener); err != nil {
-			log.Error(err, "failed to start grpc endpoint")
+			logger.Error(err, "failed to start grpc endpoint")
 			grpcServer.Stop()
 			return err
 		}

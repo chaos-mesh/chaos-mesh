@@ -107,7 +107,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}()
 
-	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod)
+	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
+		Namespace: obj.Namespace,
+		Name:      obj.Name,
+	})
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil

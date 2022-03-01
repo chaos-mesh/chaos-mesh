@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"errors"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -30,7 +31,9 @@ import (
 
 var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd)
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, logger)
 
 	Context("ContainerKill", func() {
 		It("should work", func() {

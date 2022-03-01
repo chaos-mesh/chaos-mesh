@@ -16,6 +16,7 @@
 package chaosdaemon
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
@@ -26,15 +27,17 @@ import (
 )
 
 var _ = Describe("netem server", func() {
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
 	Context("newDaemonServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd)
+			_, err := newDaemonServer(crclients.ContainerRuntimeContainerd, logger)
 			Expect(err).To(BeNil())
 		})
 
 		It("should fail on CreateContainerRuntimeInfoClient", func() {
-			_, err := newDaemonServer("invalid-runtime")
+			_, err := newDaemonServer("invalid-runtime", logger)
 			Expect(err).ToNot(BeNil())
 		})
 	})
@@ -42,7 +45,7 @@ var _ = Describe("netem server", func() {
 	Context("newGRPCServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
+			_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{}, logger)
 			Expect(err).To(BeNil())
 		})
 
@@ -50,7 +53,7 @@ var _ = Describe("netem server", func() {
 			Ω(func() {
 				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
+				_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{}, logger)
 				Expect(err).To(BeNil())
 			}).Should(Panic())
 		})

@@ -33,6 +33,7 @@ const (
 )
 
 func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Set iptables chains", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -194,7 +195,7 @@ func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
 	if iptables.enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
@@ -231,7 +232,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	if iptables.enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -247,7 +248,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	if iptables.enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
-	cmd = processBuilder.Build()
+	cmd = processBuilder.Build(iptables.ctx)
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -261,7 +262,7 @@ func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
 	if iptables.enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
