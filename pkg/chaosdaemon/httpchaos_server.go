@@ -26,7 +26,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -72,7 +71,7 @@ func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err 
 }
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
-	log := log.WithValues("Request", in)
+	log := s.getLoggerFromContext(ctx)
 	log.Info("applying http chaos")
 
 	if in.InstanceUid == "" {
@@ -96,7 +95,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 	}
 
-	resp, err := s.applyHttpChaos(ctx, log, in)
+	resp, err := s.applyHttpChaos(ctx, in)
 	if err != nil {
 		if killError := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); killError != nil {
 			log.Error(killError, "kill tproxy", "uid", in.InstanceUid)
@@ -106,7 +105,9 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	return resp, err
 }
 
-func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+	log := s.getLoggerFromContext(ctx)
+
 	pipes, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid)
 	if !ok {
 		return nil, errors.Errorf("fail to get process(%s)", in.InstanceUid)
@@ -178,10 +179,10 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
 	}
 
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 	cmd.Stderr = os.Stderr
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return errors.Wrapf(err, "execute command(%s)", cmd)
 	}

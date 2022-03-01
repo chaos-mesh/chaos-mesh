@@ -25,7 +25,10 @@ import (
 )
 
 // Build builds the command
-func (b *CommandBuilder) Build() *ManagedCommand {
+// the ctx argument passes the context information to this function
+// e.g. the corresponding resource name.
+func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
+	log := b.getLoggerFromContext(ctx)
 	args := b.args
 	cmd := b.cmd
 
