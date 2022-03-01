@@ -17,23 +17,32 @@ package chaosdaemon
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
-	"sync"
-
-	"github.com/golang/protobuf/ptypes/empty"
-
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 )
 
-type TimeChaosManager struct {
-	TimeChaosManager tasks.TaskManager
-	ShutdownLocker   sync.RWMutex
-}
+func SetTimeOffset(m tasks.TaskManager, uid tasks.UID, pid tasks.PID, config time.Config) error {
+	err := m.CheckTasks(uid, pid)
+	if err != nil && errors.Is(err, tasks.ErrDiffPID) {
 
-func (c *TimeChaosManager) SetTimeOffset() {
-
+	}
+	_ = m.Create(uid, pid, &config, nil)
+	if err != nil {
+		if errors.Cause(err) == chaoserr.ErrDuplicateEntity {
+			err := m.Apply(uid, pid, &config)
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {

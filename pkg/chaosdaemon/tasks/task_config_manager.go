@@ -16,19 +16,20 @@
 package tasks
 
 import (
-	"github.com/pkg/errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/pkg/errors"
 )
 
+type PID interface {
+	ToID() string
+}
 type UID = string
-type PID = int
 
 var ErrPIDNotFound = chaoserr.NotFound("PID")
 var ErrUIDNotFound = chaoserr.NotFound("UID")
 var ErrTaskConfigNotFound = chaoserr.NotFound("task config")
-var ErrUpdateTaskConfigWithPIDChanges = errors.New("update task config with PID changes")
 var ErrTaskConfigMapNotInit = errors.New("TaskConfigMap not init")
+var ErrDiffPID = errors.New("different pid")
 
 // Object ensure the outer config change will not change
 // the data inside the TaskManager.
@@ -42,11 +43,11 @@ type Addable interface {
 }
 
 // TaskConfig defines a composite of flexible config with an immutable target.
-// TaskConfig.main is the ID of task.
-// TaskConfig.data is the config provided by developer.
+// TaskConfig.Main is the ID of task.
+// TaskConfig.Data is the config provided by developer.
 type TaskConfig struct {
-	main PID
-	data Object
+	Main PID
+	Data Object
 }
 
 func NewTaskConfig(main PID, data Object) TaskConfig {
@@ -85,8 +86,8 @@ func (m TaskConfigManager) UpdateTaskConfig(id UID, task TaskConfig) (TaskConfig
 	if !ok {
 		return TaskConfig{}, errors.Wrapf(ErrUIDNotFound, "uid: %s, task: %v", id, task)
 	}
-	if taskOld.main != task.main {
-		return TaskConfig{}, errors.Wrapf(ErrUpdateTaskConfigWithPIDChanges, "uid: %s, task: %v", id, task)
+	if taskOld.Main != task.Main {
+		return TaskConfig{}, errors.Wrapf(ErrDiffPID, "uid: %s, task: %v", id, task)
 	}
 	m.TaskConfigMap[id] = task
 	return taskOld, nil
@@ -105,25 +106,36 @@ func (m TaskConfigManager) DeleteTaskConfig(id UID) error {
 	return nil
 }
 
-func (m TaskConfigManager) GetConfigWithUID(id UID) (interface{}, error) {
+func (m TaskConfigManager) GetConfigWithUID(id UID) (TaskConfig, error) {
 	t, ok := m.TaskConfigMap[id]
 	if !ok {
 		return TaskConfig{}, ErrUIDNotFound
 	}
-	return t.data, nil
+	return t, nil
 }
 
 func (m TaskConfigManager) GetUIDsWithPID(id PID) []UID {
 	uIds := make([]UID, 0)
 	for uid, task := range m.TaskConfigMap {
-		if task.main == id {
+		if task.Main == id {
 			uIds = append(uIds, uid)
 		}
 	}
 	return uIds
 }
 
-// SumTaskConfig will sum the TaskConfig with a same TaskConfig.main.
+func (m TaskConfigManager) CheckTask(uid UID, pid PID) error {
+	t, ok := m.TaskConfigMap[uid]
+	if !ok {
+		return ErrUIDNotFound
+	}
+	if t.Main != pid {
+		return ErrDiffPID
+	}
+	return nil
+}
+
+// SumTaskConfig will sum the TaskConfig with a same TaskConfig.Main.
 // If developers want to use it with type T, they must implement Addable for *T.
 // IMPORTANT: Just here , we do not assume A.Add(B) == B.Add(A).
 // What SumTaskConfig do : A := new(TaskConfig), A.Add(B).Add(C).Add(D)... , A marked as uid.
@@ -137,10 +149,10 @@ func (m TaskConfigManager) SumTaskConfig(uid UID) (TaskConfig, error) {
 	}
 
 	task := TaskConfig{
-		main: taskRaw.main,
-		data: taskRaw.data.DeepCopy(),
+		Main: taskRaw.Main,
+		Data: taskRaw.Data.DeepCopy(),
 	}
-	uids := m.GetUIDsWithPID(task.main)
+	uids := m.GetUIDsWithPID(task.Main)
 
 	for _, uidTemp := range uids {
 		if uid == uidTemp {
@@ -150,11 +162,11 @@ func (m TaskConfigManager) SumTaskConfig(uid UID) (TaskConfig, error) {
 		if !ok {
 			return TaskConfig{}, ErrTaskConfigNotFound
 		}
-		AddableData, ok := task.data.(Addable)
+		AddableData, ok := task.Data.(Addable)
 		if !ok {
 			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "task.Data")
 		}
-		AddableTempData, ok := taskTemp.data.(Addable)
+		AddableTempData, ok := taskTemp.Data.(Addable)
 		if !ok {
 			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "taskTemp.Data")
 		}

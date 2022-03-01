@@ -16,14 +16,21 @@
 package tasks
 
 import (
-	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	"strconv"
 )
 
 var ErrNotFoundChildProcess = chaoserr.NotFound("child process")
+var ErrNotSysPID = errors.New("pid is not SysPID")
+
+type SysPID uint32
+
+func (s SysPID) ToID() string {
+	return strconv.FormatUint(uint64(s), 10)
+}
 
 // ChaosOnProcessGroup is used for inject a chaos on a linux process group.
 // Fork is used for create a new chaos on child process.
@@ -40,54 +47,59 @@ type ChaosOnProcessGroup interface {
 type ProcessGroupHandler struct {
 	Main     ChaosOnProcessGroup
 	childMap map[PID]ChaosOnProcessGroup
-	logger   logr.Logger
+	Logger   logr.Logger
 }
 
 func NewProcessGroupHandler(logger logr.Logger, main ChaosOnProcessGroup) ProcessGroupHandler {
 	return ProcessGroupHandler{
 		Main:     main,
 		childMap: make(map[PID]ChaosOnProcessGroup),
-		logger:   logger,
+		Logger:   logr.New(logger.GetSink()),
 	}
 }
 
 // Inject try to inject the main process and then try to inject child process.
 // If something wrong in injecting a child process, Inject will just log error & continue.
 func (gp *ProcessGroupHandler) Inject(pid PID) error {
-	err := gp.Main.Inject(pid)
-	if err != nil {
-		return errors.Wrapf(err, "inject main process : %d", pid)
+	sysPID, ok := pid.(SysPID)
+	if !ok {
+		return ErrNotSysPID
 	}
 
-	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
+	err := gp.Main.Inject(sysPID)
+	if err != nil {
+		return errors.Wrapf(err, "inject main process : %v", pid)
+	}
+
+	childPIDs, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
 	if err != nil {
 		return errors.Wrapf(ErrNotFoundChildProcess, "cause : %v", err)
 	}
 
-	for _, childPid := range childPids {
-		childPID := PID(childPid)
-		if childProcessChaos, ok := gp.childMap[childPID]; ok {
+	for _, childPID := range childPIDs {
+		childSysPID := SysPID(childPID)
+		if childProcessChaos, ok := gp.childMap[childSysPID]; ok {
 			err := gp.Main.Assign(childProcessChaos)
 			if err != nil {
-				gp.logger.Error(err, "failed to assign old child process")
+				gp.Logger.Error(err, "failed to assign old child process")
 				continue
 			}
-			err = childProcessChaos.Inject(childPID)
+			err = childProcessChaos.Inject(childSysPID)
 			if err != nil {
-				gp.logger.Error(err, "failed to inject old child process")
+				gp.Logger.Error(err, "failed to inject old child process")
 			}
 		} else {
 			childProcessChaos, err := gp.Main.Fork()
 			if err != nil {
-				gp.logger.Error(err, "failed to create child process")
+				gp.Logger.Error(err, "failed to create child process")
 				continue
 			}
 			err = childProcessChaos.Inject(pid)
 			if err != nil {
-				gp.logger.Error(err, "failed to inject new child process")
+				gp.Logger.Error(err, "failed to inject new child process")
 				continue
 			}
-			gp.childMap[childPID] = childProcessChaos
+			gp.childMap[childSysPID] = childProcessChaos
 		}
 	}
 	return nil
@@ -95,22 +107,26 @@ func (gp *ProcessGroupHandler) Inject(pid PID) error {
 
 // Recover try to recover the main process and then try to recover child process.
 func (gp *ProcessGroupHandler) Recover(pid PID) error {
+	sysPID, ok := pid.(SysPID)
+	if !ok {
+		return ErrNotSysPID
+	}
 	err := gp.Main.Recover(pid)
 	if err != nil {
-		return errors.Wrapf(err, "recovery main process : %d", pid)
+		return errors.Wrapf(err, "recovery main process : %v", pid)
 	}
 
-	childPids, err := util.GetChildProcesses(uint32(pid), gp.logger)
+	childPids, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
 	if err != nil {
 		return errors.Wrapf(ErrNotFoundChildProcess, "cause : %v", err)
 	}
 
-	for _, childPid := range childPids {
-		childPID := PID(childPid)
-		if childProcessChaos, ok := gp.childMap[childPID]; ok {
-			err := childProcessChaos.Recover(childPID)
+	for _, childPID := range childPids {
+		childSysPID := SysPID(childPID)
+		if childProcessChaos, ok := gp.childMap[childSysPID]; ok {
+			err := childProcessChaos.Recover(childSysPID)
 			if err != nil {
-				gp.logger.Error(err, "failed to recover old child process")
+				gp.Logger.Error(err, "failed to recover old child process")
 			}
 		}
 	}
