@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"sync"
 
 	"github.com/go-logr/logr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -78,8 +79,11 @@ func (c *Config) GrpcAddr() string {
 // DaemonServer represents a grpc server for tc daemon
 type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
-	backgroundProcessManager bpm.BackgroundProcessManager
+	backgroundProcessManager *bpm.BackgroundProcessManager
 	rootLogger               logr.Logger
+
+	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
+	tproxyLocker *sync.Map
 
 	IPSetLocker      *locker.Locker
 	TimeChaosManager tasks.TaskManager
@@ -103,8 +107,9 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg, log),
-		TimeChaosManager:         tasks.NewTaskManager(log),
+		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg),
+		tproxyLocker:             new(sync.Map),
+		TimeChaosManager:         tasks.NewTaskManager(loggertc),
 		rootLogger:               log,
 	}
 }
@@ -246,6 +251,6 @@ func (s *Server) Shutdown() error {
 		return errors.Wrap(err, "shut grpc endpoint down")
 	}
 	s.grpcServer.GracefulStop()
-	s.daemonServer.backgroundProcessManager.Shutdown()
+	s.daemonServer.backgroundProcessManager.Shutdown(context.TODO())
 	return nil
 }

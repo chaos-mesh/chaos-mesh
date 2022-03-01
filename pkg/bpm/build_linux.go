@@ -24,12 +24,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-// Build builds the process
+// Build builds the command
 // the ctx argument passes the context information to this function
 // e.g. the corresponding resource name.
-func (b *ProcessBuilder) Build(ctx context.Context) *ManagedProcess {
+func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 	log := b.getLoggerFromContext(ctx)
-
 	args := b.args
 	cmd := b.cmd
 
@@ -52,7 +51,7 @@ func (b *ProcessBuilder) Build(ctx context.Context) *ManagedProcess {
 
 	if c := mock.On("MockProcessBuild"); c != nil {
 		f := c.(func(context.Context, string, ...string) *exec.Cmd)
-		return &ManagedProcess{
+		return &ManagedCommand{
 			Cmd:        f(b.ctx, cmd, args...),
 			Identifier: b.identifier,
 		}
@@ -77,7 +76,7 @@ func (b *ProcessBuilder) Build(ctx context.Context) *ManagedProcess {
 		command.Stderr = b.stderr
 	}
 
-	return &ManagedProcess{
+	return &ManagedCommand{
 		Cmd:        command,
 		Identifier: b.identifier,
 	}
