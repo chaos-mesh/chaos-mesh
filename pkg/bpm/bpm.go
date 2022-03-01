@@ -23,14 +23,14 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/go-logr/logr"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/process"
-	ctrl "sigs.k8s.io/controller-runtime"
-)
 
-var log = ctrl.Log.WithName("background-process-manager")
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+)
 
 type NsType string
 
@@ -114,6 +114,8 @@ type BackgroundProcessManager struct {
 	// PidPair -> Uid, to keep compatible with v2.x
 	pidPairToUid *sync.Map
 
+	rootLogger logr.Logger
+
 	metricsCollector *metricsCollector
 }
 
@@ -166,13 +168,14 @@ func (p *Process) Stopped() <-chan struct{} {
 }
 
 // StartBackgroundProcessManager creates a background process manager
-func StartBackgroundProcessManager(registry prometheus.Registerer) *BackgroundProcessManager {
+func StartBackgroundProcessManager(registry prometheus.Registerer, rootLogger logr.Logger) *BackgroundProcessManager {
 	backgroundProcessManager := &BackgroundProcessManager{
 		deathChannel:     make(chan string, 1),
 		wg:               &sync.WaitGroup{},
 		identifiers:      &sync.Map{},
 		processes:        &sync.Map{},
 		pidPairToUid:     &sync.Map{},
+		rootLogger:       rootLogger.WithName("background-process-manager"),
 		metricsCollector: nil,
 	}
 
@@ -204,7 +207,8 @@ func (m *BackgroundProcessManager) recycle(uid string) {
 }
 
 // StartProcess manages a process in manager
-func (m *BackgroundProcessManager) StartProcess(cmd *ManagedCommand) (*Process, error) {
+func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *ManagedCommand) (*Process, error) {
+	log := m.getLoggerFromContext(ctx)
 	if cmd.Identifier != nil {
 		_, loaded := m.identifiers.LoadOrStore(*cmd.Identifier, true)
 		if loaded {
@@ -226,7 +230,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedCommand) (*Process, 
 	}
 
 	m.wg.Add(1)
-	log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+	log = log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
 
 	go func() {
 		err := cmd.Wait()
@@ -247,7 +251,9 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedCommand) (*Process, 
 	return process, nil
 }
 
-func (m *BackgroundProcessManager) Shutdown() {
+func (m *BackgroundProcessManager) Shutdown(ctx context.Context) {
+	log := m.getLoggerFromContext(ctx)
+
 	m.processes.Range(func(_, value interface{}) bool {
 		process := value.(*Process)
 		log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
@@ -285,7 +291,9 @@ func (m *BackgroundProcessManager) GetPipes(uid string) (Pipes, bool) {
 
 // KillBackgroundProcess sends SIGTERM to process
 func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, uid string) error {
-	log := log.WithValues("uid", uid)
+	log := m.getLoggerFromContext(ctx)
+
+	log = log.WithValues("uid", uid)
 
 	proc, loaded := m.getProc(uid)
 	if !loaded {
@@ -318,6 +326,10 @@ func (m *BackgroundProcessManager) GetIdentifiers() []string {
 	return identifiers
 }
 
+func (m *BackgroundProcessManager) getLoggerFromContext(ctx context.Context) logr.Logger {
+	return log.EnrichLoggerWithContext(ctx, m.rootLogger)
+}
+
 // DefaultProcessBuilder returns the default process builder
 func DefaultProcessBuilder(cmd string, args ...string) *CommandBuilder {
 	return &CommandBuilder{
@@ -346,6 +358,8 @@ type CommandBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
+	// the context is used to kill the process and will be passed into
+	// `exec.CommandContext`
 	ctx context.Context
 }
 
@@ -424,6 +438,13 @@ func (b *CommandBuilder) SetStderr(stderr io.ReadWriteCloser) *CommandBuilder {
 	b.stderr = stderr
 
 	return b
+}
+
+func (b *CommandBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
+	// this logger is inherited from the global one
+	// TODO: replace it with a specific logger by passing in one or creating a new one
+	logger := log.L().WithName("background-process-manager.process-builder")
+	return log.EnrichLoggerWithContext(ctx, logger)
 }
 
 type nsOption struct {

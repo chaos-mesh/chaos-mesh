@@ -17,6 +17,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 
 	"github.com/retailnext/iptables_exporter/iptables"
 
@@ -33,7 +34,7 @@ func getIptablesContent(enterNS bool, pid uint32) (tables iptables.Tables, err e
 		builder = builder.SetNS(pid, bpm.NetNS)
 	}
 
-	out, err := builder.Build().CombinedOutput()
+	out, err := builder.Build(context.TODO()).CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
