@@ -23,17 +23,16 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/pkg/errors"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/label"
-
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/keyutil"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 )
 
 type PhysicalMachineInitOptions struct {

@@ -21,9 +21,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/pkg/errors"
-
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 )
 
 var ErrInvalidType = errors.New("invalid type of fields")

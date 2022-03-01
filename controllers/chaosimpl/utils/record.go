@@ -18,10 +18,10 @@ package utils
 import (
 	"context"
 
-	v1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
@@ -48,7 +48,7 @@ type DecodedContainerRecord struct {
 	Pod *v1.Pod
 }
 
-func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record) (decoded DecodedContainerRecord, err error) {
+func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, obj v1alpha1.InnerObject) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
 	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
@@ -77,7 +77,10 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		return
 	}
 
-	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod)
+	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod, &types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	})
 	if err != nil {
 		return
 	}

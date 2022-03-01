@@ -18,11 +18,10 @@ package v1alpha1
 import (
 	"reflect"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/pkg/errors"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 type EbsVolume string

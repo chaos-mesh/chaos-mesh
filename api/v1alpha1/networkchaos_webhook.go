@@ -22,10 +22,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 const (

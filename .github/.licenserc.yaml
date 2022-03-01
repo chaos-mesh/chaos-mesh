@@ -54,8 +54,12 @@ header:
     - 'ui/.prettierrc'
     - 'ui/.yarnclean'
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
+    - 'ui/app/src/formik/**'
+    - 'ui/app/src/openapi/**'
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
     - '**/node_modules/**'
+    - 'ui/app/build/**/*'
+    - 'ui/packages/mui-extends/esm/**/*'
     # codecov configuration file
     - codecov.yml

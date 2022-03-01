@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 )
 
 const (
@@ -33,6 +34,8 @@ const (
 
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
+
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -53,11 +56,11 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
 
-		cmd := processBuilder.Build()
+		cmd := processBuilder.Build(ctx)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -70,11 +73,11 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
 
-		cmd = processBuilder.Build()
+		cmd = processBuilder.Build(ctx)
 		output, err = cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))
@@ -86,11 +89,11 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
 
-		cmd := processBuilder.Build()
+		cmd := processBuilder.Build(ctx)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
-			return nil, encodeOutputToError(output, err)
+			return nil, util.EncodeOutputToError(output, err)
 		}
 		if len(output) != 0 {
 			log.Info("command output", "output", string(output))

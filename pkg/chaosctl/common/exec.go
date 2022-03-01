@@ -91,5 +91,5 @@ func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *k
 	}
 	// enter all possible namespaces needed, since there's no bad effect to do so
 	cmdBuilder := bpm.DefaultProcessBuilder(cmd).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetContext(ctx)
-	return Exec(ctx, daemon, cmdBuilder.Build().Cmd.String(), c)
+	return Exec(ctx, daemon, cmdBuilder.Build(ctx).Cmd.String(), c)
 }

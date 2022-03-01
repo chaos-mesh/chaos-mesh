@@ -279,12 +279,14 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 				return err
 			}
 			if evaluated && len(finishedChildren) == len(tasks) {
+				if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
+					it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
+				}
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,
 					Status: corev1.ConditionTrue,
 					Reason: "",
 				})
-				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 			} else {
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 					Type:   v1alpha1.ConditionAccomplished,

@@ -19,9 +19,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-
 	"go.uber.org/fx"
-
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"

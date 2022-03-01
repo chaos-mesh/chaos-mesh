@@ -19,9 +19,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,7 +42,7 @@ type Impl struct {
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
 	containerId := decodedContainer.ContainerId
 	if pbClient != nil {
@@ -102,7 +101,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
 	if pbClient != nil {
 		defer pbClient.Close()
@@ -130,7 +129,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		MemoryInstance:  instance.MemoryUID,
 		MemoryStartTime: instance.MemoryStartTime.UnixNano() / int64(time.Millisecond),
 	}); err != nil {
-		// TODO: check whether the erorr still exists
+		impl.Log.Error(err, "cancel stressors")
 		return v1alpha1.Injected, nil
 	}
 	delete(stresschaos.Status.Instances, records[index].Id)
