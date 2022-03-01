@@ -18,6 +18,7 @@ package utils
 import (
 	"bufio"
 	"bytes"
+	"context"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
@@ -32,7 +33,7 @@ func getTcRulesNumber(enterNS bool, pid uint32) (int, error) {
 		builder = builder.SetNS(pid, bpm.NetNS)
 	}
 
-	out, err := builder.Build().CombinedOutput()
+	out, err := builder.Build(context.TODO()).CombinedOutput()
 	if err != nil {
 		return 0, err
 	}

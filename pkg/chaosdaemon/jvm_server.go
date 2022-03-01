@@ -37,6 +37,7 @@ const (
 
 func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	req *pb.InstallJVMRulesRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -70,7 +71,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	// copy agent.jar to container's namespace
 	if req.EnterNS {
 		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
-		output, err := processBuilder.Build().CombinedOutput()
+		output, err := processBuilder.Build(ctx).CombinedOutput()
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +85,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		}
 		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-		output, err = processBuilder.Build().CombinedOutput()
+		output, err = processBuilder.Build(ctx).CombinedOutput()
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +100,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		processBuilder = processBuilder.EnableLocalMnt()
 	}
 
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// this error will occured when install agent more than once, and will ignore this error and continue to submit rule
@@ -133,7 +134,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}
-	output, err = processBuilder.Build().CombinedOutput()
+	output, err = processBuilder.Build(ctx).CombinedOutput()
 	if err != nil {
 		log.Error(err, string(output))
 		return nil, err
@@ -147,6 +148,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 
 func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	req *pb.UninstallJVMRulesRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("InstallJVMRules", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -165,7 +167,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}
-	output, err := processBuilder.Build().CombinedOutput()
+	output, err := processBuilder.Build(ctx).CombinedOutput()
 	if err != nil {
 		log.Error(err, string(output))
 		if strings.Contains(string(output), "No rule scripts to remove") {

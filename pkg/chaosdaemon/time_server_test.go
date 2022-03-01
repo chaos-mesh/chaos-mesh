@@ -25,12 +25,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("time server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil, logger)
 
 	Context("SetTimeOffset", func() {
 		It("should work", func() {
