@@ -43,7 +43,9 @@ spec:
       {{- if .Values.dashboard.serviceAccount }}
       serviceAccountName: {{ .Values.dashboard.serviceAccount }}
       {{- end }}
-      priorityClassName: {{ .Values.dashboard.priorityClassName}}
+      {{- if .Values.dashboard.priorityClassName }}
+      priorityClassName: {{ .Values.dashboard.priorityClassName }}
+      {{- end }}
       {{- if .Values.chaosDlv.enable }}
       shareProcessNamespace: true
       {{- end }}

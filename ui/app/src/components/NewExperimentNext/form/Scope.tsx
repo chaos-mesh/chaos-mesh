@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
-import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
-import { Divider, InputAdornment, MenuItem, Typography } from '@mui/material'
-import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
+
+import { AutocompleteMultipleField, SelectField } from 'components/FormField'
+import { Divider, MenuItem, Typography } from '@mui/material'
+import { arrToObjBySep, objToArrBySep } from 'lib/utils'
 import {
   getAnnotations,
   getCommonPodsByNamespaces as getCommonPods,
@@ -27,6 +28,7 @@ import { getIn, useFormikContext } from 'formik'
 import { useEffect, useMemo } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import Mode from './Mode'
 import OtherOptions from 'components/OtherOptions'
 import ScopePodsTable from './ScopePodsTable'
 import Space from '@ui/mui-extends/esm/Space'
@@ -40,14 +42,7 @@ interface ScopeProps {
   podsPreviewDesc?: string | JSX.Element
 }
 
-const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
-const modes = [
-  { name: 'Random One', value: 'one' },
-  { name: 'Fixed Number', value: 'fixed' },
-  { name: 'Fixed Percent', value: 'fixed-percent' },
-  { name: 'Random Max Percent', value: 'random-max-percent' },
-]
-const modesWithAdornment = ['fixed-percent', 'random-max-percent']
+const phases = [{ label: 'All', value: 'all' }, 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
 const Scope: React.FC<ScopeProps> = ({
   namespaces,
@@ -161,45 +156,23 @@ const Scope: React.FC<ScopeProps> = ({
           onChange={handleChangeIncludeAll}
           disabled={disabled}
         >
-          {phases.map((option: string) => (
-            <MenuItem key={option} value={option}>
-              {toTitleCase(option)}
-            </MenuItem>
-          ))}
+          {phases.map((option) =>
+            typeof option === 'string' ? (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ) : (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            )
+          )}
         </SelectField>
       </OtherOptions>
 
       <Divider />
       <Typography>{T('newE.scope.mode')}</Typography>
-
-      <SelectField
-        name={`${modeScope}.mode`}
-        label={T('newE.scope.mode')}
-        helperText={T('newE.scope.modeHelper')}
-        disabled={disabled}
-      >
-        <MenuItem value="all">All</MenuItem>
-        {modes.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.name}
-          </MenuItem>
-        ))}
-      </SelectField>
-
-      {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
-        <TextField
-          name={`${modeScope}.value`}
-          label={T('newE.scope.modeValue')}
-          helperText={T('newE.scope.modeValueHelper')}
-          InputProps={{
-            endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
-              <InputAdornment position="end">%</InputAdornment>
-            ),
-          }}
-          disabled={disabled}
-        />
-      )}
-
+      <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
       <Divider />
 
       <div>
