@@ -36,6 +36,7 @@ const (
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("applying io chaos", "Request", in)
 
 	if in.InstanceUid == "" {
@@ -84,9 +85,9 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 	cmd.Stderr = os.Stderr
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, errors.Wrapf(err, "start process `%s`", cmd)
 	}
@@ -120,6 +121,8 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 }
 
 func (s *DaemonServer) killIOChaos(ctx context.Context, uid string) error {
+	log := s.getLoggerFromContext(ctx)
+
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, uid)
 	if err != nil {
 		return errors.Wrapf(err, "kill toda %s", uid)

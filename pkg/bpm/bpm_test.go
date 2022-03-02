@@ -24,6 +24,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 func RandomeIdentifier() string {
@@ -47,12 +49,14 @@ func WaitProcess(m *BackgroundProcessManager, proc *Process, exceedTime time.Dur
 }
 
 var _ = Describe("background process manager", func() {
-	m := StartBackgroundProcessManager(nil)
+	log, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
+	m := StartBackgroundProcessManager(nil, log)
 
 	Context("normally exited process", func() {
 		It("should work", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			p, err := m.StartProcess(cmd)
+			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
+			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			WaitProcess(m, p, time.Second*3)
@@ -63,23 +67,23 @@ var _ = Describe("background process manager", func() {
 
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			p1, err := m.StartProcess(cmd)
+				Build(context.Background())
+			p1, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			// get error
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			_, err = m.StartProcess(cmd2)
+				Build(context.Background())
+			_, err = m.StartProcess(context.Background(), cmd2)
 			Expect(err).NotTo(BeNil())
 			Expect(strings.Contains(err.Error(), fmt.Sprintf("process with identifier %s is running", identifier))).To(BeTrue())
 
 			WaitProcess(m, p1, time.Second*3)
 			cmd3 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			p3, err := m.StartProcess(cmd3)
+				Build(context.TODO())
+			p3, err := m.StartProcess(context.Background(), cmd3)
 			Expect(err).To(BeNil())
 
 			WaitProcess(m, p3, time.Second*3)
@@ -88,8 +92,8 @@ var _ = Describe("background process manager", func() {
 
 	Context("kill process", func() {
 		It("should work", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			p, err := m.StartProcess(cmd)
+			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
+			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			err = m.KillBackgroundProcess(context.Background(), p.Uid)
@@ -103,23 +107,23 @@ var _ = Describe("background process manager", func() {
 
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			p1, err := m.StartProcess(cmd)
+				Build(context.Background())
+			p1, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			// get error
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			_, err = m.StartProcess(cmd2)
+				Build(context.Background())
+			_, err = m.StartProcess(context.Background(), cmd2)
 			Expect(err).NotTo(BeNil())
 			Expect(strings.Contains(err.Error(), fmt.Sprintf("process with identifier %s is running", identifier))).To(BeTrue())
 			WaitProcess(m, p1, time.Second*3)
 
 			cmd3 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			p3, err := m.StartProcess(cmd3)
+				Build(context.Background())
+			p3, err := m.StartProcess(context.Background(), cmd3)
 			Expect(err).To(BeNil())
 
 			err = m.KillBackgroundProcess(context.Background(), p3.Uid)
@@ -127,8 +131,8 @@ var _ = Describe("background process manager", func() {
 
 			cmd4 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
-			p4, err := m.StartProcess(cmd4)
+				Build(context.Background())
+			p4, err := m.StartProcess(context.Background(), cmd4)
 			Expect(err).To(BeNil())
 			WaitProcess(m, p4, time.Second*3)
 		})
@@ -139,9 +143,9 @@ var _ = Describe("background process manager", func() {
 			identifier := RandomeIdentifier()
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
+				Build(context.Background())
 
-			p, err := m.StartProcess(cmd)
+			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			ids := m.GetIdentifiers()
@@ -156,9 +160,9 @@ var _ = Describe("background process manager", func() {
 		})
 
 		It("should work with nil identifier", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build()
+			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
 
-			p, err := m.StartProcess(cmd)
+			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			ids := m.GetIdentifiers()
@@ -170,8 +174,8 @@ var _ = Describe("background process manager", func() {
 
 	Context("get uid", func() {
 		It("kill process", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build()
-			p, err := m.StartProcess(cmd)
+			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
+			p, err := m.StartProcess(context.Background(), cmd)
 			Expect(err).To(BeNil())
 
 			uid, loaded := m.GetUID(p.Pair)

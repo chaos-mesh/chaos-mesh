@@ -33,6 +33,7 @@ import (
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Executing stressors", "request", req)
 
 	// cpuStressors
@@ -64,6 +65,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	CpuPid, err := strconv.Atoi(req.CpuInstance)
 	if req.CpuInstance != "" && err != nil {
 		return nil, err
@@ -108,6 +110,7 @@ func (s *DaemonServer) CancelStressors(ctx context.Context,
 
 func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*bpm.Process, error) {
+	log := s.getLoggerFromContext(ctx)
 	if req.CpuStressors == "" {
 		return nil, nil
 	}
@@ -125,9 +128,9 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -165,6 +168,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 
 func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*bpm.Process, error) {
+	log := s.getLoggerFromContext(ctx)
 	if req.MemoryStressors == "" {
 		return nil, nil
 	}
@@ -182,9 +186,9 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}
