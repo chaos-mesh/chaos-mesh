@@ -80,6 +80,7 @@ type AWSSelector struct {
 	// but to keep the minimal modification on current implementation, it hasn't been splited.
 
 	// Endpoint indicates the endpoint of the aws server. Just used it in test now.
+	// +ui:form:ignore
 	// +optional
 	Endpoint *string `json:"endpoint,omitempty"`
 
@@ -91,11 +92,13 @@ type AWSSelector struct {
 
 	// EbsVolume indicates the ID of the EBS volume.
 	// Needed in detach-volume.
+	// +ui:form:when=action=='detach-volume'
 	// +optional
 	EbsVolume *string `json:"volumeID,omitempty" webhook:"EbsVolume,nilable"`
 
 	// DeviceName indicates the name of the device.
 	// Needed in detach-volume.
+	// +ui:form:when=action=='detach-volume'
 	// +optional
 	DeviceName *string `json:"deviceName,omitempty" webhook:"AWSDeviceName,nilable"`
 }

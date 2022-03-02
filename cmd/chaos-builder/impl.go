@@ -33,7 +33,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // updating spec of a chaos will have no effect, we'd better reject it

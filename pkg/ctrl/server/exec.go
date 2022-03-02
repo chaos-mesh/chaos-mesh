@@ -103,7 +103,7 @@ func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string, nsTy
 
 	return exec(
 		ctx, daemon,
-		cmdBuilder.EnableLocalMnt().SetContext(ctx).Build().Cmd.String(),
+		cmdBuilder.EnableLocalMnt().SetContext(ctx).Build(ctx).Cmd.String(),
 		r.Clientset,
 	)
 }
