@@ -15,14 +15,18 @@
 
 package v1alpha1
 
-const (
-	TemplateLabelKey          = "chaos-mesh.org/template-type"
-	ManagedByLabelKey         = "app.kubernetes.io/managed-by"
-	PrefixStatusCheckTemplate = "template-status-check"
+import (
+	"reflect"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// StatusCheckTemplate represents a template of status check.
-// A statusCheckTemplate would save in the ConfigMap named `template-status-check-<template-name>`.
-type StatusCheckTemplate struct {
-	StatusCheckSpec
+func (in *StatusCheckSpec) Default(root interface{}, field *reflect.StructField) {
+	// TODO
+}
+
+func (in *StatusCheckSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
+	// TODO
+	allErrs := field.ErrorList{}
+	return allErrs
 }

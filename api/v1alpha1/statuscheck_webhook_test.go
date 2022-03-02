@@ -15,14 +15,4 @@
 
 package v1alpha1
 
-const (
-	TemplateLabelKey          = "chaos-mesh.org/template-type"
-	ManagedByLabelKey         = "app.kubernetes.io/managed-by"
-	PrefixStatusCheckTemplate = "template-status-check"
-)
-
-// StatusCheckTemplate represents a template of status check.
-// A statusCheckTemplate would save in the ConfigMap named `template-status-check-<template-name>`.
-type StatusCheckTemplate struct {
-	StatusCheckSpec
-}
+// TODO

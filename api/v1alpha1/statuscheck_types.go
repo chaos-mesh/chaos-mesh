@@ -49,36 +49,55 @@ const (
 )
 
 type StatusCheckSpec struct {
+	// Mode defines the execution mode of the status check.
+	// Synchronous means the status check will exit immediately after success or failure
+	// Continuous means the status check will continue to execute until the duration is exceeded or the status check fails
+	// Support type: Synchronous / Continuous
 	// +kubebuilder:validation:Enum=Synchronous;Continuous
 	Mode StatusCheckMode `json:"mode"`
 
+	// Type defines the specific status check type.
+	// Support type: HTTP
 	// +kubebuilder:default=HTTP
 	// +kubebuilder:validation:Enum=HTTP
 	Type StatusCheckType `json:"type"`
 
+	// Duration defines the duration of the status check.
+	// A duration string is a possibly signed sequence of
+	// decimal numbers, each with optional fraction and a unit suffix,
+	// such as "300ms", "-1.5h" or "2h45m".
+	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Deadline *string `json:"deadline"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
+	// TimeoutSeconds defines the number of seconds after which the status check times out.
+	// +optional
 	// +kubebuilder:default=1
 	// +kubebuilder:validation:Minimum=1
-	TimeoutSeconds int `json:"timeoutSeconds"`
+	TimeoutSeconds int `json:"timeoutSeconds,omitempty"`
 
+	// PeriodSeconds defines how often (in seconds) to perform the status check.
+	// +optional
 	// +kubebuilder:default=10
 	// +kubebuilder:validation:Minimum=1
-	PeriodSeconds int `json:"periodSeconds"`
+	PeriodSeconds int `json:"periodSeconds,omitempty"`
 
+	// FailureThreshold defines when a status check fails,
+	// it will try FailureThreshold times before giving up.
+	// +optional
 	// +kubebuilder:default=3
 	// +kubebuilder:validation:Minimum=1
-	FailureThreshold int `json:"failureThreshold"`
+	FailureThreshold int `json:"failureThreshold,omitempty"`
 
+	// RecordsHistoryLimit defines the number of record to retain.
+	// +optional
 	// +kubebuilder:default=100
 	// +kubebuilder:validation:Minimum=1
 	// +kubebuilder:validation:Maximum=1000
-	HistoryLimit int `json:"historyLimit"`
+	RecordsHistoryLimit int `json:"recordsHistoryLimit,omitempty"`
 
 	// +optional
-	// +kubebuilder:default=true
-	AbortIfFailed bool `json:"abortIfFailed"`
+	*EmbedStatusCheck `json:",inline,omitempty"`
 }
 
 type StatusCheckStatus struct {
@@ -86,13 +105,13 @@ type StatusCheckStatus struct {
 	// +optional
 	// +patchMergeKey=type
 	// +patchStrategy=merge
-	Conditions []StatusCheckCondition `json:"conditions" patchStrategy:"merge" patchMergeKey:"type"`
+	Conditions []StatusCheckCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 
-	// Records represents the latest available observations of a StatusCheck's current state.
+	// Records contains the history of the execution of StatusCheck.
 	// +optional
 	// +patchMergeKey=type
 	// +patchStrategy=merge
-	Records []StatusCheckRecord `json:"records" patchStrategy:"merge" patchMergeKey:"type"`
+	Records []StatusCheckRecord `json:"records,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
 type StatusCheckOutcome string
@@ -116,17 +135,23 @@ const (
 	StatusCheckConditionAborted        StatusCheckConditionType = "Aborted"
 )
 
+type StatusCheckReason string
+
+const (
+	StatusCheckSuccess StatusCheckReason = "StatusCheckSuccess"
+)
+
 type StatusCheckCondition struct {
 	Type   StatusCheckConditionType `json:"type"`
 	Status corev1.ConditionStatus   `json:"status"`
 	// +optional
-	Reason string `json:"reason"`
+	Reason StatusCheckReason `json:"reason,omitempty"`
 }
 
-// Reasons
-const (
-	StatusCheckSuccess string = "StatusCheckSuccess"
-)
+type EmbedStatusCheck struct {
+	// +optional
+	HTTPStatusCheck *HTTPStatusCheck `json:"http,omitempty"`
+}
 
 type HTTPHeaderPair struct {
 	Name  string `json:"name"`
@@ -134,15 +159,22 @@ type HTTPHeaderPair struct {
 }
 
 type HTTPCriteria struct {
+	// ResponseCode defines the expected response code for the request.
+	// A responseCode string could be a single code (e.g. 200),
+	// or a range (e.g. 200-400).
 	ResponseCode string `json:"responseCode"`
 	// TODO: support response body
 }
 
 type HTTPStatusCheck struct {
-	RequestUrl     string           `json:"requestUrl"`
-	RequestMethod  string           `json:"requestMethod"`
-	RequestHeaders []HTTPHeaderPair `json:"requestHeaders"`
-	Criteria       HTTPCriteria     `json:"criteria"`
+	RequestUrl string `json:"requestUrl"`
+	// +optional
+	// +kubebuilder:default=GET
+	RequestMethod string `json:"requestMethod,omitempty"`
+	// +optional
+	RequestHeaders []HTTPHeaderPair `json:"requestHeaders,omitempty"`
+	// Criteria defines how to determine the result of the status check.
+	Criteria HTTPCriteria `json:"criteria"`
 }
 
 // +kubebuilder:object:root=true

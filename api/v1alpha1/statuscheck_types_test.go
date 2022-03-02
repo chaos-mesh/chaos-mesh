@@ -14,3 +14,69 @@
 //
 
 package v1alpha1
+
+import (
+	"context"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+)
+
+// These tests are written in BDD-style using Ginkgo framework. Refer to
+// http://onsi.github.io/ginkgo to learn more.
+
+var _ = Describe("StatusCheck", func() {
+	var (
+		key              types.NamespacedName
+		created, fetched *StatusCheck
+	)
+
+	BeforeEach(func() {
+		// Add any setup steps that needs to be executed before each test
+	})
+
+	AfterEach(func() {
+		// Add any teardown steps that needs to be executed after each test
+	})
+
+	Context("Create API", func() {
+		It("should create an object successfully", func() {
+			key = types.NamespacedName{
+				Name:      "foo",
+				Namespace: "default",
+			}
+
+			created = &StatusCheck{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "foo",
+					Namespace: "default",
+				},
+				Spec: StatusCheckSpec{
+					Mode: StatusCheckSynchronous,
+					Type: TypeHttp,
+					EmbedStatusCheck: &EmbedStatusCheck{
+						HTTPStatusCheck: &HTTPStatusCheck{
+							RequestUrl: "http://1.1.1.1:8080/health",
+							Criteria: HTTPCriteria{
+								ResponseCode: "200",
+							},
+						},
+					},
+				},
+			}
+
+			By("creating an API obj")
+			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
+
+			fetched = &StatusCheck{}
+			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
+			Expect(fetched).To(Equal(created))
+
+			By("deleting the created object")
+			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
+			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
+		})
+	})
+})

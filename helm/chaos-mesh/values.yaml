@@ -441,6 +441,7 @@ webhook:
     - blockchaos
     - physicalmachinechaos
     - physicalmachine
+    - statuscheck
 
 bpfki:
   create: false
