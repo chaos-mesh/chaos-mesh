@@ -2388,6 +2388,9 @@ var doc = `{
                     "description": "the entry node name",
                     "type": "string"
                 },
+                "finish_time": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2424,6 +2427,9 @@ var doc = `{
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
                     "type": "string"
                 },
                 "id": {

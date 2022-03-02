@@ -58,6 +58,7 @@ type WorkflowMeta struct {
 	Entry     string         `json:"entry"` // the entry node name
 	CreatedAt time.Time      `json:"created_at"`
 	EndTime   string         `json:"end_time"`
+	FinishTime time.Time 	 `json:"finish_time"`
 	Status    WorkflowStatus `json:"status,omitempty"`
 	Archived  bool           `json:"-"`
 }
@@ -432,6 +433,7 @@ type WorkflowStore interface {
 	Save(ctx context.Context, entity *WorkflowEntity) error
 	DeleteByUID(ctx context.Context, UID string) error
 	DeleteByUIDs(ctx context.Context, UIDs []string) error
+	DeleteByFinishTime(ctx context.Context, ttl time.Duration) error
 	MarkAsArchived(ctx context.Context, namespace, name string) error
 	MarkAsArchivedWithUID(ctx context.Context, UID string) error
 }

@@ -17,6 +17,7 @@ package workflow
 
 import (
 	"context"
+	"time"
 
 	"github.com/jinzhu/gorm"
 
@@ -104,6 +105,26 @@ func (it *WorkflowStore) DeleteByUID(ctx context.Context, uid string) error {
 
 func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error {
 	return it.db.Where("uid IN (?)", uids).Unscoped().Delete(core.WorkflowEntity{}).Error
+}
+
+func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
+	workflows, err := it.ListMeta(context.Background(), "", "", true)
+	
+	if err != nil {
+		return err
+	}	
+	
+	nowTime := time.Now()
+	
+	for _, wfl := range workflows {
+		if wfl.FinishTime.Add(ttl).Before(nowTime) {
+			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(*it).Error; err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
