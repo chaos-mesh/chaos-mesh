@@ -88,13 +88,16 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		// this error will occured when install agent more than once, and will ignore this error and continue to submit rule
 		errMsg1 := "Agent JAR loaded but agent failed to initialize"
 
-		// these two errors will occured when java version less or euqal to 1.8, and don't know why
+		// these two errors will occurred when java version less or equal to 1.8, and don't know why
 		// but it can install agent success even with this error, so just ignore it now.
 		// TODO: Investigate the cause of these two error
 		errMsg2 := "Provider sun.tools.attach.LinuxAttachProvider not found"
 		errMsg3 := "install java.io.IOException: Non-numeric value found"
+		// this error is caused by the different attach result codes in different java versions. In fact, the agent has attached success, just ignore it here.
+		// refer to https://stackoverflow.com/questions/54340438/virtualmachine-attach-throws-com-sun-tools-attach-agentloadexception-0-when-usi/54454418#54454418
+		errMsg4 := "install com.sun.tools.attach.AgentLoadException"
 		if !strings.Contains(string(output), errMsg1) && !strings.Contains(string(output), errMsg2) &&
-			!strings.Contains(string(output), errMsg3) {
+			!strings.Contains(string(output), errMsg3) && !strings.Contains(string(output), errMsg4) {
 			log.Error(err, string(output))
 			return nil, err
 		}
@@ -107,7 +110,9 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		return nil, err
 	}
 	ruleFile, err := os.Open(filename)
-
+	if err != nil {
+		return nil, err
+	}
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > "+filename).SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(ruleFile)
 	output, err = processBuilder.Build().CombinedOutput()

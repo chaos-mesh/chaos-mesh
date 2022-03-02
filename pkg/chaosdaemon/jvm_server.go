@@ -114,7 +114,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		// this error will occured when install agent more than once, and will ignore this error and continue to submit rule
 		errMsg1 := "Agent JAR loaded but agent failed to initialize"
 
-		// these two errors will occured when java version less or euqal to 1.8, and don't know why
+		// these two errors will occurred when java version less or equal to 1.8, and don't know why
 		// but it can install agent success even with this error, so just ignore it now.
 		// TODO: Investigate the cause of these two error
 		errMsg2 := "Provider sun.tools.attach.LinuxAttachProvider not found"

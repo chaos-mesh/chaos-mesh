@@ -16,7 +16,10 @@
 package test
 
 import (
+	"bufio"
 	"context"
+	"net"
+	"strings"
 	"syscall"
 
 	"github.com/containerd/containerd"
@@ -63,13 +66,20 @@ func (m *MockClient) ContainerExecCreate(ctx context.Context, container string, 
 	if err := mock.On("ContainerExecCreateError"); err != nil {
 		return types.IDResponse{}, err.(error)
 	}
-	return types.IDResponse{}, nil
+	return types.IDResponse{
+		ID: "1234",
+	}, nil
 }
 func (m *MockClient) ContainerExecAttach(ctx context.Context, execID string, config types.ExecStartCheck) (types.HijackedResponse, error) {
 	if err := mock.On("ContainerExecAttachError"); err != nil {
 		return types.HijackedResponse{}, err.(error)
 	}
-	return types.HijackedResponse{}, nil
+	server, _ := net.Pipe()
+	reader := bufio.NewReader(strings.NewReader("hello chaos"))
+	return types.HijackedResponse{
+		Conn:   server,
+		Reader: reader,
+	}, nil
 }
 
 func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
