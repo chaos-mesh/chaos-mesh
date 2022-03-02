@@ -824,8 +824,8 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-daemon
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-daemon
@@ -851,8 +851,8 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-controller-manager
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -878,8 +878,8 @@ metadata:
   name: chaos-mesh-webhook-certs
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: webhook-secret
@@ -896,8 +896,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-target-namespace
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -938,8 +938,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -964,8 +964,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -985,8 +985,8 @@ metadata:
   name: chaos-mesh-chaos-controller-manager-target-namespace
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -1006,8 +1006,8 @@ metadata:
   name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -1034,8 +1034,8 @@ metadata:
   name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: "chaos-testing"
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -1069,8 +1069,8 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-daemon
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-daemon
@@ -1137,8 +1137,8 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-mesh-controller-manager
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -1181,6 +1181,7 @@ spec:
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -1188,8 +1189,8 @@ metadata:
   name: chaos-daemon
   labels:
     app.kubernetes.io/component: chaos-daemon
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
 spec:
@@ -1201,8 +1202,8 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/part-of: chaos-mesh
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-daemon
@@ -1225,7 +1226,7 @@ spec:
             - --grpc-port
             - !!str 31767
             - --pprof
-          env:
+          env:            
             - name: TZ
               value: ${timezone}
           securityContext:
@@ -1278,8 +1279,8 @@ metadata:
   namespace: "chaos-testing"
   name: chaos-dashboard
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-dashboard
@@ -1293,8 +1294,8 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/part-of: chaos-mesh
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: chaos-dashboard
@@ -1312,7 +1313,7 @@ spec:
               memory: 256Mi
           command:
             - /usr/local/bin/chaos-dashboard
-          env:
+          env:            
             - name: CLEAN_SYNC_PERIOD
               value: "12h"
             - name: DATABASE_DATASOURCE
@@ -1379,14 +1380,15 @@ spec:
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: "chaos-testing"
   name: chaos-controller-manager
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: controller-manager
@@ -1400,8 +1402,8 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/part-of: chaos-mesh
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: controller-manager
@@ -1421,7 +1423,7 @@ spec:
               memory: 256Mi
         command:
           - /usr/local/bin/chaos-controller-manager
-        env:
+        env:          
           - name: METRICS_PORT
             value: "10080"
           - name: WEBHOOK_PORT
@@ -1678,8 +1680,8 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: chaos-mesh-mutation
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
@@ -2046,8 +2048,8 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: chaos-mesh-validation
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
@@ -2395,8 +2397,8 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: validate-auth
   labels:
-    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: admission-webhook
