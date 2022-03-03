@@ -112,7 +112,6 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
 		rootLogger:               log,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
 		timeChaosServer: TimeChaosServer{
 			podProcessMap: tasks.NewPodProcessMap(),
 			manager:       tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
