@@ -126,7 +126,7 @@ func (o *DebugOptions) Run(debugger debug.Debugger, args []string) error {
 	var result []*common.ChaosResult
 	var err error
 
-	result, err = debugger.Run(ctx, o.namespace, chaosName)
+	result, err = debugger.Collect(ctx, o.namespace, chaosName)
 	if err != nil {
 		return err
 	}

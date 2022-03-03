@@ -89,7 +89,7 @@ func (o *logsOptions) Run(args []string) error {
 	}
 	defer cancel()
 
-	componentsNeeded := []Component{Manager, Daemon, Dashboard}
+	componentsNeeded := []Component{Manager, Daemon, Dashboard, DnsServer}
 	for _, name := range componentsNeeded {
 		var query struct {
 			Namespace []struct {
