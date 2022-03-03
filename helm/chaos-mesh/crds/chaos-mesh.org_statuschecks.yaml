@@ -50,19 +50,19 @@ spec:
                 type: integer
               http:
                 properties:
+                  body:
+                    type: string
                   criteria:
                     description: Criteria defines how to determine the result of the
                       status check.
                     properties:
-                      responseCode:
-                        description: ResponseCode defines the expected response code
-                          for the request. A responseCode string could be a single
-                          code (e.g. 200), or a range (e.g. 200-400).
+                      statusCode:
+                        description: StatusCode defines the expected http status code
+                          for the request. A statusCode string could be a single code
+                          (e.g. 200), or a range (e.g. 200-400).
                         type: string
-                    required:
-                    - responseCode
                     type: object
-                  requestHeaders:
+                  headers:
                     items:
                       properties:
                         name:
@@ -74,21 +74,20 @@ spec:
                       - value
                       type: object
                     type: array
-                  requestMethod:
+                  method:
                     default: GET
+                    enum:
+                    - GET
+                    - POST
                     type: string
-                  requestUrl:
+                  url:
                     type: string
                 required:
-                - criteria
-                - requestUrl
+                - url
                 type: object
               mode:
                 description: 'Mode defines the execution mode of the status check.
-                  Synchronous means the status check will exit immediately after success
-                  or failure Continuous means the status check will continue to execute
-                  until the duration is exceeded or the status check fails Support
-                  type: Synchronous / Continuous'
+                  Support type: Synchronous / Continuous'
                 enum:
                 - Synchronous
                 - Continuous
@@ -119,17 +118,27 @@ spec:
                 - HTTP
                 type: string
             required:
-            - mode
             - type
             type: object
           status:
             description: Most recently observed status of status check
             properties:
+              completionTime:
+                description: CompletionTime represents time when the status check
+                  was completed.
+                format: date-time
+                type: string
               conditions:
                 description: Conditions represents the latest available observations
                   of a StatusCheck's current state.
                 items:
                   properties:
+                    lastProbeTime:
+                      format: date-time
+                      type: string
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
                     reason:
                       type: string
                     status:
@@ -137,10 +146,18 @@ spec:
                     type:
                       type: string
                   required:
+                  - lastProbeTime
+                  - lastTransitionTime
+                  - reason
                   - status
                   - type
                   type: object
                 type: array
+              count:
+                description: Count represents the total number of the status check
+                  executed.
+                format: int64
+                type: integer
               records:
                 description: Records contains the history of the execution of StatusCheck.
                 items:
@@ -155,6 +172,11 @@ spec:
                   - probeTime
                   type: object
                 type: array
+              startTime:
+                description: StartTime represents time when the status check started
+                  to execute.
+                format: date-time
+                type: string
             type: object
         required:
         - spec

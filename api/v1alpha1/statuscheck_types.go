@@ -38,23 +38,26 @@ type StatusCheck struct {
 type StatusCheckMode string
 
 const (
+	// StatusCheckSynchronous means the status check will exit
+	// immediately after success or failure.
 	StatusCheckSynchronous StatusCheckMode = "Synchronous"
-	StatusCheckContinuous  StatusCheckMode = "Continuous"
+	// StatusCheckContinuous means the status check will continue to
+	// execute until the duration is exceeded or the status check fails.
+	StatusCheckContinuous StatusCheckMode = "Continuous"
 )
 
 type StatusCheckType string
 
 const (
-	TypeHttp StatusCheckType = "HTTP"
+	TypeHTTP StatusCheckType = "HTTP"
 )
 
 type StatusCheckSpec struct {
 	// Mode defines the execution mode of the status check.
-	// Synchronous means the status check will exit immediately after success or failure
-	// Continuous means the status check will continue to execute until the duration is exceeded or the status check fails
 	// Support type: Synchronous / Continuous
+	// +optional
 	// +kubebuilder:validation:Enum=Synchronous;Continuous
-	Mode StatusCheckMode `json:"mode"`
+	Mode StatusCheckMode `json:"mode,omitempty"`
 
 	// Type defines the specific status check type.
 	// Support type: HTTP
@@ -101,6 +104,18 @@ type StatusCheckSpec struct {
 }
 
 type StatusCheckStatus struct {
+	// StartTime represents time when the status check started to execute.
+	// +optional
+	StartTime *metav1.Time `json:"startTime,omitempty"`
+
+	// CompletionTime represents time when the status check was completed.
+	// +optional
+	CompletionTime *metav1.Time `json:"completionTime,omitempty"`
+
+	// Count represents the total number of the status check executed.
+	// +optional
+	Count int64 `json:"count,omitempty"`
+
 	// Conditions represents the latest available observations of a StatusCheck's current state.
 	// +optional
 	// +patchMergeKey=type
@@ -129,23 +144,25 @@ type StatusCheckRecord struct {
 type StatusCheckConditionType string
 
 const (
-	StatusCheckConditionAccomplished   StatusCheckConditionType = "Accomplished"
-	StatusCheckConditionDeadlineExceed StatusCheckConditionType = "DeadlineExceed"
-	StatusCheckConditionProbeSucceed   StatusCheckConditionType = "ProbeSucceed"
-	StatusCheckConditionAborted        StatusCheckConditionType = "Aborted"
+	// StatusCheckConditionComplete means the status check has completed its execution.
+	StatusCheckConditionComplete StatusCheckConditionType = "Complete"
+	// StatusCheckConditionFailed means the status check has failed its execution.
+	StatusCheckConditionFailed StatusCheckConditionType = "Failed"
 )
 
 type StatusCheckReason string
 
 const (
 	StatusCheckSuccess StatusCheckReason = "StatusCheckSuccess"
+	// TODO add more reason when implementing StatusCheck
 )
 
 type StatusCheckCondition struct {
-	Type   StatusCheckConditionType `json:"type"`
-	Status corev1.ConditionStatus   `json:"status"`
-	// +optional
-	Reason StatusCheckReason `json:"reason,omitempty"`
+	Type               StatusCheckConditionType `json:"type"`
+	Status             corev1.ConditionStatus   `json:"status"`
+	Reason             StatusCheckReason        `json:"reason"`
+	LastProbeTime      *metav1.Time             `json:"lastProbeTime"`
+	LastTransitionTime *metav1.Time             `json:"lastTransitionTime"`
 }
 
 type EmbedStatusCheck struct {
@@ -159,22 +176,33 @@ type HTTPHeaderPair struct {
 }
 
 type HTTPCriteria struct {
-	// ResponseCode defines the expected response code for the request.
-	// A responseCode string could be a single code (e.g. 200),
+	// StatusCode defines the expected http status code for the request.
+	// A statusCode string could be a single code (e.g. 200),
 	// or a range (e.g. 200-400).
-	ResponseCode string `json:"responseCode"`
+	StatusCode string `json:"statusCode,omitempty" webhook:"StatusCode"`
 	// TODO: support response body
 }
 
+type HTTPRequestMethod string
+
+const (
+	MethodGet  = "GET"
+	MethodPost = "POST"
+)
+
 type HTTPStatusCheck struct {
-	RequestUrl string `json:"requestUrl"`
+	RequestUrl string `json:"url"`
+
 	// +optional
+	// +kubebuilder:validation:Enum=GET;POST
 	// +kubebuilder:default=GET
-	RequestMethod string `json:"requestMethod,omitempty"`
+	RequestMethod HTTPRequestMethod `json:"method,omitempty"`
 	// +optional
-	RequestHeaders []HTTPHeaderPair `json:"requestHeaders,omitempty"`
+	RequestHeaders []HTTPHeaderPair `json:"headers,omitempty"`
+	// +optional
+	RequestBody string `json:"body,omitempty"`
 	// Criteria defines how to determine the result of the status check.
-	Criteria HTTPCriteria `json:"criteria"`
+	Criteria HTTPCriteria `json:"criteria,omitempty"`
 }
 
 // +kubebuilder:object:root=true

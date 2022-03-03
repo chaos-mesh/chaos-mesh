@@ -15,4 +15,134 @@
 
 package v1alpha1
 
-// TODO
+import (
+	"strings"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
+
+var _ = Describe("statuscheck_webhook", func() {
+	Context("webhook.Defaultor of statuscheck", func() {
+		It("Default", func() {
+			statusCheck := &StatusCheck{}
+			statusCheck.Default()
+			Expect(statusCheck.Spec.Mode).To(Equal(StatusCheckSynchronous))
+		})
+	})
+	Context("webhook.Validator of statuscheck", func() {
+		It("Validate", func() {
+			type TestCase struct {
+				name        string
+				statusCheck StatusCheck
+				expect      string
+			}
+			tcs := []TestCase{
+				{
+					name: "simple Validate",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: TypeHTTP,
+							EmbedStatusCheck: &EmbedStatusCheck{
+								HTTPStatusCheck: &HTTPStatusCheck{
+									RequestUrl: "http://1.1.1.1",
+									Criteria: HTTPCriteria{
+										StatusCode: "200",
+									},
+								},
+							},
+						},
+					},
+					expect: "",
+				},
+				{
+					name: "simple Validate with status code range",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: TypeHTTP,
+							EmbedStatusCheck: &EmbedStatusCheck{
+								HTTPStatusCheck: &HTTPStatusCheck{
+									RequestUrl: "http://1.1.1.1",
+									Criteria: HTTPCriteria{
+										StatusCode: "200-400",
+									},
+								},
+							},
+						},
+					},
+					expect: "",
+				},
+				{
+					name: "unknown type",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: "CMD",
+						},
+					},
+					expect: "unrecognized type",
+				},
+				{
+					name: "invalid request url",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: TypeHTTP,
+							EmbedStatusCheck: &EmbedStatusCheck{
+								HTTPStatusCheck: &HTTPStatusCheck{
+									RequestUrl: "1.1.1.1",
+									Criteria: HTTPCriteria{
+										StatusCode: "-1",
+									},
+								},
+							},
+						},
+					},
+					expect: "invalid http request url",
+				},
+				{
+					name: "invalid status code",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: TypeHTTP,
+							EmbedStatusCheck: &EmbedStatusCheck{
+								HTTPStatusCheck: &HTTPStatusCheck{
+									RequestUrl: "http://1.1.1.1",
+									Criteria: HTTPCriteria{
+										StatusCode: "-1",
+									},
+								},
+							},
+						},
+					},
+					expect: "invalid status code",
+				},
+				{
+					name: "invalid status code range",
+					statusCheck: StatusCheck{
+						Spec: StatusCheckSpec{
+							Type: TypeHTTP,
+							EmbedStatusCheck: &EmbedStatusCheck{
+								HTTPStatusCheck: &HTTPStatusCheck{
+									RequestUrl: "http://1.1.1.1",
+									Criteria: HTTPCriteria{
+										StatusCode: "200-x",
+									},
+								},
+							},
+						},
+					},
+					expect: "invalid status code range",
+				},
+			}
+
+			for _, tc := range tcs {
+				err := tc.statusCheck.ValidateCreate()
+				if len(tc.expect) != 0 {
+					Expect(err).To(HaveOccurred())
+					Expect(strings.Contains(err.Error(), tc.expect)).To(BeTrue())
+				} else {
+					Expect(err).ToNot(HaveOccurred())
+				}
+			}
+		})
+	})
+})

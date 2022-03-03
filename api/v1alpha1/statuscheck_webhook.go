@@ -16,17 +16,98 @@
 package v1alpha1
 
 import (
+	"fmt"
+	"net/url"
 	"reflect"
+	"strconv"
+	"strings"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
 
 func (in *StatusCheckSpec) Default(root interface{}, field *reflect.StructField) {
-	// TODO
+	if in.Mode == "" {
+		in.Mode = StatusCheckSynchronous
+	}
 }
 
 func (in *StatusCheckSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
-	// TODO
 	allErrs := field.ErrorList{}
+
+	if in.Type == TypeHTTP {
+		if in.HTTPStatusCheck == nil {
+			allErrs = append(allErrs, field.Invalid(path.Child("http"), in.HTTPStatusCheck, "the detail of http status check is required"))
+		}
+	} else {
+		allErrs = append(allErrs, field.Invalid(path.Child("type"), in.Type, fmt.Sprintf("unrecognized type: %s", in.Type)))
+	}
+
 	return allErrs
+}
+
+func (in *HTTPStatusCheck) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.RequestUrl == "" {
+		allErrs = append(allErrs, field.Invalid(path.Child("url"), in.RequestUrl, "request url is required"))
+		return allErrs
+	}
+
+	if _, err := url.ParseRequestURI(in.RequestUrl); err != nil {
+		allErrs = append(allErrs, field.Invalid(path.Child("url"), in.RequestUrl, "invalid http request url"))
+	}
+	return allErrs
+}
+
+type StatusCode string
+
+func (in *StatusCode) Validate(root interface{}, path *field.Path) field.ErrorList {
+	packError := func(err error) field.ErrorList {
+		return field.ErrorList{
+			field.Invalid(path, in, fmt.Sprintf("incorrect status code format: %s", err.Error())),
+		}
+	}
+
+	codeStr := string(*in)
+	if codeStr == "" {
+		return field.ErrorList{
+			field.Invalid(path, in, "status code is required"),
+		}
+	}
+
+	if code, err := strconv.Atoi(codeStr); err == nil {
+		if !validateHTTPStatusCode(code) {
+			return packError(errors.New("invalid status code"))
+		}
+	} else {
+		index := strings.Index(codeStr, "-")
+		if index == -1 {
+			return packError(errors.New("not a single number or a range"))
+		}
+
+		minCodeStr := codeStr[:index]
+		maxCodeStr := codeStr[index+1:]
+		minCode, err := strconv.Atoi(minCodeStr)
+		if err != nil {
+			return packError(err)
+		}
+		maxCode, err := strconv.Atoi(maxCodeStr)
+		if err != nil {
+			return packError(err)
+		}
+		if !validateHTTPStatusCode(minCode) || !validateHTTPStatusCode(maxCode) {
+			return packError(errors.New("invalid status code range"))
+		}
+	}
+	return nil
+}
+
+func validateHTTPStatusCode(code int) bool {
+	return code > 0 && code < 1000
+}
+
+func init() {
+	genericwebhook.Register("StatusCode", reflect.PtrTo(reflect.TypeOf(StatusCode(""))))
 }
