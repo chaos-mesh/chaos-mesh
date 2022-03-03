@@ -20,15 +20,6 @@ import (
 	"flag"
 	stdlog "log"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	_ "github.com/jinzhu/gorm/dialects/mssql"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"go.uber.org/fx"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
@@ -37,6 +28,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	_ "github.com/jinzhu/gorm/dialects/mssql"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"go.uber.org/fx"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // @title Chaos Mesh Dashboard API
@@ -66,7 +64,7 @@ func main() {
 		stdlog.Fatal("failed to create root logger", err)
 	}
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	ctrl.SetLogger(rootLogger)
 	mainLog := rootLogger.WithName("main")
 
 	dashboardConfig, err := config.GetChaosDashboardEnv()
