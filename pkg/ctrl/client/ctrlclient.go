@@ -26,7 +26,7 @@ type CtrlClient struct {
 	SubscriptionClient *graphql.SubscriptionClient
 }
 
-func NewCtrlClient(ctx context.Context, url string) *CtrlClient {
+func NewCtrlClient(url string) *CtrlClient {
 	return &CtrlClient{
 		QueryClient:        graphql.NewClient(url, nil),
 		SubscriptionClient: graphql.NewSubscriptionClient(url),
