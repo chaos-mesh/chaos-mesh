@@ -16,6 +16,7 @@
 package utils
 
 import (
+	"context"
 	"encoding/xml"
 
 	"github.com/romana/ipset"
@@ -33,7 +34,7 @@ func getIPSetRulesNumber(enterNS bool, pid uint32) (int, error) {
 		builder = builder.SetNS(pid, bpm.NetNS)
 	}
 
-	out, err := builder.Build().CombinedOutput()
+	out, err := builder.Build(context.TODO()).CombinedOutput()
 	if err != nil {
 		return 0, err
 	}

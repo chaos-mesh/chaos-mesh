@@ -25,6 +25,7 @@ import (
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -117,7 +118,10 @@ func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha
 	chaos, _ := somechaos.(*v1alpha1.KernelChaos)
 	impl.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod)
+	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
+		Namespace: chaos.Namespace,
+		Name:      chaos.Name,
+	})
 	if err != nil {
 		return err
 	}
@@ -168,7 +172,10 @@ func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha
 func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	impl.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod)
+	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
+		Namespace: chaos.Namespace,
+		Name:      chaos.Name,
+	})
 	if err != nil {
 		return err
 	}

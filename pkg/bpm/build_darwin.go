@@ -15,7 +15,7 @@
 
 package bpm
 
-// Build builds the process
-func (b *ProcessBuilder) Build() *ManagedProcess {
+// Build builds the command
+func (b *CommandBuilder) Build() *ManagedCommand {
 	panic("unimplemented")
 }

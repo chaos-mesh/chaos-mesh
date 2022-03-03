@@ -14,9 +14,10 @@
  * limitations under the License.
  *
  */
+
 import { AutocompleteMultipleField, SelectField } from 'components/FormField'
 import { Divider, MenuItem, Typography } from '@mui/material'
-import { arrToObjBySep, objToArrBySep, toTitleCase } from 'lib/utils'
+import { arrToObjBySep, objToArrBySep } from 'lib/utils'
 import {
   getAnnotations,
   getCommonPodsByNamespaces as getCommonPods,
@@ -41,7 +42,7 @@ interface ScopeProps {
   podsPreviewDesc?: string | JSX.Element
 }
 
-const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
+const phases = [{ label: 'All', value: 'all' }, 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
 const Scope: React.FC<ScopeProps> = ({
   namespaces,
@@ -155,11 +156,17 @@ const Scope: React.FC<ScopeProps> = ({
           onChange={handleChangeIncludeAll}
           disabled={disabled}
         >
-          {phases.map((option: string) => (
-            <MenuItem key={option} value={option}>
-              {toTitleCase(option)}
-            </MenuItem>
-          ))}
+          {phases.map((option) =>
+            typeof option === 'string' ? (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ) : (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            )
+          )}
         </SelectField>
       </OtherOptions>
 
