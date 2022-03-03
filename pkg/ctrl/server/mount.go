@@ -26,6 +26,16 @@ import (
 )
 
 // GetMounts returns mounts info
+// The output looks like:
+// ```
+// proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+// sys /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
+// dev /dev devtmpfs rw,nosuid,relatime,size=16283300k,nr_inodes=4070825,mode=755,inode64 0 0
+// run /run tmpfs rw,nosuid,nodev,relatime,mode=755,inode64 0 0
+// tmpfs /dev/shm tmpfs rw,nosuid,nodev,inode64 0 0
+// cgroup2 /sys/fs/cgroup cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot 0 0
+// tmpfs /run/user/1000 tmpfs rw,nosuid,nodev,relatime,size=3258252k,nr_inodes=814563,mode=700,uid=1000,gid=1000,inode64 0 0
+// ```
 func (r *Resolver) GetMounts(ctx context.Context, pod *v1.Pod) ([]string, error) {
 	cmd := "cat /proc/mounts"
 	out, err := r.ExecBypass(ctx, pod, cmd, bpm.PidNS, bpm.MountNS)

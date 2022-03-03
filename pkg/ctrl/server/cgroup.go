@@ -32,7 +32,27 @@ import (
 // GetCgroups returns result of cat /proc/cgroups
 func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*model.Cgroups, error) {
 	cmd := "cat /proc/cgroups"
+
+	// the raw looks like:
+	// ```
+	// #subsys_name    hierarchy       num_cgroups     enabled
+	// cpuset  0       127     1
+	// cpu     0       127     1
+	// cpuacct 0       127     1
+	// blkio   0       127     1
+	// memory  0       127     1
+	// devices 0       127     1
+	// freezer 0       127     1
+	// net_cls 0       127     1
+	// perf_event      0       127     1
+	// net_prio        0       127     1
+	// hugetlb 0       127     1
+	// pids    0       127     1
+	// rdma    0       127     1
+	// misc    0       127     1
+	// ```
 	raw, err := r.ExecBypass(ctx, obj.Pod, cmd, bpm.PidNS, bpm.MountNS)
+
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +76,7 @@ func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*
 		if regexp.MustCompile("(cpu,cpuacct)").MatchString(string(raw)) {
 			cpuMountType = "cpu,cpuacct"
 		} else {
+			// cgroup does not support cpuacct sub-system
 			cpuMountType = "cpu"
 		}
 		cgroups.CPU = &model.CgroupsCPU{}
@@ -79,6 +100,20 @@ func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*
 }
 
 // GetCgroup returns result of cat /proc/:pid/cgroup
+// The output looks like:
+// ```
+// 11:freezer:/
+// 10:hugetlb:/
+// 9:memory:/system.slice/sshd.service
+// 8:pids:/system.slice/sshd.service
+// 7:perf_event:/
+// 6:net_cls,net_prio:/
+// 5:devices:/system.slice/sshd.service
+// 4:blkio:/system.slice/sshd.service
+// 3:cpu,cpuacct:/system.slice/sshd.service
+// 2:cpuset:/
+// 1:name=systemd:/system.slice/sshd.service
+// ```
 func (r *Resolver) GetCgroup(ctx context.Context, obj *v1.Pod, pid string) (string, error) {
 	cmd := fmt.Sprintf("cat /proc/%s/cgroup", pid)
 	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)

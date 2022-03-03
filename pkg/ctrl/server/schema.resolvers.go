@@ -1028,6 +1028,7 @@ func (r *podStressChaosResolver) ProcessStress(ctx context.Context, obj *model.P
 	for _, process := range processes {
 		cgroup, err := r.GetCgroup(ctx, obj.Pod, process.Pid)
 		if err != nil {
+			r.Log.Error(err, "get cgroup for process", "pid", process.Pid)
 			// ignore this process
 			continue
 		}

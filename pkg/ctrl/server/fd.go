@@ -24,7 +24,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
-// GetFdsOfProcess returns fd-target pairs
+// GetFdsOfProcess returns fd-target pairs.
+// The output looks like:
+// ```
+// total 0
+// lrwx------ 1 docker docker 64 Mar  3 16:11 0 -> /dev/pts/0
+// lrwx------ 1 docker docker 64 Mar  3 16:11 1 -> /dev/pts/0
+// lrwx------ 1 docker docker 64 Mar  3 16:11 2 -> /dev/pts/0
+// lr-x------ 1 docker docker 64 Mar  3 16:11 3 -> /proc/642108/fd
+// ```
 func (r *Resolver) GetFdsOfProcess(ctx context.Context, process *model.Process) []*model.Fd {
 	cmd := fmt.Sprintf("ls -l /proc/%s/fd", process.Pid)
 	out, err := r.ExecBypass(ctx, process.Pod, cmd, bpm.PidNS, bpm.MountNS)
