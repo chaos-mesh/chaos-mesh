@@ -28,5 +28,5 @@ func CreateClient(ctx context.Context, managerNamespace, managerSvc string) (*ct
 		return nil, nil, err
 	}
 
-	return ctrlclient.NewCtrlClient(ctx, fmt.Sprintf("http://127.0.0.1:%d/query", port)), cancel, nil
+	return ctrlclient.NewCtrlClient(fmt.Sprintf("http://127.0.0.1:%d/query", port)), cancel, nil
 }
