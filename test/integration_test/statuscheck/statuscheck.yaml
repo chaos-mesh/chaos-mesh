@@ -22,4 +22,4 @@ spec:
   http:
     url: http://123.123.123.123
     criteria:
-      statusCode: 200
+      statusCode: "200"

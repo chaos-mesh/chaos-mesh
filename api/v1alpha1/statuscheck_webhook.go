@@ -38,8 +38,8 @@ func (in *StatusCheckSpec) Validate(root interface{}, path *field.Path) field.Er
 	allErrs := field.ErrorList{}
 
 	if in.Type == TypeHTTP {
-		if in.HTTPStatusCheck == nil {
-			allErrs = append(allErrs, field.Invalid(path.Child("http"), in.HTTPStatusCheck, "the detail of http status check is required"))
+		if in.EmbedStatusCheck == nil || in.EmbedStatusCheck.HTTPStatusCheck == nil {
+			allErrs = append(allErrs, field.Invalid(path.Child("http"), nil, "the detail of http status check is required"))
 		}
 	} else {
 		allErrs = append(allErrs, field.Invalid(path.Child("type"), in.Type, fmt.Sprintf("unrecognized type: %s", in.Type)))

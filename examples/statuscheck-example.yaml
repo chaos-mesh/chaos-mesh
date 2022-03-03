@@ -15,12 +15,11 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: StatusCheck
 metadata:
-  name: status-check
-  namespace: chaos-testing
+  name: status-check-example
 spec:
   type: HTTP
   http:
     url: http://123.123.123.123
+    method: GET
     criteria:
-      statusCode: 200
-
+      statusCode: "200"
