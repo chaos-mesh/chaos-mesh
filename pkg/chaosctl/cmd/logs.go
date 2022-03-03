@@ -28,7 +28,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 type logsOptions struct {
@@ -60,7 +59,6 @@ Examples:
   # Print 100 log lines for chaosmesh components in node NODENAME
   chaosctl logs -t 100 -n NODENAME`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctrlclient.DisableRuntimeErrorHandler()
 			return o.Run(args)
 		},
 		SilenceErrors:     true,

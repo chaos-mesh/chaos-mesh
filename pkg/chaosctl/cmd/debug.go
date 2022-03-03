@@ -25,7 +25,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
-	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 type DebugOptions struct {
@@ -87,7 +86,6 @@ func debugResourceCommand(option *DebugOptions, chaosType string, debug debug.De
 		Short: fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
 		Long:  fmt.Sprintf(`Print the debug information for certain %s`, chaosType),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctrlclient.DisableRuntimeErrorHandler()
 			client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 			if err != nil {
 				return err
@@ -101,7 +99,6 @@ func debugResourceCommand(option *DebugOptions, chaosType string, debug debug.De
 			if len(args) != 0 {
 				return []string{}, cobra.ShellCompDirectiveNoFileComp
 			}
-			ctrlclient.DisableRuntimeErrorHandler()
 			client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 			if err != nil {
 				common.PrettyPrint(errors.Wrap(err, "create client").Error(), 0, common.Red)

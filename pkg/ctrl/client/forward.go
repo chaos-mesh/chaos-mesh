@@ -52,6 +52,9 @@ func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.
 		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
 	}
 	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
+
+	// disable error handler in k8s runtime to prevent complaining from port forwarder
+	DisableRuntimeErrorHandler()
 	return pfCancel, localPort, err
 }
 
