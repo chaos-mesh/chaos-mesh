@@ -84,7 +84,7 @@ func (r *Resolver) GetCgroup(ctx context.Context, obj *v1.Pod, pid string) (stri
 	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 }
 
-// GetCPUQuota returns result of cat cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_quota_us
+// GetCPUQuota returns result of cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_quota_us
 func (r *Resolver) GetCPUQuota(ctx context.Context, obj *v1.Pod, cpuMountType string) (int, error) {
 	cmd := fmt.Sprintf("cat /sys/fs/cgroup/%s/cpu.cfs_quota_us", cpuMountType)
 	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
@@ -94,7 +94,7 @@ func (r *Resolver) GetCPUQuota(ctx context.Context, obj *v1.Pod, cpuMountType st
 	return strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 }
 
-// GetCPUPeriod returns result of cat cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_period_us
+// GetCPUPeriod returns result of cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_period_us
 func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType string) (int, error) {
 	cmd := fmt.Sprintf("cat /sys/fs/cgroup/%s/cpu.cfs_period_us", cpuMountType)
 	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
@@ -104,7 +104,7 @@ func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType s
 	return strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 }
 
-// GetMemoryLimit returns result of cat cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+// GetMemoryLimit returns result of cat /sys/fs/cgroup/memory/memory.limit_in_bytes
 func (r *Resolver) GetMemoryLimit(ctx context.Context, obj *v1.Pod) (int64, error) {
 	cmd := "cat /sys/fs/cgroup/memory/memory.limit_in_bytes"
 	rawLimit, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)

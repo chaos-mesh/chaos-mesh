@@ -26,13 +26,11 @@ type CtrlClient struct {
 	SubscriptionClient *graphql.SubscriptionClient
 }
 
-func NewCtrlClient(ctx context.Context, url string) (*CtrlClient, error) {
-	client := &CtrlClient{
+func NewCtrlClient(ctx context.Context, url string) *CtrlClient {
+	return &CtrlClient{
 		QueryClient:        graphql.NewClient(url, nil),
 		SubscriptionClient: graphql.NewSubscriptionClient(url),
 	}
-
-	return client, nil
 }
 
 func (c *CtrlClient) ListNamespace(ctx context.Context) ([]string, error) {

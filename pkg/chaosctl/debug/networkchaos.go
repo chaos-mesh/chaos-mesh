@@ -35,7 +35,6 @@ func NetworkDebug(client *ctrlclient.CtrlClient) Debugger {
 	}
 }
 
-// Run get chaos debug information
 func (d *networkDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
@@ -103,7 +102,6 @@ func (d *networkDebugger) Run(ctx context.Context, namespace, chaosName string) 
 	return results, nil
 }
 
-// List list chaos
 func (d *networkDebugger) List(ctx context.Context, namespace string) ([]string, error) {
 	var query struct {
 		Namespace []struct {

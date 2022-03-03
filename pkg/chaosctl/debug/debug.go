@@ -23,7 +23,10 @@ import (
 )
 
 type Debugger interface {
+	// Run to get chaos debug information
 	Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error)
+
+	// List chaos
 	List(ctx context.Context, namespace string) ([]string, error)
 }
 

@@ -29,7 +29,8 @@ func (r *Resolver) GetFdsOfProcess(ctx context.Context, process *model.Process) 
 	cmd := fmt.Sprintf("ls -l /proc/%s/fd", process.Pid)
 	out, err := r.ExecBypass(ctx, process.Pod, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
-		r.Log.Error(err, "failed to get fds of process", "pid", process.Pid)
+		// errors often occur on some short-life process, ignored
+		r.Log.Error(err, "get fds of process", "pid", process.Pid)
 		return nil
 	}
 	var fds []*model.Fd

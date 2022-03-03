@@ -37,7 +37,6 @@ func IODebug(client *ctrlclient.CtrlClient) Debugger {
 	}
 }
 
-// Run get chaos debug information
 func (d *ioDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
@@ -143,7 +142,6 @@ func (d *ioDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*c
 	return results, nil
 }
 
-// List list chaos
 func (d *ioDebugger) List(ctx context.Context, namespace string) ([]string, error) {
 	var query struct {
 		Namespace []struct {
