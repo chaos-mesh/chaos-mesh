@@ -36,6 +36,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
@@ -85,8 +86,8 @@ type DaemonServer struct {
 	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
 	tproxyLocker *sync.Map
 
-	IPSetLocker      *locker.Locker
-	TimeChaosManager tasks.TaskManager
+	IPSetLocker     *locker.Locker
+	timeChaosServer TimeChaosServer
 }
 
 func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
@@ -104,13 +105,19 @@ func newDaemonServer(containerRuntime string, reg prometheus.Registerer, log log
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer, log logr.Logger) *DaemonServer {
+
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
-		TimeChaosManager:         tasks.NewTaskManager(log),
 		rootLogger:               log,
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
+		timeChaosServer: TimeChaosServer{
+			podProcessMap: tasks.NewPodProcessMap(),
+			manager:       tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
+			logger:        logr.New(log.GetSink()).WithName("TimeChaos"),
+		},
 	}
 }
 
@@ -129,7 +136,6 @@ func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsCon
 		grpc_middleware.WithUnaryServerChain(
 			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
-			MetadataExtractor(log.MetaNamespacedName),
 		),
 	}
 

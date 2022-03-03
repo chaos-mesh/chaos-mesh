@@ -15,25 +15,21 @@
 
 package time
 
-import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-)
-
 // ModifyTime modifies time of target process
 // Deprecated:  Please use FakeClockInjector.Inject and FakeClockInjector.Recover instead.
-func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
-	// Mock point to return error in unit test
-	if err := mock.On("ModifyTimeError"); err != nil {
-		if e, ok := err.(error); ok {
-			return e
-		}
-		if ignore, ok := err.(bool); ok && ignore {
-			return nil
-		}
-	}
-	timeSkew, err := NewTimekew(deltaSec, deltaNsec, clockIdsMask)
-	if err != nil {
-		return err
-	}
-	return timeSkew.Inject(pid)
-}
+//func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
+//	// Mock point to return error in unit test
+//	if err := mock.On("ModifyTimeError"); err != nil {
+//		if e, ok := err.(error); ok {
+//			return e
+//		}
+//		if ignore, ok := err.(bool); ok && ignore {
+//			return nil
+//		}
+//	}
+//	timeSkew, err := NewTimekew(deltaSec, deltaNsec, clockIdsMask)
+//	if err != nil {
+//		return err
+//	}
+//	return timeSkew.Inject(pid)
+//}

@@ -19,24 +19,34 @@ import (
 	"context"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
+	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 )
 
-func SetTimeOffset(m tasks.TaskManager, uid tasks.UID, pid tasks.PID, config time.Config) error {
-	err := m.CheckTasks(uid, pid)
-	if err != nil && errors.Is(err, tasks.ErrDiffPID) {
+type TimeChaosServer struct {
+	podProcessMap tasks.PodProcessMap
+	manager       tasks.TaskManager
+	logger        logr.Logger
+}
 
-	} else if err != nil {
-		return err
+func (s *TimeChaosServer) SetPodProcess(podID tasks.PodID, sysID tasks.SysPID) {
+	s.podProcessMap.Write(podID, sysID)
+}
+
+func (s *TimeChaosServer) SetTimeOffset(uid tasks.UID, pid tasks.PID, config time.Config) error {
+	paras := time.ConfigCreatorParas{
+		Logger:        s.logger,
+		Config:        config,
+		PodProcessMap: &s.podProcessMap,
 	}
-	_ = m.Create(uid, pid, &config, nil)
+
+	err := s.manager.Create(uid, pid, &config, paras)
 	if err != nil {
 		if errors.Cause(err) == chaoserr.ErrDuplicateEntity {
-			err := m.Apply(uid, pid, &config)
+			err := s.manager.Apply(uid, pid, &config)
 			if err != nil {
 				return err
 			}
@@ -48,8 +58,9 @@ func SetTimeOffset(m tasks.TaskManager, uid tasks.UID, pid tasks.PID, config tim
 }
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromContext(ctx)
-	log.Info("Shift time", "Request", req)
+	logger := s.timeChaosServer.logger
+
+	logger.Info("Shift time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -57,27 +68,20 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	childPids, err := util.GetChildProcesses(pid, log)
+	s.timeChaosServer.SetPodProcess(tasks.PodID(req.PodId), tasks.SysPID(pid))
+	err = s.timeChaosServer.SetTimeOffset(req.Uid, tasks.PodID(req.PodId),
+		time.NewConfig(req.Sec, req.Nsec, req.ClkIdsMask))
 	if err != nil {
-		log.Error(err, "fail to get child processes")
-	}
-	allPids := append(childPids, pid)
-	log.Info("all related processes found", "pids", allPids)
-
-	for _, pid := range allPids {
-		err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask, s.rootLogger.WithName("time"))
-		if err != nil {
-			log.Error(err, "error while modifying time", "pid", pid)
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return &empty.Empty{}, nil
 }
 
 func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log := s.getLoggerFromContext(ctx)
-	log.Info("Recover time", "Request", req)
+	logger := s.timeChaosServer.logger
+
+	logger.Info("Recover time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -85,20 +89,11 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	childPids, err := util.GetChildProcesses(pid, log)
-	if err != nil {
-		log.Error(err, "fail to get child processes")
-	}
-	allPids := append(childPids, pid)
-	log.Info("get all related process pids", "pids", allPids)
+	s.timeChaosServer.SetPodProcess(tasks.PodID(req.PodId), tasks.SysPID(pid))
 
-	for _, pid := range allPids {
-		// FIXME: if the process has halted and no process with this pid exists, we will get an error.
-		err = time.ModifyTime(int(pid), int64(0), int64(0), 0, s.rootLogger.WithName("time"))
-		if err != nil {
-			log.Error(err, "error while recovering", "pid", pid)
-			return nil, err
-		}
+	err = s.timeChaosServer.manager.Recover(req.Uid, tasks.PodID(req.PodId))
+	if err != nil {
+		return nil, err
 	}
 
 	return &empty.Empty{}, nil

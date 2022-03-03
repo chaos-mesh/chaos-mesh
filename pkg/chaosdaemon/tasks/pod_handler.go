@@ -25,12 +25,10 @@ var ErrNotFoundSysPID = chaoserr.NotFound("SysPID")
 var ErrNotPodPID = errors.New("pid is not PodPID")
 var ErrPodProcessMapNotInit = errors.New("PodProcessMap not init")
 
-type PodID struct {
-	podID UID
-}
+type PodID string
 
 func (p PodID) ToID() string {
-	return p.podID
+	return string(p)
 }
 
 type ChaosOnPOD interface {

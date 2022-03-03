@@ -18,6 +18,7 @@ package time
 import (
 	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"sync"
 )
@@ -47,6 +48,14 @@ type Config struct {
 	clockIDsMask     uint64
 }
 
+func NewConfig(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) Config {
+	return Config{
+		deltaSeconds:     deltaSeconds,
+		deltaNanoSeconds: deltaNanoSeconds,
+		clockIDsMask:     clockIDsMask,
+	}
+}
+
 func (c *Config) DeepCopy() tasks.Object {
 	return &Config{
 		c.deltaSeconds,
@@ -66,30 +75,28 @@ func (c *Config) Add(a tasks.Addable) error {
 	return errors.Wrapf(tasks.ErrCanNotAdd, "expect type : *time.Config, got : %T", a)
 }
 
+type ConfigCreatorParas struct {
+	Logger        logr.Logger
+	Config        Config
+	PodProcessMap *tasks.PodProcessMap
+}
+
 func (c *Config) New(values interface{}) (tasks.Injectable, error) {
-	skew, err := NewSkew()
+	paras, ok := values.(ConfigCreatorParas)
+	if !ok {
+		return nil, errors.New("not ConfigCreatorParas")
+	}
+
+	skew, err := GetSkew()
 	if err != nil {
 		return nil, err
 	}
-	skew.SkewConfig = *c.DeepCopy().(*Config)
-
-	podHandler, ok := values.(*tasks.PodHandler)
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("type %t is not *tasks.PodHandler", values))
-	}
-	groupProcessHandler, ok := podHandler.Main.(*tasks.ProcessGroupHandler)
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("type %t is not *tasks.ProcessGroupHandler", podHandler.Main))
-	}
-	_, ok = groupProcessHandler.Main.(*Skew)
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("type %t is not *Skew", groupProcessHandler.Main))
-	}
+	skew.SkewConfig = *paras.Config.DeepCopy().(*Config)
 
 	newGroupProcessHandler :=
-		tasks.NewProcessGroupHandler(groupProcessHandler.Logger, &skew)
-	newPodHandler := tasks.NewPodHandler(podHandler.Logger,
-		&newGroupProcessHandler)
+		tasks.NewProcessGroupHandler(paras.Logger, &skew)
+	newPodHandler := tasks.NewPodHandler(paras.PodProcessMap,
+		&newGroupProcessHandler, paras.Logger)
 	return &newPodHandler, nil
 }
 
@@ -120,7 +127,7 @@ type Skew struct {
 	logger           logr.Logger
 }
 
-func NewSkew() (Skew, error) {
+func GetSkew() (Skew, error) {
 	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime)
 	if err != nil {
 		return Skew{}, errors.Wrap(err, "load fake image")
@@ -141,7 +148,7 @@ func NewSkew() (Skew, error) {
 
 func (s *Skew) Fork() (tasks.ChaosOnProcessGroup, error) {
 	// TODO : to KEAO can I share FakeImage between threads?
-	skew, err := NewSkew()
+	skew, err := GetSkew()
 	if err != nil {
 		return nil, err
 	}

@@ -154,6 +154,7 @@ message TimeRequest {
   int64 nsec = 3;
   uint64 clk_ids_mask = 4;
   string uid = 5;
+  string pod_id = 6;
 }
 
 message ContainerAction {
