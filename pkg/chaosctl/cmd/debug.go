@@ -98,6 +98,9 @@ func debugResourceCommand(option *DebugOptions, chaosType string, debug debug.De
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) != 0 {
+				return []string{}, cobra.ShellCompDirectiveNoFileComp
+			}
 			ctrlclient.DisableRuntimeErrorHandler()
 			client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 			if err != nil {
