@@ -16,6 +16,7 @@
 package time
 
 import (
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
