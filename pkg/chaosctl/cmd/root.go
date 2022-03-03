@@ -54,12 +54,34 @@ func Execute() {
 	}
 	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
 
+	rootCmd.PersistentFlags().StringVarP(&managerNamespace, "manager-namespace", "N", "chaos-testing", "the namespace chaos-controller-manager in")
+	rootCmd.PersistentFlags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")
+	err = rootCmd.RegisterFlagCompletionFunc("manager-namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		// TODO: list namespaces without ctrlserver
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
+	if err != nil {
+		cm.PrettyPrint("failed to register completion function for flag 'manager-namespace': ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+	err = rootCmd.RegisterFlagCompletionFunc("manager-svc", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		// TODO: list svc without ctrlserver
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
+	if err != nil {
+		cm.PrettyPrint("failed to register completion function for flag 'manager-svc': ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
 	logsCmd, err := NewLogsCmd()
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
 		cm.PrettyPrint("log command: "+err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
+
 	rootCmd.AddCommand(logsCmd)
 
 	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"), map[string]debug.Debug{
@@ -74,8 +96,6 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().StringVarP(&managerNamespace, "manager-namespace", "n", "chaos-testing", "the namespace chaos-controller-manager in")
-	rootCmd.Flags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")
 	physicalMachineCommand, err := NewPhysicalMachineCommand()
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
@@ -87,6 +107,7 @@ func Execute() {
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(physicalMachineCommand)
+
 	if err := rootCmd.Execute(); err != nil {
 		cm.PrettyPrint("failed to execute cmd: ", 0, cm.Red)
 		cm.PrettyPrint(err.Error(), 1, cm.Red)
