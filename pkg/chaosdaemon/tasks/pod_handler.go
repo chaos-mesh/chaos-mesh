@@ -15,15 +15,18 @@
 package tasks
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	"sync"
 )
 
+var ErrNotFoundSysPID = chaoserr.NotFound("SysPID")
 var ErrNotPodPID = errors.New("pid is not PodPID")
+var ErrPodProcessMapNotInit = errors.New("PodProcessMap not init")
 
 type PodID struct {
-	podID  UID
-	sysPID SysPID
+	podID UID
 }
 
 func (p PodID) ToID() string {
@@ -35,16 +38,46 @@ type ChaosOnPOD interface {
 	Recoverable
 }
 
-// PodHandler implements injecting & recovering on a kubernetes POD.
-type PodHandler struct {
-	Main   ChaosOnPOD
-	Logger logr.Logger
+type PodProcessMap struct {
+	m      map[PodID]SysPID
+	rwLock sync.RWMutex
 }
 
-func NewPodHandler(logger logr.Logger, main ChaosOnPOD) PodHandler {
+func NewPodProcessMap() PodProcessMap {
+	return PodProcessMap{
+		m:      make(map[PodID]SysPID),
+		rwLock: sync.RWMutex{},
+	}
+}
+
+func (p *PodProcessMap) Read(podPID PodID) (SysPID, error) {
+	p.rwLock.RLock()
+	defer p.rwLock.RUnlock()
+	sysPID, ok := p.m[podPID]
+	if !ok {
+		return SysPID(0), ErrNotFoundSysPID
+	}
+	return sysPID, nil
+}
+
+func (p *PodProcessMap) Write(podPID PodID, sysPID SysPID) {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+	p.m[podPID] = sysPID
+}
+
+// PodHandler implements injecting & recovering on a kubernetes POD.
+type PodHandler struct {
+	PodProcessMap *PodProcessMap
+	Main          ChaosOnPOD
+	Logger        logr.Logger
+}
+
+func NewPodHandler(podProcessMap *PodProcessMap, main ChaosOnPOD, logger logr.Logger) PodHandler {
 	return PodHandler{
-		Main:   main,
-		Logger: logr.New(logger.GetSink()),
+		PodProcessMap: podProcessMap,
+		Main:          main,
+		Logger:        logr.New(logger.GetSink()),
 	}
 }
 
@@ -53,8 +86,16 @@ func (p *PodHandler) Inject(pid PID) error {
 	if !ok {
 		return ErrNotPodPID
 	}
+	if p.PodProcessMap == nil {
+		return ErrPodProcessMapNotInit
+	}
 
-	err := p.Main.Inject(podPID.sysPID)
+	sysPID, err := p.PodProcessMap.Read(podPID)
+	if err != nil {
+		return err
+	}
+
+	err = p.Main.Inject(sysPID)
 	return err
 }
 
@@ -63,7 +104,15 @@ func (p *PodHandler) Recover(pid PID) error {
 	if !ok {
 		return ErrNotPodPID
 	}
+	if p.PodProcessMap == nil {
+		return ErrPodProcessMapNotInit
+	}
 
-	err := p.Main.Recover(podPID.sysPID)
+	sysPID, err := p.PodProcessMap.Read(podPID)
+	if err != nil {
+		return err
+	}
+
+	err = p.Main.Recover(sysPID)
 	return err
 }
