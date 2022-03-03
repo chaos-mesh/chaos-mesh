@@ -147,4 +147,11 @@ var WebhookObjects = fx.Supply(
 			Object: &v1alpha1.PhysicalMachine{},
 		},
 	},
+	fx.Annotated{
+		Group: "webhookObjs",
+		Target: WebhookObject{
+			Name:   "statuscheck",
+			Object: &v1alpha1.StatusCheck{},
+		},
+	},
 )
