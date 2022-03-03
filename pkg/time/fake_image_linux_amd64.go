@@ -21,6 +21,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	clog "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
@@ -37,7 +38,8 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error
 		runtime.UnlockOSThread()
 	}()
 
-	program, err := ptrace.Trace(pid)
+	// TODO: Waiting for #2889, use logger provided by FakeImage
+	program, err := ptrace.Trace(pid, clog.L().WithName("ptrace").WithValues("pid", pid))
 	if err != nil {
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
