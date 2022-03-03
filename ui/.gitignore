@@ -26,5 +26,3 @@ package-lock.json
 
 # eslint
 .eslintcache
-
-/packages/crd
