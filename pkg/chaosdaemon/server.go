@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/go-logr/logr"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -80,8 +81,8 @@ type DaemonServer struct {
 	crClient                 crclients.ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
 
-	IPSetLocker      *locker.Locker
-	TimeChaosManager tasks.TaskManager
+	IPSetLocker     *locker.Locker
+	timeChaosServer TimeChaosServer
 }
 
 func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*DaemonServer, error) {
@@ -95,12 +96,16 @@ func newDaemonServer(containerRuntime string, reg prometheus.Registerer) (*Daemo
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer) *DaemonServer {
-	loggertc := log.WithName("TimeChaos")
+
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
-		TimeChaosManager:         tasks.NewTaskManager(loggertc),
+		timeChaosServer: TimeChaosServer{
+			podProcessMap: tasks.NewPodProcessMap(),
+			manager:       tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
+			logger:        logr.New(log.GetSink()).WithName("TimeChaos"),
+		},
 	}
 }
 

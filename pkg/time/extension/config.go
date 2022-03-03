@@ -29,7 +29,7 @@ func (c *Config) Add(a tasks.Addable) error {
 }
 
 func (c *Config) New(values interface{}) (tasks.Injectable, error) {
-	skew, err := time.NewSkew()
+	skew, err := time.GetSkew()
 	if err != nil {
 		return nil, err
 	}
