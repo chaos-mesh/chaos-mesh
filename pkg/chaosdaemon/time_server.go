@@ -30,6 +30,8 @@ func SetTimeOffset(m tasks.TaskManager, uid tasks.UID, pid tasks.PID, config tim
 	err := m.CheckTasks(uid, pid)
 	if err != nil && errors.Is(err, tasks.ErrDiffPID) {
 
+	} else if err != nil {
+		return err
 	}
 	_ = m.Create(uid, pid, &config, nil)
 	if err != nil {
