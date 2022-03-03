@@ -37,7 +37,7 @@ func IODebug(client *ctrlclient.CtrlClient) Debugger {
 	}
 }
 
-func (d *ioDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
+func (d *ioDebugger) Collect(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
 	var name *graphql.String

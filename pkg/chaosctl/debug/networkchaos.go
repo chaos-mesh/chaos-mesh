@@ -35,7 +35,7 @@ func NetworkDebug(client *ctrlclient.CtrlClient) Debugger {
 	}
 }
 
-func (d *networkDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
+func (d *networkDebugger) Collect(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
 	var name *graphql.String

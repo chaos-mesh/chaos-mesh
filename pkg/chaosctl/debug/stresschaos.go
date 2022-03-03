@@ -37,7 +37,7 @@ func StressDebug(client *ctrlclient.CtrlClient) Debugger {
 	}
 }
 
-func (d *stressDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
+func (d *stressDebugger) Collect(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
 	var name *graphql.String

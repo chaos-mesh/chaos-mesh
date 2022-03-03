@@ -37,7 +37,7 @@ func HTTPDebug(client *ctrlclient.CtrlClient) Debugger {
 	}
 }
 
-func (d *httpDebugger) Run(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
+func (d *httpDebugger) Collect(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error) {
 	var results []*common.ChaosResult
 
 	var name *graphql.String
