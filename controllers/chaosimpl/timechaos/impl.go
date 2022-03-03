@@ -69,6 +69,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		Sec:         sec,
 		Nsec:        nsec,
 		ClkIdsMask:  mask,
+		Uid:         string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
+		PodId:       string(decodedContainer.Pod.GetUID()),
 	})
 	if err != nil {
 		return v1alpha1.NotInjected, err
@@ -95,6 +97,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	impl.Log.Info("recover for container", "containerId", containerId)
 	_, err = pbClient.RecoverTimeOffset(ctx, &pb.TimeRequest{
 		ContainerId: containerId,
+		Uid:         string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
+		PodId:       string(decodedContainer.Pod.GetUID()),
 	})
 	if err != nil {
 		return v1alpha1.Injected, err
