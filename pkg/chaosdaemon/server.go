@@ -20,7 +20,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/go-logr/logr"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -110,9 +109,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
-		TimeChaosManager:         tasks.NewTaskManager(log),
 		rootLogger:               log,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(reg),
 		timeChaosServer: TimeChaosServer{
 			podProcessMap: tasks.NewPodProcessMap(),
 			manager:       tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
