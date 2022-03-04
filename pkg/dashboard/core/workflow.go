@@ -51,16 +51,16 @@ const (
 
 // WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
-	ID        uint           `gorm:"primary_key" json:"id"`
-	UID       string         `gorm:"index:workflow_uid" json:"uid"`
-	Namespace string         `json:"namespace"`
-	Name      string         `json:"name"`
-	Entry     string         `json:"entry"` // the entry node name
-	CreatedAt time.Time      `json:"created_at"`
-	EndTime   string         `json:"end_time"`
-	FinishTime time.Time 	 `json:"finish_time"`
-	Status    WorkflowStatus `json:"status,omitempty"`
-	Archived  bool           `json:"-"`
+	ID         uint           `gorm:"primary_key" json:"id"`
+	UID        string         `gorm:"index:workflow_uid" json:"uid"`
+	Namespace  string         `json:"namespace"`
+	Name       string         `json:"name"`
+	Entry      string         `json:"entry"` // the entry node name
+	CreatedAt  time.Time      `json:"created_at"`
+	EndTime    string         `json:"end_time"`
+	FinishTime time.Time      `json:"finish_time"`
+	Status     WorkflowStatus `json:"status,omitempty"`
+	Archived   bool           `json:"-"`
 }
 
 type WorkflowDetail struct {

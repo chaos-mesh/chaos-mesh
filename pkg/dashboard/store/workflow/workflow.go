@@ -109,13 +109,13 @@ func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error 
 
 func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
 	workflows, err := it.ListMeta(context.Background(), "", "", true)
-	
+
 	if err != nil {
 		return err
-	}	
-	
+	}
+
 	nowTime := time.Now()
-	
+
 	for _, wfl := range workflows {
 		if wfl.FinishTime.Add(ttl).Before(nowTime) {
 			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(*it).Error; err != nil {
