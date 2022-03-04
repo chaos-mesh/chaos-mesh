@@ -20,22 +20,18 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 type PhysicalMachineGenerateOptions struct {
-	logger     logr.Logger
 	outputPath string
 	caCertFile string
 	caKeyFile  string
 }
 
-func NewPhysicalMachineGenerateCmd(logger logr.Logger) (*cobra.Command, error) {
-	generateOption := &PhysicalMachineGenerateOptions{
-		logger: logger,
-	}
+func NewPhysicalMachineGenerateCmd() (*cobra.Command, error) {
+	generateOption := &PhysicalMachineGenerateOptions{}
 
 	generateCmd := &cobra.Command{
 		Use:           `generate`,

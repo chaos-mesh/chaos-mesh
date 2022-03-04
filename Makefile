@@ -299,7 +299,7 @@ tidy: images/dev-env/.dockerbuilt
 
 generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy
-	$(GO) generate ./pkg/ctrlserver/graph
+	$(GO) generate ./pkg/ctrl/server
 
 generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-deepcopy: images/dev-env/.dockerbuilt chaos-build
