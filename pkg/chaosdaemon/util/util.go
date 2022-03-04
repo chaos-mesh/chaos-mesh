@@ -16,13 +16,168 @@
 package util
 
 import (
-	"testing"
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"strings"
+	"sync"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/graph"
 )
 
-func TestSplitEnvs(t *testing.T) {
-	assert.Equal(t, []string(nil), SplitEnvs([]byte("\x00")))
-	assert.Equal(t, []string{"A=B"}, SplitEnvs([]byte("A=B\x00")))
-	assert.Equal(t, []string{"A=B", "C=D"}, SplitEnvs([]byte("A=B\x00C=D\x00")))
+// ReadCommName returns the command name of process
+func ReadCommName(pid int) (string, error) {
+	f, err := os.Open(fmt.Sprintf("%s/%d/comm", bpm.DefaultProcPrefix, pid))
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+
+// GetChildProcesses will return all child processes's pid. Include all generations.
+// only return error when /proc/pid/tasks cannot be read
+func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
+	procs, err := ioutil.ReadDir(bpm.DefaultProcPrefix)
+	if err != nil {
+		return nil, errors.Wrapf(err, "read /proc/pid/tasks , ppid : %d", ppid)
+	}
+
+	type processPair struct {
+		Pid  uint32
+		Ppid uint32
+	}
+
+	pairs := make(chan processPair)
+	done := make(chan bool)
+
+	go func() {
+		var wg sync.WaitGroup
+
+		for _, proc := range procs {
+			_, err := strconv.ParseUint(proc.Name(), 10, 32)
+			if err != nil {
+				continue
+			}
+
+			statusPath := bpm.DefaultProcPrefix + "/" + proc.Name() + "/stat"
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				reader, err := os.Open(statusPath)
+				if err != nil {
+					logger.Error(err, "read status file error", "path", statusPath)
+					return
+				}
+				defer reader.Close()
+
+				var (
+					pid    uint32
+					comm   string
+					state  string
+					parent uint32
+				)
+				// according to procfs's man page
+				fmt.Fscanf(reader, "%d %s %s %d", &pid, &comm, &state, &parent)
+
+				pairs <- processPair{
+					Pid:  pid,
+					Ppid: parent,
+				}
+			}()
+		}
+
+		wg.Wait()
+		done <- true
+	}()
+
+	processGraph := graph.NewGraph()
+	for {
+		select {
+		case pair := <-pairs:
+			processGraph.Insert(pair.Ppid, pair.Pid)
+		case <-done:
+			return processGraph.Flatten(ppid, logger), nil
+		}
+	}
+}
+
+func GetLinuxVersion() (string, error) {
+	f, err := os.Open("/proc/version")
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+func CompareLinuxVersion(major, revision int) (bool, error) {
+	linuxVersion, err := GetLinuxVersion()
+	versionNum := strings.Split(linuxVersion[len("linux version"):], "-")
+
+	versions := strings.Split(strings.TrimSpace(versionNum[0]), ".")
+	majorVersionNumber, err := strconv.Atoi(versions[0])
+	if err != nil {
+		return false, err
+	}
+	revisionNumber, err := strconv.Atoi(versions[1])
+	if err != nil {
+		return false, err
+	}
+	if majorVersionNumber >= major {
+		if majorVersionNumber == 4 {
+			if revisionNumber < revision {
+				return true, nil
+			}
+		}
+	} else {
+		return true, nil
+	}
+	return false, nil
+}
+func GetEnvsByProcess(pid string) ([]byte, error) {
+	file, err := os.Open("/proc/" + pid + "/environ")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
+}
+
+// SplitEnvs read /proc/PID/environ and split by []byte{0}
+func SplitEnvs(envContent []byte) []string {
+	var envs []string
+	for _, env := range bytes.Split(envContent, []byte{0}) {
+		if len(env) > 0 {
+			envs = append(envs, string(env))
+		}
+	}
+	return envs
+}
+
+func EncodeOutputToError(output []byte, err error) error {
+	return errors.Errorf("error code: %v, msg: %s", err, string(output))
 }
