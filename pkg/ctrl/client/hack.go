@@ -13,22 +13,12 @@
 // limitations under the License.
 //
 
-package graph
+package client
 
-import (
-	"context"
-	"strings"
+import "k8s.io/apimachinery/pkg/util/runtime"
 
-	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
-)
-
-// GetMounts returns mounts info
-func (r *Resolver) GetMounts(ctx context.Context, pod *v1.Pod) ([]string, error) {
-	cmd := "cat /proc/mounts"
-	out, err := r.ExecBypass(ctx, pod, cmd)
-	if err != nil {
-		return nil, errors.Wrapf(err, "run command %s failed", cmd)
-	}
-	return strings.Split(string(out), "\n"), nil
+// disable error handler in k8s runtime
+// TODO: ignore specific errors only
+func DisableRuntimeErrorHandler() {
+	runtime.ErrorHandlers = nil
 }
