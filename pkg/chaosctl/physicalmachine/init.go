@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
@@ -36,7 +35,6 @@ import (
 )
 
 type PhysicalMachineInitOptions struct {
-	logger             logr.Logger
 	chaosMeshNamespace string
 	remoteIP           string
 	sshUser            string
@@ -48,10 +46,8 @@ type PhysicalMachineInitOptions struct {
 	labels             string
 }
 
-func NewPhysicalMachineInitCmd(logger logr.Logger) (*cobra.Command, error) {
-	initOption := &PhysicalMachineInitOptions{
-		logger: logger,
-	}
+func NewPhysicalMachineInitCmd() (*cobra.Command, error) {
+	initOption := &PhysicalMachineInitOptions{}
 
 	initCmd := &cobra.Command{
 		Use:   `init (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
