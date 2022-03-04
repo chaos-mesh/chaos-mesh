@@ -229,6 +229,10 @@ docker-push-dns-server:
 docker-push-chaos-kernel:
 	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
+bin/chaos-multiversion-helper: SHELL:=$(RUN_IN_DEV_SHELL)
+bin/chaos-multiversion-helper: images/dev-env/.dockerbuilt
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-multiversion-helper ./cmd/chaos-multiversion-helper/
+
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
@@ -360,5 +364,5 @@ swagger_spec: images/dev-env/.dockerbuilt
 	dashboard dashboard-server-frontend gosec-scan \
 	failpoint-enable failpoint-disable swagger_spec \
 	e2e-test/image/e2e/bin/e2e.test \
-	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
+	proto bin/chaos-builder bin/chaos-multiversion-helper go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
 	manifests/crd.yaml generate-deepcopy boilerplate boilerplate-fix
