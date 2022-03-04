@@ -17,17 +17,18 @@ package test
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"net"
 	"strings"
 	"syscall"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 type MockClient struct{}
@@ -75,11 +76,29 @@ func (m *MockClient) ContainerExecAttach(ctx context.Context, execID string, con
 		return types.HijackedResponse{}, err.(error)
 	}
 	server, _ := net.Pipe()
-	reader := bufio.NewReader(strings.NewReader("hello chaos"))
+	stdOutBytes := []byte(strings.Repeat("o", 32*1024+8+1))
+	stdErrBytes := []byte(strings.Repeat("e", 32*1024+8+1))
+	buffer, err := getSrcBuffer(stdOutBytes, stdErrBytes)
+	if err != nil {
+		return types.HijackedResponse{}, err
+	}
+	reader := bufio.NewReader(buffer)
 	return types.HijackedResponse{
 		Conn:   server,
 		Reader: reader,
 	}, nil
+}
+
+func getSrcBuffer(stdOutBytes, stdErrBytes []byte) (buffer *bytes.Buffer, err error) {
+	buffer = new(bytes.Buffer)
+	dstOut := stdcopy.NewStdWriter(buffer, stdcopy.Stdout)
+	_, err = dstOut.Write(stdOutBytes)
+	if err != nil {
+		return
+	}
+	dstErr := stdcopy.NewStdWriter(buffer, stdcopy.Stderr)
+	_, err = dstErr.Write(stdErrBytes)
+	return
 }
 
 func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
