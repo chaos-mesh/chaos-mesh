@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package ctrlserver
+package ctrl
 
 import (
 	"net/http"
@@ -24,13 +24,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 )
 
 func Handler(logger logr.Logger, client client.Client, clientset *kubernetes.Clientset, daemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder) http.Handler {
-	resolvers := &graph.Resolver{
-		DaemonHelper: &graph.DaemonHelper{Builder: daemonClientBuilder},
+	resolvers := &server.Resolver{
+		DaemonHelper: &server.DaemonHelper{Builder: daemonClientBuilder},
 		Log:          logger,
 		Client:       client,
 		Clientset:    clientset,

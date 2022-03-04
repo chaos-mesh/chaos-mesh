@@ -1,4 +1,4 @@
-package graph
+package server
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -17,8 +17,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/generated"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
@@ -135,10 +135,6 @@ func (r *containerStateTerminatedResolver) StartedAt(ctx context.Context, obj *v
 
 func (r *containerStateTerminatedResolver) FinishedAt(ctx context.Context, obj *v1.ContainerStateTerminated) (*time.Time, error) {
 	return &obj.FinishedAt.Time, nil
-}
-
-func (r *corruptSpecResolver) Corrup(ctx context.Context, obj *v1alpha1.CorruptSpec) (string, error) {
-	return obj.Corrupt, nil
 }
 
 func (r *experimentStatusResolver) DesiredPhase(ctx context.Context, obj *v1alpha1.ExperimentStatus) (string, error) {
@@ -269,32 +265,53 @@ func (r *iOChaosActionResolver) Methods(ctx context.Context, obj *v1alpha1.IOCha
 	return methods, nil
 }
 
-func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Ino == nil {
+func (r *iOChaosActionResolver) Ino(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.Ino == nil {
 		return nil, nil
 	}
-	ino := (int)(*obj.Ino)
+	ino := (int64)(*obj.Ino)
 	return &ino, nil
 }
 
-func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Size == nil {
+func (r *iOChaosActionResolver) Size(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.Size == nil {
 		return nil, nil
 	}
-	size := (int)(*obj.Size)
+	size := (int64)(*obj.Size)
 	return &size, nil
 }
 
-func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Blocks == nil {
+func (r *iOChaosActionResolver) Blocks(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.Blocks == nil {
 		return nil, nil
 	}
-	blocks := (int)(*obj.Blocks)
+	blocks := (int64)(*obj.Blocks)
 	return &blocks, nil
 }
 
+func (r *iOChaosActionResolver) Atime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error) {
+	if obj.AttrOverrideSpec == nil {
+		return nil, nil
+	}
+	return obj.Atime, nil
+}
+
+func (r *iOChaosActionResolver) Mtime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error) {
+	if obj.AttrOverrideSpec == nil {
+		return nil, nil
+	}
+	return obj.Mtime, nil
+}
+
+func (r *iOChaosActionResolver) Ctime(ctx context.Context, obj *v1alpha1.IOChaosAction) (*v1alpha1.Timespec, error) {
+	if obj.AttrOverrideSpec == nil {
+		return nil, nil
+	}
+	return obj.Ctime, nil
+}
+
 func (r *iOChaosActionResolver) Kind(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
-	if obj.Kind == nil {
+	if obj.AttrOverrideSpec == nil || obj.Kind == nil {
 		return nil, nil
 	}
 	kind := (string)(*obj.Kind)
@@ -302,48 +319,65 @@ func (r *iOChaosActionResolver) Kind(ctx context.Context, obj *v1alpha1.IOChaosA
 }
 
 func (r *iOChaosActionResolver) Perm(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Perm == nil {
+	if obj.AttrOverrideSpec == nil || obj.Perm == nil {
 		return nil, nil
 	}
 	perm := (int)(*obj.Perm)
 	return &perm, nil
 }
 
-func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Nlink == nil {
+func (r *iOChaosActionResolver) Nlink(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.Nlink == nil {
 		return nil, nil
 	}
-	nlink := (int)(*obj.Nlink)
+	nlink := (int64)(*obj.Nlink)
 	return &nlink, nil
 }
 
-func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.UID == nil {
+func (r *iOChaosActionResolver) UID(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.UID == nil {
 		return nil, nil
 	}
-	uid := (int)(*obj.UID)
+	uid := (int64)(*obj.UID)
 	return &uid, nil
 }
 
-func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.GID == nil {
+func (r *iOChaosActionResolver) Gid(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.GID == nil {
 		return nil, nil
 	}
-	gid := (int)(*obj.GID)
+	gid := (int64)(*obj.GID)
 	return &gid, nil
 }
 
-func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int, error) {
-	if obj.Rdev == nil {
+func (r *iOChaosActionResolver) Rdev(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.AttrOverrideSpec == nil || obj.Rdev == nil {
 		return nil, nil
 	}
-	rdev := (int)(*obj.Rdev)
+	rdev := (int64)(*obj.Rdev)
 	return &rdev, nil
 }
 
 func (r *iOChaosActionResolver) Filling(ctx context.Context, obj *v1alpha1.IOChaosAction) (*string, error) {
+	if obj.MistakeSpec == nil {
+		return nil, nil
+	}
 	filling := string(obj.Filling)
 	return &filling, nil
+}
+
+func (r *iOChaosActionResolver) MaxOccurrences(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.MistakeSpec == nil {
+		return nil, nil
+	}
+	return &obj.MaxOccurrences, nil
+}
+
+func (r *iOChaosActionResolver) MaxLength(ctx context.Context, obj *v1alpha1.IOChaosAction) (*int64, error) {
+	if obj.MistakeSpec == nil {
+		return nil, nil
+	}
+	return &obj.MaxLength, nil
 }
 
 func (r *iOChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.IOChaosSpec) (string, error) {
@@ -980,8 +1014,35 @@ func (r *podStatusResolver) QosClass(ctx context.Context, obj *v1.PodStatus) (st
 	return string(obj.QOSClass), nil
 }
 
+func (r *podStressChaosResolver) Cgroups(ctx context.Context, obj *model.PodStressChaos) (*model.Cgroups, error) {
+	return r.GetCgroups(ctx, obj)
+}
+
+func (r *podStressChaosResolver) ProcessStress(ctx context.Context, obj *model.PodStressChaos) ([]*model.ProcessStress, error) {
+	processes, err := r.Pod().Processes(ctx, obj.Pod)
+	if err != nil {
+		return nil, err
+	}
+
+	var processStress []*model.ProcessStress
+	for _, process := range processes {
+		cgroup, err := r.GetCgroup(ctx, obj.Pod, process.Pid)
+		if err != nil {
+			r.Log.Error(err, "get cgroup for process", "pid", process.Pid)
+			// ignore this process
+			continue
+		}
+
+		processStress = append(processStress, &model.ProcessStress{
+			Process: process,
+			Cgroup:  cgroup,
+		})
+	}
+	return processStress, nil
+}
+
 func (r *processResolver) Fds(ctx context.Context, obj *model.Process) ([]*model.Fd, error) {
-	return r.GetFdsOfProcess(ctx, obj)
+	return r.GetFdsOfProcess(ctx, obj), nil
 }
 
 func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error) {
@@ -1041,6 +1102,31 @@ func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Str
 	return annotations, nil
 }
 
+func (r *stressChaosResolver) Podstress(ctx context.Context, obj *v1alpha1.StressChaos) ([]*model.PodStressChaos, error) {
+	pods, _, err := GetPods(ctx, obj.Status.ChaosStatus, obj.Spec.Selector, r.Client)
+	if err != nil {
+		return nil, err
+	}
+
+	var podStress []*model.PodStressChaos
+	for _, pod := range pods {
+		p := pod
+		podStress = append(podStress, &model.PodStressChaos{
+			StressChaos: obj,
+			Pod:         &p,
+		})
+	}
+	return podStress, nil
+}
+
+func (r *stressChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.StressChaosSpec) (string, error) {
+	return string(obj.Mode), nil
+}
+
+func (r *stressChaosStatusResolver) Instances(ctx context.Context, obj *v1alpha1.StressChaosStatus) (map[string]interface{}, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // AttrOverrideSpec returns generated.AttrOverrideSpecResolver implementation.
 func (r *Resolver) AttrOverrideSpec() generated.AttrOverrideSpecResolver {
 	return &attrOverrideSpecResolver{r}
@@ -1063,9 +1149,6 @@ func (r *Resolver) ContainerStateRunning() generated.ContainerStateRunningResolv
 func (r *Resolver) ContainerStateTerminated() generated.ContainerStateTerminatedResolver {
 	return &containerStateTerminatedResolver{r}
 }
-
-// CorruptSpec returns generated.CorruptSpecResolver implementation.
-func (r *Resolver) CorruptSpec() generated.CorruptSpecResolver { return &corruptSpecResolver{r} }
 
 // ExperimentStatus returns generated.ExperimentStatusResolver implementation.
 func (r *Resolver) ExperimentStatus() generated.ExperimentStatusResolver {
@@ -1155,6 +1238,11 @@ func (r *Resolver) PodSelectorSpec() generated.PodSelectorSpecResolver {
 // PodStatus returns generated.PodStatusResolver implementation.
 func (r *Resolver) PodStatus() generated.PodStatusResolver { return &podStatusResolver{r} }
 
+// PodStressChaos returns generated.PodStressChaosResolver implementation.
+func (r *Resolver) PodStressChaos() generated.PodStressChaosResolver {
+	return &podStressChaosResolver{r}
+}
+
 // Process returns generated.ProcessResolver implementation.
 func (r *Resolver) Process() generated.ProcessResolver { return &processResolver{r} }
 
@@ -1175,12 +1263,21 @@ func (r *Resolver) Record() generated.RecordResolver { return &recordResolver{r}
 // StressChaos returns generated.StressChaosResolver implementation.
 func (r *Resolver) StressChaos() generated.StressChaosResolver { return &stressChaosResolver{r} }
 
+// StressChaosSpec returns generated.StressChaosSpecResolver implementation.
+func (r *Resolver) StressChaosSpec() generated.StressChaosSpecResolver {
+	return &stressChaosSpecResolver{r}
+}
+
+// StressChaosStatus returns generated.StressChaosStatusResolver implementation.
+func (r *Resolver) StressChaosStatus() generated.StressChaosStatusResolver {
+	return &stressChaosStatusResolver{r}
+}
+
 type attrOverrideSpecResolver struct{ *Resolver }
 type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
 type containerStateRunningResolver struct{ *Resolver }
 type containerStateTerminatedResolver struct{ *Resolver }
-type corruptSpecResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
 type hTTPChaosResolver struct{ *Resolver }
 type hTTPChaosSpecResolver struct{ *Resolver }
@@ -1205,9 +1302,12 @@ type podIOChaosResolver struct{ *Resolver }
 type podNetworkChaosResolver struct{ *Resolver }
 type podSelectorSpecResolver struct{ *Resolver }
 type podStatusResolver struct{ *Resolver }
+type podStressChaosResolver struct{ *Resolver }
 type processResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
+type stressChaosSpecResolver struct{ *Resolver }
+type stressChaosStatusResolver struct{ *Resolver }
