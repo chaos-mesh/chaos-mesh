@@ -3162,7 +3162,17 @@ func (in *RawIPSet) DeepCopyInto(out *RawIPSet) {
 	*out = *in
 	if in.Cidrs != nil {
 		in, out := &in.Cidrs, &out.Cidrs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
+	if in.CidrAndPorts != nil {
+		in, out := &in.CidrAndPorts, &out.CidrAndPorts
 		*out = make([]CidrAndPort, len(*in))
+		copy(*out, *in)
+	}
+	if in.SetNames != nil {
+		in, out := &in.SetNames, &out.SetNames
+		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 	out.RawRuleSource = in.RawRuleSource

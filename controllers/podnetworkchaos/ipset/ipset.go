@@ -32,46 +32,63 @@ import (
 
 var log = ctrl.Log.WithName("ipset")
 
-type IPSetType string
+// BuildIPSets builds IP sets with provided pod ip list.
+// It returns the set IP set and other IP sets.
+func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) (v1alpha1.RawIPSet, []v1alpha1.RawIPSet) {
+	setName := GenerateIPSetName(networkchaos, "set_"+namePostFix)
+	netName := GenerateIPSetName(networkchaos, "net_"+namePostFix)
+	netPortName := GenerateIPSetName(networkchaos, "netport_"+namePostFix)
 
-const (
-	SetIPSet     IPSetType = "set"
-	NetPortIPSet IPSetType = "netPort"
-	NetIPSet     IPSetType = "net"
-)
-
-// BuildIPSet builds an ipset with provided pod ip list
-func BuildIPSet(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
-	setName := GenerateIPSetName(networkchaos, SetIPSet, namePostFix)
-	netPortName := GenerateIPSetName(networkchaos, NetPortIPSet, namePostFix)
-	netName := GenerateIPSetName(networkchaos, NetIPSet, namePostFix)
-	cidrs := []v1alpha1.CidrAndPort{}
+	cidrs := []string{}
+	cidrandPorts := []v1alpha1.CidrAndPort{}
 
 	for _, cidr := range externalCidrs {
-		cidrs = append(cidrs, cidr)
+		if cidr.Port == 0 {
+			cidrs = append(cidrs, cidr.Cidr)
+		} else {
+			cidrandPorts = append(cidrandPorts, cidr)
+		}
 	}
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) > 0 {
-			cidr := v1alpha1.CidrAndPort{Cidr: netutils.IPToCidr(pod.Status.PodIP)}
-			cidrs = append(cidrs, cidr)
+			cidrs = append(cidrs, netutils.IPToCidr(pod.Status.PodIP))
 		}
 	}
 
-	return v1alpha1.RawIPSet{
-		SetName:     setName,
-		NetPortName: netPortName,
-		NetName:     netName,
-		Cidrs:       cidrs,
+	setIPSet := v1alpha1.RawIPSet{
+		Name:      setName,
+		IPSetType: v1alpha1.SetIPSet,
+		SetNames:  []string{netName, netPortName},
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: source,
 		},
 	}
+	otherIPSets := []v1alpha1.RawIPSet{
+		{
+			Name:      netName,
+			IPSetType: v1alpha1.NetIPSet,
+			Cidrs:     cidrs,
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
+		},
+		{
+			Name:         netPortName,
+			IPSetType:    v1alpha1.NetPortIPSet,
+			CidrAndPorts: cidrandPorts,
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
+		},
+	}
+
+	return setIPSet, otherIPSets
 }
 
 // GenerateIPSetName generates name for ipset
-func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, typ IPSetType, namePostFix string) string {
-	return netutils.CompressName(networkchaos.Name, 27, fmt.Sprintf("%s_%s", typ, namePostFix))
+func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
+	return netutils.CompressName(networkchaos.Name, 27, namePostFix)
 }
 
 // FlushIPSets makes grpc calls to chaosdaemon to save ipset

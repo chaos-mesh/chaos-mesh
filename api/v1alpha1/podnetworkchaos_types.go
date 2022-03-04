@@ -55,19 +55,36 @@ type PodNetworkChaosSpec struct {
 	TrafficControls []RawTrafficControl `json:"tcs,omitempty"`
 }
 
+// IPSetType represents the type of IP set
+type IPSetType string
+
+const (
+	SetIPSet     IPSetType = "list:set"
+	NetPortIPSet IPSetType = "hash:net,port"
+	NetIPSet     IPSetType = "hash:net"
+)
+
 // RawIPSet represents an ipset on specific pod
 type RawIPSet struct {
-	// The name of set ipset
-	SetName string `json:"setName"`
+	// The name of ipset
+	Name string `json:"name"`
 
-	// The name of net,port ipset
-	NetPortName string `json:"netPortName"`
+	IPSetType IPSetType `json:"ipsetType"`
 
-	// The name of net ipset
-	NetName string `json:"netName"`
+	// The contents of ipset.
+	// Only available when IPSetType is NetIPSet.
+	// +optional
+	Cidrs []string `json:"cidrs"`
 
-	// The contents of ipset
-	Cidrs []CidrAndPort `json:"cidrs"`
+	// The contents of ipset.
+	// Only available when IPSetType is NetPortIPSet.
+	// +optional
+	CidrAndPorts []CidrAndPort `json:"cidrAndPorts"`
+
+	// The contents of ipset.
+	// Only available when IPSetType is SetIPSet.
+	// +optional
+	SetNames []string `json:"setNames"`
 
 	// The name and namespace of the source network chaos
 	RawRuleSource `json:",inline"`
@@ -77,9 +94,9 @@ type RawIPSet struct {
 type CidrAndPort struct {
 	Cidr string `json:"cidr"`
 
-	// +optional
+	// +kubebuilder:validation:Minimum=1
 	// +kubebuilder:validation:Maximum=65535
-	Port uint16 `json:"port,omitempty"`
+	Port uint16 `json:"port"`
 }
 
 // ChainDirection represents the direction of chain

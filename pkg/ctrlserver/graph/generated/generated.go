@@ -73,7 +73,6 @@ type ResolverRoot interface {
 	PodStatus() PodStatusResolver
 	Process() ProcessResolver
 	Query() QueryResolver
-	RawIPSet() RawIPSetResolver
 	RawIptables() RawIptablesResolver
 	RawTrafficControl() RawTrafficControlResolver
 	Record() RecordResolver
@@ -874,10 +873,6 @@ type ProcessResolver interface {
 }
 type QueryResolver interface {
 	Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error)
-}
-type RawIPSetResolver interface {
-	Name(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error)
-	Cidrs(ctx context.Context, obj *v1alpha1.RawIPSet) ([]string, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -17259,14 +17254,14 @@ func (ec *executionContext) _RawIPSet_name(ctx context.Context, field graphql.Co
 		Object:     "RawIPSet",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.RawIPSet().Name(rctx, obj)
+		return obj.Name, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17294,14 +17289,14 @@ func (ec *executionContext) _RawIPSet_cidrs(ctx context.Context, field graphql.C
 		Object:     "RawIPSet",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.RawIPSet().Cidrs(rctx, obj)
+		return obj.Cidrs, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -23108,37 +23103,19 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("RawIPSet")
 		case "name":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._RawIPSet_name(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._RawIPSet_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "cidrs":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._RawIPSet_cidrs(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._RawIPSet_cidrs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "source":
 			out.Values[i] = ec._RawIPSet_source(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

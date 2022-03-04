@@ -179,19 +179,42 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
-		cidrs := []*pb.CidrAndPort{}
-		for _, cidr := range ipset.Cidrs {
-			cidrs = append(cidrs, &pb.CidrAndPort{
-				Cidr: cidr.Cidr,
-				Port: uint32(cidr.Port),
+		switch ipset.IPSetType {
+		case v1alpha1.SetIPSet:
+			ipsets = append(ipsets, &pb.IPSet{
+				Name: ipset.Name,
+				Content: &pb.IPSet_Set{
+					Set: &pb.SetIPSetContent{
+						SetNames: ipset.SetNames,
+					},
+				},
+			})
+		case v1alpha1.NetIPSet:
+			ipsets = append(ipsets, &pb.IPSet{
+				Name: ipset.Name,
+				Content: &pb.IPSet_Net{
+					Net: &pb.NetIPSetContent{
+						Cidrs: ipset.Cidrs,
+					},
+				},
+			})
+		case v1alpha1.NetPortIPSet:
+			cidrAndPorts := []*pb.CidrAndPort{}
+			for _, cidr := range ipset.CidrAndPorts {
+				cidrAndPorts = append(cidrAndPorts, &pb.CidrAndPort{
+					Cidr: cidr.Cidr,
+					Port: uint32(cidr.Port),
+				})
+			}
+			ipsets = append(ipsets, &pb.IPSet{
+				Name: ipset.Name,
+				Content: &pb.IPSet_NetPort{
+					NetPort: &pb.NetPortIPSetContent{
+						CidrAndPorts: cidrAndPorts,
+					},
+				},
 			})
 		}
-		ipsets = append(ipsets, &pb.IPSet{
-			SetName:     ipset.SetName,
-			NetPortName: ipset.NetPortName,
-			NetName:     ipset.NetName,
-			Cidrs:       cidrs,
-		})
 	}
 	return ipset.FlushIPSets(ctx, chaosdaemonClient, pod, ipsets)
 }

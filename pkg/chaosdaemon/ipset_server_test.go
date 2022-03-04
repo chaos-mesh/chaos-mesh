@@ -145,55 +145,6 @@ exit 1
 		})
 	})
 
-	Context("addIpsToIPSet", func() {
-		It("should work", func() {
-			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
-				return exec.Command("echo", "mock command")
-			})()
-			err := addCIDRsToIPSet(context.TODO(), logger, true, 1, "netPortName", "netName", []*pb.CidrAndPort{
-				{Cidr: "0.0.0.0/24"},
-				{Cidr: "1.1.1.1/32", Port: 80},
-			})
-			Expect(err).To(BeNil())
-		})
-
-		It("should work since ip exist", func() {
-			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
-echo $1
-exit 1
-			`), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
-				return exec.Command("/tmp/mockfail.sh", ipExistErr)
-			})()
-			err = addCIDRsToIPSet(context.TODO(), logger, true, 1, "netPortName", "netName", []*pb.CidrAndPort{
-				{Cidr: "0.0.0.0/24"},
-				{Cidr: "1.1.1.1/32", Port: 80},
-			})
-			Expect(err).To(BeNil())
-		})
-
-		It("should fail", func() {
-			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
-echo $1
-exit 1
-			`), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
-				return exec.Command("/tmp/mockfail.sh", "fail msg")
-			})()
-			err = addCIDRsToIPSet(context.TODO(), logger, true, 1, "netPortName", "netName", []*pb.CidrAndPort{
-				{Cidr: "0.0.0.0/24"},
-				{Cidr: "1.1.1.1/32", Port: 80},
-			})
-			Expect(err).ToNot(BeNil())
-		})
-	})
-
 	Context("renameIPSet", func() {
 		It("should work", func() {
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
@@ -259,15 +210,35 @@ exit 1
 				return exec.Command("echo", "mock command")
 			})()
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
-				Ipsets: []*pb.IPSet{{
-					SetName:     "ipset-set-name",
-					NetPortName: "ipset-net-port-name",
-					NetName:     "ipset-net-name",
-					Cidrs: []*pb.CidrAndPort{
-						{Cidr: "0.0.0.0/24"},
-						{Cidr: "1.1.1.1/32", Port: 80},
+				Ipsets: []*pb.IPSet{
+					{
+						Name: "ipset-set-name",
+						Content: &pb.IPSet_Set{
+							Set: &pb.SetIPSetContent{
+								SetNames: []string{"set-1", "set-2"},
+							},
+						},
 					},
-				}},
+					{
+						Name: "ipset-net-name",
+						Content: &pb.IPSet_Net{
+							Net: &pb.NetIPSetContent{
+								Cidrs: []string{"0.0.0.0/24"},
+							},
+						},
+					},
+					{
+						Name: "ipset-net-port-name",
+						Content: &pb.IPSet_NetPort{
+							NetPort: &pb.NetPortIPSetContent{
+								CidrAndPorts: []*pb.CidrAndPort{{
+									Cidr: "1.1.1.1/32",
+									Port: 80,
+								}},
+							},
+						},
+					},
+				},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
@@ -279,12 +250,11 @@ exit 1
 			defer mock.With("TaskError", errors.New(errorStr))()
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
 				Ipsets: []*pb.IPSet{{
-					SetName:     "ipset-set-name",
-					NetPortName: "ipset-net-port-name",
-					NetName:     "ipset-net-name",
-					Cidrs: []*pb.CidrAndPort{
-						{Cidr: "0.0.0.0/24"},
-						{Cidr: "1.1.1.1/32", Port: 80},
+					Name: "ipset-name",
+					Content: &pb.IPSet_Set{
+						Set: &pb.SetIPSetContent{
+							SetNames: []string{"set-1", "set-2"},
+						},
 					},
 				}},
 				ContainerId: "containerd://container-id",

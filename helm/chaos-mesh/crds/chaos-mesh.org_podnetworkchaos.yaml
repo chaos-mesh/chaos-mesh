@@ -41,8 +41,9 @@ spec:
                 items:
                   description: RawIPSet represents an ipset on specific pod
                   properties:
-                    cidrs:
-                      description: The contents of ipset
+                    cidrAndPorts:
+                      description: The contents of ipset. Only available when IPSetType
+                        is NetPortIPSet.
                       items:
                         description: CidrAndPort represents CIDR and port pair
                         properties:
@@ -50,27 +51,36 @@ spec:
                             type: string
                           port:
                             maximum: 65535
+                            minimum: 1
                             type: integer
                         required:
                         - cidr
+                        - port
                         type: object
                       type: array
-                    netName:
-                      description: The name of net ipset
+                    cidrs:
+                      description: The contents of ipset. Only available when IPSetType
+                        is NetIPSet.
+                      items:
+                        type: string
+                      type: array
+                    ipsetType:
+                      description: IPSetType represents the type of IP set
                       type: string
-                    netPortName:
-                      description: The name of net,port ipset
+                    name:
+                      description: The name of ipset
                       type: string
-                    setName:
-                      description: The name of set ipset
-                      type: string
+                    setNames:
+                      description: The contents of ipset. Only available when IPSetType
+                        is SetIPSet.
+                      items:
+                        type: string
+                      type: array
                     source:
                       type: string
                   required:
-                  - cidrs
-                  - netName
-                  - netPortName
-                  - setName
+                  - ipsetType
+                  - name
                   - source
                   type: object
                 type: array

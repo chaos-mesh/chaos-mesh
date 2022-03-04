@@ -16,7 +16,6 @@
 package ipset
 
 import (
-	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -38,9 +37,9 @@ func Test_generateIPSetName(t *testing.T) {
 			},
 		}
 
-		name := GenerateIPSetName(networkChaos, SetIPSet, postfix)
+		name := GenerateIPSetName(networkChaos, postfix)
 
-		g.Expect(name).Should(Equal(fmt.Sprintf("%s_%s_%s", chaosName, SetIPSet, postfix)))
+		g.Expect(name).Should(Equal(chaosName + "_" + postfix))
 	})
 
 	t.Run("length equal 27", func(t *testing.T) {
@@ -50,7 +49,7 @@ func Test_generateIPSetName(t *testing.T) {
 			},
 		}
 
-		name := GenerateIPSetName(networkChaos, SetIPSet, postfix)
+		name := GenerateIPSetName(networkChaos, postfix)
 
 		g.Expect(len(name)).Should(Equal(27))
 	})

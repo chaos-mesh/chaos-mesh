@@ -360,12 +360,18 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		}
 		targetPods = append(targetPods, pod)
 	}
-	dstIpset := ipset.BuildIPSet(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
-	m.T.Append(dstIpset)
+	dstSetIPSet, dstOtherIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
+
+	for _, ipSet := range dstOtherIPSets {
+		m.T.Append(ipSet)
+	}
+
+	m.T.Append(dstSetIPSet)
+
 	m.T.Append(v1alpha1.RawIptables{
 		Name:      iptable.GenerateName(pbChainDirection, networkchaos),
 		Direction: chainDirection,
-		IPSets:    []string{dstIpset.SetName},
+		IPSets:    []string{dstSetIPSet.Name},
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: m.Source,
 		},
