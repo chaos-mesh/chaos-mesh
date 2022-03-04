@@ -17,10 +17,10 @@ package v1alpha1
 
 const (
 	// TemplateLabelKey is a label that represents the template type.
-	TemplateLabelKey          = "chaos-mesh.org/template-type"
+	TemplateLabelKey = "chaos-mesh.org/template-type"
 	// ManagedByLabelKey is a label that represents the tool being used
 	// to manage the operation of the object.
-	ManagedByLabelKey         = "app.kubernetes.io/managed-by"
+	ManagedByLabelKey = "app.kubernetes.io/managed-by"
 	// PrefixStatusCheckTemplate is the prefix of the name of a StatusCheckTemplate.
 	PrefixStatusCheckTemplate = "template-status-check"
 )

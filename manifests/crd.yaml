@@ -15744,16 +15744,17 @@ spec:
             description: Spec defines the behavior of a status check
             properties:
               duration:
-                description: Duration defines the duration of the status check. A
-                  duration string is a possibly signed sequence of decimal numbers,
-                  each with optional fraction and a unit suffix, such as "300ms",
-                  "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
-                  "s", "m", "h".
+                description: Duration defines the duration of the whole status check
+                  if the execution is always successful. Duration is available to
+                  both `Synchronous` and `Continuous` mode. A duration string is a
+                  possibly signed sequence of decimal numbers, each with optional
+                  fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+                  Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
                 type: string
               failureThreshold:
                 default: 3
-                description: FailureThreshold defines when a status check fails, it
-                  will try FailureThreshold times before giving up.
+                description: FailureThreshold defines when an execution of status
+                  check fails, it will try FailureThreshold times before giving up.
                 minimum: 1
                 type: integer
               http:
@@ -15767,21 +15768,21 @@ spec:
                       statusCode:
                         description: StatusCode defines the expected http status code
                           for the request. A statusCode string could be a single code
-                          (e.g. 200), or a range (e.g. 200-400).
+                          (e.g. 200), or a inclusive range (e.g. 200-400, both `200`
+                          and `400` are included).
                         type: string
+                    required:
+                    - statusCode
                     type: object
                   headers:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        value:
-                          type: string
-                      required:
-                      - name
-                      - value
-                      type: object
-                    type: array
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: "A Header represents the key-value pairs in an HTTP
+                      header. \n The keys should be in canonical form, as returned
+                      by CanonicalHeaderKey."
+                    type: object
                   method:
                     default: GET
                     enum:
@@ -15791,8 +15792,15 @@ spec:
                   url:
                     type: string
                 required:
+                - criteria
                 - url
                 type: object
+              intervalSeconds:
+                default: 10
+                description: IntervalSeconds defines how often (in seconds) to perform
+                  an execution of status check.
+                minimum: 1
+                type: integer
               mode:
                 description: 'Mode defines the execution mode of the status check.
                   Support type: Synchronous / Continuous'
@@ -15800,12 +15808,6 @@ spec:
                 - Synchronous
                 - Continuous
                 type: string
-              periodSeconds:
-                default: 10
-                description: PeriodSeconds defines how often (in seconds) to perform
-                  the status check.
-                minimum: 1
-                type: integer
               recordsHistoryLimit:
                 default: 100
                 description: RecordsHistoryLimit defines the number of record to retain.
@@ -15815,7 +15817,7 @@ spec:
               timeoutSeconds:
                 default: 1
                 description: TimeoutSeconds defines the number of seconds after which
-                  the status check times out.
+                  an execution of status check times out.
                 minimum: 1
                 type: integer
               type:
@@ -15872,12 +15874,12 @@ spec:
                   properties:
                     outcome:
                       type: string
-                    probeTime:
+                    startTime:
                       format: date-time
                       type: string
                   required:
                   - outcome
-                  - probeTime
+                  - startTime
                   type: object
                 type: array
               startTime:
