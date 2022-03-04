@@ -31,7 +31,7 @@ hack::ensure_kind
 PROVIDER=${PROVIDER:-}
 CLUSTER=${CLUSTER:-}
 IMAGE_TAG=${IMAGE_TAG:-}
-E2E_IMAGE=${E2E_IMAGE:-localhost:5000/pingcap/chaos-mesh-e2e:latest}
+E2E_IMAGE=${E2E_IMAGE:-ghcr.io/pingcap/chaos-mesh-e2e:latest}
 KUBECONFIG=${KUBECONFIG:-$HOME/.kube/config}
 KUBECONTEXT=${KUBECONTEXT:-kind-chaos-mesh}
 REPORT_DIR=${REPORT_DIR:-}
@@ -46,7 +46,7 @@ SKIP_GINKGO=${SKIP_GINKGO:-}
 # We don't finalizers namespace on failure by default for easier debugging in local development.
 # TODO support this feature
 DELETE_NAMESPACE_ON_FAILURE=${DELETE_NAMESPACE_ON_FAILURE:-false}
-IMAGE_REGISTRY=${IMAGE_REGISTRY:-localhost:5000}
+IMAGE_REGISTRY=${IMAGE_REGISTRY:-ghcr.io}
 
 if [ -z "$KUBECONFIG" ]; then
     echo "error: KUBECONFIG is required"

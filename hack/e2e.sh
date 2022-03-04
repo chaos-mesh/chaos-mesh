@@ -92,7 +92,7 @@ hack::ensure_kubetest2
 echo "ensured kubetest2"
 
 PROVIDER=${PROVIDER:-kind}
-IMAGE_REGISTRY=${IMAGE_REGISTRY:-localhost:5000}
+IMAGE_REGISTRY=${IMAGE_REGISTRY:-ghcr.io}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 CLUSTER=${CLUSTER:-chaos-mesh}
 KUBECONFIG=${KUBECONFIG:-~/.kube/config}

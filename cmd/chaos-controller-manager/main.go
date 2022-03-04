@@ -36,7 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -48,6 +47,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	apiWebhook "github.com/chaos-mesh/chaos-mesh/pkg/webhook"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
