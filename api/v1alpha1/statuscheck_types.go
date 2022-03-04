@@ -18,6 +18,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/http"
 )
 
 // +kubebuilder:object:root=true
@@ -65,7 +66,9 @@ type StatusCheckSpec struct {
 	// +kubebuilder:validation:Enum=HTTP
 	Type StatusCheckType `json:"type"`
 
-	// Duration defines the duration of the status check.
+	// Duration defines the duration of the whole status check if the
+	// execution is always successful.
+	// Duration is available to both `Synchronous` and `Continuous` mode.
 	// A duration string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms", "-1.5h" or "2h45m".
@@ -73,20 +76,22 @@ type StatusCheckSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
-	// TimeoutSeconds defines the number of seconds after which the status check times out.
+	// TimeoutSeconds defines the number of seconds after which
+	// an execution of status check times out.
 	// +optional
 	// +kubebuilder:default=1
 	// +kubebuilder:validation:Minimum=1
 	TimeoutSeconds int `json:"timeoutSeconds,omitempty"`
 
-	// PeriodSeconds defines how often (in seconds) to perform the status check.
+	// IntervalSeconds defines how often (in seconds) to perform
+	// an execution of status check.
 	// +optional
 	// +kubebuilder:default=10
 	// +kubebuilder:validation:Minimum=1
-	PeriodSeconds int `json:"periodSeconds,omitempty"`
+	IntervalSeconds int `json:"intervalSeconds,omitempty"`
 
-	// FailureThreshold defines when a status check fails,
-	// it will try FailureThreshold times before giving up.
+	// FailureThreshold defines when an execution of status check
+	// fails, it will try FailureThreshold times before giving up.
 	// +optional
 	// +kubebuilder:default=3
 	// +kubebuilder:validation:Minimum=1
@@ -124,9 +129,7 @@ type StatusCheckStatus struct {
 
 	// Records contains the history of the execution of StatusCheck.
 	// +optional
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	Records []StatusCheckRecord `json:"records,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
+	Records []StatusCheckRecord `json:"records,omitempty"`
 }
 
 type StatusCheckOutcome string
@@ -134,19 +137,24 @@ type StatusCheckOutcome string
 const (
 	StatusCheckOutcomeSuccess StatusCheckOutcome = "Success"
 	StatusCheckOutcomeFailure StatusCheckOutcome = "Failure"
+	StatusCheckOutcomeUnknown StatusCheckOutcome = "Unknown"
 )
 
 type StatusCheckRecord struct {
-	ProbeTime *metav1.Time       `json:"probeTime"`
+	StartTime *metav1.Time       `json:"startTime"`
 	Outcome   StatusCheckOutcome `json:"outcome"`
 }
 
 type StatusCheckConditionType string
 
 const (
-	// StatusCheckConditionComplete means the status check has completed its execution.
-	StatusCheckConditionComplete StatusCheckConditionType = "Complete"
-	// StatusCheckConditionFailed means the status check has failed its execution.
+	// StatusCheckConditionCompleted means the status check is completed.
+	// It will be `True`, in the following scenarios:
+	// 1. reach out the duration
+	// 2. the failure threshold is exceeded
+	// 3. the status check is successful (only the `Synchronous` mode)
+	StatusCheckConditionCompleted StatusCheckConditionType = "Completed"
+	// StatusCheckConditionFailed means the failure threshold is exceeded.
 	StatusCheckConditionFailed StatusCheckConditionType = "Failed"
 )
 
@@ -170,16 +178,11 @@ type EmbedStatusCheck struct {
 	HTTPStatusCheck *HTTPStatusCheck `json:"http,omitempty"`
 }
 
-type HTTPHeaderPair struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
 type HTTPCriteria struct {
 	// StatusCode defines the expected http status code for the request.
-	// A statusCode string could be a single code (e.g. 200),
-	// or a range (e.g. 200-400).
-	StatusCode string `json:"statusCode,omitempty" webhook:"StatusCode"`
+	// A statusCode string could be a single code (e.g. 200), or
+	// a inclusive range (e.g. 200-400, both `200` and `400` are included).
+	StatusCode string `json:"statusCode" webhook:"StatusCode"`
 	// TODO: support response body
 }
 
@@ -198,16 +201,15 @@ type HTTPStatusCheck struct {
 	// +kubebuilder:default=GET
 	RequestMethod HTTPRequestMethod `json:"method,omitempty"`
 	// +optional
-	RequestHeaders []HTTPHeaderPair `json:"headers,omitempty"`
+	RequestHeaders http.Header `json:"headers,omitempty"`
 	// +optional
 	RequestBody string `json:"body,omitempty"`
 	// Criteria defines how to determine the result of the status check.
-	Criteria HTTPCriteria `json:"criteria,omitempty"`
+	Criteria HTTPCriteria `json:"criteria"`
 }
 
-// +kubebuilder:object:root=true
-
 // StatusCheckList contains a list of StatusCheck
+// +kubebuilder:object:root=true
 type StatusCheckList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

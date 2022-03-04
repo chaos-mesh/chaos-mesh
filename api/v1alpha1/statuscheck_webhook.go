@@ -87,18 +87,23 @@ func (in *StatusCode) Validate(root interface{}, path *field.Path) field.ErrorLi
 			return packError(errors.New("not a single number or a range"))
 		}
 
-		minCodeStr := codeStr[:index]
-		maxCodeStr := codeStr[index+1:]
-		minCode, err := strconv.Atoi(minCodeStr)
-		if err != nil {
+		validateRange := func(codeStr string) error {
+			code, err := strconv.Atoi(codeStr)
+			if err != nil {
+				return err
+			}
+			if !validateHTTPStatusCode(code) {
+				return errors.Errorf("invalid status code range, code: %d", code)
+			}
+			return nil
+		}
+		start := codeStr[:index]
+		end := codeStr[index+1:]
+		if err := validateRange(start); err != nil {
 			return packError(err)
 		}
-		maxCode, err := strconv.Atoi(maxCodeStr)
-		if err != nil {
+		if err := validateRange(end); err != nil {
 			return packError(err)
-		}
-		if !validateHTTPStatusCode(minCode) || !validateHTTPStatusCode(maxCode) {
-			return packError(errors.New("invalid status code range"))
 		}
 	}
 	return nil
