@@ -21,13 +21,6 @@ import (
 	stdlog "log"
 	"os"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
-	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -35,6 +28,14 @@ import (
 	"go.uber.org/fx"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
 // @title Chaos Mesh Dashboard API
