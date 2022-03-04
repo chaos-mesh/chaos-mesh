@@ -68,13 +68,13 @@ func NewDefaultOperatorConfig() OperatorConfig {
 		ReleaseName: "chaos-mesh",
 		Tag:         "e2e",
 		Manager: ManagerConfig{
-			ImageRegistry:   "localhost:5000",
+			ImageRegistry:   "ghcr.io",
 			ImageRepository: "pingcap/chaos-mesh",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 		},
 		Daemon: DaemonConfig{
-			ImageRegistry:   "localhost:5000",
+			ImageRegistry:   "ghcr.io",
 			ImageRepository: "pingcap/chaos-daemon",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,

@@ -3692,6 +3692,33 @@ paths:
       summary: List workflows from Kubernetes cluster.
       tags:
       - workflows
+    post:
+      description: Create a new workflow.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Workflow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.WorkflowDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new workflow.
+      tags:
+      - workflows
   /workflows/{uid}:
     delete:
       description: Delete the specified workflow.
@@ -3781,34 +3808,6 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Update a workflow.
-      tags:
-      - workflows
-  /workflows/new:
-    post:
-      description: Create a new workflow.
-      parameters:
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1alpha1.Workflow'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/core.WorkflowDetail'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Create a new workflow.
       tags:
       - workflows
   /workflows/parse-task/http:

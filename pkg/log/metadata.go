@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,9 +13,26 @@
 // limitations under the License.
 //
 
-package bpm
+package log
 
-// Build builds the command
-func (b *CommandBuilder) Build() *ManagedCommand {
-	panic("unimplemented")
+import (
+	"context"
+
+	"github.com/go-logr/logr"
+)
+
+type Metadatkey string
+
+const (
+	MetaNamespacedName Metadatkey = "namespaced-name"
+)
+
+func EnrichLoggerWithContext(ctx context.Context, logger logr.Logger) logr.Logger {
+	newLogger := logger
+	if ctx != nil {
+		if namespacedName, ok := ctx.Value(MetaNamespacedName).(string); ok {
+			newLogger = newLogger.WithValues("namespacedName", namespacedName)
+		}
+	}
+	return newLogger
 }

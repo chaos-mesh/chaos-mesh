@@ -1806,9 +1806,7 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/workflows/new": {
+            },
             "post": {
                 "description": "Create a new workflow.",
                 "produces": [
