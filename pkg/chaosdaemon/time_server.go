@@ -21,10 +21,12 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 )
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Shift time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -33,7 +35,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	childPids, err := GetChildProcesses(pid)
+	childPids, err := util.GetChildProcesses(pid, log)
 	if err != nil {
 		log.Error(err, "fail to get child processes")
 	}
@@ -52,6 +54,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 }
 
 func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Recover time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -60,7 +63,7 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	childPids, err := GetChildProcesses(pid)
+	childPids, err := util.GetChildProcesses(pid, log)
 	if err != nil {
 		log.Error(err, "fail to get child processes")
 	}
