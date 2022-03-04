@@ -26,19 +26,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 var log = ctrl.Log.WithName("iptable")
 
 // SetIptablesChains makes grpc call to chaosdaemon to flush iptable
-func SetIptablesChains(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, pod *v1.Pod, chains []*pb.Chain) error {
-	pbClient, err := builder.Build(ctx, pod)
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
+func SetIptablesChains(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInterface, pod *v1.Pod, chains []*pb.Chain) error {
+	var err error
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)

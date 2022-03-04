@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"time"
@@ -37,10 +36,17 @@ const (
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("applying io chaos", "Request", in)
 
-	if in.Instance != 0 {
-		err := s.killIOChaos(ctx, in.Instance, in.StartTime)
+	if in.InstanceUid == "" {
+		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: int(in.Instance), CreateTime: in.StartTime}); ok {
+			in.InstanceUid = uid
+		}
+	}
+
+	if in.InstanceUid != "" {
+		err := s.killIOChaos(ctx, in.InstanceUid)
 		if err != nil {
 			return nil, err
 		}
@@ -49,8 +55,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	actions := []v1alpha1.IOChaosAction{}
 	err := json.Unmarshal([]byte(in.Actions), &actions)
 	if err != nil {
-		log.Error(err, "error while unmarshal json bytes")
-		return nil, err
+		return nil, errors.Wrap(err, "unmarshal json bytes")
 	}
 
 	log.Info("the length of actions", "length", len(actions))
@@ -63,8 +68,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
-		log.Error(err, "error while getting PID")
-		return nil, err
+		return nil, errors.Wrap(err, "getting PID")
 	}
 
 	// TODO: make this log level configurable
@@ -81,32 +85,19 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	caller, receiver := bpm.NewBlockingBuffer(), bpm.NewBlockingBuffer()
-	defer caller.Close()
-	defer receiver.Close()
-	client, err := jrpc.DialIO(ctx, receiver, caller)
-	if err != nil {
-		return nil, err
-	}
-
-	cmd := processBuilder.Build()
-	cmd.Stdin = caller
-	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
+	cmd := processBuilder.Build(ctx)
 	cmd.Stderr = os.Stderr
-	procState, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
-		return nil, err
-	}
-	var ret string
-	ct, err := procState.CreateTime()
-	if err != nil {
-		log.Error(err, "get create time failed")
-		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill toda failed", "request", in)
-		}
-		return nil, err
+		return nil, errors.Wrapf(err, "start process `%s`", cmd)
 	}
 
+	client, err := jrpc.DialIO(ctx, proc.Pipes.Stdout, proc.Pipes.Stdin)
+	if err != nil {
+		return nil, errors.Wrapf(err, "dialing rpc client")
+	}
+
+	var ret string
 	log.Info("Waiting for toda to start")
 	var rpcError error
 	maxWaitTime := time.Millisecond * 2000
@@ -116,27 +107,26 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
 	if rpcError != nil || ret != "ok" {
 		log.Info("Starting toda takes too long or encounter an error")
-		caller.Close()
-		receiver.Close()
-		if kerr := s.killIOChaos(ctx, int64(cmd.Process.Pid), ct); kerr != nil {
-			log.Error(kerr, "kill toda failed", "request", in)
+		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
+			log.Error(kerr, "kill toda", "request", in)
 		}
 		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
 	}
 
 	return &pb.ApplyIOChaosResponse{
-		Instance:  int64(cmd.Process.Pid),
-		StartTime: ct,
+		Instance:    int64(proc.Pair.Pid),
+		StartTime:   proc.Pair.CreateTime,
+		InstanceUid: proc.Uid,
 	}, nil
 }
 
-func (s *DaemonServer) killIOChaos(ctx context.Context, pid int64, startTime int64) error {
-	log.Info("killing toda", "pid", pid)
+func (s *DaemonServer) killIOChaos(ctx context.Context, uid string) error {
+	log := s.getLoggerFromContext(ctx)
 
-	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)
+	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, uid)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "kill toda %s", uid)
 	}
-	log.Info("kill toda successfully")
+	log.Info("kill toda successfully", "uid", uid)
 	return nil
 }
