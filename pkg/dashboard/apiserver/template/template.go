@@ -34,9 +34,15 @@ func NewService(conf *config.ChaosDashboardConfig) *Service {
 
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/templates")
-	endpoint.GET("/status-check", s.listStatusCheck)
-	endpoint.POST("/status-check", s.createStatusCheck)
-	endpoint.GET("/status-check/:uid", s.getStatusCheckDetailByUID)
-	endpoint.PUT("/status-check/:uid", s.updateStatusCheck)
-	endpoint.DELETE("/status-check/:uid", s.deleteStatusCheck)
+
+	statusCheckEndpoint := endpoint.Group("/status-check")
+	statusCheckEndpoint.GET("", s.listStatusCheck)
+	statusCheckEndpoint.POST("", s.createStatusCheck)
+	statusCheckEndpoint.GET("/:uid", s.getStatusCheckDetailByUID)
+	statusCheckEndpoint.PUT("/:uid", s.updateStatusCheck)
+	statusCheckEndpoint.DELETE("/:uid", s.deleteStatusCheck)
+}
+
+func (it *Service) listStatusCheck(c *gin.Context) {
+
 }
