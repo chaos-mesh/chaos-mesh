@@ -16,6 +16,7 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -169,12 +170,8 @@ func GetEnvsByProcess(pid string) ([]byte, error) {
 // SplitEnvs read /proc/PID/environ and split by []byte{0}
 func SplitEnvs(envContent []byte) []string {
 	var envs []string
-	var tmpi int
-	///proc/PID/environ end with []byte{0}
-	for i := 0; i < len(envContent); i++ {
-		if envContent[i] == 0 {
-			env := envContent[tmpi:i]
-			tmpi = i
+	for _, env := range bytes.Split(envContent, []byte{0}) {
+		if len(env) > 0 {
 			envs = append(envs, string(env))
 		}
 	}
