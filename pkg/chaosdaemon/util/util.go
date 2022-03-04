@@ -153,6 +153,33 @@ func CompareLinuxVersion(major, revision int) (bool, error) {
 	}
 	return false, nil
 }
+func GetEnvsByProcess(pid string) ([]byte, error) {
+	file, err := os.Open("/proc/" + pid + "/environ")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
+}
+
+// SplitEnvs read /proc/PID/environ and split by []byte{0}
+func SplitEnvs(envContent []byte) []string {
+	var envs []string
+	var tmpi int
+	///proc/PID/environ end with []byte{0}
+	for i := 0; i < len(envContent); i++ {
+		if envContent[i] == 0 {
+			env := envContent[tmpi:i]
+			tmpi = i
+			envs = append(envs, string(env))
+		}
+	}
+	return envs
+}
 
 func EncodeOutputToError(output []byte, err error) error {
 	return errors.Errorf("error code: %v, msg: %s", err, string(output))

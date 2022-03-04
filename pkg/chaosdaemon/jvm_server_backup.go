@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"os"
 	"strconv"
 	"strings"
@@ -82,7 +83,15 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 
 	bmInstallCmd := fmt.Sprintf(bmInstallCommandBackUp, req.Port, javaPid)
 
-	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmInstallCmd})
+	//FIXME
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmInstallCmd).SetContext(ctx)
+	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
+		log.Info("setEnvsToProcess ", "err", err)
+		return nil, err
+	}
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	output, err = processBuilder.Build().CombinedOutput()
+	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmInstallCmd})
 
 	if err != nil {
 		// this error will occured when install agent more than once, and will ignore this error and continue to submit rule
@@ -124,7 +133,16 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 	}
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "l", filename)
-	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
+
+	//FIXME
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
+	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
+		return nil, err
+	}
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	output, err = processBuilder.Build().CombinedOutput()
+
+	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
 	if err != nil {
 		log.Error(err, string(output))
 		return nil, err
@@ -163,7 +181,15 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 	}
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "u", filename)
-	output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
+
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
+	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
+		return nil, err
+	}
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	output, err = processBuilder.Build().CombinedOutput()
+
+	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
 	if err != nil {
 		log.Error(err, string(output))
 		return nil, err
@@ -173,4 +199,19 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 	}
 
 	return &empty.Empty{}, nil
+}
+
+// FIXME maybe has some  problem
+func setEnvsToProcess(processBuilder *bpm.ProcessBuilder, pid string) error {
+	//todo ,get env by pid and set it to subprocess
+	bEnvs, err := util.GetEnvsByProcess(pid)
+	if err != nil {
+		return err
+	}
+
+	for _, env := range util.SplitEnvs(bEnvs) {
+		envMap := strings.Split(env, "=")
+		processBuilder.SetEnv(envMap[0], envMap[1])
+	}
+	return nil
 }
