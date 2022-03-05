@@ -21,11 +21,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-logr/logr"
 	v1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
@@ -33,7 +35,6 @@ import (
 	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	podselector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/go-logr/logr"
 )
 
 var ignoredNamespaces = []string{
@@ -43,6 +44,7 @@ var ignoredNamespaces = []string{
 
 type Injector struct {
 	logger        logr.Logger
+	decoder       *admission.Decoder
 	kubeclient    client.Client
 	cfg           *config.Config
 	ControllerCfg *controllerCfg.ChaosControllerConfig
@@ -54,19 +56,20 @@ const (
 	StatusInjected = "injected"
 )
 
-func NewInjector(kubeclient client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) *Injector {
+func NewInjector(kubeclient client.Client, config *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *Injector {
 	return &Injector{
 		kubeclient:    kubeclient,
-		cfg:           cfg,
+		cfg:           config,
 		ControllerCfg: controllerCfg,
+		Metrics:       metrics,
 	}
 }
 
 // Inject do pod template config inject
-func (i Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *v1.AdmissionResponse {
+func (i *Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *v1.AdmissionResponse {
 	var pod corev1.Pod
 
-	NewInjector(cli, cfg, controllerCfg)
+	i = NewInjector(cli, cfg, controllerCfg, metrics)
 
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		i.logger.Error(err, "Could not unmarshal raw object")
@@ -100,7 +103,7 @@ func (i Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *confi
 	if metrics != nil {
 		metrics.InjectRequired.WithLabelValues(res.Namespace, requiredKey).Inc()
 	}
-	injectionConfig, err := cfg.GetRequestedConfig(pod.Namespace, requiredKey)
+	injectionConfig, err := i.cfg.GetRequestedConfig(pod.Namespace, requiredKey)
 	if err != nil {
 		i.logger.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
 			injectionConfig)
@@ -129,7 +132,7 @@ func (i Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *confi
 		}
 	}
 
-	annotations := map[string]string{cfg.StatusAnnotationKey(): StatusInjected}
+	annotations := map[string]string{i.cfg.StatusAnnotationKey(): StatusInjected}
 
 	patchBytes, err := i.createPatch(&pod, injectionConfig, annotations)
 	if err != nil {

@@ -19,8 +19,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
@@ -30,13 +30,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/inject"
 )
 
-var log = ctrl.Log.WithName("inject-webhook")
-
-var i inject.Injector
-
 // +kubebuilder:webhook:path=/inject-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
 // PodInjector is pod template config injector
+
+var (
+	i   *inject.Injector
+	log logr.Logger
+)
+
 type PodInjector struct {
 	client        client.Client
 	decoder       *admission.Decoder
