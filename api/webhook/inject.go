@@ -32,6 +32,8 @@ import (
 
 var log = ctrl.Log.WithName("inject-webhook")
 
+var i inject.Injector
+
 // +kubebuilder:webhook:path=/inject-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
 // PodInjector is pod template config injector
@@ -55,7 +57,7 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 	log.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
-		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.ControllerCfg, v.Metrics),
+		AdmissionResponse: *i.Inject(&req.AdmissionRequest, v.client, v.Config, v.ControllerCfg, v.Metrics),
 	}
 }
 

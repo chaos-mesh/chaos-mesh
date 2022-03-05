@@ -29,7 +29,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	podselector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
@@ -43,29 +42,32 @@ var ignoredNamespaces = []string{
 }
 
 type Injector struct {
-	logger    logr.Logger
-	err       error
-	c         client.Client
-	cfg       *config.Config
-	ctrlerCfg *controllerCfg.ChaosControllerConfig
+	logger        logr.Logger
+	kubeclient    client.Client
+	cfg           *config.Config
+	ControllerCfg *controllerCfg.ChaosControllerConfig
+	Metrics       *metrics.ChaosControllerManagerMetricsCollector
 }
-
-var i Injector
 
 const (
 	// StatusInjected is the annotation value for /status that indicates an injection was already performed on this pod
 	StatusInjected = "injected"
 )
 
-// Inject do pod template config inject
-func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *v1.AdmissionResponse {
-	var pod corev1.Pod
-	i = Injector{
-		logger:    log.L(),
-		c:         cli,
-		cfg:       cfg,
-		ctrlerCfg: controllerCfg,
+func NewInjector(kubeclient client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) *Injector {
+	return &Injector{
+		kubeclient:    kubeclient,
+		cfg:           cfg,
+		ControllerCfg: controllerCfg,
 	}
+}
+
+// Inject do pod template config inject
+func (i Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *v1.AdmissionResponse {
+	var pod corev1.Pod
+
+	NewInjector(cli, cfg, controllerCfg)
+
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		i.logger.Error(err, "Could not unmarshal raw object")
 		return &v1.AdmissionResponse{
@@ -87,7 +89,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	i.logger.V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
 	i.logger.V(4).Info("Pod", "Pod", pod)
 
-	requiredKey, ok := injectRequired(&pod.ObjectMeta, i.c, i.cfg, i.ctrlerCfg)
+	requiredKey, ok := i.injectRequired(&pod.ObjectMeta, i.kubeclient, i.cfg, i.ControllerCfg)
 	if !ok {
 		i.logger.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
 		return &v1.AdmissionResponse{
@@ -109,8 +111,8 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	}
 
 	if injectionConfig.Selector != nil {
-		meet, err := podselector.CheckPodMeetSelector(context.Background(), i.c, pod, *injectionConfig.Selector,
-			i.ctrlerCfg.ClusterScoped, i.ctrlerCfg.TargetNamespace, i.ctrlerCfg.EnableFilterNamespace)
+		meet, err := podselector.CheckPodMeetSelector(context.Background(), i.kubeclient, pod, *injectionConfig.Selector,
+			i.ControllerCfg.ClusterScoped, i.ControllerCfg.TargetNamespace, i.ControllerCfg.EnableFilterNamespace)
 		if err != nil {
 			i.logger.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
 			return &v1.AdmissionResponse{
@@ -129,7 +131,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 
 	annotations := map[string]string{cfg.StatusAnnotationKey(): StatusInjected}
 
-	patchBytes, err := createPatch(&pod, injectionConfig, annotations)
+	patchBytes, err := i.createPatch(&pod, injectionConfig, annotations)
 	if err != nil {
 		return &v1.AdmissionResponse{
 			Result: &metav1.Status{
@@ -152,7 +154,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 }
 
 // Check whether the target resource need to be injected and return the required config name
-func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) (string, bool) {
+func (i Injector) injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) (string, bool) {
 	// skip special kubernetes system namespaces
 	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
@@ -182,7 +184,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 		return "", false
 	}
 
-	requiredConfig, ok := injectByPodRequired(metadata, cfg)
+	requiredConfig, ok := i.injectByPodRequired(metadata, cfg)
 	if ok {
 		i.logger.Info("Pod annotation requesting sidecar config",
 			"namespace", metadata.Namespace, "name", metadata.Name,
@@ -190,7 +192,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 		return requiredConfig, true
 	}
 
-	requiredConfig, ok = injectByNamespaceRequired(metadata, cli, cfg)
+	requiredConfig, ok = i.injectByNamespaceRequired(metadata, cli, cfg)
 	if ok {
 		i.logger.Info("Pod annotation requesting sidecar config",
 			"namespace", metadata.Namespace, "name", metadata.Name,
@@ -198,7 +200,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 		return requiredConfig, true
 	}
 
-	requiredConfig, ok = injectByNamespaceInitRequired(metadata, cli, cfg)
+	requiredConfig, ok = i.injectByNamespaceInitRequired(metadata, cli, cfg)
 	if ok {
 		i.logger.Info("Pod annotation init requesting sidecar config",
 			"namespace", metadata.Namespace, "name", metadata.Name,
@@ -223,7 +225,7 @@ func checkInjectStatus(metadata *metav1.ObjectMeta, cfg *config.Config) bool {
 	return false
 }
 
-func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+func (i Injector) injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	var ns corev1.Namespace
 	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
 		i.logger.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
@@ -246,7 +248,7 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 	return strings.ToLower(required), true
 }
 
-func injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+func (i Injector) injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	var ns corev1.Namespace
 	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
 		i.logger.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
@@ -270,7 +272,7 @@ func injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Clien
 	return strings.ToLower(required), true
 }
 
-func injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
+func (i Injector) injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
 		annotations = make(map[string]string)
@@ -289,7 +291,7 @@ func injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (strin
 }
 
 // create mutation patch for resource
-func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[string]string) ([]byte, error) {
+func (i Injector) createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
 	// make sure any injected containers in our config get the EnvVars and VolumeMounts injected
@@ -303,16 +305,16 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 	mutatedInjectedInitContainers = mergeVolumeMounts(inj.VolumeMounts, mutatedInjectedInitContainers)
 
 	// patch all existing containers with the env vars and volume mounts
-	patch = append(patch, setVolumeMounts(pod.Spec.Containers, inj.VolumeMounts, "/spec/containers")...)
+	patch = append(patch, i.setVolumeMounts(pod.Spec.Containers, inj.VolumeMounts, "/spec/containers")...)
 	// TODO: fix set env
 	// setEnvironment may not work, because we replace the whole container in `setVolumeMounts`
 	patch = append(patch, setEnvironment(pod.Spec.Containers, inj.Environment)...)
 
 	// patch containers with our injected containers
-	patch = append(patch, addContainers(pod.Spec.Containers, mutatedInjectedContainers, "/spec/containers")...)
+	patch = append(patch, i.addContainers(pod.Spec.Containers, mutatedInjectedContainers, "/spec/containers")...)
 
 	// add initContainers, hostAliases and volumes
-	patch = append(patch, addContainers(pod.Spec.InitContainers, mutatedInjectedInitContainers, "/spec/initContainers")...)
+	patch = append(patch, i.addContainers(pod.Spec.InitContainers, mutatedInjectedInitContainers, "/spec/initContainers")...)
 	patch = append(patch, addHostAliases(pod.Spec.HostAliases, inj.HostAliases, "/spec/hostAliases")...)
 	patch = append(patch, addVolumes(pod.Spec.Volumes, inj.Volumes, "/spec/volumes")...)
 
@@ -324,12 +326,12 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 
 	// TODO: remove injecting commands when sidecar container supported
 	// set commands and args
-	patch = append(patch, setCommands(pod.Spec.Containers, inj.PostStart)...)
+	patch = append(patch, i.setCommands(pod.Spec.Containers, inj.PostStart)...)
 
 	return json.Marshal(patch)
 }
 
-func setCommands(target []corev1.Container, postStart map[string]config.ExecAction) (patch []patchOperation) {
+func (i Injector) setCommands(target []corev1.Container, postStart map[string]config.ExecAction) (patch []patchOperation) {
 	if postStart == nil {
 		return
 	}
@@ -404,7 +406,7 @@ func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch 
 	return patch
 }
 
-func addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
+func (i Injector) addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
 	first := len(target) == 0
 	var value interface{}
 	for _, add := range added {
@@ -447,7 +449,7 @@ func addVolumes(target, added []corev1.Volume, basePath string) (patch []patchOp
 	return patch
 }
 
-func setVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount, basePath string) (patch []patchOperation) {
+func (i Injector) setVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount, basePath string) (patch []patchOperation) {
 	for index, c := range target {
 		volumeMounts := map[string]corev1.VolumeMount{}
 		for _, vm := range c.VolumeMounts {

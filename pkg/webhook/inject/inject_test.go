@@ -27,6 +27,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 )
 
+var i Injector
+
 var _ = Describe("webhook inject", func() {
 
 	Context("Inject", func() {
@@ -34,7 +36,7 @@ var _ = Describe("webhook inject", func() {
 			var testClient client.Client
 			var cfg *config.Config
 			var controllerCfg *controllerCfg.ChaosControllerConfig
-			res := Inject(&admissionv1.AdmissionRequest{}, testClient, cfg, controllerCfg, nil)
+			res := i.Inject(&admissionv1.AdmissionRequest{}, testClient, cfg, controllerCfg, nil)
 			Expect(res.Result.Message).To(ContainSubstring("unexpected end of JSON input"))
 		})
 	})
@@ -64,7 +66,7 @@ var _ = Describe("webhook inject", func() {
 			var metadata metav1.ObjectMeta
 			metadata.Annotations = make(map[string]string)
 			var cfg config.Config
-			str, flag := injectByPodRequired(&metadata, &cfg)
+			str, flag := i.injectByPodRequired(&metadata, &cfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -75,7 +77,7 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations["testNamespace/request"] = "test"
 			var cfg config.Config
 			cfg.AnnotationNamespace = "testNamespace"
-			str, flag := injectByPodRequired(&metadata, &cfg)
+			str, flag := i.injectByPodRequired(&metadata, &cfg)
 			Expect(str).To(Equal("test"))
 			Expect(flag).To(Equal(true))
 		})
@@ -89,7 +91,7 @@ var _ = Describe("webhook inject", func() {
 			var cli client.Client
 			var cfg config.Config
 			var controllerCfg controllerCfg.ChaosControllerConfig
-			str, flag := injectRequired(&metadata, cli, &cfg, &controllerCfg)
+			str, flag := i.injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -102,7 +104,7 @@ var _ = Describe("webhook inject", func() {
 			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
-			str, flag := injectRequired(&metadata, cli, &cfg, &controllerCfg)
+			str, flag := i.injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -115,7 +117,7 @@ var _ = Describe("webhook inject", func() {
 			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
-			str, flag := injectRequired(&metadata, cli, &cfg, &controllerCfg)
+			str, flag := i.injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -128,7 +130,7 @@ var _ = Describe("webhook inject", func() {
 			var cfg config.Config
 			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
-			str, flag := injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
+			str, flag := i.injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
 			Expect(str).To(Equal("test"))
 			Expect(flag).To(Equal(true))
 		})
@@ -138,7 +140,7 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			var cfg config.Config
 			var controllerCfg controllerCfg.ChaosControllerConfig
-			_, flag := injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
+			_, flag := i.injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
 			Expect(flag).To(Equal(false))
 		})
 	})
@@ -149,7 +151,7 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			metadata.Namespace = "testNamespace"
 			var cfg config.Config
-			str, flag := injectByNamespaceRequired(&metadata, k8sClient, &cfg)
+			str, flag := i.injectByNamespaceRequired(&metadata, k8sClient, &cfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -160,7 +162,7 @@ var _ = Describe("webhook inject", func() {
 			var pod corev1.Pod
 			var inj config.InjectionConfig
 			annotations := make(map[string]string)
-			_, err := createPatch(&pod, &inj, annotations)
+			_, err := i.createPatch(&pod, &inj, annotations)
 			Expect(err).To(BeNil())
 		})
 	})
@@ -172,7 +174,7 @@ var _ = Describe("webhook inject", func() {
 					Name: "testContainerName",
 				}}
 			postStart := make(map[string]config.ExecAction)
-			patch := setCommands(target, postStart)
+			patch := i.setCommands(target, postStart)
 			Expect(patch).To(BeNil())
 		})
 
@@ -186,7 +188,7 @@ var _ = Describe("webhook inject", func() {
 				Command: []string{"nil"},
 			}
 			postStart["testContainerName"] = ce
-			patch := setCommands(target, postStart)
+			patch := i.setCommands(target, postStart)
 			Expect(patch).ToNot(BeNil())
 		})
 	})
@@ -253,7 +255,7 @@ var _ = Describe("webhook inject", func() {
 					Name: "testContainerName",
 				}}
 			basePath := "/test"
-			patch := addContainers(target, added, basePath)
+			patch := i.addContainers(target, added, basePath)
 			Expect(patch).ToNot(BeNil())
 		})
 
@@ -264,7 +266,7 @@ var _ = Describe("webhook inject", func() {
 					Name: "testContainerName",
 				}}
 			basePath := "/test"
-			patch := addContainers(target, added, basePath)
+			patch := i.addContainers(target, added, basePath)
 			Expect(patch).ToNot(BeNil())
 		})
 	})
@@ -312,7 +314,7 @@ var _ = Describe("webhook inject", func() {
 					Name: "test",
 				}}
 			basePath := "/test"
-			patch := setVolumeMounts(target, added, basePath)
+			patch := i.setVolumeMounts(target, added, basePath)
 			Expect(patch).ToNot(BeNil())
 		})
 	})
