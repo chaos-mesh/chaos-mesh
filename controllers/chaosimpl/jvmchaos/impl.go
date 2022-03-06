@@ -44,7 +44,7 @@ CLASS {{.Class}}
 METHOD {{.Method}}
 AT ENTRY
 IF true
-DO 
+DO
 	{{.Do}};
 ENDRULE
 `
@@ -123,7 +123,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}()
 	}
 	if err != nil {
-		return v1alpha1.Injected, err
+		// Unable to find the container, so we are unable to remove the experiment from the jvm as it has gone
+		impl.Log.Error(err, "finding container")
+		return v1alpha1.NotInjected, nil
 	}
 
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
