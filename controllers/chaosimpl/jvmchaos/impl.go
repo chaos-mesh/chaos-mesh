@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/go-logr/logr"
@@ -122,10 +123,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			}
 		}()
 	}
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "container not found") {
 		// Unable to find the container, so we are unable to remove the experiment from the jvm as it has gone
 		impl.Log.Error(err, "finding container")
 		return v1alpha1.NotInjected, nil
+	}
+	if err != nil {
+		return v1alpha1.Injected, err
 	}
 
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
@@ -140,10 +144,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		Port:        jvmChaos.Spec.Port,
 		EnterNS:     true,
 	})
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "exit status 1") {
 		// Unable to uninstall the JVMRules, most likely because the jvm process has been restarted
-		impl.Log.Error(err, "uninstall jvm rules")
+		impl.Log.Error(err, "uninstall jvm rules (possible restart of jvm process)")
 		return v1alpha1.NotInjected, nil
+	}
+	if err != nil {
+		impl.Log.Error(err, "uninstall jvm rules")
+		return v1alpha1.Injected, err
 	}
 
 	return v1alpha1.NotInjected, nil
