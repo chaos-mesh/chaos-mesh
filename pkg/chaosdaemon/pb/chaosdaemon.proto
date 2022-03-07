@@ -125,7 +125,7 @@ message IPSet {
   string name = 1;
   repeated string cidrs = 2;
   repeated CidrAndPort cidr_and_ports = 3;
-  repeated string setNames = 4;
+  repeated string set_names = 4;
   string type = 5;
 }
 
