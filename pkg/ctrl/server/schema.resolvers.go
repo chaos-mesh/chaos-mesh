@@ -19,6 +19,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
+	podSelector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
@@ -456,6 +457,19 @@ func (r *loggerResolver) Pod(ctx context.Context, ns string, name string) (<-cha
 func (r *mistakeSpecResolver) Filling(ctx context.Context, obj *v1alpha1.MistakeSpec) (*string, error) {
 	filling := string(obj.Filling)
 	return &filling, nil
+}
+
+func (r *mutablePodResolver) KillProcesses(ctx context.Context, obj *model.MutablePod, pids []string) ([]*model.KillProcessResult, error) {
+	return r.Resolver.killProcess(ctx, obj.Pod, pids)
+}
+
+func (r *mutationResolver) Pod(ctx context.Context, ns string, name string) (*model.MutablePod, error) {
+	key := types.NamespacedName{Namespace: ns, Name: name}
+	pod := new(v1.Pod)
+	if err := r.Client.Get(ctx, key, pod); err != nil {
+		return nil, err
+	}
+	return &model.MutablePod{Pod: pod}, nil
 }
 
 func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error) {
@@ -1062,6 +1076,30 @@ func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Nam
 	return []*model.Namespace{{Ns: *ns}}, nil
 }
 
+func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error) {
+	spec := v1alpha1.PodSelectorSpec{
+		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+			Namespaces: selector.Namespaces,
+		},
+		Nodes:             selector.Nodes,
+		PodPhaseSelectors: selector.PodPhaseSelectors,
+	}
+	selectImpl := podSelector.New(podSelector.Params{
+		Client: r.Client,
+		Reader: r.Client,
+	})
+	pods, err := selectImpl.Select(ctx, &v1alpha1.PodSelector{Selector: spec, Mode: v1alpha1.AllMode})
+	if err != nil {
+		return nil, err
+	}
+	var list []*v1.Pod
+	for _, pod := range pods {
+		p := pod
+		list = append(list, &p.Pod)
+	}
+	return list, nil
+}
+
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
 	return string(obj.Direction), nil
 }
@@ -1187,6 +1225,12 @@ func (r *Resolver) Logger() generated.LoggerResolver { return &loggerResolver{r}
 // MistakeSpec returns generated.MistakeSpecResolver implementation.
 func (r *Resolver) MistakeSpec() generated.MistakeSpecResolver { return &mistakeSpecResolver{r} }
 
+// MutablePod returns generated.MutablePodResolver implementation.
+func (r *Resolver) MutablePod() generated.MutablePodResolver { return &mutablePodResolver{r} }
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Namespace returns generated.NamespaceResolver implementation.
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
 
@@ -1289,6 +1333,8 @@ type iOChaosStatusResolver struct{ *Resolver }
 type ioFaultResolver struct{ *Resolver }
 type loggerResolver struct{ *Resolver }
 type mistakeSpecResolver struct{ *Resolver }
+type mutablePodResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
 type networkChaosResolver struct{ *Resolver }
 type ownerReferenceResolver struct{ *Resolver }
