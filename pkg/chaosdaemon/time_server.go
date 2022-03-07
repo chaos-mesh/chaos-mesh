@@ -17,13 +17,15 @@ package chaosdaemon
 
 import (
 	"context"
+
+	"github.com/go-logr/logr"
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
+
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
-	"github.com/go-logr/logr"
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
 )
 
 type TimeChaosServer struct {

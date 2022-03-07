@@ -17,9 +17,11 @@ package extension
 
 import (
 	"fmt"
+
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
-	"github.com/pkg/errors"
 )
 
 type Config struct {

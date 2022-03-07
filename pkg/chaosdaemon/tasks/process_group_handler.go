@@ -16,11 +16,13 @@
 package tasks
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"strconv"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"strconv"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
 var ErrNotFoundChildProcess = chaoserr.NotFound("child process")

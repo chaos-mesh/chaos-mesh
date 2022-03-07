@@ -15,10 +15,12 @@
 package tasks
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"sync"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"sync"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
 var ErrNotFoundSysPID = chaoserr.NotFound("SysPID")

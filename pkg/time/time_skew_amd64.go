@@ -17,10 +17,12 @@ package time
 
 import (
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	"sync"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"sync"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 )
 
 // clockGettimeSkewFakeImage is the filename of fake image after compiling

@@ -17,11 +17,11 @@ package time
 
 import (
 	"bytes"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"runtime"
 
 	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
