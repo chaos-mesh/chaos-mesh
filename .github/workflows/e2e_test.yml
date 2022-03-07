@@ -6,7 +6,6 @@ on:
     branches:
       - master
       - release-*
-
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -44,6 +43,12 @@ jobs:
           path: ./e2e-test/image/e2e/bin
           retention-days: 7
   e2e-test-matrix:
+    # these permissions are required by generating test reports
+    # see https://github.com/dorny/test-reporter/issues/149#issuecomment-1004820190
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
     needs:
       - build-image
       - build-e2e-binary
