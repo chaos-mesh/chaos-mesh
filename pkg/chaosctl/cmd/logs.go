@@ -20,28 +20,32 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-logr/logr"
+	"github.com/hasura/go-graphql-client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 type logsOptions struct {
-	logger logr.Logger
-	tail   int64
-	node   string
+	tail int64
+	node string
 }
 
-func NewLogsCmd(logger logr.Logger) (*cobra.Command, error) {
-	o := &logsOptions{
-		logger: logger,
-	}
+type Component string
+
+const (
+	Manager   Component = "MANAGER"
+	Daemon    Component = "DAEMON"
+	Dashboard Component = "DASHBOARD"
+	DnsServer Component = "DNSSERVER"
+)
+
+func NewLogsCmd() (*cobra.Command, error) {
+	o := &logsOptions{}
 
 	logsCmd := &cobra.Command{
 		Use:   `logs [-t LINE]`,
@@ -62,8 +66,8 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "Number of lines of recent log")
-	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "Number of lines of recent log")
+	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "number of lines of recent log")
+	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "the node of target pods")
 	err := logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		clientset, err := cm.InitClientSet()
 		if err != nil {
@@ -79,39 +83,55 @@ Examples:
 
 // Run logs
 func (o *logsOptions) Run(args []string) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	c, err := cm.InitClientSet()
+	client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 	if err != nil {
-		o.logger.V(4).Info("failed to initialize clientset", "err", err)
-		return err
+		return errors.Wrap(err, "failed to initialize clientset")
 	}
+	defer cancel()
 
-	componentsNeeded := []string{"controller-manager", "chaos-daemon", "chaos-dashboard"}
+	componentsNeeded := []Component{Manager, Daemon, Dashboard, DnsServer}
 	for _, name := range componentsNeeded {
-		selectorSpec := v1alpha1.PodSelectorSpec{
-			GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-				LabelSelectors: map[string]string{"app.kubernetes.io/component": name},
-			},
-		}
-		if o.node != "" {
-			selectorSpec.Nodes = []string{o.node}
+		var query struct {
+			Namespace []struct {
+				Component []struct {
+					Name string
+					Spec struct {
+						NodeName string
+					}
+					Logs string
+				} `graphql:"component(component: $component)"`
+			} `graphql:"namespace(ns: $namespace)"`
 		}
 
-		// TODO: just use kubernetes native label selector
-		components, err := pod.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, false)
-		if err != nil {
-			return errors.Wrapf(err, "failed to SelectPods for component %s", name)
+		variables := map[string]interface{}{
+			"namespace": graphql.String(managerNamespace),
+			"component": name,
 		}
-		o.logger.V(4).Info("select pods for component", "component", name, "pods", components)
-		for _, comp := range components {
-			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, cm.Cyan)
-			comLog, err := cm.Log(comp, o.tail, c.KubeCli)
-			if err != nil {
-				cm.PrettyPrint(err.Error(), 1, cm.Red)
-			} else {
-				cm.PrettyPrint(comLog, 1, cm.NoColor)
+
+		err := client.QueryClient.Query(context.TODO(), &query, variables)
+		if err != nil {
+			return err
+		}
+
+		if len(query.Namespace) == 0 {
+			return fmt.Errorf("no namespace %s found", managerNamespace)
+		}
+
+		for _, component := range query.Namespace[0].Component {
+			if o.node != "" && component.Spec.NodeName != o.node {
+				// ignore component on this node
+				continue
 			}
+
+			logLines := strings.Split(component.Logs, "\n")
+			if o.tail > 0 {
+				if len(logLines) > int(o.tail) {
+					logLines = logLines[len(logLines)-int(o.tail)-1:]
+				}
+			}
+
+			cm.PrettyPrint(fmt.Sprintf("[%s]", component.Name), 0, cm.Cyan)
+			cm.PrettyPrint(strings.Join(logLines, "\n"), 1, cm.NoColor)
 		}
 	}
 	return nil
