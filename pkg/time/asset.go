@@ -106,11 +106,10 @@ func LoadFakeImageFromEmbedFs(filename string, symbolName string, logger logr.Lo
 			break
 		}
 	}
-	result := NewFakeImage(
+	return NewFakeImage(
 		symbolName,
 		imageContent,
 		imageOffset,
 		logger,
-	)
-	return result, nil
+	), nil
 }
