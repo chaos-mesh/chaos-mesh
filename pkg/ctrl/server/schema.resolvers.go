@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -1078,18 +1079,61 @@ func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Nam
 
 func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error) {
 	spec := v1alpha1.PodSelectorSpec{
-		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-			Namespaces: selector.Namespaces,
-		},
+		Pods:              map[string][]string{},
+		NodeSelectors:     map[string]string{},
 		Nodes:             selector.Nodes,
 		PodPhaseSelectors: selector.PodPhaseSelectors,
+		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+			Namespaces:          selector.Namespaces,
+			FieldSelectors:      map[string]string{},
+			LabelSelectors:      map[string]string{},
+			AnnotationSelectors: map[string]string{},
+		},
 	}
+
+	for ns, p := range selector.Pods {
+		if pod, ok := p.(string); ok {
+			spec.Pods[ns] = []string{pod}
+		}
+
+		if pods, ok := p.([]string); ok {
+			spec.Pods[ns] = pods
+		}
+	}
+
+	for k, s := range selector.NodeSelectors {
+		if selector, ok := s.(string); ok {
+			spec.NodeSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.FieldSelectors {
+		if selector, ok := s.(string); ok {
+			spec.FieldSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.LabelSelectors {
+		if selector, ok := s.(string); ok {
+			spec.LabelSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.AnnotationSelectors {
+		if selector, ok := s.(string); ok {
+			spec.AnnotationSelectors[k] = selector
+		}
+	}
+
 	selectImpl := podSelector.New(podSelector.Params{
 		Client: r.Client,
 		Reader: r.Client,
 	})
 	pods, err := selectImpl.Select(ctx, &v1alpha1.PodSelector{Selector: spec, Mode: v1alpha1.AllMode})
 	if err != nil {
+		if errors.Is(err, podSelector.NoPodSelectedError) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	var list []*v1.Pod
