@@ -13,30 +13,21 @@
 // limitations under the License.
 //
 
-package common
+package debug
 
 import (
-	"github.com/go-logr/logr"
-	"k8s.io/klog/v2"
-	"k8s.io/klog/v2/klogr"
+	"context"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type LoggerFlushFunc func()
+type Debugger interface {
+	// Collect collect debug information of chaos
+	Collect(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error)
 
-func NewStderrLogger() (logr.Logger, LoggerFlushFunc, error) {
-	logger := klogr.New()
-	return logger, klog.Flush, nil
+	// List chaos names to collect
+	List(ctx context.Context, namespace string) ([]string, error)
 }
 
-var globalLogger logr.Logger
-
-func SetupGlobalLogger(logger logr.Logger) {
-	globalLogger = logger
-}
-
-func L() logr.Logger {
-	if globalLogger.GetSink() == nil {
-		panic("global logger not initialized")
-	}
-	return globalLogger
-}
+type Debug func(client *ctrlclient.CtrlClient) Debugger
