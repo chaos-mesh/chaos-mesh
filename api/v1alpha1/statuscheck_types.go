@@ -68,7 +68,7 @@ type StatusCheckSpec struct {
 	Type StatusCheckType `json:"type"`
 
 	// Duration defines the duration of the whole status check if the
-	// execution is always successful.
+	// number of failed execution does not exceed the failure threshold.
 	// Duration is available to both `Synchronous` and `Continuous` mode.
 	// A duration string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
@@ -182,7 +182,7 @@ type EmbedStatusCheck struct {
 type HTTPCriteria struct {
 	// StatusCode defines the expected http status code for the request.
 	// A statusCode string could be a single code (e.g. 200), or
-	// a inclusive range (e.g. 200-400, both `200` and `400` are included).
+	// an inclusive range (e.g. 200-400, both `200` and `400` are included).
 	StatusCode string `json:"statusCode" webhook:"StatusCode"`
 	// TODO: support response body
 }
