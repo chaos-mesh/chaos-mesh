@@ -21,7 +21,6 @@ ARG TARGET_PLATFORM=amd64
 # install byteman and set env
 RUN curl -L https://github.com/chaos-mesh/byteman/releases/download/4.0.14-cm/byteman.tar.gz -o /usr/local/bin/byteman.tar.gz
 RUN tar xvf /usr/local/bin/byteman.tar.gz -C /usr/local
-RUN rm /usr/local/bin/byteman.tar.gz
 
 ENV BYTEMAN_HOME /usr/local/byteman
 ENV PATH $PATH:/usr/local/byteman/bin
