@@ -43,6 +43,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
@@ -89,9 +90,12 @@ var _ = BeforeSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(k8sClient).ToNot(BeNil())
 
+	rootLogger, err := log.NewDefaultZapLogger()
+	Expect(err).ToNot(HaveOccurred())
 	By("start application")
 	app = fx.New(
 		fx.Options(
+			fx.Supply(rootLogger),
 			test.Module,
 			chaosimpl.AllImpl,
 			selector.Module,
