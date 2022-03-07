@@ -178,7 +178,7 @@ const NewWorkflow = () => {
     }
 
     api.workflows
-      .workflowsNewPost({
+      .workflowsPost({
         request: yaml.load(workflow) as any,
       })
       .then(() => {

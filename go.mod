@@ -232,7 +232,7 @@ require (
 
 replace (
 	github.com/chaos-mesh/chaos-mesh/api => ./api
-  github.com/swaggo/swag => github.com/pytimer/swag v1.7.9-0.20220125013646-8a5cb7b5fc19
+	github.com/swaggo/swag => github.com/pytimer/swag v1.7.9-0.20220125013646-8a5cb7b5fc19
 	k8s.io/api => k8s.io/api v0.23.1
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.1
 	k8s.io/apimachinery => k8s.io/apimachinery v0.23.1

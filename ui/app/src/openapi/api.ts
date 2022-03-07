@@ -11083,16 +11083,19 @@ export const WorkflowsApiAxiosParamCreator = function (configuration?: Configura
       }
     },
     /**
-     * Create a new workflow.
-     * @summary Create a new workflow.
-     * @param {V1alpha1Workflow} request Request body
+     * Parse the rendered task back to the original request
+     * @summary Parse the rendered task back to the original request
+     * @param {V1alpha1Template} request Rendered Task
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsNewPost: async (request: V1alpha1Workflow, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+    workflowsParseTaskHttpPost: async (
+      request: V1alpha1Template,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
       // verify required parameter 'request' is not null or undefined
-      assertParamExists('workflowsNewPost', 'request', request)
-      const localVarPath = `/workflows/new`
+      assertParamExists('workflowsParseTaskHttpPost', 'request', request)
+      const localVarPath = `/workflows/parse-task/http`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -11117,19 +11120,16 @@ export const WorkflowsApiAxiosParamCreator = function (configuration?: Configura
       }
     },
     /**
-     * Parse the rendered task back to the original request
-     * @summary Parse the rendered task back to the original request
-     * @param {V1alpha1Template} request Rendered Task
+     * Create a new workflow.
+     * @summary Create a new workflow.
+     * @param {V1alpha1Workflow} request Request body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsParseTaskHttpPost: async (
-      request: V1alpha1Template,
-      options: AxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
+    workflowsPost: async (request: V1alpha1Workflow, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
       // verify required parameter 'request' is not null or undefined
-      assertParamExists('workflowsParseTaskHttpPost', 'request', request)
-      const localVarPath = `/workflows/parse-task/http`
+      assertParamExists('workflowsPost', 'request', request)
+      const localVarPath = `/workflows`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -11357,20 +11357,6 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
     /**
-     * Create a new workflow.
-     * @summary Create a new workflow.
-     * @param {V1alpha1Workflow} request Request body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async workflowsNewPost(
-      request: V1alpha1Workflow,
-      options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CoreWorkflowDetail>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsNewPost(request, options)
-      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
-    },
-    /**
      * Parse the rendered task back to the original request
      * @summary Parse the rendered task back to the original request
      * @param {V1alpha1Template} request Rendered Task
@@ -11382,6 +11368,20 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       options?: AxiosRequestConfig
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CurlRequestForm>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsParseTaskHttpPost(request, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Create a new workflow.
+     * @summary Create a new workflow.
+     * @param {V1alpha1Workflow} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async workflowsPost(
+      request: V1alpha1Workflow,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CoreWorkflowDetail>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
     /**
@@ -11487,16 +11487,6 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
       return localVarFp.workflowsGet(namespace, status, options).then((request) => request(axios, basePath))
     },
     /**
-     * Create a new workflow.
-     * @summary Create a new workflow.
-     * @param {V1alpha1Workflow} request Request body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    workflowsNewPost(request: V1alpha1Workflow, options?: any): AxiosPromise<CoreWorkflowDetail> {
-      return localVarFp.workflowsNewPost(request, options).then((request) => request(axios, basePath))
-    },
-    /**
      * Parse the rendered task back to the original request
      * @summary Parse the rendered task back to the original request
      * @param {V1alpha1Template} request Rendered Task
@@ -11505,6 +11495,16 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
      */
     workflowsParseTaskHttpPost(request: V1alpha1Template, options?: any): AxiosPromise<CurlRequestForm> {
       return localVarFp.workflowsParseTaskHttpPost(request, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Create a new workflow.
+     * @summary Create a new workflow.
+     * @param {V1alpha1Workflow} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    workflowsPost(request: V1alpha1Workflow, options?: any): AxiosPromise<CoreWorkflowDetail> {
+      return localVarFp.workflowsPost(request, options).then((request) => request(axios, basePath))
     },
     /**
      * Render a task which sends HTTP request
@@ -11585,20 +11585,6 @@ export interface WorkflowsApiWorkflowsGetRequest {
 }
 
 /**
- * Request parameters for workflowsNewPost operation in WorkflowsApi.
- * @export
- * @interface WorkflowsApiWorkflowsNewPostRequest
- */
-export interface WorkflowsApiWorkflowsNewPostRequest {
-  /**
-   * Request body
-   * @type {V1alpha1Workflow}
-   * @memberof WorkflowsApiWorkflowsNewPost
-   */
-  readonly request: V1alpha1Workflow
-}
-
-/**
  * Request parameters for workflowsParseTaskHttpPost operation in WorkflowsApi.
  * @export
  * @interface WorkflowsApiWorkflowsParseTaskHttpPostRequest
@@ -11610,6 +11596,20 @@ export interface WorkflowsApiWorkflowsParseTaskHttpPostRequest {
    * @memberof WorkflowsApiWorkflowsParseTaskHttpPost
    */
   readonly request: V1alpha1Template
+}
+
+/**
+ * Request parameters for workflowsPost operation in WorkflowsApi.
+ * @export
+ * @interface WorkflowsApiWorkflowsPostRequest
+ */
+export interface WorkflowsApiWorkflowsPostRequest {
+  /**
+   * Request body
+   * @type {V1alpha1Workflow}
+   * @memberof WorkflowsApiWorkflowsPost
+   */
+  readonly request: V1alpha1Workflow
 }
 
 /**
@@ -11711,20 +11711,6 @@ export class WorkflowsApi extends BaseAPI {
   }
 
   /**
-   * Create a new workflow.
-   * @summary Create a new workflow.
-   * @param {WorkflowsApiWorkflowsNewPostRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof WorkflowsApi
-   */
-  public workflowsNewPost(requestParameters: WorkflowsApiWorkflowsNewPostRequest, options?: AxiosRequestConfig) {
-    return WorkflowsApiFp(this.configuration)
-      .workflowsNewPost(requestParameters.request, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
    * Parse the rendered task back to the original request
    * @summary Parse the rendered task back to the original request
    * @param {WorkflowsApiWorkflowsParseTaskHttpPostRequest} requestParameters Request parameters.
@@ -11738,6 +11724,20 @@ export class WorkflowsApi extends BaseAPI {
   ) {
     return WorkflowsApiFp(this.configuration)
       .workflowsParseTaskHttpPost(requestParameters.request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Create a new workflow.
+   * @summary Create a new workflow.
+   * @param {WorkflowsApiWorkflowsPostRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WorkflowsApi
+   */
+  public workflowsPost(requestParameters: WorkflowsApiWorkflowsPostRequest, options?: AxiosRequestConfig) {
+    return WorkflowsApiFp(this.configuration)
+      .workflowsPost(requestParameters.request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
