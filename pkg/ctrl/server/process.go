@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package graph
+package server
 
 import (
 	"context"
@@ -22,13 +22,14 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 // GetPidFromPS returns pid-command pairs
 func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]*model.Process, error) {
 	cmd := "ps"
-	out, err := r.ExecBypass(ctx, pod, cmd)
+	out, err := r.ExecBypass(ctx, pod, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return nil, errors.Wrapf(err, "run command %s failed", cmd)
 	}
