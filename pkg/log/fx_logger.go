@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,26 @@
 // limitations under the License.
 //
 
-package test
+package log
 
 import (
-	"go.uber.org/fx"
+	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
+	"github.com/go-logr/logr"
 )
 
-var Module = fx.Provide(
-	provider.NewOption,
-	provider.NewClient,
-	provider.NewAuthCli,
-	provider.NewScheme,
-	provider.NewNoCacheReader,
-	provider.NewGlobalCacheReader,
-	provider.NewControlPlaneCacheReader,
-	manager.NewTestManager,
-	recorder.NewRecorderBuilder,
-)
+type LogrPrinter struct {
+	logger logr.Logger
+}
+
+func NewLogrPrinter(logger logr.Logger) *LogrPrinter {
+	return &LogrPrinter{logger: logger}
+}
+
+func (it *LogrPrinter) Printf(s string, i ...interface{}) {
+	it.logger.
+		// Here are 2 level wrapper for this logger, one is LogrPrinter, another is fxlog.Logger,
+		// so we use 2 here. It's a little tricky but would make fx logging better.
+		WithCallDepth(2).
+		Info(fmt.Sprintf(s, i...))
+}
