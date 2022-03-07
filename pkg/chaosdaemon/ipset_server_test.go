@@ -212,31 +212,22 @@ exit 1
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
 				Ipsets: []*pb.IPSet{
 					{
-						Name: "ipset-set-name",
-						Content: &pb.IPSet_Set{
-							Set: &pb.SetIPSetContent{
-								SetNames: []string{"set-1", "set-2"},
-							},
-						},
+						Name:     "ipset-set-name",
+						Type:     "list:set",
+						SetNames: []string{"set-1", "set-2"},
 					},
 					{
-						Name: "ipset-net-name",
-						Content: &pb.IPSet_Net{
-							Net: &pb.NetIPSetContent{
-								Cidrs: []string{"0.0.0.0/24"},
-							},
-						},
+						Name:  "ipset-net-name",
+						Type:  "hash:net",
+						Cidrs: []string{"0.0.0.0/24"},
 					},
 					{
 						Name: "ipset-net-port-name",
-						Content: &pb.IPSet_NetPort{
-							NetPort: &pb.NetPortIPSetContent{
-								CidrAndPorts: []*pb.CidrAndPort{{
-									Cidr: "1.1.1.1/32",
-									Port: 80,
-								}},
-							},
-						},
+						Type: "hash:net,port",
+						CidrAndPorts: []*pb.CidrAndPort{{
+							Cidr: "1.1.1.1/32",
+							Port: 80,
+						}},
 					},
 				},
 				ContainerId: "containerd://container-id",
@@ -250,18 +241,27 @@ exit 1
 			defer mock.With("TaskError", errors.New(errorStr))()
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
 				Ipsets: []*pb.IPSet{{
-					Name: "ipset-name",
-					Content: &pb.IPSet_Set{
-						Set: &pb.SetIPSetContent{
-							SetNames: []string{"set-1", "set-2"},
-						},
-					},
+					Name:     "ipset-name",
+					SetNames: []string{"set-1", "set-2"},
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(errorStr))
+		})
+
+		It("should fail on unknown type", func() {
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
+					Name: "ipset-name",
+					Type: "foo:bar",
+				}},
+				ContainerId: "containerd://container-id",
+				EnterNS:     true,
+			})
+			Expect(err).ToNot(BeNil())
+			Expect(err.Error()).To(Equal("unexpected IP set type: foo:bar"))
 		})
 	})
 })

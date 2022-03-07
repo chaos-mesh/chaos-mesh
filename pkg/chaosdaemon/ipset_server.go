@@ -32,14 +32,10 @@ const (
 	ipsetExistErr        = "set with the same name already exists"
 	ipExistErr           = "it's already added"
 	ipsetNewNameExistErr = "a set with the new name already exists"
-)
 
-type IPSetType string
-
-const (
-	SetIPSet     IPSetType = "list:set"
-	NetPortIPSet IPSetType = "hash:net,port"
-	NetIPSet     IPSetType = "hash:net"
+	SetIPSet     = "list:set"
+	NetPortIPSet = "hash:net,port"
+	NetIPSet     = "hash:net"
 )
 
 func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
@@ -79,21 +75,20 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 	// If the IP set already exists, it will be renamed to this temp name.
 	tmpName := fmt.Sprintf("%sold", name)
 
-	var ipSetType IPSetType
+	ipSetType := set.Type
 	var values []string
 
-	switch content := set.Content.(type) {
-	case *pb.IPSet_Set:
-		ipSetType = SetIPSet
-		values = content.Set.SetNames
-	case *pb.IPSet_Net:
-		ipSetType = NetIPSet
-		values = content.Net.Cidrs
-	case *pb.IPSet_NetPort:
-		ipSetType = NetPortIPSet
-		for _, cidrAndPort := range content.NetPort.CidrAndPorts {
+	switch ipSetType {
+	case SetIPSet:
+		values = set.SetNames
+	case NetIPSet:
+		values = set.Cidrs
+	case NetPortIPSet:
+		for _, cidrAndPort := range set.CidrAndPorts {
 			values = append(values, fmt.Sprintf("%s,%d", cidrAndPort.Cidr, cidrAndPort.Port))
 		}
+	default:
+		return fmt.Errorf("unexpected IP set type: %s", ipSetType)
 	}
 
 	// IP sets can't be deleted if there are iptables rules referencing them.
@@ -115,13 +110,13 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 	return err
 }
 
-func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, ipSetType IPSetType) error {
+func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, ipSetType string) error {
 	// ipset name cannot be longer than 31 bytes
 	if len(name) > 31 {
 		name = name[:31]
 	}
 
-	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, string(ipSetType)).SetContext(ctx)
+	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, ipSetType).SetContext(ctx)
 	if enterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}

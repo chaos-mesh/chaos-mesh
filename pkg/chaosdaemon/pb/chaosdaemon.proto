@@ -123,23 +123,10 @@ message IPSetsRequest {
 
 message IPSet {
   string name = 1;
-  oneof content {
-    SetIPSetContent set = 3;
-    NetIPSetContent net = 4;
-    NetPortIPSetContent net_port = 5;
-  }
-}
-
-message SetIPSetContent {
-  repeated string setNames = 1;
-}
-
-message NetIPSetContent {
-  repeated string cidrs = 1;
-}
-
-message NetPortIPSetContent {
-  repeated CidrAndPort cidr_and_ports = 1;
+  repeated string cidrs = 2;
+  repeated CidrAndPort cidr_and_ports = 3;
+  repeated string setNames = 4;
+  string type = 5;
 }
 
 message CidrAndPort {
