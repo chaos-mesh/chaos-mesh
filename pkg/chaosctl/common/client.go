@@ -16,27 +16,17 @@
 package common
 
 import (
-	"github.com/go-logr/logr"
-	"k8s.io/klog/v2"
-	"k8s.io/klog/v2/klogr"
+	"context"
+	"fmt"
+
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type LoggerFlushFunc func()
-
-func NewStderrLogger() (logr.Logger, LoggerFlushFunc, error) {
-	logger := klogr.New()
-	return logger, klog.Flush, nil
-}
-
-var globalLogger logr.Logger
-
-func SetupGlobalLogger(logger logr.Logger) {
-	globalLogger = logger
-}
-
-func L() logr.Logger {
-	if globalLogger.GetSink() == nil {
-		panic("global logger not initialized")
+func CreateClient(ctx context.Context, managerNamespace, managerSvc string) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
+	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, managerNamespace, managerSvc)
+	if err != nil {
+		return nil, nil, err
 	}
-	return globalLogger
+
+	return ctrlclient.NewCtrlClient(fmt.Sprintf("http://127.0.0.1:%d/query", port)), cancel, nil
 }

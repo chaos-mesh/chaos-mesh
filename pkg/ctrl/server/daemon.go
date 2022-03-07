@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package graph
+package server
 
 import (
 	"context"

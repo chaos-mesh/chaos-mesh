@@ -13,28 +13,30 @@
 // limitations under the License.
 //
 
-package graph
+package server
 
 import (
 	"context"
 
 	v1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
 // GetIpset returns result of ipset list
 func (r *Resolver) GetIpset(ctx context.Context, obj *v1.Pod) (string, error) {
 	cmd := "ipset list"
-	return r.ExecBypass(ctx, obj, cmd)
+	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
 }
 
 // GetIpset returns result of tc qdisc list
 func (r *Resolver) GetTcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
 	cmd := "tc qdisc list"
-	return r.ExecBypass(ctx, obj, cmd)
+	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
 }
 
 // GetIptables returns result of iptables --list
 func (r *Resolver) GetIptables(ctx context.Context, obj *v1.Pod) (string, error) {
 	cmd := "iptables --list"
-	return r.ExecBypass(ctx, obj, cmd)
+	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
 }
