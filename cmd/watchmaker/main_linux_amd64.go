@@ -18,13 +18,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"os"
 	"strings"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"

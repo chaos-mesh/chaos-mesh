@@ -16,8 +16,9 @@
 package tasks
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
 type PID interface {
