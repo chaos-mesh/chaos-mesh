@@ -141,8 +141,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		EnterNS:     true,
 	})
 	if err != nil {
+		// Unable to uninstall the JVMRules, most likely because the jvm process has been restarted
 		impl.Log.Error(err, "uninstall jvm rules")
-		return v1alpha1.Injected, err
+		return v1alpha1.NotInjected, nil
 	}
 
 	return v1alpha1.NotInjected, nil
