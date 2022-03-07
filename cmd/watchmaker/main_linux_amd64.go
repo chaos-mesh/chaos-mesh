@@ -18,6 +18,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"os"
 	"strings"
 
@@ -49,6 +50,8 @@ func initFlag() {
 }
 
 func main() {
+	fmt.Println("Watchmaker will not support recovery function in future," +
+		" please use time attack in chaosd.")
 	initFlag()
 
 	version.PrintVersionInfo("watchmaker")
@@ -73,7 +76,13 @@ func main() {
 	}
 	log.Info("get clock ids mask", "mask", mask)
 
-	err = time.ModifyTime(pid, secDelta, nsecDelta, mask)
+	s, err := time.GetSkew()
+	if err != nil {
+		log.Error(err, "error while GetSkew")
+		os.Exit(1)
+	}
+	s.SkewConfig = time.NewConfig(secDelta, nsecDelta, mask)
+	err = s.Inject(tasks.SysPID(pid))
 
 	if err != nil {
 		log.Error(err, "error while modifying time", "pid", pid, "secDelta", secDelta, "nsecDelta", nsecDelta, "mask", mask)
