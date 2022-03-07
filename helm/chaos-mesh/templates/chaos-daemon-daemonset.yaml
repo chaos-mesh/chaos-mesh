@@ -81,7 +81,7 @@ spec:
             - /etc/chaos-daemon/cert/tls.key
           {{- end }}
           env:
-            {{- include "chaos-mesh.helpers.list-env-variables" .Values.chaosDaemon | indent 12 }}
+            {{- include "chaos-mesh.helpers.list-env-vars" .Values.chaosDaemon | indent 12 }}
             {{- if not .Values.chaosDaemon.env.TZ }}
             - name: TZ
               value: {{ .Values.timezone | default "UTC" }}

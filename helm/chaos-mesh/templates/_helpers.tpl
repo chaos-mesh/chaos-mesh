@@ -1,16 +1,20 @@
 {{/* vim: set filetype=mustache: */}}
 
 {{/*
-Handle all env variables.
+Handle env variables.
+
+TODO: in the future, we would like to use the k8s-like format for defining environment variables.
+So the `envFollowKubernetesPattern` will become to `env`.
+And the original way of writing env will be removed.
+Ref: https://github.com/chaos-mesh/chaos-mesh/pull/2955.
 */}}
-{{- define "chaos-mesh.helpers.list-env-variables" -}}
+{{- define "chaos-mesh.helpers.list-env-vars" -}}
+{{- with .envFollowKubernetesPattern }}
+{{ toYaml . }}
+{{- end }}
 {{- range $key, $val := .env }}
 - name: {{ $key | upper }}
-  {{- if kindIs "map" $val }}
-  {{- $val | toYaml | nindent 2 }}
-  {{- else }}
   value: {{ $val | quote }}
-  {{- end }}
 {{- end }}
 {{- end }}
 
