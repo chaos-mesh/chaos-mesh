@@ -45,10 +45,7 @@ jobs:
   e2e-test-matrix:
     # these permissions are required by generating test reports
     # see https://github.com/dorny/test-reporter/issues/149#issuecomment-1004820190
-    permissions:
-      id-token: write
-      contents: read
-      checks: write
+    permissions: write-all
     needs:
       - build-image
       - build-e2e-binary
