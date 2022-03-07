@@ -15745,11 +15745,12 @@ spec:
             properties:
               duration:
                 description: Duration defines the duration of the whole status check
-                  if the execution is always successful. Duration is available to
-                  both `Synchronous` and `Continuous` mode. A duration string is a
-                  possibly signed sequence of decimal numbers, each with optional
-                  fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
-                  Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                  if the number of failed execution does not exceed the failure threshold.
+                  Duration is available to both `Synchronous` and `Continuous` mode.
+                  A duration string is a possibly signed sequence of decimal numbers,
+                  each with optional fraction and a unit suffix, such as "300ms",
+                  "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
+                  "s", "m", "h".
                 type: string
               failureThreshold:
                 default: 3
@@ -15768,7 +15769,7 @@ spec:
                       statusCode:
                         description: StatusCode defines the expected http status code
                           for the request. A statusCode string could be a single code
-                          (e.g. 200), or a inclusive range (e.g. 200-400, both `200`
+                          (e.g. 200), or an inclusive range (e.g. 200-400, both `200`
                           and `400` are included).
                         type: string
                     required:
