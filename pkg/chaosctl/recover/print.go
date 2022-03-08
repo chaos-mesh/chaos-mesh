@@ -24,7 +24,3 @@ func printRecover(line string) {
 func printStep(line string) {
 	common.PrettyPrint("> "+line, 1, common.Green)
 }
-
-func printError(line string) {
-	common.PrettyPrint(line, 2, common.Red)
-}

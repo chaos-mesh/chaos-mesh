@@ -65,17 +65,17 @@ func (r *httpRecover) Recover(ctx context.Context, namespace, podName string) er
 	pod := query.Namespace[0].Pod[0]
 	printRecover(fmt.Sprintf("recovering HTTPChaos from pod %s/%s", pod.Namespace, pod.Name))
 
-	var pids []string
+	var pids []graphql.String
 	for _, process := range pod.Processes {
 		if process.Command == "tproxy" {
-			pids = append(pids, process.Pid)
+			pids = append(pids, graphql.String(process.Pid))
 		}
 	}
 
 	if len(pids) == 0 {
 		printStep("all tproxy processes are cleaned up")
 	} else {
-		printStep("cleaning tproxy processes: " + strings.Join(pids, ", "))
+		printStep(fmt.Sprintf("cleaning tproxy processes: %v", pids))
 	}
 
 	var mutation struct {
@@ -83,7 +83,7 @@ func (r *httpRecover) Recover(ctx context.Context, namespace, podName string) er
 			KillProcesses []struct {
 				Pid, Command string
 			} `graphql:"killProcesses(pids: $pids)"`
-		} `graphql:"pod(ns: $namespace, name: $name)"`
+		} `graphql:"pod(ns: $ns, name: $name)"`
 	}
 
 	err = r.client.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
@@ -93,7 +93,7 @@ func (r *httpRecover) Recover(ctx context.Context, namespace, podName string) er
 	})
 
 	if err != nil {
-		return errors.Wrapf(err, "kill tproxy processes(%s)", strings.Join(pids, ", "))
+		return errors.Wrapf(err, "kill tproxy processes(%v)", pids)
 	}
 
 	if len(mutation.Pod.KillProcesses) != 0 {
@@ -101,7 +101,7 @@ func (r *httpRecover) Recover(ctx context.Context, namespace, podName string) er
 		for _, process := range mutation.Pod.KillProcesses {
 			cleanedPids = append(cleanedPids, process.Pid)
 		}
-		printStep("tproxy processes(%s) are cleaned up" + strings.Join(cleanedPids, ", "))
+		printStep(fmt.Sprintf("tproxy processes(%s) are cleaned up", strings.Join(cleanedPids, ", ")))
 	}
 
 	return nil
