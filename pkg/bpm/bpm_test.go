@@ -17,9 +17,10 @@ package bpm
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"math/rand"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

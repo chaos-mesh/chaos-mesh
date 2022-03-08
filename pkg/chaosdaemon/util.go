@@ -17,11 +17,12 @@ package chaosdaemon
 
 import (
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"sync"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )

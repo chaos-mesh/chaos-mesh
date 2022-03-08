@@ -18,8 +18,10 @@ package tc
 import (
 	"context"
 	"fmt"
-	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
+
 	v1 "k8s.io/api/core/v1"
+
+	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 

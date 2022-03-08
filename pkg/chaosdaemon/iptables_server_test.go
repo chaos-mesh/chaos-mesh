@@ -18,10 +18,11 @@ package chaosdaemon
 import (
 	"context"
 	"errors"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

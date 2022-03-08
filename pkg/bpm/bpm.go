@@ -18,13 +18,15 @@ package bpm
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
-	"github.com/go-logr/logr"
 	"io"
 	"os"
 	"os/exec"
 	"sync"
 	"syscall"
+
+	"github.com/go-logr/logr"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/shirou/gopsutil/process"
 )
