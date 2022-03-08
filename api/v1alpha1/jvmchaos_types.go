@@ -63,17 +63,15 @@ const (
 
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
+	JVMCommonSpec
+
+	JVMClassMethodSpec
+
+	JVMStressCfgSpec
+
 	// +optional
 	// byteman rule name, should be unique, and will use JVMChaos' name if not set
 	Name string `json:"name"`
-
-	// +optional
-	// Java class
-	Class string `json:"class"`
-
-	// +optional
-	// the method in Java class
-	Method string `json:"method"`
 
 	// +optional
 	// the return value for action 'return'
@@ -88,19 +86,39 @@ type JVMParameter struct {
 	LatencyDuration int `json:"latency"`
 
 	// +optional
+	RuleData string `json:"ruleData"`
+}
+
+// JVMCommonSpec is the common specification for JVMChaos
+type JVMCommonSpec struct {
+	// +optional
+	// the port of agent server, default 9277
+	Port int32 `json:"port,omitempty"`
+
+	// the pid of Java process which need to attach
+	Pid int `json:"pid,omitempty"`
+}
+
+// JVMClassMethodSpec is the specification for class and method
+type JVMClassMethodSpec struct {
+	// +optional
+	// Java class
+	Class string `json:"class,omitempty"`
+
+	// +optional
+	// the method in Java class
+	Method string `json:"method,omitempty"`
+}
+
+// JVMStressSpec is the specification for stress
+type JVMStressCfgSpec struct {
+	// +optional
 	// the CPU core number need to use, only set it when action is stress
-	CPUCount int `json:"cpuCount"`
+	CPUCount int `json:"cpu-count,omitempty"`
 
 	// +optional
 	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
-	MemoryType string `json:"memType"`
-
-	// +optional
-	// the port of agent server, default 9277
-	Port int32 `json:"port"`
-
-	// +optional
-	RuleData string `json:"ruleData"`
+	MemoryType string `json:"mem-type,omitempty"`
 }
 
 // JVMChaosStatus defines the observed state of JVMChaos
