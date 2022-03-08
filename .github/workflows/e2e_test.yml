@@ -136,14 +136,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: test-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"
           retention-days: 7
-      - name: build test report
-        if: success() || failure()
-        uses: dorny/test-reporter@v1
-        with:
-          name: "E2E Tests: Focus ${{ matrix.focus }} on Kubernetes ${{ matrix.kubernetes-version }}"
-          path: "**/*.xml"
-          reporter: java-junit
-
