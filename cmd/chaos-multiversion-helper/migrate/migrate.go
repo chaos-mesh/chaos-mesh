@@ -16,7 +16,10 @@
 package migrate
 
 import (
+	"fmt"
+	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"log"
 	"os"
@@ -89,6 +92,10 @@ func run() error {
 	return nil
 }
 
+func quote(s string) string {
+	return fmt.Sprintf("%q", s)
+}
+
 func migrateFile(path string) error {
 	fileSet := token.NewFileSet()
 
@@ -99,16 +106,37 @@ func migrateFile(path string) error {
 
 	needMigrate := false
 	for _, imp := range fileAst.Imports {
-		if imp.Path.Value == chaosMeshAPIPrefix+from {
+		if imp.Path.Value == quote(chaosMeshAPIPrefix+from) {
 			if imp.Name == nil {
-				imp.Path.Value = chaosMeshAPIPrefix + to
+				imp.Path.Value = quote(chaosMeshAPIPrefix + to)
 
 				needMigrate = true
 			}
 		}
 	}
 	if needMigrate {
-		// do migration for `v1alpha1` package name
+		// do migration for old package name
+		ast.Inspect(fileAst, func(node ast.Node) bool {
+			switch node := node.(type) {
+			case *ast.SelectorExpr:
+				ident, ok := node.X.(*ast.Ident)
+				if !ok {
+					break
+				}
+
+				if ident.Name == from {
+					ident.Name = to
+				}
+			}
+
+			return true
+		})
+
+		file, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		printer.Fprint(file, fileSet, fileAst)
 	}
 	return nil
 }
