@@ -23,6 +23,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
@@ -83,6 +84,7 @@ func main() {
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
+		fx.Provide(ctrlserver.New),
 		fx.Options(
 			provider.Module,
 			controllers.Module,
@@ -105,6 +107,7 @@ type RunParams struct {
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 	MetricsCollector    *metrics.ChaosControllerManagerMetricsCollector
+	CtrlServer          *handler.Server
 
 	Objs        []types.Object        `group:"objs"`
 	WebhookObjs []types.WebhookObject `group:"webhookObjs"`
@@ -181,7 +184,7 @@ func Run(params RunParams) error {
 		go func() {
 			mutex := http.NewServeMux()
 			mutex.Handle("/", playground.Handler("GraphQL playground", "/query"))
-			mutex.Handle("/query", ctrlserver.Handler(params.Logger, mgr.GetClient(), params.Clientset, params.DaemonClientBuilder))
+			mutex.Handle("/query", params.CtrlServer)
 			setupLog.Info("setup ctrlserver", "addr", ccfg.ControllerCfg.CtrlAddr)
 			setupLog.Error(http.ListenAndServe(ccfg.ControllerCfg.CtrlAddr, mutex), "unable to start ctrlserver")
 		}()
