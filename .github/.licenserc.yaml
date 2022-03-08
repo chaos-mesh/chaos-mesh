@@ -61,5 +61,8 @@ header:
     - '**/node_modules/**'
     - 'ui/app/build/**/*'
     - 'ui/packages/mui-extends/esm/**/*'
+    - 'ui/packages/mui-extends/.storybook/**'
+    - 'ui/packages/mui-extends/stories/assets/**'
+    - 'ui/packages/mui-extends/stories/examples/**'
     # codecov configuration file
     - codecov.yml
