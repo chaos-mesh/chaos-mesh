@@ -1131,7 +1131,7 @@ func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInpu
 	})
 	pods, err := selectImpl.Select(ctx, &v1alpha1.PodSelector{Selector: spec, Mode: v1alpha1.AllMode})
 	if err != nil {
-		if errors.Is(err, podSelector.NoPodSelectedError) {
+		if errors.Is(err, podSelector.ErrNoPodSelected) {
 			return nil, nil
 		}
 		return nil, err

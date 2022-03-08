@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 )
 
-type HandlerParams struct {
+type ServerParams struct {
 	fx.In
 
 	NoCacheReader       client.Reader `name:"no-cache"`
@@ -37,7 +37,7 @@ type HandlerParams struct {
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
 }
 
-func New(param HandlerParams) *handler.Server {
+func New(param ServerParams) *handler.Server {
 	resolvers := &server.Resolver{
 		DaemonHelper:  &server.DaemonHelper{Builder: param.DaemonClientBuilder},
 		Log:           param.Logger.WithName("ctrl-server"),

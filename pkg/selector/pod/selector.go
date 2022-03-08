@@ -38,7 +38,7 @@ import (
 )
 
 var log = ctrl.Log.WithName("pod-selector")
-var NoPodSelectedError = errors.New("no pod is selected")
+var ErrNoPodSelected = errors.New("no pod is selected")
 
 type SelectImpl struct {
 	c client.Client
@@ -116,7 +116,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	}
 
 	if len(pods) == 0 {
-		return nil, NoPodSelectedError
+		return nil, ErrNoPodSelected
 	}
 
 	filteredPod, err := filterPodsByMode(pods, mode, value)
