@@ -331,8 +331,7 @@ type ProcessBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
-	ctx    context.Context
-	logger logr.Logger
+	ctx context.Context
 }
 
 // GetNsPath returns corresponding namespace path
