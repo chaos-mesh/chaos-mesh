@@ -300,6 +300,16 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 		})
 
+		// http chaos case in [HTTPReplaceBody] context
+		ginkgo.Context("[HTTPReplaceBody]", func() {
+			ginkgo.It("[Schedule]", func() {
+				httpchaostestcases.TestcaseHttpReplaceBodyThenRecover(ns, cli, client, port)
+			})
+			ginkgo.It("[Pause]", func() {
+				httpchaostestcases.TestcaseHttpReplaceBodyPauseAndUnPause(ns, cli, client, port)
+			})
+		})
+
 		// http chaos case in [HTTPPatch] context
 		ginkgo.Context("[HTTPPatch]", func() {
 			ginkgo.It("[Schedule]", func() {
