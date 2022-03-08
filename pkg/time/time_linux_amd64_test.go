@@ -19,12 +19,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/go-logr/zapr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
@@ -45,12 +44,6 @@ var _ = BeforeSuite(func(done Done) {
 	err := os.Chdir("../../")
 	Expect(err).NotTo(HaveOccurred())
 
-	By("register logger")
-	zapLog, err := zap.NewDevelopment()
-	Expect(err).NotTo(HaveOccurred())
-	log := zapr.NewLogger(zapLog)
-	RegisterLogger(log)
-
 	close(done)
 })
 
@@ -58,6 +51,10 @@ var _ = BeforeSuite(func(done Done) {
 // http://onsi.github.io/ginkgo to learn more.
 
 var _ = Describe("ModifyTime", func() {
+
+	// TODO: use logger with GinkgoWriter
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).ShouldNot(HaveOccurred())
 
 	var t *timer.Timer
 
@@ -82,7 +79,7 @@ var _ = Describe("ModifyTime", func() {
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), 10000, 0, 1)
+			err = ModifyTime(t.Pid(), 10000, 0, 1, logger)
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
@@ -101,7 +98,7 @@ var _ = Describe("ModifyTime", func() {
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), -10000, 0, 1)
+			err = ModifyTime(t.Pid(), -10000, 0, 1, logger)
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
@@ -120,7 +117,7 @@ var _ = Describe("ModifyTime", func() {
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), 0, 1000000000, 1)
+			err = ModifyTime(t.Pid(), 0, 1000000000, 1, logger)
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
