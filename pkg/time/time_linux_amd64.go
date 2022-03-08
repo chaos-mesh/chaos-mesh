@@ -16,12 +16,14 @@
 package time
 
 import (
+	"github.com/go-logr/logr"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // ModifyTime modifies time of target process
 // Deprecated:  Please use FakeClockInjector.Inject and FakeClockInjector.Recover instead.
-func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
+func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64, logger logr.Logger) error {
 	// Mock point to return error in unit test
 	if err := mock.On("ModifyTimeError"); err != nil {
 		if e, ok := err.(error); ok {
@@ -31,7 +33,7 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 			return nil
 		}
 	}
-	timeSkew, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask)
+	timeSkew, err := NewTimeSkew(deltaSec, deltaNsec, clockIdsMask, logger)
 	if err != nil {
 		return err
 	}
