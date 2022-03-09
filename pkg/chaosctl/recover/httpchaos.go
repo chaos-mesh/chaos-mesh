@@ -36,33 +36,7 @@ func HTTPRecover(client *ctrlclient.CtrlClient) Recover {
 	}
 }
 
-func (r *httpRecover) Recover(ctx context.Context, namespace, podName string) error {
-	var query struct {
-		Namespace []struct {
-			Pod []struct {
-				Namespace string
-				Name      string
-				Processes []struct {
-					Pid, Command string
-				}
-			} `graphql:"pod(name: $name)"`
-		} `graphql:"namespace(ns: $namespace)"`
-	}
-
-	err := r.client.QueryClient.Query(ctx, &query, map[string]interface{}{
-		"namespace": graphql.String(namespace),
-		"name":      graphql.String(podName),
-	})
-
-	if err != nil {
-		errors.Wrapf(err, "query pod %s in namespace %s", podName, namespace)
-	}
-
-	if len(query.Namespace) == 0 || len(query.Namespace[0].Pod) == 0 {
-		return errors.Errorf("pod %s in namespace %s not found", podName, namespace)
-	}
-
-	pod := query.Namespace[0].Pod[0]
+func (r *httpRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
 	printRecover(fmt.Sprintf("recovering HTTPChaos from pod %s/%s", pod.Namespace, pod.Name))
 
 	var pids []graphql.String
@@ -86,7 +60,7 @@ func (r *httpRecover) Recover(ctx context.Context, namespace, podName string) er
 		} `graphql:"pod(ns: $ns, name: $name)"`
 	}
 
-	err = r.client.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
+	err := r.client.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
 		"pids": pids,
 		"ns":   graphql.String(pod.Namespace),
 		"name": graphql.String(pod.Name),

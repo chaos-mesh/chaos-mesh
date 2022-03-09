@@ -19,7 +19,7 @@ import (
 	"context"
 
 	"github.com/hasura/go-graphql-client"
-	"k8s.io/apimachinery/pkg/types"
+	"github.com/pingcap/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
@@ -28,6 +28,14 @@ import (
 type CtrlClient struct {
 	QueryClient        *graphql.Client
 	SubscriptionClient *graphql.SubscriptionClient
+}
+
+type PartialPod struct {
+	Namespace string
+	Name      string
+	Processes []struct {
+		Pid, Command string
+	}
 }
 
 func NewCtrlClient(url string) *CtrlClient {
@@ -57,7 +65,7 @@ func (c *CtrlClient) ListNamespace(ctx context.Context) ([]string, error) {
 	return namespaces, nil
 }
 
-func (c *CtrlClient) SelectPods(ctx context.Context, selector v1alpha1.PodSelectorSpec) ([]types.NamespacedName, error) {
+func (c *CtrlClient) SelectPods(ctx context.Context, selector v1alpha1.PodSelectorSpec) ([]*PartialPod, error) {
 	selectInput := model.PodSelectorInput{
 		Pods:                map[string]interface{}{},
 		NodeSelectors:       map[string]interface{}{},
@@ -90,20 +98,13 @@ func (c *CtrlClient) SelectPods(ctx context.Context, selector v1alpha1.PodSelect
 	}
 
 	podsQuery := new(struct {
-		Pods []struct {
-			Namespace, Name string
-		} `graphql:"pods(selector: $selector)"`
+		Pods []*PartialPod `graphql:"pods(selector: $selector)"`
 	})
 
 	err := c.QueryClient.Query(ctx, podsQuery, map[string]interface{}{"selector": selectInput})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "select pods with selector: %+v", selector)
 	}
 
-	var pods []types.NamespacedName
-	for _, pod := range podsQuery.Pods {
-		pods = append(pods, types.NamespacedName{Namespace: pod.Namespace, Name: pod.Name})
-	}
-
-	return pods, nil
+	return podsQuery.Pods, nil
 }

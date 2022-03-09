@@ -107,22 +107,15 @@ func recoverResourceCommand(option *RecoverOptions, chaosType string, builder re
 
 // Run recover
 func (o *RecoverOptions) Run(recover recover.Recover, client *ctrlclient.CtrlClient, args []string) error {
-	var names []string
-	var err error
-	if len(args) > 0 {
-		names = args
-	} else {
-		names, err = o.selectPods(client)
-		if err != nil {
-			return errors.Wrap(err, "select pods")
-		}
+	pods, err := o.selectPods(client, args)
+	if err != nil {
+		return err
 	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	for _, name := range names {
-		err = recover.Recover(ctx, o.namespace, name)
+	for _, pod := range pods {
+		err = recover.Recover(ctx, pod)
 		if err != nil {
 			return err
 		}
@@ -132,32 +125,26 @@ func (o *RecoverOptions) Run(recover recover.Recover, client *ctrlclient.CtrlCli
 
 // List pods to recover
 func (o *RecoverOptions) List(client *ctrlclient.CtrlClient) ([]string, cobra.ShellCompDirective) {
-	names, err := o.selectPods(client)
+	pods, err := o.selectPods(client, []string{})
 	if err != nil {
 		common.PrettyPrint(errors.Wrap(err, "select pods").Error(), 0, common.Red)
+	}
+
+	var names []string
+	for _, pod := range pods {
+		names = append(names, pod.Name)
 	}
 
 	return names, cobra.ShellCompDirectiveNoFileComp
 }
 
-func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient) ([]string, error) {
+func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []string) ([]*ctrlclient.PartialPod, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	namespacedNames, err := client.SelectPods(ctx, v1alpha1.PodSelectorSpec{
+	return client.SelectPods(ctx, v1alpha1.PodSelectorSpec{
 		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 			Namespaces: []string{o.namespace},
 		},
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	var names []string
-	for _, namespacedName := range namespacedNames {
-		names = append(names, namespacedName.Name)
-	}
-
-	return names, nil
 }

@@ -23,7 +23,7 @@ import (
 
 type Recover interface {
 	// Recover target pod forcedly
-	Recover(ctx context.Context, namespace, podName string) error
+	Recover(ctx context.Context, pod *ctrlclient.PartialPod) error
 }
 
 type RecoverBuilder func(client *ctrlclient.CtrlClient) Recover
