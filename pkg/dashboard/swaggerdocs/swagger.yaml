@@ -338,6 +338,41 @@ definitions:
       running:
         type: integer
     type: object
+  template.StatusCheckTemplateBase:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  template.StatusCheckTemplateDetail:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  template.StatusCheckTemplateSpec:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
   utils.APIError:
     properties:
       code:
@@ -3659,6 +3694,165 @@ paths:
       summary: Start a schedule.
       tags:
       - schedules
+  /templates/statuschecks:
+    get:
+      description: Get status check templates from k8s cluster in real time.
+      parameters:
+      - description: filter status check templates by namespace
+        in: query
+        name: namespace
+        type: string
+      - description: filter status check templates by name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/template.StatusCheckTemplateBase'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: List status check templates.
+      tags:
+      - template
+    post:
+      consumes:
+      - application/json
+      description: Pass a JSON object to create a new status check template.
+      parameters:
+      - description: the status check definition
+        in: body
+        name: statuscheck
+        required: true
+        schema:
+          $ref: '#/definitions/template.StatusCheckTemplateSpec'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/template.StatusCheckTemplateSpec'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new status check template.
+      tags:
+      - templates
+  /templates/statuschecks/statuscheck:
+    delete:
+      description: Delete the status check template by namespaced name.
+      parameters:
+      - description: the namespace of status check templates
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the name of status check templates
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete a status check template.
+      tags:
+      - templates
+    get:
+      description: Get the status check template's detail by namespaced name.
+      parameters:
+      - description: the namespace of status check templates
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the name of status check templates
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/template.StatusCheckTemplateDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get a status check template.
+      tags:
+      - templates
+    put:
+      description: Update a status check template by namespaced name.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/template.StatusCheckTemplateSpec'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/template.StatusCheckTemplateSpec'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Update a status check template.
+      tags:
+      - templates
   /workflows:
     get:
       description: List workflows from Kubernetes cluster.

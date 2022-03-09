@@ -24,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/experiment"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/schedule"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/workflow"
 )
 
@@ -36,6 +37,7 @@ var handlerModule = fx.Options(
 		event.NewService,
 		archive.NewService,
 		gcp.NewService,
+		template.NewService,
 	),
 	fx.Invoke(
 		// gcp should register at the first, because it registers a middleware
@@ -47,5 +49,6 @@ var handlerModule = fx.Options(
 		workflow.Register,
 		event.Register,
 		archive.Register,
+		template.Register,
 	),
 )
