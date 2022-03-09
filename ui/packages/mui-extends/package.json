@@ -1,7 +1,7 @@
 {
   "name": "@ui/mui-extends",
   "version": "2.1.0",
-  "description": "mui extends used in web UI",
+  "description": "Mui extends used in web UI",
   "private": true,
   "files": [
     "esm"
