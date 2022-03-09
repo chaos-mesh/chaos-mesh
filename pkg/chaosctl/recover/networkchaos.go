@@ -14,3 +14,23 @@
 //
 
 package recover
+
+import (
+	"context"
+
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
+)
+
+type networkRecover struct {
+	client *ctrlclient.CtrlClient
+}
+
+func NetworkRecover(client *ctrlclient.CtrlClient) Recover {
+	return &networkRecover{
+		client: client,
+	}
+}
+
+func (r *networkRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+	return nil
+}
