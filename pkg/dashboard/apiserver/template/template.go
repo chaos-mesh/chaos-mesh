@@ -235,7 +235,7 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /templates/statuschecks/statuscheck [put]
-func (it *Service) updateStatusCheckTemplate(c *gin.Context) {
+func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
