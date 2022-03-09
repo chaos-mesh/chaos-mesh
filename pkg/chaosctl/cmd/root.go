@@ -98,8 +98,8 @@ func Execute() {
 	}
 
 	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecoverBuilder{
-		httpChaos: recover.HTTPRecover,
-		ioChaos:   recover.IORecover,
+		httpChaos: recover.PipelineBuilder(httpChaos, recover.CleanProcessRecoverBuilder("tproxy"), recover.HTTPRecover),
+		ioChaos:   recover.PipelineBuilder(ioChaos, recover.CleanProcessRecoverBuilder("toda"), recover.IORecover),
 	})
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
