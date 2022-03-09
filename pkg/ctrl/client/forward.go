@@ -13,12 +13,21 @@
 // limitations under the License.
 //
 
-package common
+package client
 
 import (
+	"context"
+
+	"github.com/pkg/errors"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
+)
+
+const (
+	CtrlServerPort = 10082
 )
 
 // CommonRestClientGetter is used for non-e2e test environment.
@@ -34,4 +43,21 @@ func NewCommonRestClientGetter() *CommonRestClientGetter {
 
 func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
 	return config.GetConfig()
+}
+
+func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, ns, svc, port)
+
+	// disable error handler in k8s runtime to prevent complaining from port forwarder
+	DisableRuntimeErrorHandler()
+	return pfCancel, localPort, err
+}
+
+func ForwardCtrlServer(ctx context.Context, ns, managerSvc string) (context.CancelFunc, uint16, error) {
+	return ForwardSvcPorts(ctx, ns, "svc/"+managerSvc, CtrlServerPort)
 }

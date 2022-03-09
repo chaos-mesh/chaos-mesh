@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +30,6 @@ import (
 )
 
 type PhysicalMachineCreateOptions struct {
-	logger     logr.Logger
 	namespace  string
 	labels     string
 	remoteIP   string
@@ -39,10 +37,8 @@ type PhysicalMachineCreateOptions struct {
 	secure     bool
 }
 
-func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
-	createOption := &PhysicalMachineCreateOptions{
-		logger: logger,
-	}
+func NewPhysicalMachineCreateCmd() (*cobra.Command, error) {
+	createOption := &PhysicalMachineCreateOptions{}
 
 	createCmd := &cobra.Command{
 		Use:           `create (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,

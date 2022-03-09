@@ -12,6 +12,21 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
+type Cgroups struct {
+	Raw    string         `json:"raw"`
+	CPU    *CgroupsCPU    `json:"cpu"`
+	Memory *CgroupsMemory `json:"memory"`
+}
+
+type CgroupsCPU struct {
+	Quota  int `json:"quota"`
+	Period int `json:"period"`
+}
+
+type CgroupsMemory struct {
+	Limit int64 `json:"limit"`
+}
+
 type Fd struct {
 	Fd     string `json:"fd"`
 	Target string `json:"target"`
@@ -30,11 +45,23 @@ type Namespace struct {
 	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos"`
 }
 
+type PodStressChaos struct {
+	StressChaos   *v1alpha1.StressChaos `json:"stressChaos"`
+	Pod           *v1.Pod               `json:"pod"`
+	Cgroups       *Cgroups              `json:"cgroups"`
+	ProcessStress []*ProcessStress      `json:"processStress"`
+}
+
 type Process struct {
 	Pod     *v1.Pod `json:"pod"`
 	Pid     string  `json:"pid"`
 	Command string  `json:"command"`
 	Fds     []*Fd   `json:"fds"`
+}
+
+type ProcessStress struct {
+	Process *Process `json:"process"`
+	Cgroup  string   `json:"cgroup"`
 }
 
 type Component string

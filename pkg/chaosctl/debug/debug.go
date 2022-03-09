@@ -13,15 +13,21 @@
 // limitations under the License.
 //
 
-package metrics
+package debug
 
 import (
-	"github.com/go-logr/logr"
+	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-// NewTestChaosControllerManagerMetricsCollector provides metrics collector for testing
-func NewTestChaosControllerManagerMetricsCollector(logger logr.Logger) *metrics.ChaosControllerManagerMetricsCollector {
-	return metrics.NewChaosControllerManagerMetricsCollector(nil, nil, logger)
+type Debugger interface {
+	// Collect collect debug information of chaos
+	Collect(ctx context.Context, namespace, chaosName string) ([]*common.ChaosResult, error)
+
+	// List chaos names to collect
+	List(ctx context.Context, namespace string) ([]string, error)
 }
+
+type Debug func(client *ctrlclient.CtrlClient) Debugger
