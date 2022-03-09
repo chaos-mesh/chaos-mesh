@@ -22,7 +22,7 @@ ARG TARGET_PLATFORM=amd64
 RUN curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.18-0.9.tar.gz -o /usr/local/byteman.tar.gz
 RUN tar xvf /usr/local/byteman.tar.gz -C /usr/local
 RUN mv /usr/local/byteman-chaos-mesh-download-v4.0.18-0.9 /usr/local/byteman
-RUN rm /usr/local/bin/byteman.tar.gz
+RUN rm /usr/local/byteman.tar.gz
 
 ENV BYTEMAN_HOME /usr/local/byteman
 ENV PATH $PATH:/usr/local/byteman/bin

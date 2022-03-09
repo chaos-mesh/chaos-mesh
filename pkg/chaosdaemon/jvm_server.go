@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -123,7 +122,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 	}
 
 	// submit helper jar
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "b", fmt.Sprintf("%s/lib/byteman-helper.jar", os.Getenv("BYTEMAN_HOME"))
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "b", fmt.Sprintf("%s/lib/byteman-helper.jar", os.Getenv("BYTEMAN_HOME")))
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
