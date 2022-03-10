@@ -66,7 +66,6 @@ func main() {
 	}
 	log := zapr.NewLogger(zapLog)
 	ptrace.RegisterLogger(log.WithName("ptrace"))
-	time.RegisterLogger(log.WithName("time"))
 
 	clkIds := strings.Split(clockIdsSlice, ",")
 	mask, err := utils.EncodeClkIds(clkIds)
@@ -76,7 +75,7 @@ func main() {
 	}
 	log.Info("get clock ids mask", "mask", mask)
 
-	s, err := time.GetSkew()
+	s, err := time.GetSkew(log)
 	if err != nil {
 		log.Error(err, "error while GetSkew")
 		os.Exit(1)
