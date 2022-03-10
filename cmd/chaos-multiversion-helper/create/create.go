@@ -125,6 +125,7 @@ func run() error {
 		if err != nil {
 			return err
 		}
+		defer newFile.Close()
 		printer.Fprint(newFile, fileSet, fileAst)
 	}
 	return nil

@@ -24,6 +24,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
+
 	doublestar "github.com/bmatcuk/doublestar/v4"
 
 	"github.com/spf13/cobra"
@@ -46,8 +48,6 @@ var whiteListPattern = []string{
 	".cache/**/*",
 	"api/**/*",
 }
-
-const chaosMeshAPIPrefix = "github.com/chaos-mesh/chaos-mesh/api/"
 
 func init() {
 	MigrateCmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
@@ -106,9 +106,9 @@ func migrateFile(path string) error {
 
 	needMigrate := false
 	for _, imp := range fileAst.Imports {
-		if imp.Path.Value == quote(chaosMeshAPIPrefix+from) {
+		if imp.Path.Value == quote(common.ChaosMeshAPIPrefix+from) {
 			if imp.Name == nil {
-				imp.Path.Value = quote(chaosMeshAPIPrefix + to)
+				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
 
 				needMigrate = true
 			}
@@ -136,6 +136,7 @@ func migrateFile(path string) error {
 		if err != nil {
 			return err
 		}
+		defer file.Close()
 		printer.Fprint(file, fileSet, fileAst)
 	}
 	return nil
