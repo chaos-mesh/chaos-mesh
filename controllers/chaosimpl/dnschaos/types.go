@@ -34,7 +34,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
@@ -55,7 +54,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	service, err := pod.GetService(ctx, impl.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	service, err := getService(ctx, impl.Client, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get service")
 		return v1alpha1.NotInjected, err
@@ -135,7 +134,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	dnschaos := obj.(*v1alpha1.DNSChaos)
 
 	// get dns server's ip used for chaos
-	service, err := pod.GetService(ctx, impl.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	service, err := getService(ctx, impl.Client, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get service")
 		return v1alpha1.Injected, err
@@ -205,3 +204,17 @@ var Module = fx.Provide(
 		Target: NewImpl,
 	},
 )
+
+// getService get k8s service by service name
+func getService(ctx context.Context, c client.Client, namespace string, serviceName string) (*v1.Service, error) {
+	service := &v1.Service{}
+	err := c.Get(ctx, client.ObjectKey{
+		Namespace: namespace,
+		Name:      serviceName,
+	}, service)
+	if err != nil {
+		return nil, err
+	}
+
+	return service, nil
+}
