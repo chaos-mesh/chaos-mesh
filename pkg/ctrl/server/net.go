@@ -50,3 +50,31 @@ func (r *Resolver) GetIptables(ctx context.Context, obj *v1.Pod) ([]string, erro
 	}
 	return strings.Split(rules, "\n"), nil
 }
+
+// cleanTcs returns actually cleaned devices
+func (r *Resolver) cleanTcs(ctx context.Context, obj *v1.Pod, devices []string) ([]string, error) {
+	var cleaned []string
+	for _, device := range devices {
+		cmd := "tc qdisc del dev " + device + " root"
+		_, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+		if err != nil {
+			return cleaned, errors.Wrapf(err, "exec `%s`", cmd)
+		}
+		cleaned = append(cleaned, device)
+	}
+	return cleaned, nil
+}
+
+// cleanIptables returns actually cleaned chains
+func (r *Resolver) cleanIptables(ctx context.Context, obj *v1.Pod, chains []string) ([]string, error) {
+	var cleaned []string
+	for _, chain := range chains {
+		cmd := "iptables -F " + chain
+		_, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+		if err != nil {
+			return cleaned, errors.Wrapf(err, "exec `%s`", cmd)
+		}
+		cleaned = append(cleaned, chain)
+	}
+	return cleaned, nil
+}

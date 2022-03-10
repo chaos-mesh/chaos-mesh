@@ -352,6 +352,8 @@ type ComplexityRoot struct {
 	}
 
 	MutablePod struct {
+		CleanIptables func(childComplexity int, chains []string) int
+		CleanTcs      func(childComplexity int, devices []string) int
 		KillProcesses func(childComplexity int, pids []string) int
 		Pod           func(childComplexity int) int
 	}
@@ -846,6 +848,8 @@ type MistakeSpecResolver interface {
 }
 type MutablePodResolver interface {
 	KillProcesses(ctx context.Context, obj *model.MutablePod, pids []string) ([]*model.KillProcessResult, error)
+	CleanTcs(ctx context.Context, obj *model.MutablePod, devices []string) ([]string, error)
+	CleanIptables(ctx context.Context, obj *model.MutablePod, chains []string) ([]string, error)
 }
 type MutationResolver interface {
 	Pod(ctx context.Context, ns string, name string) (*model.MutablePod, error)
@@ -2238,6 +2242,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MistakeSpec.MaxOccurrences(childComplexity), true
+
+	case "MutablePod.cleanIptables":
+		if e.complexity.MutablePod.CleanIptables == nil {
+			break
+		}
+
+		args, err := ec.field_MutablePod_cleanIptables_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MutablePod.CleanIptables(childComplexity, args["chains"].([]string)), true
+
+	case "MutablePod.cleanTcs":
+		if e.complexity.MutablePod.CleanTcs == nil {
+			break
+		}
+
+		args, err := ec.field_MutablePod_cleanTcs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MutablePod.CleanTcs(childComplexity, args["devices"].([]string)), true
 
 	case "MutablePod.killProcesses":
 		if e.complexity.MutablePod.KillProcesses == nil {
@@ -4366,7 +4394,9 @@ input PodSelectorInput {
 
 type MutablePod {
     pod: Pod!
-    killProcesses(pids: [String!]): [KillProcessResult!] @goField(forceResolver: true)
+    killProcesses(pids: [String!]): [KillProcessResult!]    @goField(forceResolver: true)
+    cleanTcs(devices: [String!]): [String!]                 @goField(forceResolver: true)
+    cleanIptables(chains: [String!]): [String!]             @goField(forceResolver: true)
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
@@ -5513,6 +5543,36 @@ func (ec *executionContext) field_Logger_pod_args(ctx context.Context, rawArgs m
 		}
 	}
 	args["name"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_MutablePod_cleanIptables_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["chains"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chains"))
+		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chains"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutablePod_cleanTcs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["devices"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("devices"))
+		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["devices"] = arg0
 	return args, nil
 }
 
@@ -11648,6 +11708,84 @@ func (ec *executionContext) _MutablePod_killProcesses(ctx context.Context, field
 	res := resTmp.([]*model.KillProcessResult)
 	fc.Result = res
 	return ec.marshalOKillProcessResult2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResultᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutablePod_cleanTcs(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MutablePod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_MutablePod_cleanTcs_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.MutablePod().CleanTcs(rctx, obj, args["devices"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutablePod_cleanIptables(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MutablePod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_MutablePod_cleanIptables_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.MutablePod().CleanIptables(rctx, obj, args["chains"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_pod(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -23517,6 +23655,28 @@ func (ec *executionContext) _MutablePod(ctx context.Context, sel ast.SelectionSe
 					}
 				}()
 				res = ec._MutablePod_killProcesses(ctx, field, obj)
+				return res
+			})
+		case "cleanTcs":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._MutablePod_cleanTcs(ctx, field, obj)
+				return res
+			})
+		case "cleanIptables":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._MutablePod_cleanIptables(ctx, field, obj)
 				return res
 			})
 		default:

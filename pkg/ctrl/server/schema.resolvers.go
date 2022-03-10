@@ -464,6 +464,14 @@ func (r *mutablePodResolver) KillProcesses(ctx context.Context, obj *model.Mutab
 	return r.Resolver.killProcess(ctx, obj.Pod, pids)
 }
 
+func (r *mutablePodResolver) CleanTcs(ctx context.Context, obj *model.MutablePod, devices []string) ([]string, error) {
+	return r.Resolver.cleanTcs(ctx, obj.Pod, devices)
+}
+
+func (r *mutablePodResolver) CleanIptables(ctx context.Context, obj *model.MutablePod, chains []string) ([]string, error) {
+	return r.Resolver.cleanIptables(ctx, obj.Pod, chains)
+}
+
 func (r *mutationResolver) Pod(ctx context.Context, ns string, name string) (*model.MutablePod, error) {
 	key := types.NamespacedName{Namespace: ns, Name: name}
 	pod := new(v1.Pod)

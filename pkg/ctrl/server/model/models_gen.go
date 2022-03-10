@@ -40,6 +40,8 @@ type KillProcessResult struct {
 type MutablePod struct {
 	Pod           *v1.Pod              `json:"pod"`
 	KillProcesses []*KillProcessResult `json:"killProcesses"`
+	CleanTcs      []string             `json:"cleanTcs"`
+	CleanIptables []string             `json:"cleanIptables"`
 }
 
 type Namespace struct {
