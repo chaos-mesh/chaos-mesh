@@ -43,6 +43,8 @@ type FakeImage struct {
 	OriginFuncCode []byte
 	// OriginAddress stores the origin address of OriginFuncCode.
 	OriginAddress uint64
+	// fakeEntry stores the fake entry
+	fakeEntry *mapreader.Entry
 }
 
 func NewFakeImage(symbolName string, content []byte, offset map[string]int) *FakeImage {
@@ -77,8 +79,10 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 		return errors.Wrapf(err, "PID : %d", pid)
 	}
 
-	fakeEntry := it.FindInjectedImage(program)
-
+	fakeEntry, err := it.FindInjectedImage(program)
+	if err != nil {
+		return errors.Wrapf(err, "PID : %d", pid)
+	}
 	// target process has not been injected yet
 	if fakeEntry == nil {
 		fakeEntry, err = it.InjectFakeImage(program, vdsoEntry)
@@ -127,28 +131,19 @@ func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	return vdsoEntry, nil
 }
 
-func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram) *mapreader.Entry {
+func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	// minus tailing variable part
 	// every variable has 8 bytes
-	constImageLen := len(it.content) - 8*len(it.offset)
-	var fakeEntry *mapreader.Entry
-
-	// find injected image to avoid redundant inject (which will lead to memory leak)
-	for _, e := range program.Entries {
-		e := e
-
-		image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))
+	if it.fakeEntry != nil {
+		content, err := program.ReadSlice(it.fakeEntry.StartAddress, it.fakeEntry.EndAddress-it.fakeEntry.StartAddress)
 		if err != nil {
-			continue
+			return nil, err
 		}
-
-		if bytes.Equal(*image, it.content[0:constImageLen]) {
-			fakeEntry = &e
-			log.Info("found injected image", "addr", fakeEntry.StartAddress)
-			return fakeEntry
+		if bytes.Equal(*content, it.content) {
+			return it.fakeEntry, nil
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 // InjectFakeImage Usage CheckList:
@@ -159,12 +154,15 @@ func (it *FakeImage) InjectFakeImage(program *ptrace.TracedProgram,
 	if err != nil {
 		return nil, errors.Wrapf(err, "mmap fake image")
 	}
-
+	it.fakeEntry = fakeEntry
 	originAddr, size, err := program.FindSymbolInEntry(it.symbolName, vdsoEntry)
 	if err != nil {
 		return nil, errors.Wrapf(err, "find origin %s in vdso", it.symbolName)
 	}
 	funcBytes, err := program.ReadSlice(originAddr, size)
+	if err != nil {
+		return nil, errors.Wrapf(err, "ReadSlice failed")
+	}
 	err = program.JumpToFakeFunc(originAddr, fakeEntry.StartAddress)
 	if err != nil {
 		errIn := it.TryReWriteFakeImage(program)
@@ -210,8 +208,10 @@ func (it *FakeImage) Recover(pid int) error {
 		}
 	}()
 
-	fakeEntry := it.FindInjectedImage(program)
-
+	fakeEntry, err := it.FindInjectedImage(program)
+	if err != nil {
+		return errors.Wrapf(err, "FindInjectedImage , pid: %d", pid)
+	}
 	if fakeEntry == nil {
 		return nil
 	}
