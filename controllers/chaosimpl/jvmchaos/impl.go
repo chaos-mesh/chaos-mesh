@@ -140,8 +140,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		Port:        jvmChaos.Spec.Port,
 		EnterNS:     true,
 	})
-	if err != nil && strings.Contains(err.Error(), "exit status 1") {
-		// Unable to uninstall the JVMRules, most likely because the jvm process has been restarted
+	if err != nil && strings.Contains(err.Error(), "Connection refused") {
+		// Unable to connect to the jvm - meaning that there is no agent running on the jvm, most likely because the jvm process has been restarted
 		impl.Log.Error(err, "uninstall jvm rules (possible restart of jvm process)")
 		return v1alpha1.NotInjected, nil
 	}
