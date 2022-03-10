@@ -218,6 +218,8 @@ func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint3
 	if err != nil {
 		return err
 	}
+	defer sourceFile.Close()
+
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cat > %s", dest)).SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(sourceFile)
 	output, err := processBuilder.Build(ctx).CombinedOutput()
