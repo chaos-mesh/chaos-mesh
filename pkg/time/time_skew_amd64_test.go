@@ -59,7 +59,6 @@ var _ = BeforeSuite(func(done Done) {
 // http://onsi.github.io/ginkgo to learn more.
 
 var _ = Describe("ModifyTime", func() {
-
 	var t *timer.Timer
 	s, err := GetSkew()
 	Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
@@ -95,10 +94,14 @@ var _ = Describe("ModifyTime", func() {
 			newSec := newTime.Unix()
 
 			Expect(newSec-sec).Should(BeNumerically(">=", 10000), "sec %d newSec %d", sec, newSec)
+			Expect(newSec-sec).Should(BeNumerically("<=", 10010), "sec %d newSec %d", sec, newSec)
 		})
 
 		It("should move backward successfully", func() {
 			Expect(t).NotTo(BeNil())
+			s.SkewConfig = NewConfig(10000, 0, 1)
+			err = s.Inject(tasks.SysPID(t.Pid()))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			now, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
