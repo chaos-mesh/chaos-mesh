@@ -89,7 +89,7 @@ func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 		return nil, errors.New("not ConfigCreatorParas")
 	}
 
-	skew, err := GetSkew()
+	skew, err := GetSkew(paras.Logger)
 	if err != nil {
 		return nil, err
 	}
@@ -126,16 +126,16 @@ type Skew struct {
 	getTimeOfDay *FakeImage
 
 	locker sync.Mutex
-	logger           logr.Logger
+	logger logr.Logger
 }
 
-func GetSkew() (Skew, error) {
-	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime)
+func GetSkew(logger logr.Logger) (Skew, error) {
+	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime, logger)
 	if err != nil {
 		return Skew{}, errors.Wrap(err, "load fake image")
 	}
 
-	getTimeOfDayimage, err := LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay)
+	getTimeOfDayimage, err := LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay, logger)
 	if err != nil {
 		return Skew{}, errors.Wrap(err, "load fake image")
 	}
@@ -150,7 +150,7 @@ func GetSkew() (Skew, error) {
 
 func (s *Skew) Fork() (tasks.ChaosOnProcessGroup, error) {
 	// TODO : to KEAO can I share FakeImage between threads?
-	skew, err := GetSkew()
+	skew, err := GetSkew(s.logger)
 	if err != nil {
 		return nil, err
 	}
