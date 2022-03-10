@@ -94,8 +94,8 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	}
 
 	if injectionConfig.Selector != nil {
-		meet, err := podselector.CheckPodMeetSelector(context.Background(), cli, pod, *injectionConfig.Selector,
-			controllerCfg.ClusterScoped, controllerCfg.TargetNamespace, controllerCfg.EnableFilterNamespace)
+		legacyPodSelector := podselector.NewLegacyPodSelector(cli, cli, controllerCfg.ClusterScoped, controllerCfg.TargetNamespace, controllerCfg.EnableFilterNamespace)
+		meet, err := legacyPodSelector.CheckPodMeetSelector(context.Background(), pod, *injectionConfig.Selector)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
 			return &v1.AdmissionResponse{

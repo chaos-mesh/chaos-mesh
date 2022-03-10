@@ -159,12 +159,14 @@ func TestSelectPods(t *testing.T) {
 	}
 
 	var (
-		testCfgClusterScoped   = true
-		testCfgTargetNamespace = ""
+		testCfgClusterScoped         = true
+		testCfgTargetNamespace       = ""
+		testCfgEnableFilterNamespace = false
 	)
 
+	legacyPodSelector := NewLegacyPodSelector(c, r, testCfgClusterScoped, testCfgTargetNamespace, testCfgEnableFilterNamespace)
 	for _, tc := range tcs {
-		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false)
+		filteredPods, err := legacyPodSelector.SelectPods(context.Background(), tc.selector)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
 	}
@@ -429,12 +431,15 @@ func TestCheckPodMeetSelector(t *testing.T) {
 	}
 
 	var (
-		testCfgClusterScoped   = true
-		testCfgTargetNamespace = ""
+		testCfgClusterScoped         = true
+		testCfgTargetNamespace       = ""
+		testCfgEnableFilterNamespace = false
 	)
 
+	legacyPodSelector := NewLegacyPodSelector(c, c, testCfgClusterScoped, testCfgTargetNamespace, testCfgEnableFilterNamespace)
+
 	for _, tc := range tcs {
-		meet, err := CheckPodMeetSelector(context.Background(), c, tc.pod, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false)
+		meet, err := legacyPodSelector.CheckPodMeetSelector(context.Background(), tc.pod, tc.selector)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(meet).To(Equal(tc.expectedValue), tc.name)
 	}

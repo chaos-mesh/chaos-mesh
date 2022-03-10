@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	podselector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 const DefaultNamespace = "default"
@@ -61,7 +61,8 @@ func parseNamespacedName(namespacedName string) types.NamespacedName {
 
 // GetPods returns pod list and corresponding chaos daemon
 func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.PodSelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
-	pods, err := pod.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
+	legacyPodSelector := podselector.NewLegacyPodSelector(c, c, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
+	pods, err := legacyPodSelector.SelectPods(ctx, selectorSpec)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
