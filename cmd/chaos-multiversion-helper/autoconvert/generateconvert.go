@@ -253,7 +253,7 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 				case *ast.MapType:
 					// TODO: support the pointer of map as the field type
 
-					mapFrom, mapTo := c.generateMapConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp)
+					mapFrom, mapTo := c.generateMapConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp, false)
 					to += `
 					dst.` + fieldName + ` = make(` + c.printExprToNewVersion(field.Type) + `)
 					` + mapTo + `
@@ -305,7 +305,7 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 		to += "*dst = make(" + typ + ")\n"
 		from += "*in = make(" + typ + ")\n"
 
-		mapFrom, mapTo := c.generateMapConvert("dst", "src", "in", subTypeSpecDef)
+		mapFrom, mapTo := c.generateMapConvert("dst", "src", "in", subTypeSpecDef, true)
 		to += mapTo
 		from += mapFrom
 	default:
@@ -324,17 +324,17 @@ func (c *convertImpl) needRef(typ ast.Expr) bool {
 	}
 }
 
-func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType) (string, string) {
+// generateMapConvert will generate the conversion between map
+//
+// all of dst, src and in should have been initialized.
+func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType, ptr bool) (string, string) {
 	from := ""
 	to := ""
 
-	keyIdent, ok := typ.Key.(*ast.Ident)
-	if !ok {
-		log.Fatal("unsupported map key type", reflect.TypeOf(typ.Key))
-	}
-
-	if keyIdent.Name != "string" {
-		log.Fatal("unsupported map key", keyIdent.Name)
+	if ptr {
+		in = `(*` + in + `)`
+		src = `(*` + src + `)`
+		dst = `(*` + dst + `)`
 	}
 
 	if c.canDirectConvert(typ.Value) {
@@ -395,6 +395,9 @@ func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType) 
 	return from, to
 }
 
+// generateArrayConvert will generate the conversion between array
+//
+// all of dst, src and in should have been initialized.
 func (c *convertImpl) generateArrayConvert(dst, src, in string, typ *ast.ArrayType, ptr bool) (string, string) {
 	from := ""
 	to := ""
@@ -439,6 +442,22 @@ func (c *convertImpl) generateArrayConvert(dst, src, in string, typ *ast.ArrayTy
 	return from, to
 }
 
+// getFieldName returns the name of a field in the struct
+//
+// for example, the following struct:
+//
+// ```go
+// type S struct {
+// 		A string
+// 		common.B
+//      C
+// }
+// ```
+//
+// getFieldName for these three fields would return
+// `A`, `B`, `C`
+// Then if you hava a variable `s` with type `S`, then you can
+// refer to the field with `s.A`, `s.B` and `s.C`
 func (c *convertImpl) getFieldName(field *ast.Field) string {
 	fieldName := ""
 	if field.Names != nil {
