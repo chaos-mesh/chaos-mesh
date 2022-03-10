@@ -15,6 +15,8 @@
 
 package time
 
+import "github.com/go-logr/logr"
+
 // vdsoEntryName is the name of the vDSO entry
 const vdsoEntryName = "[vdso]"
 
@@ -28,8 +30,10 @@ type FakeImage struct {
 	// offset stores the table with variable name, and it's address in content.
 	// the key presents extern variable name, ths value is the address/offset within the content.
 	offset map[string]int
+
+	logger logr.Logger
 }
 
-func NewFakeImage(symbolName string, content []byte, offset map[string]int) *FakeImage {
-	return &FakeImage{symbolName: symbolName, content: content, offset: offset}
+func NewFakeImage(symbolName string, content []byte, offset map[string]int, logger logr.Logger) *FakeImage {
+	return &FakeImage{symbolName: symbolName, content: content, offset: offset, logger: logger}
 }
