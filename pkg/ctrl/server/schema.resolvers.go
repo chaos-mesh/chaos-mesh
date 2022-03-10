@@ -780,11 +780,11 @@ func (r *podResolver) Ipset(ctx context.Context, obj *v1.Pod) (string, error) {
 	return r.GetIpset(ctx, obj)
 }
 
-func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	return r.GetTcQdisc(ctx, obj)
 }
 
-func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	return r.GetIptables(ctx, obj)
 }
 

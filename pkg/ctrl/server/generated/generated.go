@@ -889,8 +889,8 @@ type PodResolver interface {
 	Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error)
 	Mounts(ctx context.Context, obj *v1.Pod) ([]string, error)
 	Ipset(ctx context.Context, obj *v1.Pod) (string, error)
-	TcQdisc(ctx context.Context, obj *v1.Pod) (string, error)
-	Iptables(ctx context.Context, obj *v1.Pod) (string, error)
+	TcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error)
+	Iptables(ctx context.Context, obj *v1.Pod) ([]string, error)
 }
 type PodConditionResolver interface {
 	Type(ctx context.Context, obj *v1.PodCondition) (string, error)
@@ -4396,8 +4396,8 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     processes: [Process!] 	@goField(forceResolver: true)
     mounts: [String!]      	@goField(forceResolver: true)
     ipset: String! 			@goField(forceResolver: true)
-    tcQdisc: String! 		@goField(forceResolver: true)
-    iptables: String!		@goField(forceResolver: true)
+    tcQdisc: [String!] 		@goField(forceResolver: true)
+    iptables: [String!]		@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
@@ -13726,14 +13726,11 @@ func (ec *executionContext) _Pod_tcQdisc(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Pod_iptables(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
@@ -13761,14 +13758,11 @@ func (ec *executionContext) _Pod_iptables(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
@@ -24093,9 +24087,6 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					}
 				}()
 				res = ec._Pod_tcQdisc(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		case "iptables":
@@ -24107,9 +24098,6 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					}
 				}()
 				res = ec._Pod_iptables(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		default:

@@ -32,5 +32,6 @@ func HTTPRecover(client *ctrlclient.CtrlClient) Recover {
 }
 
 func (r *httpRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+	// TODO: need hostPath to store rules
 	return nil
 }

@@ -17,7 +17,9 @@ package server
 
 import (
 	"context"
+	"strings"
 
+	"github.com/pingcap/errors"
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -30,13 +32,21 @@ func (r *Resolver) GetIpset(ctx context.Context, obj *v1.Pod) (string, error) {
 }
 
 // GetIpset returns result of tc qdisc list
-func (r *Resolver) GetTcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *Resolver) GetTcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	cmd := "tc qdisc list"
-	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	rules, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	if err != nil {
+		return nil, errors.Wrapf(err, "exec `%s`", cmd)
+	}
+	return strings.Split(rules, "\n"), nil
 }
 
 // GetIptables returns result of iptables --list
-func (r *Resolver) GetIptables(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *Resolver) GetIptables(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	cmd := "iptables --list"
-	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	rules, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	if err != nil {
+		return nil, errors.Wrapf(err, "exec `%s`", cmd)
+	}
+	return strings.Split(rules, "\n"), nil
 }
