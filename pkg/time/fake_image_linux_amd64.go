@@ -16,9 +16,9 @@
 package time
 
 import (
-	"github.com/go-logr/logr"
 	"runtime"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"

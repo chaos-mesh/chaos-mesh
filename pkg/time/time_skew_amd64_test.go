@@ -16,8 +16,6 @@
 package time
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"os"
 	"testing"
 
@@ -25,6 +23,8 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 

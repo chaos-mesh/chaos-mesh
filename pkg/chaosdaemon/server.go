@@ -36,7 +36,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
@@ -105,7 +104,6 @@ func newDaemonServer(containerRuntime string, reg prometheus.Registerer, log log
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, reg prometheus.Registerer, log logr.Logger) *DaemonServer {
-
 	return &DaemonServer{
 		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
@@ -135,6 +133,7 @@ func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsCon
 		grpc_middleware.WithUnaryServerChain(
 			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
+			MetadataExtractor(log.MetaNamespacedName),
 		),
 	}
 
