@@ -19,7 +19,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/go-logr/logr"
 	"reflect"
@@ -29,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder, recorderBuilder *recorder.RecorderBuilder) error {
+func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) error {
 	if !config.ShouldSpawnController("statuscheck") {
 		return nil
 	}

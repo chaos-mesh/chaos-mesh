@@ -13,25 +13,4 @@
 // limitations under the License.
 //
 
-package statuscheck
-
-import (
-	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-// Reconciler applys statuscheck
-type Reconciler struct {
-	client.Client
-	Recorder recorder.ChaosRecorder
-
-	Log logr.Logger
-}
-
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-
-	return ctrl.Result{}, nil
-}
+package http
