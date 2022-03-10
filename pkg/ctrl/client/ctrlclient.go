@@ -36,6 +36,8 @@ type PartialPod struct {
 	Processes []struct {
 		Pid, Command string
 	}
+	TcQdisc  []string
+	Iptables []string
 }
 
 func NewCtrlClient(url string) *CtrlClient {

@@ -101,7 +101,7 @@ func Execute() {
 		httpChaos:    recover.PipelineBuilder(httpChaos, recover.CleanProcessRecoverBuilder("tproxy"), recover.HTTPRecover),
 		ioChaos:      recover.PipelineBuilder(ioChaos, recover.CleanProcessRecoverBuilder("toda"), recover.IORecover),
 		stressChaos:  recover.PipelineBuilder(stressChaos, recover.CleanProcessRecoverBuilder("stress-ng"), recover.CleanProcessRecoverBuilder("memStress")),
-		networkChaos: recover.PipelineBuilder(networkChaos, recover.NetworkRecover),
+		networkChaos: recover.PipelineBuilder(networkChaos, recover.TcsRecover, recover.IptablesRecover),
 	})
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
