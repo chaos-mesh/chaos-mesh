@@ -3358,6 +3358,10 @@ var doc = `{
                     "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
                     "type": "string"
                 },
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
@@ -3381,7 +3385,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "exception": {
@@ -3389,7 +3393,7 @@ var doc = `{
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
@@ -3397,7 +3401,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3410,7 +3414,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3419,7 +3423,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "latency": {
@@ -3427,7 +3431,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
@@ -3435,7 +3439,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3444,11 +3448,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
@@ -3456,7 +3460,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "value": {
@@ -3473,7 +3477,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -3498,7 +3502,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }

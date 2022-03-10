@@ -1037,6 +1037,9 @@ spec:
                           description: byteman rule name, should be unique, and will
                             use JVMChaos' name if not set
                           type: string
+                        pid:
+                          description: the pid of Java process which need to attach
+                          type: integer
                         port:
                           description: the port of agent server, default 9277
                           format: int32
@@ -1861,7 +1864,8 @@ spec:
                               description: the pid of Java process which need to attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-gc:
@@ -1870,7 +1874,8 @@ spec:
                               description: the pid of Java process which need to attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-latency:
@@ -1889,7 +1894,8 @@ spec:
                               description: the pid of Java process which need to attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-return:
@@ -1904,7 +1910,8 @@ spec:
                               description: the pid of Java process which need to attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                             value:
                               description: the return value for action 'return'
@@ -1916,7 +1923,8 @@ spec:
                               description: the pid of Java process which need to attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                             rule-data:
                               description: RuleData used to save the rule file's data,
@@ -1938,7 +1946,8 @@ spec:
                               description: the pid of Java process which need to attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         mode:
@@ -3460,6 +3469,9 @@ spec:
                               description: byteman rule name, should be unique, and
                                 will use JVMChaos' name if not set
                               type: string
+                            pid:
+                              description: the pid of Java process which need to attach
+                              type: integer
                             port:
                               description: the port of agent server, default 9277
                               format: int32
@@ -4313,7 +4325,8 @@ spec:
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-gc:
@@ -4323,7 +4336,8 @@ spec:
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-latency:
@@ -4343,7 +4357,8 @@ spec:
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-return:
@@ -4359,7 +4374,8 @@ spec:
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 value:
                                   description: the return value for action 'return'
@@ -4372,7 +4388,8 @@ spec:
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 rule-data:
                                   description: RuleData used to save the rule file's
@@ -4395,7 +4412,8 @@ spec:
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             mode:

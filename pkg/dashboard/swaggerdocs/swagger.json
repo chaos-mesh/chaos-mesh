@@ -3342,6 +3342,10 @@
                     "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
                     "type": "string"
                 },
+                "pid": {
+                    "description": "the pid of Java process which need to attach",
+                    "type": "integer"
+                },
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
@@ -3365,7 +3369,7 @@
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "exception": {
@@ -3373,7 +3377,7 @@
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
@@ -3381,7 +3385,7 @@
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3394,7 +3398,7 @@
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3403,7 +3407,7 @@
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "latency": {
@@ -3411,7 +3415,7 @@
                     "type": "integer"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
@@ -3419,7 +3423,7 @@
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3428,11 +3432,11 @@
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
@@ -3440,7 +3444,7 @@
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "value": {
@@ -3457,7 +3461,7 @@
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -3482,7 +3486,7 @@
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }

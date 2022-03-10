@@ -63,11 +63,11 @@ const (
 
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
-	JVMCommonSpec
+	JVMCommonSpec `json:",inline"`
 
-	JVMClassMethodSpec
+	JVMClassMethodSpec `json:",inline"`
 
-	JVMStressCfgSpec
+	JVMStressCfgSpec `json:",inline"`
 
 	// +optional
 	// byteman rule name, should be unique, and will use JVMChaos' name if not set
@@ -114,11 +114,11 @@ type JVMClassMethodSpec struct {
 type JVMStressCfgSpec struct {
 	// +optional
 	// the CPU core number need to use, only set it when action is stress
-	CPUCount int `json:"cpu-count,omitempty"`
+	CPUCount int `json:"cpuCount,omitempty"`
 
 	// +optional
 	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
-	MemoryType string `json:"mem-type,omitempty"`
+	MemoryType string `json:"memType,omitempty"`
 }
 
 // JVMChaosStatus defines the observed state of JVMChaos
