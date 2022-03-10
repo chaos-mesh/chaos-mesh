@@ -15611,6 +15611,11 @@ spec:
               maximum: 1000
               minimum: 1
               type: integer
+            successThreshold:
+              description: SuccessThreshold defines the minimum consecutive successes
+                for the status check to be considered successful.
+              minimum: 1
+              type: integer
             timeoutSeconds:
               description: TimeoutSeconds defines the number of seconds after which
                 an execution of status check times out.

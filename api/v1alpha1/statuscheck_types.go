@@ -98,6 +98,13 @@ type StatusCheckSpec struct {
 	// +kubebuilder:validation:Minimum=1
 	FailureThreshold int `json:"failureThreshold,omitempty"`
 
+	// SuccessThreshold defines the minimum consecutive successes
+	// for the status check to be considered successful.
+	// +optional
+	// +kubebuilder:default=1
+	// +kubebuilder:validation:Minimum=1
+	SuccessThreshold int `json:"successThreshold,omitempty"`
+
 	// RecordsHistoryLimit defines the number of record to retain.
 	// +optional
 	// +kubebuilder:default=100
@@ -151,18 +158,23 @@ type StatusCheckConditionType string
 const (
 	// StatusCheckConditionCompleted means the status check is completed.
 	// It will be `True`, in the following scenarios:
-	// 1. reach out the duration
+	// 1. the duration is exceeded
 	// 2. the failure threshold is exceeded
-	// 3. the status check is successful (only the `Synchronous` mode)
+	// 3. the success threshold is exceeded (only the `Synchronous` mode)
 	StatusCheckConditionCompleted StatusCheckConditionType = "Completed"
-	// StatusCheckConditionFailed means the failure threshold is exceeded.
-	StatusCheckConditionFailed StatusCheckConditionType = "Failed"
+	// StatusCheckConditionDurationExceed means the duration is exceeded.
+	StatusCheckConditionDurationExceed StatusCheckConditionType = "DurationExceed"
+	// StatusCheckConditionFailureThresholdExceed means the failure threshold is exceeded.
+	StatusCheckConditionFailureThresholdExceed StatusCheckConditionType = "FailureThresholdExceed"
+	// StatusCheckConditionSuccessThresholdExceed means the success threshold is exceeded.
+	StatusCheckConditionSuccessThresholdExceed StatusCheckConditionType = "SuccessThresholdExceed"
 )
 
 type StatusCheckReason string
 
 const (
-	StatusCheckSuccess StatusCheckReason = "StatusCheckSuccess"
+	StatusCheckExecutionSucceed StatusCheckReason = "StatusCheckExecutionSucceed"
+	StatusCheckExecutionFailed  StatusCheckReason = "StatusCheckExecutionFailed"
 	// TODO add more reason when implementing StatusCheck
 )
 
