@@ -29,8 +29,9 @@ import (
 )
 
 type SelectImpl struct {
-	c client.Client
-	r client.Reader
+	c           client.Client
+	r           client.Reader
+	podSelector *pod.SelectImpl
 
 	generic.Option
 }
@@ -45,7 +46,7 @@ func (c *Container) Id() string {
 }
 
 func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelector) ([]*Container, error) {
-	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &cs.PodSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
+	pods, err := impl.podSelector.Select(ctx, &cs.PodSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -57,9 +58,10 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 
 	var result []*Container
 	for _, pod := range pods {
+		pod := pod
 		if len(cs.ContainerNames) == 0 {
 			result = append(result, &Container{
-				Pod:           pod,
+				Pod:           pod.Pod,
 				ContainerName: pod.Spec.Containers[0].Name,
 			})
 			continue
@@ -68,7 +70,7 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 		for _, container := range pod.Spec.Containers {
 			if _, ok := containerNameMap[container.Name]; ok {
 				result = append(result, &Container{
-					Pod:           pod,
+					Pod:           pod.Pod,
 					ContainerName: container.Name,
 				})
 			}
@@ -81,15 +83,18 @@ func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelect
 type Params struct {
 	fx.In
 
-	Client client.Client
-	Reader client.Reader `name:"no-cache"`
+	Client      client.Client
+	Reader      client.Reader `name:"no-cache"`
+	PodSelector *pod.SelectImpl
 }
 
 func New(params Params) *SelectImpl {
 	return &SelectImpl{
-		params.Client,
-		params.Reader,
-		generic.Option{
+		c:           params.Client,
+		r:           params.Reader,
+		podSelector: params.PodSelector,
+		Option: generic.Option{
+			// TODO: remove this reference to global values
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,

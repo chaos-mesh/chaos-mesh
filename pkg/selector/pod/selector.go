@@ -88,6 +88,7 @@ func New(params Params) *SelectImpl {
 	return &SelectImpl{
 		params.Client,
 		params.Reader,
+		// TODO: remove this reference to global values
 		generic.Option{
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
