@@ -16,7 +16,6 @@
 package time
 
 import (
-	"bytes"
 	"runtime"
 
 	"github.com/pkg/errors"
@@ -44,7 +43,7 @@ type FakeImage struct {
 	// OriginAddress stores the origin address of OriginFuncCode.
 	OriginAddress uint64
 	// fakeEntry stores the fake entry
-	fakeEntry *mapreader.Entry
+	injectedPID *int
 }
 
 func NewFakeImage(symbolName string, content []byte, offset map[string]int) *FakeImage {
@@ -86,6 +85,8 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 	// target process has not been injected yet
 	if fakeEntry == nil {
 		fakeEntry, err = it.InjectFakeImage(program, vdsoEntry)
+		pidTemp := pid
+		it.injectedPID = &pidTemp
 		if err != nil {
 			return errors.Wrapf(err, "injecting fake image , PID : %d", pid)
 		}
@@ -132,17 +133,7 @@ func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 }
 
 func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
-	// minus tailing variable part
-	// every variable has 8 bytes
-	if it.fakeEntry != nil {
-		content, err := program.ReadSlice(it.fakeEntry.StartAddress, it.fakeEntry.EndAddress-it.fakeEntry.StartAddress)
-		if err != nil {
-			return nil, err
-		}
-		if bytes.Equal(*content, it.content) {
-			return it.fakeEntry, nil
-		}
-	}
+	// TODO : complete FindInjectedImage
 	return nil, nil
 }
 
@@ -154,7 +145,6 @@ func (it *FakeImage) InjectFakeImage(program *ptrace.TracedProgram,
 	if err != nil {
 		return nil, errors.Wrapf(err, "mmap fake image")
 	}
-	it.fakeEntry = fakeEntry
 	originAddr, size, err := program.FindSymbolInEntry(it.symbolName, vdsoEntry)
 	if err != nil {
 		return nil, errors.Wrapf(err, "find origin %s in vdso", it.symbolName)
@@ -208,14 +198,17 @@ func (it *FakeImage) Recover(pid int) error {
 		}
 	}()
 
-	fakeEntry, err := it.FindInjectedImage(program)
-	if err != nil {
-		return errors.Wrapf(err, "FindInjectedImage , pid: %d", pid)
-	}
-	if fakeEntry == nil {
-		return nil
+	//fakeEntry, err := it.FindInjectedImage(program)
+	//if err != nil {
+	//	return errors.Wrapf(err, "FindInjectedImage , pid: %d", pid)
+	//}
+	//if fakeEntry == nil {
+	//	return nil
+	//}
+
+	if it.injectedPID != nil && *it.injectedPID == pid {
+		err = it.TryReWriteFakeImage(program)
 	}
 
-	err = it.TryReWriteFakeImage(program)
 	return err
 }
