@@ -296,10 +296,10 @@ func (s *Service) listSchedule(c *gin.Context) {
 // @Description Get the detail of an archived schedule experiment.
 // @Tags archives
 // @Produce json
-// @Param uid query string true "uid"
+// @Param uid path string true "uid"
 // @Success 200 {object} Detail
-// @Router /archives/schedules/{uid} [get]
 // @Failure 500 {object} utils.APIError
+// @Router /archives/schedules/{uid} [get]
 func (s *Service) detailSchedule(c *gin.Context) {
 	var (
 		err    error
@@ -473,10 +473,10 @@ func (s *Service) listWorkflow(c *gin.Context) {
 // @Description Get the detail of an archived workflow.
 // @Tags archives
 // @Produce json
-// @Param uid query string true "uid"
+// @Param uid path string true "uid"
 // @Success 200 {object} Detail
-// @Router /archives/workflows/{uid} [get]
 // @Failure 500 {object} utils.APIError
+// @Router /archives/workflows/{uid} [get]
 func (s *Service) detailWorkflow(c *gin.Context) {
 	var (
 		err    error

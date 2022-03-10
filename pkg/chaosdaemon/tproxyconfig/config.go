@@ -176,7 +176,7 @@ type PodHttpChaosReplaceActions struct {
 
 	// Body is a rule to replace http message body in target.
 	// +optional
-	Body PodHttpChaosReplaceBody `json:"body,omitempty"`
+	Body *PodHttpChaosReplaceBody `json:"body,omitempty"`
 
 	// Queries is a rule to replace uri queries in http request.
 	// For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,

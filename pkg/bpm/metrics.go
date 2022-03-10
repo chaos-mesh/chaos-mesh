@@ -20,13 +20,13 @@ import (
 )
 
 type metricsCollector struct {
-	backgroundProcessManager  BackgroundProcessManager
+	backgroundProcessManager  *BackgroundProcessManager
 	bpmControlledProcesses    prometheus.Gauge
 	bpmControlledProcessTotal prometheus.Counter
 }
 
 // newMetricsCollector initializes metrics for each chaos daemon
-func newMetricsCollector(backgroundProcessManager BackgroundProcessManager, register prometheus.Registerer) *metricsCollector {
+func newMetricsCollector(backgroundProcessManager *BackgroundProcessManager, register prometheus.Registerer) *metricsCollector {
 	collector := &metricsCollector{
 		backgroundProcessManager: backgroundProcessManager,
 		bpmControlledProcesses: prometheus.NewGauge(prometheus.GaugeOpts{
