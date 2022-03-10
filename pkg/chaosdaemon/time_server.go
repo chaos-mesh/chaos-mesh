@@ -76,7 +76,6 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 	if err != nil {
 		return nil, err
 	}
-
 	return &empty.Empty{}, nil
 }
 
