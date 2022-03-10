@@ -19,26 +19,22 @@ import (
 	"context"
 	"crypto"
 	"crypto/x509"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 
 	"github.com/pkg/errors"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/label"
-
-	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/keyutil"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 )
 
 type PhysicalMachineInitOptions struct {
-	logger             logr.Logger
 	chaosMeshNamespace string
 	remoteIP           string
 	sshUser            string
@@ -50,10 +46,8 @@ type PhysicalMachineInitOptions struct {
 	labels             string
 }
 
-func NewPhysicalMachineInitCmd(logger logr.Logger) (*cobra.Command, error) {
-	initOption := &PhysicalMachineInitOptions{
-		logger: logger,
-	}
+func NewPhysicalMachineInitCmd() (*cobra.Command, error) {
+	initOption := &PhysicalMachineInitOptions{}
 
 	initCmd := &cobra.Command{
 		Use:   `init (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
@@ -90,14 +84,14 @@ Examples:
 
 func (o *PhysicalMachineInitOptions) Validate() error {
 	if len(o.remoteIP) == 0 {
-		return fmt.Errorf("--ip must be specified")
+		return errors.New("--ip must be specified")
 	}
 	return nil
 }
 
 func (o *PhysicalMachineInitOptions) Run(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("physical machine name is required")
+		return errors.New("physical machine name is required")
 	}
 	physicalMachineName := args[0]
 

@@ -23,7 +23,7 @@ import (
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
 )
@@ -68,13 +68,13 @@ func NewDefaultOperatorConfig() OperatorConfig {
 		ReleaseName: "chaos-mesh",
 		Tag:         "e2e",
 		Manager: ManagerConfig{
-			ImageRegistry:   "localhost:5000",
+			ImageRegistry:   "ghcr.io",
 			ImageRepository: "pingcap/chaos-mesh",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 		},
 		Daemon: DaemonConfig{
-			ImageRegistry:   "localhost:5000",
+			ImageRegistry:   "ghcr.io",
 			ImageRepository: "pingcap/chaos-daemon",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,

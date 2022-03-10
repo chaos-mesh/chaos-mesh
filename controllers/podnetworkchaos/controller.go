@@ -17,7 +17,6 @@ package podnetworkchaos
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -34,6 +33,7 @@ import (
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
@@ -130,7 +130,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}
 
-	err = r.SetIPSets(ctx, pod, obj)
+	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
+		Name:      obj.Name,
+		Namespace: obj.Namespace,
+	})
+	if err != nil {
+		r.Recorder.Event(obj, recorder.Failed{
+			Activity: "create chaos daemon client",
+			Err:      err.Error(),
+		})
+		return ctrl.Result{Requeue: true}, nil
+	}
+	defer pbClient.Close()
+
+	err = r.SetIPSets(ctx, pod, obj, pbClient)
 	if err != nil {
 		r.Log.Error(err, "fail to set ipsets")
 		r.Recorder.Event(obj, recorder.Failed{
@@ -140,7 +153,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	err = r.SetIptables(ctx, pod, obj)
+	err = r.SetIptables(ctx, pod, obj, pbClient)
 	if err != nil {
 		r.Log.Error(err, "fail to set iptables")
 		r.Recorder.Event(obj, recorder.Failed{
@@ -150,7 +163,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	err = r.SetTcs(ctx, pod, obj)
+	err = r.SetTcs(ctx, pod, obj, pbClient)
 	if err != nil {
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set tc",
@@ -163,7 +176,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // SetIPSets sets ipset on pod
-func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
 		ipsets = append(ipsets, &pb.IPSet{
@@ -171,11 +184,11 @@ func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1al
 			Cidrs: ipset.Cidrs,
 		})
 	}
-	return ipset.FlushIPSets(ctx, r.ChaosDaemonClientBuilder, pod, ipsets)
+	return ipset.FlushIPSets(ctx, chaosdaemonClient, pod, ipsets)
 }
 
 // SetIptables sets iptables on pod
-func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	chains := []*pb.Chain{}
 	for _, chain := range chaos.Spec.Iptables {
 		var direction pb.Chain_Direction
@@ -184,7 +197,7 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 		} else if chain.Direction == v1alpha1.Output {
 			direction = pb.Chain_OUTPUT
 		} else {
-			err := fmt.Errorf("unknown direction %s", string(chain.Direction))
+			err := errors.Errorf("unknown direction %s", string(chain.Direction))
 			r.Log.Error(err, "unknown direction")
 			return err
 		}
@@ -196,11 +209,11 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			Device:    chain.Device,
 		})
 	}
-	return iptable.SetIptablesChains(ctx, r.ChaosDaemonClientBuilder, pod, chains)
+	return iptable.SetIptablesChains(ctx, chaosdaemonClient, pod, chains)
 }
 
 // SetTcs sets traffic control related chaos on pod
-func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
 		if tc.Type == v1alpha1.Bandwidth {
@@ -226,12 +239,12 @@ func (r *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 				Device: tc.Device,
 			})
 		} else {
-			return fmt.Errorf("unknown tc type")
+			return errors.New("unknown tc type")
 		}
 	}
 
 	r.Log.Info("setting tcs", "tcs", tcs)
-	return tcpkg.SetTcs(ctx, r.ChaosDaemonClientBuilder, pod, tcs)
+	return tcpkg.SetTcs(ctx, chaosdaemonClient, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf

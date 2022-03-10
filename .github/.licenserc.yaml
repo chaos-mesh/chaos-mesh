@@ -10,6 +10,7 @@ header:
     - '.muse.toml'
     - '**/*.md'
     - '**/*.json'
+    - '**/*.log'
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
@@ -18,6 +19,8 @@ header:
     - 'Makefile'
     - 'PROJECT'
     - 'LICENSE'
+    # build cache in dev-env
+    - '.cache'
     # reported as unsupported by skywalking-eyes as of October 4th 2021
     - 'helm/chaos-mesh/.helmignore'
     - 'helm/chaos-mesh/templates/_helpers.tpl'
@@ -46,12 +49,17 @@ header:
     # Dockerfiles
     - '**/Dockerfile'
     # UI
-    - 'ui/.husky/pre-commit'
+    - 'ui/.husky/**'
     - 'ui/.prettierignore'
     - 'ui/.prettierrc'
     - 'ui/.yarnclean'
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
+    - 'ui/app/src/formik/**'
+    - 'ui/app/src/openapi/**'
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
+    - '**/node_modules/**'
+    - 'ui/app/build/**/*'
+    - 'ui/packages/mui-extends/esm/**/*'
     # codecov configuration file
     - codecov.yml

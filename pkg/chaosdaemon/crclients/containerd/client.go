@@ -21,6 +21,7 @@ import (
 	"syscall"
 
 	"github.com/containerd/containerd"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -48,10 +49,10 @@ type ContainerdClient struct {
 // FormatContainerID strips protocol prefix from the container ID
 func (c ContainerdClient) FormatContainerID(ctx context.Context, containerID string) (string, error) {
 	if len(containerID) < len(containerdProtocolPrefix) {
-		return "", fmt.Errorf("container id %s is not a containerd container id", containerID)
+		return "", errors.Errorf("container id %s is not a containerd container id", containerID)
 	}
 	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
-		return "", fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
+		return "", errors.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
 	}
 	return containerID[len(containerdProtocolPrefix):], nil
 }

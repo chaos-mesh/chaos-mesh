@@ -18,9 +18,8 @@ package store
 import (
 	"context"
 
-	"go.uber.org/fx"
-
 	"github.com/jinzhu/gorm"
+	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 

@@ -26,8 +26,3 @@ package-lock.json
 
 # eslint
 .eslintcache
-
-# ts-interface-builder
-*.type-ti.ts
-
-/packages/crd

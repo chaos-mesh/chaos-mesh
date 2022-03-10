@@ -16,9 +16,9 @@
 package utils
 
 import (
-	. "github.com/onsi/gomega"
-
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestEncodeClkIds(t *testing.T) {

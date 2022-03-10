@@ -18,7 +18,6 @@ package archive
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -26,6 +25,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -238,7 +238,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 	uids := c.Query("uids")
 	if uids == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("uids cannot be empty")))
 		return
 	}
 	uidSlice = strings.Split(uids, ",")
@@ -296,10 +296,10 @@ func (s *Service) listSchedule(c *gin.Context) {
 // @Description Get the detail of an archived schedule experiment.
 // @Tags archives
 // @Produce json
-// @Param uid query string true "uid"
+// @Param uid path string true "uid"
 // @Success 200 {object} Detail
-// @Router /archives/schedules/{uid} [get]
 // @Failure 500 {object} utils.APIError
+// @Router /archives/schedules/{uid} [get]
 func (s *Service) detailSchedule(c *gin.Context) {
 	var (
 		err    error
@@ -415,7 +415,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	uids := c.Query("uids")
 	if uids == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("uids cannot be empty")))
 		return
 	}
 	uidSlice = strings.Split(uids, ",")
@@ -473,10 +473,10 @@ func (s *Service) listWorkflow(c *gin.Context) {
 // @Description Get the detail of an archived workflow.
 // @Tags archives
 // @Produce json
-// @Param uid query string true "uid"
+// @Param uid path string true "uid"
 // @Success 200 {object} Detail
-// @Router /archives/workflows/{uid} [get]
 // @Failure 500 {object} utils.APIError
+// @Router /archives/workflows/{uid} [get]
 func (s *Service) detailWorkflow(c *gin.Context) {
 	var (
 		err    error
@@ -580,7 +580,7 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 	uids := c.Query("uids")
 	if uids == "" {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("uids cannot be empty")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("uids cannot be empty")))
 		return
 	}
 	uidSlice = strings.Split(uids, ",")

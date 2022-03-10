@@ -23,6 +23,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	dockerclient "github.com/docker/docker/client"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -51,10 +52,10 @@ type DockerClient struct {
 // FormatContainerID strips protocol prefix from the container ID
 func (c DockerClient) FormatContainerID(ctx context.Context, containerID string) (string, error) {
 	if len(containerID) < len(dockerProtocolPrefix) {
-		return "", fmt.Errorf("container id %s is not a docker container id", containerID)
+		return "", errors.Errorf("container id %s is not a docker container id", containerID)
 	}
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
-		return "", fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+		return "", errors.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
 	}
 	return containerID[len(dockerProtocolPrefix):], nil
 }
@@ -71,7 +72,7 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	}
 
 	if container.State.Pid == 0 {
-		return 0, fmt.Errorf("container is not running, status: %s", container.State.Status)
+		return 0, errors.Errorf("container is not running, status: %s", container.State.Status)
 	}
 
 	return uint32(container.State.Pid), nil

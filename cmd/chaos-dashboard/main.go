@@ -18,28 +18,25 @@ package main
 import (
 	"context"
 	"flag"
+	stdlog "log"
 	"os"
-
-	"go.uber.org/fx"
 
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
+	"go.uber.org/fx"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
-
-var log = ctrl.Log.WithName("chaos-dashboard")
 
 // @title Chaos Mesh Dashboard API
 // @version 2.0
@@ -63,8 +60,13 @@ func main() {
 		os.Exit(0)
 	}
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
-	mainLog := log.WithName("main")
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+
+	ctrl.SetLogger(rootLogger)
+	mainLog := rootLogger.WithName("main")
 
 	dashboardConfig, err := config.GetChaosDashboardEnv()
 	if err != nil {

@@ -20,11 +20,14 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // log is for logging in this package.
@@ -38,7 +41,7 @@ func (in *Workflow) ValidateCreate() error {
 	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), in.Spec.Entry, in.Spec.Templates)...)
 	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), in.Spec.Templates)...)
 	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
+		return errors.New(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
@@ -262,4 +265,8 @@ func shouldBeNoSchedule(path *field.Path, template Template) field.ErrorList {
 		}
 	}
 	return nil
+}
+
+func (in *Workflow) Default() {
+	gw.Default(in)
 }

@@ -18,6 +18,7 @@ package v1alpha1
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -34,6 +35,13 @@ var _ webhook.Defaulter = &Schedule{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *Schedule) Default() {
 	schedulelog.Info("default", "name", in.Name)
+	in.Spec.ConcurrencyPolicy.Default()
+}
+
+func (in *ConcurrencyPolicy) Default() {
+	if *in == "" {
+		*in = ForbidConcurrent
+	}
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-schedule,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=schedule,versions=v1alpha1,name=vschedule.kb.io
@@ -62,7 +70,7 @@ func (in *Schedule) ValidateDelete() error {
 func (in *Schedule) Validate() error {
 	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
+		return errors.New(allErrs.ToAggregate().Error())
 	}
 	return nil
 }

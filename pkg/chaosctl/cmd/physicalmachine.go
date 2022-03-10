@@ -16,17 +16,12 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/physicalmachine"
 )
 
-func NewPhysicalMachineCommand(logger logr.Logger) (*cobra.Command, error) {
-
+func NewPhysicalMachineCommand() (*cobra.Command, error) {
 	physicalMachineCmd := &cobra.Command{
 		Use:               `physical-machine (ACTION)`,
 		Aliases:           []string{"pm"},
@@ -35,31 +30,19 @@ func NewPhysicalMachineCommand(logger logr.Logger) (*cobra.Command, error) {
 		ValidArgsFunction: noCompletions,
 	}
 
-	initCmd, err := physicalmachine.NewPhysicalMachineInitCmd(logger)
+	initCmd, err := physicalmachine.NewPhysicalMachineInitCmd()
 	if err != nil {
-		logger.Error(err, "failed to initialize cmd",
-			"cmd", "physicalmachine-init",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
-		os.Exit(1)
+		return nil, err
 	}
 
-	generateCmd, err := physicalmachine.NewPhysicalMachineGenerateCmd(logger)
+	generateCmd, err := physicalmachine.NewPhysicalMachineGenerateCmd()
 	if err != nil {
-		logger.Error(err, "failed to initialize cmd",
-			"cmd", "physicalmachine-generate",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
-		os.Exit(1)
+		return nil, err
 	}
 
-	createCmd, err := physicalmachine.NewPhysicalMachineCreateCmd(logger)
+	createCmd, err := physicalmachine.NewPhysicalMachineCreateCmd()
 	if err != nil {
-		logger.Error(err, "failed to initialize cmd",
-			"cmd", "physicalmachine-create",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
-		os.Exit(1)
+		return nil, err
 	}
 
 	physicalMachineCmd.AddCommand(initCmd)

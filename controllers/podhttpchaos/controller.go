@@ -18,10 +18,10 @@ package podhttpchaos
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -31,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -54,6 +55,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			// TODO: handle this error
 			r.Log.Error(err, "unable to get chaos")
 		}
+		return ctrl.Result{}, nil
+	}
+
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration && obj.Status.FailedMessage == "" {
+		r.Log.Info("the target pod has been up to date", "pod", obj.Namespace+"/"+obj.Name)
 		return ctrl.Result{}, nil
 	}
 
@@ -102,7 +108,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 	}()
 
-	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod)
+	pbClient, err := r.ChaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
+		Namespace: obj.Namespace,
+		Name:      obj.Name,
+	})
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
@@ -110,7 +119,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		err = fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err = errors.Wrapf(utils.ErrContainerNotFound, "pod %s/%s has empty container status", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{}, nil
 	}
@@ -153,7 +162,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if res.StatusCode != http.StatusOK {
-		err = fmt.Errorf("status(%d), apply fail: %s", res.StatusCode, res.Error)
+		err = errors.Errorf("status(%d), apply fail: %s", res.StatusCode, res.Error)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}

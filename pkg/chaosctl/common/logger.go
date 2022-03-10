@@ -16,22 +16,12 @@
 package common
 
 import (
-	"flag"
-
 	"github.com/go-logr/logr"
-	"github.com/spf13/pflag"
-	"k8s.io/klog"
-	"k8s.io/klog/klogr"
+	"k8s.io/klog/v2"
+	"k8s.io/klog/v2/klogr"
 )
 
 type LoggerFlushFunc func()
-
-func SetupKlog() error {
-	// setup klog
-	klog.InitFlags(flag.CommandLine)
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	return flag.Set("logtostderr", "true")
-}
 
 func NewStderrLogger() (logr.Logger, LoggerFlushFunc, error) {
 	logger := klogr.New()
@@ -45,7 +35,7 @@ func SetupGlobalLogger(logger logr.Logger) {
 }
 
 func L() logr.Logger {
-	if globalLogger == nil {
+	if globalLogger.GetSink() == nil {
 		panic("global logger not initialized")
 	}
 	return globalLogger

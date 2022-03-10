@@ -19,12 +19,13 @@ package v1alpha1
 
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
 
 const (
 	ScheduleTypeAWSChaos ScheduleTemplateType = "AWSChaos"
+	ScheduleTypeBlockChaos ScheduleTemplateType = "BlockChaos"
 	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
 	ScheduleTypeGCPChaos ScheduleTemplateType = "GCPChaos"
 	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
@@ -42,6 +43,7 @@ const (
 
 var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeAWSChaos,
+	ScheduleTypeBlockChaos,
 	ScheduleTypeDNSChaos,
 	ScheduleTypeGCPChaos,
 	ScheduleTypeHTTPChaos,
@@ -62,6 +64,10 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 	case ScheduleTypeAWSChaos:
 		result := AWSChaos{}
 		result.Spec = *it.AWSChaos
+		return &result, nil
+	case ScheduleTypeBlockChaos:
+		result := BlockChaos{}
+		result.Spec = *it.BlockChaos
 		return &result, nil
 	case ScheduleTypeDNSChaos:
 		result := DNSChaos{}
@@ -113,7 +119,7 @@ func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (Gener
 		return &result, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
 	}
 }
 
@@ -121,6 +127,9 @@ func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
 	switch chaos := root.(type) {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec
+		return nil
+	case *BlockChaos:
+		*it.BlockChaos = chaos.Spec
 		return nil
 	case *DNSChaos:
 		*it.DNSChaos = chaos.Spec
@@ -160,6 +169,6 @@ func (it *ScheduleItem) RestoreChaosSpec(root interface{}) error {
 		return nil
 
 	default:
-		return fmt.Errorf("unsupported chaos %#v", root)
+		return errors.Wrapf(errInvalidValue, "unknown chaos %#v", root)
 	}
 }

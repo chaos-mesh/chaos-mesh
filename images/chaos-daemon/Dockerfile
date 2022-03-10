@@ -28,7 +28,7 @@ ENV PATH $PATH:/usr/local/byteman/bin
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.0/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.2/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
@@ -40,7 +40,8 @@ RUN case "$TARGET_PLATFORM" in \
     esac; \
     curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
     mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so; \
-    curl -L https://github.com/chaos-mesh/rs-tproxy/releases/download/v0.4.5/tproxy-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin
+    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.4.5/tproxy-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
+    curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.2.1/memStress_v0.2.1-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause

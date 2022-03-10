@@ -16,12 +16,12 @@
 package v1alpha1
 
 import (
-	"fmt"
 	"reflect"
 
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // validateDeviceName validates the DeviceName
@@ -32,7 +32,7 @@ func (in GCPChaosAction) Validate(root interface{}, path *field.Path) field.Erro
 	case NodeStop, DiskLoss:
 	case NodeReset:
 	default:
-		err := fmt.Errorf("gcpchaos have unknown action type")
+		err := errors.WithStack(errUnknownAction)
 		log.Error(err, "Wrong GCPChaos Action type")
 
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
@@ -48,7 +48,7 @@ func (in *GCPDeviceNames) Validate(root interface{}, path *field.Path) field.Err
 	obj := root.(*GCPChaos)
 	if obj.Spec.Action == DiskLoss {
 		if *in == nil {
-			err := fmt.Errorf("at least one device name is required on %s action", obj.Spec.Action)
+			err := errors.Errorf("at least one device name is required on %s action", obj.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, *in, err.Error()))
 		}
 	}

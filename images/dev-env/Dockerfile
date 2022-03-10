@@ -1,15 +1,19 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.16.7 AS go_install
+FROM golang:1.17 AS go_install
 
 ENV GO111MODULE=on
 ENV GOPATH /go
 ENV CGO_ENABLED 0
 
+RUN mkdir -p /go/src/github.com/YangKeao/tools
+WORKDIR /go/src/github.com/YangKeao/tools
+RUN git clone https://github.com/YangKeao/tools.git -b v0.1.9-with-combine --depth 1 .
+RUN go install ./cmd/goimports
+
 RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 RUN go install github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
-RUN go install golang.org/x/tools/cmd/goimports@v0.1.4
 RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
 RUN go install github.com/99designs/gqlgen@v0.13.0
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
@@ -29,8 +33,8 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \
-    apt-get install unzip git build-essential curl python -y && \
+RUN apt-get update && \ 
+    apt-get install unzip git build-essential curl python musl musl-dev python3 -y && \
     rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
@@ -54,6 +58,7 @@ RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
 
+COPY --from=apache/skywalking-eyes:0.2.0 /bin/license-eye /bin/license-eye
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 

@@ -19,14 +19,18 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
+	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -127,6 +131,19 @@ func (it *GrpcBuilder) WithTimeout(timeout time.Duration) *GrpcBuilder {
 	return it
 }
 
+func namespacedNameInterceptor(id types.NamespacedName) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, reply interface{}, conn *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		ctx = metadata.AppendToOutgoingContext(ctx, string(log.MetaNamespacedName), id.String())
+
+		return invoker(ctx, method, req, reply, conn, opts...)
+	}
+}
+
+func (it *GrpcBuilder) WithNamespacedName(id types.NamespacedName) *GrpcBuilder {
+	it.options = append(it.options, grpc.WithUnaryInterceptor(namespacedNameInterceptor(id)))
+	return it
+}
+
 func (it *GrpcBuilder) Insecure() *GrpcBuilder {
 	it.credentialProvider = &InsecureProvider{}
 	return it
@@ -157,13 +174,13 @@ func (it *GrpcBuilder) TLSFromFile(caCertPath string, certPath string, keyPath s
 
 func (it *GrpcBuilder) Build() (*grpc.ClientConn, error) {
 	if it.credentialProvider == nil {
-		return nil, fmt.Errorf("an authorization method must be specified")
+		return nil, errors.New("an authorization method must be specified")
 	}
-	option, err := it.credentialProvider.getCredentialOption()
+	credentialOption, err := it.credentialProvider.getCredentialOption()
 	if err != nil {
 		return nil, err
 	}
-	it.options = append(it.options, option)
+	it.options = append(it.options, credentialOption)
 	return grpc.Dial(net.JoinHostPort(it.address, strconv.Itoa(it.port)), it.options...)
 }
 

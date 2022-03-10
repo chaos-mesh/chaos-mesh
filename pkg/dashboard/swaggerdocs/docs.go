@@ -212,7 +212,7 @@ var doc = `{
                         "type": "string",
                         "description": "uid",
                         "name": "uid",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -356,7 +356,7 @@ var doc = `{
                         "type": "string",
                         "description": "uid",
                         "name": "uid",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -1806,9 +1806,7 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/workflows/new": {
+            },
             "post": {
                 "description": "Create a new workflow.",
                 "produces": [
@@ -2596,6 +2594,9 @@ var doc = `{
         "status.AllChaosStatus": {
             "type": "object",
             "properties": {
+                "deleting": {
+                    "type": "integer"
+                },
                 "finished": {
                     "type": "integer"
                 },
@@ -2647,7 +2648,7 @@ var doc = `{
                     "type": "string"
                 },
                 "deviceName": {
-                    "description": "DeviceName indicates the name of the device.\nNeeded in detach-volume.\n+optional",
+                    "description": "DeviceName indicates the name of the device.\nNeeded in detach-volume.\n+ui:form:when=action=='detach-volume'\n+optional",
                     "type": "string"
                 },
                 "duration": {
@@ -2659,7 +2660,7 @@ var doc = `{
                     "type": "string"
                 },
                 "endpoint": {
-                    "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\n+optional",
+                    "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\n+ui:form:ignore\n+optional",
                     "type": "string"
                 },
                 "secretName": {
@@ -2667,7 +2668,7 @@ var doc = `{
                     "type": "string"
                 },
                 "volumeID": {
-                    "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\n+optional",
+                    "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\n+ui:form:when=action=='detach-volume'\n+optional",
                     "type": "string"
                 }
             }
@@ -2753,6 +2754,70 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.BlockChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific block chaos action.\nSupported action: limit / delay\n+kubebuilder:validation:Enum=limit;delay",
+                    "type": "string"
+                },
+                "containerNames": {
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "delay": {
+                    "description": "Delay defines the delay distribution.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockDelaySpec"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "iops": {
+                    "description": "IOPS defines the limit of IO frequency.\n+optional",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "selector": {
+                    "description": "Selector is used to select pods that are used to inject chaos action.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                },
+                "volumeName": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.BlockDelaySpec": {
+            "type": "object",
+            "properties": {
+                "correlation": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0"
+                },
+                "jitter": {
+                    "description": "+optional",
+                    "type": "string",
+                    "default": "0ms"
+                },
+                "latency": {
+                    "description": "Latency defines the latency of every io request.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.CPUStressor": {
             "type": "object",
             "properties": {
@@ -2780,6 +2845,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
@@ -2908,7 +2978,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3066,7 +3136,7 @@ var doc = `{
                     "type": "string"
                 },
                 "deviceNames": {
-                    "description": "The device name of disks to detach.\nNeeded in disk-loss.\n+optional",
+                    "description": "The device name of disks to detach.\nNeeded in disk-loss.\n+ui:form:when=action=='disk-loss'\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3081,7 +3151,7 @@ var doc = `{
                     "type": "string"
                 },
                 "project": {
-                    "description": "Project defines the name of gcp project.",
+                    "description": "Project defines the ID of gcp project.",
                     "type": "string"
                 },
                 "secretName": {
@@ -3159,7 +3229,7 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "target": {
-                    "description": "+kubebuilder:validation:Enum=Request;Response\nTarget is the object to be selected and injected.",
+                    "description": "Target is the object to be selected and injected.\n+kubebuilder:validation:Enum=Request;Response",
                     "type": "string"
                 },
                 "value": {
@@ -3176,19 +3246,19 @@ var doc = `{
                     "type": "string"
                 },
                 "attr": {
-                    "description": "Attr defines the overrided attribution\n+optional",
+                    "description": "Attr defines the overrided attribution\n+ui:form:when=action=='attrOverride'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AttrOverrideSpec"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "delay": {
-                    "description": "Delay defines the value of I/O chaos action delay.\nA delay string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "description": "Delay defines the value of I/O chaos action delay.\nA delay string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+ui:form:when=action=='latency'\n+optional",
                     "type": "string"
                 },
                 "duration": {
@@ -3196,7 +3266,7 @@ var doc = `{
                     "type": "string"
                 },
                 "errno": {
-                    "description": "Errno defines the error code that returned by I/O action.\nrefer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html\n+optional",
+                    "description": "Errno defines the error code that returned by I/O action.\nrefer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html\n+ui:form:when=action=='fault'\n+optional",
                     "type": "integer"
                 },
                 "methods": {
@@ -3207,7 +3277,7 @@ var doc = `{
                     }
                 },
                 "mistake": {
-                    "description": "Mistake defines what types of incorrectness are injected to IO operations\n+optional",
+                    "description": "Mistake defines what types of incorrectness are injected to IO operations\n+ui:form:when=action=='mistake'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.MistakeSpec"
                 },
@@ -3250,7 +3320,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3460,12 +3530,6 @@ var doc = `{
                 }
             }
         },
-        "v1alpha1.LabelSelectorRequirements": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/metav1.LabelSelectorRequirement"
-            }
-        },
         "v1alpha1.LossSpec": {
             "type": "object",
             "properties": {
@@ -3574,7 +3638,7 @@ var doc = `{
                     "type": "string"
                 },
                 "direction": {
-                    "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both;\"\"",
+                    "description": "Direction represents the direction, this applies on netem and network partition action\n+optional\n+kubebuilder:validation:Enum=to;from;both\n+kubebuilder:default=to",
                     "type": "string"
                 },
                 "duplicate": {
@@ -3824,7 +3888,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "the subAction, generate automatically\n+optional",
+                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock",
                     "type": "string"
                 },
                 "address": {
@@ -3835,22 +3899,22 @@ var doc = `{
                     }
                 },
                 "clock": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='clock'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ClockSpec"
                 },
                 "disk-fill": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='disk-fill'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskFillSpec"
                 },
                 "disk-read-payload": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='disk-read-payload'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
                 "disk-write-payload": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='disk-write-payload'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskPayloadSpec"
                 },
@@ -3859,32 +3923,32 @@ var doc = `{
                     "type": "string"
                 },
                 "jvm-exception": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-exception'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMExceptionSpec"
                 },
                 "jvm-gc": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-gc'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMGCSpec"
                 },
                 "jvm-latency": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-latency'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMLatencySpec"
                 },
                 "jvm-return": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-return'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMReturnSpec"
                 },
                 "jvm-rule-data": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-rule-data'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMRuleDataSpec"
                 },
                 "jvm-stress": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='jvm-stress'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
                 },
@@ -3893,42 +3957,42 @@ var doc = `{
                     "type": "string"
                 },
                 "network-bandwidth": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-bandwidth'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkBandwidthSpec"
                 },
                 "network-corrupt": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-corrupt'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkCorruptSpec"
                 },
                 "network-delay": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-delay'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDelaySpec"
                 },
                 "network-dns": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-dns'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDNSSpec"
                 },
                 "network-duplicate": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-duplicate'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkDuplicateSpec"
                 },
                 "network-loss": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-loss'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkLossSpec"
                 },
                 "network-partition": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='network-partition'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.NetworkPartitionSpec"
                 },
                 "process": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='process'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
@@ -3938,18 +4002,14 @@ var doc = `{
                     "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
                 },
                 "stress-cpu": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='stress-cpu'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.StressCPUSpec"
                 },
                 "stress-mem": {
-                    "description": "+optional",
+                    "description": "+ui:form:when=action=='stress-mem'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.StressMemorySpec"
-                },
-                "uid": {
-                    "description": "the experiment ID\n+optional",
-                    "type": "string"
                 },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of physical machines to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
@@ -3966,11 +4026,6 @@ var doc = `{
                     "additionalProperties": {
                         "type": "string"
                     }
-                },
-                "expressionSelectors": {
-                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
                 },
                 "fieldSelectors": {
                     "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
@@ -4013,7 +4068,7 @@ var doc = `{
                     "type": "string"
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4151,11 +4206,6 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "expressionSelectors": {
-                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+optional",
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.LabelSelectorRequirements"
-                },
                 "fieldSelectors": {
                     "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
                     "type": "object",
@@ -4261,8 +4311,13 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
+                },
                 "concurrencyPolicy": {
-                    "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
+                    "description": "+optional\n+kubebuilder:default=Forbid\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
                 },
                 "dnsChaos": {
@@ -4376,7 +4431,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4458,6 +4513,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "blockChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
                 "children": {
                     "description": "Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.\n+optional",
@@ -4561,7 +4621,7 @@ var doc = `{
                     }
                 },
                 "containerNames": {
-                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, all containers will be injected\n+optional",
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"

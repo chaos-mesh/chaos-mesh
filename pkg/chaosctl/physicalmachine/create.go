@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,7 +30,6 @@ import (
 )
 
 type PhysicalMachineCreateOptions struct {
-	logger     logr.Logger
 	namespace  string
 	labels     string
 	remoteIP   string
@@ -38,10 +37,8 @@ type PhysicalMachineCreateOptions struct {
 	secure     bool
 }
 
-func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
-	createOption := &PhysicalMachineCreateOptions{
-		logger: logger,
-	}
+func NewPhysicalMachineCreateCmd() (*cobra.Command, error) {
+	createOption := &PhysicalMachineCreateOptions{}
 
 	createCmd := &cobra.Command{
 		Use:           `create (PHYSICALMACHINE_NAME) [-n NAMESPACE]`,
@@ -67,14 +64,14 @@ func NewPhysicalMachineCreateCmd(logger logr.Logger) (*cobra.Command, error) {
 
 func (o *PhysicalMachineCreateOptions) Validate() error {
 	if len(o.remoteIP) == 0 {
-		return fmt.Errorf("--ip must be specified")
+		return errors.New("--ip must be specified")
 	}
 	return nil
 }
 
 func (o *PhysicalMachineCreateOptions) Run(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("physical machine name is required")
+		return errors.New("physical machine name is required")
 	}
 	physicalMachineName := args[0]
 

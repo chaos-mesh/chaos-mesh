@@ -32,6 +32,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
+var (
+	errNilDecoder error = errors.New("impl decoder is nil")
+)
+
 var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const CommonRuleTemplate = `
@@ -69,9 +73,9 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("jvm chaos apply", "record", records[index])
 	if impl.decoder == nil {
-		return v1alpha1.NotInjected, fmt.Errorf("impl decoder is nil")
+		return v1alpha1.NotInjected, errors.WithStack(errNilDecoder)
 	}
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	if decodedContainer.PbClient != nil {
 		defer func() {
 			err := decodedContainer.PbClient.Close()
@@ -107,9 +111,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 // Recover means the reconciler recovers the chaos action
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	if impl.decoder == nil {
-		return v1alpha1.Injected, fmt.Errorf("impl decoder is nil")
+		return v1alpha1.Injected, errors.WithStack(errNilDecoder)
 	}
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	if decodedContainer.PbClient != nil {
 		defer func() {
 			err := decodedContainer.PbClient.Close()
@@ -193,7 +197,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 		return errors.Errorf("jvm action %s not supported", spec.Action)
 	}
 	if t == nil {
-		return errors.Errorf("parse byeman rule template failed")
+		return errors.New("parse byeman rule template failed")
 	}
 	err := t.Execute(buf, ruleParameter)
 	if err != nil {

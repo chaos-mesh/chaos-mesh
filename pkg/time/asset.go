@@ -20,70 +20,63 @@ import (
 	"debug/elf"
 	"embed"
 	"encoding/binary"
-	"os"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 )
 
 //go:embed fakeclock/*.o
 var fakeclock embed.FS
 
-// FakeImage introduce the replacement of VDSO ELF entry and customizable variables.
-// FakeImage could be constructed by LoadFakeImageFromEmbedFs(), and then used by FakeClockInjector.
-type FakeImage struct {
-	// content presents .text section which has been "manually relocation", the address of extern variables have been calculated manually
-	content []byte
-	// offset stores the table with variable name, and it's address in content.
-	// the key presents extern variable name, ths value is the address/offset within the content.
-	offset map[string]int
-}
+const textSection = ".text"
+const relocationSection = ".rela.text"
 
 // LoadFakeImageFromEmbedFs builds FakeImage from the embed filesystem. It parses the ELF file and extract the variables from the relocation section, reserves the space for them at the end of content, then calculates and saves offsets as "manually relocation"
-func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
+func LoadFakeImageFromEmbedFs(filename string, symbolName string, logger logr.Logger) (*FakeImage, error) {
 	path := "fakeclock/" + filename
 	object, err := fakeclock.ReadFile(path)
 	if err != nil {
-		log.Error(err, "read file from embedded fs", "path", path)
-		os.Exit(1)
+		return nil, errors.Wrapf(err, "read file from embedded fs %s", path)
 	}
 
 	elfFile, err := elf.NewFile(bytes.NewReader(object))
 	if err != nil {
-		log.Error(err, "parse elf", "path", path)
-		os.Exit(1)
+		return nil, errors.Wrapf(err, "parse elf file %s", path)
 	}
 
 	syms, err := elfFile.Symbols()
 	if err != nil {
-		log.Error(err, "get symbols")
-		os.Exit(1)
+		return nil, errors.Wrapf(err, "get symbols %s", path)
 	}
 
-	fakeImage := FakeImage{
-		offset: make(map[string]int),
-	}
+	var imageContent []byte
+	imageOffset := make(map[string]int)
+
 	for _, r := range elfFile.Sections {
-		if r.Type == elf.SHT_PROGBITS && r.Name == ".text" {
-			fakeImage.content, err = r.Data()
-			if err != nil {
-				log.Error(err, "read text section")
-				os.Exit(1)
-			}
 
+		if r.Type == elf.SHT_PROGBITS && r.Name == textSection {
+			imageContent, err = r.Data()
+			if err != nil {
+				return nil, errors.Wrapf(err, "read text section data %s", path)
+			}
 			break
 		}
 	}
 
 	for _, r := range elfFile.Sections {
-		if r.Type == elf.SHT_RELA && r.Name == ".rela.text" {
+		if r.Type == elf.SHT_RELA && r.Name == relocationSection {
 			rela_section, err := r.Data()
 			if err != nil {
-				log.Error(err, "read rela section")
-				os.Exit(1)
+				return nil, errors.Wrapf(err, "read rela section data %s", path)
 			}
 			rela_section_reader := bytes.NewReader(rela_section)
 
 			var rela elf.Rela64
 			for rela_section_reader.Len() > 0 {
-				binary.Read(rela_section_reader, elfFile.ByteOrder, &rela)
+				err := binary.Read(rela_section_reader, elfFile.ByteOrder, &rela)
+				if err != nil {
+					return nil, errors.Wrapf(err, "read rela section rela64 entry %s", path)
+				}
 
 				symNo := rela.Info >> 32
 				if symNo == 0 || symNo > uint64(len(syms)) {
@@ -102,16 +95,21 @@ func LoadFakeImageFromEmbedFs(filename string) (*FakeImage, error) {
 				// len(fakeImage.content) - 4 - 0x16
 
 				sym := &syms[symNo-1]
-				fakeImage.offset[sym.Name] = len(fakeImage.content)
-				targetOffset := uint32(len(fakeImage.content)) - uint32(rela.Off) + uint32(rela.Addend)
-				elfFile.ByteOrder.PutUint32(fakeImage.content[rela.Off:rela.Off+4], targetOffset)
+				imageOffset[sym.Name] = len(imageContent)
+				targetOffset := uint32(len(imageContent)) - uint32(rela.Off) + uint32(rela.Addend)
+				elfFile.ByteOrder.PutUint32(imageContent[rela.Off:rela.Off+4], targetOffset)
 
 				// TODO: support other length besides uint64 (which is 8 bytes)
-				fakeImage.content = append(fakeImage.content, make([]byte, 8)...)
+				imageContent = append(imageContent, make([]byte, 8)...)
 			}
 
 			break
 		}
 	}
-	return &fakeImage, nil
+	return NewFakeImage(
+		symbolName,
+		imageContent,
+		imageOffset,
+		logger,
+	), nil
 }

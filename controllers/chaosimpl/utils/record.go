@@ -18,7 +18,9 @@ package utils
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -46,24 +48,21 @@ type DecodedContainerRecord struct {
 	Pod *v1.Pod
 }
 
-func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record) (decoded DecodedContainerRecord, err error) {
+func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, obj v1alpha1.InnerObject) (decoded DecodedContainerRecord, err error) {
 	var pod v1.Pod
 	podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	err = d.Client.Get(ctx, podId, &pod)
 	if err != nil {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, err)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 	decoded.Pod = &pod
 	if len(pod.Status.ContainerStatuses) == 0 {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
@@ -74,12 +73,14 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 		}
 	}
 	if len(decoded.ContainerId) == 0 {
-		// TODO: organize the error in a better way
-		err = NewFailToFindContainer(pod.Namespace, pod.Name, containerName, nil)
+		err = errors.Wrapf(ErrContainerNotFound, "container with id %s not found", record.Id)
 		return
 	}
 
-	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod)
+	decoded.PbClient, err = d.ChaosDaemonClientBuilder.Build(ctx, &pod, &types.NamespacedName{
+		Namespace: obj.GetNamespace(),
+		Name:      obj.GetName(),
+	})
 	if err != nil {
 		return
 	}

@@ -67,7 +67,7 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		skipConfigCheck = true
 		allErrs = append(allErrs,
 			field.Invalid(path.Child("spec"), in,
-				"the configuration corresponding to action is empty"))
+				"the configuration corresponding to action is required"))
 	}
 
 	if len(in.Address) == 0 && in.Selector.Empty() {
@@ -82,7 +82,7 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 	for _, address := range in.Address {
 		if len(address) == 0 {
 			allErrs = append(allErrs,
-				field.Invalid(path.Child("address"), in.Address, "the address is empty"))
+				field.Invalid(path.Child("address"), in.Address, "the address is required"))
 		}
 	}
 
@@ -112,6 +112,8 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateNetworkDelayAction(in.NetworkDelay)
 	case PMNetworkPartitionAction:
 		validateConfigErr = validateNetworkPartitionAction(in.NetworkPartition)
+	case PMNetworkBandwidthAction:
+		validateConfigErr = validateNetworkBandwidthAction(in.NetworkBandwidth)
 	case PMNetworkDNSAction:
 		validateConfigErr = validateNetworkDNSAction(in.NetworkDNS)
 	case PMProcessAction:
@@ -131,8 +133,6 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 	case PMClockAction:
 		validateConfigErr = validateClockAction(in.Clock)
 	default:
-		allErrs = append(allErrs,
-			field.Invalid(path.Child("spec"), in, "unsupported action"))
 	}
 
 	if validateConfigErr != nil {
@@ -274,7 +274,19 @@ func validateNetworkPartitionAction(spec *NetworkPartitionSpec) error {
 	}
 
 	if len(spec.AcceptTCPFlags) > 0 && spec.IPProtocol != "tcp" {
-		return errors.Errorf("protocol should be 'tcp' when set accept-tcp-flags")
+		return errors.New("protocol should be 'tcp' when set accept-tcp-flags")
+	}
+
+	return nil
+}
+
+func validateNetworkBandwidthAction(spec *NetworkBandwidthSpec) error {
+	if len(spec.Device) == 0 {
+		return errors.New("device is required")
+	}
+
+	if len(spec.Rate) == 0 || spec.Limit == 0 || spec.Buffer == 0 {
+		return errors.Errorf("rate, limit and buffer both are required when action is bandwidth")
 	}
 
 	return nil
@@ -462,7 +474,7 @@ func ParseUnit(s string) (uint64, error) {
 	if n, err := units.ParseUnit(s, decimalUnitMap); err == nil {
 		return uint64(n), nil
 	}
-	return 0, fmt.Errorf("units: unknown unit %s", s)
+	return 0, errors.Wrapf(errInvalidValue, "unknown unit %s", s)
 }
 
 func (in *NetworkBandwidthSpec) Validate(root interface{}, path *field.Path) field.ErrorList {

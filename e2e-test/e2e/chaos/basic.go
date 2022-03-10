@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/onsi/ginkgo"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -35,13 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
-	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-
-	// testcases
 	dnschaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/dnschaos"
 	httpchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/httpchaos"
 	iochaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/iochaos"
@@ -50,6 +44,11 @@ import (
 	sidecartestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/sidecar"
 	stresstestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/stresschaos"
 	timechaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/timechaos"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {
@@ -301,6 +300,16 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 		})
 
+		// http chaos case in [HTTPReplaceBody] context
+		ginkgo.Context("[HTTPReplaceBody]", func() {
+			ginkgo.It("[Schedule]", func() {
+				httpchaostestcases.TestcaseHttpReplaceBodyThenRecover(ns, cli, client, port)
+			})
+			ginkgo.It("[Pause]", func() {
+				httpchaostestcases.TestcaseHttpReplaceBodyPauseAndUnPause(ns, cli, client, port)
+			})
+		})
+
 		// http chaos case in [HTTPPatch] context
 		ginkgo.Context("[HTTPPatch]", func() {
 			ginkgo.It("[Schedule]", func() {
@@ -508,11 +517,11 @@ func getPod(kubeCli kubernetes.Interface, ns string, appLabel string) (*v1.Pod, 
 	}
 
 	if len(pods.Items) > 1 {
-		return nil, fmt.Errorf("select more than one pod")
+		return nil, errors.New("select more than one pod")
 	}
 
 	if len(pods.Items) == 0 {
-		return nil, fmt.Errorf("cannot select any pod")
+		return nil, errors.New("cannot select any pod")
 	}
 
 	return &pods.Items[0], nil
