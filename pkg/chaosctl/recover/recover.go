@@ -83,9 +83,8 @@ func (r *CleanProcessRecover) Recover(ctx context.Context, pod *ctrlclient.Parti
 	if len(pids) == 0 {
 		printStep(fmt.Sprintf("all %s processes are cleaned up", r.process))
 		return nil
-	} else {
-		printStep(fmt.Sprintf("cleaning %s processes: %v", r.process, pids))
 	}
+	printStep(fmt.Sprintf("cleaning %s processes: %v", r.process, pids))
 
 	var mutation struct {
 		Pod struct {

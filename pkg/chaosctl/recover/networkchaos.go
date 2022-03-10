@@ -72,9 +72,8 @@ func (r *tcsRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) er
 	if len(devices) == 0 {
 		printStep("all tc rules are cleaned up")
 		return nil
-	} else {
-		printStep(fmt.Sprintf("cleaning tc rules for device %v", devices))
 	}
+	printStep(fmt.Sprintf("cleaning tc rules for device %v", devices))
 
 	var mutation struct {
 		Pod struct {
@@ -133,9 +132,8 @@ func (r *iptablesRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPo
 	if len(chains) == 0 {
 		printStep("all iptables rules are cleaned up")
 		return nil
-	} else {
-		printStep(fmt.Sprintf("cleaning iptables rules for chains %v", chains))
 	}
+	printStep(fmt.Sprintf("cleaning iptables rules for chains %v", chains))
 
 	var mutation struct {
 		Pod struct {

@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -31,6 +32,7 @@ import (
 
 type RecoverOptions struct {
 	namespace string
+	labels    *[]string
 }
 
 func NewRecoverCommand(logger logr.Logger, builders map[string]recover.RecoverBuilder) (*cobra.Command, error) {
@@ -55,24 +57,34 @@ Examples:
 		recoverCmd.AddCommand(recoverResourceCommand(o, chaosType, builder))
 	}
 
-	recoverCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
+	recoverCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find pods")
+	o.labels = recoverCmd.PersistentFlags().StringSliceP("label", "l", nil, "labels to select pods")
 	err := recoverCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		client, cancel, err := common.CreateClient(context.TODO(), managerNamespace, managerSvc)
 		if err != nil {
-			logger.Error(err, "fail to create client")
+			logger.Error(err, "create client")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 		defer cancel()
 
 		completion, err := client.ListNamespace(context.TODO())
 		if err != nil {
-			logger.Error(err, "fail to complete resource")
+			logger.Error(err, "complete resource")
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
 		return completion, cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
 	})
-	return recoverCmd, err
+	if err != nil {
+		return nil, errors.Wrap(err, "register completion func for flag `namespace`")
+	}
+	err = recoverCmd.RegisterFlagCompletionFunc("label", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "register completion func for flag `label`")
+	}
+	return recoverCmd, nil
 }
 
 func recoverResourceCommand(option *RecoverOptions, chaosType string, builder recover.RecoverBuilder) *cobra.Command {
@@ -142,9 +154,25 @@ func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []strin
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	return client.SelectPods(ctx, v1alpha1.PodSelectorSpec{
+	selector := v1alpha1.PodSelectorSpec{
 		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
 			Namespaces: []string{o.namespace},
 		},
-	})
+	}
+
+	labelSelector := map[string]string{}
+	if o.labels != nil && len(*o.labels) > 0 {
+		for _, label := range *o.labels {
+			pair := strings.Split(label, "=")
+			if len(pair) == 2 {
+				labelSelector[pair[0]] = pair[1]
+			}
+		}
+	}
+
+	if len(labelSelector) != 0 {
+		selector.LabelSelectors = labelSelector
+	}
+
+	return client.SelectPods(ctx, selector)
 }
