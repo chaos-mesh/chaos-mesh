@@ -175,7 +175,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	legacyPodSelector := pod.NewLegacyPodSelector(kubeCli, kubeCli, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	legacyPodSelector := pod.NewLegacyPodSelector(kubeCli, nil, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	filteredPods, err := legacyPodSelector.SelectPods(ctx, selector)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -304,7 +304,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	selector.Namespaces = nsList
 
 	ctx := context.TODO()
-	legacyPodSelector := pod.NewLegacyPodSelector(kubeCli, kubeCli, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	legacyPodSelector := pod.NewLegacyPodSelector(kubeCli, nil, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	filteredPods, err := legacyPodSelector.SelectPods(ctx, selector)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -357,7 +357,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	selector.Namespaces = nsList
 
 	ctx := context.TODO()
-	legacyPodSelector := pod.NewLegacyPodSelector(kubeCli, kubeCli, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	legacyPodSelector := pod.NewLegacyPodSelector(kubeCli, nil, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	filteredPods, err := legacyPodSelector.SelectPods(ctx, selector)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
