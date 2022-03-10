@@ -17,7 +17,6 @@ package pod
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -28,6 +27,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
