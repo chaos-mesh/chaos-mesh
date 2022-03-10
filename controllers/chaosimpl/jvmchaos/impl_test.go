@@ -18,8 +18,9 @@ package jvmchaos
 import (
 	"testing"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	. "github.com/onsi/gomega"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func TestGenerateRuleData(t *testing.T) {
