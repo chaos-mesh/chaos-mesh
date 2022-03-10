@@ -95,6 +95,7 @@ func New(params Params) *SelectImpl {
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and SelectorMode
+// Deprecated: use pod.SelectImpl as instead
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
