@@ -13,16 +13,23 @@
 // limitations under the License.
 //
 
-package time
+package server
+
+//go:generate gqlgen
+//
+// This file will not be regenerated automatically.
+//
+// It serves as dependency injection for your app, add any dependencies you require here.
 
 import (
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var log = ctrl.Log.WithName("time")
-
-// RegisterLogger registers a logger on time pkg
-func RegisterLogger(logger logr.Logger) {
-	log = logger
+type Resolver struct {
+	*DaemonHelper
+	Log       logr.Logger
+	Client    client.Client
+	Clientset *kubernetes.Clientset
 }

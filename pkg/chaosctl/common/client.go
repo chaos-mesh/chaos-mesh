@@ -13,23 +13,20 @@
 // limitations under the License.
 //
 
-package graph
-
-//go:generate gqlgen
-//
-// This file will not be regenerated automatically.
-//
-// It serves as dependency injection for your app, add any dependencies you require here.
+package common
 
 import (
-	"github.com/go-logr/logr"
-	"k8s.io/client-go/kubernetes"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"context"
+	"fmt"
+
+	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type Resolver struct {
-	*DaemonHelper
-	Log       logr.Logger
-	Client    client.Client
-	Clientset *kubernetes.Clientset
+func CreateClient(ctx context.Context, managerNamespace, managerSvc string) (*ctrlclient.CtrlClient, context.CancelFunc, error) {
+	cancel, port, err := ctrlclient.ForwardCtrlServer(ctx, managerNamespace, managerSvc)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return ctrlclient.NewCtrlClient(fmt.Sprintf("http://127.0.0.1:%d/query", port)), cancel, nil
 }

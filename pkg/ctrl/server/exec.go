@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package common
+package server
 
 import (
 	"bytes"
@@ -32,10 +32,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
-// Exec executes certain command and returns the result
+// exec executes certain command and returns the result
 // Only commands in chaos-mesh components should use this way
 // for target pod, use ExecBypass
-func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+func exec(ctx context.Context, pod *v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 	name := pod.GetObjectMeta().GetName()
 	namespace := pod.GetObjectMeta().GetNamespace()
 	// TODO: if `containerNames` is set and specific container is injected chaos,
@@ -81,15 +81,29 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 }
 
 // ExecBypass use chaos-daemon to enter namespace and execute command in target pod
-func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string, nsTypes ...bpm.NsType) (string, error) {
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// See grpc/grpc-go#3918 for detail. Could be resolved in the future
 	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
-	pid, err := GetPidFromPod(ctx, pod, daemon)
+	pid, err := r.GetPidFromPod(ctx, pod)
 	if err != nil {
 		return "", err
 	}
-	// enter all possible namespaces needed, since there's no bad effect to do so
-	cmdBuilder := bpm.DefaultProcessBuilder(cmd).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetContext(ctx)
-	return Exec(ctx, daemon, cmdBuilder.Build(ctx).Cmd.String(), c)
+
+	podResolver := &podResolver{Resolver: r}
+	daemon, err := podResolver.Daemon(ctx, pod)
+	if err != nil {
+		return "", err
+	}
+
+	cmdBuilder := bpm.DefaultProcessBuilder(cmd)
+	for _, nsType := range nsTypes {
+		cmdBuilder = cmdBuilder.SetNS(pid, nsType)
+	}
+
+	return exec(
+		ctx, daemon,
+		cmdBuilder.EnableLocalMnt().SetContext(ctx).Build(ctx).Cmd.String(),
+		r.Clientset,
+	)
 }
