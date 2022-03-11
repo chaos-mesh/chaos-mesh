@@ -1210,7 +1210,6 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-daemon
-      hostIPC: true
       hostPID: true
       containers:
         - name: chaos-daemon
