@@ -204,6 +204,10 @@ spec:
             resourceGroupName:
               description: ResourceGroupName defines the name of ResourceGroup
               type: string
+            secretName:
+              description: SecretName defines the name of kubernetes secret. It is
+                used for Azure credentials.
+              type: string
             subscriptionID:
               description: SubscriptionID defines the id of Azure subscription.
               type: string
@@ -4323,6 +4327,10 @@ spec:
                 resourceGroupName:
                   description: ResourceGroupName defines the name of ResourceGroup
                   type: string
+                secretName:
+                  description: SecretName defines the name of kubernetes secret. It
+                    is used for Azure credentials.
+                  type: string
                 subscriptionID:
                   description: SubscriptionID defines the id of Azure subscription.
                   type: string
@@ -7001,6 +7009,10 @@ spec:
                           resourceGroupName:
                             description: ResourceGroupName defines the name of ResourceGroup
                             type: string
+                          secretName:
+                            description: SecretName defines the name of kubernetes
+                              secret. It is used for Azure credentials.
+                            type: string
                           subscriptionID:
                             description: SubscriptionID defines the id of Azure subscription.
                             type: string
@@ -9485,6 +9497,10 @@ spec:
                               resourceGroupName:
                                 description: ResourceGroupName defines the name of
                                   ResourceGroup
+                                type: string
+                              secretName:
+                                description: SecretName defines the name of kubernetes
+                                  secret. It is used for Azure credentials.
                                 type: string
                               subscriptionID:
                                 description: SubscriptionID defines the id of Azure
@@ -16408,6 +16424,10 @@ spec:
                 resourceGroupName:
                   description: ResourceGroupName defines the name of ResourceGroup
                   type: string
+                secretName:
+                  description: SecretName defines the name of kubernetes secret. It
+                    is used for Azure credentials.
+                  type: string
                 subscriptionID:
                   description: SubscriptionID defines the id of Azure subscription.
                   type: string
@@ -18757,6 +18777,10 @@ spec:
                       type: integer
                     resourceGroupName:
                       description: ResourceGroupName defines the name of ResourceGroup
+                      type: string
+                    secretName:
+                      description: SecretName defines the name of kubernetes secret.
+                        It is used for Azure credentials.
                       type: string
                     subscriptionID:
                       description: SubscriptionID defines the id of Azure subscription.
@@ -21467,6 +21491,10 @@ spec:
                                 description: ResourceGroupName defines the name of
                                   ResourceGroup
                                 type: string
+                              secretName:
+                                description: SecretName defines the name of kubernetes
+                                  secret. It is used for Azure credentials.
+                                type: string
                               subscriptionID:
                                 description: SubscriptionID defines the id of Azure
                                   subscription.
@@ -24019,6 +24047,10 @@ spec:
                                   resourceGroupName:
                                     description: ResourceGroupName defines the name
                                       of ResourceGroup
+                                    type: string
+                                  secretName:
+                                    description: SecretName defines the name of kubernetes
+                                      secret. It is used for Azure credentials.
                                     type: string
                                   subscriptionID:
                                     description: SubscriptionID defines the id of
@@ -33752,6 +33784,10 @@ spec:
                       resourceGroupName:
                         description: ResourceGroupName defines the name of ResourceGroup
                         type: string
+                      secretName:
+                        description: SecretName defines the name of kubernetes secret.
+                          It is used for Azure credentials.
+                        type: string
                       subscriptionID:
                         description: SubscriptionID defines the id of Azure subscription.
                         type: string
@@ -36170,6 +36206,10 @@ spec:
                             type: integer
                           resourceGroupName:
                             description: ResourceGroupName defines the name of ResourceGroup
+                            type: string
+                          secretName:
+                            description: SecretName defines the name of kubernetes
+                              secret. It is used for Azure credentials.
                             type: string
                           subscriptionID:
                             description: SubscriptionID defines the id of Azure subscription.

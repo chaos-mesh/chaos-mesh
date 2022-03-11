@@ -90,6 +90,10 @@ type AzureSelector struct {
 	// Needed in disk-detach.
 	// +optional
 	LUN *int `json:"lun,omitempty" webhook:"LUN,nilable"`
+
+	// SecretName defines the name of kubernetes secret. It is used for Azure credentials.
+	// +optional
+	SecretName *string `json:"secretName,omitempty"`
 }
 
 func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {

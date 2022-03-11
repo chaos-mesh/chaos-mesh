@@ -45,7 +45,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "chaos is not azureChaos", "chaos", chaos)
 		return v1alpha1.NotInjected, err
 	}
-	vmClient, err := utils.GetVMClient(azurechaos)
+	vmClient, err := utils.GetVMClient(ctx, impl.Client, azurechaos)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the vm client")
 		return v1alpha1.NotInjected, err
@@ -89,12 +89,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	vmClient, err := utils.GetVMClient(azurechaos)
+	vmClient, err := utils.GetVMClient(ctx, impl.Client, azurechaos)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the vm client")
 		return v1alpha1.Injected, err
 	}
-	disksClient, err := utils.GetDiskClient(azurechaos)
+	disksClient, err := utils.GetDiskClient(ctx, impl.Client, azurechaos)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the disk client")
 		return v1alpha1.Injected, err
