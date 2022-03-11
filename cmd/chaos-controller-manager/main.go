@@ -90,6 +90,7 @@ func main() {
 			types.ChaosObjects,
 			types.WebhookObjects,
 		),
+		fx.Invoke(provider.RegisterConvert),
 		fx.Invoke(Run),
 	)
 

@@ -55,7 +55,7 @@ func main() {
 
 	frontendGenerator := newFrontendCodeGenerator(nil)
 
-	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
+	filepath.Walk("./api/"+apiVersion, func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
 
 		if err != nil {
@@ -148,7 +148,7 @@ func init() {
 %s
 }
 `, initImpl, scheduleImpl)
-	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
+	file, err := os.Create("./api/" + apiVersion + "/zz_generated.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
@@ -156,28 +156,28 @@ func init() {
 	fmt.Fprint(file, implCode)
 
 	testCode += testInit
-	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
+	file, err = os.Create("./api/" + apiVersion + "/zz_generated.chaosmesh_test.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
 	}
 	fmt.Fprint(file, testCode)
 
-	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh.go")
+	file, err = os.Create("./api/" + apiVersion + "/zz_generated.workflow.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowGenerator.Render())
 
-	file, err = os.Create("./api/v1alpha1/zz_generated.workflow.chaosmesh_test.go")
+	file, err = os.Create("./api/" + apiVersion + "/zz_generated.workflow.chaosmesh_test.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
 	}
 	fmt.Fprint(file, workflowTestGenerator.Render())
 
-	file, err = os.Create("./api/v1alpha1/zz_generated.schedule.chaosmesh.go")
+	file, err = os.Create("./api/" + apiVersion + "/zz_generated.schedule.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
