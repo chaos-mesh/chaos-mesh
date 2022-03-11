@@ -15,4 +15,4 @@
 
 package main
 
-const apiVersion = "v1alpha2"
+const apiVersion = "v1alpha1"
