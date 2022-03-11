@@ -16,4 +16,6 @@
 package statuscheck
 
 type StatusCheck interface {
+	Do()
 }
+

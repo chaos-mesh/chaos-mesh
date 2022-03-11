@@ -15,29 +15,20 @@
 
 package statuscheck
 
-type worker struct {
-	stopCh chan struct{}
+import "sync"
 
-	spec struct{} // TODO StatusCheck spec
+type Manager interface {
+	// Add creates new probe workers for every container probe. This should be called for every
+	// pod created.
+	Add()
+	// Remove handles cleaning up the removed pod state, including terminating probe workers and
+	// deleting cached results.
+	Remove()
 }
 
-func newWorker() *worker {
-	return &worker{
-		stopCh: make(chan struct{}),
-	}
-}
-
-// run periodically execute the status check.
-func (w *worker) run() {
-
-}
-
-func (w *worker) stop() {
-	close(w.stopCh)
-}
-
-// execute the status check once and records the result.
-// Returns whether the worker should continue.
-func (w *worker) execute() bool {
-	return true
+type manager struct {
+	// Map of active workers for probes
+	workers map[string]*worker
+	// Lock for accessing & mutating workers
+	workerLock sync.RWMutex
 }

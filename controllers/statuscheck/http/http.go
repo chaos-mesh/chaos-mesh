@@ -14,3 +14,7 @@
 //
 
 package http
+
+type httpStatusCheck struct {
+
+}
