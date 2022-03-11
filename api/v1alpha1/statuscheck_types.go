@@ -91,8 +91,8 @@ type StatusCheckSpec struct {
 	// +kubebuilder:validation:Minimum=1
 	IntervalSeconds int `json:"intervalSeconds,omitempty"`
 
-	// FailureThreshold defines when an execution of status check
-	// fails, it will try FailureThreshold times before giving up.
+	// FailureThreshold defines the minimum consecutive failure
+	// for the status check to be considered failed.
 	// +optional
 	// +kubebuilder:default=3
 	// +kubebuilder:validation:Minimum=1
@@ -100,6 +100,7 @@ type StatusCheckSpec struct {
 
 	// SuccessThreshold defines the minimum consecutive successes
 	// for the status check to be considered successful.
+	// SuccessThreshold only works for `Synchronous` mode.
 	// +optional
 	// +kubebuilder:default=1
 	// +kubebuilder:validation:Minimum=1
@@ -145,7 +146,6 @@ type StatusCheckOutcome string
 const (
 	StatusCheckOutcomeSuccess StatusCheckOutcome = "Success"
 	StatusCheckOutcomeFailure StatusCheckOutcome = "Failure"
-	StatusCheckOutcomeUnknown StatusCheckOutcome = "Unknown"
 )
 
 type StatusCheckRecord struct {

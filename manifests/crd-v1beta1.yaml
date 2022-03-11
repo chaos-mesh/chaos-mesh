@@ -15553,8 +15553,8 @@ spec:
                 "m", "h".
               type: string
             failureThreshold:
-              description: FailureThreshold defines when an execution of status check
-                fails, it will try FailureThreshold times before giving up.
+              description: FailureThreshold defines the minimum consecutive failure
+                for the status check to be considered failed.
               minimum: 1
               type: integer
             http:
@@ -15613,7 +15613,8 @@ spec:
               type: integer
             successThreshold:
               description: SuccessThreshold defines the minimum consecutive successes
-                for the status check to be considered successful.
+                for the status check to be considered successful. SuccessThreshold
+                only works for `Synchronous` mode.
               minimum: 1
               type: integer
             timeoutSeconds:
