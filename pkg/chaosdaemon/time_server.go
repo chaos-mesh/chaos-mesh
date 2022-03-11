@@ -26,6 +26,7 @@ import (
 )
 
 func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Shift time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -42,7 +43,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 	log.Info("all related processes found", "pids", allPids)
 
 	for _, pid := range allPids {
-		err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)
+		err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask, s.rootLogger.WithName("time"))
 		if err != nil {
 			log.Error(err, "error while modifying time", "pid", pid)
 			return nil, err
@@ -53,6 +54,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 }
 
 func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Recover time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -70,7 +72,7 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 
 	for _, pid := range allPids {
 		// FIXME: if the process has halted and no process with this pid exists, we will get an error.
-		err = time.ModifyTime(int(pid), int64(0), int64(0), 0)
+		err = time.ModifyTime(int(pid), int64(0), int64(0), 0, s.rootLogger.WithName("time"))
 		if err != nil {
 			log.Error(err, "error while recovering", "pid", pid)
 			return nil, err

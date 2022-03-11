@@ -1210,7 +1210,6 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-daemon
-      hostIPC: true
       hostPID: true
       containers:
         - name: chaos-daemon
@@ -1313,6 +1312,8 @@ spec:
           command:
             - /usr/local/bin/chaos-dashboard
           env:
+            - name: CLEAN_SYNC_PERIOD
+              value: "12h"
             - name: DATABASE_DATASOURCE
               value: "/data/core.sqlite"
             - name: DATABASE_DRIVER
@@ -1325,6 +1326,10 @@ spec:
               value: "0.0.0.0"
             - name: METRIC_PORT
               value: "2334"
+            - name: TTL_EVENT
+              value: "168h"
+            - name: TTL_EXPERIMENT
+              value: "336h"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
