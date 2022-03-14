@@ -19,9 +19,23 @@ import { FormControl, FormControlLabel, FormHelperText, FormLabel } from '@mui/m
 import { default as MuiCheckbox, CheckboxProps as MuiCheckboxProps } from '@mui/material/Checkbox'
 
 export type CheckboxProps = MuiCheckboxProps & {
+  /**
+   * The name of ths input field when using it in a form.
+   */
   name?: string
+  /**
+   * The label of the checkbox, would be shown on the top of the checkbox.
+   */
   label: string
+  /**
+   * The helper text of the checkbox, would be shown on the right of the checkbox in the same line.
+   *
+   * If not provided, it would use the `label` as the helper text.
+   */
   helperText?: string
+  /**
+   * Validation error message, would be shown on the bottom of the checkbox.
+   */
   errorMessage?: string
 }
 
