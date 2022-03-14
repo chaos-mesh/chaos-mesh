@@ -55,7 +55,7 @@ func (in *LUN) Validate(root interface{}, path *field.Path) field.ErrorList {
 	return allErrs
 }
 
-// ValidateScheduler validates the scheduler and duration
+// ValidateScheduler validates the azure chaos actions
 func (in *AzureChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
