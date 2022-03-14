@@ -823,6 +823,7 @@ spec:
                       chaos action.
                     type: string
                   percent:
+                    default: 100
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
@@ -3149,6 +3150,7 @@ spec:
                           I/O chaos action.
                         type: string
                       percent:
+                        default: 100
                         description: 'Percent defines the percentage of injection
                           errors and provides a number from 0-100. default: 100.'
                         type: integer
@@ -5926,6 +5928,7 @@ spec:
                                     injecting I/O chaos action.
                                   type: string
                                 percent:
+                                  default: 100
                                   description: 'Percent defines the percentage of
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
@@ -8497,6 +8500,7 @@ spec:
                                         for injecting I/O chaos action.
                                       type: string
                                     percent:
+                                      default: 100
                                       description: 'Percent defines the percentage
                                         of injection errors and provides a number
                                         from 0-100. default: 100.'

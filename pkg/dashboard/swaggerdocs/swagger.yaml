@@ -1071,6 +1071,7 @@ definitions:
           Percent defines the percentage of injection errors and provides a number from 0-100.
           default: 100.
           +optional
+          +kubebuilder:default=100
         type: integer
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
