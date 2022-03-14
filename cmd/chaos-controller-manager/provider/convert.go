@@ -16,14 +16,13 @@
 package provider
 
 import (
-	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var oldObjs = []runtime.Object{}
 
-var RegisterConvert = fx.Invoke(func(mgr ctrl.Manager) error {
+func RegisterConvert(mgr ctrl.Manager) error {
 	for _, obj := range oldObjs {
 		err := ctrl.NewWebhookManagedBy(mgr).
 			For(obj).
@@ -34,4 +33,4 @@ var RegisterConvert = fx.Invoke(func(mgr ctrl.Manager) error {
 	}
 
 	return nil
-})
+}
