@@ -44,3 +44,12 @@ WithValidationError.args = {
   checked: true,
   disabled: false,
 }
+
+export const WithoutHelperText = Template.bind({})
+WithoutHelperText.args = {
+  label: 'Abort HTTP Request',
+  helperText: '',
+  errorMessage: 'Abort could not be used with action: delay',
+  checked: true,
+  disabled: false,
+}

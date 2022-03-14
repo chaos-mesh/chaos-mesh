@@ -19,10 +19,10 @@ import { FormControl, FormControlLabel, FormHelperText, FormLabel, Input, InputL
 import { default as MuiCheckbox, CheckboxProps as MuiCheckboxProps } from '@mui/material/Checkbox'
 
 export type CheckboxProps = MuiCheckboxProps & {
-  name: string
+  name?: string
   label: string
-  helperText: string
-  errorMessage: string
+  helperText?: string
+  errorMessage?: string
 }
 
 export default (props: CheckboxProps) => {
@@ -34,7 +34,7 @@ export default (props: CheckboxProps) => {
           control={
             <MuiCheckbox checked={props.checked} onChange={props.onChange} disabled={props.disabled}></MuiCheckbox>
           }
-          label={props.helperText}
+          label={props.helperText || props.label}
         ></FormControlLabel>
 
         <FormHelperText>{props.errorMessage}</FormHelperText>
