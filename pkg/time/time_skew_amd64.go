@@ -16,6 +16,7 @@
 package time
 
 import (
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
 
@@ -41,21 +42,22 @@ type SkewClockGetTime struct {
 	deltaNanoSeconds int64
 	clockIDsMask     uint64
 	fakeImage        *FakeImage
+	logger           logr.Logger
 }
 
-func NewSkewClockGetTime(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64) (*SkewClockGetTime, error) {
+func NewSkewClockGetTime(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, logger logr.Logger) (*SkewClockGetTime, error) {
 	var image *FakeImage
 	var err error
 
-	if image, err = LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime); err != nil {
+	if image, err = LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime, logger); err != nil {
 		return nil, errors.Wrap(err, "load fake image")
 	}
 
-	return NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image), nil
+	return NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, clockIDsMask, image, logger), nil
 }
 
-func NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage) *SkewClockGetTime {
-	return &SkewClockGetTime{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage}
+func NewSkewClockGetTimeWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, clockIDsMask uint64, fakeImage *FakeImage, logger logr.Logger) *SkewClockGetTime {
+	return &SkewClockGetTime{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, clockIDsMask: clockIDsMask, fakeImage: fakeImage, logger: logger}
 }
 
 func (it *SkewClockGetTime) Inject(pid int) error {
@@ -67,7 +69,7 @@ func (it *SkewClockGetTime) Inject(pid int) error {
 }
 
 func (it *SkewClockGetTime) Recover(pid int) error {
-	zeroSkew := NewSkewClockGetTimeWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage)
+	zeroSkew := NewSkewClockGetTimeWithCustomFakeImage(0, 0, it.clockIDsMask, it.fakeImage, it.logger)
 	return zeroSkew.Inject(pid)
 }
 
@@ -81,20 +83,21 @@ type SkewGetTimeOfDay struct {
 	deltaSeconds     int64
 	deltaNanoSeconds int64
 	fakeImage        *FakeImage
+	logger           logr.Logger
 }
 
-func NewSkewGetTimeOfDay(deltaSeconds int64, deltaNanoSeconds int64) (*SkewGetTimeOfDay, error) {
+func NewSkewGetTimeOfDay(deltaSeconds int64, deltaNanoSeconds int64, logger logr.Logger) (*SkewGetTimeOfDay, error) {
 	var image *FakeImage
 	var err error
 
-	if image, err = LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay); err != nil {
+	if image, err = LoadFakeImageFromEmbedFs(timeOfDaySkewFakeImage, getTimeOfDay, logger); err != nil {
 		return nil, errors.Wrap(err, "load fake image")
 	}
 
-	return NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, image), nil
+	return NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds, deltaNanoSeconds, image, logger), nil
 }
 
-func NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, fakeImage *FakeImage) *SkewGetTimeOfDay {
+func NewSkewGetTimeOfDayWithCustomFakeImage(deltaSeconds int64, deltaNanoSeconds int64, fakeImage *FakeImage, logger logr.Logger) *SkewGetTimeOfDay {
 	return &SkewGetTimeOfDay{deltaSeconds: deltaSeconds, deltaNanoSeconds: deltaNanoSeconds, fakeImage: fakeImage}
 }
 
@@ -106,7 +109,7 @@ func (it *SkewGetTimeOfDay) Inject(pid int) error {
 }
 
 func (it *SkewGetTimeOfDay) Recover(pid int) error {
-	zeroSkew := NewSkewGetTimeOfDayWithCustomFakeImage(0, 0, it.fakeImage)
+	zeroSkew := NewSkewGetTimeOfDayWithCustomFakeImage(0, 0, it.fakeImage, it.logger)
 	return zeroSkew.Inject(pid)
 }
 
@@ -128,12 +131,12 @@ func (it *CompositeInjector) Recover(pid int) error {
 	return nil
 }
 
-func NewTimeSkew(deltaSec int64, deltaNsec int64, clockIdsMask uint64) (FakeClockInjector, error) {
-	skewClockGetTime, err := NewSkewClockGetTime(deltaSec, deltaNsec, clockIdsMask)
+func NewTimeSkew(deltaSec int64, deltaNsec int64, clockIdsMask uint64, logger logr.Logger) (FakeClockInjector, error) {
+	skewClockGetTime, err := NewSkewClockGetTime(deltaSec, deltaNsec, clockIdsMask, logger)
 	if err != nil {
 		return nil, err
 	}
-	skewGetTimeOfDay, err := NewSkewGetTimeOfDay(deltaSec, deltaNsec)
+	skewGetTimeOfDay, err := NewSkewGetTimeOfDay(deltaSec, deltaNsec, logger)
 	if err != nil {
 		return nil, err
 	}
