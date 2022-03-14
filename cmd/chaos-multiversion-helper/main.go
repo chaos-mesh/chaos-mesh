@@ -18,6 +18,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/addoldobjs"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/autoconvert"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/create"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/migrate"
@@ -32,6 +33,7 @@ func main() {
 	rootCmd.AddCommand(create.CreateCmd)
 	rootCmd.AddCommand(migrate.MigrateCmd)
 	rootCmd.AddCommand(autoconvert.ConvertCmd)
+	rootCmd.AddCommand(addoldobjs.AddOldObjsCmd)
 
 	rootCmd.Execute()
 }
