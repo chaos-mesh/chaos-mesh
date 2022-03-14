@@ -39,8 +39,8 @@ func generateConvert(version string, hub string) error {
 		return err
 	}
 
-	structMap := map[string]*ast.GenDecl{}
-	mainConvertTypes := list.New()
+	definitionMap := map[string]*ast.GenDecl{}
+	types := newUniqueList()
 	for _, file := range sources {
 		// skip files which are not golang source code
 		if !strings.HasSuffix(file.Name(), "go") {
@@ -53,6 +53,7 @@ func generateConvert(version string, hub string) error {
 			return err
 		}
 
+		// add all type definition to the definitionMap
 		ast.Inspect(fileAst, func(n ast.Node) bool {
 			node, ok := n.(*ast.GenDecl)
 			if !ok || node.Tok != token.TYPE {
@@ -60,11 +61,12 @@ func generateConvert(version string, hub string) error {
 			}
 
 			typeName := node.Specs[0].(*ast.TypeSpec).Name.Name
-			structMap[typeName] = node
+			definitionMap[typeName] = node
 
 			return false
 		})
 
+		// read the comment map to decide which types need to be converted
 		cmap := ast.NewCommentMap(fileSet, fileAst, fileAst.Comments)
 		for node, commentGroups := range cmap {
 			node, ok := node.(*ast.GenDecl)
@@ -83,7 +85,7 @@ func generateConvert(version string, hub string) error {
 				}
 
 				if isObjectRoot {
-					mainConvertTypes.PushBack(typeName)
+					types.push(typeName)
 				}
 			}
 		}
@@ -97,27 +99,28 @@ func generateConvert(version string, hub string) error {
 	defer convertFile.Close()
 
 	impl := convertImpl{
-		structMap:    structMap,
-		convertTypes: mainConvertTypes,
+		definitionMap: definitionMap,
+		types:         types,
 	}
 
 	return impl.generate(convertFile)
 }
 
 type convertImpl struct {
-	structMap    map[string]*ast.GenDecl
-	convertTypes *list.List
+	definitionMap map[string]*ast.GenDecl
 
-	generatedTypes map[string]struct{}
+	types *uniqueList
 }
 
 func (c *convertImpl) generate(convertFile *os.File) error {
-	c.generatedTypes = make(map[string]struct{})
+	// mark the original added types.
+	// the signiture of these types will be different from other `Convert` function.
+	// because the `controller-runtime` requires them to convert to the `conversion.Hub`
 	hubTypes := make(map[string]struct{})
-	for ele := c.convertTypes.Front(); ele != nil; ele = ele.Next() {
-		hubTypes[ele.Value.(string)] = struct{}{}
-		c.generatedTypes[ele.Value.(string)] = struct{}{}
-	}
+
+	c.types.forEatch(func(typ string) {
+		hubTypes[typ] = struct{}{}
+	})
 
 	convertFile.WriteString(common.Boilerplate + "\n")
 	convertFile.WriteString("package " + version + "\n\n")
@@ -128,9 +131,7 @@ import (
 )
 	`)
 
-	for ele := c.convertTypes.Front(); ele != nil; ele = ele.Next() {
-		typ := ele.Value.(string)
-
+	c.types.forEatch(func(typ string) {
 		from, to := c.generateTypeConvert(typ)
 
 		if _, ok := hubTypes[typ]; ok {
@@ -160,8 +161,7 @@ import (
 				return nil
 			}`)
 		}
-
-	}
+	})
 	return nil
 }
 
@@ -205,29 +205,41 @@ func (c *convertImpl) printExprToNewVersion(expr ast.Expr) string {
 	return ""
 }
 
+// generateTypeConvert generates the convert function for the type
 func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 	from := ""
 	to := ""
 
-	typDeclare, ok := c.structMap[typ]
+	typeDeclare, ok := c.definitionMap[typ]
 	if !ok {
 		log.Fatal("type not found: ", typ)
 	}
 
-	subType := typDeclare.Specs[0]
-	subTypeSpec := subType.(*ast.TypeSpec)
-	subTypeSpecDef := interface{}(nil)
+	typeSpec := typeDeclare.Specs[0].(*ast.TypeSpec)
+	derefedTypeSpec := interface{}(nil)
 
-	derefSubTypeSpecDef, ok := subTypeSpec.Type.(*ast.StarExpr)
+	// if the type spec is a pointer, deref it
+	//
+	// because for any type (other than slice, map), we will generate the convert
+	// function whose receiver is the pointer type, so we can deref the pointer here for the convinience
+	pointerTypeSpec, ok := typeSpec.Type.(*ast.StarExpr)
 	if ok {
-		subTypeSpecDef = derefSubTypeSpecDef.X
+		derefedTypeSpec = pointerTypeSpec.X
+		switch derefedTypeSpec.(type) {
+		case *ast.ArrayType:
+			log.Fatal("not supported yet")
+		case *ast.MapType:
+			log.Fatal("not supported yet")
+		}
 	} else {
-		subTypeSpecDef = subTypeSpec.Type
+		derefedTypeSpec = typeSpec.Type
 	}
 
-	switch subTypeSpecDef := subTypeSpecDef.(type) {
+	switch typeSpecDef := derefedTypeSpec.(type) {
 	case *ast.StructType:
-		for _, field := range subTypeSpecDef.Fields.List {
+		// if this type is a definition for struct
+		// we will generate the convert function for every field
+		for _, field := range typeSpecDef.Fields.List {
 			fieldName := c.getFieldName(field)
 			if len(fieldName) == 0 {
 				log.Fatal("field name is empty")
@@ -239,8 +251,6 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 			} else {
 				switch fieldTyp := field.Type.(type) {
 				case *ast.ArrayType:
-					// TODO: support the pointer of slice as the field type
-
 					arrayFrom, arrayTo := c.generateArrayConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp, false)
 					to += `
 					dst.` + fieldName + ` = make(` + c.printExprToNewVersion(field.Type) + `, len(in.` + fieldName + `))
@@ -251,8 +261,6 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 					` + arrayFrom + `
 					`
 				case *ast.MapType:
-					// TODO: support the pointer of map as the field type
-
 					mapFrom, mapTo := c.generateMapConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp, false)
 					to += `
 					dst.` + fieldName + ` = make(` + c.printExprToNewVersion(field.Type) + `)
@@ -270,12 +278,23 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 						in.` + fieldName + `.ConvertFrom(&src.` + fieldName + `)
 						`
 				case *ast.StarExpr:
+					// TODO: support the pointer of slice and map as the field type
+					switch fieldTyp.X.(type) {
+					case *ast.ArrayType:
+						log.Fatal("not supported yet")
+					case *ast.MapType:
+						log.Fatal("not supported yet")
+					}
+
+					typeName := types.ExprString(fieldTyp.X)
+					typeNameInNewVersion := c.printExprToNewVersion(fieldTyp.X)
+
 					to += `
 					if in.` + fieldName + ` == nil {
 						dst.` + fieldName + ` = nil
 					} else {
 						if dst.` + fieldName + ` == nil {
-							dst.` + fieldName + ` = new(` + c.printExprToNewVersion(fieldTyp.X) + `)
+							dst.` + fieldName + ` = new(` + typeNameInNewVersion + `)
 						}
 						in.` + fieldName + `.ConvertTo(dst.` + fieldName + `)
 					}
@@ -283,7 +302,7 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 
 					from += `
 					if in.` + fieldName + ` == nil {
-						in.` + fieldName + ` = new(` + types.ExprString(fieldTyp.X) + `) 
+						in.` + fieldName + ` = new(` + typeName + `) 
 					}
 					in.` + fieldName + `.ConvertFrom(src.` + fieldName + `)
 					`
@@ -292,24 +311,27 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 			}
 		}
 	case *ast.Ident:
+		// this type definition is an type alias, then it can be simply converted.
 		to += "*dst = " + hub + "." + typ + "(*in)\n"
 		from += "*in = " + typ + "(*src)\n"
 	case *ast.ArrayType:
+		// this type definition is an array
 		to += "*dst = make(" + hub + "." + typ + ",len(*in))\n"
 		from += "*in = make(" + typ + ",len(*src))\n"
 
-		arrayFrom, arrayTo := c.generateArrayConvert("dst", "src", "in", subTypeSpecDef, true)
+		arrayFrom, arrayTo := c.generateArrayConvert("dst", "src", "in", typeSpecDef, true)
 		to += arrayTo
 		from += arrayFrom
 	case *ast.MapType:
+		// this type definition is a map
 		to += "*dst = make(" + typ + ")\n"
 		from += "*in = make(" + typ + ")\n"
 
-		mapFrom, mapTo := c.generateMapConvert("dst", "src", "in", subTypeSpecDef, true)
+		mapFrom, mapTo := c.generateMapConvert("dst", "src", "in", typeSpecDef, true)
 		to += mapTo
 		from += mapFrom
 	default:
-		log.Fatal("unknown type ", typ, reflect.TypeOf(subTypeSpecDef))
+		log.Fatal("unknown type ", typ, reflect.TypeOf(typeSpecDef))
 	}
 
 	return from, to
@@ -487,6 +509,21 @@ func (c *convertImpl) getFieldName(field *ast.Field) string {
 	return fieldName
 }
 
+// canDirectConvert returns whether the type can be directly converted.
+//
+// But as this package only works with AST, without type related information, it
+// cannot be 100 percent sure. This function guaranteed that:
+//
+// 1. If this type is a built in type, it will return true
+// 2. If this type is a type from other package, it will return true, as we assume
+//    the dependency of different versions of API will be the same.
+// 3. If this type is a pointer, it will be dereferenced and see whether the type
+//    it references can be directly converted.
+// 4. If this type is a slice, it will return true if the element type can be
+//    converted directly.
+// 5. For other senerio, we assume this type cannot be directly converted, and it will be
+//    pushed into the convertTypes. An `ConvertTo` and `ConvertFrom` will be implemented
+//    for this type.
 func (c *convertImpl) canDirectConvert(typ ast.Expr) bool {
 	directConvert := false
 
@@ -504,10 +541,7 @@ func (c *convertImpl) canDirectConvert(typ ast.Expr) bool {
 		if _, ok := builtInTypes[fieldType.Name]; ok {
 			directConvert = true
 		} else {
-			if _, ok := c.generatedTypes[fieldType.Name]; !ok {
-				c.convertTypes.PushBack(fieldType.Name)
-				c.generatedTypes[fieldType.Name] = struct{}{}
-			}
+			c.types.push(fieldType.Name)
 		}
 	case *ast.SelectorExpr:
 		// assume the selectorExpr always refers to a third party type
@@ -519,4 +553,31 @@ func (c *convertImpl) canDirectConvert(typ ast.Expr) bool {
 	}
 
 	return directConvert
+}
+
+type uniqueList struct {
+	convertTypes *list.List
+	exist        map[string]struct{}
+}
+
+func newUniqueList() *uniqueList {
+	return &uniqueList{
+		convertTypes: list.New(),
+		exist:        make(map[string]struct{}),
+	}
+}
+
+func (c *uniqueList) push(typs ...string) {
+	for _, typ := range typs {
+		if _, ok := c.exist[typ]; !ok {
+			c.convertTypes.PushBack(typ)
+			c.exist[typ] = struct{}{}
+		}
+	}
+}
+
+func (c *uniqueList) forEatch(f func(string)) {
+	for e := c.convertTypes.Front(); e != nil; e = e.Next() {
+		f(e.Value.(string))
+	}
 }
