@@ -21,38 +21,42 @@ import (
 	"go/printer"
 	"go/token"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
-var CreateCmd = &cobra.Command{
-	Use:   "create --from <old-version> --to <new-version>",
-	Short: "create command create a new version of chaos api",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := run()
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
+func NewCreateCmd(log logr.Logger) *cobra.Command {
+	var from, to string
+	var asStorageVersion bool
+
+	var cmd = &cobra.Command{
+		Use:   "create --from <old-version> --to <new-version>",
+		Short: "create command create a new version of chaos api",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := run(log, from, to, asStorageVersion)
+			if err != nil {
+				log.Error(err, "create new version")
+				os.Exit(1)
+			}
+		},
+	}
+
+	cmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
+	cmd.Flags().StringVar(&to, "to", "", "new version of chaos api")
+	cmd.Flags().BoolVar(&asStorageVersion, "as-storage-version", true, "new version of chaos api")
+
+	cmd.MarkFlagRequired("from")
+	cmd.MarkFlagRequired("to")
+
+	return cmd
 }
 
-var from, to string
-var asStorageVersion bool
-
-func init() {
-	CreateCmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
-	CreateCmd.Flags().StringVar(&to, "to", "", "new version of chaos api")
-	CreateCmd.Flags().BoolVar(&asStorageVersion, "as-storage-version", true, "new version of chaos api")
-
-	CreateCmd.MarkFlagRequired("from")
-	CreateCmd.MarkFlagRequired("to")
-}
-
-func run() error {
+func run(log logr.Logger, from, to string, asStorageVersion bool) error {
 	fileSet := token.NewFileSet()
 
 	oldAPIDirectory := "api/" + from
@@ -61,7 +65,7 @@ func run() error {
 
 	oldFiles, err := ioutil.ReadDir(oldAPIDirectory)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	for _, file := range oldFiles {
@@ -73,7 +77,7 @@ func run() error {
 		oldFilePath := oldAPIDirectory + "/" + file.Name()
 		fileAst, err := parser.ParseFile(fileSet, oldFilePath, nil, parser.ParseComments)
 		if err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 
 		// modify the package name to the new version
@@ -117,13 +121,13 @@ func run() error {
 
 			err = sedProcess.Wait()
 			if err != nil {
-				return err
+				return errors.WithStack(err)
 			}
 		}
 
 		newFile, err := os.Create(newAPIDirectory + "/" + file.Name())
 		if err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 		defer newFile.Close()
 		printer.Fprint(newFile, fileSet, fileAst)

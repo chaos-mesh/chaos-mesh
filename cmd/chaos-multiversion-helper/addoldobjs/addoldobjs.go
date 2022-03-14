@@ -21,36 +21,39 @@ import (
 	"go/printer"
 	"go/token"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
-var AddOldObjsCmd = &cobra.Command{
-	Use:   "addoldobjs --version <version>",
-	Short: "addoldobjs command automatically add the old version objs to `cmd/chaos-controller-manager/provider/convert.go`",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := run()
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
+func NewAddOldObjsCmd(log logr.Logger) *cobra.Command {
+	var version string
+
+	cmd := &cobra.Command{
+		Use:   "addoldobjs --version <version>",
+		Short: "addoldobjs command automatically add the old version objs to `cmd/chaos-controller-manager/provider/convert.go`",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := run(log, version)
+			if err != nil {
+				log.Error(err, "add old objects")
+				os.Exit(1)
+			}
+		},
+	}
+
+	cmd.Flags().StringVar(&version, "version", "", "the version to iterate and add to convert")
+	cmd.MarkFlagRequired("version")
+
+	return cmd
 }
 
-var version string
-
-func init() {
-	AddOldObjsCmd.Flags().StringVar(&version, "version", "", "the version to iterate and add to convert")
-
-	AddOldObjsCmd.MarkFlagRequired("version")
-}
-
-func run() error {
-	types, err := getOldTypes()
+func run(log logr.Logger, version string) error {
+	types, err := getOldTypes(version)
 	if err != nil {
 		return err
 	}
@@ -60,7 +63,7 @@ func run() error {
 	fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	ast.Inspect(fileAst, func(n ast.Node) bool {
 		node, ok := n.(*ast.GenDecl)
@@ -90,7 +93,8 @@ func run() error {
 			if valueSpec, ok := node.Specs[0].(*ast.ValueSpec); ok && valueSpec.Names[0].Name == "oldObjs" {
 				sliceLit, ok := valueSpec.Values[0].(*ast.CompositeLit)
 				if !ok {
-					log.Fatal("oldObjs is not a slice")
+					err := errors.New("oldObjs is not a slice")
+					log.Error(err, "oldObjs is not a slice")
 				}
 
 				included := map[string]struct{}{}
@@ -140,13 +144,13 @@ func run() error {
 	return printer.Fprint(newFile, fileSet, fileAst)
 }
 
-func getOldTypes() ([]string, error) {
+func getOldTypes(version string) ([]string, error) {
 	fileSet := token.NewFileSet()
 
 	apiDirectory := "api" + "/" + version
 	sources, err := ioutil.ReadDir(apiDirectory)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	types := []string{}
@@ -159,7 +163,7 @@ func getOldTypes() ([]string, error) {
 		filePath := apiDirectory + "/" + file.Name()
 		fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		// read the comment map to decide which types need to be converted

@@ -17,39 +17,42 @@ package autoconvert
 
 import (
 	"errors"
-	"log"
 	"os"
 
+	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
-var ConvertCmd = &cobra.Command{
-	Use:   "autoconvert --version <version> --hub <hub-version>",
-	Short: "autoconvert command generates code to automatically convert between two versions",
-	Long: `autoconvert will do the following things:
-	1. remove the Hub declaration in <version>, if it is.
-	2. create the Hub tag for <hub-version>, if it is not.
-	3. generate ConvertTo and ConvertFrom function for the <version>, and assume it has 
-		a type which is deeply the same with the <hub-version>.
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		err := run()
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
-}
+func NewConvertCmd(log logr.Logger) *cobra.Command {
+	var version, hub string
 
-var version, hub string
+	var cmd = &cobra.Command{
+		Use:   "autoconvert --version <version> --hub <hub-version>",
+		Short: "autoconvert command generates code to automatically convert between two versions",
+		Long: `autoconvert will do the following things:
+		1. remove the Hub declaration in <version>, if it is.
+		2. create the Hub tag for <hub-version>, if it is not.
+		3. generate ConvertTo and ConvertFrom function for the <version>, and assume it has 
+			a type which is deeply the same with the <hub-version>.
+		`,
+		Run: func(cmd *cobra.Command, args []string) {
+			err := run(log, version, hub)
+			if err != nil {
+				log.Error(err, "generate convert and hub")
+				os.Exit(1)
+			}
+		},
+	}
 
-func init() {
-	ConvertCmd.Flags().StringVar(&version, "version", "", "the version to generate the convert")
-	ConvertCmd.Flags().StringVar(&hub, "hub", "", "the hub version")
+	cmd.Flags().StringVar(&version, "version", "", "the version to generate the convert")
+	cmd.Flags().StringVar(&hub, "hub", "", "the hub version")
 
-	ConvertCmd.MarkFlagRequired("version")
-	ConvertCmd.MarkFlagRequired("hub")
+	cmd.MarkFlagRequired("version")
+	cmd.MarkFlagRequired("hub")
+
+	return cmd
 }
 
 func removeHub(version string) error {
@@ -65,7 +68,7 @@ func removeHub(version string) error {
 	return nil
 }
 
-func run() error {
+func run(log logr.Logger, version, hub string) error {
 	err := removeHub(version)
 	if err != nil {
 		return err
@@ -76,7 +79,7 @@ func run() error {
 		return err
 	}
 
-	err = generateConvert(version, hub)
+	err = generateConvert(log, version, hub)
 	if err != nil {
 		return err
 	}

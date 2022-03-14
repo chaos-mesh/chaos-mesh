@@ -16,12 +16,15 @@
 package main
 
 import (
+	stdlog "log"
+
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/addoldobjs"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/autoconvert"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/create"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/migrate"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 var rootCmd = &cobra.Command{
@@ -30,10 +33,16 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	rootCmd.AddCommand(create.CreateCmd)
-	rootCmd.AddCommand(migrate.MigrateCmd)
-	rootCmd.AddCommand(autoconvert.ConvertCmd)
-	rootCmd.AddCommand(addoldobjs.AddOldObjsCmd)
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+	rootLogger = rootLogger.WithName("chaos-multiversion-helper")
+
+	rootCmd.AddCommand(create.NewCreateCmd(rootLogger.WithName("create")))
+	rootCmd.AddCommand(migrate.NewMigrateCmd(rootLogger.WithName("migrate")))
+	rootCmd.AddCommand(autoconvert.NewConvertCmd(rootLogger.WithName("autoconvert")))
+	rootCmd.AddCommand(addoldobjs.NewAddOldObjsCmd(rootLogger.WithName("addoldobjs")))
 
 	rootCmd.Execute()
 }

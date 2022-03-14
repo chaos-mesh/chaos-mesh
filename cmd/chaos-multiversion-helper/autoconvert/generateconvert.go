@@ -22,21 +22,24 @@ import (
 	"go/token"
 	"go/types"
 	"io/ioutil"
-	"log"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
+	"github.com/go-logr/logr"
+	"github.com/pingcap/errors"
 )
 
-func generateConvert(version string, hub string) error {
+var errTypeNotSupported = errors.New("type is not supported")
+var errTypeNotFound = errors.New("type not found")
+
+func generateConvert(log logr.Logger, version string, hub string) error {
 	fileSet := token.NewFileSet()
 
 	apiDirectory := "api" + "/" + version
 	sources, err := ioutil.ReadDir(apiDirectory)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	definitionMap := map[string]*ast.GenDecl{}
@@ -50,7 +53,7 @@ func generateConvert(version string, hub string) error {
 		filePath := apiDirectory + "/" + file.Name()
 		fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 		if err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 
 		// add all type definition to the definitionMap
@@ -94,13 +97,16 @@ func generateConvert(version string, hub string) error {
 	convertFilePath := apiDirectory + "/" + "zz_generated.convert.chaosmesh.go"
 	convertFile, err := os.Create(convertFilePath)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	defer convertFile.Close()
 
 	impl := convertImpl{
 		definitionMap: definitionMap,
+		version:       version,
+		hub:           hub,
 		types:         types,
+		log:           log,
 	}
 
 	return impl.generate(convertFile)
@@ -109,7 +115,11 @@ func generateConvert(version string, hub string) error {
 type convertImpl struct {
 	definitionMap map[string]*ast.GenDecl
 
+	version, hub string
+
 	types *uniqueList
+
+	log logr.Logger
 }
 
 func (c *convertImpl) generate(convertFile *os.File) error {
@@ -118,49 +128,55 @@ func (c *convertImpl) generate(convertFile *os.File) error {
 	// because the `controller-runtime` requires them to convert to the `conversion.Hub`
 	hubTypes := make(map[string]struct{})
 
-	c.types.forEatch(func(typ string) {
+	c.types.forEatch(func(typ string) error {
 		hubTypes[typ] = struct{}{}
+		return nil
 	})
 
 	convertFile.WriteString(common.Boilerplate + "\n")
-	convertFile.WriteString("package " + version + "\n\n")
+	convertFile.WriteString("package " + c.version + "\n\n")
 	convertFile.WriteString(`
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/` + hub + `"
+	"github.com/chaos-mesh/chaos-mesh/api/` + c.hub + `"
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 	`)
 
-	c.types.forEatch(func(typ string) {
-		from, to := c.generateTypeConvert(typ)
+	c.types.forEatch(func(typ string) error {
+		from, to, err := c.generateTypeConvert(typ)
+		if err != nil {
+			return err
+		}
 
 		if _, ok := hubTypes[typ]; ok {
 			convertFile.WriteString(`
 			func (in *` + typ + `) ConvertTo(dstRaw conversion.Hub) error {
-				dst := dstRaw.(*` + hub + `.` + typ + `)
+				dst := dstRaw.(*` + c.hub + `.` + typ + `)
 			
 			` + to + `
 				return nil
 			}
 			
 			func (in *` + typ + `) ConvertFrom(srcRaw conversion.Hub) error {
-				src := srcRaw.(*` + hub + `.` + typ + `)
+				src := srcRaw.(*` + c.hub + `.` + typ + `)
 			
 			` + from + `
 				return nil
 			}`)
 		} else {
 			convertFile.WriteString(`
-			func (in *` + typ + `) ConvertTo(dst *` + hub + `.` + typ + `) error {
+			func (in *` + typ + `) ConvertTo(dst *` + c.hub + `.` + typ + `) error {
 			` + to + `
 				return nil
 			}
 			
-			func (in *` + typ + `) ConvertFrom(src *` + hub + `.` + typ + `) error {
+			func (in *` + typ + `) ConvertFrom(src *` + c.hub + `.` + typ + `) error {
 			` + from + `
 				return nil
 			}`)
 		}
+
+		return nil
 	})
 	return nil
 }
@@ -184,35 +200,50 @@ var builtInTypes = map[string]struct{}{
 	"float64": {},
 }
 
-func (c *convertImpl) printExprToNewVersion(expr ast.Expr) string {
+func (c *convertImpl) printExprToNewVersion(expr ast.Expr) (string, error) {
 	switch t := expr.(type) {
 	case *ast.Ident:
 		if _, ok := builtInTypes[t.Name]; ok {
-			return t.Name
+			return t.Name, nil
 		}
-		return hub + "." + t.Name
+		return c.hub + "." + t.Name, nil
 	case *ast.SelectorExpr:
-		return types.ExprString(expr)
+		return types.ExprString(expr), nil
 	case *ast.StarExpr:
-		return "*" + c.printExprToNewVersion(t.X)
+		newTyp, err := c.printExprToNewVersion(t.X)
+		if err != nil {
+			return "", err
+		}
+		return "*" + newTyp, nil
 	case *ast.ArrayType:
-		return "[]" + c.printExprToNewVersion(t.Elt)
+		newTyp, err := c.printExprToNewVersion(t.Elt)
+		if err != nil {
+			return "", err
+		}
+		return "[]" + newTyp, nil
 	case *ast.MapType:
-		return "map[" + c.printExprToNewVersion(t.Key) + "]" + c.printExprToNewVersion(t.Value)
+		newKeyTyp, err := c.printExprToNewVersion(t.Key)
+		if err != nil {
+			return "", err
+		}
+		newValueTyp, err := c.printExprToNewVersion(t.Key)
+		if err != nil {
+			return "", err
+		}
+		return "map[" + newKeyTyp + "]" + newValueTyp, nil
 	default:
-		log.Fatal("not supported yet")
+		return "", errors.Wrapf(errTypeNotSupported, "type %T", t)
 	}
-	return ""
 }
 
 // generateTypeConvert generates the convert function for the type
-func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
+func (c *convertImpl) generateTypeConvert(typ string) (string, string, error) {
 	from := ""
 	to := ""
 
 	typeDeclare, ok := c.definitionMap[typ]
 	if !ok {
-		log.Fatal("type not found: ", typ)
+		return "", "", errors.WithStack(errTypeNotFound)
 	}
 
 	typeSpec := typeDeclare.Specs[0].(*ast.TypeSpec)
@@ -227,9 +258,9 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 		derefedTypeSpec = pointerTypeSpec.X
 		switch derefedTypeSpec.(type) {
 		case *ast.ArrayType:
-			log.Fatal("not supported yet")
+			return "", "", errors.Wrapf(errTypeNotSupported, "type %T", derefedTypeSpec)
 		case *ast.MapType:
-			log.Fatal("not supported yet")
+			return "", "", errors.Wrapf(errTypeNotSupported, "type %T", derefedTypeSpec)
 		}
 	} else {
 		derefedTypeSpec = typeSpec.Type
@@ -240,9 +271,9 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 		// if this type is a definition for struct
 		// we will generate the convert function for every field
 		for _, field := range typeSpecDef.Fields.List {
-			fieldName := c.getFieldName(field)
-			if len(fieldName) == 0 {
-				log.Fatal("field name is empty")
+			fieldName, err := c.getFieldName(field)
+			if err != nil {
+				return "", "", err
 			}
 
 			if c.canDirectConvert(field.Type) {
@@ -252,8 +283,13 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 				switch fieldTyp := field.Type.(type) {
 				case *ast.ArrayType:
 					arrayFrom, arrayTo := c.generateArrayConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp, false)
+					newFieldType, err := c.printExprToNewVersion(field.Type)
+					if err != nil {
+						return "", "", err
+					}
+
 					to += `
-					dst.` + fieldName + ` = make(` + c.printExprToNewVersion(field.Type) + `, len(in.` + fieldName + `))
+					dst.` + fieldName + ` = make(` + newFieldType + `, len(in.` + fieldName + `))
 					` + arrayTo + `
 					`
 					from += `
@@ -261,9 +297,18 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 					` + arrayFrom + `
 					`
 				case *ast.MapType:
-					mapFrom, mapTo := c.generateMapConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp, false)
+					mapFrom, mapTo, err := c.generateMapConvert("dst."+fieldName, "src."+fieldName, "in."+fieldName, fieldTyp, false)
+					if err != nil {
+						return "", "", err
+					}
+
+					newFieldType, err := c.printExprToNewVersion(field.Type)
+					if err != nil {
+						return "", "", err
+					}
+
 					to += `
-					dst.` + fieldName + ` = make(` + c.printExprToNewVersion(field.Type) + `)
+					dst.` + fieldName + ` = make(` + newFieldType + `)
 					` + mapTo + `
 					`
 					from += `
@@ -279,15 +324,15 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 						`
 				case *ast.StarExpr:
 					// TODO: support the pointer of slice and map as the field type
-					switch fieldTyp.X.(type) {
-					case *ast.ArrayType:
-						log.Fatal("not supported yet")
-					case *ast.MapType:
-						log.Fatal("not supported yet")
+					if _, ok := fieldTyp.X.(*ast.StructType); !ok {
+						return "", "", errors.Wrapf(errTypeNotSupported, "type %T", fieldTyp.X)
 					}
 
 					typeName := types.ExprString(fieldTyp.X)
-					typeNameInNewVersion := c.printExprToNewVersion(fieldTyp.X)
+					typeNameInNewVersion, err := c.printExprToNewVersion(fieldTyp.X)
+					if err != nil {
+						return "", "", err
+					}
 
 					to += `
 					if in.` + fieldName + ` == nil {
@@ -312,11 +357,11 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 		}
 	case *ast.Ident:
 		// this type definition is an type alias, then it can be simply converted.
-		to += "*dst = " + hub + "." + typ + "(*in)\n"
+		to += "*dst = " + c.hub + "." + typ + "(*in)\n"
 		from += "*in = " + typ + "(*src)\n"
 	case *ast.ArrayType:
 		// this type definition is an array
-		to += "*dst = make(" + hub + "." + typ + ",len(*in))\n"
+		to += "*dst = make(" + c.hub + "." + typ + ",len(*in))\n"
 		from += "*in = make(" + typ + ",len(*src))\n"
 
 		arrayFrom, arrayTo := c.generateArrayConvert("dst", "src", "in", typeSpecDef, true)
@@ -327,14 +372,18 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string) {
 		to += "*dst = make(" + typ + ")\n"
 		from += "*in = make(" + typ + ")\n"
 
-		mapFrom, mapTo := c.generateMapConvert("dst", "src", "in", typeSpecDef, true)
+		mapFrom, mapTo, err := c.generateMapConvert("dst", "src", "in", typeSpecDef, true)
+		if err != nil {
+			return "", "", err
+		}
+
 		to += mapTo
 		from += mapFrom
 	default:
-		log.Fatal("unknown type ", typ, reflect.TypeOf(typeSpecDef))
+		return "", "", errors.Wrapf(errTypeNotSupported, "type %T", typeSpecDef)
 	}
 
-	return from, to
+	return from, to, nil
 }
 
 func (c *convertImpl) needRef(typ ast.Expr) bool {
@@ -349,7 +398,7 @@ func (c *convertImpl) needRef(typ ast.Expr) bool {
 // generateMapConvert will generate the conversion between map
 //
 // all of dst, src and in should have been initialized.
-func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType, ptr bool) (string, string) {
+func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType, ptr bool) (string, string, error) {
 	from := ""
 	to := ""
 
@@ -374,23 +423,11 @@ func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType, 
 	} else {
 		switch valueTyp := typ.Value.(type) {
 		case *ast.StarExpr:
-			from += `
-			for key,val := range ` + src + ` {
-				// TODO: convert the value
-			}
-			`
-
-			to += `
-			for key,val := range ` + in + ` {
-				// TODO: convert the value
-			}
-			`
-
 			// we need to initialize the target value and we will have to handle
 			// different situations for different type of value
-			log.Fatal("not supported yet")
+			return "", "", errors.Wrapf(errTypeNotSupported, "type %T", typ.Value)
 		case *ast.SliceExpr:
-			log.Fatal("not supported yet")
+			return "", "", errors.Wrapf(errTypeNotSupported, "type %T", typ.Value)
 		case *ast.Ident:
 			// this ident cannot be directly convert, while the value is not a pointer
 
@@ -406,7 +443,7 @@ func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType, 
 
 			to += `
 			for key,val := range ` + in + ` {
-				tmpValue := new(` + hub + "." + valueTyp.Name + `)
+				tmpValue := new(` + c.hub + "." + valueTyp.Name + `)
 				val.ConvertTo(tmpValue)
 				` + dst + `[key] = *tmpValue
 			}
@@ -414,7 +451,7 @@ func (c *convertImpl) generateMapConvert(dst, src, in string, typ *ast.MapType, 
 		}
 	}
 
-	return from, to
+	return from, to, nil
 }
 
 // generateArrayConvert will generate the conversion between array
@@ -480,7 +517,7 @@ func (c *convertImpl) generateArrayConvert(dst, src, in string, typ *ast.ArrayTy
 // `A`, `B`, `C`
 // Then if you hava a variable `s` with type `S`, then you can
 // refer to the field with `s.A`, `s.B` and `s.C`
-func (c *convertImpl) getFieldName(field *ast.Field) string {
+func (c *convertImpl) getFieldName(field *ast.Field) (string, error) {
 	fieldName := ""
 	if field.Names != nil {
 		fieldName = field.Names[0].Name
@@ -502,11 +539,11 @@ func (c *convertImpl) getFieldName(field *ast.Field) string {
 			// for example, the time.Time, or kubernetes metadata
 			fieldName = fieldType.Sel.Name
 		default:
-			log.Fatal("unknown embedded struct type", reflect.TypeOf(fieldType))
+			return "", errors.Errorf("unknown embedded struct type: %T", fieldType)
 		}
 	}
 
-	return fieldName
+	return fieldName, nil
 }
 
 // canDirectConvert returns whether the type can be directly converted.
@@ -576,8 +613,13 @@ func (c *uniqueList) push(typs ...string) {
 	}
 }
 
-func (c *uniqueList) forEatch(f func(string)) {
+func (c *uniqueList) forEatch(f func(string) error) error {
 	for e := c.convertTypes.Front(); e != nil; e = e.Next() {
-		f(e.Value.(string))
+		err := f(e.Value.(string))
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

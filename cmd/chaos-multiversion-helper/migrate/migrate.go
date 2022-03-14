@@ -21,47 +21,49 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"log"
 	"os"
 
 	doublestar "github.com/bmatcuk/doublestar/v4"
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
-var MigrateCmd = &cobra.Command{
-	Use:   "migrate --from <old-version> --to <new-version>",
-	Short: "migrate command iterate over all golang source codes (except a whitelist) and migrate them to the new version",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := run()
-		if err != nil {
-			log.Fatal(err)
-		}
-	},
-}
+func NewMigrateCmd(log logr.Logger) *cobra.Command {
+	var from, to string
 
-var from, to string
+	cmd := &cobra.Command{
+		Use:   "migrate --from <old-version> --to <new-version>",
+		Short: "migrate command iterate over all golang source codes (except a whitelist) and migrate them to the new version",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := run(from, to)
+			if err != nil {
+				log.Error(err, "migrate source codes", "from", from, "to", to)
+				os.Exit(1)
+			}
+		},
+	}
+
+	cmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
+	cmd.Flags().StringVar(&to, "to", "", "new version of chaos api")
+
+	cmd.MarkFlagRequired("from")
+	cmd.MarkFlagRequired("to")
+
+	return cmd
+}
 
 var whiteListPattern = []string{
 	".cache/**/*",
 	"api/**/*",
 }
 
-func init() {
-	MigrateCmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
-	MigrateCmd.Flags().StringVar(&to, "to", "", "new version of chaos api")
-
-	MigrateCmd.MarkFlagRequired("from")
-	MigrateCmd.MarkFlagRequired("to")
-}
-
 func isWhiteListed(path string) bool {
 	for _, pattern := range whiteListPattern {
-		match, err := doublestar.PathMatch(pattern, path)
-		if err != nil {
-			log.Fatal(err)
-		}
+		match, _ := doublestar.PathMatch(pattern, path)
+		// ignore error, because the only possible error is bad pattern
 
 		if match {
 			return true
@@ -71,10 +73,10 @@ func isWhiteListed(path string) bool {
 	return false
 }
 
-func run() error {
+func run(from, to string) error {
 	allGoFiles, err := doublestar.Glob(os.DirFS("."), "**/*.go")
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	for _, file := range allGoFiles {
@@ -82,7 +84,7 @@ func run() error {
 			continue
 		}
 
-		err := migrateFile(file)
+		err := migrateFile(file, from, to)
 		if err != nil {
 			return err
 		}
@@ -95,12 +97,12 @@ func quote(s string) string {
 	return fmt.Sprintf("%q", s)
 }
 
-func migrateFile(path string) error {
+func migrateFile(path string, from string, to string) error {
 	fileSet := token.NewFileSet()
 
 	fileAst, err := parser.ParseFile(fileSet, path, nil, parser.ParseComments)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	needMigrate := false
@@ -133,7 +135,7 @@ func migrateFile(path string) error {
 
 		file, err := os.Create(path)
 		if err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 		defer file.Close()
 		printer.Fprint(file, fileSet, fileAst)
