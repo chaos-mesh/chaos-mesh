@@ -18,19 +18,18 @@ package metrics
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
 const chaosDashboardSubsystem = "chaos_dashboard"
 
-var log = ctrl.Log.WithName("metrics-collector")
-
 // Collector implements prometheus.Collector interface
 type Collector struct {
+	log             logr.Logger
 	experimentStore core.ExperimentStore
 	scheduleStore   core.ScheduleStore
 	workflowStore   core.WorkflowStore
@@ -43,6 +42,7 @@ type Collector struct {
 // NewCollector initializes metrics and collector
 func NewCollector(experimentStore core.ExperimentStore, scheduleStore core.ScheduleStore, workflowStore core.WorkflowStore) *Collector {
 	return &Collector{
+		log:             z.NewDefaultZapLogger(),
 		experimentStore: experimentStore,
 		scheduleStore:   scheduleStore,
 		workflowStore:   workflowStore,
@@ -86,7 +86,7 @@ func (collector *Collector) collectArchivedExperiments() {
 
 	metas, err := collector.experimentStore.ListMeta(context.TODO(), "", "", "", true)
 	if err != nil {
-		log.Error(err, "fail to list all archived chaos experiments")
+		collector.log.Error(err, "fail to list all archived chaos experiments")
 		return
 	}
 
@@ -111,7 +111,7 @@ func (collector *Collector) collectArchivedSchedules() {
 
 	metas, err := collector.scheduleStore.ListMeta(context.TODO(), "", "", true)
 	if err != nil {
-		log.Error(err, "fail to list all archived schedules")
+		collector.log.Error(err, "fail to list all archived schedules")
 		return
 	}
 
@@ -130,7 +130,7 @@ func (collector *Collector) collectArchivedWorkflows() {
 
 	metas, err := collector.workflowStore.ListMeta(context.TODO(), "", "", true)
 	if err != nil {
-		log.Error(err, "fail to list all archived workflows")
+		collector.log.Error(err, "fail to list all archived workflows")
 		return
 	}
 
@@ -157,3 +157,4 @@ func Register(params Params) {
 	collector := NewCollector(params.ExperimentStore, params.ScheduleStore, params.WorkflowStore)
 	params.Registry.MustRegister(collector)
 }
+
