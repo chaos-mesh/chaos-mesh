@@ -53,6 +53,7 @@ func GetDiskClient(ctx context.Context, cli client.Client, azurechaos *v1alpha1.
 	return &disksClient, nil
 }
 
+// GetAuthorizer is used to get the azure authorizer
 func GetAuthorizer(ctx context.Context, cli client.Client, azurechaos *v1alpha1.AzureChaos) (autorest.Authorizer, error) {
 	secret := &v1.Secret{}
 	err := cli.Get(ctx, types.NamespacedName{
