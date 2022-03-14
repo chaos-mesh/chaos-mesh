@@ -1794,6 +1794,45 @@ func (in *PodNetworkChaos) Default() {
 	gw.Default(in)
 }
 
+const KindStatusCheck = "StatusCheck"
+
+var StatusCheckWebhookLog = logf.Log.WithName("StatusCheck-resource")
+
+func (in *StatusCheck) ValidateCreate() error {
+	StatusCheckWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *StatusCheck) ValidateUpdate(old runtime.Object) error {
+	StatusCheckWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*StatusCheck).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *StatusCheck) ValidateDelete() error {
+	StatusCheckWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &StatusCheck{}
+
+func (in *StatusCheck) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &StatusCheck{}
+
+func (in *StatusCheck) Default() {
+	gw.Default(in)
+}
+
 const KindStressChaos = "StressChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -2141,6 +2180,8 @@ func init() {
 	SchemeBuilder.Register(&PodIOChaos{}, &PodIOChaosList{})
 
 	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
+
+	SchemeBuilder.Register(&StatusCheck{}, &StatusCheckList{})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
 	all.register(KindStressChaos, &ChaosKind{
