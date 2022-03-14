@@ -25,8 +25,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 	"github.com/spf13/cobra"
+
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
 var AddOldObjsCmd = &cobra.Command{

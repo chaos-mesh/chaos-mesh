@@ -24,11 +24,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
-
 	doublestar "github.com/bmatcuk/doublestar/v4"
-
 	"github.com/spf13/cobra"
+
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
 var MigrateCmd = &cobra.Command{
