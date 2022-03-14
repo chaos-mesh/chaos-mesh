@@ -74,7 +74,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "selector unmarshal error")
 		return v1alpha1.NotInjected, err
 	}
-	
+
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
 		VolumeId:   selected.EbsVolume,
 		Device:     selected.DeviceName,

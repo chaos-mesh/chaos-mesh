@@ -48,7 +48,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
-	
+
 	var selected v1alpha1.GCPSelector
 	err = json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
