@@ -97,7 +97,7 @@ func getDaemonMap(ctx context.Context, c client.Client) (map[string]v1.Pod, erro
 
 	daemonMap := map[string]v1.Pod{}
 	for _, d := range list.Items {
-		if d.Spec.NodeName == "" {
+		if d.Spec.NodeName != "" {
 			daemonMap[d.Spec.NodeName] = d
 		}
 	}
