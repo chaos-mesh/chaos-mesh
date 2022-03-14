@@ -20,6 +20,7 @@ const Template: ComponentStory<typeof Checkbox> = ({ ...props }: CheckboxProps) 
 
 export const Default = Template.bind({})
 Default.args = {
+  name: 'spec.abort',
   label: 'Abort HTTP Request',
   helperText: 'Abort is a rule to abort a http session.',
   errorMessage: '',
@@ -29,6 +30,7 @@ Default.args = {
 
 export const Disabled = Template.bind({})
 Disabled.args = {
+  name: 'spec.abort',
   label: 'Abort HTTP Request',
   helperText: 'Abort is a rule to abort a http session.',
   errorMessage: '',
@@ -38,6 +40,7 @@ Disabled.args = {
 
 export const WithValidationError = Template.bind({})
 WithValidationError.args = {
+  name: 'spec.abort',
   label: 'Abort HTTP Request',
   helperText: 'Abort is a rule to abort a http session.',
   errorMessage: 'Abort could not be used with action: delay',
@@ -47,6 +50,7 @@ WithValidationError.args = {
 
 export const WithoutHelperText = Template.bind({})
 WithoutHelperText.args = {
+  name: 'spec.abort',
   label: 'Abort HTTP Request',
   helperText: '',
   errorMessage: 'Abort could not be used with action: delay',

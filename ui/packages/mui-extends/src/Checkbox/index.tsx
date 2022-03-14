@@ -15,7 +15,7 @@
  *
  */
 
-import { FormControl, FormControlLabel, FormHelperText, FormLabel, Input, InputLabel } from '@mui/material'
+import { FormControl, FormControlLabel, FormHelperText, FormLabel } from '@mui/material'
 import { default as MuiCheckbox, CheckboxProps as MuiCheckboxProps } from '@mui/material/Checkbox'
 
 export type CheckboxProps = MuiCheckboxProps & {
@@ -32,7 +32,12 @@ export default (props: CheckboxProps) => {
         <FormLabel component="legend">{props.label}</FormLabel>
         <FormControlLabel
           control={
-            <MuiCheckbox checked={props.checked} onChange={props.onChange} disabled={props.disabled}></MuiCheckbox>
+            <MuiCheckbox
+              checked={props.checked}
+              onChange={props.onChange}
+              disabled={props.disabled}
+              inputProps={{ name: props.name }}
+            ></MuiCheckbox>
           }
           label={props.helperText || props.label}
         ></FormControlLabel>
