@@ -48,8 +48,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
+	
 	var selected v1alpha1.GCPSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "selector unmarshal error")
+		return v1alpha1.NotInjected, err
+	}
+
 	_, err = computeService.Instances.Reset(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		impl.Log.Error(err, "fail to reset the instance")

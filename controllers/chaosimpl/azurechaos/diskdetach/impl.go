@@ -50,8 +50,13 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "fail to get the vm client")
 		return v1alpha1.NotInjected, err
 	}
+
 	var selected v1alpha1.AzureSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "selector unmarshal error")
+		return v1alpha1.NotInjected, err
+	}
 
 	vm, err := vmClient.Get(context.Background(), azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, compute.InstanceView)
 	if err != nil {

@@ -69,7 +69,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	ec2client := ec2.NewFromConfig(cfg)
 
 	var selected v1alpha1.AWSSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "selector unmarshal error")
+		return v1alpha1.NotInjected, err
+	}
+	
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
 		VolumeId:   selected.EbsVolume,
 		Device:     selected.DeviceName,
