@@ -38,6 +38,7 @@ var alwaysAllowedKind = []string{
 	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
 	v1alpha1.KindPhysicalMachine,
+	v1alpha1.KindStatusCheck,
 
 	"WorkflowNode",
 }
