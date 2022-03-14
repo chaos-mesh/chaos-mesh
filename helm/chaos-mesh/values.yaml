@@ -295,6 +295,13 @@ dashboard:
     # you set a database encryption secret. This must be set before any secrets are stored
     # in the database.
     # DATABASE_SECRET:
+
+    # Set the sync period to clean up archived data
+    CLEAN_SYNC_PERIOD: 12h
+    # Set TTL of archived event data
+    TTL_EVENT: 168h
+    # Set TTL of archived experiment data
+    TTL_EXPERIMENT: 336h
   ingress:
     ## Set to true to enable ingress record generation
     enabled: false
@@ -441,6 +448,7 @@ webhook:
     - blockchaos
     - physicalmachinechaos
     - physicalmachine
+    - statuscheck
 
 bpfki:
   create: false

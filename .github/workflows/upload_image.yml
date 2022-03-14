@@ -17,6 +17,9 @@ jobs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
       - uses: actions/checkout@master
+        with:
+          # it requires all the tags and branch for generation the correct GitVersion with hack/version.sh
+          fetch-depth: 0
 
       - name: Extract Image Tag
         shell: bash
@@ -57,6 +60,8 @@ jobs:
             IMAGE_DEV_ENV_BUILD=1 \
             IMAGE_BUILD_ENV_BUILD=1 \
             IMAGE_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            IMAGE_BUILD_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            IMAGE_DEV_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
             IMAGE_REGISTRY=ghcr.io \
             UI=$UI \
             image-$IMAGE

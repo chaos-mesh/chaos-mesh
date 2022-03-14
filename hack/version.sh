@@ -19,7 +19,8 @@ set -euo pipefail
 function chaos_mesh::version::get_version_vars() {
   if [[ -n ${GIT_COMMIT-} ]] || GIT_COMMIT=$(git rev-parse "HEAD^{commit}" 2>/dev/null); then
     # Use git describe to find the version based on tags.
-    if [[ -n ${GIT_VERSION-} ]] || GIT_VERSION=$(git describe --tags --abbrev=14 "${GIT_COMMIT}^{commit}" 2>/dev/null); then
+    # --always would show the unique abbr commit as fallback.
+    if [[ -n ${GIT_VERSION-} ]] || GIT_VERSION=$(git describe --always --tags --abbrev=14 "${GIT_COMMIT}^{commit}" 2>/dev/null); then
       # if current commit is not on a certain tag
       if ! git describe --tags --exact-match >/dev/null 2>&1 ; then
         # GIT_VERSION=gitBranch-gitCommitHash
