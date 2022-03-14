@@ -25,9 +25,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 	"github.com/go-logr/logr"
 	"github.com/pingcap/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
 var errTypeNotSupported = errors.New("type is not supported")
