@@ -17,7 +17,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -70,25 +69,37 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selectorSpec v1al
 		return nil, nil, nil
 	}
 
+	daemonMap, err := getDaemonMap(ctx, c)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "get daemon map")
+	}
+
 	var chaosDaemons []v1.Pod
 	// get chaos daemon
 	for _, chaosPod := range pods {
-		nodeName := chaosPod.Spec.NodeName
-		daemonSelector := v1alpha1.PodSelectorSpec{
-			Nodes: []string{nodeName},
-			GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
-				LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
-			},
+		daemon, exist := daemonMap[chaosPod.Spec.NodeName]
+		if !exist {
+			return nil, nil, errors.Errorf("no daemons found for pod %s", chaosPod.GetName())
 		}
-		daemons, err := pod.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, false)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", chaosPod.GetName()))
-		}
-		if len(daemons) == 0 {
-			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", chaosPod.GetName(), daemonSelector)
-		}
-		chaosDaemons = append(chaosDaemons, daemons[0])
+		chaosDaemons = append(chaosDaemons, daemon)
 	}
 
 	return pods, chaosDaemons, nil
+}
+
+// GetDaemonMap returns a map of node name to daemon pod
+func getDaemonMap(ctx context.Context, c client.Client) (map[string]v1.Pod, error) {
+	var list v1.PodList
+	labels := componentLabels(model.ComponentDaemon)
+	if err := c.List(ctx, &list, client.MatchingLabels(labels)); err != nil {
+		return nil, errors.Wrapf(err, "list daemons by label %v", labels)
+	}
+
+	daemonMap := map[string]v1.Pod{}
+	for _, d := range list.Items {
+		if d.Spec.NodeName == "" {
+			daemonMap[d.Spec.NodeName] = d
+		}
+	}
+	return daemonMap, nil
 }

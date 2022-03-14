@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -741,16 +742,16 @@ func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
 }
 
 func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) {
-	var list v1.PodList
-	if err := r.Client.List(ctx, &list, client.MatchingLabels(componentLabels(model.ComponentDaemon))); err != nil {
-		return nil, err
+	daemons, err := getDaemonMap(ctx, r.Client)
+	if err != nil {
+		return nil, errors.Wrap(err, "get daemons")
 	}
-	for _, daemon := range list.Items {
-		if obj.Spec.NodeName == daemon.Spec.NodeName {
-			return &daemon, nil
-		}
+
+	daemon, exist := daemons[obj.Name]
+	if !exist {
+		return nil, errors.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
 	}
-	return nil, fmt.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
+	return &daemon, nil
 }
 
 func (r *podResolver) Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error) {
