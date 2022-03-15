@@ -106,7 +106,7 @@ func normalizeVolumeName(ctx context.Context, volumePath string) (string, error)
 }
 
 func enableIOEMElevator(volumeName string) error {
-	schedulerPath := "/host-sys/block/" + volumeName + "/queue/scheduler"
+	schedulerPath := "/sys/block/" + volumeName + "/queue/scheduler"
 	rawSchedulers, err := os.ReadFile(schedulerPath)
 	if err != nil {
 		return errors.Wrapf(err, "reading schedulers %s", schedulerPath)
@@ -124,16 +124,17 @@ func enableIOEMElevator(volumeName string) error {
 		// the default scheduler is none, and it's fine to keep ioem without
 		// significant overhead.
 
-		if strings.HasPrefix(scheduler, "ioem") {
+		if strings.Contains(scheduler, "ioem") {
 			choosenScheduler = scheduler // it's either ioem or ioem-mq
 		}
 	}
 
 	if len(choosenScheduler) == 0 {
-		return errors.New("no ioem scheduler found")
+		return errors.New("ioem scheduler not found")
 	}
 
 	if choosenScheduler[0] == '[' && choosenScheduler[len(choosenScheduler)-1] == ']' {
+		// it has aleady been enabled
 		return nil
 	}
 
