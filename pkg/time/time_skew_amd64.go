@@ -145,6 +145,7 @@ func GetSkew(logger logr.Logger) (Skew, error) {
 		clockGetTime: clockGetTimeImage,
 		getTimeOfDay: getTimeOfDayimage,
 		locker:       sync.Mutex{},
+		logger:       logger,
 	}, nil
 }
 
@@ -175,6 +176,9 @@ func (s *Skew) Inject(pid tasks.PID) error {
 	if !ok {
 		return tasks.ErrNotSysPID
 	}
+
+	s.logger.Info("injecting time skew", "pid", pid)
+
 	err := s.clockGetTime.AttachToProcess(int(sysPID), map[string]uint64{
 		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
 		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
@@ -201,16 +205,29 @@ func (s *Skew) Recover(pid tasks.PID) error {
 	if !ok {
 		return tasks.ErrNotSysPID
 	}
-	err1 := s.clockGetTime.Recover(int(sysPID))
+
+	s.logger.Info("recovering time skew", "pid", pid)
+
+	err1 := s.clockGetTime.Recover(int(sysPID), map[string]uint64{
+		externVarClockIdsMask: s.SkewConfig.clockIDsMask,
+		externVarTvSecDelta:   uint64(s.SkewConfig.deltaSeconds),
+		externVarTvNsecDelta:  uint64(s.SkewConfig.deltaNanoSeconds),
+	})
 	if err1 != nil {
-		err2 := s.getTimeOfDay.Recover(int(sysPID))
+		err2 := s.getTimeOfDay.Recover(int(sysPID), map[string]uint64{
+			externVarTvSecDelta:  uint64(s.SkewConfig.deltaSeconds),
+			externVarTvNsecDelta: uint64(s.SkewConfig.deltaNanoSeconds),
+		})
 		if err2 != nil {
 			return errors.Wrapf(err1, "time skew all failed %v", err2)
 		}
 		return err1
 	}
 
-	err2 := s.getTimeOfDay.Recover(int(sysPID))
+	err2 := s.getTimeOfDay.Recover(int(sysPID), map[string]uint64{
+		externVarTvSecDelta:  uint64(s.SkewConfig.deltaSeconds),
+		externVarTvNsecDelta: uint64(s.SkewConfig.deltaNanoSeconds),
+	})
 	if err2 != nil {
 		return err2
 	}

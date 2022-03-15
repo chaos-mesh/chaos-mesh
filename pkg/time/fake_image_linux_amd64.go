@@ -82,7 +82,7 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 		return errors.Wrapf(err, "PID : %d", pid)
 	}
 
-	fakeEntry, err := it.FindInjectedImage(program)
+	fakeEntry, err := it.FindInjectedImage(program, len(variables))
 	if err != nil {
 		return errors.Wrapf(err, "PID : %d", pid)
 	}
@@ -134,7 +134,7 @@ func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	return vdsoEntry, nil
 }
 
-func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
+func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram, varNum int) (*mapreader.Entry, error) {
 	it.logger.Info("finding injected image")
 
 	// minus tailing variable part
@@ -142,15 +142,21 @@ func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram) (*mapreade
 	if it.fakeEntry != nil {
 		content, err := program.ReadSlice(it.fakeEntry.StartAddress, it.fakeEntry.EndAddress-it.fakeEntry.StartAddress)
 		if err != nil {
-			it.logger.Error(err, "ReadSlice fail")
+			it.logger.V(0).Info("ReadSlice fail")
 			return nil, nil
 		}
-		contentWithoutVariable := (*content)[:len(it.content)-30]
-		expectedContentWithoutVariable := it.content[:len(it.content)-30]
+		if varNum*8 > len(it.content) {
+			return nil, errors.New("variable num bigger than content num")
+		}
+		contentWithoutVariable := (*content)[:len(it.content)-varNum*8]
+		expectedContentWithoutVariable := it.content[:len(it.content)-varNum*8]
 		it.logger.Info("successfully read slice", "content", contentWithoutVariable, "expected content", expectedContentWithoutVariable)
+
 		if bytes.Equal(contentWithoutVariable, expectedContentWithoutVariable) {
-			it.logger.Info("found")
+			it.logger.Info("slice found")
 			return it.fakeEntry, nil
+		} else {
+			it.logger.V(0).Info("slice not found")
 		}
 	}
 	return nil, nil
@@ -199,7 +205,7 @@ func (it *FakeImage) TryReWriteFakeImage(program *ptrace.TracedProgram) error {
 	return nil
 }
 
-func (it *FakeImage) Recover(pid int) error {
+func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
 	runtime.LockOSThread()
 	defer func() {
 		runtime.UnlockOSThread()
@@ -218,7 +224,7 @@ func (it *FakeImage) Recover(pid int) error {
 		}
 	}()
 
-	fakeEntry, err := it.FindInjectedImage(program)
+	fakeEntry, err := it.FindInjectedImage(program, len(vars))
 	if err != nil {
 		return errors.Wrapf(err, "FindInjectedImage , pid: %d", pid)
 	}
@@ -226,5 +232,6 @@ func (it *FakeImage) Recover(pid int) error {
 		return nil
 	}
 
+	err = it.TryReWriteFakeImage(program)
 	return err
 }
