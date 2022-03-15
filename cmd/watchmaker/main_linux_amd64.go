@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -59,7 +58,6 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("error while creating zap logger: %v", err))
 	}
-	ptrace.RegisterLogger(logger.WithName("ptrace"))
 
 	clkIds := strings.Split(clockIdsSlice, ",")
 	mask, err := utils.EncodeClkIds(clkIds)
