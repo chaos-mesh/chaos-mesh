@@ -439,6 +439,7 @@ webhook:
     - kernelchaos
     - stresschaos
     - awschaos
+    - azurechaos
     - gcpchaos
     - dnschaos
     - jvmchaos

@@ -85,6 +85,50 @@ spec:
                       - awsRegion
                       - ec2Instance
                       type: object
+                    azureChaos:
+                      description: AzureChaosSpec is the content of the specification
+                        for an AzureChaos
+                      properties:
+                        action:
+                          description: 'Action defines the specific azure chaos action.
+                            Supported action: vm-stop / vm-restart / disk-detach Default
+                            action: vm-stop'
+                          enum:
+                          - vm-stop
+                          - vm-restart
+                          - disk-detach
+                          type: string
+                        diskName:
+                          description: DiskName indicates the name of the disk. Needed
+                            in disk-detach.
+                          type: string
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action.
+                          type: string
+                        lun:
+                          description: LUN indicates the Logical Unit Number of the
+                            data disk. Needed in disk-detach.
+                          type: integer
+                        resourceGroupName:
+                          description: ResourceGroupName defines the name of ResourceGroup
+                          type: string
+                        secretName:
+                          description: SecretName defines the name of kubernetes secret.
+                            It is used for Azure credentials.
+                          type: string
+                        subscriptionID:
+                          description: SubscriptionID defines the id of Azure subscription.
+                          type: string
+                        vmName:
+                          description: VMName defines the name of Virtual Machine
+                          type: string
+                      required:
+                      - action
+                      - resourceGroupName
+                      - subscriptionID
+                      - vmName
+                      type: object
                     blockChaos:
                       description: BlockChaosSpec is the content of the specification
                         for a BlockChaos
@@ -2496,6 +2540,51 @@ spec:
                           - action
                           - awsRegion
                           - ec2Instance
+                          type: object
+                        azureChaos:
+                          description: AzureChaosSpec is the content of the specification
+                            for an AzureChaos
+                          properties:
+                            action:
+                              description: 'Action defines the specific azure chaos
+                                action. Supported action: vm-stop / vm-restart / disk-detach
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              - disk-detach
+                              type: string
+                            diskName:
+                              description: DiskName indicates the name of the disk.
+                                Needed in disk-detach.
+                              type: string
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            lun:
+                              description: LUN indicates the Logical Unit Number of
+                                the data disk. Needed in disk-detach.
+                              type: integer
+                            resourceGroupName:
+                              description: ResourceGroupName defines the name of ResourceGroup
+                              type: string
+                            secretName:
+                              description: SecretName defines the name of kubernetes
+                                secret. It is used for Azure credentials.
+                              type: string
+                            subscriptionID:
+                              description: SubscriptionID defines the id of Azure
+                                subscription.
+                              type: string
+                            vmName:
+                              description: VMName defines the name of Virtual Machine
+                              type: string
+                          required:
+                          - action
+                          - resourceGroupName
+                          - subscriptionID
+                          - vmName
                           type: object
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification

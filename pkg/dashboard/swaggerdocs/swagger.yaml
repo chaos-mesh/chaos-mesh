@@ -442,6 +442,47 @@ definitions:
         description: +optional
         type: integer
     type: object
+  v1alpha1.AzureChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific azure chaos action.
+          Supported action: vm-stop / vm-restart / disk-detach
+          Default action: vm-stop
+          +kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach
+        type: string
+      diskName:
+        description: |-
+          DiskName indicates the name of the disk.
+          Needed in disk-detach.
+          +optional
+        type: string
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      lun:
+        description: |-
+          LUN indicates the Logical Unit Number of the data disk.
+          Needed in disk-detach.
+          +optional
+        type: integer
+      resourceGroupName:
+        description: ResourceGroupName defines the name of ResourceGroup
+        type: string
+      secretName:
+        description: |-
+          SecretName defines the name of kubernetes secret. It is used for Azure credentials.
+          +optional
+        type: string
+      subscriptionID:
+        description: SubscriptionID defines the id of Azure subscription.
+        type: string
+      vmName:
+        description: VMName defines the name of Virtual Machine
+        type: string
+    type: object
   v1alpha1.BandwidthSpec:
     properties:
       buffer:
@@ -571,6 +612,10 @@ definitions:
     properties:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
         type: object
       blockChaos:
@@ -2091,6 +2136,10 @@ definitions:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
         type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
+        description: +optional
+        type: object
       blockChaos:
         $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
@@ -2287,6 +2336,10 @@ definitions:
     properties:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
         type: object
       blockChaos:
