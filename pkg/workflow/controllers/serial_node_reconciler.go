@@ -128,12 +128,14 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 
 		// TODO: also check the consistent between spec in task and the spec in child node
 		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
+			if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
+			}
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
-			it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
@@ -203,28 +205,30 @@ func (it *SerialNodeReconciler) syncChildNodes(ctx context.Context, node v1alpha
 					// delete that related nodes with best-effort pattern
 					nodesToDelete := finishedChildNodes[index:]
 
-					var nodesToCleanup []string
-					for _, item := range nodesToDelete {
-						nodesToCleanup = append(nodesToCleanup, item.Name)
-					}
-					it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
-
-					for _, refToDelete := range nodesToDelete {
-						nodeToDelete := v1alpha1.WorkflowNode{}
-						err := it.kubeClient.Get(ctx, types.NamespacedName{
-							Namespace: node.Namespace,
-							Name:      refToDelete.Name,
-						}, &nodeToDelete)
-						if client.IgnoreNotFound(err) != nil {
-							it.logger.Error(err, "failed to fetch outdated child node",
-								"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-								"child node", fmt.Sprintf("%s/%s", node.Namespace, nodeToDelete.Name))
+					if len(nodesToDelete) > 0 {
+						var nodesToCleanup []string
+						for _, item := range nodesToDelete {
+							nodesToCleanup = append(nodesToCleanup, item.Name)
 						}
-						err = it.kubeClient.Delete(ctx, &nodeToDelete)
-						if client.IgnoreNotFound(err) != nil {
-							it.logger.Error(err, "failed to fetch outdated child node",
-								"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
-								"child node", fmt.Sprintf("%s/%s", node.Namespace, nodeToDelete.Name))
+						it.eventRecorder.Event(&node, recorder.RerunBySpecChanged{CleanedChildrenNode: nodesToCleanup})
+
+						for _, refToDelete := range nodesToDelete {
+							nodeToDelete := v1alpha1.WorkflowNode{}
+							err := it.kubeClient.Get(ctx, types.NamespacedName{
+								Namespace: node.Namespace,
+								Name:      refToDelete.Name,
+							}, &nodeToDelete)
+							if client.IgnoreNotFound(err) != nil {
+								it.logger.Error(err, "failed to fetch outdated child node",
+									"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+									"child node", fmt.Sprintf("%s/%s", node.Namespace, nodeToDelete.Name))
+							}
+							err = it.kubeClient.Delete(ctx, &nodeToDelete)
+							if client.IgnoreNotFound(err) != nil {
+								it.logger.Error(err, "failed to fetch outdated child node",
+									"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
+									"child node", fmt.Sprintf("%s/%s", node.Namespace, nodeToDelete.Name))
+							}
 						}
 					}
 					break

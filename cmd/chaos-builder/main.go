@@ -24,12 +24,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/go-logr/zapr"
 	"github.com/pingcap/errors"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"go.uber.org/zap"
 )
 
 var (
-	log = zap.New(zap.UseDevMode(true))
+	zapLogger, _ = zap.NewDevelopment()
+	log          = zapr.NewLogger(zapLogger)
 )
 
 type metadata struct {
@@ -182,7 +184,7 @@ func init() {
 	}
 	fmt.Fprint(file, scheduleGenerator.Render())
 
-	file, err = os.Create("./ui/src/api/zz_generated.frontend.chaos-mesh.ts")
+	file, err = os.Create("./ui/app/src/api/zz_generated.frontend.chaos-mesh.ts")
 	if err != nil {
 		log.Error(err, "fail to create file")
 		os.Exit(1)
@@ -194,20 +196,20 @@ func getType(fset *token.FileSet, node ast.Node, comment *ast.Comment) (*ast.Typ
 	log.Info("build", "pos", fset.Position(comment.Pos()))
 	decl, ok := node.(*ast.GenDecl)
 	if !ok {
-		err := errors.Errorf("node is not a *ast.GenDecl")
+		err := errors.New("node is not a *ast.GenDecl")
 		log.Error(err, "fail to get type")
 		return nil, err
 	}
 
 	if decl.Tok != token.TYPE {
-		err := errors.Errorf("node.Tok is not token.TYPE")
+		err := errors.New("node.Tok is not token.TYPE")
 		log.Error(err, "fail to get type")
 		return nil, err
 	}
 
 	baseType, ok := decl.Specs[0].(*ast.TypeSpec)
 	if !ok {
-		err := errors.Errorf("node is not a *ast.TypeSpec")
+		err := errors.New("node is not a *ast.TypeSpec")
 		log.Error(err, "fail to get type")
 		return nil, err
 	}

@@ -19,10 +19,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
-
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +29,10 @@ import (
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 )
 
 func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli client.Client) {
@@ -55,14 +55,16 @@ func TestcasePodKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli 
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces: []string{
-							ns,
-						},
-						LabelSelectors: map[string]string{
-							"app": "nginx",
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces: []string{
+								ns,
+							},
+							LabelSelectors: map[string]string{
+								"app": "nginx",
+							},
 						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 		},
@@ -111,14 +113,16 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces: []string{
-							ns,
-						},
-						LabelSelectors: map[string]string{
-							"app": "nginx",
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces: []string{
+								ns,
+							},
+							LabelSelectors: map[string]string{
+								"app": "nginx",
+							},
 						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 		},

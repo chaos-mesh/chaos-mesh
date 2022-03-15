@@ -18,21 +18,28 @@ package physicalmachinechaos
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 type Impl struct {
 	client.Client
@@ -42,13 +49,32 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("apply physical machine chaos")
 
-	physicalMachinechaos := obj.(*v1alpha1.PhysicalMachineChaos)
-	addresses := records[index].Id
-	addressArray := strings.Split(addresses, ",")
+	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	var address string
+	// For compatibility with older versions, we now have two ways to select the address
+	// of the physical machine, so there will be two possible values for the records:
+	//
+	// 1. when using address directly, values in records are IP
+	// 2. when using selector, values in records are NamespacedName
+	if len(physicalMachineChaos.Spec.Address) > 0 {
+		address = records[index].Id
+	} else {
+		var physicalMachine v1alpha1.PhysicalMachine
+		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+		err = impl.Get(ctx, namespacedName, &physicalMachine)
+		if err != nil {
+			// TODO: handle this error
+			return v1alpha1.NotInjected, err
+		}
+		address = physicalMachine.Spec.Address
+	}
 
 	// for example, physicalMachinechaos.Spec.Action is 'network-delay', action is 'network', subAction is 'delay'
 	// notice: 'process' and 'clock' action has no subAction, set subAction to ""
-	actions := strings.SplitN(string(physicalMachinechaos.Spec.Action), "-", 2)
+	actions := strings.SplitN(string(physicalMachineChaos.Spec.Action), "-", 2)
 	if len(actions) == 1 {
 		actions = append(actions, "")
 	} else if len(actions) != 2 {
@@ -56,7 +82,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 	action, subAction := actions[0], actions[1]
-	physicalMachinechaos.Spec.ExpInfo.Action = subAction
+	physicalMachineChaos.Spec.ExpInfo.Action = subAction
 
 	/*
 		transform ExpInfo in PhysicalMachineChaos to json data required by chaosd
@@ -73,22 +99,22 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			transform to json data: "{\"uid\":\"123\",\"action\":\"cpu\",\"load\":1,\"workers\":1}
 	*/
 	var expInfoMap map[string]interface{}
-	expInfoBytes, _ := json.Marshal(physicalMachinechaos.Spec.ExpInfo)
+	expInfoBytes, _ := json.Marshal(physicalMachineChaos.Spec.ExpInfo)
 	err := json.Unmarshal(expInfoBytes, &expInfoMap)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal experiment info")
 		return v1alpha1.NotInjected, err
 	}
-	configKV, ok := expInfoMap[string(physicalMachinechaos.Spec.Action)].(map[string]interface{})
+	configKV, ok := expInfoMap[string(physicalMachineChaos.Spec.Action)].(map[string]interface{})
 	if !ok {
 		err = errors.New("transform action config to map failed")
 		impl.Log.Error(err, "")
 		return v1alpha1.NotInjected, err
 	}
+	delete(expInfoMap, string(physicalMachineChaos.Spec.Action))
 	for k, v := range configKV {
 		expInfoMap[k] = v
 	}
-	delete(expInfoMap, string(physicalMachinechaos.Spec.Action))
 
 	expInfoBytes, err = json.Marshal(expInfoMap)
 	if err != nil {
@@ -96,20 +122,18 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	for _, address := range addressArray {
-		url := fmt.Sprintf("%s/api/attack/%s", address, action)
-		impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
+	url := fmt.Sprintf("%s/api/attack/%s", address, action)
+	impl.Log.Info("HTTP request", "address", address, "data", string(expInfoBytes))
 
-		statusCode, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
-		if err != nil {
-			return v1alpha1.NotInjected, err
-		}
+	statusCode, body, err := impl.doHttpRequest("POST", url, bytes.NewBuffer(expInfoBytes))
+	if err != nil {
+		return v1alpha1.NotInjected, errors.Wrap(err, body)
+	}
 
-		if statusCode != http.StatusOK {
-			err = errors.New("HTTP status is not OK")
-			impl.Log.Error(err, "")
-			return v1alpha1.NotInjected, err
-		}
+	if statusCode != http.StatusOK {
+		err = errors.New("HTTP status is not OK")
+		impl.Log.Error(err, body)
+		return v1alpha1.NotInjected, errors.Wrap(err, body)
 	}
 
 	return v1alpha1.Injected, nil
@@ -118,56 +142,107 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("recover physical machine chaos")
 
-	physicalMachinechaos := obj.(*v1alpha1.PhysicalMachineChaos)
-	addresses := records[index].Id
-
-	addressArray := strings.Split(addresses, ",")
-	for _, address := range addressArray {
-		url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachinechaos.Spec.ExpInfo.UID)
-		statusCode, err := impl.doHttpRequest("DELETE", url, nil)
+	physicalMachineChaos := obj.(*v1alpha1.PhysicalMachineChaos)
+	var address string
+	if len(physicalMachineChaos.Spec.Address) > 0 {
+		address = records[index].Id
+	} else {
+		var physicalMachine v1alpha1.PhysicalMachine
+		namespacedName, err := controller.ParseNamespacedName(records[index].Id)
 		if err != nil {
 			return v1alpha1.Injected, err
 		}
-
-		if statusCode == http.StatusNotFound {
-			impl.Log.Info("experiment not found", "uid", physicalMachinechaos.Spec.ExpInfo.UID)
-		} else if statusCode != http.StatusOK {
-			err = errors.New("HTTP status is not OK")
-			impl.Log.Error(err, "")
+		err = impl.Get(ctx, namespacedName, &physicalMachine)
+		if err != nil {
+			// TODO: handle this error
 			return v1alpha1.Injected, err
 		}
+		address = physicalMachine.Spec.Address
+	}
+
+	url := fmt.Sprintf("%s/api/attack/%s", address, physicalMachineChaos.Spec.ExpInfo.UID)
+	statusCode, body, err := impl.doHttpRequest("DELETE", url, nil)
+	if err != nil {
+		return v1alpha1.Injected, errors.Wrap(err, body)
+	}
+
+	if statusCode == http.StatusNotFound {
+		impl.Log.Info("experiment not found", "uid", physicalMachineChaos.Spec.ExpInfo.UID)
+	} else if statusCode != http.StatusOK {
+		err = errors.New("HTTP status is not OK")
+		impl.Log.Error(err, body)
+		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
 
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, error) {
+func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string, error) {
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		impl.Log.Error(err, "fail to generate HTTP request")
-		return 0, err
+		return 0, "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	httpClient := &http.Client{}
+	var httpClient *http.Client
+	if config.ControllerCfg.ChaosdSecurityMode {
+		httpClient, err = securityHTTPClient(url)
+		if err != nil {
+			impl.Log.Error(err, "generate HTTPS client")
+			return 0, "", err
+		}
+	} else {
+		httpClient = &http.Client{Timeout: 5 * time.Second}
+	}
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		impl.Log.Error(err, "do HTTP request")
-		return 0, err
+		return 0, "", err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	impl.Log.Info("HTTP response", "url", url, "status", resp.Status, "body", string(body))
 
-	return resp.StatusCode, nil
+	return resp.StatusCode, string(body), nil
 }
 
-func NewImpl(c client.Client, log logr.Logger) *common.ChaosImplPair {
-	return &common.ChaosImplPair{
+func securityHTTPClient(url string) (*http.Client, error) {
+	if !strings.Contains(url, "https") {
+		return nil, errors.Errorf("a secure url should begin with `https` rather than `http`, url: %s", url)
+	}
+
+	pair, err := tls.LoadX509KeyPair(config.ControllerCfg.ChaosdClientCert, config.ControllerCfg.ChaosdClientKey)
+	if err != nil {
+		return nil, errors.Wrap(err, "load x509 key pair failed")
+	}
+
+	pool := x509.NewCertPool()
+	ca, err := ioutil.ReadFile(config.ControllerCfg.ChaosdCACert)
+	if err != nil {
+		return nil, errors.Wrap(err, "read ChaosdCACert file failed")
+	}
+	pool.AppendCertsFromPEM(ca)
+
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      pool,
+				Certificates: []tls.Certificate{pair},
+				ServerName:   "chaosd.chaos-mesh.org",
+			},
+		},
+		Timeout: 5 * time.Second,
+	}, nil
+}
+
+func NewImpl(c client.Client, log logr.Logger) *impltypes.ChaosImplPair {
+	return &impltypes.ChaosImplPair{
 		Name:   "physicalmachinechaos",
 		Object: &v1alpha1.PhysicalMachineChaos{},
 		Impl: &Impl{

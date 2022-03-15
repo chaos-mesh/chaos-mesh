@@ -23,7 +23,7 @@ import (
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
 )
@@ -45,15 +45,17 @@ type OperatorConfig struct {
 
 // ManagerConfig describe the chaos-operator configuration during installing chaos-mesh
 type ManagerConfig struct {
-	Image           string
-	Tag             string
+	ImageRegistry   string
+	ImageRepository string
+	ImageTag        string
 	ImagePullPolicy string
 }
 
 // DaemonConfig describe the chaos-daemon configuration during installing chaos-mesh
 type DaemonConfig struct {
-	Image           string
-	Tag             string
+	ImageRegistry   string
+	ImageRepository string
+	ImageTag        string
 	Runtime         string
 	SocketPath      string
 	ImagePullPolicy string
@@ -66,13 +68,15 @@ func NewDefaultOperatorConfig() OperatorConfig {
 		ReleaseName: "chaos-mesh",
 		Tag:         "e2e",
 		Manager: ManagerConfig{
-			Image:           "localhost:5000/pingcap/chaos-mesh",
-			Tag:             "latest",
+			ImageRegistry:   "ghcr.io",
+			ImageRepository: "pingcap/chaos-mesh",
+			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 		},
 		Daemon: DaemonConfig{
-			Image:           "localhost:5000/pingcap/chaos-daemon",
-			Tag:             "latest",
+			ImageRegistry:   "ghcr.io",
+			ImageRepository: "pingcap/chaos-daemon",
+			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
@@ -91,15 +95,19 @@ type operatorAction struct {
 
 func (oi *OperatorConfig) operatorHelmSetValue() string {
 	set := map[string]string{
-		"controllerManager.image":           fmt.Sprintf("%s:%s", oi.Manager.Image, oi.Manager.Tag),
-		"controllerManager.imagePullPolicy": oi.Manager.ImagePullPolicy,
-		"chaosDaemon.image":                 fmt.Sprintf("%s:%s", oi.Daemon.Image, oi.Daemon.Tag),
-		"chaosDaemon.runtime":               oi.Daemon.Runtime,
-		"chaosDaemon.socketPath":            oi.Daemon.SocketPath,
-		"chaosDaemon.imagePullPolicy":       oi.Daemon.ImagePullPolicy,
-		"dnsServer.create":                  "true",
-		"dnsServer.image":                   oi.DNSImage,
-		"dashboard.create":                  fmt.Sprintf("%t", oi.EnableDashboard),
+		"controllerManager.image.registry":   oi.Manager.ImageRegistry,
+		"controllerManager.image.repository": oi.Manager.ImageRepository,
+		"controllerManager.image.tag":        oi.Manager.ImageTag,
+		"controllerManager.imagePullPolicy":  oi.Manager.ImagePullPolicy,
+		"chaosDaemon.image.registry":         oi.Daemon.ImageRegistry,
+		"chaosDaemon.image.repository":       oi.Daemon.ImageRepository,
+		"chaosDaemon.image.tag":              oi.Daemon.ImageTag,
+		"chaosDaemon.runtime":                oi.Daemon.Runtime,
+		"chaosDaemon.socketPath":             oi.Daemon.SocketPath,
+		"chaosDaemon.imagePullPolicy":        oi.Daemon.ImagePullPolicy,
+		"dnsServer.create":                   "true",
+		"dnsServer.image":                    oi.DNSImage,
+		"dashboard.create":                   fmt.Sprintf("%t", oi.EnableDashboard),
 	}
 	arr := make([]string, 0, len(set))
 	for k, v := range set {

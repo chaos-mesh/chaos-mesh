@@ -10,7 +10,7 @@ ARG UI
 ARG SWAGGER
 
 RUN apt-get update && \ 
-    apt-get install tzdata -y && \
+    apt-get install tzdata ca-certificates -y && \
     rm -rf /var/lib/apt/lists/*
 
 ENV http_proxy=

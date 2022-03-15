@@ -20,7 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -55,11 +54,15 @@ var _ = Describe("JVMChaos", func() {
 					Namespace: "default",
 				},
 				Spec: JVMChaosSpec{
-					Action: JVMDelayAction,
-					Target: SERVLET,
+					Action: JVMLatencyAction,
+					JVMParameter: JVMParameter{
+						Class:           "Main",
+						Method:          "print",
+						LatencyDuration: 1000,
+					},
 					ContainerSelector: ContainerSelector{
 						PodSelector: PodSelector{
-							Mode: OnePodMode,
+							Mode: OneMode,
 						},
 					},
 				},

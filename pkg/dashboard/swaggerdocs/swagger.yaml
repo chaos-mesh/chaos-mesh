@@ -14,6 +14,15 @@ definitions:
         type: string
       type: array
     type: object
+  common.PhysicalMachine:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
   common.Pod:
     properties:
       ip:
@@ -41,16 +50,23 @@ definitions:
           EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
           annotated with `chaos-mesh.org/inject=enabled` will be injected.
         type: boolean
+      gcp_security_mode:
+        default: false
+        description: GcpSecurityMode will use the gcloud authentication to login to
+          GKE user
+        type: boolean
       listen_host:
         default: 0.0.0.0
         type: string
       listen_port:
         default: 2333
         type: integer
+      root_path:
+        default: http://localhost:2333
+        type: string
       security_mode:
         default: true
-        description: If SecurityMode is set to true, then the dashboard requires token
-          authentication.
+        description: SecurityMode will use the token login by the user if set to true
         type: boolean
       target_namespace:
         description: |-
@@ -211,6 +227,30 @@ definitions:
       uid:
         type: string
     type: object
+  curl.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
+    type: object
+  curl.RequestForm:
+    properties:
+      body:
+        type: string
+      followLocation:
+        type: boolean
+      header:
+        $ref: '#/definitions/curl.Header'
+        type: object
+      jsonContent:
+        type: boolean
+      method:
+        type: string
+      name:
+        type: string
+      url:
+        type: string
+    type: object
   experiment.Detail:
     properties:
       created_at:
@@ -287,6 +327,8 @@ definitions:
     type: object
   status.AllChaosStatus:
     properties:
+      deleting:
+        type: integer
       finished:
         type: integer
       injecting:
@@ -328,6 +370,7 @@ definitions:
         description: |-
           DeviceName indicates the name of the device.
           Needed in detach-volume.
+          +ui:form:when=action=='detach-volume'
           +optional
         type: string
       duration:
@@ -341,6 +384,7 @@ definitions:
       endpoint:
         description: |-
           Endpoint indicates the endpoint of the aws server. Just used it in test now.
+          +ui:form:ignore
           +optional
         type: string
       secretName:
@@ -352,6 +396,7 @@ definitions:
         description: |-
           EbsVolume indicates the ID of the EBS volume.
           Needed in detach-volume.
+          +ui:form:when=action=='detach-volume'
           +optional
         type: string
     type: object
@@ -397,6 +442,47 @@ definitions:
         description: +optional
         type: integer
     type: object
+  v1alpha1.AzureChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific azure chaos action.
+          Supported action: vm-stop / vm-restart / disk-detach
+          Default action: vm-stop
+          +kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach
+        type: string
+      diskName:
+        description: |-
+          DiskName indicates the name of the disk.
+          Needed in disk-detach.
+          +optional
+        type: string
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      lun:
+        description: |-
+          LUN indicates the Logical Unit Number of the data disk.
+          Needed in disk-detach.
+          +optional
+        type: integer
+      resourceGroupName:
+        description: ResourceGroupName defines the name of ResourceGroup
+        type: string
+      secretName:
+        description: |-
+          SecretName defines the name of kubernetes secret. It is used for Azure credentials.
+          +optional
+        type: string
+      subscriptionID:
+        description: SubscriptionID defines the id of Azure subscription.
+        type: string
+      vmName:
+        description: VMName defines the name of Virtual Machine
+        type: string
+    type: object
   v1alpha1.BandwidthSpec:
     properties:
       buffer:
@@ -432,6 +518,74 @@ definitions:
           bps means bytes per second.
         type: string
     type: object
+  v1alpha1.BlockChaosSpec:
+    properties:
+      action:
+        description: |-
+          Action defines the specific block chaos action.
+          Supported action: limit / delay
+          +kubebuilder:validation:Enum=limit;delay
+        type: string
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, the first container will be injected
+          +optional
+        items:
+          type: string
+        type: array
+      delay:
+        $ref: '#/definitions/v1alpha1.BlockDelaySpec'
+        description: |-
+          Delay defines the delay distribution.
+          +optional
+        type: object
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
+        type: string
+      iops:
+        description: |-
+          IOPS defines the limit of IO frequency.
+          +optional
+        type: integer
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+      volumeName:
+        type: string
+    type: object
+  v1alpha1.BlockDelaySpec:
+    properties:
+      correlation:
+        default: "0"
+        description: +optional
+        type: string
+      jitter:
+        default: 0ms
+        description: +optional
+        type: string
+      latency:
+        description: Latency defines the latency of every io request.
+        type: string
+    type: object
   v1alpha1.CPUStressor:
     properties:
       load:
@@ -458,6 +612,14 @@ definitions:
     properties:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
+        description: +optional
+        type: object
+      blockChaos:
+        $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
         type: object
       concurrencyPolicy:
@@ -530,10 +692,16 @@ definitions:
   v1alpha1.ClockSpec:
     properties:
       clock-ids-slice:
+        description: |-
+          the identifier of the particular clock on which to act.
+          More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.
+          Muti clock ids should be split with ","
         type: string
       pid:
+        description: the pid of target program.
         type: integer
       time-offset:
+        description: specifies the length of time offset.
         type: string
     type: object
   v1alpha1.ConditionalBranch:
@@ -569,7 +737,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -600,10 +768,10 @@ definitions:
         type: object
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
@@ -626,20 +794,35 @@ definitions:
     type: object
   v1alpha1.DiskFillSpec:
     properties:
-      fill_by_fallocate:
+      fill-by-fallocate:
+        description: fill disk by fallocate
         type: boolean
       path:
+        description: |-
+          specifies the location to fill data in. if path not provided,
+          payload will read/write from/into a temp file, temp file will be deleted after writing
         type: string
       size:
+        description: |-
+          specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+          K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
         type: string
     type: object
   v1alpha1.DiskPayloadSpec:
     properties:
       path:
+        description: |-
+          specifies the location to fill data in. if path not provided,
+          payload will read/write from/into a temp file, temp file will be deleted after writing
         type: string
-      payload_process_num:
+      payload-process-num:
+        description: specifies the number of process work on writing, default 1, only
+          1-255 is valid value
         type: integer
       size:
+        description: |-
+          specifies how many units of data will write into the file path. support unit: c=1, w=2, b=512, kB=1000,
+          K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. example : 1M | 512kB
         type: string
     type: object
   v1alpha1.DuplicateSpec:
@@ -735,6 +918,7 @@ definitions:
         description: |-
           The device name of disks to detach.
           Needed in disk-loss.
+          +ui:form:when=action=='disk-loss'
           +optional
         items:
           type: string
@@ -748,7 +932,7 @@ definitions:
         description: Instance defines the name of the instance
         type: string
       project:
-        description: Project defines the name of gcp project.
+        description: Project defines the ID of gcp project.
         type: string
       secretName:
         description: |-
@@ -839,15 +1023,15 @@ definitions:
         type: object
       target:
         description: |-
-          +kubebuilder:validation:Enum=Request;Response
           Target is the object to be selected and injected.
+          +kubebuilder:validation:Enum=Request;Response
         type: string
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
@@ -863,12 +1047,13 @@ definitions:
         $ref: '#/definitions/v1alpha1.AttrOverrideSpec'
         description: |-
           Attr defines the overrided attribution
+          +ui:form:when=action=='attrOverride'
           +optional
         type: object
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -880,6 +1065,7 @@ definitions:
           decimal numbers, each with optional fraction and a unit suffix,
           such as "300ms".
           Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +ui:form:when=action=='latency'
           +optional
         type: string
       duration:
@@ -896,6 +1082,7 @@ definitions:
         description: |-
           Errno defines the error code that returned by I/O action.
           refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+          +ui:form:when=action=='fault'
           +optional
         type: integer
       methods:
@@ -910,6 +1097,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.MistakeSpec'
         description: |-
           Mistake defines what types of incorrectness are injected to IO operations
+          +ui:form:when=action=='mistake'
           +optional
         type: object
       mode:
@@ -928,6 +1116,7 @@ definitions:
           Percent defines the percentage of injection errors and provides a number from 0-100.
           default: 100.
           +optional
+          +kubebuilder:default=100
         type: integer
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -936,10 +1125,10 @@ definitions:
         type: object
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
       volumePath:
@@ -951,60 +1140,80 @@ definitions:
       action:
         description: |-
           Action defines the specific jvm chaos action.
-          Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
-          +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+          Supported action: latency;return;exception;stress;gc;ruleData
+          +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
+        type: string
+      class:
+        description: |-
+          +optional
+          Java class
         type: string
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
         type: array
+      cpuCount:
+        description: |-
+          +optional
+          the CPU core number need to use, only set it when action is stress
+        type: integer
       duration:
         description: |-
           Duration represents the duration of the chaos action
           +optional
         type: string
-      flags:
-        additionalProperties:
-          type: string
+      exception:
         description: |-
-          Flags represents the flags of action
           +optional
-        type: object
-      matchers:
-        additionalProperties:
-          type: string
+          the exception which needs to throw for action `exception`
+        type: string
+      latency:
         description: |-
-          Matchers represents the matching rules for the target
           +optional
-        type: object
+          the latency duration for action 'latency', unit ms
+        type: integer
+      memType:
+        description: |-
+          +optional
+          the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+        type: string
+      method:
+        description: |-
+          +optional
+          the method in Java class
+        type: string
       mode:
         description: |-
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      name:
+        description: |-
+          +optional
+          byteman rule name, should be unique, and will use JVMChaos' name if not set
+        type: string
+      port:
+        description: |-
+          +optional
+          the port of agent server, default 9277
+        type: integer
+      ruleData:
+        description: +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
           action.
         type: object
-      target:
-        description: |-
-          Target defines the specific jvm chaos target.
-          Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
-          +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
-        type: string
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
+          the return value for action 'return'
         type: string
     type: object
   v1alpha1.JVMExceptionSpec:
@@ -1013,7 +1222,7 @@ definitions:
         description: Java class
         type: string
       exception:
-        description: the exception which needs to throw dor action `exception`
+        description: the exception which needs to throw for action `exception`
         type: string
       method:
         description: the method in Java class
@@ -1091,7 +1300,7 @@ definitions:
       mem-type:
         description: the memory type need to locate, only set it when action is stress,
           the value can be 'stack' or 'heap'
-        type: integer
+        type: string
       pid:
         description: the pid of Java process which need to attach
         type: integer
@@ -1121,17 +1330,13 @@ definitions:
         type: object
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
-  v1alpha1.LabelSelectorRequirements:
-    items:
-      $ref: '#/definitions/metav1.LabelSelectorRequirement'
-    type: array
   v1alpha1.LossSpec:
     properties:
       correlation:
@@ -1185,6 +1390,27 @@ definitions:
           +kubebuilder:validation:Minimum=1
         type: integer
     type: object
+  v1alpha1.NetworkBandwidthSpec:
+    properties:
+      buffer:
+        description: +kubebuilder:validation:Minimum=1
+        type: integer
+      device:
+        type: string
+      hostname:
+        type: string
+      ip-address:
+        type: string
+      limit:
+        description: +kubebuilder:validation:Minimum=1
+        type: integer
+      minburst:
+        type: integer
+      peakrate:
+        type: integer
+      rate:
+        type: string
+    type: object
   v1alpha1.NetworkChaosSpec:
     properties:
       action:
@@ -1221,7 +1447,8 @@ definitions:
         description: |-
           Direction represents the direction, this applies on netem and network partition action
           +optional
-          +kubebuilder:validation:Enum=to;from;both;""
+          +kubebuilder:validation:Enum=to;from;both
+          +kubebuilder:default=to
         type: string
       duplicate:
         $ref: '#/definitions/v1alpha1.DuplicateSpec'
@@ -1269,98 +1496,154 @@ definitions:
         type: string
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
   v1alpha1.NetworkCorruptSpec:
     properties:
       correlation:
+        description: correlation is percentage (10 is 10%)
         type: string
       device:
+        description: the network interface to impact
         type: string
       egress-port:
+        description: |-
+          only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
       hostname:
+        description: only impact traffic to these hostnames
         type: string
       ip-address:
+        description: only impact egress traffic to these IP addresses
         type: string
       ip-protocol:
+        description: 'only impact traffic using this IP protocol, supported: tcp,
+          udp, icmp, all'
         type: string
       percent:
+        description: percentage of packets to corrupt (10 is 10%)
         type: string
       source-port:
+        description: |-
+          only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
     type: object
   v1alpha1.NetworkDNSSpec:
     properties:
       dns-domain-name:
+        description: map this host to specified IP
         type: string
       dns-ip:
+        description: map specified host to this IP address
         type: string
       dns-server:
+        description: update the DNS server in /etc/resolv.conf with this value
         type: string
     type: object
   v1alpha1.NetworkDelaySpec:
     properties:
       correlation:
+        description: correlation is percentage (10 is 10%)
         type: string
       device:
+        description: the network interface to impact
         type: string
       egress-port:
+        description: |-
+          only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
       hostname:
+        description: only impact traffic to these hostnames
         type: string
       ip-address:
+        description: only impact egress traffic to these IP addresses
         type: string
       ip-protocol:
+        description: 'only impact traffic using this IP protocol, supported: tcp,
+          udp, icmp, all'
         type: string
       jitter:
+        description: 'jitter time, time units: ns, us (or µs), ms, s, m, h.'
         type: string
       latency:
+        description: 'delay egress time, time units: ns, us (or µs), ms, s, m, h.'
         type: string
       source-port:
+        description: |-
+          only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
     type: object
   v1alpha1.NetworkDuplicateSpec:
     properties:
       correlation:
+        description: correlation is percentage (10 is 10%)
         type: string
       device:
+        description: the network interface to impact
         type: string
       egress-port:
+        description: |-
+          only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
       hostname:
+        description: only impact traffic to these hostnames
         type: string
       ip-address:
+        description: only impact egress traffic to these IP addresses
         type: string
       ip-protocol:
+        description: 'only impact traffic using this IP protocol, supported: tcp,
+          udp, icmp, all'
         type: string
       percent:
+        description: percentage of packets to duplicate (10 is 10%)
         type: string
       source-port:
+        description: |-
+          only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
     type: object
   v1alpha1.NetworkLossSpec:
     properties:
       correlation:
+        description: correlation is percentage (10 is 10%)
         type: string
       device:
+        description: the network interface to impact
         type: string
       egress-port:
+        description: |-
+          only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
       hostname:
+        description: only impact traffic to these hostnames
         type: string
       ip-address:
+        description: only impact egress traffic to these IP addresses
         type: string
       ip-protocol:
+        description: 'only impact traffic using this IP protocol, supported: tcp,
+          udp, icmp, all'
         type: string
       percent:
+        description: percentage of packets to loss (10 is 10%)
         type: string
       source-port:
+        description: |-
+          only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
+          it can only be used in conjunction with -p tcp or -p udp
         type: string
     type: object
   v1alpha1.NetworkPartitionSpec:
@@ -1371,114 +1654,227 @@ definitions:
           only set when the IPProtocol is tcp, used for partition.
         type: string
       device:
+        description: the network interface to impact
         type: string
       direction:
+        description: |-
+          specifies the partition direction, values can be 'from', 'to'.
+          'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server,
+          'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.
         type: string
       hostname:
+        description: only impact traffic to these hostnames
         type: string
       ip-address:
+        description: only impact egress traffic to these IP addresses
         type: string
       ip-protocol:
+        description: only impact egress traffic to these IP addresses
         type: string
     type: object
   v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
-        description: |-
-          the subAction, generate automatically
-          +optional
+        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
         type: string
       address:
+        description: |-
+          DEPRECATED: Use Selector instead.
+          Only one of Address and Selector could be specified.
+          +optional
         items:
           type: string
         type: array
       clock:
         $ref: '#/definitions/v1alpha1.ClockSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='clock'
+          +optional
         type: object
       disk-fill:
         $ref: '#/definitions/v1alpha1.DiskFillSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='disk-fill'
+          +optional
         type: object
       disk-read-payload:
         $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='disk-read-payload'
+          +optional
         type: object
       disk-write-payload:
         $ref: '#/definitions/v1alpha1.DiskPayloadSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='disk-write-payload'
+          +optional
         type: object
       duration:
         description: |-
           Duration represents the duration of the chaos action
           +optional
-          Duration represents the duration of the chaos action
         type: string
       jvm-exception:
         $ref: '#/definitions/v1alpha1.JVMExceptionSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-exception'
+          +optional
         type: object
       jvm-gc:
         $ref: '#/definitions/v1alpha1.JVMGCSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-gc'
+          +optional
         type: object
       jvm-latency:
         $ref: '#/definitions/v1alpha1.JVMLatencySpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-latency'
+          +optional
         type: object
       jvm-return:
         $ref: '#/definitions/v1alpha1.JVMReturnSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-return'
+          +optional
         type: object
       jvm-rule-data:
         $ref: '#/definitions/v1alpha1.JVMRuleDataSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-rule-data'
+          +optional
         type: object
       jvm-stress:
         $ref: '#/definitions/v1alpha1.JVMStressSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='jvm-stress'
+          +optional
+        type: object
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      network-bandwidth:
+        $ref: '#/definitions/v1alpha1.NetworkBandwidthSpec'
+        description: |-
+          +ui:form:when=action=='network-bandwidth'
+          +optional
         type: object
       network-corrupt:
         $ref: '#/definitions/v1alpha1.NetworkCorruptSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-corrupt'
+          +optional
         type: object
       network-delay:
         $ref: '#/definitions/v1alpha1.NetworkDelaySpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-delay'
+          +optional
         type: object
       network-dns:
         $ref: '#/definitions/v1alpha1.NetworkDNSSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-dns'
+          +optional
         type: object
       network-duplicate:
         $ref: '#/definitions/v1alpha1.NetworkDuplicateSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-duplicate'
+          +optional
         type: object
       network-loss:
         $ref: '#/definitions/v1alpha1.NetworkLossSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-loss'
+          +optional
         type: object
       network-partition:
         $ref: '#/definitions/v1alpha1.NetworkPartitionSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='network-partition'
+          +optional
         type: object
       process:
         $ref: '#/definitions/v1alpha1.ProcessSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='process'
+          +optional
+        type: object
+      selector:
+        $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
+        description: |-
+          Selector is used to select physical machines that are used to inject chaos action.
+          +optional
         type: object
       stress-cpu:
         $ref: '#/definitions/v1alpha1.StressCPUSpec'
-        description: +optional
+        description: |-
+          +ui:form:when=action=='stress-cpu'
+          +optional
         type: object
       stress-mem:
         $ref: '#/definitions/v1alpha1.StressMemorySpec'
-        description: +optional
-        type: object
-      uid:
         description: |-
-          the experiment ID
+          +ui:form:when=action=='stress-mem'
+          +optional
+        type: object
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of physical machines to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
+    type: object
+  v1alpha1.PhysicalMachineSelectorSpec:
+    properties:
+      annotationSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on annotations.
+          +optional
+        type: object
+      fieldSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on fields.
+          +optional
+        type: object
+      labelSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on labels.
+          +optional
+        type: object
+      namespaces:
+        description: |-
+          Namespaces is a set of namespace to which objects belong.
+          +optional
+        items:
+          type: string
+        type: array
+      physicalMachines:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: |-
+          PhysicalMachines is a map of string keys and a set values that used to select physical machines.
+          The key defines the namespace which physical machine belong,
+          and each value is a set of physical machine names.
+          +optional
+        type: object
     type: object
   v1alpha1.PodChaosSpec:
     properties:
@@ -1492,7 +1888,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -1527,10 +1923,10 @@ definitions:
         type: object
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
@@ -1629,10 +2025,10 @@ definitions:
         type: object
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
@@ -1644,13 +2040,6 @@ definitions:
         description: |-
           Map of string keys and values that can be used to select objects.
           A selector based on annotations.
-          +optional
-        type: object
-      expressionSelectors:
-        $ref: '#/definitions/v1alpha1.LabelSelectorRequirements'
-        description: |-
-          a slice of label selector expressions that can be used to select objects.
-          A list of selectors based on set-based label expressions.
           +optional
         type: object
       fieldSelectors:
@@ -1715,8 +2104,10 @@ definitions:
   v1alpha1.ProcessSpec:
     properties:
       process:
+        description: the process name or the process ID
         type: string
       signal:
+        description: the signal number to send
         type: integer
     type: object
   v1alpha1.ReorderSpec:
@@ -1746,9 +2137,18 @@ definitions:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
         type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
+        description: +optional
+        type: object
+      blockChaos:
+        $ref: '#/definitions/v1alpha1.BlockChaosSpec'
+        description: +optional
+        type: object
       concurrencyPolicy:
         description: |-
           +optional
+          +kubebuilder:default=Forbid
           +kubebuilder:validation:Enum=Forbid;Allow
         type: string
       dnsChaos:
@@ -1832,8 +2232,14 @@ definitions:
   v1alpha1.StressCPUSpec:
     properties:
       load:
+        description: specifies P percent loading per CPU worker. 0 is effectively
+          a sleep (no load) and 100 is full loading.
         type: integer
+      options:
+        description: extend stress-ng options
+        type: string
       workers:
+        description: specifies N workers to apply the stressor.
         type: integer
     type: object
   v1alpha1.StressChaosSpec:
@@ -1841,7 +2247,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -1882,16 +2288,22 @@ definitions:
         type: object
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
   v1alpha1.StressMemorySpec:
     properties:
+      options:
+        description: extend stress-ng options
+        type: string
       size:
+        description: |-
+          specifies N bytes consumed per vm worker, default is the total available memory.
+          One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..
         type: string
     type: object
   v1alpha1.Stressors:
@@ -1925,6 +2337,14 @@ definitions:
     properties:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
+        description: +optional
+        type: object
+      azureChaos:
+        $ref: '#/definitions/v1alpha1.AzureChaosSpec'
+        description: +optional
+        type: object
+      blockChaos:
+        $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
         type: object
       children:
@@ -2020,7 +2440,7 @@ definitions:
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
-          If not set, all containers will be injected
+          If not set, the first container will be injected
           +optional
         items:
           type: string
@@ -2046,10 +2466,10 @@ definitions:
         type: string
       value:
         description: |-
-          Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-          If `FixedPodMode`, provide an integer of pods to do chaos action.
-          If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-          IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
     type: object
@@ -2318,7 +2738,7 @@ paths:
       description: Get the detail of an archived schedule experiment.
       parameters:
       - description: uid
-        in: query
+        in: path
         name: uid
         required: true
         type: string
@@ -2413,7 +2833,7 @@ paths:
       description: Get the detail of an archived workflow.
       parameters:
       - description: uid
-        in: query
+        in: path
         name: uid
         required: true
         type: string
@@ -2558,6 +2978,82 @@ paths:
       summary: Get all namespaces from Kubernetes cluster.
       tags:
       - common
+  /common/physicalmachine-annotations:
+    get:
+      description: Get the annotations of the physicalMachines in the specified namespace
+        from Kubernetes cluster.
+      parameters:
+      - description: The physicalMachine's namespace list, split by ,
+        in: query
+        name: physicalMachineNamespaceList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the annotations of the physicalMachines in the specified namespace
+        from Kubernetes cluster.
+      tags:
+      - common
+  /common/physicalmachine-labels:
+    get:
+      description: Get the labels of the physicalMachines in the specified namespace
+        from Kubernetes cluster.
+      parameters:
+      - description: The physicalMachine's namespace list, split by ,
+        in: query
+        name: physicalMachineNamespaceList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.MapSlice'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get the labels of the physicalMachines in the specified namespace from
+        Kubernetes cluster.
+      tags:
+      - common
+  /common/physicalmachines:
+    post:
+      description: Get physicalMachines from Kubernetes cluster.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/common.PhysicalMachine'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get physicalMachines from Kubernetes cluster.
+      tags:
+      - common
   /common/pods:
     post:
       description: Get pods from Kubernetes cluster.
@@ -2687,6 +3183,39 @@ paths:
       summary: Get an event.
       tags:
       - events
+  /events/workflow/{uid}:
+    get:
+      description: list all events for Workflow and related WorkflowNode.
+      parameters:
+      - description: The namespace of the object
+        in: query
+        name: namespace
+        type: string
+      - description: The UID of the Workflow
+        in: path
+        name: uid
+        type: string
+      - description: The max length of events list
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/core.Event'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: cascadeFetchEventsForWorkflow list all events for Workflow and related
+        WorkflowNode.
+      tags:
+      - events
   /experiments:
     delete:
       description: Batch delete chaos experiments by uids.
@@ -2811,39 +3340,6 @@ paths:
           schema:
             $ref: '#/definitions/utils.APIError'
       summary: Create a new chaos experiment.
-      tags:
-      - experiments
-    put:
-      description: Update a chaos experiment.
-      parameters:
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          additionalProperties: true
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Update a chaos experiment.
       tags:
       - experiments
   /experiments/{uid}:
@@ -3094,37 +3590,6 @@ paths:
       summary: Create a new schedule.
       tags:
       - schedules
-    put:
-      description: Update a schedule.
-      parameters:
-      - description: Request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/v1alpha1.Schedule'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/v1alpha1.Schedule'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.APIError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.APIError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIError'
-      summary: Update a schedule.
-      tags:
-      - schedules
   /schedules/{uid}:
     delete:
       description: Delete the schedule by uid.
@@ -3281,6 +3746,33 @@ paths:
       summary: List workflows from Kubernetes cluster.
       tags:
       - workflows
+    post:
+      description: Create a new workflow.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Workflow'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/core.WorkflowDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new workflow.
+      tags:
+      - workflows
   /workflows/{uid}:
     delete:
       description: Delete the specified workflow.
@@ -3372,23 +3864,23 @@ paths:
       summary: Update a workflow.
       tags:
       - workflows
-  /workflows/new:
+  /workflows/parse-task/http:
     post:
-      description: Create a new workflow.
+      description: Parse the rendered task back to the original request
       parameters:
-      - description: Request body
+      - description: Rendered Task
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/v1alpha1.Workflow'
+          $ref: '#/definitions/v1alpha1.Template'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/core.WorkflowDetail'
+            $ref: '#/definitions/curl.RequestForm'
         "400":
           description: Bad Request
           schema:
@@ -3397,7 +3889,63 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.APIError'
-      summary: Create a new workflow.
+      summary: Parse the rendered task back to the original request
+      tags:
+      - workflows
+  /workflows/render-task/http:
+    post:
+      description: Render a task which sends HTTP request
+      parameters:
+      - description: Origin HTTP Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/curl.RequestForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1alpha1.Template'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Render a task which sends HTTP request
+      tags:
+      - workflows
+  /workflows/validate-task/http:
+    post:
+      description: Validate the given template is a valid rendered HTTP Task
+      parameters:
+      - description: Rendered Task
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1alpha1.Template'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Validate the given template is a valid rendered HTTP Task
       tags:
       - workflows
 swagger: "2.0"

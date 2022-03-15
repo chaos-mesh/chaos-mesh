@@ -29,8 +29,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record/util"
 	ref "k8s.io/client-go/tools/reference"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 type ChaosRecorder interface {
@@ -38,10 +40,11 @@ type ChaosRecorder interface {
 }
 
 type chaosRecorder struct {
-	log    logr.Logger
-	source v1.EventSource
-	client client.Client
-	scheme *runtime.Scheme
+	log              logr.Logger
+	source           v1.EventSource
+	client           client.Client
+	scheme           *runtime.Scheme
+	metricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
@@ -71,6 +74,8 @@ func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 		err := r.client.Create(context.TODO(), event)
 		if err != nil {
 			r.log.Error(err, "fail to submit event", "event", event)
+		} else {
+			r.metricsCollector.EmittedEvents.WithLabelValues(event.Type, event.Reason, event.Namespace).Inc()
 		}
 	}()
 }
@@ -115,9 +120,10 @@ func register(ev ...ChaosEvent) {
 }
 
 type RecorderBuilder struct {
-	c      client.Client
-	logger logr.Logger
-	scheme *runtime.Scheme
+	c                client.Client
+	logger           logr.Logger
+	scheme           *runtime.Scheme
+	metricsCollector *metrics.ChaosControllerManagerMetricsCollector
 }
 
 func (b *RecorderBuilder) Build(name string) ChaosRecorder {
@@ -126,16 +132,18 @@ func (b *RecorderBuilder) Build(name string) ChaosRecorder {
 		source: v1.EventSource{
 			Component: name,
 		},
-		client: b.c,
-		scheme: b.scheme,
+		client:           b.c,
+		scheme:           b.scheme,
+		metricsCollector: b.metricsCollector,
 	}
 }
 
-func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme) *RecorderBuilder {
+func NewRecorderBuilder(c client.Client, logger logr.Logger, scheme *runtime.Scheme, metricsCollector *metrics.ChaosControllerManagerMetricsCollector) *RecorderBuilder {
 	return &RecorderBuilder{
 		c,
 		logger,
 		scheme,
+		metricsCollector,
 	}
 }
 

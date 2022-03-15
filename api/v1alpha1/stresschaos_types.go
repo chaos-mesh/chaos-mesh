@@ -18,13 +18,13 @@ package v1alpha1
 import (
 	"fmt"
 
-	"github.com/docker/go-units"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 
 // +kubebuilder:object:root=true
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 
 // StressChaos is the Schema for the stresschaos API
@@ -78,12 +78,18 @@ type StressChaosStatus struct {
 
 // StressInstance is an instance generates stresses
 type StressInstance struct {
-	// UID is the instance identifier
+	// UID is the stress-ng identifier
 	// +optional
 	UID string `json:"uid"`
-	// StartTime specifies when the instance starts
+	// MemoryUID is the memStress identifier
+	// +optional
+	MemoryUID string `json:"memoryUid"`
+	// StartTime specifies when the stress-ng starts
 	// +optional
 	StartTime *metav1.Time `json:"startTime"`
+	// MemoryStartTime specifies when the memStress starts
+	// +optional
+	MemoryStartTime *metav1.Time `json:"memoryStartTime"`
 }
 
 // Stressors defines plenty of stressors supported to stress system components out.
@@ -98,43 +104,35 @@ type Stressors struct {
 }
 
 // Normalize the stressors to comply with stress-ng
-func (in *Stressors) Normalize() (string, error) {
-	stressors := ""
+func (in *Stressors) Normalize() (string, string, error) {
+	cpuStressors := ""
+	memoryStressors := ""
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
-		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
+		memoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
-			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				size, err := units.FromHumanSize(string(in.MemoryStressor.Size))
-				if err != nil {
-					return "", err
-				}
-				stressors += fmt.Sprintf(" --vm-bytes %d", size)
-			} else {
-				stressors += fmt.Sprintf(" --vm-bytes %s",
-					in.MemoryStressor.Size)
-			}
+			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 		}
 
 		if in.MemoryStressor.Options != nil {
 			for _, v := range in.MemoryStressor.Options {
-				stressors += fmt.Sprintf(" %v ", v)
+				memoryStressors += fmt.Sprintf(" %v ", v)
 			}
 		}
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
-		stressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
+		cpuStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
-			stressors += fmt.Sprintf(" --cpu-load %d",
+			cpuStressors += fmt.Sprintf(" --cpu-load %d",
 				*in.CPUStressor.Load)
 		}
 
 		if in.CPUStressor.Options != nil {
 			for _, v := range in.CPUStressor.Options {
-				stressors += fmt.Sprintf(" %v ", v)
+				cpuStressors += fmt.Sprintf(" %v ", v)
 			}
 		}
 	}
-	return stressors, nil
+	return cpuStressors, memoryStressors, nil
 }
 
 // Stressor defines common configurations of a stressor

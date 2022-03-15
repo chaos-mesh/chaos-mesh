@@ -21,14 +21,13 @@ import (
 	"strings"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -61,8 +60,8 @@ func TestcaseForbidHostNetwork(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-4"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.To,
 		pointer.StringPtr("9m"),
 	)
@@ -131,8 +130,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.To,
 		testDelayDuration,
 	)
@@ -170,8 +169,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.Both,
 		testDelayDuration,
 	)
@@ -207,8 +206,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"app": "network-peer-1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.OneMode,
+		v1alpha1.OneMode,
 		v1alpha1.From,
 		testDelayDuration,
 	)
@@ -246,8 +245,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-1",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"partition": "1"},
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.Both,
 		testDelayDuration,
 	)
@@ -283,8 +282,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-2",
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"partition": "0"},
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.To,
 		testDelayDuration,
 	)
@@ -325,8 +324,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-without-target",
 		map[string]string{"app": "network-peer-0"},
 		nil,
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.To,
 		testDelayDuration,
 	)
@@ -364,8 +363,8 @@ func TestcaseNetworkPartition(
 		ns, "network-chaos-without-target",
 		map[string]string{"app": "network-peer-0"},
 		nil,
-		v1alpha1.OnePodMode,
-		v1alpha1.AllPodMode,
+		v1alpha1.OneMode,
+		v1alpha1.AllMode,
 		v1alpha1.From,
 		testDelayDuration,
 	)

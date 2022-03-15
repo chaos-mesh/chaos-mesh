@@ -21,18 +21,19 @@ import (
 	"encoding/json"
 	"reflect"
 	"time"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // updating spec of a chaos will have no effect, we'd better reject it
-var ErrCanNotUpdateChaos = fmt.Errorf("Cannot update chaos spec")
+var ErrCanNotUpdateChaos = errors.New("Cannot update chaos spec")
 
 const KindAWSChaos = "AWSChaos"
 
@@ -168,6 +169,276 @@ func (in *AWSChaos) Validate() error {
 var _ webhook.Defaulter = &AWSChaos{}
 
 func (in *AWSChaos) Default() {
+	gw.Default(in)
+}
+
+const KindAzureChaos = "AzureChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *AzureChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *AzureChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *AzureChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *AzureChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *AzureChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *AzureChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// AzureChaosList contains a list of AzureChaos
+type AzureChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []AzureChaos `json:"items"`
+}
+
+func (in *AzureChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *AzureChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *AzureChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *AzureChaos) IsOneShot() bool {
+	if in.Spec.Action==AzureVmRestart {
+		return true
+	}
+
+	return false
+}
+
+var AzureChaosWebhookLog = logf.Log.WithName("AzureChaos-resource")
+
+func (in *AzureChaos) ValidateCreate() error {
+	AzureChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *AzureChaos) ValidateUpdate(old runtime.Object) error {
+	AzureChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*AzureChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *AzureChaos) ValidateDelete() error {
+	AzureChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &AzureChaos{}
+
+func (in *AzureChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &AzureChaos{}
+
+func (in *AzureChaos) Default() {
+	gw.Default(in)
+}
+
+const KindBlockChaos = "BlockChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *BlockChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *BlockChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *BlockChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *BlockChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *BlockChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *BlockChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// BlockChaosList contains a list of BlockChaos
+type BlockChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []BlockChaos `json:"items"`
+}
+
+func (in *BlockChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *BlockChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *BlockChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *BlockChaos) IsOneShot() bool {
+	return false
+}
+
+var BlockChaosWebhookLog = logf.Log.WithName("BlockChaos-resource")
+
+func (in *BlockChaos) ValidateCreate() error {
+	BlockChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *BlockChaos) ValidateUpdate(old runtime.Object) error {
+	BlockChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*BlockChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *BlockChaos) ValidateDelete() error {
+	BlockChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &BlockChaos{}
+
+func (in *BlockChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &BlockChaos{}
+
+func (in *BlockChaos) Default() {
 	gw.Default(in)
 }
 
@@ -1239,6 +1510,45 @@ func (in *PhysicalMachineChaos) Default() {
 	gw.Default(in)
 }
 
+const KindPhysicalMachine = "PhysicalMachine"
+
+var PhysicalMachineWebhookLog = logf.Log.WithName("PhysicalMachine-resource")
+
+func (in *PhysicalMachine) ValidateCreate() error {
+	PhysicalMachineWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PhysicalMachine) ValidateUpdate(old runtime.Object) error {
+	PhysicalMachineWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*PhysicalMachine).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PhysicalMachine) ValidateDelete() error {
+	PhysicalMachineWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &PhysicalMachine{}
+
+func (in *PhysicalMachine) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PhysicalMachine{}
+
+func (in *PhysicalMachine) Default() {
+	gw.Default(in)
+}
+
 const KindPodChaos = "PodChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1481,6 +1791,45 @@ func (in *PodNetworkChaos) Validate() error {
 var _ webhook.Defaulter = &PodNetworkChaos{}
 
 func (in *PodNetworkChaos) Default() {
+	gw.Default(in)
+}
+
+const KindStatusCheck = "StatusCheck"
+
+var StatusCheckWebhookLog = logf.Log.WithName("StatusCheck-resource")
+
+func (in *StatusCheck) ValidateCreate() error {
+	StatusCheckWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *StatusCheck) ValidateUpdate(old runtime.Object) error {
+	StatusCheckWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*StatusCheck).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *StatusCheck) ValidateDelete() error {
+	StatusCheckWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &StatusCheck{}
+
+func (in *StatusCheck) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &StatusCheck{}
+
+func (in *StatusCheck) Default() {
 	gw.Default(in)
 }
 
@@ -1758,6 +2107,18 @@ func init() {
 		list:  &AWSChaosList{},
 	})
 
+	SchemeBuilder.Register(&AzureChaos{}, &AzureChaosList{})
+	all.register(KindAzureChaos, &ChaosKind{
+		chaos: &AzureChaos{},
+		list:  &AzureChaosList{},
+	})
+
+	SchemeBuilder.Register(&BlockChaos{}, &BlockChaosList{})
+	all.register(KindBlockChaos, &ChaosKind{
+		chaos: &BlockChaos{},
+		list:  &BlockChaosList{},
+	})
+
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
 		chaos: &DNSChaos{},
@@ -1806,6 +2167,8 @@ func init() {
 		list:  &PhysicalMachineChaosList{},
 	})
 
+	SchemeBuilder.Register(&PhysicalMachine{}, &PhysicalMachineList{})
+
 	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 	all.register(KindPodChaos, &ChaosKind{
 		chaos: &PodChaos{},
@@ -1817,6 +2180,8 @@ func init() {
 	SchemeBuilder.Register(&PodIOChaos{}, &PodIOChaosList{})
 
 	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
+
+	SchemeBuilder.Register(&StatusCheck{}, &StatusCheckList{})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
 	all.register(KindStressChaos, &ChaosKind{
@@ -1834,6 +2199,16 @@ func init() {
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		chaos: &AWSChaos{},
 		list:  &AWSChaosList{},
+	})
+
+	allScheduleItem.register(KindAzureChaos, &ChaosKind{
+		chaos: &AzureChaos{},
+		list:  &AzureChaosList{},
+	})
+
+	allScheduleItem.register(KindBlockChaos, &ChaosKind{
+		chaos: &BlockChaos{},
+		list:  &BlockChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{

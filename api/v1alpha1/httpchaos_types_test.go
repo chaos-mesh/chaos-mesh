@@ -20,7 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -59,7 +58,7 @@ var _ = Describe("HTTPChaos", func() {
 				},
 				Spec: HTTPChaosSpec{
 					PodSelector: PodSelector{
-						Mode: OnePodMode,
+						Mode: OneMode,
 					},
 					Target: PodHttpRequest,
 					Port:   80,

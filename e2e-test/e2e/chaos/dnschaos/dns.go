@@ -23,9 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -63,10 +64,12 @@ func TestcaseDNSRandom(
 			DomainNamePatterns: []string{"not-exist-?ost.*", "not_exist?host.abc", "not-exist-host.def"},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Mode: v1alpha1.AllPodMode,
+					Mode: v1alpha1.AllMode,
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "network-peer"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "network-peer"},
+						},
 					},
 				},
 			},
@@ -125,10 +128,12 @@ func TestcaseDNSError(
 			DomainNamePatterns: []string{"chaos-mes?.org", "github.com", "16?.co*"},
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
-					Mode: v1alpha1.AllPodMode,
+					Mode: v1alpha1.AllMode,
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "network-peer"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "network-peer"},
+						},
 					},
 				},
 			},
@@ -174,7 +179,7 @@ func testDNSServer(c http.Client, port uint16, url string) (string, error) {
 	result := string(out)
 	klog.Infof("testDNSServer result: %s", result)
 	if strings.Contains(result, "failed") {
-		return "", fmt.Errorf("test DNS server failed")
+		return "", errors.New("test DNS server failed")
 	}
 
 	return result, nil

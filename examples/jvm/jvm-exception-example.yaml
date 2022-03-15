@@ -13,25 +13,15 @@
 # limitations under the License.
 #
 apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+kind: JVMChaos
 metadata:
-  name: jvm-exception-example
-  namespace: app
+  name: exception
 spec:
-  schedule: '@every 1m'
-  type: JVMChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  jvmChaos:
-    action: tce
-    target: jvm
-    flags:
-      exception: java.lang.Exception
-    matchers:
-      classname: org.chaosmesh.jvm.Application
-      methodname: hello
-    mode: one
-    selector:
-      labelSelectors:
-        app: springboot-jvmchaos-demo
-    duration: 30s
+  action: exception
+  class: Main
+  method: sayhello
+  exception: java.io.IOException("BOOM")
+  mode: all
+  selector:
+    namespaces:
+      - helloworld

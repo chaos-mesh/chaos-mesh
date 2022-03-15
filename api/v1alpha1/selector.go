@@ -20,30 +20,55 @@ import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 // LabelSelectorRequirements is list of LabelSelectorRequirement
 type LabelSelectorRequirements []metav1.LabelSelectorRequirement
 
-// PodMode represents the mode to run pod chaos action.
-type PodMode string
+// SelectorMode represents the mode to run chaos action.
+type SelectorMode string
 
 const (
-	// OnePodMode represents that the system will do the chaos action on one pod selected randomly.
-	OnePodMode PodMode = "one"
-	// AllPodMode represents that the system will do the chaos action on all pods
+	// OneMode represents that the system will do the chaos action on one object selected randomly.
+	OneMode SelectorMode = "one"
+	// AllMode represents that the system will do the chaos action on all objects
 	// regardless of status (not ready or not running pods includes).
 	// Use this label carefully.
-	AllPodMode PodMode = "all"
-	// FixedPodMode represents that the system will do the chaos action on a specific number of running pods.
-	FixedPodMode PodMode = "fixed"
-	// FixedPercentPodMode to specify a fixed % that can be inject chaos action.
-	FixedPercentPodMode PodMode = "fixed-percent"
-	// RandomMaxPercentPodMode to specify a maximum % that can be inject chaos action.
-	RandomMaxPercentPodMode PodMode = "random-max-percent"
+	AllMode SelectorMode = "all"
+	// FixedMode represents that the system will do the chaos action on a specific number of running objects.
+	FixedMode SelectorMode = "fixed"
+	// FixedPercentMode to specify a fixed % that can be inject chaos action.
+	FixedPercentMode SelectorMode = "fixed-percent"
+	// RandomMaxPercentMode to specify a maximum % that can be inject chaos action.
+	RandomMaxPercentMode SelectorMode = "random-max-percent"
 )
+
+// GenericSelectorSpec defines some selectors to select objects.
+type GenericSelectorSpec struct {
+	// Namespaces is a set of namespace to which objects belong.
+	// +optional
+	Namespaces []string `json:"namespaces,omitempty"`
+
+	// Map of string keys and values that can be used to select objects.
+	// A selector based on fields.
+	// +optional
+	FieldSelectors map[string]string `json:"fieldSelectors,omitempty"`
+
+	// Map of string keys and values that can be used to select objects.
+	// A selector based on labels.
+	// +optional
+	LabelSelectors map[string]string `json:"labelSelectors,omitempty"`
+
+	// a slice of label selector expressions that can be used to select objects.
+	// A list of selectors based on set-based label expressions.
+	// +optional
+	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty" swaggerignore:"true"`
+
+	// Map of string keys and values that can be used to select objects.
+	// A selector based on annotations.
+	// +optional
+	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
+}
 
 // PodSelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type PodSelectorSpec struct {
-	// Namespaces is a set of namespace to which objects belong.
-	// +optional
-	Namespaces []string `json:"namespaces,omitempty"`
+	GenericSelectorSpec `json:",inline"`
 
 	// Nodes is a set of node name and objects must belong to these nodes.
 	// +optional
@@ -60,26 +85,6 @@ type PodSelectorSpec struct {
 	// and objects must belong to these selected nodes.
 	// +optional
 	NodeSelectors map[string]string `json:"nodeSelectors,omitempty"`
-
-	// Map of string keys and values that can be used to select objects.
-	// A selector based on fields.
-	// +optional
-	FieldSelectors map[string]string `json:"fieldSelectors,omitempty"`
-
-	// Map of string keys and values that can be used to select objects.
-	// A selector based on labels.
-	// +optional
-	LabelSelectors map[string]string `json:"labelSelectors,omitempty"`
-
-	// a slice of label selector expressions that can be used to select objects.
-	// A list of selectors based on set-based label expressions.
-	// +optional
-	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty"`
-
-	// Map of string keys and values that can be used to select objects.
-	// A selector based on annotations.
-	// +optional
-	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
 
 	// PodPhaseSelectors is a set of condition of a pod at the current time.
 	// supported value: Pending / Running / Succeeded / Failed / Unknown
@@ -100,12 +105,12 @@ type PodSelector struct {
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
 	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
+	Mode SelectorMode `json:"mode"`
 
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	// Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+	// If `FixedMode`, provide an integer of pods to do chaos action.
+	// If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	Value string `json:"value,omitempty"`
 }
@@ -114,7 +119,7 @@ type ContainerSelector struct {
 	PodSelector `json:",inline"`
 
 	// ContainerNames indicates list of the name of affected container.
-	// If not set, all containers will be injected
+	// If not set, the first container will be injected
 	// +optional
 	ContainerNames []string `json:"containerNames,omitempty"`
 }

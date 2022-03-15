@@ -18,7 +18,7 @@ package v1alpha1
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 type ScheduleItem struct {
@@ -35,7 +35,7 @@ func (in EmbedChaos) Validate(path *field.Path, chaosType string) field.ErrorLis
 		return allErrors
 	}
 
-	gw.Default(&root)
+	gw.Default(root)
 	err = in.RestoreChaosSpec(root)
 	if err != nil {
 		allErrors = append(allErrors, field.Invalid(path, in, err.Error()))

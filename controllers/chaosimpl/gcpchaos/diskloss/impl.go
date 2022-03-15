@@ -18,25 +18,24 @@ package diskloss
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	compute "google.golang.org/api/compute/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 type Impl struct {
 	client.Client
 
 	Log logr.Logger
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
@@ -50,8 +49,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		impl.Log.Error(err, "fail to get the compute service")
 		return v1alpha1.NotInjected, err
 	}
+
 	var selected v1alpha1.GCPSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
+
 	instance, err := computeService.Instances.Get(selected.Project, selected.Zone, selected.Instance).Do()
 	if err != nil {
 		impl.Log.Error(err, "fail to get the instance")
@@ -80,12 +85,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 	}
 	if len(notFound) != 0 {
-		err = fmt.Errorf("instance (%s) does not have the disk (%s)", selected.Instance, notFound)
+		err = errors.Errorf("instance (%s) does not have the disk (%s)", selected.Instance, notFound)
 		impl.Log.Error(err, "the instance does not have the disk")
 		return v1alpha1.NotInjected, err
 	}
 	if len(marshalErr) != 0 {
-		err = fmt.Errorf("instance (%s), marshal disk info error (%s)", selected.Instance, marshalErr)
+		err = errors.Errorf("instance (%s), marshal disk info error (%s)", selected.Instance, marshalErr)
 		impl.Log.Error(err, "marshal disk info error")
 		return v1alpha1.NotInjected, err
 	}
@@ -115,7 +120,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 	var disk compute.AttachedDisk
 	var selected v1alpha1.GCPSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
+
 	for _, attachedDiskString := range gcpchaos.Status.AttachedDisksStrings {
 		err = json.Unmarshal([]byte(attachedDiskString), &disk)
 		if err != nil {

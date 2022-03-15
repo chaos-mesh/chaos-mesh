@@ -17,11 +17,10 @@ package trafficcontrol
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -29,11 +28,14 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 const (
 	targetIPSetPostFix = "tgt"
@@ -52,8 +54,6 @@ type Impl struct {
 
 	Log logr.Logger
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	// The only possible phase to get in here is "Not Injected" or "Not Injected/Wait"
@@ -265,7 +265,7 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	case v1alpha1.BandwidthAction:
 		tcType = v1alpha1.Bandwidth
 	default:
-		return fmt.Errorf("unknown action %s", spec.Action)
+		return errors.Wrapf(utils.ErrUnknownAction, "action: %s", spec.Action)
 	}
 
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)

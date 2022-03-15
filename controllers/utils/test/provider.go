@@ -21,12 +21,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/metrics"
 )
 
 var Module = fx.Provide(
 	provider.NewOption,
 	provider.NewClient,
-	provider.NewLogger,
 	provider.NewAuthCli,
 	provider.NewScheme,
 	provider.NewNoCacheReader,
@@ -34,4 +34,5 @@ var Module = fx.Provide(
 	provider.NewControlPlaneCacheReader,
 	manager.NewTestManager,
 	recorder.NewRecorderBuilder,
+	metrics.NewTestChaosControllerManagerMetricsCollector,
 )

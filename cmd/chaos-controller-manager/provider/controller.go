@@ -18,14 +18,12 @@ package provider
 import (
 	"context"
 	"math"
+	"net"
+	"strconv"
 
 	"github.com/go-logr/logr"
 	lru "github.com/hashicorp/golang-lru"
 	"go.uber.org/fx"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -36,6 +34,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
 var (
@@ -62,7 +63,7 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 	}
 	options := ctrl.Options{
 		Scheme:                     scheme,
-		MetricsBindAddress:         config.ControllerCfg.MetricsAddr,
+		MetricsBindAddress:         net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
 		LeaderElectionNamespace:    leaderElectionNamespace,
 		LeaderElectionResourceLock: "configmaps",
@@ -70,7 +71,8 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
 		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,
 		RenewDeadline:              &config.ControllerCfg.LeaderElectRenewDeadline,
-		Port:                       9443,
+		Port:                       config.ControllerCfg.WebhookPort,
+		Host:                       config.ControllerCfg.WebhookHost,
 		// Don't aggregate events
 		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
 			MaxEvents:            math.MaxInt32,
@@ -129,10 +131,6 @@ func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) 
 	}, nil
 }
 
-func NewLogger() logr.Logger {
-	return ctrl.Log
-}
-
 type noCacheReader struct {
 	fx.Out
 
@@ -163,9 +161,7 @@ type controlPlaneCacheReader struct {
 	client.Reader `name:"control-plane-cache"`
 }
 
-func NewControlPlaneCacheReader(logger logr.Logger) (controlPlaneCacheReader, error) {
-	cfg := ctrl.GetConfigOrDie()
-
+func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPlaneCacheReader, error) {
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
 	if err != nil {
 		return controlPlaneCacheReader{}, err
@@ -212,12 +208,12 @@ func NewClientSet(config *rest.Config) (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
+// Module would provide objects to fx for dependency injection.
 var Module = fx.Provide(
 	NewOption,
 	NewClient,
 	NewClientSet,
 	NewManager,
-	NewLogger,
 	NewAuthCli,
 	NewScheme,
 	NewConfig,

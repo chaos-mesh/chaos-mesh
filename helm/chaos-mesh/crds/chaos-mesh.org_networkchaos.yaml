@@ -16,7 +16,14 @@ spec:
     singular: networkchaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: NetworkChaos is the Schema for the networkchaos API
@@ -129,13 +136,13 @@ spec:
                 description: Device represents the network device to be affected.
                 type: string
               direction:
+                default: to
                 description: Direction represents the direction, this applies on netem
                   and network partition action
                 enum:
                 - to
                 - from
                 - both
-                - ""
                 type: string
               duplicate:
                 description: DuplicateSpec represents the detail about loss action
@@ -370,11 +377,11 @@ spec:
                         type: object
                     type: object
                   value:
-                    description: Value is required when the mode is set to `FixedPodMode`
-                      / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
-                      provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    description: Value is required when the mode is set to `FixedMode`
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
                       provide a number from 0-100 to specify the percent of pods the
-                      server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
                       a number from 0-100 to specify the max percent of pods to do
                       chaos action
                     type: string
@@ -387,12 +394,12 @@ spec:
                   in target scope.
                 type: string
               value:
-                description: Value is required when the mode is set to `FixedPodMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                description: Value is required when the mode is set to `FixedMode`
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - action
@@ -459,6 +466,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

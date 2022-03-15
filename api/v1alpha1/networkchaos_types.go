@@ -23,6 +23,8 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // +kubebuilder:object:root=true
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 
 // NetworkChaos is the Schema for the networkchaos API
@@ -107,7 +109,8 @@ type NetworkChaosSpec struct {
 
 	// Direction represents the direction, this applies on netem and network partition action
 	// +optional
-	// +kubebuilder:validation:Enum=to;from;both;""
+	// +kubebuilder:validation:Enum=to;from;both
+	// +kubebuilder:default=to
 	Direction Direction `json:"direction,omitempty"`
 
 	// Target represents network target, this applies on netem and network partition action

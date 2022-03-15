@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -59,10 +59,12 @@ func TestcaseIOErrorDurationForATimeThenRecover(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 		},
@@ -124,10 +126,12 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 			},
 		},
@@ -238,10 +242,12 @@ func TestcaseIOErrorWithSpecifiedContainer(
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
-						Namespaces:     []string{ns},
-						LabelSelectors: map[string]string{"app": "io"},
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "io"},
+						},
 					},
-					Mode: v1alpha1.OnePodMode,
+					Mode: v1alpha1.OneMode,
 				},
 				ContainerNames: []string{containerName},
 			},

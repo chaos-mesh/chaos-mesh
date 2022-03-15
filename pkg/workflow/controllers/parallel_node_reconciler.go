@@ -108,12 +108,14 @@ func (it *ParallelNodeReconciler) Reconcile(ctx context.Context, request reconci
 
 		// TODO: also check the consistent between spec in task and the spec in child node
 		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
+			if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
+				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
+			}
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
 				Status: corev1.ConditionTrue,
 				Reason: "",
 			})
-			it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAccomplished,
@@ -160,10 +162,12 @@ func (it *ParallelNodeReconciler) syncChildNodes(ctx context.Context, node v1alp
 
 	var tasksToStartup []string
 
+	if len(existsChildNodes) == 0 {
+		tasksToStartup = node.Spec.Children
+	}
 	// TODO: check the specific of task and workflow nodes
 	// the definition of Spec.Children changed, remove all the existed nodes
-	if len(setDifference(taskNamesOfNodes, node.Spec.Children)) > 0 ||
-		len(setDifference(node.Spec.Children, taskNamesOfNodes)) > 0 {
+	if len(existsChildNodes) > 0 && (len(setDifference(taskNamesOfNodes, node.Spec.Children)) > 0 || len(setDifference(node.Spec.Children, taskNamesOfNodes)) > 0) {
 		tasksToStartup = node.Spec.Children
 
 		var nodesToCleanup []string

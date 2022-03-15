@@ -21,16 +21,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
-
-	"github.com/go-logr/zapr"
-	"go.uber.org/zap"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
+	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
 var (
@@ -60,25 +54,22 @@ func main() {
 		os.Exit(0)
 	}
 
-	zapLog, err := zap.NewDevelopment()
+	logger, err := log.NewDefaultZapLogger()
 	if err != nil {
 		panic(fmt.Sprintf("error while creating zap logger: %v", err))
 	}
-	log := zapr.NewLogger(zapLog)
-	ptrace.RegisterLogger(log.WithName("ptrace"))
-	time.RegisterLogger(log.WithName("time"))
 
 	clkIds := strings.Split(clockIdsSlice, ",")
 	mask, err := utils.EncodeClkIds(clkIds)
 	if err != nil {
-		log.Error(err, "error while converting clock ids to mask")
+		logger.Error(err, "error while converting clock ids to mask")
 		os.Exit(1)
 	}
-	log.Info("get clock ids mask", "mask", mask)
+	logger.Info("get clock ids mask", "mask", mask)
 
-	err = time.ModifyTime(pid, secDelta, nsecDelta, mask)
+	err = time.ModifyTime(pid, secDelta, nsecDelta, mask, logger.WithName("time"))
 
 	if err != nil {
-		log.Error(err, "error while modifying time", "pid", pid, "secDelta", secDelta, "nsecDelta", nsecDelta, "mask", mask)
+		logger.Error(err, "error while modifying time", "pid", pid, "secDelta", secDelta, "nsecDelta", nsecDelta, "mask", mask)
 	}
 }

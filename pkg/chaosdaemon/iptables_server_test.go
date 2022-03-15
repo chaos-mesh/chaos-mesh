@@ -17,23 +17,26 @@ package chaosdaemon
 
 import (
 	"context"
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd)
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil, logger)
 
 	Context("FlushIptables", func() {
 		It("should work", func() {

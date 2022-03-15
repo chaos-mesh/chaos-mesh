@@ -25,18 +25,19 @@ import (
 	"encoding/json"
 	"reflect"
 	"time"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	gw "github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
+	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
 // updating spec of a chaos will have no effect, we'd better reject it
-var ErrCanNotUpdateChaos = fmt.Errorf("Cannot update chaos spec")
+var ErrCanNotUpdateChaos = errors.New("Cannot update chaos spec")
 `
 
 const implTemplate = `

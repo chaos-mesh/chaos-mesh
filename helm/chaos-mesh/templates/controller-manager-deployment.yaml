@@ -37,13 +37,15 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
-    {{- if .Values.controllerManager.hostNetwork }}
+      {{- if .Values.controllerManager.hostNetwork }}
       hostNetwork: true
-    {{- end }}
-    {{- if .Values.controllerManager.serviceAccount }}
+      {{- end }}
+      {{- if .Values.controllerManager.serviceAccount }}
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
-    {{- end }}
-      priorityClassName: {{ .Values.controllerManager.priorityClassName}}
+      {{- end }}
+      {{- if  .Values.controllerManager.priorityClassName }}
+      priorityClassName: {{ .Values.controllerManager.priorityClassName }}
+      {{- end }}
       {{- if .Values.chaosDlv.enable }}
       shareProcessNamespace: true
       {{- end }}
@@ -52,13 +54,17 @@ spec:
       {{- end }}
       containers:
       - name: chaos-mesh
-        image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
+        image: {{template "chaos-controller-manager.image" . }}
         imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
+          {{- range $envKey, $envVal := .Values.controllerManager.env }}
+          - name: {{ $envKey | upper }}
+            value: {{ $envVal | quote }}
+          {{- end }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -102,7 +108,9 @@ spec:
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str {{ .Values.dnsServer.grpcPort }}
           - name: SECURITY_MODE
-            value: "{{ .Values.dashboard.securityMode }}"
+            value: {{ .Values.dashboard.securityMode | quote }}
+          - name: CHAOSD_SECURITY_MODE
+            value: {{ .Values.controllerManager.chaosdSecurityMode | quote }}
           {{- if .Values.dashboard.securityMode}}
           - name: CHAOS_DAEMON_CLIENT_CERT
             value: /etc/chaos-daemon/cert/tls.crt
@@ -114,6 +122,14 @@ spec:
             value: "30"
           - name: BURST
             value: "50"
+          {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: CHAOSD_CA_CERT
+            value: /etc/chaosd/cert/ca.crt
+          - name: CHAOSD_CLIENT_CERT
+            value: /etc/chaosd/cert/tls.crt
+          - name: CHAOSD_CLIENT_KEY
+            value: /etc/chaosd/cert/tls.key
           {{- end }}
           {{- if .Values.controllerManager.podChaos.podFailure.pauseImage }}
           - name: POD_FAILURE_PAUSE_IMAGE
@@ -136,11 +152,16 @@ spec:
             mountPath: /etc/chaos-daemon/cert
             readOnly: true
           {{- end }}
+          {{- if .Values.controllerManager.chaosdSecurityMode }}
+          - name: chaosd-client-cert
+            mountPath: /etc/chaosd/cert
+            readOnly: true
+          {{- end }}
         ports:
           - name: webhook
-            containerPort: 9443 # Customize containerPort
+            containerPort: {{ .Values.controllerManager.env.WEBHOOK_PORT }}
           - name: http
-            containerPort: 10080
+            containerPort: {{ .Values.controllerManager.env.METRICS_PORT }}
         {{- if .Values.enableProfiling }}
           - name: pprof
             containerPort: 10081
@@ -151,7 +172,7 @@ spec:
         {{- end }}
       {{- if .Values.chaosDlv.enable }}
       - name: chaos-mesh-dlv
-        image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+        image: {{template "chaos-dlv.image" . }}
         imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
         env:
           - name: CMD_NAME
@@ -172,6 +193,11 @@ spec:
         - name: chaos-daemon-client-cert
           secret:
             secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
+        {{- end }}
+        {{- if .Values.controllerManager.chaosdSecurityMode }}
+        - name: chaosd-client-cert
+          secret:
+            secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
         {{- end }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:

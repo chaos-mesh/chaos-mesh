@@ -24,7 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/partition"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/networkchaos/trafficcontrol"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
 
 type Impl struct {
@@ -34,9 +34,9 @@ type Impl struct {
 	Partition      *partition.Impl      `action:"partition"`
 }
 
-func NewImpl(impl Impl) *common.ChaosImplPair {
-	delegate := action.New(&impl)
-	return &common.ChaosImplPair{
+func NewImpl(impl Impl) *impltypes.ChaosImplPair {
+	delegate := action.NewMultiplexer(&impl)
+	return &impltypes.ChaosImplPair{
 		Name:       "networkchaos",
 		Object:     &v1alpha1.NetworkChaos{},
 		Impl:       &delegate,

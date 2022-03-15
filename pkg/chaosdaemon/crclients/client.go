@@ -17,7 +17,8 @@ package crclients
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/crio"
@@ -41,6 +42,8 @@ type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
 	FormatContainerID(ctx context.Context, containerID string) (string, error)
+	ListContainerIDs(ctx context.Context) ([]string, error)
+	GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error)
 }
 
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
@@ -67,7 +70,7 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("only docker/containerd/crio is supported, but got %s", containerRuntime)
+		return nil, errors.Errorf("only docker/containerd/crio is supported, but got %s", containerRuntime)
 	}
 
 	return cli, nil

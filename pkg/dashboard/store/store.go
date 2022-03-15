@@ -18,17 +18,17 @@ package store
 import (
 	"context"
 
-	"go.uber.org/fx"
-
 	"github.com/jinzhu/gorm"
+	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
+	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/workflow"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/experiment"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/schedule"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/workflow"
 )
 
 var (
@@ -40,6 +40,8 @@ var (
 			schedule.NewStore,
 			workflow.NewStore,
 		),
+		fx.Supply(controllermetrics.Registry),
+		fx.Invoke(metrics.Register),
 		fx.Invoke(experiment.DeleteIncompleteExperiments),
 		fx.Invoke(schedule.DeleteIncompleteSchedules),
 	)
@@ -58,7 +60,7 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*gorm.DB, e
 
 	gormDB, err := gorm.Open(conf.Database.Driver, ds)
 	if err != nil {
-		log.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver, " datasource => ", conf.Database.Datasource)
+		log.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver)
 
 		return nil, err
 	}

@@ -17,6 +17,7 @@ package main
 
 import (
 	"flag"
+	stdlog "log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -31,22 +32,22 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver"
+	ctrlserver "github.com/chaos-mesh/chaos-mesh/pkg/ctrl"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	apiWebhook "github.com/chaos-mesh/chaos-mesh/pkg/webhook"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
@@ -68,16 +69,26 @@ func main() {
 		os.Exit(0)
 	}
 
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+	log.ReplaceGlobals(rootLogger)
+	ctrl.SetLogger(rootLogger)
+
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
-
 	app := fx.New(
+		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
+		fx.Supply(controllermetrics.Registry),
+		fx.Supply(rootLogger),
+		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
 		fx.Options(
 			provider.Module,
 			controllers.Module,
 			selector.Module,
 			types.ChaosObjects,
+			types.WebhookObjects,
 		),
 		fx.Invoke(Run),
 	)
@@ -93,16 +104,32 @@ type RunParams struct {
 	Logger              logr.Logger
 	AuthCli             *authorizationv1.AuthorizationV1Client
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+	MetricsCollector    *metrics.ChaosControllerManagerMetricsCollector
 
-	Objs []types.Object `group:"objs"`
+	Objs        []types.Object        `group:"objs"`
+	WebhookObjs []types.WebhookObject `group:"webhookObjs"`
 }
 
 func Run(params RunParams) error {
 	mgr := params.Mgr
 	authCli := params.AuthCli
+	metricsCollector := params.MetricsCollector
 
 	var err error
 	for _, obj := range params.Objs {
+		if !ccfg.ShouldStartWebhook(obj.Name) {
+			continue
+		}
+
+		err = ctrl.NewWebhookManagedBy(mgr).
+			For(obj.Object).
+			Complete()
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, obj := range params.WebhookObjs {
 		if !ccfg.ShouldStartWebhook(obj.Name) {
 			continue
 		}
@@ -133,9 +160,6 @@ func Run(params RunParams) error {
 			return err
 		}
 	}
-
-	// Init metrics collector
-	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
 
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()

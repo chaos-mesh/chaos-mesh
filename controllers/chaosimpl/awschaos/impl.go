@@ -23,7 +23,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/detachvolume"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2restart"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/awschaos/ec2stop"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
 
 type Impl struct {
@@ -34,9 +34,9 @@ type Impl struct {
 	Ec2Stop      *ec2stop.Impl      `action:"ec2-stop"`
 }
 
-func NewImpl(impl Impl) *common.ChaosImplPair {
-	delegate := action.New(&impl)
-	return &common.ChaosImplPair{
+func NewImpl(impl Impl) *types.ChaosImplPair {
+	delegate := action.NewMultiplexer(&impl)
+	return &types.ChaosImplPair{
 		Name:   "awschaos",
 		Object: &v1alpha1.AWSChaos{},
 		Impl:   &delegate,

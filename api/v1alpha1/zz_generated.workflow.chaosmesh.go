@@ -19,12 +19,14 @@ package v1alpha1
 
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
 
 const (
 	TypeAWSChaos TemplateType = "AWSChaos"
+	TypeAzureChaos TemplateType = "AzureChaos"
+	TypeBlockChaos TemplateType = "BlockChaos"
 	TypeDNSChaos TemplateType = "DNSChaos"
 	TypeGCPChaos TemplateType = "GCPChaos"
 	TypeHTTPChaos TemplateType = "HTTPChaos"
@@ -42,6 +44,8 @@ const (
 var allChaosTemplateType = []TemplateType{
 	TypeSchedule,
 	TypeAWSChaos,
+	TypeAzureChaos,
+	TypeBlockChaos,
 	TypeDNSChaos,
 	TypeGCPChaos,
 	TypeHTTPChaos,
@@ -59,6 +63,10 @@ var allChaosTemplateType = []TemplateType{
 type EmbedChaos struct {
 	// +optional
 	AWSChaos *AWSChaosSpec `json:"awsChaos,omitempty"`
+	// +optional
+	AzureChaos *AzureChaosSpec `json:"azureChaos,omitempty"`
+	// +optional
+	BlockChaos *BlockChaosSpec `json:"blockChaos,omitempty"`
 	// +optional
 	DNSChaos *DNSChaosSpec `json:"dnsChaos,omitempty"`
 	// +optional
@@ -89,6 +97,14 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypeAWSChaos:
 		result := AWSChaos{}
 		result.Spec = *it.AWSChaos
+		return &result, nil
+	case TypeAzureChaos:
+		result := AzureChaos{}
+		result.Spec = *it.AzureChaos
+		return &result, nil
+	case TypeBlockChaos:
+		result := BlockChaos{}
+		result.Spec = *it.BlockChaos
 		return &result, nil
 	case TypeDNSChaos:
 		result := DNSChaos{}
@@ -136,7 +152,7 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 		return &result, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
 	}
 }
 
@@ -144,6 +160,12 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	switch chaos := root.(type) {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec
+		return nil
+	case *AzureChaos:
+		*it.AzureChaos = chaos.Spec
+		return nil
+	case *BlockChaos:
+		*it.BlockChaos = chaos.Spec
 		return nil
 	case *DNSChaos:
 		*it.DNSChaos = chaos.Spec
@@ -180,7 +202,7 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 		return nil
 
 	default:
-		return fmt.Errorf("unsupported chaos %#v", root)
+		return errors.Wrapf(errInvalidValue, "unknown chaos %#v", root)
 	}
 }
 
@@ -188,6 +210,12 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 	switch templateType {
 	case TypeAWSChaos:
 		result := AWSChaosList{}
+		return &result, nil
+	case TypeAzureChaos:
+		result := AzureChaosList{}
+		return &result, nil
+	case TypeBlockChaos:
+		result := BlockChaosList{}
 		return &result, nil
 	case TypeDNSChaos:
 		result := DNSChaosList{}
@@ -224,11 +252,27 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported template type %s", templateType)
+		return nil, errors.Wrapf(errInvalidValue, "unknown template type %s", templateType)
 	}
 }
 
 func (in *AWSChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *AzureChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *BlockChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

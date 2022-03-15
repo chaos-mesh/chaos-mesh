@@ -1,3 +1,15 @@
+# This workflow defines the go and ui related jobs.
+#
+# First, we use [dorny/paths-filter@v2](https://github.com/dorny/paths-filter) to
+# detect changes in go and ui related files, and then run the corresponding sub-jobs
+# based on the changes.
+#
+# Please note that due to the GitHub required checks, the `go` and `ui` jobs are
+# also need to run to report the status. So here we need to define an additional
+# "skip" file to ensure that the status is reported. For details, please refer to:
+#
+# - `ci_skip.yml`
+# - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
 name: ci
 
 on:
@@ -7,54 +19,70 @@ on:
       - release-*
 
 jobs:
-
-  pull:
+  # JOB to run change detection
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            go:
+              - Makefile
+              - go.*
+              - '**.go'
+              - 'helm/**'
+            ui:
+              - 'ui/yarn.lock'
+              - '**.js'
+              - '**.ts'
+              - '**.tsx'
+  go:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         job:
           - verify
           - build
           - test
     steps:
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v2
 
       - name: Build Chaos Mesh Build Env
-        if: ${{ github.event.pull_request }}
         env:
           IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
         run: |
           if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_BUILD_ENV_BUILD=1; 
-          else 
-            export IMAGE_BUILD_ENV_BUILD=0; 
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
           fi
 
           make image-build-env
-      
+
       - name: Build Chaos Mesh Dev Env
-        if: ${{ github.event.pull_request }}
         env:
           IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
         run: |
           if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_DEV_ENV_BUILD=1; 
-          else 
-            export IMAGE_DEV_ENV_BUILD=0; 
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
           fi
 
           make image-dev-env
 
       - name: ${{ matrix.job }}
+        env:
+          job: ${{ matrix.job }}
         run: |
-          # workaround for https://github.com/actions/setup-go/issues/14
-          export GOPATH=${GITHUB_WORKSPACE}/go
-          export PATH=$PATH:$GOPATH/bin
-
           if [[ "$job" == "verify" ]]; then
             make check
             echo "Please make check before creating a PR"
@@ -64,9 +92,46 @@ jobs:
           elif [[ "$job" == "test" ]]; then
             ROOT=$(pwd)
             KUBEBUILDER_ASSETS=${ROOT}/output/bin/kubebuilder/bin make test
-            BUILD_NUMBER=${BUILD_NUMBER} CODECOV_TOKEN="${CODECOV_TOKEN}" CI=1 make coverage
           else
             make $job
           fi
-        env:
-          job: ${{ matrix.job }}
+  ui:
+    needs: changes
+    if: ${{ needs.changes.outputs.ui == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./ui
+    strategy:
+      matrix:
+        job:
+          - build
+          - test
+        # node-version: ["14"] # TODO: add nodejs-16?
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: "yarn"
+          cache-dependency-path: "ui/yarn.lock"
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
+
+      - name: Cache app build
+        if: ${{ matrix.job == 'build' }}
+        uses: actions/cache@v2
+        with:
+          path: ./ui/app/build
+          key: ${{ runner.os }}-yarn-${{ hashFiles('ui/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Try build
+        if: ${{ matrix.job == 'build' }}
+        run: yarn build
+
+      - name: Run UT
+        if: ${{ matrix.job == 'test' }}
+        run: yarn test

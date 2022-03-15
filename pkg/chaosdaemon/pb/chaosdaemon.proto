@@ -25,6 +25,10 @@ service ChaosDaemon {
   rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
 
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
+
+  rpc InstallJVMRules(InstallJVMRulesRequest) returns (google.protobuf.Empty) {}
+
+  rpc UninstallJVMRules(UninstallJVMRulesRequest) returns (google.protobuf.Empty) {}
 }
 
 message TcHandle {
@@ -166,18 +170,27 @@ message ExecStressRequest {
   }
   Scope scope = 1;
   string target = 2;
-  string stressors = 3;
+  string cpuStressors = 3;
   bool enterNS = 4;
+  string memoryStressors = 5;
 }
 
 message ExecStressResponse {
-  string instance = 1;
-  int64 startTime = 2;
+  string cpuInstance = 1;
+  int64 cpuStartTime = 2;
+  string memoryInstance = 3;
+  int64 memoryStartTime = 4;
+  string cpuInstanceUid = 5;
+  string memoryInstanceUid = 6;
 }
 
 message CancelStressRequest {
-  string instance = 1;
-  int64 startTime = 2;
+  string cpuInstance = 1;
+  int64 cpuStartTime = 2;
+  string memoryInstance = 3;
+  int64 memoryStartTime = 4;
+  string cpuInstanceUid = 5;
+  string memoryInstanceUid = 6;
 }
 
 message ApplyIOChaosRequest {
@@ -188,11 +201,13 @@ message ApplyIOChaosRequest {
   int64 instance = 4;
   int64 startTime = 5;
   bool enterNS = 6;
+  string instance_uid = 7;
 }
 
 message ApplyIOChaosResponse {
   int64 instance = 1;
   int64 startTime = 2;
+  string instance_uid = 3;
 }
 
 message ApplyHttpChaosRequest {
@@ -203,6 +218,7 @@ message ApplyHttpChaosRequest {
   int64 instance = 4;
   int64 startTime = 5;
   bool enterNS = 6;
+  string instance_uid = 7;
 }
 
 message ApplyHttpChaosResponse {
@@ -210,6 +226,7 @@ message ApplyHttpChaosResponse {
   int64 startTime = 2;
   int32 statusCode = 3;
   string error = 4;
+  string instance_uid = 5;
 }
 
 
@@ -238,5 +255,19 @@ message SetDNSServerRequest {
   string container_id = 1;
   string dns_server = 2;
   bool enable = 3;
+  bool enterNS = 4;
+}
+
+message InstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  int32 port = 3;
+  bool enterNS = 4;
+}
+
+message UninstallJVMRulesRequest {
+  string container_id = 1;
+  string rule = 2;
+  int32 port = 3;
   bool enterNS = 4;
 }

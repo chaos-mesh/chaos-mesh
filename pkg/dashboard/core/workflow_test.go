@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -409,7 +408,7 @@ func Test_convertWorkflowNode(t *testing.T) {
 							IOChaos: &v1alpha1.IOChaosSpec{
 								ContainerSelector: v1alpha1.ContainerSelector{
 									PodSelector: v1alpha1.PodSelector{
-										Mode: v1alpha1.OnePodMode,
+										Mode: v1alpha1.OneMode,
 									},
 								},
 								Action:     "delay",

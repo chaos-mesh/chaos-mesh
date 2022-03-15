@@ -38,21 +38,22 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
-  {{- if .Values.chaosDaemon.hostNetwork }}
+      {{- if .Values.chaosDaemon.hostNetwork }}
       hostNetwork: true
-  {{- end }}
-  {{- if .Values.chaosDaemon.serviceAccount }}
+      {{- end }}
+      {{- if .Values.chaosDaemon.serviceAccount }}
       serviceAccountName: {{ .Values.chaosDaemon.serviceAccount }}
-  {{- end }}
-      hostIPC: true
+      {{- end }}
       hostPID: true
-      priorityClassName: {{ .Values.chaosDaemon.priorityClassName}}
-  {{- if .Values.imagePullSecrets }}
+      {{- if .Values.chaosDaemon.priorityClassName }}
+      priorityClassName: {{ .Values.chaosDaemon.priorityClassName }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
-  {{- end }}
+      {{- end }}
       containers:
         - name: chaos-daemon
-          image: {{template "registry-prefix" .}}{{ .Values.chaosDaemon.image }}
+          image: {{template "chaos-daemon.image" . }}
           imagePullPolicy: {{ .Values.chaosDaemon.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.chaosDaemon.resources }}
           resources:
@@ -115,6 +116,8 @@ spec:
               {{- end }}
             - name: sys-path
               mountPath: /host-sys
+            - name: lib-modules
+              mountPath: /lib/modules
             {{- if .Values.dashboard.securityMode}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
@@ -128,7 +131,7 @@ spec:
               containerPort: {{ .Values.chaosDaemon.httpPort }}
 {{- if .Values.bpfki.create }}
         - name: bpfki
-          image: {{template "registry-prefix" .}}{{ .Values.bpfki.image }}
+          image: {{template "chaos-kernel.image" . }}
           imagePullPolicy: {{ .Values.bpfki.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.bpfki.resources }}
           resources:
@@ -157,7 +160,7 @@ spec:
 {{- end }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
-          image: {{template "registry-prefix" .}}{{ .Values.chaosDlv.image }}
+          image: {{template "chaos-dlv.image" . }}
           imagePullPolicy: {{ .Values.chaosDlv.imagePullPolicy | default "IfNotPresent" }}
           env:
             - name: CMD_NAME
@@ -177,6 +180,9 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
         {{- if .Values.dashboard.securityMode}}
         - name: chaos-daemon-cert
           secret:

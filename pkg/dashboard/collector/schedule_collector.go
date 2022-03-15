@@ -18,10 +18,10 @@ package collector
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
+	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -56,13 +56,6 @@ func (r *ScheduleCollector) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	if err != nil {
 		r.Log.Error(err, "failed to get schedule object", "request", req.NamespacedName)
-		return ctrl.Result{}, nil
-	}
-
-	if !schedule.DeletionTimestamp.IsZero() {
-		if err = r.archiveSchedule(req.Namespace, req.Name); err != nil {
-			r.Log.Error(err, "failed to archive schedule")
-		}
 		return ctrl.Result{}, nil
 	}
 
@@ -101,7 +94,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.NetworkChaos.Action)
 	case v1alpha1.ScheduleTypeIOChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.IOChaos.Action)
-	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos:
+	case v1alpha1.ScheduleTypeTimeChaos, v1alpha1.ScheduleTypeKernelChaos, v1alpha1.ScheduleTypeStressChaos, v1alpha1.ScheduleTypeHTTPChaos:
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeDNSChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.DNSChaos.Action)
@@ -109,6 +102,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.AWSChaos.Action)
 	case v1alpha1.ScheduleTypeGCPChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.GCPChaos.Action)
+	case v1alpha1.ScheduleTypeJVMChaos:
+		archive.Action = string(schedule.Spec.ScheduleItem.JVMChaos.Action)
 	case v1alpha1.ScheduleTypePhysicalMachineChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.PhysicalMachineChaos.Action)
 	default:

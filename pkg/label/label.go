@@ -18,6 +18,8 @@ package label
 import (
 	"fmt"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Label is the label field in metadata
@@ -36,4 +38,20 @@ func (l Label) String() string {
 	}
 
 	return strings.Join(arr, ",")
+}
+
+func ParseLabel(data string) (Label, error) {
+	if len(data) == 0 {
+		return Label{}, nil
+	}
+
+	labels := make(map[string]string)
+	for _, tok := range strings.Split(data, ",") {
+		kv := strings.Split(tok, "=")
+		if len(kv) != 2 {
+			return nil, errors.Errorf("invalid labels: %s", data)
+		}
+		labels[kv[0]] = kv[1]
+	}
+	return labels, nil
 }

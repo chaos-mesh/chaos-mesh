@@ -25,9 +25,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -72,7 +73,7 @@ func sendUDPPacket(c http.Client, port uint16, targetIP string) error {
 
 	result := string(out)
 	if result != "send successfully\n" {
-		return fmt.Errorf("doesn't send successfully: %s", result)
+		return errors.Errorf("doesn't send successfully: %s", result)
 	}
 
 	klog.Info("send request successfully")
@@ -97,11 +98,11 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 	result := string(out)
 	parts := strings.Split(result, " ")
 	if len(parts) != 2 {
-		return 0, fmt.Errorf("the length of parts is not 2 %v", parts)
+		return 0, errors.Errorf("the length of parts is not 2 %v", parts)
 	}
 
 	if parts[0] != "OK" {
-		return 0, fmt.Errorf("the first part of response is not OK")
+		return 0, errors.New("the first part of response is not OK")
 	}
 
 	return strconv.ParseInt(parts[1], 10, 64)
@@ -109,7 +110,7 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 
 func makeNetworkPartitionChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode,
+	fromPodMode, toPodMode v1alpha1.SelectorMode,
 	direction v1alpha1.Direction,
 	duration *string,
 ) *v1alpha1.NetworkChaos {
@@ -117,8 +118,10 @@ func makeNetworkPartitionChaos(
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -136,8 +139,10 @@ func makeNetworkPartitionChaos(
 			Duration:  duration,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},
@@ -147,14 +152,16 @@ func makeNetworkPartitionChaos(
 
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
+	fromPodMode, toPodMode v1alpha1.SelectorMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
 ) *v1alpha1.NetworkChaos {
 	var target *v1alpha1.PodSelector
 	if toLabelSelectors != nil {
 		target = &v1alpha1.PodSelector{
 			Selector: v1alpha1.PodSelectorSpec{
-				Namespaces:     []string{namespace},
-				LabelSelectors: toLabelSelectors,
+				GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+					Namespaces:     []string{namespace},
+					LabelSelectors: toLabelSelectors,
+				},
 			},
 			Mode: toPodMode,
 		}
@@ -173,8 +180,10 @@ func makeNetworkDelayChaos(
 			Direction:   direction,
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{namespace},
-					LabelSelectors: fromLabelSelectors,
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{namespace},
+						LabelSelectors: fromLabelSelectors,
+					},
 				},
 				Mode: fromPodMode,
 			},

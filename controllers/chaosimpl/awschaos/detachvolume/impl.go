@@ -28,16 +28,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
+
+var _ impltypes.ChaosImpl = (*Impl)(nil)
 
 type Impl struct {
 	client.Client
 
 	Log logr.Logger
 }
-
-var _ common.ChaosImpl = (*Impl)(nil)
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	awschaos := obj.(*v1alpha1.AWSChaos)
@@ -69,7 +69,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	ec2client := ec2.NewFromConfig(cfg)
 
 	var selected v1alpha1.AWSSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
+
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
 		VolumeId:   selected.EbsVolume,
 		Device:     selected.DeviceName,
@@ -115,7 +120,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	ec2client := ec2.NewFromConfig(cfg)
 
 	var selected v1alpha1.AWSSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
 		Device:     selected.DeviceName,

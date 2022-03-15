@@ -17,7 +17,6 @@ package httpchaos
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -35,14 +34,14 @@ import (
 func TestcaseHttpAbortThenRecover(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 
@@ -56,10 +55,12 @@ func TestcaseHttpAbortThenRecover(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",
@@ -105,14 +106,14 @@ func TestcaseHttpAbortThenRecover(
 func TestcaseHttpAbortPauseAndUnPause(
 	ns string,
 	cli client.Client,
-	c http.Client,
+	c HTTPE2EClient,
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	By("waiting on e2e helper ready")
-	err := util.WaitE2EHelperReady(c, port)
+	err := util.WaitHTTPE2EHelperReady(*c.C, c.IP, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 	By("create http abort chaos CRD objects")
 
@@ -126,10 +127,12 @@ func TestcaseHttpAbortPauseAndUnPause(
 		Spec: v1alpha1.HTTPChaosSpec{
 			PodSelector: v1alpha1.PodSelector{
 				Selector: v1alpha1.PodSelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "http"},
+					GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "http"},
+					},
 				},
-				Mode: v1alpha1.OnePodMode,
+				Mode: v1alpha1.OneMode,
 			},
 			Port:   8080,
 			Target: "Request",
@@ -213,7 +216,6 @@ func TestcaseHttpAbortPauseAndUnPause(
 		return true, nil
 	})
 	framework.ExpectNoError(err, "fail to recover http chaos")
-
 	By("resume http abort chaos experiment")
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, httpChaos)

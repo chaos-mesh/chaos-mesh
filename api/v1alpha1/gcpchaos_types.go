@@ -22,6 +22,8 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
+// +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 // +chaos-mesh:oneshot=in.Spec.Action==NodeReset
 
@@ -70,7 +72,7 @@ type GCPChaosSpec struct {
 }
 
 type GCPSelector struct {
-	// Project defines the name of gcp project.
+	// Project defines the ID of gcp project.
 	Project string `json:"project"`
 
 	// Zone defines the zone of gcp project.
@@ -81,6 +83,7 @@ type GCPSelector struct {
 
 	// The device name of disks to detach.
 	// Needed in disk-loss.
+	// +ui:form:when=action=='disk-loss'
 	// +optional
 	DeviceNames []string `json:"deviceNames,omitempty" webhook:"GCPDeviceNames,nilable"`
 }

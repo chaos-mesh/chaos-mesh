@@ -16,7 +16,14 @@ spec:
     singular: iochaos
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: IOChaos is the Schema for the iochaos API
@@ -116,7 +123,7 @@ spec:
                 type: object
               containerNames:
                 description: ContainerNames indicates list of the name of affected
-                  container. If not set, all containers will be injected
+                  container. If not set, the first container will be injected
                 items:
                   type: string
                 type: array
@@ -183,6 +190,7 @@ spec:
                   action.
                 type: string
               percent:
+                default: 100
                 description: 'Percent defines the percentage of injection errors and
                   provides a number from 0-100. default: 100.'
                 type: integer
@@ -277,12 +285,12 @@ spec:
                     type: object
                 type: object
               value:
-                description: Value is required when the mode is set to `FixedPodMode`
-                  / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
-                  provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                  provide a number from 0-100 to specify the percent of pods the server
-                  can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                  from 0-100 to specify the max percent of pods to do chaos action
+                description: Value is required when the mode is set to `FixedMode`
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
                 type: string
               volumePath:
                 description: VolumePath represents the mount path of injected volume
@@ -349,6 +357,7 @@ spec:
         type: object
     served: true
     storage: true
+    subresources: {}
 status:
   acceptedNames:
     kind: ""

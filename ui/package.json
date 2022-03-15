@@ -1,122 +1,31 @@
 {
-  "name": "chaos-mesh-dashboard",
-  "version": "2.0.0",
+  "name": "@ui/root",
+  "version": "2.1.0",
   "description": "A Web UI for Chaos Mesh",
+  "author": "Yue Yang <g1enyy0ung@gmail.com>",
   "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.4.0",
-    "@emotion/styled": "^11.3.0",
-    "@loadable/component": "^5.14.1",
-    "@material-ui/core": "^5.0.0-alpha.35",
-    "@material-ui/icons": "^5.0.0-alpha.35",
-    "@material-ui/lab": "^5.0.0-alpha.35",
-    "@material-ui/styles": "^5.0.0-alpha.35",
-    "@nivo/core": "^0.68.0",
-    "@nivo/pie": "^0.68.0",
-    "@reduxjs/toolkit": "^1.5.0",
-    "ace-builds": "^1.4.12",
-    "axios": "^0.21.1",
-    "clsx": "^1.1.1",
-    "copy-text-to-clipboard": "^3.0.1",
-    "cytoscape": "^3.18.1",
-    "cytoscape-dagre": "^2.3.2",
-    "d3": "^6.5.0",
-    "flat": "^5.0.2",
-    "formik": "^2.2.6",
-    "idb": "^6.1.2",
-    "js-file-download": "^0.4.12",
-    "js-yaml": "^4.0.0",
-    "lodash.debounce": "^4.0.8",
-    "lodash.flattendeep": "^4.4.0",
-    "lodash.groupby": "^4.6.0",
-    "lodash.isempty": "^4.4.0",
-    "luxon": "^1.25.0",
-    "react": "^17.0.1",
-    "react-ace": "^9.2.1",
-    "react-dom": "^17.0.1",
-    "react-intl": "^5.10.16",
-    "react-redux": "^7.2.2",
-    "react-router-dom": "^5.1.2",
-    "react-scripts": "~4.0.3",
-    "react-window": "^1.8.6",
-    "reactour": "^1.18.0",
-    "redux": "^4.0.5",
-    "snakecase-keys": "^3.2.1",
-    "styled-components": "^5.2.1",
-    "typescript": "^4.0.3",
-    "yup": "^0.29.1"
-  },
+  "workspaces": [
+    "app",
+    "packages/*"
+  ],
   "scripts": {
     "bootstrap": "./scripts/bootstrap.sh",
-    "server": "../images/chaos-dashboard/bin/chaos-dashboard",
-    "start": "react-scripts start",
-    "start:default": "cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start",
-    "start:all": "concurrently --raw 'yarn server' 'yarn start:default'",
-    "build": "react-scripts build",
-    "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
-    "test": "react-scripts test",
-    "test:init": "./scripts/test/interface-builder.sh",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "build": "yarn workspace @ui/mui-extends build && yarn workspace @ui/app build",
+    "test": "yarn workspace @ui/mui-extends build && yarn workspace @ui/mui-extends test && yarn workspace @ui/openapi test && yarn workspace @ui/app test",
+    "prepare": "cd ..; is-ci || husky install ./ui/.husky",
+    "clean": "rimraf app/node_modules && rimraf packages/**/node_modules && rimraf node_modules"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.11.9",
-    "@testing-library/react": "^11.2.3",
-    "@testing-library/user-event": "^12.1.10",
-    "@types/cytoscape": "^3.14.12",
-    "@types/d3": "^6.3.0",
-    "@types/flat": "^5.0.1",
-    "@types/jest": "^26.0.20",
-    "@types/js-yaml": "^4.0.0",
-    "@types/loadable__component": "^5.13.1",
-    "@types/lodash.debounce": "^4.0.6",
-    "@types/lodash.flattendeep": "^4.4.6",
-    "@types/lodash.groupby": "^4.6.6",
-    "@types/lodash.isempty": "^4.4.6",
-    "@types/luxon": "^1.25.1",
-    "@types/node": "^12.12.36",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "@types/react-redux": "^7.1.15",
-    "@types/react-router-dom": "^5.1.7",
-    "@types/react-window": "^1.8.2",
-    "@types/reactour": "^1.17.1",
-    "@types/yup": "^0.29.11",
-    "axios-mock-adapter": "^1.19.0",
-    "concurrently": "^5.3.0",
-    "cross-env": "^7.0.3",
-    "http-proxy-middleware": "^1.0.6",
-    "husky": "^4.3.8",
+    "husky": "^7.0.4",
     "import-sort-style-eslint": "^6.0.0",
-    "lint-staged": "^10.5.3",
-    "prettier": "^2.2.1",
-    "prettier-plugin-import-sort": "^0.0.6",
-    "redux-logger": "^3.0.6",
-    "source-map-explorer": "^2.5.2",
-    "ts-interface-builder": "^0.2.3",
-    "ts-interface-checker": "^0.1.13"
+    "is-ci": "^3.0.1",
+    "lint-staged": "^12.1.2",
+    "prettier": "^2.5.0",
+    "prettier-plugin-import-sort": "^0.0.7",
+    "rimraf": "^3.0.2"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "importSort": {
     ".js, .ts, .tsx": {
