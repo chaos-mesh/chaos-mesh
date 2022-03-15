@@ -1826,7 +1826,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplateSpec"
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
                         }
                     }
                 ],
@@ -1834,7 +1834,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplateSpec"
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
                         }
                     },
                     "400": {
@@ -1921,7 +1921,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplateSpec"
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
                         }
                     }
                 ],
@@ -1929,7 +1929,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplateSpec"
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
                         }
                     },
                     "400": {
@@ -2851,6 +2851,24 @@ var doc = `{
                 }
             }
         },
+        "template.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                }
+            }
+        },
         "template.StatusCheckTemplateBase": {
             "type": "object",
             "properties": {
@@ -2886,21 +2904,11 @@ var doc = `{
                 "namespace": {
                     "type": "string"
                 },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                },
                 "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "template.StatusCheckTemplateSpec": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
                     "type": "string"
                 }
             }
@@ -3528,6 +3536,40 @@ var doc = `{
                 },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPCriteria": {
+            "type": "object",
+            "properties": {
+                "statusCode": {
+                    "description": "StatusCode defines the expected http status code for the request.\nA statusCode string could be a single code (e.g. 200), or\nan inclusive range (e.g. 200-400, both ` + "`" + `200` + "`" + ` and ` + "`" + `400` + "`" + ` are included).",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPStatusCheck": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "criteria": {
+                    "description": "Criteria defines how to determine the result of the status check.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPCriteria"
+                },
+                "headers": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "+optional\n+kubebuilder:validation:Enum=GET;POST\n+kubebuilder:default=GET",
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -4700,6 +4742,48 @@ var doc = `{
                 },
                 "time": {
                     "description": "+optional\n+nullable",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration defines the duration of the whole status check if the\nnumber of failed execution does not exceed the failure threshold.\nDuration is available to both ` + "`" + `Synchronous` + "`" + ` and ` + "`" + `Continuous` + "`" + ` mode.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "failureThreshold": {
+                    "description": "FailureThreshold defines the minimum consecutive failure\nfor the status check to be considered failed.\n+optional\n+kubebuilder:default=3\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "http": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
+                },
+                "intervalSeconds": {
+                    "description": "IntervalSeconds defines how often (in seconds) to perform\nan execution of status check.\n+optional\n+kubebuilder:default=10\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the execution mode of the status check.\nSupport type: Synchronous / Continuous\n+optional\n+kubebuilder:validation:Enum=Synchronous;Continuous",
+                    "type": "string"
+                },
+                "recordsHistoryLimit": {
+                    "description": "RecordsHistoryLimit defines the number of record to retain.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:Minimum=1\n+kubebuilder:validation:Maximum=1000",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "SuccessThreshold defines the minimum consecutive successes\nfor the status check to be considered successful.\nSuccessThreshold only works for ` + "`" + `Synchronous` + "`" + ` mode.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "description": "TimeoutSeconds defines the number of seconds after which\nan execution of status check times out.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type defines the specific status check type.\nSupport type: HTTP\n+kubebuilder:default=HTTP\n+kubebuilder:validation:Enum=HTTP",
                     "type": "string"
                 }
             }

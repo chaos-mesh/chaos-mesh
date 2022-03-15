@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
@@ -65,15 +66,15 @@ type StatusCheckTemplateBase struct {
 
 // StatusCheckTemplateDetail represent details of StatusCheckTemplate.
 type StatusCheckTemplateDetail struct {
-	StatusCheckTemplateBase
-	// TODO StatusCheckSpec
+	StatusCheckTemplateBase `json:",inline,omitempty"`
+	Spec                    v1alpha1.StatusCheckTemplate `json:"spec"`
 }
 
-type StatusCheckTemplateSpec struct {
-	Namespace   string `json:"namespace"`
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	// TODO StatusCheckSpec
+type StatusCheckTemplate struct {
+	Namespace   string                       `json:"namespace"`
+	Name        string                       `json:"name"`
+	Description string                       `json:"description,omitempty"`
+	Spec        v1alpha1.StatusCheckTemplate `json:"spec"`
 }
 
 // @Summary List status check templates.
@@ -99,27 +100,35 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 		s.logger.Info("Replace query namespace with", ns)
 	}
 
-	templateList := v1.ConfigMapList{}
-	if err = kubeCli.List(context.Background(), &templateList,
+	configMapList := v1.ConfigMapList{}
+	if err = kubeCli.List(context.Background(), &configMapList,
 		client.InNamespace(ns),
-		client.MatchingLabels{"template-type": "status-check"},
+		client.MatchingLabels{
+			v1alpha1.TemplateTypeLabelKey: v1alpha1.KindStatusCheck,
+			v1alpha1.ManagedByLabelKey:    v1alpha1.ManagedByLabelValue,
+		},
 	); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
 
 	templates := make([]*StatusCheckTemplateBase, 0)
-	for _, template := range templateList.Items {
-		if name != "" && template.Name != name {
+	for _, cm := range configMapList.Items {
+		templateName := v1alpha1.GetTemplateName(cm)
+		if templateName == "" {
+			// skip illegal template
+			continue
+		}
+		if name != "" && templateName != name {
 			continue
 		}
 
 		templates = append(templates, &StatusCheckTemplateBase{
-			Namespace:   template.Namespace,
-			Name:        template.Name, // TODO
-			UID:         string(template.UID),
-			Created:     template.CreationTimestamp.Format(time.RFC3339),
-			Description: template.Annotations[""], // TODO
+			Namespace:   cm.Namespace,
+			Name:        templateName,
+			UID:         string(cm.UID),
+			Created:     cm.CreationTimestamp.Format(time.RFC3339),
+			Description: v1alpha1.GetTemplateDescription(cm),
 		})
 	}
 
@@ -135,8 +144,8 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 // @Tags templates
 // @Accept json
 // @Produce json
-// @Param statuscheck body StatusCheckTemplateSpec true "the status check definition"
-// @Success 200 {object} StatusCheckTemplateSpec
+// @Param statuscheck body StatusCheckTemplate true "the status check definition"
+// @Success 200 {object} StatusCheckTemplate
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /templates/statuschecks [post]
@@ -147,33 +156,37 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 
-	var spec StatusCheckTemplateSpec
-	if err = u.ShouldBindBodyWithJSON(c, &spec); err != nil {
+	var template StatusCheckTemplate
+	if err = u.ShouldBindBodyWithJSON(c, &template); err != nil {
 		return
 	}
 
-	// TODO convert to StatusCheckSpec
-	data, err := yaml.Marshal(spec)
+	spec, err := yaml.Marshal(template.Spec)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	// TODO
-	template := v1.ConfigMap{
+	cm := v1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:   spec.Namespace,
-			Name:        spec.Name,
-			Labels:      map[string]string{},
-			Annotations: map[string]string{},
+			Namespace: template.Namespace,
+			Name:      v1alpha1.GenerateTemplateName(template.Name),
+			Labels: map[string]string{
+				v1alpha1.TemplateTypeLabelKey: v1alpha1.KindStatusCheck,
+				v1alpha1.ManagedByLabelKey:    v1alpha1.ManagedByLabelValue,
+			},
+			Annotations: map[string]string{
+				v1alpha1.TemplateNameAnnotationKey:        template.Name,
+				v1alpha1.TemplateDescriptionAnnotationKey: template.Description,
+			},
 		},
-		Data: map[string]string{"template": string(data)},
+		Data: map[string]string{v1alpha1.StatusCheckTemplateKey: string(spec)},
 	}
-	if err = kubeCli.Create(context.Background(), &template); err != nil {
+	if err = kubeCli.Create(context.Background(), &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, spec)
+	c.JSON(http.StatusOK, template)
 }
 
 // @Summary Get a status check template.
@@ -191,7 +204,6 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
 		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
-
 		return
 	}
 
@@ -200,28 +212,40 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 		ns = s.conf.TargetNamespace
 		s.logger.Info("Replace query namespace with", ns)
 	}
+	if name == "" {
+		u.SetAPIError(c, u.ErrBadRequest.New("name is required"))
+		return
+	}
 
-	var template v1.ConfigMap
+	var cm v1.ConfigMap
 	if err = kubeCli.Get(context.Background(),
 		types.NamespacedName{
 			Namespace: ns,
-			Name:      name,
-		}, &template); err != nil {
+			Name:      v1alpha1.GenerateTemplateName(name),
+		}, &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
 
-	var data StatusCheckTemplateSpec
-	if err := yaml.Unmarshal([]byte(template.Data["template"]), &data); err != nil {
+	if !v1alpha1.IsStatusCheckTemplate(cm) {
+		u.SetAPIError(c, u.ErrInternalServer.New("invalid status check template"))
+		return
+	}
+
+	var spec v1alpha1.StatusCheckTemplate
+	if err := yaml.Unmarshal([]byte(cm.Data[v1alpha1.StatusCheckTemplateKey]), &spec); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 	detail := StatusCheckTemplateDetail{
-		StatusCheckTemplateBase{
-			Namespace: template.Namespace,
-			Name:      template.Name,
-			UID:       string(template.UID),
+		StatusCheckTemplateBase: StatusCheckTemplateBase{
+			Namespace:   cm.Namespace,
+			Name:        v1alpha1.GetTemplateName(cm),
+			UID:         string(cm.UID),
+			Created:     cm.CreationTimestamp.Format(time.RFC3339),
+			Description: v1alpha1.GetTemplateDescription(cm),
 		},
+		Spec: spec,
 	}
 	c.JSON(http.StatusOK, detail)
 }
@@ -230,8 +254,8 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 // @Description Update a status check template by namespaced name.
 // @Tags templates
 // @Produce json
-// @Param request body StatusCheckTemplateSpec true "Request body"
-// @Success 200 {object} StatusCheckTemplateSpec
+// @Param request body StatusCheckTemplate true "Request body"
+// @Success 200 {object} StatusCheckTemplate
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /templates/statuschecks/statuscheck [put]
@@ -242,31 +266,42 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 
-	var spec StatusCheckTemplateSpec
-	if err = u.ShouldBindBodyWithJSON(c, &spec); err != nil {
+	var template StatusCheckTemplate
+	if err = u.ShouldBindBodyWithJSON(c, &template); err != nil {
 		return
 	}
 
-	var template v1.ConfigMap
+	var cm v1.ConfigMap
 	if err = kubeCli.Get(context.Background(),
 		types.NamespacedName{
-			Namespace: spec.Namespace,
-			Name:      spec.Name,
-		}, &template); err != nil {
+			Namespace: template.Namespace,
+			Name:      v1alpha1.GenerateTemplateName(template.Name),
+		}, &cm); err != nil {
 		u.SetAPImachineryError(c, err)
+		return
+	}
+	if !v1alpha1.IsStatusCheckTemplate(cm) {
+		u.SetAPIError(c, u.ErrInternalServer.New("invalid status check template"))
 		return
 	}
 
-	data, err := yaml.Marshal(spec)
+	spec, err := yaml.Marshal(template.Spec)
 	if err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	template.Data["template"] = string(data)
-	if err := kubeCli.Update(context.Background(), &template); err != nil {
+	if cm.Data == nil {
+		cm.Data = map[string]string{v1alpha1.StatusCheckTemplateKey: string(spec)}
+	} else {
+		cm.Data[v1alpha1.StatusCheckTemplateKey] = string(spec)
+	}
+	cm.Annotations[v1alpha1.TemplateDescriptionAnnotationKey] = template.Description
+
+	if err := kubeCli.Update(context.Background(), &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, spec)
+	c.JSON(http.StatusOK, template)
 }
 
 // @Summary Delete a status check template.
@@ -292,18 +327,26 @@ func (s *Service) deleteStatusCheckTemplate(c *gin.Context) {
 		ns = s.conf.TargetNamespace
 		s.logger.Info("Replace query namespace with", ns)
 	}
-
-	var template v1.ConfigMap
-	if err = kubeCli.Get(context.Background(),
-		types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		}, &template); err != nil {
-		u.SetAPImachineryError(c, err)
+	if name == "" {
+		u.SetAPIError(c, u.ErrBadRequest.New("name is required"))
 		return
 	}
 
-	if err := kubeCli.Delete(context.Background(), &template); err != nil {
+	var cm v1.ConfigMap
+	if err = kubeCli.Get(context.Background(),
+		types.NamespacedName{
+			Namespace: ns,
+			Name:      v1alpha1.GenerateTemplateName(name),
+		}, &cm); err != nil {
+		u.SetAPImachineryError(c, err)
+		return
+	}
+	if !v1alpha1.IsStatusCheckTemplate(cm) {
+		u.SetAPIError(c, u.ErrInternalServer.New("invalid status check template"))
+		return
+	}
+
+	if err := kubeCli.Delete(context.Background(), &cm); err != nil {
 		u.SetAPImachineryError(c, err)
 		return
 	}
