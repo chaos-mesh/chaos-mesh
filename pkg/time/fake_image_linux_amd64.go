@@ -142,7 +142,7 @@ func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram, varNum int
 	if it.fakeEntry != nil {
 		content, err := program.ReadSlice(it.fakeEntry.StartAddress, it.fakeEntry.EndAddress-it.fakeEntry.StartAddress)
 		if err != nil {
-			it.logger.V(0).Info("ReadSlice fail")
+			it.logger.Info("ReadSlice fail")
 			return nil, nil
 		}
 		if varNum*8 > len(it.content) {
@@ -155,9 +155,8 @@ func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram, varNum int
 		if bytes.Equal(contentWithoutVariable, expectedContentWithoutVariable) {
 			it.logger.Info("slice found")
 			return it.fakeEntry, nil
-		} else {
-			it.logger.V(0).Info("slice not found")
 		}
+		it.logger.Info("slice not found")
 	}
 	return nil, nil
 }
