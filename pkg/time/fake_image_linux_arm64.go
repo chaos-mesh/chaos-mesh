@@ -16,9 +16,10 @@
 package time
 
 import (
+	"github.com/go-logr/logr"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
-	"github.com/go-logr/logr"
 )
 
 // vdsoEntryName is the name of the vDSO entry
