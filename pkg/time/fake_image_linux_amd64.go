@@ -212,7 +212,7 @@ func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
 	if it.OriginFuncCode == nil {
 		return nil
 	}
-	program, err := ptrace.Trace(pid)
+	program, err := ptrace.Trace(pid, it.logger)
 	if err != nil {
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
