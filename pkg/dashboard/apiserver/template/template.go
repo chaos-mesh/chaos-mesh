@@ -160,6 +160,11 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 	if err = u.ShouldBindBodyWithJSON(c, &template); err != nil {
 		return
 	}
+	template.Spec.Default()
+	if err := template.Spec.Validate(); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
 
 	spec, err := yaml.Marshal(template.Spec)
 	if err != nil {
@@ -268,6 +273,11 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 
 	var template StatusCheckTemplate
 	if err = u.ShouldBindBodyWithJSON(c, &template); err != nil {
+		return
+	}
+	template.Spec.Default()
+	if err := template.Spec.Validate(); err != nil {
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 

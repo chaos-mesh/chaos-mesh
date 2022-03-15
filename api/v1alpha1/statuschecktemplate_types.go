@@ -17,7 +17,6 @@ package v1alpha1
 
 import (
 	"fmt"
-
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -68,4 +67,23 @@ func IsStatusCheckTemplate(cm v1.ConfigMap) bool {
 	return cm.Labels[ManagedByLabelKey] == ManagedByLabelValue &&
 		cm.Labels[TemplateTypeLabelKey] == KindStatusCheck &&
 		cm.Name == GenerateTemplateName(cm.Annotations[TemplateNameAnnotationKey])
+}
+
+func (in *StatusCheckTemplate) Validate() error {
+	statusCheck := &StatusCheck{
+		Spec: in.StatusCheckSpec,
+	}
+	return statusCheck.Validate()
+}
+
+func (in *StatusCheckTemplate) Default() {
+	if in == nil {
+		return
+	}
+
+	statusCheck := &StatusCheck{
+		Spec: in.StatusCheckSpec,
+	}
+	statusCheck.Default()
+	in.StatusCheckSpec = statusCheck.Spec
 }
