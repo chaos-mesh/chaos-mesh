@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
@@ -32,10 +33,6 @@ const (
 	ipsetExistErr        = "set with the same name already exists"
 	ipExistErr           = "it's already added"
 	ipsetNewNameExistErr = "a set with the new name already exists"
-
-	SetIPSet     = "list:set"
-	NetPortIPSet = "hash:net,port"
-	NetIPSet     = "hash:net"
 )
 
 func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
@@ -75,15 +72,15 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 	// If the IP set already exists, it will be renamed to this temp name.
 	tmpName := fmt.Sprintf("%sold", name)
 
-	ipSetType := set.Type
+	ipSetType := v1alpha1.IPSetType(set.Type)
 	var values []string
 
 	switch ipSetType {
-	case SetIPSet:
+	case v1alpha1.SetIPSet:
 		values = set.SetNames
-	case NetIPSet:
+	case v1alpha1.NetIPSet:
 		values = set.Cidrs
-	case NetPortIPSet:
+	case v1alpha1.NetPortIPSet:
 		for _, cidrAndPort := range set.CidrAndPorts {
 			values = append(values, fmt.Sprintf("%s,%d", cidrAndPort.Cidr, cidrAndPort.Port))
 		}
@@ -110,13 +107,13 @@ func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, 
 	return err
 }
 
-func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, ipSetType string) error {
+func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, ipSetType v1alpha1.IPSetType) error {
 	// ipset name cannot be longer than 31 bytes
 	if len(name) > 31 {
 		name = name[:31]
 	}
 
-	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, ipSetType).SetContext(ctx)
+	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, string(ipSetType)).SetContext(ctx)
 	if enterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}

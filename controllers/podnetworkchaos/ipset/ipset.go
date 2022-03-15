@@ -33,20 +33,18 @@ import (
 var log = ctrl.Log.WithName("ipset")
 
 // BuildIPSets builds IP sets with provided pod ip list.
-// It returns the set IP set and other IP sets.
-func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) (v1alpha1.RawIPSet, []v1alpha1.RawIPSet) {
-	setName := GenerateIPSetName(networkchaos, "set_"+namePostFix)
+func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) []v1alpha1.RawIPSet {
 	netName := GenerateIPSetName(networkchaos, "net_"+namePostFix)
 	netPortName := GenerateIPSetName(networkchaos, "netport_"+namePostFix)
 
 	cidrs := []string{}
-	cidrandPorts := []v1alpha1.CidrAndPort{}
+	cidrAndPorts := []v1alpha1.CidrAndPort{}
 
 	for _, cidr := range externalCidrs {
 		if cidr.Port == 0 {
 			cidrs = append(cidrs, cidr.Cidr)
 		} else {
-			cidrandPorts = append(cidrandPorts, cidr)
+			cidrAndPorts = append(cidrAndPorts, cidr)
 		}
 	}
 
@@ -56,15 +54,7 @@ func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkcha
 		}
 	}
 
-	setIPSet := v1alpha1.RawIPSet{
-		Name:      setName,
-		IPSetType: v1alpha1.SetIPSet,
-		SetNames:  []string{netName, netPortName},
-		RawRuleSource: v1alpha1.RawRuleSource{
-			Source: source,
-		},
-	}
-	otherIPSets := []v1alpha1.RawIPSet{
+	return []v1alpha1.RawIPSet{
 		{
 			Name:      netName,
 			IPSetType: v1alpha1.NetIPSet,
@@ -76,14 +66,30 @@ func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkcha
 		{
 			Name:         netPortName,
 			IPSetType:    v1alpha1.NetPortIPSet,
-			CidrAndPorts: cidrandPorts,
+			CidrAndPorts: cidrAndPorts,
 			RawRuleSource: v1alpha1.RawRuleSource{
 				Source: source,
 			},
 		},
 	}
+}
 
-	return setIPSet, otherIPSets
+func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
+	name := GenerateIPSetName(networkchaos, "set_"+namePostFix)
+	setNames := []string{}
+
+	for _, set := range sets {
+		setNames = append(setNames, set.Name)
+	}
+
+	return v1alpha1.RawIPSet{
+		Name:      name,
+		IPSetType: v1alpha1.SetIPSet,
+		SetNames:  setNames,
+		RawRuleSource: v1alpha1.RawRuleSource{
+			Source: source,
+		},
+	}
 }
 
 // GenerateIPSetName generates name for ipset

@@ -299,10 +299,12 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		}
 		targetPods = append(targetPods, pod)
 	}
-	dstSetIPSet, dstOtherIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, string(tcType[0:2])+ipSetPostFix, m.Source)
-	impl.Log.Info("apply traffic control with filter", "sources", m.Source, "ipset", dstSetIPSet)
+	ipSetWithTcPostFix := string(tcType[0:2]) + ipSetPostFix
+	dstIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetWithTcPostFix, m.Source)
+	dstSetIPSet := ipset.BuildSetIPSet(dstIPSets, networkchaos, ipSetWithTcPostFix, m.Source)
+	impl.Log.Info("apply traffic control with filter", "sources", m.Source, "setIpset", dstSetIPSet, "ipSets", dstIPSets)
 
-	for _, ipSet := range dstOtherIPSets {
+	for _, ipSet := range dstIPSets {
 		m.T.Append(ipSet)
 	}
 

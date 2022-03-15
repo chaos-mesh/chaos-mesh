@@ -25,6 +25,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -51,7 +52,7 @@ var _ = Describe("ipset server", func() {
 				Expect(args[6]).To(Equal("hash:net"))
 				return exec.Command("echo", "mock command")
 			})()
-			err := createIPSet(context.TODO(), logger, true, 1, "name", NetIPSet)
+			err := createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).To(BeNil())
 		})
 
@@ -70,7 +71,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = createIPSet(context.TODO(), logger, true, 1, "name", NetIPSet)
+			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).To(BeNil())
 		})
 
@@ -85,7 +86,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = createIPSet(context.TODO(), logger, true, 1, "name", NetIPSet)
+			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).ToNot(BeNil())
 		})
 
@@ -100,7 +101,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = createIPSet(context.TODO(), logger, true, 1, "name", NetIPSet)
+			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).ToNot(BeNil())
 		})
 	})

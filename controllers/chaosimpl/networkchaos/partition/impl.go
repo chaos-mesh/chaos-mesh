@@ -360,9 +360,10 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		}
 		targetPods = append(targetPods, pod)
 	}
-	dstSetIPSet, dstOtherIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
+	dstIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetPostFix, m.Source)
+	dstSetIPSet := ipset.BuildSetIPSet(dstIPSets, networkchaos, ipSetPostFix, m.Source)
 
-	for _, ipSet := range dstOtherIPSets {
+	for _, ipSet := range dstIPSets {
 		m.T.Append(ipSet)
 	}
 
