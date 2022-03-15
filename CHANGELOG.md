@@ -40,6 +40,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump kubernetes dependencies to v1.23.1 [#2778](https://github.com/chaos-mesh/chaos-mesh/pull/2778)
 - Removed docker registry mirror [#2797](https://github.com/chaos-mesh/chaos-mesh/pull/2797)
 - Use OpenAPI definitions to generate API Client and Form data in UI [2770](https://github.com/chaos-mesh/chaos-mesh/pull/2770)
+- Refine logging in pkg/selector/pod [#3002](https://github.com/chaos-mesh/chaos-mesh/pull/3002)
 
 ### Deprecated
 
