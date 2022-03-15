@@ -3332,7 +3332,7 @@ var doc = `{
                     "type": "string"
                 },
                 "percent": {
-                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional",
+                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional\n+kubebuilder:default=100",
                     "type": "integer"
                 },
                 "selector": {
