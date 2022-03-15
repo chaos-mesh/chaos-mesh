@@ -46,7 +46,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	var selected v1alpha1.AWSSelector
 	err := json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
-		impl.Log.Error(err, "selector unmarshal error")
+		impl.Log.Error(err, "fail to unmarshal the selector")
 		return v1alpha1.NotInjected, err
 	}
 
@@ -98,7 +98,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	awschaos := obj.(*v1alpha1.AWSChaos)
 
 	var selected v1alpha1.AWSSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err := json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
 
 	opts := []func(*awscfg.LoadOptions) error{
 		awscfg.WithRegion(selected.AWSRegion),

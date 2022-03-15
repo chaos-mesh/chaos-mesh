@@ -77,8 +77,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "fail to get the vm client")
 		return v1alpha1.Injected, err
 	}
+
 	var selected v1alpha1.AzureSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
+
 	_, err = vmClient.Start(ctx, selected.ResourceGroupName, selected.VMName)
 	if err != nil {
 		impl.Log.Error(err, "fail to start the vm")

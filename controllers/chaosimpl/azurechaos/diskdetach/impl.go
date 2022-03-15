@@ -54,7 +54,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	var selected v1alpha1.AzureSelector
 	err = json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
-		impl.Log.Error(err, "selector unmarshal error")
+		impl.Log.Error(err, "fail to unmarshal the selector")
 		return v1alpha1.NotInjected, err
 	}
 
@@ -128,7 +128,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	vm.StorageProfile.DataDisks = &newDiskList
 
 	var selected v1alpha1.AzureSelector
-	json.Unmarshal([]byte(records[index].Id), &selected)
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "fail to unmarshal the selector")
+		return v1alpha1.NotInjected, err
+	}
+
 	_, err = vmClient.CreateOrUpdate(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
 	if err != nil {
 		impl.Log.Error(err, "fail to attach the disk")
