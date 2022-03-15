@@ -58,7 +58,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	vm, err := vmClient.Get(context.Background(), azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, compute.InstanceView)
+	vm, err := vmClient.Get(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, compute.InstanceView)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the specified vm")
 		return v1alpha1.NotInjected, err
@@ -79,7 +79,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	newDiskList := append((*vm.StorageProfile.DataDisks)[:diskIndex], (*vm.StorageProfile.DataDisks)[diskIndex+1:]...)
 	vm.StorageProfile.DataDisks = &newDiskList
 
-	_, err = vmClient.CreateOrUpdate(context.Background(), azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
+	_, err = vmClient.CreateOrUpdate(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
 	if err != nil {
 		impl.Log.Error(err, "fail to detach the disk from the vm")
 		return v1alpha1.NotInjected, err
@@ -105,12 +105,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	disk, err := disksClient.Get(context.Background(), azurechaos.Spec.ResourceGroupName, *azurechaos.Spec.DiskName)
+	disk, err := disksClient.Get(ctx, azurechaos.Spec.ResourceGroupName, *azurechaos.Spec.DiskName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the disk detail")
 		return v1alpha1.Injected, err
 	}
-	vm, err := vmClient.Get(context.Background(), azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, compute.InstanceView)
+	vm, err := vmClient.Get(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, compute.InstanceView)
 	if err != nil {
 		impl.Log.Error(err, "fail to get the specified vm")
 		return v1alpha1.Injected, err
@@ -129,7 +129,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	var selected v1alpha1.AzureSelector
 	json.Unmarshal([]byte(records[index].Id), &selected)
-	_, err = vmClient.CreateOrUpdate(context.Background(), azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
+	_, err = vmClient.CreateOrUpdate(ctx, azurechaos.Spec.ResourceGroupName, azurechaos.Spec.VMName, vm)
 	if err != nil {
 		impl.Log.Error(err, "fail to attach the disk")
 		return v1alpha1.Injected, err
