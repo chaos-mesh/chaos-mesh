@@ -74,6 +74,7 @@ func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkcha
 	}
 }
 
+// BuildSetIPSet builds list:set IP set that stores given sets
 func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
 	name := GenerateIPSetName(networkchaos, "set_"+namePostFix)
 	setNames := []string{}
