@@ -197,25 +197,6 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 
 //revive:enable:flag-parameter
 
-// GetService get k8s service by service name
-func GetService(ctx context.Context, c client.Client, namespace, controllerNamespace string, serviceName string) (*v1.Service, error) {
-	// use the environment value if namespace is empty
-	if len(namespace) == 0 {
-		namespace = controllerNamespace
-	}
-
-	service := &v1.Service{}
-	err := c.Get(ctx, client.ObjectKey{
-		Namespace: namespace,
-		Name:      serviceName,
-	}, service)
-	if err != nil {
-		return nil, err
-	}
-
-	return service, nil
-}
-
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
 func CheckPodMeetSelector(ctx context.Context, c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (bool, error) {
 	if len(selector.Pods) > 0 {
