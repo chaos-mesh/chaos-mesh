@@ -44,6 +44,11 @@ const timeOfDaySkewFakeImage = "fake_gettimeofday.o"
 // getTimeOfDay is the target function would be replaced
 const getTimeOfDay = "gettimeofday"
 
+// Config is the summary config of get_time_of_day and clock_get_time.
+// Config here is only for injector of k8s pod.
+// We divide group injector on linux process , pod injector for k8s and
+// the base injector , so we can simply create another config struct just
+// for linux process for chaos-mesh/chaosd or watchmaker.
 type Config struct {
 	deltaSeconds     int64
 	deltaNanoSeconds int64
@@ -66,6 +71,7 @@ func (c *Config) DeepCopy() tasks.Object {
 	}
 }
 
+// Add implement how to merge time skew tasks.
 func (c *Config) Add(a tasks.Addable) error {
 	A, OK := a.(*Config)
 	if OK {
@@ -83,17 +89,17 @@ type ConfigCreatorParas struct {
 	PodProcessMap *tasks.PodProcessMap
 }
 
+// New assumes we get ConfigCreatorParas from values.
 func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 	paras, ok := values.(ConfigCreatorParas)
 	if !ok {
 		return nil, errors.New("not ConfigCreatorParas")
 	}
 
-	skew, err := GetSkew(paras.Logger)
+	skew, err := GetSkew(paras.Logger, paras.Config)
 	if err != nil {
 		return nil, err
 	}
-	skew.SkewConfig = *paras.Config.DeepCopy().(*Config)
 
 	newGroupProcessHandler :=
 		tasks.NewProcessGroupHandler(paras.Logger, &skew)
@@ -102,6 +108,9 @@ func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 	return &newPodHandler, nil
 }
 
+// Assign assumes the input injectable is *tasks.PodHandler.
+// We also assume the Main of PodHandler is *tasks.ProcessGroupHandler
+// and the Main of ProcessGroupHandler is *Skew.
 func (c *Config) Assign(injectable tasks.Injectable) error {
 	podHandler, ok := injectable.(*tasks.PodHandler)
 	if !ok {
@@ -120,6 +129,8 @@ func (c *Config) Assign(injectable tasks.Injectable) error {
 	return nil
 }
 
+// Skew implements ChaosOnProcessGroup.
+// We locked Skew injecting and recovering to avoid conflict.
 type Skew struct {
 	SkewConfig   Config
 	clockGetTime *FakeImage
@@ -129,7 +140,7 @@ type Skew struct {
 	logger logr.Logger
 }
 
-func GetSkew(logger logr.Logger) (Skew, error) {
+func GetSkew(logger logr.Logger, c Config) (Skew, error) {
 	clockGetTimeImage, err := LoadFakeImageFromEmbedFs(clockGettimeSkewFakeImage, clockGettime, logger)
 	if err != nil {
 		return Skew{}, errors.Wrap(err, "load fake image")
@@ -141,7 +152,7 @@ func GetSkew(logger logr.Logger) (Skew, error) {
 	}
 
 	return Skew{
-		SkewConfig:   Config{},
+		SkewConfig:   c,
 		clockGetTime: clockGetTimeImage,
 		getTimeOfDay: getTimeOfDayimage,
 		locker:       sync.Mutex{},
@@ -151,11 +162,10 @@ func GetSkew(logger logr.Logger) (Skew, error) {
 
 func (s *Skew) Fork() (tasks.ChaosOnProcessGroup, error) {
 	// TODO : to KEAO can I share FakeImage between threads?
-	skew, err := GetSkew(s.logger)
+	skew, err := GetSkew(s.logger, s.SkewConfig)
 	if err != nil {
 		return nil, err
 	}
-	skew.SkewConfig = *s.SkewConfig.DeepCopy().(*Config)
 
 	return &skew, nil
 }

@@ -55,9 +55,6 @@ var _ = Describe("ModifyTime", func() {
 	var t *timer.Timer
 	logger, err := log.NewDefaultZapLogger()
 	Expect(err).ShouldNot(HaveOccurred())
-	s, err := GetSkew(logger)
-	Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
-
 	BeforeEach(func() {
 		var err error
 
@@ -72,14 +69,16 @@ var _ = Describe("ModifyTime", func() {
 
 	Context("Modify Time", func() {
 		It("should move forward successfully", func() {
+
 			Expect(t).NotTo(BeNil())
+			s, err := GetSkew(logger, NewConfig(10000, 0, 1))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			now, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
 
-			s.SkewConfig = NewConfig(10000, 0, 1)
 			err = s.Inject(tasks.SysPID(t.Pid()))
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
@@ -94,7 +93,9 @@ var _ = Describe("ModifyTime", func() {
 
 		It("should move backward successfully", func() {
 			Expect(t).NotTo(BeNil())
-			s.SkewConfig = NewConfig(10000, 0, 1)
+			s, err := GetSkew(logger, NewConfig(10000, 0, 1))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
 			err = s.Inject(tasks.SysPID(t.Pid()))
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
@@ -110,18 +111,19 @@ var _ = Describe("ModifyTime", func() {
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newSec := newTime.Unix()
-
 			Expect(10000-(sec-newSec)).Should(BeNumerically("<=", 1), "sec %d newSec %d", sec, newSec)
 		})
 
 		It("should handle nsec overflow", func() {
 			Expect(t).NotTo(BeNil())
 
+			s, err := GetSkew(logger, NewConfig(0, 1000000000, 1))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
 			now, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
-			s.SkewConfig = NewConfig(0, 1000000000, 1)
 
 			err = s.Inject(tasks.SysPID(t.Pid()))
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
@@ -130,7 +132,6 @@ var _ = Describe("ModifyTime", func() {
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newSec := newTime.Unix()
-
 			Expect(newSec-sec).Should(BeNumerically(">=", 1), "sec %d newSec %d", sec, newSec)
 		})
 	})

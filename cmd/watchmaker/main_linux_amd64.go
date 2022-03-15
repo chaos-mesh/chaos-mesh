@@ -73,12 +73,11 @@ func main() {
 	}
 	log.Info("get clock ids mask", "mask", mask)
 
-	s, err := time.GetSkew(log)
+	s, err := time.GetSkew(log, time.NewConfig(secDelta, nsecDelta, mask))
 	if err != nil {
 		log.Error(err, "error while GetSkew")
 		os.Exit(1)
 	}
-	s.SkewConfig = time.NewConfig(secDelta, nsecDelta, mask)
 	err = s.Inject(tasks.SysPID(pid))
 
 	if err != nil {
