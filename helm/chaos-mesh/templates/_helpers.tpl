@@ -8,7 +8,7 @@ So the `envFollowKubernetesPattern` will become to `env`.
 And the original way of writing env will be removed.
 Ref: https://github.com/chaos-mesh/chaos-mesh/pull/2955.
 */}}
-{{- define "chaos-mesh.helpers.list-env-vars" -}}
+{{- define "chaos-mesh.helpers.listEnvVars" -}}
 {{- with .envFollowKubernetesPattern }}
 {{ toYaml . }}
 {{- end }}
