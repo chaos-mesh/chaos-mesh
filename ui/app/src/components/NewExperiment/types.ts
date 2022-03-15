@@ -159,6 +159,7 @@ export interface Time {
 
 export interface ExperimentType {
   AWSChaos: AWS
+  AzureChaos?: unknown
   DNSChaos: DNS
   GCPChaos: GCP
   HTTPChaos?: unknown
