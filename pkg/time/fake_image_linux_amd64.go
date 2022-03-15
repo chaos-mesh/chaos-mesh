@@ -66,7 +66,7 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 		runtime.UnlockOSThread()
 	}()
 
-	program, err := ptrace.Trace(pid)
+	program, err := ptrace.Trace(pid, it.logger.WithName("ptrace").WithValues("pid", pid))
 	if err != nil {
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
