@@ -55,7 +55,7 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 	return allErrs
 }
 
-// ValidateScheduler validates the scheduler and duration
+// Validate validates aws chaos actions
 func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
