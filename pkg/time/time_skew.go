@@ -90,6 +90,7 @@ type ConfigCreatorParas struct {
 }
 
 // New assumes we get ConfigCreatorParas from values.
+// New will init a struct just like PodHandler(ProcessGroupHandler(Skew))
 func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 	paras, ok := values.(ConfigCreatorParas)
 	if !ok {
@@ -208,6 +209,9 @@ func (s *Skew) Inject(pid tasks.PID) error {
 	return nil
 }
 
+// Recover clock_get_time & get_time_of_day one by one ,
+// if error comes from clock_get_time.Recover we will continue recover another fake image
+// and merge errors.
 func (s *Skew) Recover(pid tasks.PID) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()

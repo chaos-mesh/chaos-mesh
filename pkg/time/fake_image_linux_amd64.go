@@ -134,6 +134,7 @@ func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 	return vdsoEntry, nil
 }
 
+// FindInjectedImage find injected image to avoid redundant inject.
 func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram, varNum int) (*mapreader.Entry, error) {
 	it.logger.Info("finding injected image")
 
@@ -204,6 +205,8 @@ func (it *FakeImage) TryReWriteFakeImage(program *ptrace.TracedProgram) error {
 	return nil
 }
 
+// Recover the injected image. If injected image not found ,
+// Recover will not return error.
 func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
 	runtime.LockOSThread()
 	defer func() {

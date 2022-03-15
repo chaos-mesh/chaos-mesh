@@ -45,6 +45,11 @@ func (s *TimeChaosServer) SetTimeOffset(uid tasks.UID, pid tasks.PID, config tim
 		PodProcessMap: &s.podProcessMap,
 	}
 
+	// We assume the base time skew is not sensitive with process changes which
+	// means time skew will not return error when the task target pod changes container id & PID.
+	// We assume controller will never update tasks.
+	// According to the above, we do not handle error from s.manager.Apply like
+	// ErrDuplicateEntity(task UID).
 	err := s.manager.Create(uid, pid, &config, paras)
 	if err != nil {
 		if errors.Cause(err) == chaoserr.ErrDuplicateEntity {
