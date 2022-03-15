@@ -49,7 +49,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, errors.Wrapf(err, "parse container and volumePath %s", records[index].Id)
 	}
 
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
 	containerId := decodedContainer.ContainerId
 	if pbClient != nil {
@@ -125,7 +125,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("blockchaos recover", "record", records[index])
 
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
 	if pbClient != nil {
 		defer pbClient.Close()

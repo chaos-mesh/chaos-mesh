@@ -33,6 +33,8 @@ const chaosDaemonHelperCommand = "cdh"
 const ioemPeriodUs = 10000
 
 func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockChaosRequest) (*pb.ApplyBlockChaosResponse, error) {
+	log := s.getLoggerFromContext(ctx)
+
 	volumeName, err := normalizeVolumeName(ctx, req.VolumePath)
 	if err != nil {
 		log.Error(err, "normalize volume name", "volumePath", req.VolumePath)
@@ -94,7 +96,7 @@ func normalizeVolumeName(ctx context.Context, volumePath string) (string, error)
 		SetContext(ctx).
 		SetNS(1, bpm.MountNS).
 		EnableLocalMnt().
-		Build().
+		Build(ctx).
 		Output()
 	if err != nil {
 		return "", errors.Wrapf(err, "normalize volume name %s", volumePath)
@@ -127,6 +129,14 @@ func enableIOEMElevator(volumeName string) error {
 		}
 	}
 
+	if len(choosenScheduler) == 0 {
+		return errors.New("no ioem scheduler found")
+	}
+
+	if choosenScheduler[0] == '[' && choosenScheduler[len(choosenScheduler)-1] == ']' {
+		return nil
+	}
+
 	// it doesn't matter to pass any permission, because the file must exist
 	err = os.WriteFile(schedulerPath, []byte(choosenScheduler), 0000)
 	if err != nil {
@@ -137,6 +147,8 @@ func enableIOEMElevator(volumeName string) error {
 }
 
 func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
+
 	c, err := client.New()
 	if err != nil {
 		log.Error(err, "create chaos-driver client")
