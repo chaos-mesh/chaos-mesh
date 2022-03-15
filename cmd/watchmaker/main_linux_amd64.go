@@ -25,7 +25,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -65,7 +64,6 @@ func main() {
 		panic(fmt.Sprintf("error while creating zap logger: %v", err))
 	}
 	log := zapr.NewLogger(zapLog)
-	ptrace.RegisterLogger(log.WithName("ptrace"))
 
 	clkIds := strings.Split(clockIdsSlice, ",")
 	mask, err := utils.EncodeClkIds(clkIds)
