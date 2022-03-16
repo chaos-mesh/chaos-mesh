@@ -43,9 +43,25 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		return nil, err
 	}
 
+<<<<<<< HEAD
+=======
+	//todo get pid in the container，
+	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "ps -eo pid,comm | grep java | awk 'NR==1 {print $1}'").SetContext(ctx).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	output, err := processBuilder.Build().Output()
+	if err != nil {
+		return nil, err
+	}
+	log.Info("get java pid", "output", string(output))
+
+	javaPid, err := strconv.Atoi(strings.Replace(string(output), "\n", "", -1))
+	if err != nil {
+		return nil, err
+	}
+
+>>>>>>> fix get java pid
 	// todo: Need to write the BYTEMAN_HOME environment variable in bminstall.sh and bmsubmit.sh
 	// or do this in code ?
-	agentFile, err := os.Open("/usr/local/bin/byteman.tar.gz")
+	agentFile, err := os.Open("/usr/local/byteman.tar.gz")
 	if err != nil {
 		return nil, err
 	}
@@ -124,11 +140,15 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "l", filename)
 
 	//FIXME
+<<<<<<< HEAD
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetNS(pid, bpm.NetNS)
+=======
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome)
+>>>>>>> fix get java pid
 	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
 		return nil, err
 	}
-	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
 	output, err = processBuilder.Build().CombinedOutput()
 
 	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
@@ -174,11 +194,15 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "u", filename)
 
+<<<<<<< HEAD
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome).SetNS(pid, bpm.NetNS)
+=======
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome)
+>>>>>>> fix get java pid
 	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
 		return nil, err
 	}
-	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
 	output, err = processBuilder.Build().CombinedOutput()
 
 	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
