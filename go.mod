@@ -277,4 +277,4 @@ replace (
 	k8s.io/sample-controller => k8s.io/sample-controller v0.23.1
 )
 
-go 1.17
+go 1.18
