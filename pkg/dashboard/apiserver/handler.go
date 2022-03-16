@@ -37,7 +37,7 @@ var handlerModule = fx.Options(
 		event.NewService,
 		archive.NewService,
 		gcp.NewService,
-		template.NewService,
+		template.Bootstrap,
 	),
 	fx.Invoke(
 		// gcp should register at the first, because it registers a middleware
