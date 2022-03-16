@@ -17,6 +17,7 @@ package metrics
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/go-logr/logr"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
