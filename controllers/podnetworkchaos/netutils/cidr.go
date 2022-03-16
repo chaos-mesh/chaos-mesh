@@ -16,10 +16,11 @@
 package netutils
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -56,7 +57,7 @@ func ResolveCidr(name string) ([]v1alpha1.CidrAndPort, error) {
 		toResolve = host
 		port64, err := strconv.ParseUint(portStr, 10, 16)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse port %w", err)
+			return nil, errors.Errorf("parse port %w", err)
 		}
 		port = uint16(port64)
 	} else {
