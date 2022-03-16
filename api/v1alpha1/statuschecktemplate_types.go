@@ -86,5 +86,5 @@ func (in *StatusCheckTemplate) Default() {
 		Spec: in.StatusCheckSpec,
 	}
 	statusCheck.Default()
-	in.StatusCheckSpec = statusCheck.Spec
+	in.StatusCheckSpec = *statusCheck.Spec.DeepCopy()
 }
