@@ -15,7 +15,9 @@
 
 package bpm
 
-// Build builds the process
-func (b *ProcessBuilder) Build() *ManagedProcess {
+import "context"
+
+// Build builds the command
+func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 	panic("unimplemented")
 }

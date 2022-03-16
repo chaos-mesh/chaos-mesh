@@ -86,6 +86,7 @@ type IOChaosSpec struct {
 	// Percent defines the percentage of injection errors and provides a number from 0-100.
 	// default: 100.
 	// +optional
+	// +kubebuilder:default=100
 	Percent int `json:"percent,omitempty" webhook:"Percent"`
 
 	// VolumePath represents the mount path of injected volume
