@@ -18,11 +18,10 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -43,8 +42,6 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		return nil, err
 	}
 
-<<<<<<< HEAD
-=======
 	//todo get pid in the container，
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "ps -eo pid,comm | grep java | awk 'NR==1 {print $1}'").SetContext(ctx).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	output, err := processBuilder.Build().Output()
@@ -58,17 +55,16 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		return nil, err
 	}
 
->>>>>>> fix get java pid
 	// todo: Need to write the BYTEMAN_HOME environment variable in bminstall.sh and bmsubmit.sh
 	// or do this in code ?
-	agentFile, err := os.Open("/usr/local/byteman.tar.gz")
+	agentFile, err := os.Open("/usr/local/bin/byteman.tar.gz")
 	if err != nil {
 		return nil, err
 	}
 	//processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
-	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman.tar.gz").SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-	output, err := processBuilder.Build().CombinedOutput()
+	output, err = processBuilder.Build().CombinedOutput()
 	if err != nil {
 		return nil, err
 	}
@@ -85,11 +81,10 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 		log.Info("tar byteman.tar.gz", "output", string(output))
 	}
 
-	// Assuming the first process is the java process
-	bmInstallCmd := fmt.Sprintf(bmInstallCommandBackUp, req.Port, 1)
+	bmInstallCmd := fmt.Sprintf(bmInstallCommandBackUp, req.Port, javaPid)
 
 	//FIXME
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmInstallCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome)
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmInstallCmd).SetContext(ctx)
 	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
 		log.Info("setEnvsToProcess ", "err", err)
 		return nil, err
@@ -140,15 +135,11 @@ func (s *DaemonServer) InstallJVMRulesBackUp(ctx context.Context,
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "l", filename)
 
 	//FIXME
-<<<<<<< HEAD
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetNS(pid, bpm.NetNS)
-=======
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome)
->>>>>>> fix get java pid
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
 		return nil, err
 	}
-	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	output, err = processBuilder.Build().CombinedOutput()
 
 	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
@@ -178,9 +169,6 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 		return nil, err
 	}
 	ruleFile, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
 
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", "cat > "+filename).SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(ruleFile)
@@ -194,15 +182,11 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 
 	bmSubmitCmd := fmt.Sprintf(bmSubmitCommandBackUp, req.Port, "u", filename)
 
-<<<<<<< HEAD
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome).SetNS(pid, bpm.NetNS)
-=======
-	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx).SetEnv("BYTEMAN_HOME", bytemanHome)
->>>>>>> fix get java pid
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 	if err = setEnvsToProcess(processBuilder, strconv.Itoa(int(pid))); err != nil {
 		return nil, err
 	}
-	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	output, err = processBuilder.Build().CombinedOutput()
 
 	//output, err = s.crClient.ExecCommandByContainerID(ctx, req.ContainerId, []string{"sh", "-c", bmSubmitCmd})
@@ -216,10 +200,7 @@ func (s *DaemonServer) UninstallJVMRulesBackUp(ctx context.Context,
 
 	return &empty.Empty{}, nil
 }
-
-// FIXME maybe has some  problem
 func setEnvsToProcess(processBuilder *bpm.ProcessBuilder, pid string) error {
-	//todo ,get env by pid and set it to subprocess
 	bEnvs, err := util.GetEnvsByProcess(pid)
 	if err != nil {
 		return err
