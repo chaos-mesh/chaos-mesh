@@ -504,11 +504,12 @@ definitions:
           Duration represents the duration of the chaos action.
           +optional
         type: string
-      iops:
+      limit:
+        $ref: '#/definitions/v1alpha1.BlockLimitSpec'
         description: |-
-          IOPS defines the limit of IO frequency.
+          Limit defines the limit of IO frequency.
           +optional
-        type: integer
+        type: object
       mode:
         description: |-
           Mode defines the mode to run chaos action.
@@ -544,6 +545,14 @@ definitions:
       latency:
         description: Latency defines the latency of every io request.
         type: string
+    type: object
+  v1alpha1.BlockLimitSpec:
+    properties:
+      period:
+        type: string
+      quota:
+        description: Quota defines how many operations are permitted in a period
+        type: integer
     type: object
   v1alpha1.CPUStressor:
     properties:

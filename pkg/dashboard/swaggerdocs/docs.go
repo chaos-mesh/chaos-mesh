@@ -2777,9 +2777,10 @@ var doc = `{
                     "description": "Duration represents the duration of the chaos action.\n+optional",
                     "type": "string"
                 },
-                "iops": {
-                    "description": "IOPS defines the limit of IO frequency.\n+optional",
-                    "type": "integer"
+                "limit": {
+                    "description": "Limit defines the limit of IO frequency.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.BlockLimitSpec"
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
@@ -2815,6 +2816,18 @@ var doc = `{
                 "latency": {
                     "description": "Latency defines the latency of every io request.",
                     "type": "string"
+                }
+            }
+        },
+        "v1alpha1.BlockLimitSpec": {
+            "type": "object",
+            "properties": {
+                "period": {
+                    "type": "string"
+                },
+                "quota": {
+                    "description": "Quota defines how many operations are permitted in a period",
+                    "type": "integer"
                 }
             }
         },
