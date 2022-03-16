@@ -136,7 +136,6 @@ func (it *Service) parseHTTPTask(c *gin.Context) {
 // @Router /workflows [get]
 // @Failure 500 {object} utils.APIError
 func (it *Service) listWorkflows(c *gin.Context) {
-	it.logger.Info("ttttt")
 	namespace := c.Query("namespace")
 	if len(namespace) == 0 && !it.conf.ClusterScoped &&
 		len(it.conf.TargetNamespace) != 0 {
