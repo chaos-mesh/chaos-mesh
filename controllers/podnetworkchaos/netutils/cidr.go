@@ -57,7 +57,7 @@ func ResolveCidr(name string) ([]v1alpha1.CidrAndPort, error) {
 		toResolve = host
 		port64, err := strconv.ParseUint(portStr, 10, 16)
 		if err != nil {
-			return nil, errors.Errorf("parse port %w", err)
+			return nil, errors.Errorf("parse port %s", err)
 		}
 		port = uint16(port64)
 	} else {
