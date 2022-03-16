@@ -34,7 +34,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
@@ -47,7 +46,7 @@ type Impl struct {
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	if decodedContainer.PbClient != nil {
 		defer decodedContainer.PbClient.Close()
 	}
@@ -55,7 +54,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	service, err := pod.GetService(ctx, impl.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	service, err := impl.getService(ctx, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get service")
 		return v1alpha1.NotInjected, err
@@ -120,7 +119,7 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 }
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	if decodedContainer.PbClient != nil {
 		defer decodedContainer.PbClient.Close()
 	}
@@ -135,7 +134,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	dnschaos := obj.(*v1alpha1.DNSChaos)
 
 	// get dns server's ip used for chaos
-	service, err := pod.GetService(ctx, impl.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	service, err := impl.getService(ctx, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		impl.Log.Error(err, "fail to get service")
 		return v1alpha1.Injected, err
@@ -185,6 +184,20 @@ func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string
 	}
 
 	return nil
+}
+
+// getService get k8s service by service name
+func (impl *Impl) getService(ctx context.Context, namespace string, serviceName string) (*v1.Service, error) {
+	service := &v1.Service{}
+	err := impl.Client.Get(ctx, client.ObjectKey{
+		Namespace: namespace,
+		Name:      serviceName,
+	}, service)
+	if err != nil {
+		return nil, err
+	}
+
+	return service, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {

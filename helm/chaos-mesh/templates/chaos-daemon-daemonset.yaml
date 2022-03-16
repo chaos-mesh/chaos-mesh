@@ -45,7 +45,6 @@ spec:
       {{- if .Values.chaosDaemon.serviceAccount }}
       serviceAccountName: {{ .Values.chaosDaemon.serviceAccount }}
       {{- end }}
-      hostIPC: true
       hostPID: true
       {{- if .Values.chaosDaemon.priorityClassName }}
       priorityClassName: {{ .Values.chaosDaemon.priorityClassName }}

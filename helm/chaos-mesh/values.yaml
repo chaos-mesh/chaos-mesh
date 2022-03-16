@@ -440,6 +440,7 @@ webhook:
     - kernelchaos
     - stresschaos
     - awschaos
+    - azurechaos
     - gcpchaos
     - dnschaos
     - jvmchaos
@@ -449,6 +450,7 @@ webhook:
     - blockchaos
     - physicalmachinechaos
     - physicalmachine
+    - statuscheck
 
 bpfki:
   create: false

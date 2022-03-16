@@ -1211,7 +1211,6 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-daemon
-      hostIPC: true
       hostPID: true
       containers:
         - name: chaos-daemon
@@ -1857,6 +1856,27 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-azurechaos
+    failurePolicy: Fail
+    name: mazurechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - azurechaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
         path: /mutate-chaos-mesh-org-v1alpha1-gcpchaos
     failurePolicy: Fail
     name: mgcpchaos.kb.io
@@ -2041,6 +2061,27 @@ webhooks:
           - UPDATE
         resources:
           - physicalmachines
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /mutate-chaos-mesh-org-v1alpha1-statuscheck
+    failurePolicy: Fail
+    name: mstatuscheck.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - statuschecks
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1
@@ -2201,6 +2242,27 @@ webhooks:
           - UPDATE
         resources:
           - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-azurechaos
+    failurePolicy: Fail
+    name: vazurechaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - azurechaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -2390,6 +2452,27 @@ webhooks:
           - UPDATE
         resources:
           - physicalmachines
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-chaos-mesh-org-v1alpha1-statuscheck
+    failurePolicy: Fail
+    name: vstatuscheck.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - statuschecks
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1

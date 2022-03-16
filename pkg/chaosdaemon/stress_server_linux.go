@@ -23,7 +23,9 @@ import (
 	"time"
 
 	"github.com/containerd/cgroups"
+	cgroupsv2 "github.com/containerd/cgroups/v2"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	daemonCgroups "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
@@ -33,6 +35,7 @@ import (
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("Executing stressors", "request", req)
 
 	// cpuStressors
@@ -64,6 +67,7 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
+	log := s.getLoggerFromContext(ctx)
 	CpuPid, err := strconv.Atoi(req.CpuInstance)
 	if req.CpuInstance != "" && err != nil {
 		return nil, err
@@ -106,8 +110,41 @@ func (s *DaemonServer) CancelStressors(ctx context.Context,
 	return &empty.Empty{}, nil
 }
 
+func GetCGroupManagerForPID(pid int) (interface{}, error) {
+	if cgroups.Mode() == cgroups.Unified {
+		groupPath, err := cgroupsv2.PidGroupPath(pid)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error detecting groupPath")
+		}
+
+		cgroup2, err := cgroupsv2.LoadManager("/host-sys/fs/cgroup", groupPath)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error loading cgroup v2 manager")
+		}
+		return cgroup2, nil
+
+	}
+	// By default it's cgroup v1
+	cgroup1, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(pid))
+	if err != nil {
+		return nil, errors.Wrap(err, "Error loading cgroup v1 manager")
+	}
+	return cgroup1, nil
+}
+
+func AttachProcessToCGroup(pid int, control interface{}) error {
+	if cgroups.Mode() == cgroups.Unified {
+		var cgroup2 = control.(*cgroupsv2.Manager)
+		return cgroup2.AddProc(uint64(pid))
+	}
+	// By default it's cgroup v1
+	var cgroup1 = control.(cgroups.Cgroup)
+	return cgroup1.Add(cgroups.Process{Pid: pid})
+}
+
 func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*bpm.Process, error) {
+	log := s.getLoggerFromContext(ctx)
 	if req.CpuStressors == "" {
 		return nil, nil
 	}
@@ -115,7 +152,8 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
+
+	cgroupManager, err := GetCGroupManagerForPID(int(pid))
 	if err != nil {
 		return nil, err
 	}
@@ -125,15 +163,15 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}
 	log.Info("Start stress-ng successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.Uid)
 
-	if err = control.Add(cgroups.Process{Pid: proc.Pair.Pid}); err != nil {
+	if err = AttachProcessToCGroup(proc.Pair.Pid, cgroupManager); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill stress-ng failed", "request", req)
 		}
@@ -165,6 +203,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 
 func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*bpm.Process, error) {
+	log := s.getLoggerFromContext(ctx)
 	if req.MemoryStressors == "" {
 		return nil, nil
 	}
@@ -172,25 +211,27 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	control, err := cgroups.Load(daemonCgroups.V1, daemonCgroups.PidPath(int(pid)))
+
+	cgroupManager, err := GetCGroupManagerForPID(int(pid))
 	if err != nil {
 		return nil, err
 	}
+
 	processBuilder := bpm.DefaultProcessBuilder("memStress", strings.Fields(req.MemoryStressors)...).
 		EnablePause()
 
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 
-	proc, err := s.backgroundProcessManager.StartProcess(cmd)
+	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
 		return nil, err
 	}
 	log.Info("Start memStress successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.Uid)
 
-	if err = control.Add(cgroups.Process{Pid: proc.Pair.Pid}); err != nil {
+	if err = AttachProcessToCGroup(proc.Pair.Pid, cgroupManager); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill memStress failed", "request", req)
 		}
