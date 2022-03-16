@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +13,20 @@
 // limitations under the License.
 //
 
-package time
+package azure
 
 import (
-	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"context"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-var log = ctrl.Log.WithName("time")
+type SelectImpl struct{}
 
-// RegisterLogger registers a logger on time pkg
-func RegisterLogger(logger logr.Logger) {
-	log = logger
+func (impl *SelectImpl) Select(ctx context.Context, azureSelector *v1alpha1.AzureSelector) ([]*v1alpha1.AzureSelector, error) {
+	return []*v1alpha1.AzureSelector{azureSelector}, nil
+}
+
+func New() *SelectImpl {
+	return &SelectImpl{}
 }

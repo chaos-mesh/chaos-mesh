@@ -1,0 +1,203 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: statuschecks.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: StatusCheck
+    listKind: StatusCheckList
+    plural: statuschecks
+    singular: statuscheck
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a status check
+            properties:
+              duration:
+                description: Duration defines the duration of the whole status check
+                  if the number of failed execution does not exceed the failure threshold.
+                  Duration is available to both `Synchronous` and `Continuous` mode.
+                  A duration string is a possibly signed sequence of decimal numbers,
+                  each with optional fraction and a unit suffix, such as "300ms",
+                  "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
+                  "s", "m", "h".
+                type: string
+              failureThreshold:
+                default: 3
+                description: FailureThreshold defines the minimum consecutive failure
+                  for the status check to be considered failed.
+                minimum: 1
+                type: integer
+              http:
+                properties:
+                  body:
+                    type: string
+                  criteria:
+                    description: Criteria defines how to determine the result of the
+                      status check.
+                    properties:
+                      statusCode:
+                        description: StatusCode defines the expected http status code
+                          for the request. A statusCode string could be a single code
+                          (e.g. 200), or an inclusive range (e.g. 200-400, both `200`
+                          and `400` are included).
+                        type: string
+                    required:
+                    - statusCode
+                    type: object
+                  headers:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: "A Header represents the key-value pairs in an HTTP
+                      header. \n The keys should be in canonical form, as returned
+                      by CanonicalHeaderKey."
+                    type: object
+                  method:
+                    default: GET
+                    enum:
+                    - GET
+                    - POST
+                    type: string
+                  url:
+                    type: string
+                required:
+                - criteria
+                - url
+                type: object
+              intervalSeconds:
+                default: 10
+                description: IntervalSeconds defines how often (in seconds) to perform
+                  an execution of status check.
+                minimum: 1
+                type: integer
+              mode:
+                description: 'Mode defines the execution mode of the status check.
+                  Support type: Synchronous / Continuous'
+                enum:
+                - Synchronous
+                - Continuous
+                type: string
+              recordsHistoryLimit:
+                default: 100
+                description: RecordsHistoryLimit defines the number of record to retain.
+                maximum: 1000
+                minimum: 1
+                type: integer
+              successThreshold:
+                default: 1
+                description: SuccessThreshold defines the minimum consecutive successes
+                  for the status check to be considered successful. SuccessThreshold
+                  only works for `Synchronous` mode.
+                minimum: 1
+                type: integer
+              timeoutSeconds:
+                default: 1
+                description: TimeoutSeconds defines the number of seconds after which
+                  an execution of status check times out.
+                minimum: 1
+                type: integer
+              type:
+                default: HTTP
+                description: 'Type defines the specific status check type. Support
+                  type: HTTP'
+                enum:
+                - HTTP
+                type: string
+            required:
+            - type
+            type: object
+          status:
+            description: Most recently observed status of status check
+            properties:
+              completionTime:
+                description: CompletionTime represents time when the status check
+                  was completed.
+                format: date-time
+                type: string
+              conditions:
+                description: Conditions represents the latest available observations
+                  of a StatusCheck's current state.
+                items:
+                  properties:
+                    lastProbeTime:
+                      format: date-time
+                      type: string
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastProbeTime
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              count:
+                description: Count represents the total number of the status check
+                  executed.
+                format: int64
+                type: integer
+              records:
+                description: Records contains the history of the execution of StatusCheck.
+                items:
+                  properties:
+                    outcome:
+                      type: string
+                    startTime:
+                      format: date-time
+                      type: string
+                  required:
+                  - outcome
+                  - startTime
+                  type: object
+                type: array
+              startTime:
+                description: StartTime represents time when the status check started
+                  to execute.
+                format: date-time
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
