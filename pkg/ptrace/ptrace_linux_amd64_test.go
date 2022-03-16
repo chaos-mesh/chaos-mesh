@@ -25,12 +25,11 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/go-logr/zapr"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
@@ -51,10 +50,6 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 
 	By("register logger")
-	zapLog, err := zap.NewDevelopment()
-	Expect(err).NotTo(HaveOccurred())
-	log := zapr.NewLogger(zapLog)
-	RegisterLogger(log)
 
 	close(done)
 })
@@ -63,6 +58,9 @@ var _ = BeforeSuite(func(done Done) {
 // http://onsi.github.io/ginkgo to learn more.
 
 var _ = Describe("PTrace", func() {
+
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).NotTo(HaveOccurred())
 
 	var t *timer.Timer
 	var program *TracedProgram
@@ -75,7 +73,7 @@ var _ = Describe("PTrace", func() {
 
 		time.Sleep(time.Millisecond)
 
-		program, err = Trace(t.Pid())
+		program, err = Trace(t.Pid(), logger)
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 	})
 
@@ -101,7 +99,7 @@ var _ = Describe("PTrace", func() {
 	})
 
 	It("double trace should get error", func() {
-		_, err := Trace(t.Pid())
+		_, err := Trace(t.Pid(), logger)
 		Expect(err).Should(HaveOccurred())
 	})
 
@@ -141,7 +139,7 @@ var _ = Describe("PTrace", func() {
 		err := program.Detach()
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
-		program, err = Trace(t.Pid())
+		program, err = Trace(t.Pid(), logger)
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 	})
 
@@ -153,7 +151,7 @@ var _ = Describe("PTrace", func() {
 		time.Sleep(time.Millisecond)
 
 		pid := p.Process.Pid
-		program, err := Trace(pid)
+		program, err := Trace(pid, logger)
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 		err = program.Detach()
