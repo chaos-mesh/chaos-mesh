@@ -49,9 +49,9 @@ type BlockChaosSpec struct {
 	// +optional
 	Delay *BlockDelaySpec `json:"delay,omitempty"`
 
-	// IOPS defines the limit of IO frequency.
+	// Limit defines the limit of IO frequency.
 	// +optional
-	IOPS int `json:"iops,omitempty"`
+	Limit BlockLimitSpec `json:"limit,omitempty"`
 
 	ContainerNodeVolumePathSelector `json:",inline"`
 
@@ -70,6 +70,14 @@ type BlockDelaySpec struct {
 
 	// +optional
 	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
+}
+
+// BlockLimitSpec describes the block delay specification
+type BlockLimitSpec struct {
+	// Quota defines how many operations are permitted in a period
+	Quota uint64 `json:"quota,omitempty"`
+
+	Period string `json:"period,omitempty" webhook:"Duration"`
 }
 
 // ContainerNodeVolumePathSelector is the selector to select a node and a PV on it

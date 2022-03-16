@@ -30,8 +30,6 @@ import (
 
 const chaosDaemonHelperCommand = "cdh"
 
-const ioemPeriodUs = 10000
-
 func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockChaosRequest) (*pb.ApplyBlockChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 
@@ -66,10 +64,8 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 	}
 
 	if req.Action == pb.ApplyBlockChaosRequest_Limit {
-		// 1e6 / period_us * quota = IOPS, which means
-		// quota = IOPS * period_us / 1e6
-		quota := uint64(req.Iops * ioemPeriodUs / 1e6)
-		id, err := c.InjectIOEMLimit(volumePath, 0, uint(pid), ioemPeriodUs, quota)
+		log.Info("Injecting IOEM Limit", "quota", req.Limit.Quota, "period_us", req.Limit.PeriodUs, "volumePath", volumePath)
+		id, err := c.InjectIOEMLimit(volumePath, 0, uint(pid), req.Limit.PeriodUs, req.Limit.Quota)
 		if err != nil {
 			log.Error(err, "inject ioem limit")
 			return nil, err
@@ -78,6 +74,8 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 			InjectionId: int32(id),
 		}, nil
 	} else if req.Action == pb.ApplyBlockChaosRequest_Delay {
+		log.Info("Injecting IOEM Delay", "delay", req.Delay.Delay, "jitter", req.Delay.Jitter, "corr", req.Delay.Correlation)
+
 		id, err := c.InjectIOEMDelay(volumePath, 0, uint(pid), int64(req.Delay.Delay), int64(req.Delay.Jitter), uint32(req.Delay.Correlation))
 		if err != nil {
 			log.Error(err, "inject ioem delay")
@@ -156,6 +154,7 @@ func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlo
 		return nil, err
 	}
 
+	log.Info("Recovering IOEM", "injectionId", req.InjectionId)
 	err = c.Recover(int(req.InjectionId))
 	if err != nil {
 		log.Error(err, "recover injection", "id", req.InjectionId)

@@ -71,9 +71,17 @@ spec:
               duration:
                 description: Duration represents the duration of the chaos action.
                 type: string
-              iops:
-                description: IOPS defines the limit of IO frequency.
-                type: integer
+              limit:
+                description: Limit defines the limit of IO frequency.
+                properties:
+                  period:
+                    type: string
+                  quota:
+                    description: Quota defines how many operations are permitted in
+                      a period
+                    format: int64
+                    type: integer
+                type: object
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'

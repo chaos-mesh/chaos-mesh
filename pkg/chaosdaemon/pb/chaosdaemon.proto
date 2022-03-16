@@ -283,7 +283,7 @@ message ApplyBlockChaosRequest {
     Delay = 1;
   }
   Action action = 3;
-  int32 iops = 4;
+  BlockLimitSpec limit = 4;
   BlockDelaySpec delay = 5;
   bool enterNS = 6;
 }
@@ -292,6 +292,11 @@ message BlockDelaySpec {
   int32 delay = 1;
   float correlation = 2;
   int32 jitter = 3;
+}
+
+message BlockLimitSpec {
+  uint64 quota = 1;
+  uint64 period_us = 2;
 }
 
 message ApplyBlockChaosResponse {
