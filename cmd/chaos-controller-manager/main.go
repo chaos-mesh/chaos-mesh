@@ -191,7 +191,7 @@ func Run(params RunParams) error {
 		setupLog.Error(err, "invalid environment configuration")
 		os.Exit(1)
 	}
-	configWatcher, err := watcher.New(*ccfg.ControllerCfg.WatcherConfig, metricsCollector)
+	configWatcher, err := watcher.New(*ccfg.ControllerCfg.WatcherConfig, metricsCollector, params.Logger.WithName("config-watcher"))
 	if err != nil {
 		setupLog.Error(err, "unable to create config watcher")
 		os.Exit(1)

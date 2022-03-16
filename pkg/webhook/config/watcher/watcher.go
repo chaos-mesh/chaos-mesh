@@ -17,6 +17,7 @@ package watcher
 
 import (
 	"context"
+	"github.com/go-logr/logr"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -30,14 +31,12 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 )
 
-var log = ctrl.Log.WithName("inject-webhook")
 var restClusterConfig = ctrlconfig.GetConfig
 var kubernetesNewForConfig = kubernetes.NewForConfig
 
@@ -54,10 +53,11 @@ type K8sConfigMapWatcher struct {
 	Config
 	client  k8sv1.CoreV1Interface
 	metrics *metrics.ChaosControllerManagerMetricsCollector
+	logger  logr.Logger
 }
 
 // New creates a new K8sConfigMapWatcher
-func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*K8sConfigMapWatcher, error) {
+func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector, logger logr.Logger) (*K8sConfigMapWatcher, error) {
 	c := K8sConfigMapWatcher{Config: cfg, metrics: metrics}
 	if strings.TrimSpace(c.TemplateNamespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md
@@ -72,14 +72,14 @@ func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*
 		ns := strings.TrimSpace(string(nsBytes))
 		if ns != "" {
 			c.TemplateNamespace = ns
-			log.Info("Inferred ConfigMap",
+			logger.Info("Inferred ConfigMap",
 				"template namespace", c.TemplateNamespace, "filepath", serviceAccountNamespaceFilePath)
 		} else {
 			return nil, errors.New("can not found namespace. maybe you should specify --template-namespace if you are running outside of kubernetes")
 		}
 	}
 
-	log.Info("Creating Kubernetes client to talk to the api-server")
+	logger.Info("Creating Kubernetes client to talk to the api-server")
 	k8sConfig, err := restClusterConfig()
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector) (*
 	if err = validate(&c); err != nil {
 		return nil, errors.Wrap(err, "validate K8sConfigMapWatcher")
 	}
-	log.Info("Created ConfigMap watcher",
+	logger.Info("Created ConfigMap watcher",
 		"apiserver", k8sConfig.Host, "template namespaces", c.TemplateNamespace,
 		"template labels", c.TemplateLabels, "config labels", c.ConfigLabels)
 	return &c, nil
@@ -121,7 +121,7 @@ func validate(c *K8sConfigMapWatcher) error {
 
 // Watch watches for events impacting watched ConfigMaps and emits their events across a channel
 func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan struct{}) error {
-	log.Info("Watching for ConfigMaps for changes",
+	c.logger.Info("Watching for ConfigMaps for changes",
 		"template namespace", c.TemplateNamespace, "labels", c.ConfigLabels)
 	templateWatcher, err := c.client.ConfigMaps(c.TemplateNamespace).Watch(
 		// FIXME: get context from parameter
@@ -157,13 +157,13 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			// channel may closed caused by HTTP timeout, should restart watcher
 			// detail at https://github.com/kubernetes/client-go/issues/334
 			if !ok {
-				log.V(5).Info("channel has closed, will restart watcher")
+				c.logger.V(5).Info("channel has closed, will restart watcher")
 				return ErrWatchChannelClosed
 			}
 			if e.Type == watch.Error {
 				return apierrs.FromObject(e.Object)
 			}
-			log.V(3).Info("type", e.Type, "kind", e.Object.GetObjectKind())
+			c.logger.V(3).Info("type", e.Type, "kind", e.Object.GetObjectKind())
 			switch e.Type {
 			case watch.Added:
 				fallthrough
@@ -171,23 +171,23 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 				fallthrough
 			case watch.Deleted:
 				// signal reconciliation of all InjectionConfigs
-				log.V(3).Info("Signalling event received from watch channel",
+				c.logger.V(3).Info("Signalling event received from watch channel",
 					"type", e.Type, "kind", e.Object.GetObjectKind())
 				notifyMe <- struct{}{}
 			default:
-				log.Error(nil, "got unsupported event! skipping", "type", e.Type, "kind", e.Object.GetObjectKind())
+				c.logger.Error(nil, "got unsupported event! skipping", "type", e.Type, "kind", e.Object.GetObjectKind())
 			}
 		case e, ok := <-configWatcher.ResultChan():
 			// channel may closed caused by HTTP timeout, should restart watcher
 			// detail at https://github.com/kubernetes/client-go/issues/334
 			if !ok {
-				log.V(5).Info("channel has closed, will restart watcher")
+				c.logger.V(5).Info("channel has closed, will restart watcher")
 				return ErrWatchChannelClosed
 			}
 			if e.Type == watch.Error {
 				return apierrs.FromObject(e.Object)
 			}
-			log.V(3).Info("type", e.Type, "kind", e.Object.GetObjectKind())
+			c.logger.V(3).Info("type", e.Type, "kind", e.Object.GetObjectKind())
 			switch e.Type {
 			case watch.Added:
 				fallthrough
@@ -195,15 +195,15 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 				fallthrough
 			case watch.Deleted:
 				// signal reconciliation of all InjectionConfigs
-				log.V(3).Info("Signalling event received from watch channel",
+				c.logger.V(3).Info("Signalling event received from watch channel",
 					"type", e.Type, "kind", e.Object.GetObjectKind())
 				notifyMe <- struct{}{}
 			default:
-				log.Error(nil, "got unsupported event! skipping", "type", e.Type, "kind", e.Object.GetObjectKind())
+				c.logger.Error(nil, "got unsupported event! skipping", "type", e.Type, "kind", e.Object.GetObjectKind())
 			}
 			// events! yay!
 		case <-stopCh:
-			log.V(2).Info("Stopping configmap watcher, context indicated we are done")
+			c.logger.V(2).Info("Stopping configmap watcher, context indicated we are done")
 			// clean up, we cancelled the context, so stop the watch
 			return nil
 		}
@@ -227,7 +227,7 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 		return nil, err
 	}
 	if len(templates) == 0 || len(configs) == 0 {
-		log.Info("cannot get injection configs")
+		c.logger.Info("cannot get injection configs")
 		return nil, nil
 	}
 
@@ -238,7 +238,7 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 	for _, conf := range configs {
 		temp, ok := templates[conf.Template]
 		if !ok {
-			log.Error(errors.New("cannot find the specified template"), "",
+			c.logger.Error(errors.New("cannot find the specified template"), "",
 				"template", conf.Template, "namespace", conf.Namespace, "config", conf.Name)
 			if c.metrics != nil {
 				c.metrics.TemplateNotExist.WithLabelValues(conf.Namespace, conf.Template).Inc()
@@ -247,21 +247,21 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 		}
 		yamlTemp, err := template.New("").Parse(temp)
 		if err != nil {
-			log.Error(err, "failed to parse template",
+			c.logger.Error(err, "failed to parse template",
 				"template", conf.Template, "config", conf.Name)
 			continue
 		}
 
 		result, err := renderTemplateWithArgs(yamlTemp, conf.Arguments)
 		if err != nil {
-			log.Error(err, "failed to render template",
+			c.logger.Error(err, "failed to render template",
 				"template", conf.Template, "config", conf.Name)
 			continue
 		}
 
 		var injectConfig config.InjectionConfig
 		if err := yaml.Unmarshal(result, &injectConfig); err != nil {
-			log.Error(err, "failed to unmarshal injection config", "injection config", string(result))
+			c.logger.Error(err, "failed to unmarshal injection config", "injection config", string(result))
 			continue
 		}
 
@@ -281,7 +281,7 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 
 // GetTemplates returns a map of common templates
 func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
-	log.Info("Fetching Template Configs...")
+	c.logger.Info("Fetching Template Configs...")
 	templateList, err := c.client.ConfigMaps(c.TemplateNamespace).List(
 		// FIXME: get context from parameter
 		context.TODO(),
@@ -292,7 +292,7 @@ func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
 		return nil, err
 	}
 
-	log.Info("Fetched templates", "templates count", len(templateList.Items))
+	c.logger.Info("Fetched templates", "templates count", len(templateList.Items))
 	templates := make(map[string]string, len(templateList.Items))
 	for _, temp := range templateList.Items {
 		templates[temp.Name] = temp.Data[templateItemKey]
@@ -305,7 +305,7 @@ func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
 
 // GetConfigs returns the list of template args config
 func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
-	log.Info("Fetching Configs...")
+	c.logger.Info("Fetching Configs...")
 	// List all the configs with the required label selector
 	configList, err := c.client.ConfigMaps("").List(
 		// FIXME: get context from parmeter
@@ -317,7 +317,7 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 		return nil, err
 	}
 
-	log.Info("Fetched configs", "configs count", len(configList.Items))
+	c.logger.Info("Fetched configs", "configs count", len(configList.Items))
 	if c.metrics != nil {
 		c.metrics.ConfigTemplates.Reset()
 	}
@@ -327,7 +327,7 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 		for _, payload := range item.Data {
 			conf, err := config.LoadTemplateArgs(strings.NewReader(payload))
 			if err != nil {
-				log.Error(err, "failed to load template args", "payload", payload)
+				c.logger.Error(err, "failed to load template args", "payload", payload)
 				if c.metrics != nil {
 					c.metrics.TemplateLoadError.Inc()
 				}
@@ -338,7 +338,7 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 				configSet[conf.Namespace] = make(map[string]struct{})
 			}
 			if _, ok := configSet[conf.Namespace][conf.Name]; ok {
-				log.Error(errors.New("duplicate config name"), "",
+				c.logger.Error(errors.New("duplicate config name"), "",
 					"namespace", conf.Namespace, "name", conf.Name)
 				if c.metrics != nil {
 					c.metrics.ConfigNameDuplicate.WithLabelValues(conf.Namespace, conf.Name).Inc()
