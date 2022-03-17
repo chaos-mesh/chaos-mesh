@@ -19,7 +19,6 @@ import (
 	"context"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
@@ -40,7 +39,7 @@ type Collector struct {
 }
 
 // NewCollector initializes metrics and collector
-func NewCollector(experimentStore core.ExperimentStore, scheduleStore core.ScheduleStore, workflowStore core.WorkflowStore) *Collector {
+func NewCollector(log logr.Logger, experimentStore core.ExperimentStore, scheduleStore core.ScheduleStore, workflowStore core.WorkflowStore) *Collector {
 	return &Collector{
 		log:             NewDefaultZapLogger(),
 		experimentStore: experimentStore,
@@ -157,4 +156,3 @@ func Register(params Params) {
 	collector := NewCollector(params.ExperimentStore, params.ScheduleStore, params.WorkflowStore)
 	params.Registry.MustRegister(collector)
 }
-
