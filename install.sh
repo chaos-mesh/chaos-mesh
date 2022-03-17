@@ -1225,7 +1225,8 @@ spec:
             - --grpc-port
             - !!str 31767
             - --pprof
-          env:            
+          env:
+            
             - name: TZ
               value: ${timezone}
           securityContext:
@@ -1312,7 +1313,7 @@ spec:
               memory: 256Mi
           command:
             - /usr/local/bin/chaos-dashboard
-          env:            
+          env:
             - name: CLEAN_SYNC_PERIOD
               value: "12h"
             - name: DATABASE_DATASOURCE
@@ -1422,7 +1423,7 @@ spec:
               memory: 256Mi
         command:
           - /usr/local/bin/chaos-controller-manager
-        env:          
+        env:
           - name: METRICS_PORT
             value: "10080"
           - name: WEBHOOK_PORT

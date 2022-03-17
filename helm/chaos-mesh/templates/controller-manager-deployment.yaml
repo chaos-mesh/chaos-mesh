@@ -62,7 +62,7 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
-          {{- include "chaos-mesh.helpers.listEnvVars" .Values.controllerManager | indent 10 }}
+          {{- include "chaos-mesh.helpers.listEnvVars" .Values.controllerManager | trim | nindent 10 }}
           - name: NAMESPACE
             valueFrom:
               fieldRef:
