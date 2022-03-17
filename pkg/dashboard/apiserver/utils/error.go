@@ -16,6 +16,7 @@
 package utils
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"fmt"
 	"net/http"
 	"strings"
@@ -67,7 +68,7 @@ func SetAPIError(c *gin.Context, err *errorx.Error) {
 		FullText: fmt.Sprintf("%+v", err),
 	}
 
-	Log.Error(err.Cause(), typeName)
+	log.L().Error(err.Cause(), typeName)
 	c.AbortWithStatusJSON(code, &apiError)
 }
 
