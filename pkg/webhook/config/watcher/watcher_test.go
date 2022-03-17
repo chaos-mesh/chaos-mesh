@@ -24,9 +24,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 var _ = Describe("webhook config watcher", func() {
+	rootLogger, err := log.NewDefaultZapLogger()
+	Expect(err).ShouldNot(HaveOccurred())
 	Context("New", func() {
 		It("should return InClusterConfig error", func() {
 			old := restClusterConfig
@@ -37,7 +41,7 @@ var _ = Describe("webhook config watcher", func() {
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
-			configWatcher, err := New(*config, nil)
+			configWatcher, err := New(*config, nil, rootLogger)
 			Expect(configWatcher).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("InClusterConfig"))
@@ -53,7 +57,7 @@ var _ = Describe("webhook config watcher", func() {
 			}
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
-			configWatcher, err := New(*config, nil)
+			configWatcher, err := New(*config, nil, rootLogger)
 			Expect(configWatcher).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("NewForConfig"))
@@ -64,7 +68,7 @@ var _ = Describe("webhook config watcher", func() {
 
 			config := NewConfig()
 			config.TemplateNamespace = "testNamespace"
-			configWatcher, err := New(*config, nil)
+			configWatcher, err := New(*config, nil, rootLogger)
 			Expect(configWatcher).ToNot(BeNil())
 			Expect(err).To(BeNil())
 		})

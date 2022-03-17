@@ -17,13 +17,13 @@ package watcher
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
