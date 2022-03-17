@@ -20,10 +20,6 @@ import { default as MuiCheckbox, CheckboxProps as MuiCheckboxProps } from '@mui/
 
 export type CheckboxProps = MuiCheckboxProps & {
   /**
-   * The name of ths input field when using it in a form.
-   */
-  name?: string
-  /**
    * The label of the checkbox, would be shown on the top of the checkbox.
    */
   label: string
@@ -39,24 +35,17 @@ export type CheckboxProps = MuiCheckboxProps & {
   errorMessage?: string
 }
 
-export default (props: CheckboxProps) => {
+export default ({ label, helperText, errorMessage, ...rest }: CheckboxProps) => {
   return (
     <div>
-      <FormControl error={props.errorMessage !== ''} required={true}>
-        <FormLabel component="legend">{props.label}</FormLabel>
+      <FormControl error={errorMessage !== ''} required={true}>
+        <FormLabel component="legend">{label}</FormLabel>
         <FormControlLabel
-          control={
-            <MuiCheckbox
-              checked={props.checked}
-              onChange={props.onChange}
-              disabled={props.disabled}
-              inputProps={{ name: props.name }}
-            ></MuiCheckbox>
-          }
-          label={props.helperText || props.label}
+          control={<MuiCheckbox {...rest}></MuiCheckbox>}
+          label={helperText || label}
         ></FormControlLabel>
 
-        <FormHelperText>{props.errorMessage}</FormHelperText>
+        <FormHelperText>{errorMessage}</FormHelperText>
       </FormControl>
     </div>
   )
