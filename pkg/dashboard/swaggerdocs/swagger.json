@@ -2372,9 +2372,6 @@
                     "description": "the entry node name",
                     "type": "string"
                 },
-                "finish_time": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -2411,9 +2408,6 @@
                 },
                 "entry": {
                     "description": "the entry node name",
-                    "type": "string"
-                },
-                "finish_time": {
                     "type": "string"
                 },
                 "id": {

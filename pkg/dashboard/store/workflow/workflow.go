@@ -107,7 +107,7 @@ func (it *WorkflowStore) DeleteByUIDs(ctx context.Context, uids []string) error 
 	return it.db.Where("uid IN (?)", uids).Unscoped().Delete(core.WorkflowEntity{}).Error
 }
 
-func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Duration) error {
+func (it *WorkflowStore) DeleteByEndTime(ctx context.Context, ttl time.Duration) error {
 	workflows, err := it.ListMeta(context.Background(), "", "", true)
 
 	if err != nil {
@@ -117,7 +117,14 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 	nowTime := time.Now()
 
 	for _, wfl := range workflows {
-		if wfl.FinishTime.Add(ttl).Before(nowTime) {
+
+		endTime, err := time.Parse(time.RFC3339, wfl.EndTime)
+
+		if err != nil {
+			return err
+		}
+
+		if endTime.Add(ttl).Before(nowTime) {
 			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(*it).Error; err != nil {
 				return err
 			}
@@ -130,7 +137,7 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
 	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "end_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
 	}
 	return nil
@@ -139,7 +146,7 @@ func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name str
 func (it *WorkflowStore) MarkAsArchivedWithUID(ctx context.Context, uid string) error {
 	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("uid = ? AND archived = ?", uid, false).
-		Updates(map[string]interface{}{"archived": true}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "end_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
 	}
 	return nil

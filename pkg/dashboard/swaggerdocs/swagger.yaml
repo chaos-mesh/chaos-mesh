@@ -190,8 +190,6 @@ definitions:
       entry:
         description: the entry node name
         type: string
-      finish_time:
-        type: string
       id:
         type: integer
       kube_object:
@@ -217,8 +215,6 @@ definitions:
         type: string
       entry:
         description: the entry node name
-        type: string
-      finish_time:
         type: string
       id:
         type: integer

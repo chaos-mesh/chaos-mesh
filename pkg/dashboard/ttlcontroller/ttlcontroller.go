@@ -88,5 +88,5 @@ func (c *Controller) runWorker() {
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
 	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
 	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
-	c.workflow.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
+	c.workflow.DeleteByEndTime(ctx, c.ttlconfig.WorkflowTTL)
 }
