@@ -23,11 +23,11 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
@@ -37,7 +37,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
 )
 
-var log = ctrl.Log.WithName("pod-selector")
 var ErrNoPodSelected = errors.New("no pod is selected")
 
 type SelectImpl struct {
@@ -98,6 +97,7 @@ func New(params Params) *SelectImpl {
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and SelectorMode
+// Deprecated: use pod.SelectImpl as instead
 func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
@@ -159,7 +159,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 	for ns, names := range spec.Pods {
 		if !clusterScoped {
 			if targetNamespace != ns {
-				log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
+				log.L().WithName("pod-selector").Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 				continue
 			}
 		}
@@ -186,7 +186,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 			}
 
 			if apierrors.IsNotFound(err) {
-				log.Error(err, "Pod is not found", "namespace", ns, "pod name", name)
+				log.L().WithName("pod-selector").Info("pod is not found, skip it", "namespace", ns, "pod name", name)
 				continue
 			}
 
@@ -197,25 +197,6 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 }
 
 //revive:enable:flag-parameter
-
-// GetService get k8s service by service name
-func GetService(ctx context.Context, c client.Client, namespace, controllerNamespace string, serviceName string) (*v1.Service, error) {
-	// use the environment value if namespace is empty
-	if len(namespace) == 0 {
-		namespace = controllerNamespace
-	}
-
-	service := &v1.Service{}
-	err := c.Get(ctx, client.ObjectKey{
-		Namespace: namespace,
-		Name:      serviceName,
-	}, service)
-	if err != nil {
-		return nil, err
-	}
-
-	return service, nil
-}
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
 func CheckPodMeetSelector(ctx context.Context, c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (bool, error) {
