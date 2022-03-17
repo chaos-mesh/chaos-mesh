@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,24 +16,24 @@
 package v1alpha1
 
 import (
+	"fmt"
 	"reflect"
 
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
-type EbsVolume string
-type AWSDeviceName string
+type DiskName string
+type LUN int
 
-func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *DiskName) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	awsChaos := root.(*AWSChaos)
-	if awsChaos.Spec.Action == DetachVolume {
+	azurechaos := root.(*AzureChaos)
+	if azurechaos.Spec.Action == AzureDiskDetach {
 		if in == nil {
-			err := errors.Wrapf(errInvalidValue, "the ID of EBS volume is required on %s action", awsChaos.Spec.Action)
+			err := fmt.Errorf("the name of data disk should not be empty on %s action", azurechaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -41,13 +41,13 @@ func (in *EbsVolume) Validate(root interface{}, path *field.Path) field.ErrorLis
 	return allErrs
 }
 
-func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.ErrorList {
+func (in *LUN) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	awsChaos := root.(*AWSChaos)
-	if awsChaos.Spec.Action == DetachVolume {
+	azurechaos := root.(*AzureChaos)
+	if azurechaos.Spec.Action == AzureDiskDetach {
 		if in == nil {
-			err := errors.Wrapf(errInvalidValue, "the name of device is required on %s action", awsChaos.Spec.Action)
+			err := fmt.Errorf("the LUN of data disk should not be empty on %s action", azurechaos.Spec.Action)
 			allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 		}
 	}
@@ -55,17 +55,17 @@ func (in *AWSDeviceName) Validate(root interface{}, path *field.Path) field.Erro
 	return allErrs
 }
 
-// Validate validates aws chaos actions
-func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
+// Validate validates the azure chaos actions
+func (in *AzureChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	// in cannot be nil
 	switch *in {
-	case Ec2Stop, DetachVolume:
-	case Ec2Restart:
+	case AzureVmStop, AzureDiskDetach:
+	case AzureVmRestart:
 	default:
-		err := errors.WithStack(errUnknownAction)
-		log.Error(err, "Wrong AWSChaos Action type")
+		err := fmt.Errorf("azurechaos have unknown action type")
+		log.Error(err, "Wrong AzureChaos Action type")
 
 		allErrs = append(allErrs, field.Invalid(path, in, err.Error()))
 	}
@@ -73,6 +73,6 @@ func (in *AWSChaosAction) Validate(root interface{}, path *field.Path) field.Err
 }
 
 func init() {
-	genericwebhook.Register("EbsVolume", reflect.PtrTo(reflect.TypeOf(EbsVolume(""))))
-	genericwebhook.Register("AWSDeviceName", reflect.PtrTo(reflect.TypeOf(AWSDeviceName(""))))
+	genericwebhook.Register("DiskName", reflect.PtrTo(reflect.TypeOf(DiskName(""))))
+	genericwebhook.Register("LUN", reflect.PtrTo(reflect.TypeOf(LUN(0))))
 }
