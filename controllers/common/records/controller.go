@@ -90,6 +90,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				return ctrl.Result{}, nil
 			}
 
+			if len(targets) == 0 {
+				r.Log.Info("no target has been selected")
+				r.Recorder.Event(obj, recorder.Failed{
+					Activity: "select targets",
+					Err:      "no target has been selected",
+				})
+				return ctrl.Result{}, nil
+			}
+
 			for _, target := range targets {
 				records = append(records, &v1alpha1.Record{
 					Id:          target.Id(),
@@ -100,15 +109,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
-	}
-
-	if len(records) == 0 {
-		r.Log.Info("no record has been selected")
-		r.Recorder.Event(obj, recorder.Failed{
-			Activity: "select targets",
-			Err:      "no record has been selected",
-		})
-		return ctrl.Result{}, nil
 	}
 
 	needRetry := false
