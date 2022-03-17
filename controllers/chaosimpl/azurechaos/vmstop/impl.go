@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,18 @@
 // limitations under the License.
 //
 
-package nodereset
+package vmstop
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/gcpchaos/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/azurechaos/utils"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 )
 
@@ -37,41 +37,65 @@ type Impl struct {
 }
 
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	gcpchaos, ok := chaos.(*v1alpha1.GCPChaos)
+	azurechaos, ok := chaos.(*v1alpha1.AzureChaos)
 	if !ok {
-		err := errors.New("chaos is not gcpchaos")
-		impl.Log.Error(err, "chaos is not GCPChaos", "chaos", chaos)
-		return v1alpha1.NotInjected, err
-	}
-	computeService, err := utils.GetComputeService(ctx, impl.Client, gcpchaos)
-	if err != nil {
-		impl.Log.Error(err, "fail to get the compute service")
+		err := errors.New("chaos is not azurechaos")
+		impl.Log.Error(err, "chaos is not azureChaos", "chaos", chaos)
 		return v1alpha1.NotInjected, err
 	}
 
-	var selected v1alpha1.GCPSelector
+	vmClient, err := utils.GetVMClient(ctx, impl.Client, azurechaos)
+	if err != nil {
+		impl.Log.Error(err, "fail to get the vm client")
+		return v1alpha1.NotInjected, err
+	}
+
+	var selected v1alpha1.AzureSelector
+	err = json.Unmarshal([]byte(records[index].Id), &selected)
+	if err != nil {
+		impl.Log.Error(err, "selector unmarshal error")
+		return v1alpha1.NotInjected, err
+	}
+
+	_, err = vmClient.PowerOff(ctx, selected.ResourceGroupName, selected.VMName, nil)
+	if err != nil {
+		impl.Log.Error(err, "fail to power off the vm")
+		return v1alpha1.NotInjected, err
+	}
+
+	return v1alpha1.Injected, nil
+}
+func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
+	azurechaos, ok := chaos.(*v1alpha1.AzureChaos)
+	if !ok {
+		err := errors.New("chaos is not azurechaos")
+		impl.Log.Error(err, "chaos is not AzureChaos", "chaos", chaos)
+		return v1alpha1.Injected, err
+	}
+	vmClient, err := utils.GetVMClient(ctx, impl.Client, azurechaos)
+	if err != nil {
+		impl.Log.Error(err, "fail to get the vm client")
+		return v1alpha1.Injected, err
+	}
+
+	var selected v1alpha1.AzureSelector
 	err = json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal the selector")
 		return v1alpha1.NotInjected, err
 	}
 
-	_, err = computeService.Instances.Reset(selected.Project, selected.Zone, selected.Instance).Do()
+	_, err = vmClient.Start(ctx, selected.ResourceGroupName, selected.VMName)
 	if err != nil {
-		impl.Log.Error(err, "fail to reset the instance")
-		return v1alpha1.NotInjected, err
+		impl.Log.Error(err, "fail to start the vm")
+		return v1alpha1.Injected, err
 	}
-
-	return v1alpha1.Injected, nil
-}
-
-func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, chaos v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	return v1alpha1.NotInjected, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *Impl {
 	return &Impl{
 		Client: c,
-		Log:    log.WithName("nodereset"),
+		Log:    log.WithName("vmstop"),
 	}
 }
