@@ -1226,7 +1226,6 @@ spec:
             - !!str 31767
             - --pprof
           env:
-            
             - name: TZ
               value: ${timezone}
           securityContext:
