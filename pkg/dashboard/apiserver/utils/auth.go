@@ -18,6 +18,7 @@ package utils
 import (
 	"net/http"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/gin-gonic/gin"
 	authorizationv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,8 +27,6 @@ import (
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
-
-var log = Log.WithName("auth middleware")
 
 func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
 	if mockResult := mock.On("AuthMiddleware"); mockResult != nil {
@@ -48,7 +47,7 @@ func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
 	if ns == "" && !config.ClusterScoped && config.TargetNamespace != "" {
 		ns = config.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		log.L().WithName("auth middleware").V(1).Info("Replace query namespace with", ns)
 	}
 
 	verb := "list"
