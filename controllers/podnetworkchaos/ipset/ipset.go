@@ -25,7 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -57,12 +57,8 @@ func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) 
 }
 
 // FlushIPSets makes grpc calls to chaosdaemon to save ipset
-func FlushIPSets(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, pod *v1.Pod, ipsets []*pb.IPSet) error {
-	pbClient, err := builder.Build(ctx, pod)
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
+func FlushIPSets(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInterface, pod *v1.Pod, ipsets []*pb.IPSet) error {
+	var err error
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)

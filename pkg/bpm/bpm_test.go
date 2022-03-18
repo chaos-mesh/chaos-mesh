@@ -20,6 +20,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/shirou/gopsutil/process"
@@ -59,11 +61,14 @@ func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime ti
 }
 
 var _ = Describe("background process manager", func() {
-	m := NewBackgroundProcessManager()
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
+
+	m := NewBackgroundProcessManager(logger)
 
 	Context("normally exited process", func() {
 		It("should work", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build()
+			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
 			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
@@ -75,14 +80,14 @@ var _ = Describe("background process manager", func() {
 
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
+				Build(context.Background())
 			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			startTime := time.Now()
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
+				Build(context.Background())
 			_, err = m.StartProcess(cmd2)
 			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
@@ -97,7 +102,7 @@ var _ = Describe("background process manager", func() {
 
 	Context("kill process", func() {
 		It("should work", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build()
+			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
 			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
@@ -119,7 +124,7 @@ var _ = Describe("background process manager", func() {
 
 			cmd := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
+				Build(context.Background())
 			_, err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
@@ -131,7 +136,7 @@ var _ = Describe("background process manager", func() {
 
 			cmd2 := DefaultProcessBuilder("sleep", "2").
 				SetIdentifier(identifier).
-				Build()
+				Build(context.Background())
 
 			go func() {
 				time.Sleep(time.Second)

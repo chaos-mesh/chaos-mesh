@@ -17,12 +17,14 @@ package main
 
 import (
 	"flag"
+	stdlog "log"
 	"os"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
@@ -30,7 +32,6 @@ import (
 )
 
 var (
-	log  = ctrl.Log.WithName("chaos-daemon")
 	conf = &chaosdaemon.Config{Host: "0.0.0.0"}
 
 	printVersion bool
@@ -55,8 +56,13 @@ func main() {
 	if printVersion {
 		os.Exit(0)
 	}
-
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	rootLogger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		stdlog.Fatal("failed to create root logger", err)
+	}
+	rootLogger = rootLogger.WithName("chaos-daemon.daemon-server")
+	log.ReplaceGlobals(rootLogger)
+	ctrl.SetLogger(rootLogger)
 
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(
@@ -65,14 +71,14 @@ func main() {
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 
-	log.Info("grant access to /dev/fuse")
-	err := fusedev.GrantAccess()
+	rootLogger.Info("grant access to /dev/fuse")
+	err = fusedev.GrantAccess()
 	if err != nil {
-		log.Error(err, "fail to grant access to /dev/fuse")
+		rootLogger.Error(err, "fail to grant access to /dev/fuse")
 	}
 
-	if err = chaosdaemon.StartServer(conf, reg); err != nil {
-		log.Error(err, "failed to start chaos-daemon server")
+	if err = chaosdaemon.StartServer(conf, reg, rootLogger); err != nil {
+		rootLogger.Error(err, "failed to start chaos-daemon server")
 		os.Exit(1)
 	}
 }

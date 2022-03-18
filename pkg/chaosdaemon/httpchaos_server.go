@@ -68,7 +68,8 @@ func (t stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err e
 }
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
-	log := log.WithValues("Request", in)
+	logger := s.getLoggerFromContext(ctx)
+	log := logger.WithValues("Request", in)
 	log.Info("applying http chaos")
 
 	if s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime) == nil {
@@ -91,6 +92,7 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 }
 
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	stdio := s.backgroundProcessManager.Stdio(int(in.Instance), in.StartTime)
 	if stdio == nil {
 		return nil, errors.Errorf("fail to get stdio of process")
@@ -144,6 +146,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, logger logr.Logger, i
 }
 
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
+	log := s.getLoggerFromContext(ctx)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
 		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
@@ -159,7 +162,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
 	}
 
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 	cmd.Stderr = os.Stderr
 
 	procState, err := s.backgroundProcessManager.StartProcess(cmd)
