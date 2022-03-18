@@ -74,17 +74,17 @@ type RawIPSet struct {
 	// The contents of ipset.
 	// Only available when IPSetType is NetIPSet.
 	// +optional
-	Cidrs []string `json:"cidrs"`
+	Cidrs []string `json:"cidrs,omitempty"`
 
 	// The contents of ipset.
 	// Only available when IPSetType is NetPortIPSet.
 	// +optional
-	CidrAndPorts []CidrAndPort `json:"cidrAndPorts"`
+	CidrAndPorts []CidrAndPort `json:"cidrAndPorts,omitempty"`
 
 	// The contents of ipset.
 	// Only available when IPSetType is SetIPSet.
 	// +optional
-	SetNames []string `json:"setNames"`
+	SetNames []string `json:"setNames,omitempty"`
 
 	// The name and namespace of the source network chaos
 	RawRuleSource `json:",inline"`
