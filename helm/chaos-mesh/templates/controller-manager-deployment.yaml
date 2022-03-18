@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,9 +62,8 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
-          {{- range $envKey, $envVal := .Values.controllerManager.env }}
-          - name: {{ $envKey | upper }}
-            value: {{ $envVal | quote }}
+          {{- if .Values.controllerManager.env }}
+          {{- include "chaos-mesh.helpers.listEnvVars" .Values.controllerManager | trim | nindent 10 }}
           {{- end }}
           - name: NAMESPACE
             valueFrom:
