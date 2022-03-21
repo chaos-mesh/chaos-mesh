@@ -157,7 +157,7 @@ func (i *Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *conf
 }
 
 // Check whether the target resource need to be injected and return the required config name
-func (i Injector) injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) (string, bool) {
+func (i *Injector) injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) (string, bool) {
 	// skip special kubernetes system namespaces
 	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
@@ -228,7 +228,7 @@ func checkInjectStatus(metadata *metav1.ObjectMeta, cfg *config.Config) bool {
 	return false
 }
 
-func (i Injector) injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+func (i *Injector) injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	var ns corev1.Namespace
 	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
 		i.logger.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
@@ -251,7 +251,7 @@ func (i Injector) injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli cli
 	return strings.ToLower(required), true
 }
 
-func (i Injector) injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+func (i *Injector) injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	var ns corev1.Namespace
 	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
 		i.logger.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
@@ -275,7 +275,7 @@ func (i Injector) injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli
 	return strings.ToLower(required), true
 }
 
-func (i Injector) injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
+func (i *Injector) injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
 		annotations = make(map[string]string)
@@ -294,7 +294,7 @@ func (i Injector) injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.C
 }
 
 // create mutation patch for resource
-func (i Injector) createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[string]string) ([]byte, error) {
+func (i *Injector) createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
 	// make sure any injected containers in our config get the EnvVars and VolumeMounts injected
@@ -334,7 +334,7 @@ func (i Injector) createPatch(pod *corev1.Pod, inj *config.InjectionConfig, anno
 	return json.Marshal(patch)
 }
 
-func (i Injector) setCommands(target []corev1.Container, postStart map[string]config.ExecAction) (patch []patchOperation) {
+func (i *Injector) setCommands(target []corev1.Container, postStart map[string]config.ExecAction) (patch []patchOperation) {
 	if postStart == nil {
 		return
 	}
@@ -409,7 +409,7 @@ func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch 
 	return patch
 }
 
-func (i Injector) addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
+func (i *Injector) addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
 	first := len(target) == 0
 	var value interface{}
 	for _, add := range added {
@@ -452,7 +452,7 @@ func addVolumes(target, added []corev1.Volume, basePath string) (patch []patchOp
 	return patch
 }
 
-func (i Injector) setVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount, basePath string) (patch []patchOperation) {
+func (i *Injector) setVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount, basePath string) (patch []patchOperation) {
 	for index, c := range target {
 		volumeMounts := map[string]corev1.VolumeMount{}
 		for _, vm := range c.VolumeMounts {

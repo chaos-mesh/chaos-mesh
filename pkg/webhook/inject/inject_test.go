@@ -27,9 +27,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 )
 
-var i Injector
-
 var _ = Describe("webhook inject", func() {
+	i := &Injector{}
 
 	Context("Inject", func() {
 		It("should return unexpected end of JSON input", func() {
