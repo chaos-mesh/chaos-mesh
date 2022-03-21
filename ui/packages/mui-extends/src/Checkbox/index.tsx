@@ -38,7 +38,7 @@ export type CheckboxProps = MuiCheckboxProps & {
 
 export default ({ label, helperText, error, ...rest }: CheckboxProps) => {
   return (
-    <FormControl error required={true}>
+    <FormControl error={error} required={true}>
       <FormControlLabel control={<MuiCheckbox {...rest}></MuiCheckbox>} label={label}></FormControlLabel>
       <FormHelperText>{helperText}</FormHelperText>
     </FormControl>
