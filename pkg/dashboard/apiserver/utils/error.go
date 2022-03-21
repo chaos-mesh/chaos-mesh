@@ -68,7 +68,7 @@ func SetAPIError(c *gin.Context, err *errorx.Error) {
 		FullText: fmt.Sprintf("%+v", err),
 	}
 
-	log.L().Error(err.Cause(), typeName)
+	log.L().WithName("kebab-case").Error(err.Cause(), typeName)
 	c.AbortWithStatusJSON(code, &apiError)
 }
 
