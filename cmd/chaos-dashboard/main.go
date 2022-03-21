@@ -83,6 +83,8 @@ func main() {
 
 	controllerRuntimeSignalHandlerContext := ctrl.SetupSignalHandler()
 	app := fx.New(
+		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
+		fx.Supply(rootLogger),
 		fx.Provide(
 			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
 				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
