@@ -22,11 +22,11 @@ import (
 	"go.uber.org/fx"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
 	genericfield "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
@@ -34,8 +34,6 @@ import (
 	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
 )
-
-var log = ctrl.Log.WithName("physical-machine-selector")
 
 type SelectImpl struct {
 	c client.Client
@@ -212,7 +210,7 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 	for ns, names := range spec.PhysicalMachines {
 		if !clusterScoped {
 			if targetNamespace != ns {
-				log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
+				log.L().WithName("physical-machine-selector").Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 				continue
 			}
 		}
@@ -238,7 +236,7 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 			}
 
 			if apierrors.IsNotFound(err) {
-				log.Error(err, "PhysicalMachine is not found", "namespace", ns, "physical machine name", name)
+				log.L().WithName("physical-machine-selector").Error(err, "PhysicalMachine is not found", "namespace", ns, "physical machine name", name)
 				continue
 			}
 
