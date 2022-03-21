@@ -10,7 +10,7 @@ Here are several steps to publish a new release, and several of them are optiona
 
 This step is required for all the releases(major, minor, bugfix/patch).
 
-As we maintain a CHANGELOG.md on each active branch, we could use it to draft release notes. Changelog is used for developers and Release Notes is used for users, so there are some little different between them.
+As we maintain a `CHANGELOG.md` on each active branch, we could use it to draft release notes. Changelog is used for developers and Release Notes is used for users, so there are some little different between them.
 
 - Draft a Release Notes on google docs, here is a Release Notes template: [Google Docs](https://docs.google.com/document/d/1v0P5NQyepEyT4CH8usouyJup_fvOYtsYAz8nbJfn3Jk/edit?usp=sharing)
 - Collect changelogs from `CHANGELOG.md` on the target branch into Release Notes. There are several patterns for mapping them:
@@ -51,7 +51,7 @@ You should update the `CHANGELOG.md` on the target branch:
 - rename `[Unreleased]` to `[vx.y.z] - YYYY-MM-DD`, and slim empty changes types with only `-Nothing`.
 - create new `[Unreleased]` at the top of `CHANGELOG.md`, with `- Nothing` placeholder in each type of changes.
 
-For more detail, see RFC [keep-a-changelog#](https://github.com/chaos-mesh/rfcs/blob/main/text/2022-01-17-keep-a-changelog.md#changelogmd-in-release--branches)
+For more detail, see RFC [keep-a-changelog](https://github.com/chaos-mesh/rfcs/blob/main/text/2022-01-17-keep-a-changelog.md#changelogmd-in-release--branches)
 
 ### Step 5 Create Release on GitHub
 
@@ -65,9 +65,9 @@ Please note that here the prefix `v` on the tag is required.
 
 This step is required for all the releases(major, minor, bugfix/patch).
 
-After 2.1.0, a GitHub Action would automatically run after GitHub Release is published: https://github.com/chaos-mesh/chaos-mesh/actions?query=event%3Arelease
+After `2.1.0`, a GitHub Action would automatically run after GitHub Release is published: https://github.com/chaos-mesh/chaos-mesh/actions?query=event%3Arelease
 
-Before 2.1.0, you should manually trigger a Jenkins Pipeline with several parameters: `tag` and `branch`. https://ci.pingcap.net/view/chaos-mesh/job/release_chaos_mesh/
+Before `2.1.0`, you should manually trigger a Jenkins Pipeline with several parameters: `tag` and `branch`. https://ci.pingcap.net/view/chaos-mesh/job/release_chaos_mesh/
 
 ### Step 7 Upload crd.yaml and install.sh to CDN
 
