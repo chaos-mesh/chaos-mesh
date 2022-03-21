@@ -48,7 +48,7 @@ This step is required for all the releases(major, minor, bugfix/patch).
 
 You should update the `CHANGELOG.md` on the target branch:
 
-- rename `[Unreleased]` to `[vx.y.z] - YYYY-MM-DD`, and slim empty changes types with only `-Nothing`.
+- rename `[Unreleased]` to `[x.y.z] - YYYY-MM-DD`, and slim empty changes types with only `-Nothing`.
 - create new `[Unreleased]` at the top of `CHANGELOG.md`, with `- Nothing` placeholder in each type of changes.
 
 For more detail, see RFC [keep-a-changelog](https://github.com/chaos-mesh/rfcs/blob/main/text/2022-01-17-keep-a-changelog.md#changelogmd-in-release--branches)
@@ -80,8 +80,8 @@ A GitHub Action would automatically run after GitHub Release is published: https
 This step is required for all the releases(major, minor, bugfix/patch).
 
 - Pull the latest code from `release-x.y` branch
-- `git tag chart-vx.y.z`
-- `git push upstream chart-vx.y.z`(`upstream` is the remote repo `github.com/chaos-mesh/chaos-mesh`)
+- `git tag chart-x.y.z`
+- `git push upstream chart-x.y.z`(`upstream` is the remote repo `github.com/chaos-mesh/chaos-mesh`)
 - A GitHub Action would automatically run: https://github.com/chaos-mesh/chaos-mesh/actions/workflows/release_helm_chart.yml. And new helm artifact will be published to https://github.com/chaos-mesh/charts/tree/gh-pages.
 
 ### Step 9 Update TiChi Bot Configuration
