@@ -1,0 +1,142 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: azurechaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: AzureChaos
+    listKind: AzureChaosList
+    plural: azurechaos
+    singular: azurechaos
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: AzureChaos is the Schema for the azurechaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AzureChaosSpec is the content of the specification for an
+              AzureChaos
+            properties:
+              action:
+                description: 'Action defines the specific azure chaos action. Supported
+                  action: vm-stop / vm-restart / disk-detach Default action: vm-stop'
+                enum:
+                - vm-stop
+                - vm-restart
+                - disk-detach
+                type: string
+              diskName:
+                description: DiskName indicates the name of the disk. Needed in disk-detach.
+                type: string
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              lun:
+                description: LUN indicates the Logical Unit Number of the data disk.
+                  Needed in disk-detach.
+                type: integer
+              resourceGroupName:
+                description: ResourceGroupName defines the name of ResourceGroup
+                type: string
+              secretName:
+                description: SecretName defines the name of kubernetes secret. It
+                  is used for Azure credentials.
+                type: string
+              subscriptionID:
+                description: SubscriptionID defines the id of Azure subscription.
+                type: string
+              vmName:
+                description: VMName defines the name of Virtual Machine
+                type: string
+            required:
+            - action
+            - resourceGroupName
+            - subscriptionID
+            - vmName
+            type: object
+          status:
+            description: AzureChaosStatus represents the status of an AzureChaos
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        phase:
+                          type: string
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - phase
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
