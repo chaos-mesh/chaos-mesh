@@ -52,7 +52,6 @@ export const WithoutHelperText = Template.bind({})
 WithoutHelperText.args = {
   name: 'spec.abort',
   label: 'Abort HTTP Request',
-  helperText: 'Abort could not be used with action: delay',
   checked: true,
   disabled: false,
   error: true,
