@@ -37,7 +37,7 @@ You should make a new PR for updating the version in helm charts and `install.sh
 - Docker image tags in helm charts:
   - After `2.1.0`, there is only one place need to change: `images.tag` in `helm/chaos-mesh/values.yaml`.
   - Before `2.1.0`, you should update the image tag for **each image**
-- `version` in help messages of `install.sh`, about line 46.
+- `version` in help messages of `install.sh`, like `Version of chaos-mesh, default value: <replace-with-version>`.
 - Execute `make check` for updating the versions in generated files.
 
 Then you could make a PR with above changes into `release-x.y` branch, here is an example: https://github.com/chaos-mesh/chaos-mesh/pull/2631
