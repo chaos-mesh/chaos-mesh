@@ -15,7 +15,8 @@
 
 package statuscheck
 
-type StatusCheck interface {
-	Do()
-}
+import "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
+type Executor interface {
+	Do(spec v1alpha1.StatusCheckSpec) (string, error)
+}

@@ -16,6 +16,7 @@
 package controllers
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
@@ -42,6 +43,7 @@ var Module = fx.Options(
 	fx.Invoke(podnetworkchaos.Bootstrap),
 	fx.Invoke(podiochaos.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
+	fx.Invoke(statuscheck.Bootstrap),
 
 	schedule.Module,
 	chaosimpl.AllImpl)

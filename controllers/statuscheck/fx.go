@@ -34,19 +34,15 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recor
 	}
 
 	return builder.Default(mgr).
-		For(&v1alpha1.PodNetworkChaos{}).
+		For(&v1alpha1.StatusCheck{}).
 		Named("statuscheck").
 		WithEventFilter(predicate.Funcs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldObj := e.ObjectOld.(*v1alpha1.PodNetworkChaos)
-				newObj := e.ObjectNew.(*v1alpha1.PodNetworkChaos)
+				oldObj := e.ObjectOld.(*v1alpha1.StatusCheck)
+				newObj := e.ObjectNew.(*v1alpha1.StatusCheck)
 
 				return !reflect.DeepEqual(oldObj.Spec, newObj.Spec)
 			},
 		}).
-		Complete(&Reconciler{
-			Client:   client,
-			Log:      logger.WithName("statuscheck"),
-			Recorder: recorderBuilder.Build("statuscheck"),
-		})
+		Complete(NewReconciler(client, logger.WithName("statuscheck"), recorderBuilder.Build("statuscheck")))
 }
