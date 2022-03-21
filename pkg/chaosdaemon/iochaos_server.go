@@ -36,6 +36,7 @@ const (
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
@@ -88,7 +89,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		return nil, err
 	}
 
-	cmd := processBuilder.Build()
+	cmd := processBuilder.Build(ctx)
 	cmd.Stdin = caller
 	cmd.Stdout = io.MultiWriter(receiver, os.Stdout)
 	cmd.Stderr = os.Stderr
@@ -130,6 +131,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 }
 
 func (s *DaemonServer) killIOChaos(ctx context.Context, pid int64, startTime int64) error {
+	log := s.getLoggerFromContext(ctx)
 	log.Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)

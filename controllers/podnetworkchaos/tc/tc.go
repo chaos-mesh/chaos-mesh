@@ -21,22 +21,18 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 
+	chaosdaemonclient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 var log = ctrl.Log.WithName("tc")
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
-func SetTcs(ctx context.Context, builder *chaosdaemon.ChaosDaemonClientBuilder, pod *v1.Pod, tcs []*pb.Tc) error {
-	pbClient, err := builder.Build(ctx, pod)
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
+func SetTcs(ctx context.Context, pbClient chaosdaemonclient.ChaosDaemonClientInterface, pod *v1.Pod, tcs []*pb.Tc) error {
+	var err error
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
