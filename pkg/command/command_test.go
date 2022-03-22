@@ -16,7 +16,6 @@
 package command
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -52,10 +51,10 @@ func TestMarshal(t *testing.T) {
 		Match{NewExec(), "help"},
 		Match_{},
 	}
-	path, args, err := Marshal(n)
+	path, fields, err := Marshal(n)
 	assert.NoError(t, err, "nil")
 	assert.Equal(t, "iptables -p 20 --ports 2021 2023 -m --helper help",
-		path+" "+strings.Join(args, " "))
+		path+" "+JoinFields(fields, " ", " ", " "))
 }
 
 type Iptables struct {
@@ -94,10 +93,10 @@ func TestMarshalExample(t *testing.T) {
 		SPorts:         "2021,2022",
 		TcpFlags:       "SYN",
 	}
-	path, args, err := Marshal(n)
+	path, fields, err := Marshal(n)
 	assert.NoError(t, err, "nil")
 	assert.Equal(t, "iptables -A Chaos_Chain -j Chaos_Target --protocol tcp -m multiport --source-ports 2021,2022 --tcp-flags SYN",
-		path+" "+strings.Join(args, " "))
+		path+" "+JoinFields(fields, " ", " ", " "))
 
 	p := TestInvalidParaType{
 		Exec: NewExec(),

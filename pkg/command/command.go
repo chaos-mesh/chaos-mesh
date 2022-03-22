@@ -16,7 +16,6 @@
 package command
 
 import (
-	"os/exec"
 	"reflect"
 	"strings"
 
@@ -24,7 +23,7 @@ import (
 )
 
 // ExecTag stands for the path of executable file in command.
-// If we want this util works ,
+// If we want the command variable contain the field,
 // we must add Exec in the struct and use NewExec() to initialize it,
 // because the default way to initialize Exec means None in code.
 const ExecTag = "exec"
@@ -73,64 +72,81 @@ func NewExec() Exec {
 	return Exec{active: true}
 }
 
-func ToCommand(i interface{}) (*exec.Cmd, error) {
-	path, args, err := Marshal(i)
-	if err != nil {
-		return nil, err
-	}
-	return exec.Command(path, args...), nil
-}
-
-func Marshal(i interface{}) (string, []string, error) {
+func Marshal(i interface{}) (string, []Field, error) {
 	value := reflect.ValueOf(i)
 	return marshal(value)
 }
 
-func marshal(value reflect.Value) (string, []string, error) {
+type Field struct {
+	Name string
+	Args []string
+}
+
+func (f Field) Join(medSep string, subSep string) string {
+	args := strings.Join(f.Args, subSep)
+	if args == "" {
+		return f.Name
+	}
+	if f.Name == "" {
+		return args
+	}
+	return f.Name + medSep + args
+}
+
+func JoinFields(fields []Field, majorSep string, medSep string, subSep string) string {
+	fieldStrings := make([]string, len(fields))
+	for i := range fieldStrings {
+		fieldStrings[i] = fields[i].Join(medSep, subSep)
+	}
+	return strings.Join(fieldStrings, majorSep)
+}
+
+func marshal(value reflect.Value) (string, []Field, error) {
 	//var options []string
 	if path, ok := SearchKey(value); ok {
 		// Field(0).String is Exec.Path
-
 		if path == "" {
 			return "", nil, nil
 		}
-		args := make([]string, 0)
+		fields := make([]Field, 0)
 		for i := 0; i < value.NumField(); i++ {
 			if _, ok := value.Type().Field(i).Tag.Lookup(SubCommandTag); ok {
-				subPath, subArgs, err := marshal(value.Field(i))
+				subPath, subFields, err := marshal(value.Field(i))
 				if err != nil {
 					return "", nil, err
 				}
 				if subPath != "" {
-					args = append(args, subPath)
+					fields = append(fields, Field{Name: subPath})
 				}
-				args = append(args, subArgs...)
+				fields = append(fields, subFields...)
 			}
 			if paraName, ok := value.Type().Field(i).Tag.Lookup(ParaTag); ok {
 				if value.Type().Field(i).Type.Name() == "string" {
 					if value.Field(i).String() != "" {
-						if paraName != "" {
-							args = append(args, paraName)
-						}
-						args = append(args, value.Field(i).String())
+						fields = append(fields, Field{Name: paraName,
+							Args: []string{value.Field(i).String()}})
 					}
 				} else if value.Field(i).Kind() == reflect.Slice {
 					if slicePara, ok := value.Field(i).Interface().([]string); ok {
 						if strings.Join(slicePara, "") != "" {
-							if paraName != "" {
-								args = append(args, paraName)
-							}
-							args = append(args, slicePara...)
+							fields = append(fields, Field{Name: paraName,
+								Args: slicePara})
 						}
 					} else {
 						return "", nil, errors.Errorf("invalid parameter slice type %s :parameter slice must be string slice", value.Field(i).String())
+					}
+				} else if value.Field(i).Kind() == reflect.Bool {
+					if boolPara, ok := value.Field(i).Interface().(bool); ok {
+						if boolPara {
+							fields = append(fields, Field{Name: paraName})
+						}
 					}
 				} else {
 					return "", nil, errors.Errorf("invalid parameter type %s : parameter must be string or string slice", value.Type().Field(i).Type.Name())
 				}
 			}
 		}
-		return path, args, nil
+		return path, fields, nil
 	}
 	return "", nil, nil
 }
