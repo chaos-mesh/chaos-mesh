@@ -33,6 +33,7 @@ func (p PodID) ToID() string {
 	return string(p)
 }
 
+// ChaosOnPOD stand for the inner process injector for container.
 type ChaosOnPOD interface {
 	Injectable
 	Recoverable
@@ -81,6 +82,8 @@ func NewPodHandler(podProcessMap *PodProcessMap, main ChaosOnPOD, logger logr.Lo
 	}
 }
 
+// Inject get the container process PID and Inject it with Main injector.
+// Be careful about the error handling here.
 func (p *PodHandler) Inject(pid PID) error {
 	podPID, ok := pid.(PodID)
 	if !ok {
@@ -99,6 +102,8 @@ func (p *PodHandler) Inject(pid PID) error {
 	return err
 }
 
+// Recover get the container process PID and Recover it with Main injector.
+// Be careful about the error handling here.
 func (p *PodHandler) Recover(pid PID) error {
 	podPID, ok := pid.(PodID)
 	if !ok {
