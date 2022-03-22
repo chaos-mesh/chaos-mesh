@@ -54,5 +54,7 @@ header:
     - 'ui/app/src/setupProxy.js'
     - 'ui/**/*.svg'
     - '**/node_modules/**'
+    - 'ui/app/build/**/*'
+    - 'ui/packages/mui-extends/esm/**/*'
     # codecov configuration file
     - codecov.yml

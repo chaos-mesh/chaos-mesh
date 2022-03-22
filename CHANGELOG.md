@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.1.4] - 2022-03-21
+
+### Added
+
 - Add time skew for gettimeofday [#2742](https://github.com/chaos-mesh/chaos-mesh/pull/2742)
 
 ### Changed
@@ -29,7 +55,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix default value for concurrencyPolicy [#2836](https://github.com/chaos-mesh/chaos-mesh/pull/2836)
 - Fix PhysicalMachineChaos to make it able to create network bandwidth experiment. [#2850](https://github.com/chaos-mesh/chaos-mesh/pull/2850)
 - Fix workflow emit new events after accomplished [#2911](https://github.com/chaos-mesh/chaos-mesh/pull/2911)
-- Fix human unreadable logging timestamp [#2970](https://github.com/chaos-mesh/chaos-mesh/pull/2970) [#2973](https://github.com/chaos-mesh/chaos-mesh/pull/2973)
+- Fix human unreadable logging timestamp [#2970](https://github.com/chaos-mesh/chaos-mesh/pull/2970) [#2973](https://github.com/chaos-mesh/chaos-mesh/pull/2973) [#2991](https://github.com/chaos-mesh/chaos-mesh/pull/2991)
 - Fix default value of percent field in iochaos [#3018](https://github.com/chaos-mesh/chaos-mesh/pull/3018)
 
 ### Security

@@ -15,6 +15,8 @@
 
 package chaosdaemon
 
+import "github.com/chaos-mesh/chaos-mesh/pkg/log"
+
 // Edge represents an edge in graph
 type Edge struct {
 	Source uint32
@@ -66,6 +68,7 @@ func (g *Graph) Flatten(source uint32) []uint32 {
 		current = current.Next
 	}
 
-	log.Info("get flatTree", "source", source, "flatTree", flatTree)
+	// TODO: replace this usage of global logger
+	log.L().WithName("chaos-daemon.graph").Info("get flatTree", "source", source, "flatTree", flatTree)
 	return flatTree
 }

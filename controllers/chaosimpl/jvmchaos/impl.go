@@ -71,7 +71,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if impl.decoder == nil {
 		return v1alpha1.NotInjected, fmt.Errorf("impl decoder is nil")
 	}
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	if decodedContainer.PbClient != nil {
 		defer func() {
 			err := decodedContainer.PbClient.Close()
@@ -109,7 +109,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if impl.decoder == nil {
 		return v1alpha1.Injected, fmt.Errorf("impl decoder is nil")
 	}
-	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index])
+	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	if decodedContainer.PbClient != nil {
 		defer func() {
 			err := decodedContainer.PbClient.Close()

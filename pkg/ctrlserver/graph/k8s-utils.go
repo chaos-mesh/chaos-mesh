@@ -16,9 +16,14 @@
 package graph
 
 import (
+	"context"
 	"strings"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrlserver/graph/model"
 )
@@ -50,4 +55,21 @@ func parseNamespacedName(namespacedName string) types.NamespacedName {
 		Namespace: parts[0],
 		Name:      parts[1],
 	}
+}
+
+// getDaemonMap returns a map of node name to daemon pod
+func getDaemonMap(ctx context.Context, c client.Client) (map[string]v1.Pod, error) {
+	var list v1.PodList
+	labels := componentLabels(model.ComponentDaemon)
+	if err := c.List(ctx, &list, client.MatchingLabels(labels)); err != nil {
+		return nil, errors.Wrapf(err, "list daemons by label %v", labels)
+	}
+
+	daemonMap := map[string]v1.Pod{}
+	for _, d := range list.Items {
+		if d.Spec.NodeName != "" {
+			daemonMap[d.Spec.NodeName] = d
+		}
+	}
+	return daemonMap, nil
 }
