@@ -19,7 +19,7 @@ The Maintainers of Chaos Mesh, along with their emails, are listed be
 The Committers of Chaos Mesh, along with their emails, are listed below:
 
 | Name                                                             | Email                                                                         | Org                                   |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
+|------------------------------------------------------------------|-------------------------------------------------------------------------------|---------------------------------------|
 | Glen Yang ([g1eny0ung](https://github.com/g1eny0ung))            | [yangyue@pingcap.com](mailto:yangyue@pingcap.com)                             | [PingCAP](https://www.pingcap.com/)   |
 | Yihao Fu ([fewdan](https://github.com/fewdan))                   | [fuyihao@pingcap.com](mailto:fuyihao@pingcap.com)                             | [PingCAP](https://www.pingcap.com/)   |
 | Jiaxing Wu ([Colstuwjx](https://github.com/Colstuwjx))           | [wjx_colstu@hotmail.com](mailto:wjx_colstu@hotmail.com)                       | [Kingnet](https://www.kingnet.com/)   |
@@ -29,6 +29,7 @@ The Committers of Chaos Mesh, along with their emails, are listed below:
 | Wenbo Zhang ([ethercflow](https://github.com/ethercflow))        | [zhangwenbo@pingcap.com](mailto:zhangwenbo@pingcap.com)                       | [PingCAP](https://www.pingcap.com/)   |
 | Zhiqiang Zhou ([STRRL](https://github.com/STRRL))                | [zhouzhiqiang@pingcap.com](mailto:zhouzhiqiang@pingcap.com)                   | [PingCAP](https://www.pingcap.com/)   |
 | Shivansh Saini ([shivanshs9](https://github.com/shivanshs9))     | [shivansh.saini.cse17@iitbhu.ac.in](mailto:shivansh.saini.cse17@iitbhu.ac.in) | [Headout](https://github.com/headout) |
+| Siyu Chen ([iguoyr](https://github.com/iguoyr))                  | [chensiyu@pingcap.com](mailto:chensiyu@pingcap.com)                           | [PingCAP](https://www.pingcap.com/)   |
 
 ## Emeritus Maintainers
 
