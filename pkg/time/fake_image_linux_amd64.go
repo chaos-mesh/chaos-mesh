@@ -37,14 +37,14 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error
 		runtime.UnlockOSThread()
 	}()
 
-	program, err := ptrace.Trace(pid)
+	program, err := ptrace.Trace(pid, it.logger.WithName("ptrace").WithValues("pid", pid))
 	if err != nil {
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
 	defer func() {
 		err = program.Detach()
 		if err != nil {
-			log.Error(err, "fail to detach program", "pid", program.Pid())
+			it.logger.Error(err, "fail to detach program", "pid", program.Pid())
 		}
 	}()
 
@@ -77,7 +77,7 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) error
 
 		if bytes.Equal(*image, it.content[0:constImageLen]) {
 			fakeEntry = &e
-			log.Info("found injected image", "addr", fakeEntry.StartAddress, "pid", pid)
+			it.logger.Info("found injected image", "addr", fakeEntry.StartAddress, "pid", pid)
 			break
 		}
 	}

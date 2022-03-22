@@ -4812,6 +4812,43 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.AzureChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific azure chaos action.\nSupported action: vm-stop / vm-restart / disk-detach\nDefault action: vm-stop\n+kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach",
+                    "type": "string"
+                },
+                "diskName": {
+                    "description": "DiskName indicates the name of the disk.\nNeeded in disk-detach.\n+optional",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "lun": {
+                    "description": "LUN indicates the Logical Unit Number of the data disk.\nNeeded in disk-detach.\n+optional",
+                    "type": "integer"
+                },
+                "resourceGroupName": {
+                    "description": "ResourceGroupName defines the name of ResourceGroup",
+                    "type": "string"
+                },
+                "secretName": {
+                    "description": "SecretName defines the name of kubernetes secret. It is used for Azure credentials.\n+optional",
+                    "type": "string"
+                },
+                "subscriptionID": {
+                    "description": "SubscriptionID defines the id of Azure subscription.",
+                    "type": "string"
+                },
+                "vmName": {
+                    "description": "VMName defines the name of Virtual Machine",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.BandwidthSpec": {
             "type": "object",
             "properties": {
@@ -4925,6 +4962,11 @@ var doc = `{
                 "awsChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
                     "description": "+optional",
@@ -5351,7 +5393,7 @@ var doc = `{
                     "type": "string"
                 },
                 "percent": {
-                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional",
+                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional\n+kubebuilder:default=100",
                     "type": "integer"
                 },
                 "selector": {
@@ -6421,6 +6463,11 @@ var doc = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
                 },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
+                },
                 "blockChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
@@ -6611,6 +6658,11 @@ var doc = `{
                 "awsChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
                     "description": "+optional",
