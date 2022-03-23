@@ -64,7 +64,7 @@ func Test_validateStatusCode(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			ok := validateStatusCode(tc.criteria, result{statusCode: tc.result})
+			ok := validateStatusCode(tc.criteria, response{statusCode: tc.result})
 			if ok != tc.expect {
 				t.Errorf("criteria: %s result: %d expect: %t", tc.criteria, tc.result, tc.expect)
 			}
