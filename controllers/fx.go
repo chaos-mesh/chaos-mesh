@@ -16,7 +16,6 @@
 package controllers
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
@@ -25,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
+	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"

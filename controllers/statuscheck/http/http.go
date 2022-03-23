@@ -17,73 +17,94 @@ package http
 
 import (
 	"bytes"
-	"errors"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type httpExecutor struct {
+	logger logr.Logger
 }
 
-func NewExecutor() *httpExecutor {
-	return &httpExecutor{}
+func NewExecutor(logger logr.Logger) *httpExecutor {
+	return &httpExecutor{logger: logger}
 }
 
-type result struct {
+type response struct {
 	statusCode int
+	body       string
 }
 
-func (e *httpExecutor) Do(spec v1alpha1.StatusCheckSpec) (string, error) {
+func (e *httpExecutor) Type() string {
+	return "HTTP"
+}
+
+func (e *httpExecutor) Do(spec v1alpha1.StatusCheckSpec) (bool, string, error) {
 	client := &http.Client{
 		Timeout: time.Duration(spec.TimeoutSeconds) * time.Second,
 	}
 	if spec.EmbedStatusCheck == nil || spec.EmbedStatusCheck.HTTPStatusCheck == nil {
-		return "", errors.New("")
+		// this should not happen, if the webhook works as expected
+		return false, "illegal status check, http should not be empty", nil
 	}
 
 	httpStatusCheck := spec.HTTPStatusCheck
-	result, err := DoHTTPRequest(client,
+	return e.DoHTTPRequest(client,
 		httpStatusCheck.RequestUrl,
 		string(httpStatusCheck.RequestMethod),
 		httpStatusCheck.RequestHeaders,
-		[]byte(httpStatusCheck.RequestBody))
-	if err != nil {
-		return "", err
-	}
-	if !validate(spec.HTTPStatusCheck.Criteria, *result) {
-
-	}
-	return "", nil
+		[]byte(httpStatusCheck.RequestBody),
+		httpStatusCheck.Criteria)
 }
 
-func DoHTTPRequest(client *http.Client, url, method string, headers http.Header, body []byte) (*result, error) {
+func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
+	headers http.Header, body []byte, criteria v1alpha1.HTTPCriteria) (bool, string, error) {
 	req, err := http.NewRequest(method, url, bytes.NewReader(body))
 	if err != nil {
-		return nil, err
+		return false, errors.Wrap(err, "new http request").Error(), nil
 	}
 	req.Header = headers
-	response, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return false, errors.Wrap(err, "do http request").Error(), nil
 	}
-	defer response.Body.Close()
-	return &result{statusCode: response.StatusCode}, nil
+	defer resp.Body.Close()
+
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return false, "", errors.Wrap(err, "unable to read response body")
+	}
+
+	return validate(e.logger.WithValues("url", url),
+		criteria, response{statusCode: resp.StatusCode, body: string(responseBody)})
 }
 
-func validate(criteria v1alpha1.HTTPCriteria, result result) bool {
-	return validateStatusCode(criteria.StatusCode, result)
+func validate(logger logr.Logger, criteria v1alpha1.HTTPCriteria, resp response) (bool, string, error) {
+	ok := validateStatusCode(criteria.StatusCode, resp)
+	if !ok {
+		logger.Info("validate status code failed",
+			"criteria", criteria.StatusCode,
+			"statusCode", resp.statusCode, "body", resp.body)
+		return false, fmt.Sprintf("unexpected status code: %d", resp.statusCode), nil
+	}
+	return ok, "", nil
 }
 
 // validateStatusCode validate whether the result is as expected.
 // A criteria(statusCode) string could be a single code (e.g. 200), or
 // an inclusive range (e.g. 200-400, both `200` and `400` are included).
 // The format of the criteria field will be validated in webhook.
-func validateStatusCode(criteria string, result result) bool {
+func validateStatusCode(criteria string, resp response) bool {
 	if code, err := strconv.Atoi(criteria); err == nil {
-		return code == result.statusCode
+		return code == resp.statusCode
 	}
 	index := strings.Index(criteria, "-")
 	if index == -1 {
@@ -99,6 +120,6 @@ func validateStatusCode(criteria string, result result) bool {
 	if err != nil {
 		return false
 	}
-	return result.statusCode >= startStatusCode &&
-		result.statusCode <= endStatusCode
+	return resp.statusCode >= startStatusCode &&
+		resp.statusCode <= endStatusCode
 }

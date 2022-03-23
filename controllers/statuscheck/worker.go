@@ -16,36 +16,64 @@
 package statuscheck
 
 import (
+	"sync"
+	"time"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck/http"
-	"github.com/go-logr/logr"
-	"time"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
-type worker struct {
-	stopCh  chan struct{}
-	manager *manager
-
-	statusCheck v1alpha1.StatusCheck
-	executor    Executor
-	logger      logr.Logger
+type Executor interface {
+	// Do will execute according to the status check configuration,
+	// returns:
+	// 1. the result status (true for success, false for failure).
+	// 2. output of execution.
+	// 3. errors if any, it will lead to throw away the result of the execution.
+	Do(spec v1alpha1.StatusCheckSpec) (bool, string, error)
+	// Type provides the type of executor
+	Type() string
 }
 
-func newWorker(manager *manager, statusCheck v1alpha1.StatusCheck, logger logr.Logger) *worker {
+type worker struct {
+	logger        logr.Logger
+	eventRecorder recorder.ChaosRecorder
+
+	// stopCh is a channel for stopping the worker.
+	stopCh chan struct{}
+	once   sync.Once
+
+	manager *manager
+	// Describes the status check configuration (read-only)
+	statusCheck v1alpha1.StatusCheck
+	executor    Executor
+
+	lastResult      bool
+	sameResultCount int
+}
+
+func newWorker(logger logr.Logger, eventRecorder recorder.ChaosRecorder,
+	manager *manager, statusCheck v1alpha1.StatusCheck) *worker {
 	var executor Executor
 	switch statusCheck.Spec.Type {
 	case v1alpha1.TypeHTTP:
-		executor = http.NewExecutor()
+		executor = http.NewExecutor(logger.WithName("http-executor"))
 	default:
-		// TODO handle this error
+		logger.Error(errors.New("unsupported type"), "unable to create worker")
 	}
 
 	return &worker{
-		stopCh:      make(chan struct{}),
-		manager:     manager,
-		statusCheck: statusCheck,
-		executor:    executor,
-		logger:      logger,
+		logger:        logger,
+		eventRecorder: eventRecorder,
+		manager:       manager,
+		statusCheck:   statusCheck,
+		executor:      executor,
+		stopCh:        make(chan struct{}, 1), // non-blocking
 	}
 }
 
@@ -55,30 +83,79 @@ func (w *worker) run() {
 	ticker := time.NewTicker(interval)
 	defer func() {
 		ticker.Stop()
-		w.manager.removeWorker(string(w.statusCheck.UID))
+		key := types.NamespacedName{Namespace: w.statusCheck.Namespace, Name: w.statusCheck.Name}
+		// delete worker from manager cache
+		w.manager.workers.delete(key)
 	}()
 
-	for w.execute() {
+	for {
 		select {
 		case <-ticker.C:
+			if !w.execute() {
+				return
+			}
 		case <-w.stopCh:
 			return
 		}
 	}
 }
 
+// stop stops the worker, it is safe to call stop multiple times.
 func (w *worker) stop() {
-	close(w.stopCh)
+	w.once.Do(func() {
+		close(w.stopCh)
+	})
 }
 
 // execute the status check once and records the result.
 // Returns whether the worker should continue.
 func (w *worker) execute() bool {
-	// TODO
-	result, err := w.executor.Do(w.statusCheck.Spec)
-	if err != nil {
+	if w.executor == nil {
 		return false
 	}
-	w.logger.Info("execute", "result", result)
+
+	startTime := time.Now()
+	result, output, err := w.executor.Do(w.statusCheck.Spec)
+	if err != nil {
+		// executor error, throw away the result.
+		w.logger.Error(err, "executor internal error")
+		return true
+	}
+
+	if w.lastResult == result {
+		w.sameResultCount++
+	} else {
+		w.lastResult = result
+		w.sameResultCount = 1
+	}
+
+	key := types.NamespacedName{Namespace: w.statusCheck.Namespace, Name: w.statusCheck.Name}
+	if result {
+		w.logger.V(1).Info("execute status check", "msg", output)
+		w.manager.results.append(key, v1alpha1.StatusCheckRecord{
+			StartTime: &metav1.Time{Time: startTime},
+			Outcome:   v1alpha1.StatusCheckOutcomeSuccess,
+		})
+		if w.statusCheck.Spec.Mode == v1alpha1.StatusCheckSynchronous &&
+			w.sameResultCount >= w.statusCheck.Spec.SuccessThreshold {
+			w.logger.Info("exceed the success threshold")
+			// if status check mode is Synchronous, and it exceeds the SuccessThreshold,
+			// then stop the worker
+			return false
+		}
+	} else {
+		w.logger.Info("status check execution failed", "msg", output)
+		w.eventRecorder.Event(&w.statusCheck, recorder.StatusCheckExecutionFailed{ExecutorType: w.executor.Type(), Msg: output})
+		w.manager.results.append(key, v1alpha1.StatusCheckRecord{
+			StartTime: &metav1.Time{Time: startTime},
+			Outcome:   v1alpha1.StatusCheckOutcomeFailure,
+		})
+		if w.sameResultCount >= w.statusCheck.Spec.FailureThreshold {
+			w.logger.Info("exceed the failure threshold")
+			// if it exceeds the FailureThreshold, stop the worker
+			return false
+		}
+	}
+
 	return true
 }

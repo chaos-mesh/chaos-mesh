@@ -17,6 +17,7 @@ package v1alpha1
 
 import (
 	"net/http"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -173,8 +174,8 @@ const (
 type StatusCheckReason string
 
 const (
-	StatusCheckExecutionSucceed StatusCheckReason = "StatusCheckExecutionSucceed"
-	StatusCheckExecutionFailed  StatusCheckReason = "StatusCheckExecutionFailed"
+	StatusCheckExecutionFailed StatusCheckReason = "StatusCheckExecutionFailed"
+	StatusCheckCompleted       StatusCheckReason = "StatusCheckCompleted"
 	// TODO add more reason when implementing StatusCheck
 )
 
@@ -227,4 +228,46 @@ type StatusCheckList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []StatusCheck `json:"items"`
+}
+
+func (in *StatusCheckSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+func (in *StatusCheck) DurationExceed(now time.Time) (bool, time.Duration, error) {
+	if in.Status.StartTime == nil {
+		return false, 0, nil
+	}
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.Status.StartTime.Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *StatusCheck) IsCompleted() bool {
+	for _, condition := range in.Status.Conditions {
+		if condition.Type == StatusCheckConditionCompleted &&
+			condition.Status == corev1.ConditionTrue {
+			return true
+		}
+	}
+	return false
 }

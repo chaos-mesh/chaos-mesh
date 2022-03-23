@@ -16,83 +16,174 @@
 package statuscheck
 
 import (
+	"sync"
+
+	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/go-logr/logr"
-	"sync"
 )
 
 type Manager interface {
-	// Add creates new probe workers for every container probe. This should be called for every
-	// pod created.
+	// Add creates new workers for every status check.
 	Add(statusCheck v1alpha1.StatusCheck)
-	// Remove handles cleaning up the removed pod state, including terminating probe workers and
+	// Get returns the cached results about the status check.
+	Get(statusCheck v1alpha1.StatusCheck) (Result, bool)
+	// Delete handles cleaning up the removed status check state, including terminating workers and
 	// deleting cached results.
-	Remove(statusCheck v1alpha1.StatusCheck)
-
-	Get(statusCheck v1alpha1.StatusCheck)
+	// This should be called when StatusCheck is deleted.
+	Delete(key types.NamespacedName)
+	// Complete handles terminating workers, but not deleting cached results.
+	// This should be called when StatusCheck is completed.
+	Complete(statusCheck v1alpha1.StatusCheck)
 }
 
 type manager struct {
-	// Map of active workers for probes
-	workers map[string]*worker
-	// Lock for accessing & mutating workers
-	workerLock sync.RWMutex
-	// result
-	result map[string]string
-
 	logger        logr.Logger
 	eventRecorder recorder.ChaosRecorder
+
+	workers workerCache
+	results resultCache
 }
 
-func NewManager(eventRecorder recorder.ChaosRecorder, logger logr.Logger) Manager {
+func NewManager(logger logr.Logger, eventRecorder recorder.ChaosRecorder) Manager {
 	return &manager{
-		workers:       make(map[string]*worker),
-		eventRecorder: eventRecorder,
 		logger:        logger,
+		eventRecorder: eventRecorder,
+		workers:       workerCache{workers: sync.Map{}},
+		results:       resultCache{results: make(map[types.NamespacedName]Result)},
 	}
 }
 
 func (m *manager) Add(statusCheck v1alpha1.StatusCheck) {
-	m.workerLock.Lock()
-	defer m.workerLock.Unlock()
-
-	key := string(statusCheck.UID)
-	if _, ok := m.workers[key]; ok {
+	key := types.NamespacedName{Namespace: statusCheck.Namespace, Name: statusCheck.Name}
+	if _, ok := m.results.get(key); ok {
 		return
 	}
+	m.results.init(key, statusCheck.Status.Records, statusCheck.Status.Count, uint(statusCheck.Spec.RecordsHistoryLimit))
 
-	worker := newWorker(m, statusCheck, m.logger.WithName("statuscheck-worker"))
-	m.workers[key] = worker
-	go worker.run()
+	if statusCheck.IsCompleted() {
+		// if status check is completed, there is no need to create a worker
+		return
+	}
+	worker := newWorker(m.logger.WithName("statuscheck-worker").WithValues("statuscheck", key), m.eventRecorder, m, statusCheck)
+	m.workers.add(key, worker)
 }
 
-func (m *manager) Remove(statusCheck v1alpha1.StatusCheck) {
-	m.workerLock.Lock()
-	defer m.workerLock.Unlock()
+func (m *manager) Get(statusCheck v1alpha1.StatusCheck) (Result, bool) {
+	key := types.NamespacedName{Namespace: statusCheck.Namespace, Name: statusCheck.Name}
+	result, ok := m.results.get(key)
+	if !ok {
+		return Result{}, false
+	}
+	return result, true
+}
 
-	key := string(statusCheck.UID)
-	worker, ok := m.workers[key]
+func (m *manager) Delete(key types.NamespacedName) {
+	m.results.delete(key)
+	m.workers.delete(key)
+}
+
+func (m *manager) Complete(statusCheck v1alpha1.StatusCheck) {
+	key := types.NamespacedName{Namespace: statusCheck.Namespace, Name: statusCheck.Name}
+	m.workers.delete(key)
+}
+
+// workerCache provides cached workers.
+type workerCache struct {
+	// Map of NamespacedName of StatusCheck -> *worker
+	workers sync.Map
+}
+
+func (c *workerCache) add(key types.NamespacedName, worker *worker) {
+	_, ok := c.workers.LoadOrStore(key, worker)
+	if !ok {
+		go worker.run()
+	}
+}
+
+func (c *workerCache) delete(key types.NamespacedName) {
+	obj, ok := c.workers.LoadAndDelete(key)
 	if !ok {
 		return
 	}
+	worker := obj.(*worker)
 	worker.stop()
 }
 
-func (m *manager) Get(statusCheck v1alpha1.StatusCheck) {
-	m.workerLock.RLock()
-	defer m.workerLock.RUnlock()
+func (c *workerCache) get(key types.NamespacedName) (*worker, bool) {
+	obj, ok := c.workers.Load(key)
+	if !ok {
+		return nil, ok
+	}
+	return obj.(*worker), ok
 }
 
-func (m *manager) getWorker(uid string) (*worker, bool) {
-	m.workerLock.RLock()
-	defer m.workerLock.RUnlock()
-	worker, ok := m.workers[uid]
-	return worker, ok
+// resultCache provides cached status check results.
+type resultCache struct {
+	// Map of NamespacedName of StatusCheck -> *result
+	results map[types.NamespacedName]Result
+	lock    sync.RWMutex
 }
 
-func (m *manager) removeWorker(uid string) {
-	m.workerLock.Lock()
-	defer m.workerLock.Unlock()
-	delete(m.workers, uid)
+type Result struct {
+	Records []v1alpha1.StatusCheckRecord
+	Count   int64
+	// recordsHistoryLimit defines the number of record to retain.
+	recordsHistoryLimit uint
+}
+
+// init should only be called when adding a new worker.
+func (c *resultCache) init(key types.NamespacedName, obj []v1alpha1.StatusCheckRecord, count int64, limit uint) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if _, ok := c.results[key]; ok {
+		return
+	}
+	if len(obj) == 0 {
+		obj = make([]v1alpha1.StatusCheckRecord, 0)
+		count = 0
+	}
+	c.results[key] = Result{
+		Records:             limitRecords(obj, limit),
+		Count:               count,
+		recordsHistoryLimit: limit,
+	}
+}
+
+// append will append the record to the cache.
+// It should be only called by worker
+func (c *resultCache) append(key types.NamespacedName, obj v1alpha1.StatusCheckRecord) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	result, _ := c.results[key]
+	result.Records = append(result.Records, obj)
+	result.Records = limitRecords(result.Records, result.recordsHistoryLimit)
+	result.Count++
+	c.results[key] = result
+}
+
+func (c *resultCache) delete(key types.NamespacedName) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	delete(c.results, key)
+}
+
+func (c *resultCache) get(key types.NamespacedName) (Result, bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	result, ok := c.results[key]
+	return result, ok
+}
+
+func limitRecords(records []v1alpha1.StatusCheckRecord, limit uint) []v1alpha1.StatusCheckRecord {
+	length := len(records)
+	if length < int(limit) {
+		return records
+	}
+	return records[length-int(limit):]
 }
