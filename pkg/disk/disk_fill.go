@@ -5,6 +5,8 @@ type CommonConfig struct {
 
 	Size    string
 	Percent string
+
+	SpaceLock string
 }
 
 type FillConfig struct {
@@ -12,6 +14,20 @@ type FillConfig struct {
 	FillByFAllocate bool
 }
 
-type ReadConfig struct {
+type RuntimeConfig struct {
+	ProcessNum    uint8
+	LoopExecution bool
+}
+
+type PayloadAction int
+
+const (
+	Read PayloadAction = iota
+	Write
+)
+
+type PayloadConfig struct {
+	Action PayloadAction
 	CommonConfig
+	RuntimeConfig
 }
