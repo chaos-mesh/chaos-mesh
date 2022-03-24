@@ -57,8 +57,6 @@ type ResolverRoot interface {
 	IoFault() IoFaultResolver
 	Logger() LoggerResolver
 	MistakeSpec() MistakeSpecResolver
-	MutablePod() MutablePodResolver
-	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	NetworkChaos() NetworkChaosResolver
 	OwnerReference() OwnerReferenceResolver
@@ -324,11 +322,6 @@ type ComplexityRoot struct {
 		Weight func(childComplexity int) int
 	}
 
-	KillProcessResult struct {
-		Command func(childComplexity int) int
-		Pid     func(childComplexity int) int
-	}
-
 	Logger struct {
 		Component func(childComplexity int, ns string, component model.Component) int
 		Pod       func(childComplexity int, ns string, name string) int
@@ -349,17 +342,6 @@ type ComplexityRoot struct {
 		Filling        func(childComplexity int) int
 		MaxLength      func(childComplexity int) int
 		MaxOccurrences func(childComplexity int) int
-	}
-
-	MutablePod struct {
-		CleanIptables func(childComplexity int, chains []string) int
-		CleanTcs      func(childComplexity int, devices []string) int
-		KillProcesses func(childComplexity int, pids []string) int
-		Pod           func(childComplexity int) int
-	}
-
-	Mutation struct {
-		Pod func(childComplexity int, ns string, name string) int
 	}
 
 	Namespace struct {
@@ -845,14 +827,6 @@ type LoggerResolver interface {
 }
 type MistakeSpecResolver interface {
 	Filling(ctx context.Context, obj *v1alpha1.MistakeSpec) (*string, error)
-}
-type MutablePodResolver interface {
-	KillProcesses(ctx context.Context, obj *model.MutablePod, pids []string) ([]*model.KillProcessResult, error)
-	CleanTcs(ctx context.Context, obj *model.MutablePod, devices []string) ([]string, error)
-	CleanIptables(ctx context.Context, obj *model.MutablePod, chains []string) ([]string, error)
-}
-type MutationResolver interface {
-	Pod(ctx context.Context, ns string, name string) (*model.MutablePod, error)
 }
 type NamespaceResolver interface {
 	Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error)
@@ -2149,20 +2123,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IoFault.Weight(childComplexity), true
 
-	case "KillProcessResult.command":
-		if e.complexity.KillProcessResult.Command == nil {
-			break
-		}
-
-		return e.complexity.KillProcessResult.Command(childComplexity), true
-
-	case "KillProcessResult.pid":
-		if e.complexity.KillProcessResult.Pid == nil {
-			break
-		}
-
-		return e.complexity.KillProcessResult.Pid(childComplexity), true
-
 	case "Logger.component":
 		if e.complexity.Logger.Component == nil {
 			break
@@ -2242,61 +2202,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MistakeSpec.MaxOccurrences(childComplexity), true
-
-	case "MutablePod.cleanIptables":
-		if e.complexity.MutablePod.CleanIptables == nil {
-			break
-		}
-
-		args, err := ec.field_MutablePod_cleanIptables_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MutablePod.CleanIptables(childComplexity, args["chains"].([]string)), true
-
-	case "MutablePod.cleanTcs":
-		if e.complexity.MutablePod.CleanTcs == nil {
-			break
-		}
-
-		args, err := ec.field_MutablePod_cleanTcs_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MutablePod.CleanTcs(childComplexity, args["devices"].([]string)), true
-
-	case "MutablePod.killProcesses":
-		if e.complexity.MutablePod.KillProcesses == nil {
-			break
-		}
-
-		args, err := ec.field_MutablePod_killProcesses_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.MutablePod.KillProcesses(childComplexity, args["pids"].([]string)), true
-
-	case "MutablePod.pod":
-		if e.complexity.MutablePod.Pod == nil {
-			break
-		}
-
-		return e.complexity.MutablePod.Pod(childComplexity), true
-
-	case "Mutation.pod":
-		if e.complexity.Mutation.Pod == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_pod_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Pod(childComplexity, args["ns"].(string), args["name"].(string)), true
 
 	case "Namespace.component":
 		if e.complexity.Namespace.Component == nil {
@@ -4204,20 +4109,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
-	case ast.Mutation:
-		return func(ctx context.Context) *graphql.Response {
-			if !first {
-				return nil
-			}
-			first = false
-			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
-			var buf bytes.Buffer
-			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data: buf.Bytes(),
-			}
-		}
 	case ast.Subscription:
 		next := ec._Logger(ctx, rc.Operation.SelectionSet)
 
@@ -4292,17 +4183,12 @@ scalar Int64
 
 schema {
     query: Query
-    mutation: Mutation
     subscription: Logger
 }
 
 type Query {
     namespace(ns: String): [Namespace!]
     pods(selector: PodSelectorInput!): [Pod!]
-}
-
-type Mutation {
-    pod(ns: String! = "default", name: String!): MutablePod
 }
 
 type Logger {
@@ -4346,11 +4232,6 @@ type Process {
     fds: [Fd!]      @goField(forceResolver: true)
 }
 
-type KillProcessResult {
-    pid: String!
-    command: String!
-}
-
 type Fd {
     fd: String!
     target: String!
@@ -4390,13 +4271,6 @@ input PodSelectorInput {
     # podPhaseSelectors is a set of condition of a pod at the current time.
     # supported value: Pending / Running / Succeeded / Failed / Unknown
     podPhaseSelectors: [String!]
-}
-
-type MutablePod {
-    pod: Pod!
-    killProcesses(pids: [String!]): [KillProcessResult!]    @goField(forceResolver: true)
-    cleanTcs(devices: [String!]): [String!]                 @goField(forceResolver: true)
-    cleanIptables(chains: [String!]): [String!]             @goField(forceResolver: true)
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
@@ -5523,75 +5397,6 @@ func (ec *executionContext) field_Logger_component_args(ctx context.Context, raw
 }
 
 func (ec *executionContext) field_Logger_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["ns"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["ns"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_MutablePod_cleanIptables_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []string
-	if tmp, ok := rawArgs["chains"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chains"))
-		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["chains"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_MutablePod_cleanTcs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []string
-	if tmp, ok := rawArgs["devices"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("devices"))
-		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["devices"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_MutablePod_killProcesses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 []string
-	if tmp, ok := rawArgs["pids"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pids"))
-		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["pids"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -11200,76 +11005,6 @@ func (ec *executionContext) _IoFault_weight(ctx context.Context, field graphql.C
 	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KillProcessResult_pid(ctx context.Context, field graphql.CollectedField, obj *model.KillProcessResult) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "KillProcessResult",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Pid, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KillProcessResult_command(ctx context.Context, field graphql.CollectedField, obj *model.KillProcessResult) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "KillProcessResult",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Command, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Logger_component(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -11634,197 +11369,6 @@ func (ec *executionContext) _MistakeSpec_maxLength(ctx context.Context, field gr
 	res := resTmp.(int64)
 	fc.Result = res
 	return ec.marshalOInt2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _MutablePod_pod(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "MutablePod",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Pod, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*v1.Pod)
-	fc.Result = res
-	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _MutablePod_killProcesses(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "MutablePod",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_MutablePod_killProcesses_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MutablePod().KillProcesses(rctx, obj, args["pids"].([]string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.KillProcessResult)
-	fc.Result = res
-	return ec.marshalOKillProcessResult2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResultᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _MutablePod_cleanTcs(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "MutablePod",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_MutablePod_cleanTcs_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MutablePod().CleanTcs(rctx, obj, args["devices"].([]string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _MutablePod_cleanIptables(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "MutablePod",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_MutablePod_cleanIptables_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MutablePod().CleanIptables(rctx, obj, args["chains"].([]string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_pod(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_pod_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Pod(rctx, args["ns"].(string), args["name"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.MutablePod)
-	fc.Result = res
-	return ec.marshalOMutablePod2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐMutablePod(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_ns(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
@@ -23479,38 +23023,6 @@ func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
-var killProcessResultImplementors = []string{"KillProcessResult"}
-
-func (ec *executionContext) _KillProcessResult(ctx context.Context, sel ast.SelectionSet, obj *model.KillProcessResult) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, killProcessResultImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("KillProcessResult")
-		case "pid":
-			out.Values[i] = ec._KillProcessResult_pid(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "command":
-			out.Values[i] = ec._KillProcessResult_command(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var loggerImplementors = []string{"Logger"}
 
 func (ec *executionContext) _Logger(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
@@ -23619,94 +23131,6 @@ func (ec *executionContext) _MistakeSpec(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._MistakeSpec_maxOccurrences(ctx, field, obj)
 		case "maxLength":
 			out.Values[i] = ec._MistakeSpec_maxLength(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var mutablePodImplementors = []string{"MutablePod"}
-
-func (ec *executionContext) _MutablePod(ctx context.Context, sel ast.SelectionSet, obj *model.MutablePod) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, mutablePodImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MutablePod")
-		case "pod":
-			out.Values[i] = ec._MutablePod_pod(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "killProcesses":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MutablePod_killProcesses(ctx, field, obj)
-				return res
-			})
-		case "cleanTcs":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MutablePod_cleanTcs(ctx, field, obj)
-				return res
-			})
-		case "cleanIptables":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MutablePod_cleanIptables(ctx, field, obj)
-				return res
-			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var mutationImplementors = []string{"Mutation"}
-
-func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
-
-	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
-		Object: "Mutation",
-	})
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Mutation")
-		case "pod":
-			out.Values[i] = ec._Mutation_pod(ctx, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -26612,16 +26036,6 @@ func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaos�
 	return ec._IoFault(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNKillProcessResult2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResult(ctx context.Context, sel ast.SelectionSet, v *model.KillProcessResult) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._KillProcessResult(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *model.Namespace) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -27640,46 +27054,6 @@ func (ec *executionContext) marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋcha
 	return ret
 }
 
-func (ec *executionContext) marshalOKillProcessResult2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResultᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.KillProcessResult) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNKillProcessResult2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResult(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
 func (ec *executionContext) marshalOLossSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐLossSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.LossSpec) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -27714,13 +27088,6 @@ func (ec *executionContext) marshalOMistakeSpec2ᚖgithubᚗcomᚋchaosᚑmesh�
 		return graphql.Null
 	}
 	return ec._MistakeSpec(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOMutablePod2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐMutablePod(ctx context.Context, sel ast.SelectionSet, v *model.MutablePod) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._MutablePod(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespaceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Namespace) graphql.Marshaler {
