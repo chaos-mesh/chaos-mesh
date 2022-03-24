@@ -22,6 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
+// TODO: use NotType[expected, in any]() error after go1.18 updated
 var ErrCanNotAdd = errors.New("can not add")
 var ErrCanNotAssign = errors.New("can not assign")
 var ErrCanNotNew = errors.New("can not new")
@@ -52,13 +53,13 @@ type Assign interface {
 
 // TaskExecutor indicate that the type can be used
 // for execute task here as a task config.
-// Addable means we can sum many task config in to one for apply.
+// Mergeable means we can sum many task config in to one for apply.
 // Creator means we can use the task config to create a running task
 // which can Inject on PID.
 // Assign means we can use the task config to update an existing running task.
 type TaskExecutor interface {
 	Object
-	Addable
+	Mergeable
 	Creator
 	Assign
 }
@@ -76,8 +77,8 @@ type TaskExecutor interface {
 // the task must implement Recoverable.
 // If not implement ,
 // the Recover function will return a ErrNotImplement("Recoverable") error.
-// IMPORTANT: We assume task config obey that TaskConfig.Data A,B. A.Add(B)
-// is approximately equal to B.Add(A)
+// IMPORTANT: We assume task config obey that TaskConfig.Data A,B. A.Merge(B)
+// is approximately equal to B.Merge(A)
 type TaskManager struct {
 	taskConfigManager TaskConfigManager
 	taskMap           map[PID]Injectable
@@ -245,7 +246,7 @@ func (cm TaskManager) Recover(uid UID, pid PID) error {
 }
 
 func (cm TaskManager) commit(uid UID, pid PID) error {
-	task, err := cm.taskConfigManager.SumTaskConfig(uid)
+	task, err := cm.taskConfigManager.MergeTaskConfig(uid)
 	if err != nil {
 		return errors.Wrapf(err, "unknown recovering in the taskConfigManager, UID: %v", uid)
 	}

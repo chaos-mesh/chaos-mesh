@@ -26,6 +26,7 @@ type PID interface {
 }
 type UID = string
 
+// TODO: use generic error after golang 1.18 updated
 var ErrPIDNotFound = chaoserr.NotFound("PID")
 var ErrUIDNotFound = chaoserr.NotFound("UID")
 var ErrTaskConfigNotFound = chaoserr.NotFound("task config")
@@ -38,9 +39,9 @@ type Object interface {
 	DeepCopy() Object
 }
 
-// Addable introduces the data gathering ability.
-type Addable interface {
-	Add(a Addable) error
+// Mergeable introduces the data gathering ability.
+type Mergeable interface {
+	Merge(a Mergeable) error
 }
 
 // TaskConfig defines a composite of flexible config with an immutable target.
@@ -59,7 +60,7 @@ func NewTaskConfig(main PID, data Object) TaskConfig {
 }
 
 // TaskConfigManager provides some basic methods on TaskConfig.
-// If developers wants to use SumTaskConfig, they must implement Addable for the TaskConfig.
+// If developers wants to use MergeTaskConfig, they must implement Mergeable for the TaskConfig.
 type TaskConfigManager struct {
 	TaskConfigMap map[UID]TaskConfig
 }
@@ -136,11 +137,11 @@ func (m TaskConfigManager) CheckTask(uid UID, pid PID) error {
 	return nil
 }
 
-// SumTaskConfig will sum the TaskConfig with a same TaskConfig.Main.
-// If developers want to use it with type T, they must implement Addable for *T.
-// IMPORTANT: Just here , we do not assume A.Add(B) == B.Add(A).
-// What SumTaskConfig do : A := new(TaskConfig), A.Add(B).Add(C).Add(D)... , A marked as uid.
-func (m TaskConfigManager) SumTaskConfig(uid UID) (TaskConfig, error) {
+// MergeTaskConfig will sum the TaskConfig with a same TaskConfig.Main.
+// If developers want to use it with type T, they must implement Mergeable for *T.
+// IMPORTANT: Just here , we do not assume A.Merge(B) == B.Merge(A).
+// What MergeTaskConfig do : A := new(TaskConfig), A.Merge(B).Merge(C).Merge(D)... , A marked as uid.
+func (m TaskConfigManager) MergeTaskConfig(uid UID) (TaskConfig, error) {
 	if m.TaskConfigMap == nil {
 		return TaskConfig{}, ErrTaskConfigMapNotInit
 	}
@@ -163,15 +164,15 @@ func (m TaskConfigManager) SumTaskConfig(uid UID) (TaskConfig, error) {
 		if !ok {
 			return TaskConfig{}, ErrTaskConfigNotFound
 		}
-		AddableData, ok := task.Data.(Addable)
+		AddableData, ok := task.Data.(Mergeable)
 		if !ok {
-			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "task.Data")
+			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Mergeable"), "task.Data")
 		}
-		AddableTempData, ok := taskTemp.Data.(Addable)
+		AddableTempData, ok := taskTemp.Data.(Mergeable)
 		if !ok {
-			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Addable"), "taskTemp.Data")
+			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Mergeable"), "taskTemp.Data")
 		}
-		err := AddableData.Add(AddableTempData)
+		err := AddableData.Merge(AddableTempData)
 		if err != nil {
 			return TaskConfig{}, err
 		}

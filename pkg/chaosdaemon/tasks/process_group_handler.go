@@ -25,7 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
-var ErrNotFoundChildProcess = chaoserr.NotFound("child process")
+// TODO: is not SysPID -> NotType[SysPID] after update to go 1.18
 var ErrNotSysPID = errors.New("pid is not SysPID")
 
 type SysPID uint32
@@ -75,7 +75,7 @@ func (gp *ProcessGroupHandler) Inject(pid PID) error {
 
 	childPIDs, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
 	if err != nil {
-		return errors.Wrapf(ErrNotFoundChildProcess, "cause : %v", err)
+		return errors.Wrapf(chaoserr.NotFound("child process"), "cause : %v", err)
 	}
 
 	for _, childPID := range childPIDs {
@@ -120,7 +120,7 @@ func (gp *ProcessGroupHandler) Recover(pid PID) error {
 
 	childPids, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
 	if err != nil {
-		return errors.Wrapf(ErrNotFoundChildProcess, "cause : %v", err)
+		return errors.Wrapf(chaoserr.NotFound("child process"), "cause : %v", err)
 	}
 
 	for _, childPID := range childPids {

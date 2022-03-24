@@ -19,6 +19,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+//Todo : update after go1.18 updated
+//func NotFound[T any]() error {
+//	var inner T
+//	return errors.New(fmt.Sprintf("%T not found", inner))
+//}
+
 func NotFound(name string) error {
 	return errors.Errorf("%s not found.", name)
 }

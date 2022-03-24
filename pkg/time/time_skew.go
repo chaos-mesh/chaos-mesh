@@ -72,7 +72,7 @@ func (c *Config) DeepCopy() tasks.Object {
 }
 
 // Add implement how to merge time skew tasks.
-func (c *Config) Add(a tasks.Addable) error {
+func (c *Config) Merge(a tasks.Mergeable) error {
 	A, OK := a.(*Config)
 	if OK {
 		c.deltaSeconds += A.deltaSeconds

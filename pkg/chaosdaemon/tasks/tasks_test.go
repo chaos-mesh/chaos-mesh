@@ -32,7 +32,7 @@ type FakeConfig struct {
 	i int
 }
 
-func (f *FakeConfig) Add(a Addable) error {
+func (f *FakeConfig) Merge(a Mergeable) error {
 	A, OK := a.(*FakeConfig)
 	if OK {
 		f.i += A.i

@@ -23,9 +23,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
-var ErrNotFoundSysPID = chaoserr.NotFound("SysPID")
+// TODO: is not PodID -> NotType[PodPID] after update to go 1.18
 var ErrNotPodPID = errors.New("pid is not PodPID")
-var ErrPodProcessMapNotInit = errors.New("PodProcessMap not init")
 
 type PodID string
 
@@ -56,7 +55,7 @@ func (p *PodProcessMap) Read(podPID PodID) (SysPID, error) {
 	defer p.rwLock.RUnlock()
 	sysPID, ok := p.m[podPID]
 	if !ok {
-		return SysPID(0), ErrNotFoundSysPID
+		return SysPID(0), chaoserr.NotFound("SysPID")
 	}
 	return sysPID, nil
 }
@@ -90,7 +89,7 @@ func (p *PodHandler) Inject(pid PID) error {
 		return ErrNotPodPID
 	}
 	if p.PodProcessMap == nil {
-		return ErrPodProcessMapNotInit
+		return errors.New("PodProcessMap not init")
 	}
 
 	sysPID, err := p.PodProcessMap.Read(podPID)
@@ -110,7 +109,7 @@ func (p *PodHandler) Recover(pid PID) error {
 		return ErrNotPodPID
 	}
 	if p.PodProcessMap == nil {
-		return ErrPodProcessMapNotInit
+		return errors.New("PodProcessMap not init")
 	}
 
 	sysPID, err := p.PodProcessMap.Read(podPID)
