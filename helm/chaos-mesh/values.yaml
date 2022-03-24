@@ -106,11 +106,11 @@ controllerManager:
 
   # A list of controllers to enable. "*" enables all controllers by default.
   enabledControllers:
-  - "*"
+    - "*"
 
   # A list of webhooks to enable. "*" enables all webhooks by default.
   enabledWebhooks:
-  - "*"
+    - "*"
 
   # This is Dangerous. Run only on temporary clusters.
   allowHostNetworkTesting: false
@@ -184,7 +184,8 @@ chaosDaemon:
   # runtime: crio
   # socketPath: /var/run/crio/crio.sock
 
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -280,11 +281,11 @@ dashboard:
     #
     subPath: ""
 
-  # The keys within the "env" map are mounted as environment variables on the Chaos Dashboard pod.
+  # The keys within the "env" map are mounted as environment variables on the pod.
   env:
-    LISTEN_HOST: "0.0.0.0"
+    LISTEN_HOST: 0.0.0.0
     LISTEN_PORT: 2333
-    METRIC_HOST: "0.0.0.0"
+    METRIC_HOST: 0.0.0.0
     METRIC_PORT: 2334
 
     # If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
@@ -439,6 +440,7 @@ webhook:
     - kernelchaos
     - stresschaos
     - awschaos
+    - azurechaos
     - gcpchaos
     - dnschaos
     - jvmchaos
@@ -448,6 +450,7 @@ webhook:
     - blockchaos
     - physicalmachinechaos
     - physicalmachine
+    - statuscheck
 
 bpfki:
   create: false
@@ -460,7 +463,8 @@ bpfki:
     tag: ""
   imagePullPolicy: IfNotPresent
   grpcPort: 50051
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following

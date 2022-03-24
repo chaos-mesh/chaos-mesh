@@ -24,7 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
 
-// validateDeviceName validates the DeviceName
+// validateDeviceName validates the gcp chaos actions
 func (in GCPChaosAction) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
