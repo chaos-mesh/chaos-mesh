@@ -22,7 +22,6 @@ import (
 
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
 )
 
 var managerNamespace, managerSvc string
@@ -97,12 +96,8 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecoverBuilder{
-		httpChaos:    recover.PipelineBuilder(httpChaos, recover.CleanProcessRecoverBuilder("tproxy"), recover.HTTPRecover),
-		ioChaos:      recover.PipelineBuilder(ioChaos, recover.CleanProcessRecoverBuilder("toda"), recover.IORecover),
-		stressChaos:  recover.PipelineBuilder(stressChaos, recover.CleanProcessRecoverBuilder("stress-ng"), recover.CleanProcessRecoverBuilder("memStress")),
-		networkChaos: recover.PipelineBuilder(networkChaos, recover.TcsRecover, recover.IptablesRecover),
-	})
+	// TODO: register recovers
+	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), nil)
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
 		cm.PrettyPrint("recover command: "+err.Error(), 1, cm.Red)
