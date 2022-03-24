@@ -42,14 +42,14 @@ func NewRecoverCommand(logger logr.Logger, builders map[string]recover.RecoverBu
 		Use:   `recover (CHAOSTYPE) (PODs) [-n NAMESPACE]`,
 		Short: `Recover certain chaos from certain pods`,
 		Long: `Recover certain chaos from certain pods.
-Currently support networkchaos, stresschaos, iochaos and httpchaos.
+Currently unimplemented.
 
 Examples:
   # Recover network chaos from pods in namespace default
-  chaosctl debug networkchaos
+  chaosctl recover networkchaos
 
   # Recover network chaos from certain pod in 
-  chaosctl debug networkchaos PODs -n NAMESPACE`,
+  chaosctl recover networkchaos PODs -n NAMESPACE`,
 		ValidArgsFunction: noCompletions,
 	}
 

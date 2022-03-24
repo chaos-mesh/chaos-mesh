@@ -27,3 +27,13 @@ type Recover interface {
 }
 
 type RecoverBuilder func(client *ctrlclient.CtrlClient) Recover
+
+type noopRecover struct{}
+
+func NewNoopRecover(client *ctrlclient.CtrlClient) Recover {
+	return &noopRecover{}
+}
+
+func (r *noopRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+	return nil
+}
