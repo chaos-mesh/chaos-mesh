@@ -140,6 +140,7 @@ func (o *RecoverOptions) List(client *ctrlclient.CtrlClient) ([]string, cobra.Sh
 	pods, err := o.selectPods(client, []string{})
 	if err != nil {
 		common.PrettyPrint(errors.Wrap(err, "select pods").Error(), 0, common.Red)
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
 
 	var names []string
@@ -160,13 +161,19 @@ func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []strin
 		},
 	}
 
+	if len(names) != 0 {
+		selector.Pods = map[string][]string{o.namespace: names}
+	}
+
 	labelSelector := map[string]string{}
 	if o.labels != nil && len(*o.labels) > 0 {
 		for _, label := range *o.labels {
 			pair := strings.Split(label, "=")
-			if len(pair) == 2 {
-				labelSelector[pair[0]] = pair[1]
+			if len(pair) != 2 {
+				common.PrettyPrint(fmt.Sprintf("wrong label: %s", label), 0, common.Red)
+				continue
 			}
+			labelSelector[pair[0]] = pair[1]
 		}
 	}
 
