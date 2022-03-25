@@ -48,9 +48,10 @@ const (
 
 // Inject do pod template config inject
 func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *v1.AdmissionResponse {
+	logger := log.L().WithName("inject")
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
-		log.L().WithName("inject").Error(err, "Could not unmarshal raw object")
+		logger.Error(err, "Could not unmarshal raw object")
 		return &v1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
@@ -64,15 +65,15 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 		pod.ObjectMeta.Namespace = res.Namespace
 	}
 
-	log.L().WithName("inject").Info("AdmissionReview for",
+	logger.Info("AdmissionReview for",
 		"Kind", res.Kind, "Namespace", res.Namespace, "Name", res.Name, "podName", podName, "UID", res.UID, "patchOperation", res.Operation, "UserInfo", res.UserInfo)
-	log.L().WithName("inject").V(4).Info("Object", "Object", string(res.Object.Raw))
-	log.L().WithName("inject").V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
-	log.L().WithName("inject").V(4).Info("Pod", "Pod", pod)
+	logger.V(4).Info("Object", "Object", string(res.Object.Raw))
+	logger.V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
+	logger.V(4).Info("Pod", "Pod", pod)
 
 	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg, controllerCfg)
 	if !ok {
-		log.L().WithName("inject").Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
+		logger.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
 		return &v1.AdmissionResponse{
 			Allowed: true,
 		}
@@ -83,7 +84,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 	}
 	injectionConfig, err := cfg.GetRequestedConfig(pod.Namespace, requiredKey)
 	if err != nil {
-		log.L().WithName("inject").Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
+		logger.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
 			injectionConfig)
 		// dont prevent pods from launching! just return allowed
 		return &v1.AdmissionResponse{
@@ -95,14 +96,14 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 		meet, err := podselector.CheckPodMeetSelector(context.Background(), cli, pod, *injectionConfig.Selector,
 			controllerCfg.ClusterScoped, controllerCfg.TargetNamespace, controllerCfg.EnableFilterNamespace)
 		if err != nil {
-			log.L().WithName("inject").Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
+			logger.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
 			return &v1.AdmissionResponse{
 				Allowed: true,
 			}
 		}
 
 		if !meet {
-			log.L().WithName("inject").Info("Skipping injection, this pod does not meet the selection criteria",
+			logger.Info("Skipping injection, this pod does not meet the selection criteria",
 				"namespace", pod.Namespace, "name", pod.Name)
 			return &v1.AdmissionResponse{
 				Allowed: true,
@@ -121,7 +122,7 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 		}
 	}
 
-	log.L().Info("AdmissionResponse: patch", "patchBytes", string(patchBytes))
+	logger.Info("AdmissionResponse: patch", "patchBytes", string(patchBytes))
 	if metrics != nil {
 		metrics.Injections.WithLabelValues(res.Namespace, requiredKey).Inc()
 	}
@@ -136,10 +137,11 @@ func Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, con
 
 // Check whether the target resource need to be injected and return the required config name
 func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) (string, bool) {
+	logger := log.L().WithName("inject")
 	// skip special kubernetes system namespaces
 	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
-			log.L().Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
+			logger.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
 			return "", false
 		}
 	}
@@ -147,19 +149,19 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 	if controllerCfg.EnableFilterNamespace {
 		ok, err := genericnamespace.IsAllowedNamespaces(context.Background(), cli, metadata.Namespace)
 		if err != nil {
-			log.L().Error(err, "fail to check whether this namespace should be injected", "namespace", metadata.Namespace)
+			logger.Error(err, "fail to check whether this namespace should be injected", "namespace", metadata.Namespace)
 		}
 
 		if !ok {
-			log.L().Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
+			logger.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
 			return "", false
 		}
 	}
 
-	log.L().V(4).Info("meta", "meta", metadata)
+	logger.V(4).Info("meta", "meta", metadata)
 
 	if checkInjectStatus(metadata, cfg) {
-		log.L().Info("Pod annotation indicates injection already satisfied, skipping",
+		logger.Info("Pod annotation indicates injection already satisfied, skipping",
 			"namespace", metadata.Namespace, "name", metadata.Name,
 			"annotationKey", cfg.StatusAnnotationKey(), "value", StatusInjected)
 		return "", false
@@ -167,7 +169,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 
 	requiredConfig, ok := injectByPodRequired(metadata, cfg)
 	if ok {
-		log.L().Info("Pod annotation requesting sidecar config",
+		logger.Info("Pod annotation requesting sidecar config",
 			"namespace", metadata.Namespace, "name", metadata.Name,
 			"annotation", cfg.RequestAnnotationKey(), "requiredConfig", requiredConfig)
 		return requiredConfig, true
@@ -175,7 +177,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 
 	requiredConfig, ok = injectByNamespaceRequired(metadata, cli, cfg)
 	if ok {
-		log.L().Info("Pod annotation requesting sidecar config",
+		logger.Info("Pod annotation requesting sidecar config",
 			"namespace", metadata.Namespace, "name", metadata.Name,
 			"annotation", cfg.RequestAnnotationKey(), "requiredConfig", requiredConfig)
 		return requiredConfig, true
@@ -183,7 +185,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 
 	requiredConfig, ok = injectByNamespaceInitRequired(metadata, cli, cfg)
 	if ok {
-		log.L().Info("Pod annotation init requesting sidecar config",
+		logger.Info("Pod annotation init requesting sidecar config",
 			"namespace", metadata.Namespace, "name", metadata.Name,
 			"annotation", cfg.RequestAnnotationKey(), "requiredConfig", requiredConfig)
 		return requiredConfig, true
@@ -208,8 +210,9 @@ func checkInjectStatus(metadata *metav1.ObjectMeta, cfg *config.Config) bool {
 
 func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	var ns corev1.Namespace
+	logger := log.L().WithName("inject")
 	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
-		log.L().Error(err, "failed to get namespace", "namespace", metadata.Namespace)
+		logger.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
 		return "", false
 	}
 	annotations := ns.GetAnnotations()
@@ -219,20 +222,21 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 
 	required, ok := annotations[annotation.GenKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
 	if !ok {
-		log.L().Info("Pod annotation by namespace is missing, skipping injection",
+		logger.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
 		return "", false
 	}
 
-	log.L().Info("Get sidecar config from namespace annotations",
+	logger.Info("Get sidecar config from namespace annotations",
 		"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
 	return strings.ToLower(required), true
 }
 
 func injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	var ns corev1.Namespace
+	logger := log.L().WithName("inject")
 	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
-		log.L().Error(err, "failed to get namespace", "namespace", metadata.Namespace)
+		logger.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
 		return "", false
 	}
 
@@ -243,17 +247,18 @@ func injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Clien
 
 	required, ok := annotations[cfg.RequestInitAnnotationKey()]
 	if !ok {
-		log.L().Info("Pod annotation by namespace is missing, skipping injection",
+		logger.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
 		return "", false
 	}
 
-	log.L().Info("Get sidecar config from namespace annotations",
+	logger.Info("Get sidecar config from namespace annotations",
 		"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
 	return strings.ToLower(required), true
 }
 
 func injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
+	logger := log.L().WithName("inject")
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
 		annotations = make(map[string]string)
@@ -261,12 +266,12 @@ func injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (strin
 
 	required, ok := annotations[cfg.RequestAnnotationKey()]
 	if !ok {
-		log.L().Info("Pod annotation is missing, skipping injection",
+		logger.Info("Pod annotation is missing, skipping injection",
 			"namespace", metadata.Namespace, "name", metadata.Name, "annotation", cfg.RequestAnnotationKey())
 		return "", false
 	}
 
-	log.L().Info("Get sidecar config from pod annotations",
+	logger.Info("Get sidecar config from pod annotations",
 		"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
 	return strings.ToLower(required), true
 }
@@ -313,6 +318,7 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 }
 
 func setCommands(target []corev1.Container, postStart map[string]config.ExecAction) (patch []patchOperation) {
+	logger := log.L().WithName("inject")
 	if postStart == nil {
 		return
 	}
@@ -327,7 +333,7 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 
 		commands := MergeCommands(execCmd.Command, container.Command, container.Args)
 
-		log.L().Info("Inject command", "command", commands)
+		logger.Info("Inject command", "command", commands)
 
 		patch = append(patch, patchOperation{
 			Op:    "replace",
@@ -388,11 +394,12 @@ func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch 
 }
 
 func addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
+	logger := log.L().WithName("inject")
 	first := len(target) == 0
 	var value interface{}
 	for _, add := range added {
 		value = add
-		log.L().V(6).Info("Add container", "add", add)
+		logger.V(6).Info("Add container", "add", add)
 		path := basePath
 		if first {
 			first = false
@@ -431,13 +438,14 @@ func addVolumes(target, added []corev1.Volume, basePath string) (patch []patchOp
 }
 
 func setVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount, basePath string) (patch []patchOperation) {
+	logger := log.L().WithName("inject")
 	for index, c := range target {
 		volumeMounts := map[string]corev1.VolumeMount{}
 		for _, vm := range c.VolumeMounts {
 			volumeMounts[vm.Name] = vm
 		}
 		for _, added := range addedVolumeMounts {
-			log.L().Info("volumeMount", "add", added)
+			logger.Info("volumeMount", "add", added)
 			volumeMounts[added.Name] = added
 		}
 
