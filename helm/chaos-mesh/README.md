@@ -24,17 +24,17 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
 | `enableCtrlServer` | A flag to enable ctrlserver which provides service to chaosctl in controller-manager. | `true` |
-| `images.registry` | the global container registry for the images, you could replace it with your self-hosted container registry. | `ghcr.io` |
+| `images.registry` | The global container registry for the images, you could replace it with your self-hosted container registry. | `ghcr.io` |
 | `images.tag` | The global image tag (for example, semiVer with prefix v, or latest). | `latest` |
 | `imagePullSecrets` | Global Docker registry secret names as an array  | [] (does not add image pull secrets to deployed pods) |
-| `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
+| `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `3` |
-| `controllerManager.image.registry` | override global registry, empty value means using the global images.registry | `` |
-| `controllerManager.image.repository` | repository part for image of chaos-controller-manager | `chaos-mesh/chaos-mesh` |
-| `controllerManager.image.tag` | override global tag, empty value means using the global images.tag | `` |
+| `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `controllerManager.image.repository` | Repository part for image of chaos-controller-manager | `chaos-mesh/chaos-mesh` |
+| `controllerManager.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `controllerManager.imagePullPolicy` | Image pull policy | `Always` |
 | `controllerManager.enableFilterNamespace` | If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` could be injected | false |
 | `controllerManager.service.type` | Kubernetes Service type for service chaos-controller-manager | `ClusterIP` |
@@ -51,14 +51,14 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | `10s` |
 | `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | `2s` |
 | `controllerManager.chaosdSecurityMode` |  Enabled for mTLS connection between chaos-controller-manager and chaosd | `true` |
-| `controllerManager.image.registry` | override global registry, empty value means using the global images.registry | `` |
-| `controllerManager.image.repository` | repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
-| `controllerManager.image.tag` | override global tag, empty value means using the global images.tag | `` |
+| `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `controllerManager.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
+| `controllerManager.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `chaosDaemon.imagePullPolicy` | Image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
-| `chaosDaemon.env` | extra chaosDaemon envs | `{}` |
-| `chaosDaemon.hostNetwork` | running chaosDaemon on host network | `false` |
+| `chaosDaemon.env` | Extra chaosDaemon envs | `{}` |
+| `chaosDaemon.hostNetwork` | Running chaosDaemon on host network | `false` |
 | `chaosDaemon.privileged` | Run chaos-daemon container in privileged mode. If it is set to false, chaos-daemon will be run in some specified capabilities. capabilities: SYS_PTRACE, NET_ADMIN, MKNOD, SYS_CHROOT, SYS_ADMIN, KILL, IPC_LOCK | `true` |
 | `chaosDaemon.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
@@ -72,13 +72,13 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.affinity` |  Map of chaos-daemon node/pod affinities | `{}` |
 | `dashboard.create` | Enable chaos-dashboard | `false` |
 | `dashboard.rootUrl` | Specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL. | `http://localhost:2333` |
-| `dashboard.hostNetwork` | running chaos-dashboard on host network | `false` |
-| `dashboard.replicaCount` | replicas of chaos-dashboard | `1` |
+| `dashboard.hostNetwork` | Running chaos-dashboard on host network | `false` |
+| `dashboard.replicaCount` | Replicas of chaos-dashboard | `1` |
 | `dashboard.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `dashboard.serviceAccount` | The serviceAccount for chaos-dashboard  | `chaos-dashboard` |
-| `dashboard.image.registry` | override global registry, empty value means using the global images.registry | `` |
-| `dashboard.image.repository` | repository part for image of chaos-dashboard | `chaos-mesh/chaos-dashboard` |
-| `dashboard.image.tag` | override global tag, empty value means using the global images.tag | `` |
+| `dashboard.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `dashboard.image.repository` | Repository part for image of chaos-dashboard | `chaos-mesh/chaos-dashboard` |
+| `dashboard.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `dashboard.imagePullPolicy` | Image pull policy | `Always` |
 | `dashboard.securityMode` | Enable both of "rbac authentication on Chaos Dashboard" and "chaos-daemon mtls" | `true` |
 | `dashboard.gcpSecurityMode` | Enable GCP Authentication Integration, see: <https://chaos-mesh.org/docs/gcp-authentication/> for more details | `false` |
@@ -125,8 +125,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dnsServer.nodeSelector` | Node labels for chaos-dns-server pod assignment | `` |
 | `dnsServer.tolerations` | Toleration labels for chaos-dns-server pod assignment | `[]` |
 | `dnsServer.podAnnotations` | Pod annotations of chaos-dns-server | `` |
-| `dnsServer.name` | the service name of chaos-dns-server | `chaos-mesh-dns-server` |
-| `dnsServer.grpcPort` | `grpc port for chaos-dns-server` | `9288` |
+| `dnsServer.name` | The service name of chaos-dns-server | `chaos-mesh-dns-server` |
+| `dnsServer.grpcPort` | Grpc port for chaos-dns-server | `9288` |
 | `dnsServer.resources` | CPU/Memory resource requests/limits for chaos-dns-server pod |  `requests: { cpu: "100m", memory: "70Mi" }, limits:{}` |
 | `dnsServer.env.LISTEN_HOST` | The address of chaos-dns-server listen on | `0.0.0.0` |
 | `dnsServer.env.LISTEN_PORT` | The port of chaos-dns-server listen on | `53` |
@@ -141,23 +141,23 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `prometheus.podAnnotations` | Deployment prometheus annotations | `{}` |
 | `prometheus.resources` | CPU/Memory resource requests/limits for prometheus pod |  `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
 | `prometheus.service.type` | Kubernetes Service type | `ClusterIP` |
-| `prometheus.volume.storage` | storage size of PVC | `2Gi` |
-| `prometheus.volume.storageClassName` | storage class of PVC | `standard` |
+| `prometheus.volume.storage` | Storage size of PVC | `2Gi` |
+| `prometheus.volume.storageClassName` | Storage class of PVC | `standard` |
 | `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
-| `webhook.timeoutSeconds` | timeout for admission webhooks in seconds | `5` |
+| `webhook.timeoutSeconds` | Timeout for admission webhooks in seconds | `5` |
 | `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
 | `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos,stresschaos,awschaos,azurechaos,gcpchaos,dnschaos,jvmchaos,schedule,workflow,httpchaos,bnlockchaos,physicalmachinechaos,phsicalmachine,statuscheck]` |
 | `bpfki.create` | Enable chaos-kernel | `false` |
-| `bpfki.image.registry` | override global registry, empty value means using the global images.registry | `` |
-| `bpfki.image.repository` | repository part for image of chaos-kernel | `chaos-mesh/chaos-kernel` |
-| `bpfki.image.tag` | override global tag, empty value means using the global images.tag | `` |
+| `bpfki.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `bpfki.image.repository` | Repository part for image of chaos-kernel | `chaos-mesh/chaos-kernel` |
+| `bpfki.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `bpfki.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `bpfki.grpcPort` | The port which grpc server listens on | `50051` |
 | `bpfki.resources` | CPU/Memory resource requests/limits for chaos-kernel container | {}}` |
 | `chaosDlv.enable` | Create sidecar remote debugging container | `false` |
-| `chaosDlv.image.registry` | override global registry, empty value means using the global images.registry | `false` |
-| `chaosDlv.repository` | repository part for image of chaos-dlv | `chaos-mesh/chaos-dlv` |
-| `chaosDlv.tag` | override global tag, empty value means using the global images.tag | `false` |
+| `chaosDlv.image.registry` | Override global registry, empty value means using the global images.registry | `false` |
+| `chaosDlv.repository` | Repository part for image of chaos-dlv | `chaos-mesh/chaos-dlv` |
+| `chaosDlv.tag` | Override global tag, empty value means using the global images.tag | `false` |
 | `chaosDlv.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
