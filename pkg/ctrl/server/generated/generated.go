@@ -120,7 +120,7 @@ type ComplexityRoot struct {
 		Raw    func(childComplexity int) int
 	}
 
-	CgroupsCPU struct {
+	CgroupsCpu struct {
 		Period func(childComplexity int) int
 		Quota  func(childComplexity int) int
 	}
@@ -448,25 +448,25 @@ type ComplexityRoot struct {
 		UID                        func(childComplexity int) int
 	}
 
-	PodHTTPChaosActions struct {
+	PodHttpChaosActions struct {
 		Abort   func(childComplexity int) int
 		Delay   func(childComplexity int) int
 		Patch   func(childComplexity int) int
 		Replace func(childComplexity int) int
 	}
 
-	PodHTTPChaosPatchActions struct {
+	PodHttpChaosPatchActions struct {
 		Body    func(childComplexity int) int
 		Headers func(childComplexity int) int
 		Queries func(childComplexity int) int
 	}
 
-	PodHTTPChaosPatchBodyAction struct {
+	PodHttpChaosPatchBodyAction struct {
 		Type  func(childComplexity int) int
 		Value func(childComplexity int) int
 	}
 
-	PodHTTPChaosReplaceActions struct {
+	PodHttpChaosReplaceActions struct {
 		Body    func(childComplexity int) int
 		Code    func(childComplexity int) int
 		Headers func(childComplexity int) int
@@ -475,7 +475,7 @@ type ComplexityRoot struct {
 		Queries func(childComplexity int) int
 	}
 
-	PodHTTPChaosRule struct {
+	PodHttpChaosRule struct {
 		Actions  func(childComplexity int) int
 		Port     func(childComplexity int) int
 		Selector func(childComplexity int) int
@@ -483,7 +483,7 @@ type ComplexityRoot struct {
 		Target   func(childComplexity int) int
 	}
 
-	PodHTTPChaosSelector struct {
+	PodHttpChaosSelector struct {
 		Code            func(childComplexity int) int
 		Method          func(childComplexity int) int
 		Path            func(childComplexity int) int
@@ -492,11 +492,11 @@ type ComplexityRoot struct {
 		ResponseHeaders func(childComplexity int) int
 	}
 
-	PodHTTPChaosSpec struct {
+	PodHttpChaosSpec struct {
 		Rules func(childComplexity int) int
 	}
 
-	PodHTTPChaosStatus struct {
+	PodHttpChaosStatus struct {
 		FailedMessage      func(childComplexity int) int
 		ObservedGeneration func(childComplexity int) int
 		Pid                func(childComplexity int) int
@@ -1149,18 +1149,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Cgroups.Raw(childComplexity), true
 
 	case "CgroupsCpu.period":
-		if e.complexity.CgroupsCPU.Period == nil {
+		if e.complexity.CgroupsCpu.Period == nil {
 			break
 		}
 
-		return e.complexity.CgroupsCPU.Period(childComplexity), true
+		return e.complexity.CgroupsCpu.Period(childComplexity), true
 
 	case "CgroupsCpu.quota":
-		if e.complexity.CgroupsCPU.Quota == nil {
+		if e.complexity.CgroupsCpu.Quota == nil {
 			break
 		}
 
-		return e.complexity.CgroupsCPU.Quota(childComplexity), true
+		return e.complexity.CgroupsCpu.Quota(childComplexity), true
 
 	case "CgroupsMemory.limit":
 		if e.complexity.CgroupsMemory.Limit == nil {
@@ -2849,221 +2849,221 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.PodHTTPChaos.UID(childComplexity), true
 
 	case "PodHttpChaosActions.abort":
-		if e.complexity.PodHTTPChaosActions.Abort == nil {
+		if e.complexity.PodHttpChaosActions.Abort == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosActions.Abort(childComplexity), true
+		return e.complexity.PodHttpChaosActions.Abort(childComplexity), true
 
 	case "PodHttpChaosActions.delay":
-		if e.complexity.PodHTTPChaosActions.Delay == nil {
+		if e.complexity.PodHttpChaosActions.Delay == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosActions.Delay(childComplexity), true
+		return e.complexity.PodHttpChaosActions.Delay(childComplexity), true
 
 	case "PodHttpChaosActions.patch":
-		if e.complexity.PodHTTPChaosActions.Patch == nil {
+		if e.complexity.PodHttpChaosActions.Patch == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosActions.Patch(childComplexity), true
+		return e.complexity.PodHttpChaosActions.Patch(childComplexity), true
 
 	case "PodHttpChaosActions.replace":
-		if e.complexity.PodHTTPChaosActions.Replace == nil {
+		if e.complexity.PodHttpChaosActions.Replace == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosActions.Replace(childComplexity), true
+		return e.complexity.PodHttpChaosActions.Replace(childComplexity), true
 
 	case "PodHttpChaosPatchActions.body":
-		if e.complexity.PodHTTPChaosPatchActions.Body == nil {
+		if e.complexity.PodHttpChaosPatchActions.Body == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosPatchActions.Body(childComplexity), true
+		return e.complexity.PodHttpChaosPatchActions.Body(childComplexity), true
 
 	case "PodHttpChaosPatchActions.headers":
-		if e.complexity.PodHTTPChaosPatchActions.Headers == nil {
+		if e.complexity.PodHttpChaosPatchActions.Headers == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosPatchActions.Headers(childComplexity), true
+		return e.complexity.PodHttpChaosPatchActions.Headers(childComplexity), true
 
 	case "PodHttpChaosPatchActions.queries":
-		if e.complexity.PodHTTPChaosPatchActions.Queries == nil {
+		if e.complexity.PodHttpChaosPatchActions.Queries == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosPatchActions.Queries(childComplexity), true
+		return e.complexity.PodHttpChaosPatchActions.Queries(childComplexity), true
 
 	case "PodHttpChaosPatchBodyAction.type":
-		if e.complexity.PodHTTPChaosPatchBodyAction.Type == nil {
+		if e.complexity.PodHttpChaosPatchBodyAction.Type == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosPatchBodyAction.Type(childComplexity), true
+		return e.complexity.PodHttpChaosPatchBodyAction.Type(childComplexity), true
 
 	case "PodHttpChaosPatchBodyAction.value":
-		if e.complexity.PodHTTPChaosPatchBodyAction.Value == nil {
+		if e.complexity.PodHttpChaosPatchBodyAction.Value == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosPatchBodyAction.Value(childComplexity), true
+		return e.complexity.PodHttpChaosPatchBodyAction.Value(childComplexity), true
 
 	case "PodHttpChaosReplaceActions.body":
-		if e.complexity.PodHTTPChaosReplaceActions.Body == nil {
+		if e.complexity.PodHttpChaosReplaceActions.Body == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosReplaceActions.Body(childComplexity), true
+		return e.complexity.PodHttpChaosReplaceActions.Body(childComplexity), true
 
 	case "PodHttpChaosReplaceActions.code":
-		if e.complexity.PodHTTPChaosReplaceActions.Code == nil {
+		if e.complexity.PodHttpChaosReplaceActions.Code == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosReplaceActions.Code(childComplexity), true
+		return e.complexity.PodHttpChaosReplaceActions.Code(childComplexity), true
 
 	case "PodHttpChaosReplaceActions.headers":
-		if e.complexity.PodHTTPChaosReplaceActions.Headers == nil {
+		if e.complexity.PodHttpChaosReplaceActions.Headers == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosReplaceActions.Headers(childComplexity), true
+		return e.complexity.PodHttpChaosReplaceActions.Headers(childComplexity), true
 
 	case "PodHttpChaosReplaceActions.method":
-		if e.complexity.PodHTTPChaosReplaceActions.Method == nil {
+		if e.complexity.PodHttpChaosReplaceActions.Method == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosReplaceActions.Method(childComplexity), true
+		return e.complexity.PodHttpChaosReplaceActions.Method(childComplexity), true
 
 	case "PodHttpChaosReplaceActions.path":
-		if e.complexity.PodHTTPChaosReplaceActions.Path == nil {
+		if e.complexity.PodHttpChaosReplaceActions.Path == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosReplaceActions.Path(childComplexity), true
+		return e.complexity.PodHttpChaosReplaceActions.Path(childComplexity), true
 
 	case "PodHttpChaosReplaceActions.queries":
-		if e.complexity.PodHTTPChaosReplaceActions.Queries == nil {
+		if e.complexity.PodHttpChaosReplaceActions.Queries == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosReplaceActions.Queries(childComplexity), true
+		return e.complexity.PodHttpChaosReplaceActions.Queries(childComplexity), true
 
 	case "PodHttpChaosRule.actions":
-		if e.complexity.PodHTTPChaosRule.Actions == nil {
+		if e.complexity.PodHttpChaosRule.Actions == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosRule.Actions(childComplexity), true
+		return e.complexity.PodHttpChaosRule.Actions(childComplexity), true
 
 	case "PodHttpChaosRule.port":
-		if e.complexity.PodHTTPChaosRule.Port == nil {
+		if e.complexity.PodHttpChaosRule.Port == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosRule.Port(childComplexity), true
+		return e.complexity.PodHttpChaosRule.Port(childComplexity), true
 
 	case "PodHttpChaosRule.selector":
-		if e.complexity.PodHTTPChaosRule.Selector == nil {
+		if e.complexity.PodHttpChaosRule.Selector == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosRule.Selector(childComplexity), true
+		return e.complexity.PodHttpChaosRule.Selector(childComplexity), true
 
 	case "PodHttpChaosRule.source":
-		if e.complexity.PodHTTPChaosRule.Source == nil {
+		if e.complexity.PodHttpChaosRule.Source == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosRule.Source(childComplexity), true
+		return e.complexity.PodHttpChaosRule.Source(childComplexity), true
 
 	case "PodHttpChaosRule.target":
-		if e.complexity.PodHTTPChaosRule.Target == nil {
+		if e.complexity.PodHttpChaosRule.Target == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosRule.Target(childComplexity), true
+		return e.complexity.PodHttpChaosRule.Target(childComplexity), true
 
 	case "PodHttpChaosSelector.code":
-		if e.complexity.PodHTTPChaosSelector.Code == nil {
+		if e.complexity.PodHttpChaosSelector.Code == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSelector.Code(childComplexity), true
+		return e.complexity.PodHttpChaosSelector.Code(childComplexity), true
 
 	case "PodHttpChaosSelector.method":
-		if e.complexity.PodHTTPChaosSelector.Method == nil {
+		if e.complexity.PodHttpChaosSelector.Method == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSelector.Method(childComplexity), true
+		return e.complexity.PodHttpChaosSelector.Method(childComplexity), true
 
 	case "PodHttpChaosSelector.path":
-		if e.complexity.PodHTTPChaosSelector.Path == nil {
+		if e.complexity.PodHttpChaosSelector.Path == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSelector.Path(childComplexity), true
+		return e.complexity.PodHttpChaosSelector.Path(childComplexity), true
 
 	case "PodHttpChaosSelector.port":
-		if e.complexity.PodHTTPChaosSelector.Port == nil {
+		if e.complexity.PodHttpChaosSelector.Port == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSelector.Port(childComplexity), true
+		return e.complexity.PodHttpChaosSelector.Port(childComplexity), true
 
 	case "PodHttpChaosSelector.requestHeaders":
-		if e.complexity.PodHTTPChaosSelector.RequestHeaders == nil {
+		if e.complexity.PodHttpChaosSelector.RequestHeaders == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSelector.RequestHeaders(childComplexity), true
+		return e.complexity.PodHttpChaosSelector.RequestHeaders(childComplexity), true
 
 	case "PodHttpChaosSelector.responseHeaders":
-		if e.complexity.PodHTTPChaosSelector.ResponseHeaders == nil {
+		if e.complexity.PodHttpChaosSelector.ResponseHeaders == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSelector.ResponseHeaders(childComplexity), true
+		return e.complexity.PodHttpChaosSelector.ResponseHeaders(childComplexity), true
 
 	case "PodHttpChaosSpec.rules":
-		if e.complexity.PodHTTPChaosSpec.Rules == nil {
+		if e.complexity.PodHttpChaosSpec.Rules == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosSpec.Rules(childComplexity), true
+		return e.complexity.PodHttpChaosSpec.Rules(childComplexity), true
 
 	case "PodHttpChaosStatus.failedMessage":
-		if e.complexity.PodHTTPChaosStatus.FailedMessage == nil {
+		if e.complexity.PodHttpChaosStatus.FailedMessage == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosStatus.FailedMessage(childComplexity), true
+		return e.complexity.PodHttpChaosStatus.FailedMessage(childComplexity), true
 
 	case "PodHttpChaosStatus.observedGeneration":
-		if e.complexity.PodHTTPChaosStatus.ObservedGeneration == nil {
+		if e.complexity.PodHttpChaosStatus.ObservedGeneration == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosStatus.ObservedGeneration(childComplexity), true
+		return e.complexity.PodHttpChaosStatus.ObservedGeneration(childComplexity), true
 
 	case "PodHttpChaosStatus.pid":
-		if e.complexity.PodHTTPChaosStatus.Pid == nil {
+		if e.complexity.PodHttpChaosStatus.Pid == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosStatus.Pid(childComplexity), true
+		return e.complexity.PodHttpChaosStatus.Pid(childComplexity), true
 
 	case "PodHttpChaosStatus.startTime":
-		if e.complexity.PodHTTPChaosStatus.StartTime == nil {
+		if e.complexity.PodHttpChaosStatus.StartTime == nil {
 			break
 		}
 
-		return e.complexity.PodHTTPChaosStatus.StartTime(childComplexity), true
+		return e.complexity.PodHttpChaosStatus.StartTime(childComplexity), true
 
 	case "PodIOChaos.apiVersion":
 		if e.complexity.PodIOChaos.APIVersion == nil {
@@ -20211,14 +20211,14 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 		Object:     "__Directive",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20227,9 +20227,9 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -20302,6 +20302,41 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -20348,14 +20383,14 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 		Object:     "__EnumValue",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20364,9 +20399,9 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -20482,14 +20517,14 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 		Object:     "__Field",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20498,9 +20533,9 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -20686,14 +20721,14 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 		Object:     "__InputValue",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20702,9 +20737,9 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -20761,6 +20796,38 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Schema_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Schema",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -21037,9 +21104,9 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -21248,6 +21315,38 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Type",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SpecifiedByURL(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -21264,7 +21363,6 @@ var attrOverrideSpecImplementors = []string{"AttrOverrideSpec"}
 
 func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.AttrOverrideSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, attrOverrideSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21273,7 +21371,8 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 			out.Values[i] = graphql.MarshalString("AttrOverrideSpec")
 		case "ino":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21281,10 +21380,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_ino(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "size":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21292,10 +21397,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_size(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "blocks":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21303,16 +21414,37 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_blocks(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "atime":
-			out.Values[i] = ec._AttrOverrideSpec_atime(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._AttrOverrideSpec_atime(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "mtime":
-			out.Values[i] = ec._AttrOverrideSpec_mtime(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._AttrOverrideSpec_mtime(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "ctime":
-			out.Values[i] = ec._AttrOverrideSpec_ctime(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._AttrOverrideSpec_ctime(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "kind":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21320,10 +21452,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_kind(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "perm":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21331,10 +21469,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_perm(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "nlink":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21342,10 +21486,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_nlink(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21353,10 +21503,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_uid(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "gid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21364,10 +21520,16 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_gid(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "rdev":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21375,6 +21537,11 @@ func (ec *executionContext) _AttrOverrideSpec(ctx context.Context, sel ast.Selec
 				}()
 				res = ec._AttrOverrideSpec_rdev(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -21391,7 +21558,6 @@ var bandwidthSpecImplementors = []string{"BandwidthSpec"}
 
 func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.BandwidthSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bandwidthSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21399,13 +21565,19 @@ func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("BandwidthSpec")
 		case "rate":
-			out.Values[i] = ec._BandwidthSpec_rate(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._BandwidthSpec_rate(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "limit":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21416,10 +21588,16 @@ func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.Selectio
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "buffer":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21430,10 +21608,16 @@ func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.Selectio
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "peakrate":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21441,10 +21625,16 @@ func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._BandwidthSpec_peakrate(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "minburst":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21452,6 +21642,11 @@ func (ec *executionContext) _BandwidthSpec(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._BandwidthSpec_minburst(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -21468,7 +21663,6 @@ var cPUStressorImplementors = []string{"CPUStressor"}
 
 func (ec *executionContext) _CPUStressor(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CPUStressor) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cPUStressorImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21476,14 +21670,29 @@ func (ec *executionContext) _CPUStressor(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CPUStressor")
 		case "workers":
-			out.Values[i] = ec._CPUStressor_workers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CPUStressor_workers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "load":
-			out.Values[i] = ec._CPUStressor_load(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CPUStressor_load(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "options":
-			out.Values[i] = ec._CPUStressor_options(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CPUStressor_options(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21499,7 +21708,6 @@ var cgroupsImplementors = []string{"Cgroups"}
 
 func (ec *executionContext) _Cgroups(ctx context.Context, sel ast.SelectionSet, obj *model.Cgroups) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cgroupsImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21507,14 +21715,29 @@ func (ec *executionContext) _Cgroups(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Cgroups")
 		case "raw":
-			out.Values[i] = ec._Cgroups_raw(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Cgroups_raw(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "cpu":
-			out.Values[i] = ec._Cgroups_cpu(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Cgroups_cpu(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "memory":
-			out.Values[i] = ec._Cgroups_memory(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Cgroups_memory(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21530,7 +21753,6 @@ var cgroupsCpuImplementors = []string{"CgroupsCpu"}
 
 func (ec *executionContext) _CgroupsCpu(ctx context.Context, sel ast.SelectionSet, obj *model.CgroupsCPU) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cgroupsCpuImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21538,12 +21760,22 @@ func (ec *executionContext) _CgroupsCpu(ctx context.Context, sel ast.SelectionSe
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CgroupsCpu")
 		case "quota":
-			out.Values[i] = ec._CgroupsCpu_quota(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CgroupsCpu_quota(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "period":
-			out.Values[i] = ec._CgroupsCpu_period(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CgroupsCpu_period(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -21562,7 +21794,6 @@ var cgroupsMemoryImplementors = []string{"CgroupsMemory"}
 
 func (ec *executionContext) _CgroupsMemory(ctx context.Context, sel ast.SelectionSet, obj *model.CgroupsMemory) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, cgroupsMemoryImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21570,7 +21801,12 @@ func (ec *executionContext) _CgroupsMemory(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CgroupsMemory")
 		case "limit":
-			out.Values[i] = ec._CgroupsMemory_limit(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CgroupsMemory_limit(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -21589,7 +21825,6 @@ var chaosConditionImplementors = []string{"ChaosCondition"}
 
 func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ChaosCondition) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, chaosConditionImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21598,7 +21833,8 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 			out.Values[i] = graphql.MarshalString("ChaosCondition")
 		case "type":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21609,10 +21845,16 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "status":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21623,9 +21865,19 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "reason":
-			out.Values[i] = ec._ChaosCondition_reason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ChaosCondition_reason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21641,7 +21893,6 @@ var containerStateImplementors = []string{"ContainerState"}
 
 func (ec *executionContext) _ContainerState(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerState) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21649,11 +21900,26 @@ func (ec *executionContext) _ContainerState(ctx context.Context, sel ast.Selecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ContainerState")
 		case "waiting":
-			out.Values[i] = ec._ContainerState_waiting(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerState_waiting(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "running":
-			out.Values[i] = ec._ContainerState_running(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerState_running(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "terminated":
-			out.Values[i] = ec._ContainerState_terminated(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerState_terminated(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21669,7 +21935,6 @@ var containerStateRunningImplementors = []string{"ContainerStateRunning"}
 
 func (ec *executionContext) _ContainerStateRunning(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStateRunning) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateRunningImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21678,7 +21943,8 @@ func (ec *executionContext) _ContainerStateRunning(ctx context.Context, sel ast.
 			out.Values[i] = graphql.MarshalString("ContainerStateRunning")
 		case "startedAt":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21686,6 +21952,11 @@ func (ec *executionContext) _ContainerStateRunning(ctx context.Context, sel ast.
 				}()
 				res = ec._ContainerStateRunning_startedAt(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -21702,7 +21973,6 @@ var containerStateTerminatedImplementors = []string{"ContainerStateTerminated"}
 
 func (ec *executionContext) _ContainerStateTerminated(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStateTerminated) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateTerminatedImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21710,19 +21980,40 @@ func (ec *executionContext) _ContainerStateTerminated(ctx context.Context, sel a
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ContainerStateTerminated")
 		case "exitCode":
-			out.Values[i] = ec._ContainerStateTerminated_exitCode(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateTerminated_exitCode(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "signal":
-			out.Values[i] = ec._ContainerStateTerminated_signal(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateTerminated_signal(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "reason":
-			out.Values[i] = ec._ContainerStateTerminated_reason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateTerminated_reason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "message":
-			out.Values[i] = ec._ContainerStateTerminated_message(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateTerminated_message(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "startedAt":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21730,10 +22021,16 @@ func (ec *executionContext) _ContainerStateTerminated(ctx context.Context, sel a
 				}()
 				res = ec._ContainerStateTerminated_startedAt(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "finishedAt":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21741,9 +22038,19 @@ func (ec *executionContext) _ContainerStateTerminated(ctx context.Context, sel a
 				}()
 				res = ec._ContainerStateTerminated_finishedAt(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "containerID":
-			out.Values[i] = ec._ContainerStateTerminated_containerID(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateTerminated_containerID(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21759,7 +22066,6 @@ var containerStateWaitingImplementors = []string{"ContainerStateWaiting"}
 
 func (ec *executionContext) _ContainerStateWaiting(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStateWaiting) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, containerStateWaitingImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21767,9 +22073,19 @@ func (ec *executionContext) _ContainerStateWaiting(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ContainerStateWaiting")
 		case "reason":
-			out.Values[i] = ec._ContainerStateWaiting_reason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateWaiting_reason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "message":
-			out.Values[i] = ec._ContainerStateWaiting_message(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStateWaiting_message(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21785,7 +22101,6 @@ var containerStatusImplementors = []string{"ContainerStatus"}
 
 func (ec *executionContext) _ContainerStatus(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, containerStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21793,41 +22108,86 @@ func (ec *executionContext) _ContainerStatus(ctx context.Context, sel ast.Select
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ContainerStatus")
 		case "name":
-			out.Values[i] = ec._ContainerStatus_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "State":
-			out.Values[i] = ec._ContainerStatus_State(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_State(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "lastTerminationState":
-			out.Values[i] = ec._ContainerStatus_lastTerminationState(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_lastTerminationState(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "ready":
-			out.Values[i] = ec._ContainerStatus_ready(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_ready(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "restartCount":
-			out.Values[i] = ec._ContainerStatus_restartCount(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_restartCount(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "image":
-			out.Values[i] = ec._ContainerStatus_image(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_image(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "imageID":
-			out.Values[i] = ec._ContainerStatus_imageID(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_imageID(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "containerID":
-			out.Values[i] = ec._ContainerStatus_containerID(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_containerID(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "started":
-			out.Values[i] = ec._ContainerStatus_started(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ContainerStatus_started(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21843,7 +22203,6 @@ var corruptSpecImplementors = []string{"CorruptSpec"}
 
 func (ec *executionContext) _CorruptSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CorruptSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, corruptSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21851,12 +22210,22 @@ func (ec *executionContext) _CorruptSpec(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("CorruptSpec")
 		case "corrupt":
-			out.Values[i] = ec._CorruptSpec_corrupt(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CorruptSpec_corrupt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "correlation":
-			out.Values[i] = ec._CorruptSpec_correlation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CorruptSpec_correlation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21872,7 +22241,6 @@ var delaySpecImplementors = []string{"DelaySpec"}
 
 func (ec *executionContext) _DelaySpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.DelaySpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, delaySpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21880,16 +22248,36 @@ func (ec *executionContext) _DelaySpec(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("DelaySpec")
 		case "latency":
-			out.Values[i] = ec._DelaySpec_latency(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DelaySpec_latency(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "correlation":
-			out.Values[i] = ec._DelaySpec_correlation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DelaySpec_correlation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "jitter":
-			out.Values[i] = ec._DelaySpec_jitter(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DelaySpec_jitter(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "reorder":
-			out.Values[i] = ec._DelaySpec_reorder(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DelaySpec_reorder(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21905,7 +22293,6 @@ var duplicateSpecImplementors = []string{"DuplicateSpec"}
 
 func (ec *executionContext) _DuplicateSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.DuplicateSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, duplicateSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21913,12 +22300,22 @@ func (ec *executionContext) _DuplicateSpec(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("DuplicateSpec")
 		case "duplicate":
-			out.Values[i] = ec._DuplicateSpec_duplicate(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DuplicateSpec_duplicate(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "correlation":
-			out.Values[i] = ec._DuplicateSpec_correlation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._DuplicateSpec_correlation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21934,7 +22331,6 @@ var experimentStatusImplementors = []string{"ExperimentStatus"}
 
 func (ec *executionContext) _ExperimentStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ExperimentStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, experimentStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21943,7 +22339,8 @@ func (ec *executionContext) _ExperimentStatus(ctx context.Context, sel ast.Selec
 			out.Values[i] = graphql.MarshalString("ExperimentStatus")
 		case "desiredPhase":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -21954,9 +22351,19 @@ func (ec *executionContext) _ExperimentStatus(ctx context.Context, sel ast.Selec
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "Records":
-			out.Values[i] = ec._ExperimentStatus_Records(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ExperimentStatus_Records(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21972,7 +22379,6 @@ var fdImplementors = []string{"Fd"}
 
 func (ec *executionContext) _Fd(ctx context.Context, sel ast.SelectionSet, obj *model.Fd) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, fdImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -21980,12 +22386,22 @@ func (ec *executionContext) _Fd(ctx context.Context, sel ast.SelectionSet, obj *
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Fd")
 		case "fd":
-			out.Values[i] = ec._Fd_fd(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Fd_fd(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "target":
-			out.Values[i] = ec._Fd_target(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Fd_target(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -22004,7 +22420,6 @@ var hTTPChaosImplementors = []string{"HTTPChaos"}
 
 func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hTTPChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22012,38 +22427,69 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("HTTPChaos")
 		case "kind":
-			out.Values[i] = ec._HTTPChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._HTTPChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._HTTPChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._HTTPChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._HTTPChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._HTTPChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22054,20 +22500,36 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._HTTPChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._HTTPChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22078,10 +22540,16 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22089,12 +22557,23 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._HTTPChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._HTTPChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22102,10 +22581,16 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._HTTPChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22113,29 +22598,60 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._HTTPChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._HTTPChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._HTTPChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._HTTPChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._HTTPChaos_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
-			out.Values[i] = ec._HTTPChaos_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaos_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "podhttp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22143,6 +22659,11 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._HTTPChaos_podhttp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -22159,7 +22680,6 @@ var hTTPChaosSpecImplementors = []string{"HTTPChaosSpec"}
 
 func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaosSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hTTPChaosSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22167,13 +22687,19 @@ func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("HTTPChaosSpec")
 		case "selector":
-			out.Values[i] = ec._HTTPChaosSpec_selector(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_selector(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "mode":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22184,12 +22710,23 @@ func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.Selectio
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "value":
-			out.Values[i] = ec._HTTPChaosSpec_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "target":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22200,26 +22737,72 @@ func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.Selectio
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "abort":
-			out.Values[i] = ec._HTTPChaosSpec_abort(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_abort(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "delay":
-			out.Values[i] = ec._HTTPChaosSpec_delay(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_delay(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "replace":
-			out.Values[i] = ec._HTTPChaosSpec_replace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_replace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "patch":
-			out.Values[i] = ec._HTTPChaosSpec_patch(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_patch(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "port":
-			out.Values[i] = ec._HTTPChaosSpec_port(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_port(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "path":
-			out.Values[i] = ec._HTTPChaosSpec_path(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_path(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "method":
-			out.Values[i] = ec._HTTPChaosSpec_method(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_method(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "code":
-			out.Values[i] = ec._HTTPChaosSpec_code(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_code(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "requestHeaders":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22227,10 +22810,16 @@ func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._HTTPChaosSpec_requestHeaders(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "responseHeaders":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22238,9 +22827,19 @@ func (ec *executionContext) _HTTPChaosSpec(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._HTTPChaosSpec_responseHeaders(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "duration":
-			out.Values[i] = ec._HTTPChaosSpec_duration(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosSpec_duration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22256,7 +22855,6 @@ var hTTPChaosStatusImplementors = []string{"HTTPChaosStatus"}
 
 func (ec *executionContext) _HTTPChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.HTTPChaosStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, hTTPChaosStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22264,12 +22862,23 @@ func (ec *executionContext) _HTTPChaosStatus(ctx context.Context, sel ast.Select
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("HTTPChaosStatus")
 		case "conditions":
-			out.Values[i] = ec._HTTPChaosStatus_conditions(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosStatus_conditions(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "experiment":
-			out.Values[i] = ec._HTTPChaosStatus_experiment(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._HTTPChaosStatus_experiment(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "instances":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22277,6 +22886,11 @@ func (ec *executionContext) _HTTPChaosStatus(ctx context.Context, sel ast.Select
 				}()
 				res = ec._HTTPChaosStatus_instances(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -22293,7 +22907,6 @@ var iOChaosImplementors = []string{"IOChaos"}
 
 func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IOChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, iOChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22301,38 +22914,69 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("IOChaos")
 		case "kind":
-			out.Values[i] = ec._IOChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._IOChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._IOChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._IOChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._IOChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._IOChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22343,20 +22987,36 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._IOChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._IOChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22367,10 +23027,16 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22378,12 +23044,23 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 				}()
 				res = ec._IOChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._IOChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22391,10 +23068,16 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 				}()
 				res = ec._IOChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22402,29 +23085,60 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 				}()
 				res = ec._IOChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._IOChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._IOChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._IOChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._IOChaos_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
-			out.Values[i] = ec._IOChaos_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaos_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "podios":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22432,6 +23146,11 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 				}()
 				res = ec._IOChaos_podios(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -22448,7 +23167,6 @@ var iOChaosActionImplementors = []string{"IOChaosAction"}
 
 func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IOChaosAction) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, iOChaosActionImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22457,7 +23175,8 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 			out.Values[i] = graphql.MarshalString("IOChaosAction")
 		case "type":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22468,15 +23187,26 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "path":
-			out.Values[i] = ec._IOChaosAction_path(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosAction_path(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "methods":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22484,16 +23214,37 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_methods(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "percent":
-			out.Values[i] = ec._IOChaosAction_percent(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosAction_percent(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "faults":
-			out.Values[i] = ec._IOChaosAction_faults(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosAction_faults(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "latency":
-			out.Values[i] = ec._IOChaosAction_latency(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosAction_latency(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "ino":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22501,10 +23252,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_ino(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "size":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22512,10 +23269,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_size(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "blocks":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22523,10 +23286,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_blocks(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "atime":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22534,10 +23303,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_atime(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "mtime":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22545,10 +23320,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_mtime(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ctime":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22556,10 +23337,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_ctime(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "kind":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22567,10 +23354,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_kind(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "perm":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22578,10 +23371,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_perm(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "nlink":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22589,10 +23388,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_nlink(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22600,10 +23405,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_uid(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "gid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22611,10 +23422,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_gid(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "rdev":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22622,10 +23439,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_rdev(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "filling":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22633,10 +23456,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_filling(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "maxOccurrences":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22644,10 +23473,16 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_maxOccurrences(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "maxLength":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22655,9 +23490,19 @@ func (ec *executionContext) _IOChaosAction(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosAction_maxLength(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "source":
-			out.Values[i] = ec._IOChaosAction_source(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosAction_source(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -22676,7 +23521,6 @@ var iOChaosSpecImplementors = []string{"IOChaosSpec"}
 
 func (ec *executionContext) _IOChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IOChaosSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, iOChaosSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22684,15 +23528,26 @@ func (ec *executionContext) _IOChaosSpec(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("IOChaosSpec")
 		case "containerNames":
-			out.Values[i] = ec._IOChaosSpec_containerNames(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_containerNames(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "selector":
-			out.Values[i] = ec._IOChaosSpec_selector(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_selector(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "mode":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22703,12 +23558,23 @@ func (ec *executionContext) _IOChaosSpec(ctx context.Context, sel ast.SelectionS
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "value":
-			out.Values[i] = ec._IOChaosSpec_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "action":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22719,12 +23585,23 @@ func (ec *executionContext) _IOChaosSpec(ctx context.Context, sel ast.SelectionS
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "delay":
-			out.Values[i] = ec._IOChaosSpec_delay(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_delay(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "errno":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22732,16 +23609,37 @@ func (ec *executionContext) _IOChaosSpec(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._IOChaosSpec_errno(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "attr":
-			out.Values[i] = ec._IOChaosSpec_attr(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_attr(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "mistake":
-			out.Values[i] = ec._IOChaosSpec_mistake(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_mistake(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "path":
-			out.Values[i] = ec._IOChaosSpec_path(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_path(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "methods":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22749,16 +23647,36 @@ func (ec *executionContext) _IOChaosSpec(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._IOChaosSpec_methods(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "percent":
-			out.Values[i] = ec._IOChaosSpec_percent(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_percent(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "volumePath":
-			out.Values[i] = ec._IOChaosSpec_volumePath(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_volumePath(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "duration":
-			out.Values[i] = ec._IOChaosSpec_duration(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosSpec_duration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22774,7 +23692,6 @@ var iOChaosStatusImplementors = []string{"IOChaosStatus"}
 
 func (ec *executionContext) _IOChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IOChaosStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, iOChaosStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22782,12 +23699,23 @@ func (ec *executionContext) _IOChaosStatus(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("IOChaosStatus")
 		case "conditions":
-			out.Values[i] = ec._IOChaosStatus_conditions(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosStatus_conditions(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "experiment":
-			out.Values[i] = ec._IOChaosStatus_experiment(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IOChaosStatus_experiment(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "instances":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22795,6 +23723,11 @@ func (ec *executionContext) _IOChaosStatus(ctx context.Context, sel ast.Selectio
 				}()
 				res = ec._IOChaosStatus_instances(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -22811,7 +23744,6 @@ var ioFaultImplementors = []string{"IoFault"}
 
 func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.IoFault) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ioFaultImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22820,7 +23752,8 @@ func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("IoFault")
 		case "errno":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22831,9 +23764,19 @@ func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "weight":
-			out.Values[i] = ec._IoFault_weight(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._IoFault_weight(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -22874,7 +23817,6 @@ var lossSpecImplementors = []string{"LossSpec"}
 
 func (ec *executionContext) _LossSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.LossSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, lossSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22882,12 +23824,22 @@ func (ec *executionContext) _LossSpec(ctx context.Context, sel ast.SelectionSet,
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("LossSpec")
 		case "loss":
-			out.Values[i] = ec._LossSpec_loss(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._LossSpec_loss(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "correlation":
-			out.Values[i] = ec._LossSpec_correlation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._LossSpec_correlation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22903,7 +23855,6 @@ var memoryStressorImplementors = []string{"MemoryStressor"}
 
 func (ec *executionContext) _MemoryStressor(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.MemoryStressor) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, memoryStressorImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22911,14 +23862,29 @@ func (ec *executionContext) _MemoryStressor(ctx context.Context, sel ast.Selecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("MemoryStressor")
 		case "workers":
-			out.Values[i] = ec._MemoryStressor_workers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MemoryStressor_workers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "size":
-			out.Values[i] = ec._MemoryStressor_size(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MemoryStressor_size(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "options":
-			out.Values[i] = ec._MemoryStressor_options(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MemoryStressor_options(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22934,7 +23900,6 @@ var mistakeSpecImplementors = []string{"MistakeSpec"}
 
 func (ec *executionContext) _MistakeSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.MistakeSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mistakeSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22943,7 +23908,8 @@ func (ec *executionContext) _MistakeSpec(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = graphql.MarshalString("MistakeSpec")
 		case "filling":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22951,11 +23917,26 @@ func (ec *executionContext) _MistakeSpec(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._MistakeSpec_filling(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "maxOccurrences":
-			out.Values[i] = ec._MistakeSpec_maxOccurrences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MistakeSpec_maxOccurrences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "maxLength":
-			out.Values[i] = ec._MistakeSpec_maxLength(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MistakeSpec_maxLength(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22971,7 +23952,6 @@ var namespaceImplementors = []string{"Namespace"}
 
 func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet, obj *model.Namespace) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, namespaceImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -22979,13 +23959,19 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Namespace")
 		case "ns":
-			out.Values[i] = ec._Namespace_ns(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Namespace_ns(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "component":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -22993,10 +23979,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_component(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "pod":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23004,10 +23996,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_pod(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "stresschaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23015,10 +24013,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_stresschaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "iochaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23026,10 +24030,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_iochaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "podiochaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23037,10 +24047,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_podiochaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "httpchaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23048,10 +24064,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_httpchaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "podhttpchaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23059,10 +24081,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_podhttpchaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "networkchaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23070,10 +24098,16 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_networkchaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "podnetworkchaos":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23081,6 +24115,11 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._Namespace_podnetworkchaos(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -23097,7 +24136,6 @@ var networkChaosImplementors = []string{"NetworkChaos"}
 
 func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.NetworkChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, networkChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23105,38 +24143,69 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("NetworkChaos")
 		case "kind":
-			out.Values[i] = ec._NetworkChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._NetworkChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._NetworkChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._NetworkChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._NetworkChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._NetworkChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23147,20 +24216,36 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._NetworkChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._NetworkChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23171,10 +24256,16 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23182,12 +24273,23 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._NetworkChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._NetworkChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23195,10 +24297,16 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._NetworkChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23206,19 +24314,40 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._NetworkChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._NetworkChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._NetworkChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._NetworkChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._NetworkChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "podnetwork":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23226,6 +24355,11 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._NetworkChaos_podnetwork(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -23242,7 +24376,6 @@ var ownerReferenceImplementors = []string{"OwnerReference"}
 
 func (ec *executionContext) _OwnerReference(ctx context.Context, sel ast.SelectionSet, obj *v11.OwnerReference) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ownerReferenceImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23250,23 +24383,39 @@ func (ec *executionContext) _OwnerReference(ctx context.Context, sel ast.Selecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("OwnerReference")
 		case "kind":
-			out.Values[i] = ec._OwnerReference_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._OwnerReference_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._OwnerReference_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._OwnerReference_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._OwnerReference_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._OwnerReference_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23277,11 +24426,26 @@ func (ec *executionContext) _OwnerReference(ctx context.Context, sel ast.Selecti
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "controller":
-			out.Values[i] = ec._OwnerReference_controller(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._OwnerReference_controller(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "blockOwnerDeletion":
-			out.Values[i] = ec._OwnerReference_blockOwnerDeletion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._OwnerReference_blockOwnerDeletion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23297,7 +24461,6 @@ var podImplementors = []string{"Pod"}
 
 func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj *v1.Pod) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23305,38 +24468,69 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Pod")
 		case "kind":
-			out.Values[i] = ec._Pod_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._Pod_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._Pod_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._Pod_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._Pod_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._Pod_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23347,20 +24541,36 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._Pod_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._Pod_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23371,10 +24581,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23382,12 +24598,23 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}()
 				res = ec._Pod_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._Pod_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23395,10 +24622,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}()
 				res = ec._Pod_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23406,29 +24639,60 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}()
 				res = ec._Pod_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._Pod_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._Pod_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._Pod_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._Pod_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
-			out.Values[i] = ec._Pod_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Pod_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "logs":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23439,10 +24703,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "daemon":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23450,10 +24720,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}()
 				res = ec._Pod_daemon(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "processes":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23461,10 +24737,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}()
 				res = ec._Pod_processes(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "mounts":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23472,10 +24754,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 				}()
 				res = ec._Pod_mounts(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ipset":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23486,10 +24774,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "tcQdisc":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23500,10 +24794,16 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "iptables":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23514,6 +24814,11 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -23530,7 +24835,6 @@ var podConditionImplementors = []string{"PodCondition"}
 
 func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.SelectionSet, obj *v1.PodCondition) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podConditionImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23539,7 +24843,8 @@ func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("PodCondition")
 		case "type":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23550,10 +24855,16 @@ func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "status":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23564,10 +24875,16 @@ func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "lastProbeTime":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23575,10 +24892,16 @@ func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._PodCondition_lastProbeTime(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "lastTransitionTime":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23586,11 +24909,26 @@ func (ec *executionContext) _PodCondition(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._PodCondition_lastTransitionTime(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "reason":
-			out.Values[i] = ec._PodCondition_reason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodCondition_reason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "message":
-			out.Values[i] = ec._PodCondition_message(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodCondition_message(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23606,7 +24944,6 @@ var podHTTPChaosImplementors = []string{"PodHTTPChaos"}
 
 func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHTTPChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23614,38 +24951,69 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHTTPChaos")
 		case "kind":
-			out.Values[i] = ec._PodHTTPChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._PodHTTPChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._PodHTTPChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._PodHTTPChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._PodHTTPChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._PodHTTPChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23656,20 +25024,36 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._PodHTTPChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._PodHTTPChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23680,10 +25064,16 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23691,12 +25081,23 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._PodHTTPChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._PodHTTPChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23704,10 +25105,16 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._PodHTTPChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23715,29 +25122,60 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 				}()
 				res = ec._PodHTTPChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._PodHTTPChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._PodHTTPChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._PodHTTPChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._PodHTTPChaos_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
-			out.Values[i] = ec._PodHTTPChaos_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHTTPChaos_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "pod":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23748,6 +25186,11 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -23764,7 +25207,6 @@ var podHttpChaosActionsImplementors = []string{"PodHttpChaosActions"}
 
 func (ec *executionContext) _PodHttpChaosActions(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosActions) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosActionsImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23772,13 +25214,33 @@ func (ec *executionContext) _PodHttpChaosActions(ctx context.Context, sel ast.Se
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosActions")
 		case "abort":
-			out.Values[i] = ec._PodHttpChaosActions_abort(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosActions_abort(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "delay":
-			out.Values[i] = ec._PodHttpChaosActions_delay(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosActions_delay(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "replace":
-			out.Values[i] = ec._PodHttpChaosActions_replace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosActions_replace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "patch":
-			out.Values[i] = ec._PodHttpChaosActions_patch(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosActions_patch(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23794,7 +25256,6 @@ var podHttpChaosPatchActionsImplementors = []string{"PodHttpChaosPatchActions"}
 
 func (ec *executionContext) _PodHttpChaosPatchActions(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosPatchActions) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosPatchActionsImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23802,11 +25263,26 @@ func (ec *executionContext) _PodHttpChaosPatchActions(ctx context.Context, sel a
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosPatchActions")
 		case "body":
-			out.Values[i] = ec._PodHttpChaosPatchActions_body(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosPatchActions_body(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "queries":
-			out.Values[i] = ec._PodHttpChaosPatchActions_queries(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosPatchActions_queries(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "headers":
-			out.Values[i] = ec._PodHttpChaosPatchActions_headers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosPatchActions_headers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -23822,7 +25298,6 @@ var podHttpChaosPatchBodyActionImplementors = []string{"PodHttpChaosPatchBodyAct
 
 func (ec *executionContext) _PodHttpChaosPatchBodyAction(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosPatchBodyAction) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosPatchBodyActionImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23830,12 +25305,22 @@ func (ec *executionContext) _PodHttpChaosPatchBodyAction(ctx context.Context, se
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosPatchBodyAction")
 		case "type":
-			out.Values[i] = ec._PodHttpChaosPatchBodyAction_type(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosPatchBodyAction_type(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "value":
-			out.Values[i] = ec._PodHttpChaosPatchBodyAction_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosPatchBodyAction_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -23854,7 +25339,6 @@ var podHttpChaosReplaceActionsImplementors = []string{"PodHttpChaosReplaceAction
 
 func (ec *executionContext) _PodHttpChaosReplaceActions(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosReplaceActions) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosReplaceActionsImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23862,14 +25346,30 @@ func (ec *executionContext) _PodHttpChaosReplaceActions(ctx context.Context, sel
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosReplaceActions")
 		case "path":
-			out.Values[i] = ec._PodHttpChaosReplaceActions_path(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosReplaceActions_path(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "method":
-			out.Values[i] = ec._PodHttpChaosReplaceActions_method(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosReplaceActions_method(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "code":
-			out.Values[i] = ec._PodHttpChaosReplaceActions_code(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosReplaceActions_code(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "body":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23877,10 +25377,16 @@ func (ec *executionContext) _PodHttpChaosReplaceActions(ctx context.Context, sel
 				}()
 				res = ec._PodHttpChaosReplaceActions_body(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "queries":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23888,10 +25394,16 @@ func (ec *executionContext) _PodHttpChaosReplaceActions(ctx context.Context, sel
 				}()
 				res = ec._PodHttpChaosReplaceActions_queries(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "headers":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23899,6 +25411,11 @@ func (ec *executionContext) _PodHttpChaosReplaceActions(ctx context.Context, sel
 				}()
 				res = ec._PodHttpChaosReplaceActions_headers(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -23915,7 +25432,6 @@ var podHttpChaosRuleImplementors = []string{"PodHttpChaosRule"}
 
 func (ec *executionContext) _PodHttpChaosRule(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosRule) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosRuleImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23924,7 +25440,8 @@ func (ec *executionContext) _PodHttpChaosRule(ctx context.Context, sel ast.Selec
 			out.Values[i] = graphql.MarshalString("PodHttpChaosRule")
 		case "target":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23935,24 +25452,49 @@ func (ec *executionContext) _PodHttpChaosRule(ctx context.Context, sel ast.Selec
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "selector":
-			out.Values[i] = ec._PodHttpChaosRule_selector(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosRule_selector(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "actions":
-			out.Values[i] = ec._PodHttpChaosRule_actions(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosRule_actions(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "source":
-			out.Values[i] = ec._PodHttpChaosRule_source(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosRule_source(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "port":
-			out.Values[i] = ec._PodHttpChaosRule_port(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosRule_port(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -23971,7 +25513,6 @@ var podHttpChaosSelectorImplementors = []string{"PodHttpChaosSelector"}
 
 func (ec *executionContext) _PodHttpChaosSelector(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosSelector) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosSelectorImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -23979,16 +25520,37 @@ func (ec *executionContext) _PodHttpChaosSelector(ctx context.Context, sel ast.S
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosSelector")
 		case "port":
-			out.Values[i] = ec._PodHttpChaosSelector_port(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosSelector_port(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "path":
-			out.Values[i] = ec._PodHttpChaosSelector_path(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosSelector_path(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "method":
-			out.Values[i] = ec._PodHttpChaosSelector_method(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosSelector_method(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "code":
-			out.Values[i] = ec._PodHttpChaosSelector_code(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosSelector_code(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "requestHeaders":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -23996,10 +25558,16 @@ func (ec *executionContext) _PodHttpChaosSelector(ctx context.Context, sel ast.S
 				}()
 				res = ec._PodHttpChaosSelector_requestHeaders(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "responseHeaders":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24007,6 +25575,11 @@ func (ec *executionContext) _PodHttpChaosSelector(ctx context.Context, sel ast.S
 				}()
 				res = ec._PodHttpChaosSelector_responseHeaders(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -24023,7 +25596,6 @@ var podHttpChaosSpecImplementors = []string{"PodHttpChaosSpec"}
 
 func (ec *executionContext) _PodHttpChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24031,7 +25603,12 @@ func (ec *executionContext) _PodHttpChaosSpec(ctx context.Context, sel ast.Selec
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosSpec")
 		case "rules":
-			out.Values[i] = ec._PodHttpChaosSpec_rules(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosSpec_rules(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24050,7 +25627,6 @@ var podHttpChaosStatusImplementors = []string{"PodHttpChaosStatus"}
 
 func (ec *executionContext) _PodHttpChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24058,13 +25634,33 @@ func (ec *executionContext) _PodHttpChaosStatus(ctx context.Context, sel ast.Sel
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodHttpChaosStatus")
 		case "pid":
-			out.Values[i] = ec._PodHttpChaosStatus_pid(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosStatus_pid(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "startTime":
-			out.Values[i] = ec._PodHttpChaosStatus_startTime(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosStatus_startTime(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "failedMessage":
-			out.Values[i] = ec._PodHttpChaosStatus_failedMessage(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosStatus_failedMessage(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "observedGeneration":
-			out.Values[i] = ec._PodHttpChaosStatus_observedGeneration(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosStatus_observedGeneration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24080,7 +25676,6 @@ var podIOChaosImplementors = []string{"PodIOChaos"}
 
 func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodIOChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podIOChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24088,38 +25683,69 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodIOChaos")
 		case "kind":
-			out.Values[i] = ec._PodIOChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._PodIOChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._PodIOChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._PodIOChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._PodIOChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._PodIOChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24130,20 +25756,36 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._PodIOChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._PodIOChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24154,10 +25796,16 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24165,12 +25813,23 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 				}()
 				res = ec._PodIOChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._PodIOChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24178,10 +25837,16 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 				}()
 				res = ec._PodIOChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24189,29 +25854,60 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 				}()
 				res = ec._PodIOChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._PodIOChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._PodIOChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._PodIOChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._PodIOChaos_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
-			out.Values[i] = ec._PodIOChaos_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaos_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "pod":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24222,10 +25918,16 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ios":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24233,6 +25935,11 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 				}()
 				res = ec._PodIOChaos_ios(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -24249,7 +25956,6 @@ var podIOChaosSpecImplementors = []string{"PodIOChaosSpec"}
 
 func (ec *executionContext) _PodIOChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodIOChaosSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podIOChaosSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24257,14 +25963,29 @@ func (ec *executionContext) _PodIOChaosSpec(ctx context.Context, sel ast.Selecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodIOChaosSpec")
 		case "volumeMountPath":
-			out.Values[i] = ec._PodIOChaosSpec_volumeMountPath(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosSpec_volumeMountPath(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "container":
-			out.Values[i] = ec._PodIOChaosSpec_container(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosSpec_container(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "actions":
-			out.Values[i] = ec._PodIOChaosSpec_actions(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosSpec_actions(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24280,7 +26001,6 @@ var podIOChaosStatusImplementors = []string{"PodIOChaosStatus"}
 
 func (ec *executionContext) _PodIOChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodIOChaosStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podIOChaosStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24288,13 +26008,33 @@ func (ec *executionContext) _PodIOChaosStatus(ctx context.Context, sel ast.Selec
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodIOChaosStatus")
 		case "pid":
-			out.Values[i] = ec._PodIOChaosStatus_pid(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosStatus_pid(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "startTime":
-			out.Values[i] = ec._PodIOChaosStatus_startTime(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosStatus_startTime(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "failedMessage":
-			out.Values[i] = ec._PodIOChaosStatus_failedMessage(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosStatus_failedMessage(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "observedGeneration":
-			out.Values[i] = ec._PodIOChaosStatus_observedGeneration(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIOChaosStatus_observedGeneration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24310,7 +26050,6 @@ var podIPImplementors = []string{"PodIP"}
 
 func (ec *executionContext) _PodIP(ctx context.Context, sel ast.SelectionSet, obj *v1.PodIP) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podIPImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24318,7 +26057,12 @@ func (ec *executionContext) _PodIP(ctx context.Context, sel ast.SelectionSet, ob
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodIP")
 		case "ip":
-			out.Values[i] = ec._PodIP_ip(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodIP_ip(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24337,7 +26081,6 @@ var podNetworkChaosImplementors = []string{"PodNetworkChaos"}
 
 func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodNetworkChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podNetworkChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24345,38 +26088,69 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodNetworkChaos")
 		case "kind":
-			out.Values[i] = ec._PodNetworkChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._PodNetworkChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._PodNetworkChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._PodNetworkChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._PodNetworkChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._PodNetworkChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24387,20 +26161,36 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._PodNetworkChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._PodNetworkChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24411,10 +26201,16 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24422,12 +26218,23 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodNetworkChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._PodNetworkChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24435,10 +26242,16 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodNetworkChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24446,29 +26259,60 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodNetworkChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._PodNetworkChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._PodNetworkChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._PodNetworkChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._PodNetworkChaos_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "status":
-			out.Values[i] = ec._PodNetworkChaos_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaos_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "pod":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24479,6 +26323,11 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -24495,7 +26344,6 @@ var podNetworkChaosSpecImplementors = []string{"PodNetworkChaosSpec"}
 
 func (ec *executionContext) _PodNetworkChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodNetworkChaosSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podNetworkChaosSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24503,11 +26351,26 @@ func (ec *executionContext) _PodNetworkChaosSpec(ctx context.Context, sel ast.Se
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodNetworkChaosSpec")
 		case "ipSets":
-			out.Values[i] = ec._PodNetworkChaosSpec_ipSets(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaosSpec_ipSets(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "iptables":
-			out.Values[i] = ec._PodNetworkChaosSpec_iptables(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaosSpec_iptables(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "trafficControls":
-			out.Values[i] = ec._PodNetworkChaosSpec_trafficControls(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaosSpec_trafficControls(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24523,7 +26386,6 @@ var podNetworkChaosStatusImplementors = []string{"PodNetworkChaosStatus"}
 
 func (ec *executionContext) _PodNetworkChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodNetworkChaosStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podNetworkChaosStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24531,12 +26393,22 @@ func (ec *executionContext) _PodNetworkChaosStatus(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodNetworkChaosStatus")
 		case "failedMessage":
-			out.Values[i] = ec._PodNetworkChaosStatus_failedMessage(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaosStatus_failedMessage(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "observedGeneration":
-			out.Values[i] = ec._PodNetworkChaosStatus_observedGeneration(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodNetworkChaosStatus_observedGeneration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24555,7 +26427,6 @@ var podSelectorSpecImplementors = []string{"PodSelectorSpec"}
 
 func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodSelectorSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podSelectorSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24563,12 +26434,23 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodSelectorSpec")
 		case "namespaces":
-			out.Values[i] = ec._PodSelectorSpec_namespaces(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodSelectorSpec_namespaces(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "nodes":
-			out.Values[i] = ec._PodSelectorSpec_nodes(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodSelectorSpec_nodes(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "pods":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24576,10 +26458,16 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodSelectorSpec_pods(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "nodeSelectors":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24587,10 +26475,16 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodSelectorSpec_nodeSelectors(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "fieldSelectors":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24598,10 +26492,16 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodSelectorSpec_fieldSelectors(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "labelSelectors":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24609,10 +26509,16 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodSelectorSpec_labelSelectors(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotationSelectors":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24620,9 +26526,19 @@ func (ec *executionContext) _PodSelectorSpec(ctx context.Context, sel ast.Select
 				}()
 				res = ec._PodSelectorSpec_annotationSelectors(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "podPhaseSelectors":
-			out.Values[i] = ec._PodSelectorSpec_podPhaseSelectors(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodSelectorSpec_podPhaseSelectors(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24638,7 +26554,6 @@ var podSpecImplementors = []string{"PodSpec"}
 
 func (ec *executionContext) _PodSpec(ctx context.Context, sel ast.SelectionSet, obj *v1.PodSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24646,7 +26561,12 @@ func (ec *executionContext) _PodSpec(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodSpec")
 		case "nodeName":
-			out.Values[i] = ec._PodSpec_nodeName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodSpec_nodeName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24665,7 +26585,6 @@ var podStatusImplementors = []string{"PodStatus"}
 
 func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet, obj *v1.PodStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24674,7 +26593,8 @@ func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = graphql.MarshalString("PodStatus")
 		case "phase":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24685,39 +26605,80 @@ func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "conditions":
-			out.Values[i] = ec._PodStatus_conditions(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_conditions(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "message":
-			out.Values[i] = ec._PodStatus_message(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_message(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "reason":
-			out.Values[i] = ec._PodStatus_reason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_reason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "nominatedNodeName":
-			out.Values[i] = ec._PodStatus_nominatedNodeName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_nominatedNodeName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "hostIP":
-			out.Values[i] = ec._PodStatus_hostIP(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_hostIP(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "podIP":
-			out.Values[i] = ec._PodStatus_podIP(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_podIP(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "podIPs":
-			out.Values[i] = ec._PodStatus_podIPs(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_podIPs(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "startTime":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24725,14 +26686,30 @@ func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet
 				}()
 				res = ec._PodStatus_startTime(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "initContainerStatuses":
-			out.Values[i] = ec._PodStatus_initContainerStatuses(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_initContainerStatuses(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "containerStatuses":
-			out.Values[i] = ec._PodStatus_containerStatuses(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_containerStatuses(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "qosClass":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24743,9 +26720,19 @@ func (ec *executionContext) _PodStatus(ctx context.Context, sel ast.SelectionSet
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ephemeralContainerStatuses":
-			out.Values[i] = ec._PodStatus_ephemeralContainerStatuses(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStatus_ephemeralContainerStatuses(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24761,7 +26748,6 @@ var podStressChaosImplementors = []string{"PodStressChaos"}
 
 func (ec *executionContext) _PodStressChaos(ctx context.Context, sel ast.SelectionSet, obj *model.PodStressChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, podStressChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24769,18 +26755,29 @@ func (ec *executionContext) _PodStressChaos(ctx context.Context, sel ast.Selecti
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("PodStressChaos")
 		case "stressChaos":
-			out.Values[i] = ec._PodStressChaos_stressChaos(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStressChaos_stressChaos(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "pod":
-			out.Values[i] = ec._PodStressChaos_pod(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodStressChaos_pod(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "cgroups":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24791,10 +26788,16 @@ func (ec *executionContext) _PodStressChaos(ctx context.Context, sel ast.Selecti
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "processStress":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24802,6 +26805,11 @@ func (ec *executionContext) _PodStressChaos(ctx context.Context, sel ast.Selecti
 				}()
 				res = ec._PodStressChaos_processStress(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -24818,7 +26826,6 @@ var processImplementors = []string{"Process"}
 
 func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, obj *model.Process) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, processImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24826,23 +26833,39 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Process")
 		case "pod":
-			out.Values[i] = ec._Process_pod(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Process_pod(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "pid":
-			out.Values[i] = ec._Process_pid(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Process_pid(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "command":
-			out.Values[i] = ec._Process_command(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Process_command(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "fds":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24850,6 +26873,11 @@ func (ec *executionContext) _Process(ctx context.Context, sel ast.SelectionSet, 
 				}()
 				res = ec._Process_fds(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -24866,7 +26894,6 @@ var processStressImplementors = []string{"ProcessStress"}
 
 func (ec *executionContext) _ProcessStress(ctx context.Context, sel ast.SelectionSet, obj *model.ProcessStress) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, processStressImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24874,12 +26901,22 @@ func (ec *executionContext) _ProcessStress(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProcessStress")
 		case "process":
-			out.Values[i] = ec._ProcessStress_process(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ProcessStress_process(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "cgroup":
-			out.Values[i] = ec._ProcessStress_cgroup(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ProcessStress_cgroup(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24898,7 +26935,6 @@ var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, queryImplementors)
-
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Query",
 	})
@@ -24906,12 +26942,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
 		case "namespace":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -24919,11 +26961,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}()
 				res = ec._Query_namespace(ctx, field)
 				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
 			})
 		case "__type":
-			out.Values[i] = ec._Query___type(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Query___type(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 		case "__schema":
-			out.Values[i] = ec._Query___schema(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Query___schema(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -24939,7 +26999,6 @@ var rawIPSetImplementors = []string{"RawIPSet"}
 
 func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawIPSet) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, rawIPSetImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24947,17 +27006,32 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("RawIPSet")
 		case "name":
-			out.Values[i] = ec._RawIPSet_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "cidrs":
-			out.Values[i] = ec._RawIPSet_cidrs(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_cidrs(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "source":
-			out.Values[i] = ec._RawIPSet_source(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_source(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -24976,7 +27050,6 @@ var rawIptablesImplementors = []string{"RawIptables"}
 
 func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawIptables) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, rawIptablesImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -24984,18 +27057,29 @@ func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("RawIptables")
 		case "name":
-			out.Values[i] = ec._RawIptables_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIptables_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "ipSets":
-			out.Values[i] = ec._RawIptables_ipSets(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIptables_ipSets(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "direction":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25006,14 +27090,29 @@ func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionS
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "source":
-			out.Values[i] = ec._RawIptables_source(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIptables_source(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "device":
-			out.Values[i] = ec._RawIptables_device(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIptables_device(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25029,7 +27128,6 @@ var rawTrafficControlImplementors = []string{"RawTrafficControl"}
 
 func (ec *executionContext) _RawTrafficControl(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawTrafficControl) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, rawTrafficControlImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25038,7 +27136,8 @@ func (ec *executionContext) _RawTrafficControl(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("RawTrafficControl")
 		case "type":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25049,23 +27148,68 @@ func (ec *executionContext) _RawTrafficControl(ctx context.Context, sel ast.Sele
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "delay":
-			out.Values[i] = ec._RawTrafficControl_delay(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_delay(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "loss":
-			out.Values[i] = ec._RawTrafficControl_loss(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_loss(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "duplicate":
-			out.Values[i] = ec._RawTrafficControl_duplicate(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_duplicate(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "corrupt":
-			out.Values[i] = ec._RawTrafficControl_corrupt(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_corrupt(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "bandwidth":
-			out.Values[i] = ec._RawTrafficControl_bandwidth(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_bandwidth(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "ipSet":
-			out.Values[i] = ec._RawTrafficControl_ipSet(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_ipSet(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "source":
-			out.Values[i] = ec._RawTrafficControl_source(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_source(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "device":
-			out.Values[i] = ec._RawTrafficControl_device(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_device(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25081,7 +27225,6 @@ var recordImplementors = []string{"Record"}
 
 func (ec *executionContext) _Record(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Record) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, recordImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25089,18 +27232,29 @@ func (ec *executionContext) _Record(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Record")
 		case "id":
-			out.Values[i] = ec._Record_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Record_id(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selectorKey":
-			out.Values[i] = ec._Record_selectorKey(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Record_selectorKey(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "phase":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25111,6 +27265,11 @@ func (ec *executionContext) _Record(ctx context.Context, sel ast.SelectionSet, o
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -25127,7 +27286,6 @@ var reorderSpecImplementors = []string{"ReorderSpec"}
 
 func (ec *executionContext) _ReorderSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.ReorderSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, reorderSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25135,14 +27293,29 @@ func (ec *executionContext) _ReorderSpec(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ReorderSpec")
 		case "reorder":
-			out.Values[i] = ec._ReorderSpec_reorder(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ReorderSpec_reorder(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "correlation":
-			out.Values[i] = ec._ReorderSpec_correlation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ReorderSpec_correlation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "gap":
-			out.Values[i] = ec._ReorderSpec_gap(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._ReorderSpec_gap(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25158,7 +27331,6 @@ var stressChaosImplementors = []string{"StressChaos"}
 
 func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.StressChaos) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, stressChaosImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25166,38 +27338,69 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("StressChaos")
 		case "kind":
-			out.Values[i] = ec._StressChaos_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "apiVersion":
-			out.Values[i] = ec._StressChaos_apiVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_apiVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
-			out.Values[i] = ec._StressChaos_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generateName":
-			out.Values[i] = ec._StressChaos_generateName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_generateName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "namespace":
-			out.Values[i] = ec._StressChaos_namespace(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_namespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "selfLink":
-			out.Values[i] = ec._StressChaos_selfLink(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_selfLink(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "uid":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25208,20 +27411,36 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "resourceVersion":
-			out.Values[i] = ec._StressChaos_resourceVersion(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_resourceVersion(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "generation":
-			out.Values[i] = ec._StressChaos_generation(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_generation(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "creationTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25232,10 +27451,16 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionTimestamp":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25243,12 +27468,23 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._StressChaos_deletionTimestamp(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "deletionGracePeriodSeconds":
-			out.Values[i] = ec._StressChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_deletionGracePeriodSeconds(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "labels":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25256,10 +27492,16 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._StressChaos_labels(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "annotations":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25267,24 +27509,50 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._StressChaos_annotations(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "ownerReferences":
-			out.Values[i] = ec._StressChaos_ownerReferences(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_ownerReferences(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "finalizers":
-			out.Values[i] = ec._StressChaos_finalizers(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_finalizers(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "clusterName":
-			out.Values[i] = ec._StressChaos_clusterName(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_clusterName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "spec":
-			out.Values[i] = ec._StressChaos_spec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaos_spec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "podstress":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25292,6 +27560,11 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 				}()
 				res = ec._StressChaos_podstress(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -25308,7 +27581,6 @@ var stressChaosSpecImplementors = []string{"StressChaosSpec"}
 
 func (ec *executionContext) _StressChaosSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.StressChaosSpec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, stressChaosSpecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25316,15 +27588,26 @@ func (ec *executionContext) _StressChaosSpec(ctx context.Context, sel ast.Select
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("StressChaosSpec")
 		case "containerNames":
-			out.Values[i] = ec._StressChaosSpec_containerNames(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosSpec_containerNames(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "selector":
-			out.Values[i] = ec._StressChaosSpec_selector(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosSpec_selector(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "mode":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25335,15 +27618,40 @@ func (ec *executionContext) _StressChaosSpec(ctx context.Context, sel ast.Select
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		case "value":
-			out.Values[i] = ec._StressChaosSpec_value(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosSpec_value(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "stressors":
-			out.Values[i] = ec._StressChaosSpec_stressors(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosSpec_stressors(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "stressngStressors":
-			out.Values[i] = ec._StressChaosSpec_stressngStressors(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosSpec_stressngStressors(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "duration":
-			out.Values[i] = ec._StressChaosSpec_duration(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosSpec_duration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25359,7 +27667,6 @@ var stressChaosStatusImplementors = []string{"StressChaosStatus"}
 
 func (ec *executionContext) _StressChaosStatus(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.StressChaosStatus) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, stressChaosStatusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25367,12 +27674,23 @@ func (ec *executionContext) _StressChaosStatus(ctx context.Context, sel ast.Sele
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("StressChaosStatus")
 		case "conditions":
-			out.Values[i] = ec._StressChaosStatus_conditions(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosStatus_conditions(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "experiment":
-			out.Values[i] = ec._StressChaosStatus_experiment(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._StressChaosStatus_experiment(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "instances":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -25380,6 +27698,11 @@ func (ec *executionContext) _StressChaosStatus(ctx context.Context, sel ast.Sele
 				}()
 				res = ec._StressChaosStatus_instances(ctx, field, obj)
 				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
 			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -25396,7 +27719,6 @@ var stressorsImplementors = []string{"Stressors"}
 
 func (ec *executionContext) _Stressors(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Stressors) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, stressorsImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25404,9 +27726,19 @@ func (ec *executionContext) _Stressors(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Stressors")
 		case "memoryStressor":
-			out.Values[i] = ec._Stressors_memoryStressor(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Stressors_memoryStressor(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "cpuStressor":
-			out.Values[i] = ec._Stressors_cpuStressor(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Stressors_cpuStressor(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25422,7 +27754,6 @@ var timespecImplementors = []string{"Timespec"}
 
 func (ec *executionContext) _Timespec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.Timespec) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, timespecImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25430,12 +27761,22 @@ func (ec *executionContext) _Timespec(ctx context.Context, sel ast.SelectionSet,
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Timespec")
 		case "sec":
-			out.Values[i] = ec._Timespec_sec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Timespec_sec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "nsec":
-			out.Values[i] = ec._Timespec_nsec(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Timespec_nsec(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -25454,7 +27795,6 @@ var __DirectiveImplementors = []string{"__Directive"}
 
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __DirectiveImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25462,19 +27802,49 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
-			out.Values[i] = ec.___Directive_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___Directive_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "locations":
-			out.Values[i] = ec.___Directive_locations(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_locations(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "args":
-			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_args(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isRepeatable":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_isRepeatable(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -25493,7 +27863,6 @@ var __EnumValueImplementors = []string{"__EnumValue"}
 
 func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __EnumValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25501,19 +27870,39 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
-			out.Values[i] = ec.___EnumValue_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___EnumValue_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "isDeprecated":
-			out.Values[i] = ec.___EnumValue_isDeprecated(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_isDeprecated(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "deprecationReason":
-			out.Values[i] = ec.___EnumValue_deprecationReason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_deprecationReason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25529,7 +27918,6 @@ var __FieldImplementors = []string{"__Field"}
 
 func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __FieldImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25537,29 +27925,59 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
-			out.Values[i] = ec.___Field_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___Field_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "args":
-			out.Values[i] = ec.___Field_args(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_args(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "type":
-			out.Values[i] = ec.___Field_type(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_type(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "isDeprecated":
-			out.Values[i] = ec.___Field_isDeprecated(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_isDeprecated(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "deprecationReason":
-			out.Values[i] = ec.___Field_deprecationReason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_deprecationReason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25575,7 +27993,6 @@ var __InputValueImplementors = []string{"__InputValue"}
 
 func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __InputValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25583,19 +28000,39 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
-			out.Values[i] = ec.___InputValue_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___InputValue_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "type":
-			out.Values[i] = ec.___InputValue_type(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_type(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "defaultValue":
-			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_defaultValue(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25611,29 +28048,60 @@ var __SchemaImplementors = []string{"__Schema"}
 
 func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __SchemaImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
+		case "description":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "types":
-			out.Values[i] = ec.___Schema_types(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_types(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "queryType":
-			out.Values[i] = ec.___Schema_queryType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_queryType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "mutationType":
-			out.Values[i] = ec.___Schema_mutationType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_mutationType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "subscriptionType":
-			out.Values[i] = ec.___Schema_subscriptionType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_subscriptionType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "directives":
-			out.Values[i] = ec.___Schema_directives(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_directives(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -25652,7 +28120,6 @@ var __TypeImplementors = []string{"__Type"}
 
 func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __TypeImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -25660,26 +28127,78 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
-			out.Values[i] = ec.___Type_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
-			out.Values[i] = ec.___Type_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "description":
-			out.Values[i] = ec.___Type_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "fields":
-			out.Values[i] = ec.___Type_fields(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_fields(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "interfaces":
-			out.Values[i] = ec.___Type_interfaces(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_interfaces(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "possibleTypes":
-			out.Values[i] = ec.___Type_possibleTypes(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_possibleTypes(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "enumValues":
-			out.Values[i] = ec.___Type_enumValues(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_enumValues(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "inputFields":
-			out.Values[i] = ec.___Type_inputFields(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_inputFields(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "ofType":
-			out.Values[i] = ec.___Type_ofType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_ofType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "specifiedByURL":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_specifiedByURL(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25950,6 +28469,13 @@ func (ec *executionContext) marshalNPodHttpChaosRule2ᚕgithubᚗcomᚋchaosᚑm
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26101,11 +28627,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
+		vSlice = graphql.CoerceList(v)
 	}
 	var err error
 	res := make([]string, len(vSlice))
@@ -26123,6 +28645,12 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
 	}
 
 	return ret
@@ -26202,6 +28730,13 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26223,11 +28758,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
+		vSlice = graphql.CoerceList(v)
 	}
 	var err error
 	res := make([]string, len(vSlice))
@@ -26275,6 +28806,13 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26324,6 +28862,13 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26365,6 +28910,13 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26413,7 +28965,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-	return graphql.MarshalBoolean(v)
+	res := graphql.MarshalBoolean(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v interface{}) (*bool, error) {
@@ -26428,7 +28981,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalBoolean(*v)
+	res := graphql.MarshalBoolean(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOCPUStressor2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCPUStressor(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.CPUStressor) graphql.Marshaler {
@@ -26489,6 +29043,13 @@ func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmes
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26554,6 +29115,13 @@ func (ec *executionContext) marshalOContainerStatus2ᚕk8sᚗioᚋapiᚋcoreᚋv
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26619,6 +29187,13 @@ func (ec *executionContext) marshalOFd2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaos
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26659,6 +29234,13 @@ func (ec *executionContext) marshalOHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑmesh�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26699,6 +29281,13 @@ func (ec *executionContext) marshalOIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26739,6 +29328,13 @@ func (ec *executionContext) marshalOIOChaosAction2ᚕgithubᚗcomᚋchaosᚑmesh
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26748,7 +29344,8 @@ func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}
 }
 
 func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	return graphql.MarshalInt(v)
+	res := graphql.MarshalInt(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
@@ -26757,7 +29354,8 @@ func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface
 }
 
 func (ec *executionContext) marshalOInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
-	return graphql.MarshalInt32(v)
+	res := graphql.MarshalInt32(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface{}) (int64, error) {
@@ -26766,7 +29364,8 @@ func (ec *executionContext) unmarshalOInt2int64(ctx context.Context, v interface
 }
 
 func (ec *executionContext) marshalOInt2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
-	return graphql.MarshalInt64(v)
+	res := graphql.MarshalInt64(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
@@ -26781,7 +29380,8 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt(*v)
+	res := graphql.MarshalInt(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v interface{}) (*int32, error) {
@@ -26796,7 +29396,8 @@ func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.Se
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt32(*v)
+	res := graphql.MarshalInt32(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
@@ -26811,7 +29412,8 @@ func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.Se
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt64(*v)
+	res := graphql.MarshalInt64(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOInt642ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
@@ -26826,7 +29428,8 @@ func (ec *executionContext) marshalOInt642ᚖint64(ctx context.Context, sel ast.
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt64(*v)
+	res := graphql.MarshalInt64(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFaultᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.IoFault) graphql.Marshaler {
@@ -26866,6 +29469,13 @@ func (ec *executionContext) marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋcha
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26888,7 +29498,8 @@ func (ec *executionContext) marshalOMap2map(ctx context.Context, sel ast.Selecti
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalMap(v)
+	res := graphql.MarshalMap(v)
+	return res
 }
 
 func (ec *executionContext) marshalOMemoryStressor2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐMemoryStressor(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.MemoryStressor) graphql.Marshaler {
@@ -26942,6 +29553,13 @@ func (ec *executionContext) marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmesh�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -26982,6 +29600,13 @@ func (ec *executionContext) marshalONetworkChaos2ᚕᚖgithubᚗcomᚋchaosᚑme
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27022,6 +29647,13 @@ func (ec *executionContext) marshalOOwnerReference2ᚕk8sᚗioᚋapimachineryᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27062,6 +29694,13 @@ func (ec *executionContext) marshalOPod2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27109,6 +29748,13 @@ func (ec *executionContext) marshalOPodCondition2ᚕk8sᚗioᚋapiᚋcoreᚋv1�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27149,6 +29795,13 @@ func (ec *executionContext) marshalOPodHTTPChaos2ᚕᚖgithubᚗcomᚋchaosᚑme
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27210,6 +29863,13 @@ func (ec *executionContext) marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmesh
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27250,6 +29910,13 @@ func (ec *executionContext) marshalOPodIP2ᚕk8sᚗioᚋapiᚋcoreᚋv1ᚐPodIP�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27290,6 +29957,13 @@ func (ec *executionContext) marshalOPodNetworkChaos2ᚕᚖgithubᚗcomᚋchaos�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27330,6 +30004,13 @@ func (ec *executionContext) marshalOPodStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27370,6 +30051,13 @@ func (ec *executionContext) marshalOProcess2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27410,6 +30098,13 @@ func (ec *executionContext) marshalOProcessStress2ᚕᚖgithubᚗcomᚋchaosᚑm
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27450,6 +30145,13 @@ func (ec *executionContext) marshalORawIPSet2ᚕgithubᚗcomᚋchaosᚑmeshᚋch
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27490,6 +30192,13 @@ func (ec *executionContext) marshalORawIptables2ᚕgithubᚗcomᚋchaosᚑmesh�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27530,6 +30239,13 @@ func (ec *executionContext) marshalORawTrafficControl2ᚕgithubᚗcomᚋchaosᚑ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27570,6 +30286,13 @@ func (ec *executionContext) marshalORecord2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋc
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27617,6 +30340,13 @@ func (ec *executionContext) marshalOStressChaos2ᚕᚖgithubᚗcomᚋchaosᚑmes
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27633,7 +30363,8 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	return graphql.MarshalString(v)
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
@@ -27642,11 +30373,7 @@ func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v
 	}
 	var vSlice []interface{}
 	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
+		vSlice = graphql.CoerceList(v)
 	}
 	var err error
 	res := make([]string, len(vSlice))
@@ -27669,6 +30396,12 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
 	}
 
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27678,11 +30411,7 @@ func (ec *executionContext) unmarshalOString2ᚕᚕstringᚄ(ctx context.Context
 	}
 	var vSlice []interface{}
 	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
+		vSlice = graphql.CoerceList(v)
 	}
 	var err error
 	res := make([][]string, len(vSlice))
@@ -27705,6 +30434,12 @@ func (ec *executionContext) marshalOString2ᚕᚕstringᚄ(ctx context.Context, 
 		ret[i] = ec.marshalNString2ᚕstringᚄ(ctx, sel, v[i])
 	}
 
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27720,7 +30455,8 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalString(*v)
+	res := graphql.MarshalString(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
@@ -27735,7 +30471,8 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalTime(*v)
+	res := graphql.MarshalTime(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOTimespec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐTimespec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.Timespec) graphql.Marshaler {
@@ -27782,6 +30519,13 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27822,6 +30566,13 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27862,6 +30613,13 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -27909,6 +30667,13 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 

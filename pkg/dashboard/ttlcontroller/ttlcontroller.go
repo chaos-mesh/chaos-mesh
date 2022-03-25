@@ -34,6 +34,8 @@ var (
 type Controller struct {
 	experiment core.ExperimentStore
 	event      core.EventStore
+	schedule   core.ScheduleStore
+	workflow   core.WorkflowStore
 	ttlconfig  *TTLconfig
 }
 
@@ -45,17 +47,25 @@ type TTLconfig struct {
 	EventTTL time.Duration
 	// ArchiveTTL defines the ttl of archives
 	ArchiveTTL time.Duration
+	// ScheduleTTL defines the ttl of schedule
+	ScheduleTTL time.Duration
+	// WorkflowTTL defines the ttl of workflow
+	WorkflowTTL time.Duration
 }
 
 // NewController returns a new database ttl controller
 func NewController(
 	experiment core.ExperimentStore,
 	event core.EventStore,
+	schedule core.ScheduleStore,
+	workflow core.WorkflowStore,
 	ttlc *TTLconfig,
 ) *Controller {
 	return &Controller{
 		experiment: experiment,
 		event:      event,
+		schedule:   schedule,
+		workflow:   workflow,
 		ttlconfig:  ttlc,
 	}
 }
@@ -69,7 +79,7 @@ func Register(ctx context.Context, c *Controller) {
 	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, ctx.Done())
 }
 
-// runWorker is a long-running function that will be called in order to delete the events and archives.
+// runWorker is a long-running function that will be called in order to delete the events, archives, schedule, and workflow.
 func (c *Controller) runWorker() {
 	log.Info("Deleting expired data from the database")
 
@@ -77,4 +87,6 @@ func (c *Controller) runWorker() {
 
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
 	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
+	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
+	c.workflow.DeleteByEndTime(ctx, c.ttlconfig.WorkflowTTL)
 }
