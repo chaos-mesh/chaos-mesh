@@ -113,7 +113,7 @@ func marshal(value reflect.Value) (string, []Field, error) {
 			if _, ok := value.Type().Field(i).Tag.Lookup(SubCommandTag); ok {
 				subPath, subFields, err := marshal(value.Field(i))
 				if err != nil {
-					return "", nil, err
+					return "", nil, errors.WithStack(err)
 				}
 				if subPath != "" {
 					fields = append(fields, Field{Name: subPath})

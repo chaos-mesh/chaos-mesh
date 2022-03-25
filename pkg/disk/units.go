@@ -1,8 +1,8 @@
 package disk
 
 import (
-	"fmt"
 	"github.com/alecthomas/units"
+	"github.com/pkg/errors"
 	"strconv"
 )
 
@@ -31,5 +31,5 @@ func ParseUnit(s string) (uint64, error) {
 	if n, err := units.ParseUnit(s, decimalUnitMap); err == nil {
 		return uint64(n), nil
 	}
-	return 0, fmt.Errorf("units: unknown unit %s", s)
+	return 0, errors.Errorf("units: unknown unit %s", s)
 }

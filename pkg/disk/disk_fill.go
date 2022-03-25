@@ -1,5 +1,12 @@
 package disk
 
+import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/command"
+	"github.com/go-logr/logr"
+	"strconv"
+)
+
 type CommonConfig struct {
 	Path string
 
@@ -14,20 +21,71 @@ type FillConfig struct {
 	FillByFAllocate bool
 }
 
-type RuntimeConfig struct {
-	ProcessNum    uint8
-	LoopExecution bool
+func NewFillConfig(fillByFallocate bool, c CommonConfig) FillConfig {
+	return FillConfig{
+		CommonConfig:    c,
+		FillByFAllocate: fillByFallocate,
+	}
 }
 
-type PayloadAction int
+type Fill struct {
+	FillConfig
+	DdCmds       []DD
+	FallocateCmd *FAllocate
 
-const (
-	Read PayloadAction = iota
-	Write
-)
+	logger logr.Logger
+}
 
-type PayloadConfig struct {
-	Action PayloadAction
-	CommonConfig
-	RuntimeConfig
+func InitFill(c FillConfig, logger logr.Logger) (*Fill, error) {
+	path, err := WritePath(c.Path)
+	if err != nil {
+		return nil, err
+	}
+	byteSize, err := Count(c.Size, c.Percent, path)
+	if c.FillByFAllocate {
+		fallocateCmd := FAllocate{
+			Exec:     command.NewExec(),
+			Length:   strconv.FormatUint(byteSize, 10),
+			FileName: path,
+		}
+		return &Fill{
+			FillConfig:   c,
+			DdCmds:       nil,
+			FallocateCmd: &fallocateCmd,
+			logger:       logger,
+		}, nil
+	} else {
+		ddBlocks, err := SplitBytesByProcessNum(byteSize, 1)
+		if err != nil {
+			return nil, err
+		}
+
+		var cmds []DD
+		for _, block := range ddBlocks {
+			cmds = append(cmds, DD{
+				Exec:      command.NewExec(),
+				ReadPath:  DevZero,
+				WritePath: path,
+				BlockSize: block.BlockSize,
+				Count:     block.Count,
+				Iflag:     "fullblock", // fullblock : accumulate full blocks of input.
+				Oflag:     "append",
+				Conv:      "notrunc", // notrunc : do not truncate the output file.
+			})
+		}
+		return &Fill{
+			FillConfig:   c,
+			DdCmds:       cmds,
+			FallocateCmd: nil,
+			logger:       logger,
+		}, nil
+	}
+}
+
+func (f *Fill) Inject() error {
+	if f.FillByFAllocate && f.FallocateCmd != nil {
+		cmd ,err := f.FallocateCmd.ToCmd()
+
+		bpm.
+	}
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestFAllocateOption_ToCmd(t *testing.T) {
-	dd := FAllocateOption{
+	dd := FAllocate{
 		Exec:     command.NewExec(),
 		Length:   "20M",
 		FileName: "/tmp/tmp_file",

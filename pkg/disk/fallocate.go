@@ -5,13 +5,13 @@ import (
 	"os/exec"
 )
 
-type FAllocateOption struct {
+type FAllocate struct {
 	command.Exec `exec:"fallocate"`
 	Length       string `para:"-l"`
 	FileName     string `para:""`
 }
 
-func (c FAllocateOption) ToCmd() (*exec.Cmd, error) {
+func (c FAllocate) ToCmd() (*exec.Cmd, error) {
 	path, fields, err := command.Marshal(c)
 	if err != nil {
 		return nil, err
