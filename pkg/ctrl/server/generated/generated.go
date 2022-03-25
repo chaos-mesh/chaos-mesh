@@ -21452,7 +21452,10 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 
 func (ec *executionContext) unmarshalInputPodSelectorInput(ctx context.Context, obj interface{}) (model.PodSelectorInput, error) {
 	var it model.PodSelectorInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -27141,7 +27144,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			})
 		case "pods":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -27149,6 +27153,14 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}()
 				res = ec._Query_pods(ctx, field)
 				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
 			})
 		case "__type":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
