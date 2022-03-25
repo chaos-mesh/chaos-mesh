@@ -206,11 +206,13 @@ func Run(params RunParams) error {
 			Config:        conf,
 			ControllerCfg: ccfg.ControllerCfg,
 			Metrics:       metricsCollector,
+			Logger:        params.Logger.WithName("pod-injector"),
 		}},
 	)
 	hookServer.Register("/validate-auth", &webhook.Admission{
 		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
-			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace),
+			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace,
+			params.Logger.WithName("validate-auth")),
 	},
 	)
 

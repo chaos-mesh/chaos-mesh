@@ -432,6 +432,7 @@ type WorkflowStore interface {
 	Save(ctx context.Context, entity *WorkflowEntity) error
 	DeleteByUID(ctx context.Context, UID string) error
 	DeleteByUIDs(ctx context.Context, UIDs []string) error
+	DeleteByEndTime(ctx context.Context, ttl time.Duration) error
 	MarkAsArchived(ctx context.Context, namespace, name string) error
 	MarkAsArchivedWithUID(ctx context.Context, UID string) error
 }
