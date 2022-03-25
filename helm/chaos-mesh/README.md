@@ -90,7 +90,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.env.CLEAN_SYNC_PERIOD`| Set the sync period to clean up archived data | `12h` |
 | `dashboard.env.TTL_EVENT`| Set TTL of archived event data | `168h` |
 | `dashboard.env.TTL_EXPERIMENT`| Set TTL of archived experiment data | `336h` |
-| `dashboard.env.TTL_SCHEDULE`| Set TTL of archived schedule data | `168h` |
+| `dashboard.env.TTL_SCHEDULE`| Set TTL of archived schedule data | `336h` |
 | `dashboard.env.TTL_WORKFLOW`| Set TTL of archived workflow data | `336h` |
 | `dashboard.ingress.enabled`                   | Enable the use of the ingress controller to access the dashboard                         | `false`             |
 | `dashboard.ingress.certManager`               | Enable Cert-Manager for ingress                                                      | `false`             |
