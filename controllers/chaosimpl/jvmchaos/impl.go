@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/go-logr/logr"
@@ -44,7 +45,7 @@ CLASS {{.Class}}
 METHOD {{.Method}}
 AT ENTRY
 IF true
-DO 
+DO
 	{{.Do}};
 ENDRULE
 `
@@ -122,6 +123,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			}
 		}()
 	}
+	if err != nil && strings.Contains(err.Error(), "container not found") {
+		// Unable to find the container, so we are unable to remove the experiment from the jvm as it has gone
+		impl.Log.Error(err, "finding container")
+		return v1alpha1.NotInjected, nil
+	}
 	if err != nil {
 		return v1alpha1.Injected, err
 	}
@@ -138,6 +144,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		Port:        jvmChaos.Spec.Port,
 		EnterNS:     true,
 	})
+	if err != nil && strings.Contains(err.Error(), "Connection refused") {
+		// Unable to connect to the jvm - meaning that there is no agent running on the jvm, most likely because the jvm process has been restarted
+		impl.Log.Error(err, "uninstall jvm rules (possible restart of jvm process)")
+		return v1alpha1.NotInjected, nil
+	}
 	if err != nil {
 		impl.Log.Error(err, "uninstall jvm rules")
 		return v1alpha1.Injected, err
