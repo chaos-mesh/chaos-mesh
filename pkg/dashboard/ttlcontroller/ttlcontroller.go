@@ -36,11 +36,11 @@ type Controller struct {
 	event      core.EventStore
 	schedule   core.ScheduleStore
 	workflow   core.WorkflowStore
-	ttlconfig  *TTLconfig
+	ttlconfig  *TTLConfig
 }
 
-// TTLconfig defines the ttl
-type TTLconfig struct {
+// TTLConfig defines the ttl
+type TTLConfig struct {
 	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database
 	DatabaseTTLResyncPeriod time.Duration
 	// EventTTL defines the ttl of events
@@ -59,7 +59,7 @@ func NewController(
 	event core.EventStore,
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
-	ttlc *TTLconfig,
+	ttlc *TTLConfig,
 ) *Controller {
 	return &Controller{
 		experiment: experiment,
