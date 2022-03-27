@@ -156,3 +156,18 @@ Define the webhook's name
 {{- define "chaos-dlv.image" -}}
 {{ .Values.chaosDlv.image.registry | default .Values.images.registry }}/{{ .Values.chaosDlv.image.repository }}:{{ .Values.chaosDlv.image.tag | default .Values.images.tag }}
 {{- end -}}
+
+{{/*
+Return the appropriate apiVersion for ingress
+*/}}
+{{- define "chaos-dashboard.ingress.apiVersion" -}}
+{{- if .Values.dashboard.ingress.apiVersionOverrides -}}
+{{- print .Values.dashboard.ingress.apiVersionOverrides -}}
+{{- else if semverCompare "<1.14-0" .Capabilities.KubeVersion.Version -}}
+{{- print "extensions/v1beta1" -}}
+{{- else if semverCompare "<1.19-0" .Capabilities.KubeVersion.Version -}}
+{{- print "networking.k8s.io/v1beta1" -}}
+{{- else -}}
+{{- print "networking.k8s.io/v1" -}}
+{{- end -}}
+{{- end -}}
