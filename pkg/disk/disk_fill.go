@@ -1,9 +1,12 @@
 package disk
 
 import (
+	"context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/command"
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	"os/exec"
 	"strconv"
 )
 
@@ -82,10 +85,45 @@ func InitFill(c FillConfig, logger logr.Logger) (*Fill, error) {
 	}
 }
 
-func (f *Fill) Inject() error {
-	if f.FillByFAllocate && f.FallocateCmd != nil {
-		cmd ,err := f.FallocateCmd.ToCmd()
+func WrapCmd(rawCmd *exec.Cmd, pid uint32) *bpm.ManagedCommand {
+	// cmd.Args == path + args
+	processBuilder := bpm.DefaultProcessBuilder(rawCmd.Path, rawCmd.Args[1:]...).
+		EnableLocalMnt().
+		SetNS(pid, bpm.MountNS).
+		SetNS(pid, bpm.PidNS)
 
-		bpm.
+	return processBuilder.Build(context.Background())
+}
+
+func (f *Fill) Inject(pid uint32) error {
+	if f.FillByFAllocate && f.FallocateCmd != nil {
+		rawCmd, err := f.FallocateCmd.ToCmd()
+		if err != nil {
+			return err
+		}
+		cmd := WrapCmd(rawCmd, pid)
+		f.logger.Info(cmd.String())
+		out, err := cmd.CombinedOutput()
+		f.logger.Info(string(out))
+		if err != nil {
+			return errors.WithStack(err)
+		}
+	} else if !f.FillByFAllocate && f.DdCmds != nil {
+		for _, rawDD := range f.DdCmds {
+			rawCmd, err := rawDD.ToCmd()
+			if err != nil {
+				return err
+			}
+			cmd := WrapCmd(rawCmd, pid)
+			f.logger.Info(cmd.String())
+			out, err := cmd.CombinedOutput()
+			f.logger.Info(string(out))
+			if err != nil {
+				return errors.WithStack(err)
+			}
+		}
+	} else {
+		return errors.New("unexpected situation")
 	}
+	return nil
 }

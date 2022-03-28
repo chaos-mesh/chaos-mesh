@@ -32,7 +32,6 @@ func WritePath(path string) (string, error) {
 		if err != nil {
 			return "", errors.WithStack(err)
 		}
-		return path, nil
 	}
 
 	fi, err := os.Stat(path)
