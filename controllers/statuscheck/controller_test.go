@@ -198,7 +198,7 @@ var _ = Describe("StatusCheck", func() {
 					IntervalSeconds:     1,
 					TimeoutSeconds:      1,
 					FailureThreshold:    3,
-					SuccessThreshold:    1,
+					SuccessThreshold:    3,
 					RecordsHistoryLimit: 10,
 					Duration:            &duration,
 					EmbedStatusCheck: &v1alpha1.EmbedStatusCheck{
