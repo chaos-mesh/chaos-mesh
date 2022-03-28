@@ -51,15 +51,16 @@ const (
 
 // WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
-	ID        uint           `gorm:"primary_key" json:"id"`
-	UID       string         `gorm:"index:workflow_uid" json:"uid"`
-	Namespace string         `json:"namespace"`
-	Name      string         `json:"name"`
-	Entry     string         `json:"entry"` // the entry node name
-	CreatedAt time.Time      `json:"created_at"`
-	EndTime   string         `json:"end_time"`
-	Status    WorkflowStatus `json:"status,omitempty"`
-	Archived  bool           `json:"-"`
+	ID         uint           `gorm:"primary_key" json:"id"`
+	UID        string         `gorm:"index:workflow_uid" json:"uid"`
+	Namespace  string         `json:"namespace"`
+	Name       string         `json:"name"`
+	Entry      string         `json:"entry"` // the entry node name
+	CreatedAt  time.Time      `json:"created_at"`
+	FinishTime time.Time      `json:"finish_time"`
+	EndTime    string         `json:"end_time"`
+	Status     WorkflowStatus `json:"status,omitempty"`
+	Archived   bool           `json:"-"`
 }
 
 type WorkflowDetail struct {
@@ -257,6 +258,10 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
 		result.EndTime = kubeWorkflow.Status.EndTime.Format(time.RFC3339)
 	}
 
+	if kubeWorkflow.GetDeletionTimestamp() != nil {
+		result.FinishTime = kubeWorkflow.GetDeletionTimestamp().Time
+	}
+
 	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {
 		result.Status = WorkflowSucceed
 	} else if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionScheduled, corev1.ConditionTrue) {
@@ -432,7 +437,7 @@ type WorkflowStore interface {
 	Save(ctx context.Context, entity *WorkflowEntity) error
 	DeleteByUID(ctx context.Context, UID string) error
 	DeleteByUIDs(ctx context.Context, UIDs []string) error
-	DeleteByEndTime(ctx context.Context, ttl time.Duration) error
+	DeleteByFinishTime(ctx context.Context, ttl time.Duration) error
 	MarkAsArchived(ctx context.Context, namespace, name string) error
 	MarkAsArchivedWithUID(ctx context.Context, UID string) error
 }
@@ -452,6 +457,7 @@ func WorkflowCR2WorkflowEntity(workflow *v1alpha1.Workflow) (*WorkflowEntity, er
 	if err != nil {
 		return nil, err
 	}
+
 	return &WorkflowEntity{
 		WorkflowMeta: convertWorkflow(*workflow),
 		Workflow:     string(jsonContent),
