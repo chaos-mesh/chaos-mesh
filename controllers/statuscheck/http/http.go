@@ -80,7 +80,7 @@ func (e *httpExecutor) DoHTTPRequest(client *http.Client, url, method string,
 
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return false, "", errors.Wrap(err, "unable to read response body")
+		return false, "", errors.Wrap(err, "read response body")
 	}
 
 	return validate(e.logger.WithValues("url", url),

@@ -20,12 +20,10 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck/http"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
@@ -58,15 +56,7 @@ type worker struct {
 }
 
 func newWorker(logger logr.Logger, eventRecorder recorder.ChaosRecorder,
-	manager *manager, statusCheck v1alpha1.StatusCheck) *worker {
-	var executor Executor
-	switch statusCheck.Spec.Type {
-	case v1alpha1.TypeHTTP:
-		executor = http.NewExecutor(logger.WithName("http-executor"))
-	default:
-		logger.Error(errors.New("unsupported type"), "unable to create worker")
-	}
-
+	manager *manager, statusCheck v1alpha1.StatusCheck, executor Executor) *worker {
 	return &worker{
 		logger:        logger,
 		eventRecorder: eventRecorder,
@@ -79,9 +69,11 @@ func newWorker(logger logr.Logger, eventRecorder recorder.ChaosRecorder,
 
 // run periodically execute the status check.
 func (w *worker) run() {
+	w.logger.V(1).Info("worker start")
 	interval := time.Duration(w.statusCheck.Spec.IntervalSeconds) * time.Second
 	ticker := time.NewTicker(interval)
 	defer func() {
+		w.logger.V(1).Info("worker stop")
 		ticker.Stop()
 		key := types.NamespacedName{Namespace: w.statusCheck.Namespace, Name: w.statusCheck.Name}
 		// delete worker from manager cache
@@ -110,10 +102,6 @@ func (w *worker) stop() {
 // execute the status check once and records the result.
 // Returns whether the worker should continue.
 func (w *worker) execute() bool {
-	if w.executor == nil {
-		return false
-	}
-
 	startTime := time.Now()
 	result, output, err := w.executor.Do(w.statusCheck.Spec)
 	if err != nil {
@@ -131,7 +119,7 @@ func (w *worker) execute() bool {
 
 	key := types.NamespacedName{Namespace: w.statusCheck.Namespace, Name: w.statusCheck.Name}
 	if result {
-		w.logger.V(1).Info("execute status check", "msg", output)
+		w.logger.V(1).Info("status check execution succeed", "msg", output)
 		w.manager.results.append(key, v1alpha1.StatusCheckRecord{
 			StartTime: &metav1.Time{Time: startTime},
 			Outcome:   v1alpha1.StatusCheckOutcomeSuccess,

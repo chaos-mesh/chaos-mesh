@@ -50,11 +50,9 @@ func Test_isThresholdExceed(t *testing.T) {
 			args: args{
 				records: []v1alpha1.StatusCheckRecord{
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
-					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
-					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 				},
 				want:      v1alpha1.StatusCheckOutcomeFailure,
-				threshold: 3,
+				threshold: 1,
 			},
 			want: true,
 		},

@@ -51,6 +51,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	obj := &v1alpha1.StatusCheck{}
 	if err := r.kubeClient.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
+			r.logger.Info("status check is deleted")
 			// the StatusCheck is deleted, remove it from manger
 			r.manager.Delete(req.NamespacedName)
 			return ctrl.Result{}, nil
@@ -58,21 +59,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	// // if status check was completed previously, we don't want to redo the termination
+	// if status check was completed previously, we don't want to redo the termination
 	if obj.IsCompleted() {
+		r.logger.Info("status check is already completed")
 		return ctrl.Result{}, nil
 	}
 
 	result, ok := r.manager.Get(*obj)
 	if !ok {
 		// if nil, add status check to manager
-		r.manager.Add(*obj)
+		err := r.manager.Add(*obj)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 		result, _ = r.manager.Get(*obj)
 	}
 
 	updateError := retry.RetryOnConflict(retry.DefaultBackoff, r.updateStatus(ctx, req, result, startTime))
 
-	return ctrl.Result{}, client.IgnoreNotFound(updateError)
+	return ctrl.Result{RequeueAfter: time.Duration(obj.Spec.IntervalSeconds) * time.Second}, client.IgnoreNotFound(updateError)
 }
 
 func (r *Reconciler) updateStatus(ctx context.Context, req ctrl.Request, result Result, startTime time.Time) func() error {
@@ -89,22 +94,47 @@ func (r *Reconciler) updateStatus(ctx context.Context, req ctrl.Request, result 
 		statusCheck.Status.Count = result.Count
 		statusCheck.Status.Records = result.Records
 
-		conditions, err := generateConditions(*statusCheck)
+		conditions, err := r.generateConditions(*statusCheck)
 		if err != nil {
 			return err
 		}
-		statusCheck.Status.Conditions = conditions
 
-		if statusCheck.IsCompleted() {
+		if conditions.isCompleted() {
 			if statusCheck.Status.CompletionTime == nil {
 				statusCheck.Status.CompletionTime = &metav1.Time{Time: time.Now()}
 			}
 			r.manager.Complete(*statusCheck)
-			r.eventRecorder.Event(statusCheck, recorder.StatusCheckCompleted{})
-			r.logger.Info("status check completed", "statuscheck", req.NamespacedName)
+			r.eventRecorder.Event(statusCheck, recorder.StatusCheckCompleted{Msg: conditions[v1alpha1.StatusCheckConditionCompleted].Reason})
+			r.logger.Info("status check is completed", "statuscheck", req.NamespacedName)
 		}
+		if conditions.isDurationExceed() {
+			r.eventRecorder.Event(statusCheck, recorder.StatusCheckDurationExceed{})
+		}
+		if conditions.isSuccessThresholdExceed() {
+			r.eventRecorder.Event(statusCheck, recorder.StatusCheckSuccessThresholdExceed{})
+		}
+		if conditions.isFailureThresholdExceed() {
+			r.eventRecorder.Event(statusCheck, recorder.StatusCheckFailureThresholdExceed{})
+		}
+
+		statusCheck.Status.Conditions = toConditionList(conditions)
 
 		r.logger.V(1).Info("update status of status check", "statuscheck", req.NamespacedName)
 		return r.kubeClient.Status().Update(ctx, statusCheck)
 	}
+}
+
+func (r *Reconciler) generateConditions(statusCheck v1alpha1.StatusCheck) (conditionMap, error) {
+	conditions := toConditionMap(statusCheck.Status.Conditions)
+
+	if err := setDurationExceedCondition(statusCheck, conditions); err != nil {
+		return nil, err
+	}
+	setFailureThresholdExceedCondition(statusCheck, conditions)
+	setSuccessThresholdExceedCondition(statusCheck, conditions)
+
+	// this condition must be placed after the above three conditions
+	setCompletedCondition(statusCheck, conditions)
+
+	return conditions, nil
 }

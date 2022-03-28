@@ -19,15 +19,17 @@ import (
 	"sync"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck/http"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
 type Manager interface {
 	// Add creates new workers for every status check.
-	Add(statusCheck v1alpha1.StatusCheck)
+	Add(statusCheck v1alpha1.StatusCheck) error
 	// Get returns the cached results about the status check.
 	Get(statusCheck v1alpha1.StatusCheck) (Result, bool)
 	// Delete handles cleaning up the removed status check state, including terminating workers and
@@ -43,32 +45,42 @@ type manager struct {
 	logger        logr.Logger
 	eventRecorder recorder.ChaosRecorder
 
-	workers workerCache
-	results resultCache
+	workers     workerCache
+	results     resultCache
+	newExecutor newExecutorFunc
 }
 
-func NewManager(logger logr.Logger, eventRecorder recorder.ChaosRecorder) Manager {
+type newExecutorFunc func(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor, error)
+
+func NewManager(logger logr.Logger, eventRecorder recorder.ChaosRecorder, newExecutorFunc newExecutorFunc) Manager {
 	return &manager{
 		logger:        logger,
 		eventRecorder: eventRecorder,
 		workers:       workerCache{workers: sync.Map{}},
 		results:       resultCache{results: make(map[types.NamespacedName]Result)},
+		newExecutor:   newExecutorFunc,
 	}
 }
 
-func (m *manager) Add(statusCheck v1alpha1.StatusCheck) {
+func (m *manager) Add(statusCheck v1alpha1.StatusCheck) error {
 	key := types.NamespacedName{Namespace: statusCheck.Namespace, Name: statusCheck.Name}
 	if _, ok := m.results.get(key); ok {
-		return
+		return nil
 	}
 	m.results.init(key, statusCheck.Status.Records, statusCheck.Status.Count, uint(statusCheck.Spec.RecordsHistoryLimit))
 
 	if statusCheck.IsCompleted() {
 		// if status check is completed, there is no need to create a worker
-		return
+		return errors.New("status check is completed")
 	}
-	worker := newWorker(m.logger.WithName("statuscheck-worker").WithValues("statuscheck", key), m.eventRecorder, m, statusCheck)
+
+	executor, err := m.newExecutor(m.logger, statusCheck)
+	if err != nil {
+		return errors.Wrap(err, "new executor")
+	}
+	worker := newWorker(m.logger.WithName("worker").WithValues("statuscheck", key), m.eventRecorder, m, statusCheck, executor)
 	m.workers.add(key, worker)
+	return nil
 }
 
 func (m *manager) Get(statusCheck v1alpha1.StatusCheck) (Result, bool) {
@@ -186,4 +198,15 @@ func limitRecords(records []v1alpha1.StatusCheckRecord, limit uint) []v1alpha1.S
 		return records
 	}
 	return records[length-int(limit):]
+}
+
+func newExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor, error) {
+	var executor Executor
+	switch statusCheck.Spec.Type {
+	case v1alpha1.TypeHTTP:
+		executor = http.NewExecutor(logger.WithName("http-executor"))
+	default:
+		return nil, errors.New("unsupported type")
+	}
+	return executor, nil
 }

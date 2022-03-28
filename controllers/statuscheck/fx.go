@@ -35,7 +35,7 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recor
 		return nil
 	}
 	eventRecorder := recorderBuilder.Build("statuscheck")
-	manager := NewManager(logger.WithName("statuscheck-manager"), eventRecorder)
+	manager := NewManager(logger.WithName("statuscheck-manager"), eventRecorder, newExecutor)
 
 	return builder.Default(mgr).
 		For(&v1alpha1.StatusCheck{}).

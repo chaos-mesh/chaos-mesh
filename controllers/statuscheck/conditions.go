@@ -36,7 +36,7 @@ func toConditionMap(conditions []v1alpha1.StatusCheckCondition) conditionMap {
 }
 
 func toConditionList(conditions conditionMap) []v1alpha1.StatusCheckCondition {
-	result := make([]v1alpha1.StatusCheckCondition, len(conditions), 0)
+	result := make([]v1alpha1.StatusCheckCondition, 0, len(conditions))
 	for _, condition := range conditions {
 		condition := condition
 		result = append(result, condition)
@@ -69,19 +69,24 @@ func (in conditionMap) setCondition(
 	}
 }
 
-func generateConditions(statusCheck v1alpha1.StatusCheck) ([]v1alpha1.StatusCheckCondition, error) {
-	conditions := toConditionMap(statusCheck.Status.Conditions)
+func (in conditionMap) isCompleted() bool {
+	cond, ok := in[v1alpha1.StatusCheckConditionCompleted]
+	return ok && cond.Status == corev1.ConditionTrue
+}
 
-	if err := setDurationExceedCondition(statusCheck, conditions); err != nil {
-		return nil, err
-	}
-	setFailureThresholdExceedCondition(statusCheck, conditions)
-	setSuccessThresholdExceedCondition(statusCheck, conditions)
+func (in conditionMap) isDurationExceed() bool {
+	cond, ok := in[v1alpha1.StatusCheckConditionDurationExceed]
+	return ok && cond.Status == corev1.ConditionTrue
+}
 
-	// this condition must be placed after the above three conditions
-	setCompletedCondition(statusCheck, conditions)
+func (in conditionMap) isFailureThresholdExceed() bool {
+	cond, ok := in[v1alpha1.StatusCheckConditionFailureThresholdExceed]
+	return ok && cond.Status == corev1.ConditionTrue
+}
 
-	return toConditionList(conditions), nil
+func (in conditionMap) isSuccessThresholdExceed() bool {
+	cond, ok := in[v1alpha1.StatusCheckConditionSuccessThresholdExceed]
+	return ok && cond.Status == corev1.ConditionTrue
 }
 
 func setDurationExceedCondition(statusCheck v1alpha1.StatusCheck, conditions conditionMap) error {
@@ -107,7 +112,7 @@ func setFailureThresholdExceedCondition(statusCheck v1alpha1.StatusCheck, condit
 }
 
 func setSuccessThresholdExceedCondition(statusCheck v1alpha1.StatusCheck, conditions conditionMap) {
-	if isThresholdExceed(statusCheck.Status.Records, v1alpha1.StatusCheckOutcomeSuccess, statusCheck.Spec.FailureThreshold) {
+	if isThresholdExceed(statusCheck.Status.Records, v1alpha1.StatusCheckOutcomeSuccess, statusCheck.Spec.SuccessThreshold) {
 		conditions.setCondition(v1alpha1.StatusCheckConditionSuccessThresholdExceed, corev1.ConditionTrue, "")
 	} else {
 		conditions.setCondition(v1alpha1.StatusCheckConditionSuccessThresholdExceed, corev1.ConditionFalse, "")
@@ -115,20 +120,17 @@ func setSuccessThresholdExceedCondition(statusCheck v1alpha1.StatusCheck, condit
 }
 
 func setCompletedCondition(statusCheck v1alpha1.StatusCheck, conditions conditionMap) {
-	condition, ok := conditions[v1alpha1.StatusCheckConditionDurationExceed]
-	if ok && condition.Status == corev1.ConditionTrue {
-		conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionTrue, "")
+	if conditions.isDurationExceed() {
+		conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionTrue, v1alpha1.StatusCheckDurationExceed)
 		return
 	}
-	condition, ok = conditions[v1alpha1.StatusCheckConditionFailureThresholdExceed]
-	if ok && condition.Status == corev1.ConditionTrue {
-		conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionTrue, "")
+	if conditions.isFailureThresholdExceed() {
+		conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionTrue, v1alpha1.StatusCheckFailureThresholdExceed)
 		return
 	}
 	if statusCheck.Spec.Mode == v1alpha1.StatusCheckSynchronous {
-		condition, ok = conditions[v1alpha1.StatusCheckConditionSuccessThresholdExceed]
-		if ok && condition.Status == corev1.ConditionTrue {
-			conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionTrue, "")
+		if conditions.isSuccessThresholdExceed() {
+			conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionTrue, v1alpha1.StatusCheckSuccessThresholdExceed)
 			return
 		}
 	}

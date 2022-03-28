@@ -174,9 +174,11 @@ const (
 type StatusCheckReason string
 
 const (
-	StatusCheckExecutionFailed StatusCheckReason = "StatusCheckExecutionFailed"
-	StatusCheckCompleted       StatusCheckReason = "StatusCheckCompleted"
-	// TODO add more reason when implementing StatusCheck
+	StatusCheckCompleted              StatusCheckReason = "StatusCheckCompleted"
+	StatusCheckDurationExceed         StatusCheckReason = "StatusCheckDurationExceed"
+	StatusCheckFailureThresholdExceed StatusCheckReason = "StatusCheckFailureThresholdExceed"
+	StatusCheckSuccessThresholdExceed StatusCheckReason = "StatusCheckSuccessThresholdExceed"
+	StatusCheckExecutionFailed        StatusCheckReason = "StatusCheckExecutionFailed"
 )
 
 type StatusCheckCondition struct {

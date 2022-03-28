@@ -24,6 +24,7 @@ import (
 )
 
 type StatusCheckCompleted struct {
+	Msg v1alpha1.StatusCheckReason
 }
 
 func (it StatusCheckCompleted) Type() string {
@@ -35,7 +36,7 @@ func (it StatusCheckCompleted) Reason() string {
 }
 
 func (it StatusCheckCompleted) Message() string {
-	return "status check completed"
+	return fmt.Sprintf("status check completed: %s", string(it.Msg))
 }
 
 type StatusCheckExecutionFailed struct {
@@ -55,9 +56,57 @@ func (it StatusCheckExecutionFailed) Message() string {
 	return fmt.Sprintf("%s execution of status check failed: %s", it.ExecutorType, it.Msg)
 }
 
+type StatusCheckDurationExceed struct {
+}
+
+func (it StatusCheckDurationExceed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it StatusCheckDurationExceed) Reason() string {
+	return string(v1alpha1.StatusCheckDurationExceed)
+}
+
+func (it StatusCheckDurationExceed) Message() string {
+	return fmt.Sprintf("duration exceed")
+}
+
+type StatusCheckFailureThresholdExceed struct {
+}
+
+func (it StatusCheckFailureThresholdExceed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it StatusCheckFailureThresholdExceed) Reason() string {
+	return string(v1alpha1.StatusCheckFailureThresholdExceed)
+}
+
+func (it StatusCheckFailureThresholdExceed) Message() string {
+	return fmt.Sprintf("failure threshold exceed")
+}
+
+type StatusCheckSuccessThresholdExceed struct {
+}
+
+func (it StatusCheckSuccessThresholdExceed) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it StatusCheckSuccessThresholdExceed) Reason() string {
+	return string(v1alpha1.StatusCheckSuccessThresholdExceed)
+}
+
+func (it StatusCheckSuccessThresholdExceed) Message() string {
+	return fmt.Sprintf("success threshold exceed")
+}
+
 func init() {
 	register(
 		StatusCheckCompleted{},
 		StatusCheckExecutionFailed{},
+		StatusCheckDurationExceed{},
+		StatusCheckFailureThresholdExceed{},
+		StatusCheckSuccessThresholdExceed{},
 	)
 }
