@@ -85,14 +85,14 @@ func InitFill(c FillConfig, logger logr.Logger) (*Fill, error) {
 	}
 }
 
-func WrapCmd(rawCmd *exec.Cmd, pid uint32) *bpm.ManagedCommand {
+func WrapCmd(rawCmd *exec.Cmd, pid uint32) *exec.Cmd {
 	// cmd.Args == path + args
 	processBuilder := bpm.DefaultProcessBuilder(rawCmd.Path, rawCmd.Args[1:]...).
 		EnableLocalMnt().
 		SetNS(pid, bpm.MountNS).
 		SetNS(pid, bpm.PidNS)
 
-	return processBuilder.Build(context.Background())
+	return processBuilder.Build(context.Background()).Cmd
 }
 
 func (f *Fill) Inject(pid uint32) error {

@@ -49,17 +49,16 @@ func SplitBytesByProcessNum(bytes uint64, processNum uint8) ([]DdArgBlock, error
 		}
 	}
 
-	if bytes == 0 {
-		ddArgBlocks = append(ddArgBlocks, DdArgBlock{
-			Count:     "0",
-			BlockSize: "1M",
-		})
-	} else {
+	if bytes != 0 {
 		ddArgBlocks = append(ddArgBlocks, DdArgBlock{
 			Count:     "1",
 			BlockSize: strconv.FormatUint(bytes, 10) + "c",
 		})
 	}
+	ddArgBlocks = append(ddArgBlocks, DdArgBlock{
+		Count:     "0",
+		BlockSize: "1M",
+	})
 	return ddArgBlocks, nil
 }
 

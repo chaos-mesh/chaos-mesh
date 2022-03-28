@@ -1,7 +1,11 @@
 package disk
 
 import (
+	"bytes"
+	"os"
+	"os/exec"
 	"sync"
+	"syscall"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/command"
 	"github.com/go-logr/logr"
@@ -39,7 +43,10 @@ type Payload struct {
 	PayloadConfig
 	DdCmds []DD
 
-	wg sync.WaitGroup
+	wg        sync.WaitGroup
+	processes []*exec.Cmd
+
+	locker sync.Locker
 
 	logger logr.Logger
 }
@@ -51,7 +58,9 @@ func InitPayload(c PayloadConfig, logger logr.Logger) (*Payload, error) {
 		if err != nil {
 			return nil, err
 		}
-		byteSize, err := Count(c.Size, c.Percent, path)
+		c.Path = path
+
+		byteSize, err := Count(c.Size, c.Percent, c.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +91,9 @@ func InitPayload(c PayloadConfig, logger logr.Logger) (*Payload, error) {
 		if err != nil {
 			return nil, err
 		}
-		byteSize, err := Count(c.Size, c.Percent, path)
+		c.Path = path
+
+		byteSize, err := Count(c.Size, c.Percent, c.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -113,32 +124,63 @@ func InitPayload(c PayloadConfig, logger logr.Logger) (*Payload, error) {
 	}
 }
 
-func (p *Payload) Inject(pid uint32) error {
-	p.wg.Add(len(p.DdCmds))
-	errs := make(chan error, len(p.DdCmds))
+func StartCmd(c *exec.Cmd) (*bytes.Buffer, error) {
+	if c.Stdout != nil {
+		return nil, errors.New("exec: Stdout already set")
+	}
+	if c.Stderr != nil {
+		return nil, errors.New("exec: Stderr already set")
+	}
+	var b bytes.Buffer
+	c.Stdout = &b
+	c.Stderr = &b
+	err := c.Start()
+	return &b, errors.WithStack(err)
+}
 
-	for _, rawDD := range p.DdCmds {
+func (p *Payload) Inject(pid uint32) error {
+	p.locker.Lock()
+	cmds := make([]*exec.Cmd, len(p.DdCmds))
+	for i, rawDD := range p.DdCmds {
 		rawCmd, err := rawDD.ToCmd()
 		if err != nil {
 			return err
 		}
-		cmd := WrapCmd(rawCmd, pid)
-		p.logger.Info(cmd.String())
+		cmds[i] = WrapCmd(rawCmd, pid)
+	}
 
+	testCmd := cmds[len(cmds)-1]
+	p.logger.Info(testCmd.String())
+	out, err := testCmd.CombinedOutput()
+	p.logger.Info(string(out))
+	if err != nil {
+		return errors.Wrap(err, string(out))
+	}
+
+	cmds = cmds[:len(cmds)-1]
+	p.wg.Add(len(cmds))
+	errs := make(chan error, len(cmds))
+	p.processes = make([]*exec.Cmd, len(cmds))
+	for i, cmd := range cmds {
+		p.logger.Info(cmd.String())
+		out, err := StartCmd(cmd)
+		if err != nil {
+			return err
+		}
+		p.processes[i] = cmd
+
+		cmd := cmd
 		go func() {
 			defer p.wg.Done()
-			out, err := cmd.CombinedOutput()
-			p.logger.Info(string(out))
+			err = cmd.Wait()
+			p.logger.Info(out.String())
 			if err != nil {
 				errs <- err
 				return
 			}
 		}()
-
-		if err != nil {
-			return errors.WithStack(err)
-		}
 	}
+	p.locker.Unlock()
 	p.wg.Wait()
 	close(errs)
 	var result error
@@ -146,4 +188,38 @@ func (p *Payload) Inject(pid uint32) error {
 		result = multierror.Append(result, err)
 	}
 	return errors.WithStack(result)
+}
+
+func (p *Payload) Recover() error {
+	p.locker.Lock()
+	defer p.locker.Unlock()
+
+	var result error
+
+	for _, process := range p.processes {
+		if process != nil {
+			if process.Process != nil {
+				if err := process.Process.Signal(syscall.SIGTERM); err != nil {
+					result = multierror.Append(result, errors.WithStack(err))
+				} else {
+					_, err := process.Process.Wait()
+					if err != nil {
+						result = multierror.Append(result, errors.WithStack(err))
+					}
+				}
+			}
+			p.logger.Info("I don't why , but process.Process is nil")
+		}
+		p.logger.Info("I don't why , but process is nil")
+	}
+	p.processes = []*exec.Cmd{}
+
+	if p.Action == Write {
+		err := os.Remove(p.Path)
+		if err != nil {
+			result = multierror.Append(result, errors.WithStack(err))
+		}
+	}
+
+	return result
 }
