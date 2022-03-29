@@ -79,6 +79,14 @@ spec:
             - --key
             - /etc/chaos-daemon/cert/tls.key
           {{- end }}
+            - --runtime-socket-path
+          {{- if eq .Values.chaosDaemon.runtime "docker" }}
+            -  /host-run/docker.sock
+          {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
+            -  /host-run/containerd.sock
+          {{- else if eq .Values.chaosDaemon.runtime "crio" }}
+            -  /host-run/crio.sock
+          {{- end }}
           env:
             {{- if .Values.chaosDaemon.env }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.chaosDaemon | trim | nindent 12 }}
@@ -108,11 +116,11 @@ spec:
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
-              mountPath: /var/run/docker.sock
+              mountPath: /host-run/docker.sock
               {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
-              mountPath: /run/containerd/containerd.sock
+              mountPath: /host-run/containerd.sock
               {{- else if eq .Values.chaosDaemon.runtime "crio" }}
-              mountPath: /var/run/crio/crio.sock
+              mountPath: /host-run/crio.sock
               {{- end }}
             - name: sys-path
               mountPath: /host-sys
