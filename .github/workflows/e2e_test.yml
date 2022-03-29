@@ -54,19 +54,17 @@ jobs:
           - v1.15.12
           - v1.20.15
           - v1.23.4
-        # focus is the regex expression to filter the test cases, see: https://onsi.github.io/ginkgo/#description-based-filtering
-        # because it's a regex expression, so we should use escape to present square brackets.
         focus:
-          - '\[Graceful-Shutdown\] \[IOChaos\]'
-          - '\[Graceful-Shutdown\] \[HTTPChaos\]'
-          - '\[Basic\] \[PodChaos\]'
-          - '\[Basic\] \[TimeChaos\]'
-          - '\[Basic\] \[IOChaos\]'
-          - '\[Basic\] \[HTTPChaos\]'
-          - '\[Basic\] \[Sidecar Config\]'
-          - '\[Basic\] \[NetworkChaos\]'
-          - '\[Basic\] \[DNSChaos\]'
-          - '\[Basic\] \[StressChaos\]'
+          - '[Graceful-Shutdown] [IOChaos]'
+          - '[Graceful-Shutdown] [HTTPChaos]'
+          - '[Basic] [PodChaos]'
+          - '[Basic] [TimeChaos]'
+          - '[Basic] [IOChaos]'
+          - '[Basic] [HTTPChaos]'
+          - '[Basic] [Sidecar Config]'
+          - '[Basic] [NetworkChaos]'
+          - '[Basic] [DNSChaos]'
+          - '[Basic] [StressChaos]'
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -120,6 +118,8 @@ jobs:
         env:
           FOCUS: ${{ matrix.focus }}
         run: |
+          # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets
+          export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -p -focus="${FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/pingcap/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
