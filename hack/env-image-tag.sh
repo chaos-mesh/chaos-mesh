@@ -34,7 +34,7 @@ if [ "$#" -eq  "0" ]; then
   exit 1
 fi
 
-if [[ "$1" == 'dev-env' || "$1" == 'build-env'  ]]; then
+if [[ "$1" == "dev-env" || "$1" == "build-env"  ]]; then
   docker run -i mikefarah/yq:latest ".$1.tag" < $PROJECT_DIR/env-images.yaml
   exit 0
 fi
