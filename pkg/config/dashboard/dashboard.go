@@ -81,27 +81,27 @@ func GetChaosDashboardEnv() (*ChaosDashboardConfig, error) {
 func ParsePersistTTLConfig(config *PersistTTLConfig) (*ttlcontroller.TTLConfig, error) {
 	syncPeriod, err := time.ParseDuration(config.SyncPeriod)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
 	event, err := time.ParseDuration(config.Event)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
 	experiment, err := time.ParseDuration(config.Experiment)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
 	schedule, err := time.ParseDuration(config.Schedule)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
 	workflow, err := time.ParseDuration(config.Workflow)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
 	return &ttlcontroller.TTLConfig{
