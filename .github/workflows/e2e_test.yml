@@ -43,9 +43,6 @@ jobs:
           path: ./e2e-test/image/e2e/bin
           retention-days: 7
   e2e-test-matrix:
-    # these permissions are required by generating test reports
-    # see https://github.com/dorny/test-reporter/issues/149#issuecomment-1004820190
-    permissions: write-all
     needs:
       - build-image
       - build-e2e-binary
@@ -57,8 +54,19 @@ jobs:
           - v1.15.12
           - v1.20.15
           - v1.23.4
+        # focus is the regex expression to filter the test cases, see: https://onsi.github.io/ginkgo/#description-based-filtering
+        # because it's a regex expression, so we should use escape to present square brackets.
         focus:
-          - Basic
+          - '\[Graceful-Shutdown\] \[IOChaos\]'
+          - '\[Graceful-Shutdown\] \[HTTPChaos\]'
+          - '\[Basic\] \[PodChaos\]'
+          - '\[Basic\] \[TimeChaos\]'
+          - '\[Basic\] \[IOChaos\]'
+          - '\[Basic\] \[HTTPChaos\]'
+          - '\[Basic\] \[Sidecar Config\]'
+          - '\[Basic\] \[NetworkChaos\]'
+          - '\[Basic\] \[DNSChaos\]'
+          - '\[Basic\] \[StressChaos\]'
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
