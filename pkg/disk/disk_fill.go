@@ -6,6 +6,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/command"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	"go.uber.org/multierr"
+	"os"
 	"os/exec"
 	"strconv"
 )
@@ -44,7 +46,8 @@ func InitFill(c FillConfig, logger logr.Logger) (*Fill, error) {
 	if err != nil {
 		return nil, err
 	}
-	byteSize, err := Count(c.Size, c.Percent, path)
+	c.Path = path
+	byteSize, err := Count(c.Size, c.Percent, c.Path)
 	if c.FillByFAllocate {
 		fallocateCmd := FAllocate{
 			Exec:     command.NewExec(),
@@ -106,6 +109,7 @@ func (f *Fill) Inject(pid uint32) error {
 		out, err := cmd.CombinedOutput()
 		f.logger.Info(string(out))
 		if err != nil {
+			err = multierr.Append(err, f.Recover())
 			return errors.WithStack(err)
 		}
 	} else if !f.FillByFAllocate && f.DdCmds != nil {
@@ -119,6 +123,7 @@ func (f *Fill) Inject(pid uint32) error {
 			out, err := cmd.CombinedOutput()
 			f.logger.Info(string(out))
 			if err != nil {
+				err = multierr.Append(err, f.Recover())
 				return errors.WithStack(err)
 			}
 		}
@@ -126,4 +131,14 @@ func (f *Fill) Inject(pid uint32) error {
 		return errors.New("unexpected situation")
 	}
 	return nil
+}
+
+func (f Fill) Recover() error {
+	if _, err := os.Stat(f.Path); err == nil {
+		return os.Remove(f.Path)
+	} else if errors.Is(err, os.ErrNotExist) {
+		return nil
+	} else {
+		return errors.WithStack(err)
+	}
 }

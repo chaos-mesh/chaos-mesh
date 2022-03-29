@@ -28,4 +28,6 @@ func TestFill_Inject(t *testing.T) {
 
 	err = f.Inject(uint32(timer.Pid()))
 	assert.NoError(t, err)
+	err = f.Recover()
+	assert.NoError(t, err)
 }

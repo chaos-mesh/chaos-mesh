@@ -5,6 +5,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 	"github.com/stretchr/testify/assert"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -14,13 +15,13 @@ func TestPayload_Inject(t *testing.T) {
 	timer, err := timer.StartTimer()
 	assert.NoError(t, err)
 
-	c := NewPayloadConfig(Read, CommonConfig{
+	c := NewPayloadConfig(Write, CommonConfig{
 		Path:      "",
-		Size:      "100M",
+		Size:      "10G",
 		Percent:   "",
 		SpaceLock: "",
 	}, RuntimeConfig{
-		ProcessNum:    4,
+		ProcessNum:    2,
 		LoopExecution: false,
 	})
 
@@ -29,7 +30,12 @@ func TestPayload_Inject(t *testing.T) {
 
 	p, err := InitPayload(c, logger)
 	assert.NoError(t, err)
+	pid := timer.Pid()
+	var wg sync.WaitGroup
+	wg.Add(1)
 
-	err = p.Inject(uint32(timer.Pid()))
+	err = p.Inject(uint32(pid))
 	assert.NoError(t, err)
+
+	p.Recover()
 }

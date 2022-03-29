@@ -2,15 +2,15 @@ package disk
 
 import (
 	"bytes"
-	"os"
-	"os/exec"
-	"sync"
-	"syscall"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/command"
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
+	"os"
+	"os/exec"
+	"sync"
+	"syscall"
+	"time"
 )
 
 type RuntimeConfig struct {
@@ -46,7 +46,7 @@ type Payload struct {
 	wg        sync.WaitGroup
 	processes []*exec.Cmd
 
-	locker sync.Locker
+	locker sync.Mutex
 
 	logger logr.Logger
 }
@@ -154,6 +154,8 @@ func (p *Payload) Inject(pid uint32) error {
 	out, err := testCmd.CombinedOutput()
 	p.logger.Info(string(out))
 	if err != nil {
+		p.locker.Unlock()
+		err = multierror.Append(err, p.Recover())
 		return errors.Wrap(err, string(out))
 	}
 
@@ -165,6 +167,8 @@ func (p *Payload) Inject(pid uint32) error {
 		p.logger.Info(cmd.String())
 		out, err := StartCmd(cmd)
 		if err != nil {
+			p.locker.Unlock()
+			err = multierror.Append(err, p.Recover())
 			return err
 		}
 		p.processes[i] = cmd
@@ -181,6 +185,7 @@ func (p *Payload) Inject(pid uint32) error {
 		}()
 	}
 	p.locker.Unlock()
+	p.logger.Info("UNLOCK")
 	p.wg.Wait()
 	close(errs)
 	var result error
@@ -190,8 +195,11 @@ func (p *Payload) Inject(pid uint32) error {
 	return errors.WithStack(result)
 }
 
+const WaitTime = time.Second * 10
+
 func (p *Payload) Recover() error {
 	p.locker.Lock()
+	p.logger.Info("RECOVER")
 	defer p.locker.Unlock()
 
 	var result error
@@ -207,19 +215,25 @@ func (p *Payload) Recover() error {
 						result = multierror.Append(result, errors.WithStack(err))
 					}
 				}
+			} else {
+				p.logger.Info("I don't know why , but process.Process is nil")
 			}
-			p.logger.Info("I don't why , but process.Process is nil")
+		} else {
+			p.logger.Info("I don't know why , but process is nil")
 		}
-		p.logger.Info("I don't why , but process is nil")
+
 	}
 	p.processes = []*exec.Cmd{}
 
 	if p.Action == Write {
-		err := os.Remove(p.Path)
-		if err != nil {
-			result = multierror.Append(result, errors.WithStack(err))
+		if _, err := os.Stat(p.Path); err == nil {
+			return os.Remove(p.Path)
+		} else if errors.Is(err, os.ErrNotExist) {
+			return nil
+		} else {
+			return errors.WithStack(err)
 		}
 	}
 
-	return result
+	return errors.WithStack(result)
 }
