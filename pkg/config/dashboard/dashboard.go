@@ -86,22 +86,22 @@ func ParsePersistTTLConfig(config *PersistTTLConfig) (*ttlcontroller.TTLConfig, 
 
 	event, err := time.ParseDuration(config.Event)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration event TTL")
+		return nil, errors.Wrap(err, "parse configuration TTL for event")
 	}
 
 	experiment, err := time.ParseDuration(config.Experiment)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration experiment TTL")
+		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
 	}
 
 	schedule, err := time.ParseDuration(config.Schedule)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration schedule TTL")
+		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
 	}
 
 	workflow, err := time.ParseDuration(config.Workflow)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration workflow TTL")
+		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
 	}
 
 	return &ttlcontroller.TTLConfig{
