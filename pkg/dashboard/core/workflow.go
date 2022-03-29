@@ -51,16 +51,18 @@ const (
 
 // WorkflowMeta defines the root structure of a workflow.
 type WorkflowMeta struct {
-	ID         uint           `gorm:"primary_key" json:"id"`
-	UID        string         `gorm:"index:workflow_uid" json:"uid"`
-	Namespace  string         `json:"namespace"`
-	Name       string         `json:"name"`
-	Entry      string         `json:"entry"` // the entry node name
-	CreatedAt  time.Time      `json:"created_at"`
-	FinishTime time.Time      `json:"finish_time"`
-	EndTime    string         `json:"end_time"`
-	Status     WorkflowStatus `json:"status,omitempty"`
-	Archived   bool           `json:"-"`
+	ID        uint      `gorm:"primary_key" json:"id"`
+	UID       string    `gorm:"index:workflow_uid" json:"uid"`
+	Namespace string    `json:"namespace"`
+	Name      string    `json:"name"`
+	Entry     string    `json:"entry"` // the entry node name
+	CreatedAt time.Time `json:"created_at"`
+	// FinishTime represents the time when the workflow was deleted from Kubernetes.
+	FinishTime time.Time `json:"finish_time"`
+	// EndTime represents the time when the workflow completed all steps.
+	EndTime  string         `json:"end_time"`
+	Status   WorkflowStatus `json:"status,omitempty"`
+	Archived bool           `json:"-"`
 }
 
 type WorkflowDetail struct {
