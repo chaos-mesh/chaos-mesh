@@ -30,7 +30,6 @@ const (
 	ContainerRuntimeContainerd = "containerd"
 	ContainerRuntimeCrio       = "crio"
 
-	// TODO(yeya24): make ns configurable
 	defaultDockerSocket     = "unix:///var/run/docker.sock"
 	defaultContainerdSocket = "/run/containerd/containerd.sock"
 	defaultCrioSocket       = "/var/run/crio/crio.sock"
@@ -40,8 +39,9 @@ const (
 // CrClientConfig contains the basic cr client configuration.
 type CrClientConfig struct {
 	// Support docker, containerd, crio for now
-	Runtime    string
-	SocketPath string
+	Runtime      string
+	SocketPath   string
+	ContainerdNS string
 }
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
@@ -76,7 +76,11 @@ func CreateContainerRuntimeInfoClient(clientConfig *CrClientConfig) (ContainerRu
 		if socketPath == "" {
 			socketPath = defaultContainerdSocket
 		}
-		cli, err = containerd.New(socketPath, containerd.WithDefaultNamespace(containerdDefaultNS))
+		containerdNS := containerdDefaultNS
+		if clientConfig.ContainerdNS != "" {
+			containerdNS = clientConfig.ContainerdNS
+		}
+		cli, err = containerd.New(socketPath, containerd.WithDefaultNamespace(containerdNS))
 		if err != nil {
 			return nil, err
 		}

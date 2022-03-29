@@ -31,13 +31,29 @@ var _ = Describe("netem server", func() {
 	Expect(err).To(BeNil())
 
 	Context("newDaemonServer", func() {
-		It("should work", func() {
+		It("should work without socket path", func() {
+			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeDocker}, nil, logger)
+			Expect(err).To(BeNil())
+			defer mock.With("MockContainerdClient", &test.MockClient{})()
+			_, err = newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+			Expect(err).To(BeNil())
+		})
+
+		It("should work with socket path", func() {
 			_, err := newDaemonServer(&crclients.CrClientConfig{
 				Runtime:    crclients.ContainerRuntimeDocker,
 				SocketPath: "/foo/bar/docker.socket"}, nil, logger)
 			Expect(err).To(BeNil())
+		})
+
+		It("should work with socket path and ns", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err = newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+			_, err := newDaemonServer(&crclients.CrClientConfig{Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
+			Expect(err).To(BeNil())
+			_, err = newDaemonServer(&crclients.CrClientConfig{
+				Runtime:      crclients.ContainerRuntimeContainerd,
+				SocketPath:   "/foo/bar/containerd.socket",
+				ContainerdNS: "chaos-mesh.org"}, nil, logger)
 			Expect(err).To(BeNil())
 		})
 

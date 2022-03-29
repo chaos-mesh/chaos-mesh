@@ -45,6 +45,7 @@ func init() {
 	flag.IntVar(&conf.HTTPPort, "http-port", 31766, "the port which http server listens on")
 	flag.StringVar(&conf.CrClientConfig.Runtime, "runtime", "docker", "current container runtime")
 	flag.StringVar(&conf.CrClientConfig.SocketPath, "runtime-socket-path", "", "current container runtime socket path")
+	flag.StringVar(&conf.CrClientConfig.ContainerdNS, "containerd-ns", "k8s.io", "namespace used for containerd")
 	flag.StringVar(&conf.CaCert, "ca", "", "ca certificate of grpc server")
 	flag.StringVar(&conf.Cert, "cert", "", "certificate of grpc server")
 	flag.StringVar(&conf.Key, "key", "", "key of grpc server")
