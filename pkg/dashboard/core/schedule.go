@@ -58,7 +58,7 @@ type ScheduleStore interface {
 // Schedule represents a schedule instance. Use in db.
 type Schedule struct {
 	ScheduleMeta
-	Schedule string `gorm:"size:2048"` // JSON string
+	Schedule string `gorm:"size:4096"` // JSON string
 }
 
 // ScheduleMeta defines the metadata of a schedule instance. Use in db.
