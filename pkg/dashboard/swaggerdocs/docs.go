@@ -2382,6 +2382,7 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
@@ -2389,6 +2390,7 @@ var doc = `{
                     "type": "string"
                 },
                 "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2423,6 +2425,7 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
@@ -2430,6 +2433,7 @@ var doc = `{
                     "type": "string"
                 },
                 "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {

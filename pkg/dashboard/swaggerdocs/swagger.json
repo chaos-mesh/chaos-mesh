@@ -2366,6 +2366,7 @@
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
@@ -2373,6 +2374,7 @@
                     "type": "string"
                 },
                 "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2407,6 +2409,7 @@
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
@@ -2414,6 +2417,7 @@
                     "type": "string"
                 },
                 "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
