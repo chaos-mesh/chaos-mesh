@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
 // limitations under the License.
 //
 
-package time
+package workflow
 
 import (
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-var log = ctrl.Log.WithName("time")
-
-// RegisterLogger registers a logger on time pkg
-func RegisterLogger(logger logr.Logger) {
-	log = logger
+func Bootstrap(conf *config.ChaosDashboardConfig, store core.WorkflowStore, logger logr.Logger) *Service {
+	return NewService(conf, store, logger.WithName("workflow-api"))
 }

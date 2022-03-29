@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -44,7 +45,6 @@ spec:
       {{- if .Values.chaosDaemon.serviceAccount }}
       serviceAccountName: {{ .Values.chaosDaemon.serviceAccount }}
       {{- end }}
-      hostIPC: true
       hostPID: true
       {{- if .Values.chaosDaemon.priorityClassName }}
       priorityClassName: {{ .Values.chaosDaemon.priorityClassName }}
@@ -80,9 +80,8 @@ spec:
             - /etc/chaos-daemon/cert/tls.key
           {{- end }}
           env:
-            {{- range $envKey, $envVal := .Values.chaosDaemon.env }}
-            - name: {{ $envKey | upper }}
-              value: {{ $envVal | quote }}
+            {{- if .Values.chaosDaemon.env }}
+            {{- include "chaos-mesh.helpers.listEnvVars" .Values.chaosDaemon | trim | nindent 12 }}
             {{- end }}
             {{- if not .Values.chaosDaemon.env.TZ }}
             - name: TZ
