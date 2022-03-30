@@ -64,7 +64,6 @@ type PersistTTLConfig struct {
 type DatabaseConfig struct {
 	Driver     string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
 	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"core.sqlite"`
-	Secret     string `envconfig:"DATABASE_SECRET"`
 }
 
 // GetChaosDashboardEnv gets all env variables related to dashboard.
