@@ -20,11 +20,19 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/disk"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"sync"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/go-logr/logr"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -36,14 +44,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
-	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 )
 
 //go:generate protoc -I pb pb/chaosdaemon.proto --go_out=plugins=grpc:pb
@@ -87,6 +87,8 @@ type DaemonServer struct {
 
 	IPSetLocker      *locker.Locker
 	TimeChaosManager tasks.TaskManager
+
+	DiskChaosManager DiskChaosManager
 }
 
 func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
@@ -110,7 +112,12 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
 		TimeChaosManager:         tasks.NewTaskManager(log),
-		rootLogger:               log,
+		DiskChaosManager: DiskChaosManager{
+			FillMap:    NewSyncMap(make(map[string]*disk.Fill)),
+			PayloadMap: NewSyncMap(make(map[string]*disk.Payload)),
+			locker:     sync.RWMutex{},
+		},
+		rootLogger: log,
 	}
 }
 
