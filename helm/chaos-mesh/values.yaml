@@ -324,6 +324,10 @@ dashboard:
     TTL_EVENT: 168h
     # Set TTL of archived experiment data
     TTL_EXPERIMENT: 336h
+    # Set TTL of archived schedule data
+    TTL_SCHEDULE: 336h
+    # Set TTL of archived workflow data
+    TTL_WORKFLOW: 336h
   ingress:
     ## Set to true to enable ingress record generation
     enabled: false
