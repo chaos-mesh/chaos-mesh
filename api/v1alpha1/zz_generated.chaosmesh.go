@@ -25,9 +25,9 @@ import (
 	"github.com/pkg/errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"k8s.io/apimachinery/pkg/runtime"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
@@ -128,7 +128,7 @@ func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *AWSChaos) IsOneShot() bool {
-	if in.Spec.Action==Ec2Restart {
+	if in.Spec.Action == Ec2Restart {
 		return true
 	}
 
@@ -265,7 +265,7 @@ func (in *AzureChaos) DurationExceeded(now time.Time) (bool, time.Duration, erro
 }
 
 func (in *AzureChaos) IsOneShot() bool {
-	if in.Spec.Action==AzureVmRestart {
+	if in.Spec.Action == AzureVmRestart {
 		return true
 	}
 
@@ -439,6 +439,139 @@ func (in *BlockChaos) Validate() error {
 var _ webhook.Defaulter = &BlockChaos{}
 
 func (in *BlockChaos) Default() {
+	gw.Default(in)
+}
+
+const KindDiskChaos = "DiskChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *DiskChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *DiskChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *DiskChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *DiskChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *DiskChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *DiskChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// DiskChaosList contains a list of DiskChaos
+type DiskChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []DiskChaos `json:"items"`
+}
+
+func (in *DiskChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *DiskChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *DiskChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *DiskChaos) IsOneShot() bool {
+	return false
+}
+
+var DiskChaosWebhookLog = logf.Log.WithName("DiskChaos-resource")
+
+func (in *DiskChaos) ValidateCreate() error {
+	DiskChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *DiskChaos) ValidateUpdate(old runtime.Object) error {
+	DiskChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*DiskChaos).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *DiskChaos) ValidateDelete() error {
+	DiskChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &DiskChaos{}
+
+func (in *DiskChaos) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &DiskChaos{}
+
+func (in *DiskChaos) Default() {
 	gw.Default(in)
 }
 
@@ -668,7 +801,7 @@ func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *GCPChaos) IsOneShot() bool {
-	if in.Spec.Action==NodeReset {
+	if in.Spec.Action == NodeReset {
 		return true
 	}
 
@@ -1642,7 +1775,7 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *PodChaos) IsOneShot() bool {
-	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
+	if in.Spec.Action == PodKillAction || in.Spec.Action == ContainerKillAction {
 		return true
 	}
 
@@ -2119,6 +2252,12 @@ func init() {
 		list:  &BlockChaosList{},
 	})
 
+	SchemeBuilder.Register(&DiskChaos{}, &DiskChaosList{})
+	all.register(KindDiskChaos, &ChaosKind{
+		chaos: &DiskChaos{},
+		list:  &DiskChaosList{},
+	})
+
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
 		chaos: &DNSChaos{},
@@ -2195,7 +2334,6 @@ func init() {
 		list:  &TimeChaosList{},
 	})
 
-
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		chaos: &AWSChaos{},
 		list:  &AWSChaosList{},
@@ -2209,6 +2347,11 @@ func init() {
 	allScheduleItem.register(KindBlockChaos, &ChaosKind{
 		chaos: &BlockChaos{},
 		list:  &BlockChaosList{},
+	})
+
+	allScheduleItem.register(KindDiskChaos, &ChaosKind{
+		chaos: &DiskChaos{},
+		list:  &DiskChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{

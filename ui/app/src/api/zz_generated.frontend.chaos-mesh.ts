@@ -4,6 +4,7 @@ const mapping = new Map<ExperimentKind, string>([
   ['AWSChaos', 'awsChaos'],
   ['AzureChaos', 'azureChaos'],
   ['BlockChaos', 'blockChaos'],
+  ['DiskChaos', 'diskChaos'],
   ['DNSChaos', 'dnsChaos'],
   ['GCPChaos', 'gcpChaos'],
   ['HTTPChaos', 'httpChaos'],

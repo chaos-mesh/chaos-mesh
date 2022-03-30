@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"github.com/chaos-mesh/chaos-mesh/pkg/command"
 	"github.com/go-logr/logr"
-	"github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
+	"go.uber.org/multierr"
 	"os"
 	"os/exec"
 	"sync"
@@ -162,7 +162,7 @@ func (p *Payload) Inject(pid uint32) error {
 	p.logger.Info(string(out))
 	if err != nil {
 		p.locker.Unlock()
-		err = multierror.Append(err, p.Recover())
+		err = multierr.Append(err, p.Recover())
 		return errors.Wrap(err, string(out))
 	}
 
@@ -175,7 +175,7 @@ func (p *Payload) Inject(pid uint32) error {
 		out, err := StartCmd(cmd)
 		if err != nil {
 			p.locker.Unlock()
-			err = multierror.Append(err, p.Recover())
+			err = multierr.Append(err, p.Recover())
 			return err
 		}
 		p.processes[i] = cmd
@@ -197,7 +197,7 @@ func (p *Payload) Inject(pid uint32) error {
 	close(errs)
 	var result error
 	for err := range errs {
-		result = multierror.Append(result, err)
+		result = multierr.Append(result, err)
 	}
 	return errors.WithStack(result)
 }
@@ -212,11 +212,11 @@ func (p *Payload) Recover() error {
 		if process != nil {
 			if process.Process != nil {
 				if err := process.Process.Signal(syscall.SIGTERM); err != nil {
-					result = multierror.Append(result, errors.WithStack(err))
+					result = multierr.Append(result, errors.WithStack(err))
 				} else {
 					_, err := process.Process.Wait()
 					if err != nil {
-						result = multierror.Append(result, errors.WithStack(err))
+						result = multierr.Append(result, errors.WithStack(err))
 					}
 				}
 			} else {

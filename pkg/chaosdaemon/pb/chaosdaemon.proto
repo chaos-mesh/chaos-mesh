@@ -14,6 +14,11 @@ service ChaosDaemon {
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
   rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
 
+  rpc DiskFill(DiskFillRequest) returns (google.protobuf.Empty) {}
+  rpc DiskPayload(DiskPayloadRequest) returns (google.protobuf.Empty) {}
+  rpc RecoverDiskFill(DiskFillRecoverRequest) returns (google.protobuf.Empty) {}
+  rpc RecoverDiskPayload(DiskPayloadRecoverRequest) returns (google.protobuf.Empty) {}
+
   rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
   rpc ContainerGetPid (ContainerRequest) returns (ContainerResponse) {}
 
@@ -146,6 +151,33 @@ message Chain {
   string destination_ports = 7;
   string tcp_flags = 8;
   string device = 9;
+}
+
+message DiskFillRequest {
+  string path = 1;
+  string size = 2;
+  string percent = 3;
+  string space_lock_size = 4;
+  bool fill_by_fallocate = 5;
+  string container_id = 6;
+}
+
+message DiskFillRecoverRequest {
+  string container_id = 1;
+}
+
+message DiskPayloadRequest {
+  string path = 1;
+  string size = 2;
+  string percent = 3;
+  string space_lock_size = 4;
+  uint32 process_num = 5;
+  int32  action = 6;
+  string container_id = 7;
+}
+
+message DiskPayloadRecoverRequest {
+  string container_id = 1;
 }
 
 message TimeRequest {
