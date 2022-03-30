@@ -15,10 +15,10 @@ func TestFill_Inject(t *testing.T) {
 	assert.NoError(t, err)
 
 	c := NewFillConfig(false, CommonConfig{
-		Path:      "",
-		Size:      "20M",
-		Percent:   "",
-		SpaceLock: "",
+		Path:    "",
+		Size:    "20M",
+		Percent: "",
+		SLock:   NewSpaceLock("50M"),
 	})
 	logger, err := log.NewDefaultZapLogger()
 	assert.NoError(t, err)

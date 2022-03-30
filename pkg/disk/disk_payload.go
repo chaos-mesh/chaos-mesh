@@ -10,7 +10,6 @@ import (
 	"os/exec"
 	"sync"
 	"syscall"
-	"time"
 )
 
 type RuntimeConfig struct {
@@ -139,11 +138,19 @@ func StartCmd(c *exec.Cmd) (*bytes.Buffer, error) {
 }
 
 func (p *Payload) Inject(pid uint32) error {
+	err := p.SLock.Lock()
+	if err != nil {
+		return err
+	}
+	defer p.SLock.Unlock()
+
 	p.locker.Lock()
+	p.logger.Info("inject payload: lock payload")
 	cmds := make([]*exec.Cmd, len(p.DdCmds))
 	for i, rawDD := range p.DdCmds {
 		rawCmd, err := rawDD.ToCmd()
 		if err != nil {
+			p.locker.Unlock()
 			return err
 		}
 		cmds[i] = WrapCmd(rawCmd, pid)
@@ -185,7 +192,7 @@ func (p *Payload) Inject(pid uint32) error {
 		}()
 	}
 	p.locker.Unlock()
-	p.logger.Info("UNLOCK")
+	p.logger.Info("inject payload: unlock payload")
 	p.wg.Wait()
 	close(errs)
 	var result error
@@ -195,13 +202,10 @@ func (p *Payload) Inject(pid uint32) error {
 	return errors.WithStack(result)
 }
 
-const WaitTime = time.Second * 10
-
 func (p *Payload) Recover() error {
 	p.locker.Lock()
-	p.logger.Info("RECOVER")
 	defer p.locker.Unlock()
-
+	p.logger.Info("recover payload: lock payload")
 	var result error
 
 	for _, process := range p.processes {

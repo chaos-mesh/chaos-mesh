@@ -7,18 +7,28 @@ import (
 )
 
 type SpaceLock struct {
+	size string
 	file *os.File
 }
 
-const RandomFileSize = 24
+func NewSpaceLock(size string) SpaceLock {
+	if size == "" {
+		size = "0"
+	}
+	return SpaceLock{
+		size: size,
+	}
+}
 
-func (l *SpaceLock) Lock(size string) error {
-	bSize, err := ParseUnit(size)
+const RandomFileNameSize = 24
+
+func (l *SpaceLock) Lock() error {
+	bSize, err := ParseUnit(l.size)
 	if err != nil {
 		return err
 	}
 
-	f, err := os.Create(rand.String(RandomFileSize))
+	f, err := os.Create(rand.String(RandomFileNameSize))
 	if err != nil {
 		return err
 	}

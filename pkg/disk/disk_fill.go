@@ -18,7 +18,7 @@ type CommonConfig struct {
 	Size    string
 	Percent string
 
-	SpaceLock string
+	SLock SpaceLock
 }
 
 type FillConfig struct {
@@ -99,6 +99,11 @@ func WrapCmd(rawCmd *exec.Cmd, pid uint32) *exec.Cmd {
 }
 
 func (f *Fill) Inject(pid uint32) error {
+	err := f.SLock.Lock()
+	if err != nil {
+		return err
+	}
+	defer f.SLock.Unlock()
 	if f.FillByFAllocate && f.FallocateCmd != nil {
 		rawCmd, err := f.FallocateCmd.ToCmd()
 		if err != nil {

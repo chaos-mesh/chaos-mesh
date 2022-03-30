@@ -5,7 +5,7 @@ import (
 )
 
 func TestSpaceLock_Lock(t *testing.T) {
-	var sLock SpaceLock
-	sLock.Lock("20M")
+	sLock := NewSpaceLock("20M")
+	sLock.Lock()
 	sLock.Unlock()
 }

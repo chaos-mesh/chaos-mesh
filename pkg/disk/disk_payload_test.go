@@ -16,10 +16,10 @@ func TestPayload_Inject(t *testing.T) {
 	assert.NoError(t, err)
 
 	c := NewPayloadConfig(Write, CommonConfig{
-		Path:      "",
-		Size:      "10G",
-		Percent:   "",
-		SpaceLock: "",
+		Path:    "",
+		Size:    "10G",
+		Percent: "",
+		SLock:   NewSpaceLock("50M"),
 	}, RuntimeConfig{
 		ProcessNum:    2,
 		LoopExecution: false,
