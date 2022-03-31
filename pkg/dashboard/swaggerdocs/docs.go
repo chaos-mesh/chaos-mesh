@@ -4032,6 +4032,10 @@ var doc = `{
                     "description": "the process name or the process ID",
                     "type": "string"
                 },
+                "recoverCmd": {
+                    "description": "the command to be run when recovering experiment",
+                    "type": "string"
+                },
                 "signal": {
                     "description": "the signal number to send",
                     "type": "integer"

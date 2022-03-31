@@ -2693,6 +2693,9 @@ spec:
                   process:
                     description: the process name or the process ID
                     type: string
+                  recoverCmd:
+                    description: the command to be run when recovering experiment
+                    type: string
                   signal:
                     description: the signal number to send
                     type: integer
@@ -5598,6 +5601,9 @@ spec:
                       process:
                         description: the process name or the process ID
                         type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
+                        type: string
                       signal:
                         description: the signal number to send
                         type: integer
@@ -8164,6 +8170,10 @@ spec:
                                 process:
                                   description: the process name or the process ID
                                   type: string
+                                recoverCmd:
+                                  description: the command to be run when recovering
+                                    experiment
+                                  type: string
                                 signal:
                                   description: the signal number to send
                                   type: integer
@@ -10430,6 +10440,10 @@ spec:
                                     process:
                                       description: the process name or the process
                                         ID
+                                      type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
                                       type: string
                                     signal:
                                       description: the signal number to send
@@ -16992,6 +17006,9 @@ spec:
                       process:
                         description: the process name or the process ID
                         type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
+                        type: string
                       signal:
                         description: the signal number to send
                         type: integer
@@ -19094,6 +19111,9 @@ spec:
                         properties:
                           process:
                             description: the process name or the process ID
+                            type: string
+                          recoverCmd:
+                            description: the command to be run when recovering experiment
                             type: string
                           signal:
                             description: the signal number to send
@@ -21723,6 +21743,10 @@ spec:
                                       description: the process name or the process
                                         ID
                                       type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
+                                      type: string
                                     signal:
                                       description: the signal number to send
                                       type: integer
@@ -24070,6 +24094,10 @@ spec:
                                         process:
                                           description: the process name or the process
                                             ID
+                                          type: string
+                                        recoverCmd:
+                                          description: the command to be run when
+                                            recovering experiment
                                           type: string
                                         signal:
                                           description: the signal number to send
@@ -33528,6 +33556,9 @@ spec:
                             process:
                               description: the process name or the process ID
                               type: string
+                            recoverCmd:
+                              description: the command to be run when recovering experiment
+                              type: string
                             signal:
                               description: the signal number to send
                               type: integer
@@ -35735,6 +35766,10 @@ spec:
                               properties:
                                 process:
                                   description: the process name or the process ID
+                                  type: string
+                                recoverCmd:
+                                  description: the command to be run when recovering
+                                    experiment
                                   type: string
                                 signal:
                                   description: the signal number to send
