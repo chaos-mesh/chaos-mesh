@@ -3918,6 +3918,10 @@
         "v1alpha1.MemoryStressor": {
             "type": "object",
             "properties": {
+                "oomScoreAdj": {
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximm=1000\n+kubebuilder:default=0\n+optional",
+                    "type": "integer"
+                },
                 "options": {
                     "description": "extend stress-ng options\n+optional",
                     "type": "array",
