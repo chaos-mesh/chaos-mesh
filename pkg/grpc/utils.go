@@ -19,8 +19,8 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"net"
+	"os"
 	"strconv"
 	"time"
 
@@ -69,7 +69,7 @@ type CredentialProvider interface {
 }
 
 func (it *FileProvider) getCredentialOption() (grpc.DialOption, error) {
-	caCert, err := ioutil.ReadFile(it.file.CaCert)
+	caCert, err := os.ReadFile(it.file.CaCert)
 	if err != nil {
 		return nil, err
 	}
