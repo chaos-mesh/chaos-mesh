@@ -36,11 +36,11 @@ type Controller struct {
 	event      core.EventStore
 	schedule   core.ScheduleStore
 	workflow   core.WorkflowStore
-	ttlconfig  *TTLconfig
+	ttlconfig  *TTLConfig
 }
 
-// TTLconfig defines the ttl
-type TTLconfig struct {
+// TTLConfig defines the ttl
+type TTLConfig struct {
 	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database
 	DatabaseTTLResyncPeriod time.Duration
 	// EventTTL defines the ttl of events
@@ -59,7 +59,7 @@ func NewController(
 	event core.EventStore,
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
-	ttlc *TTLconfig,
+	ttlc *TTLConfig,
 ) *Controller {
 	return &Controller{
 		experiment: experiment,
@@ -88,5 +88,5 @@ func (c *Controller) runWorker() {
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
 	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
 	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
-	c.workflow.DeleteByEndTime(ctx, c.ttlconfig.WorkflowTTL)
+	c.workflow.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
 }
