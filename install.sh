@@ -1331,6 +1331,10 @@ spec:
               value: "168h"
             - name: TTL_EXPERIMENT
               value: "336h"
+            - name: TTL_SCHEDULE
+              value: "336h"
+            - name: TTL_WORKFLOW
+              value: "336h"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
