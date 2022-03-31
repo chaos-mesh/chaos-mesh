@@ -1,9 +1,10 @@
-FROM golang:alpine3.10
+FROM golang:1.18
 
 WORKDIR /src
 
 COPY main.go /src
 COPY go.mod /src
+COPY go.sum /src
 
 RUN go build -o test main.go
 
