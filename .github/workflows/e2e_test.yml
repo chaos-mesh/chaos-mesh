@@ -57,8 +57,6 @@ jobs:
           - v1.20.15
           - v1.23.4
         focus:
-          - '[Graceful-Shutdown] [IOChaos]'
-          - '[Graceful-Shutdown] [HTTPChaos]'
           - '[Basic] [PodChaos]'
           - '[Basic] [TimeChaos]'
           - '[Basic] [IOChaos]'
