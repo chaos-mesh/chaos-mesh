@@ -11,6 +11,7 @@ export IMAGE_BUILD ?= 1
 
 # todo: rename the project/repository of e2e-helper to chaos-mesh
 export IMAGE_E2E_HELPER_PROJECT ?= pingcap
+export IMAGE_CHAOS_MESH_E2E_PROJECT ?= pingcap
 
 ROOT=$(shell pwd)
 HELM_BIN=$(ROOT)/output/bin/helm
