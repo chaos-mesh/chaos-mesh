@@ -18,10 +18,11 @@ package recover
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
-	"github.com/pkg/errors"
 )
 
 func SelectPods(ctx context.Context, client *ctrlclient.CtrlClient, selector v1alpha1.PodSelectorSpec) ([]*PartialPod, error) {
