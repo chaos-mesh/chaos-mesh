@@ -23,6 +23,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joomcode/errorx"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 var (
@@ -67,7 +69,7 @@ func SetAPIError(c *gin.Context, err *errorx.Error) {
 		FullText: fmt.Sprintf("%+v", err),
 	}
 
-	Log.Error(err.Cause(), typeName)
+	log.L().WithName("auth middleware").Error(err.Cause(), typeName)
 	c.AbortWithStatusJSON(code, &apiError)
 }
 
