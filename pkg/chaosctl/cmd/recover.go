@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 )
 
 type RecoverOptions struct {
@@ -168,20 +169,14 @@ func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []strin
 		selector.Pods = map[string][]string{o.namespace: names}
 	}
 
-	labelSelector := map[string]string{}
 	if o.labels != nil && len(*o.labels) > 0 {
-		for _, label := range *o.labels {
-			pair := strings.Split(label, "=")
-			if len(pair) != 2 {
-				common.PrettyPrint(fmt.Sprintf("wrong label: %s", label), 0, common.Red)
-				continue
-			}
-			labelSelector[pair[0]] = pair[1]
+		labels, err := label.ParseLabel(strings.Join(*o.labels, ","))
+		if err != nil {
+			return nil, errors.Wrap(err, "parse labels")
 		}
-	}
-
-	if len(labelSelector) != 0 {
-		selector.LabelSelectors = labelSelector
+		if len(labels) != 0 {
+			selector.LabelSelectors = labels
+		}
 	}
 
 	return client.SelectPods(ctx, selector)
