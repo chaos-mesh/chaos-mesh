@@ -1,0 +1,22 @@
+# As https://github.com/dorny/test-reporter#recommended-setup-for-public-repositories says, the GitHub Actions triggered
+# by event pull_request would only be permitted with read-all permissions. But dorny/test-reporter requires checks: write,
+# so we split it into another GitHub Action Workflow.
+
+name: E2E Test Report
+on:
+  workflow_run:
+    workflows: ['E2E Test']
+    types:
+      - completed
+
+jobs:
+  e2e-test-report:
+    runs-on: ubuntu-latest
+    steps:
+    - name: build test report
+      uses: dorny/test-reporter@v1
+      with:
+        artifact: '/test-junit-reports-(.*)/'
+        name: "E2E Tests Report $1"
+        path: "**/*.xml"
+        reporter: java-junit
