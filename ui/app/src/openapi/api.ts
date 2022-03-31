@@ -347,7 +347,7 @@ export interface CoreWorkflowDetail {
    */
   created_at?: string
   /**
-   *
+   * EndTime represents the time when the workflow completed all steps.
    * @type {string}
    * @memberof CoreWorkflowDetail
    */
@@ -358,6 +358,12 @@ export interface CoreWorkflowDetail {
    * @memberof CoreWorkflowDetail
    */
   entry?: string
+  /**
+   * FinishTime represents the time when the workflow was deleted from Kubernetes.
+   * @type {string}
+   * @memberof CoreWorkflowDetail
+   */
+  finish_time?: string
   /**
    *
    * @type {number}
@@ -414,7 +420,7 @@ export interface CoreWorkflowMeta {
    */
   created_at?: string
   /**
-   *
+   * EndTime represents the time when the workflow completed all steps.
    * @type {string}
    * @memberof CoreWorkflowMeta
    */
@@ -425,6 +431,12 @@ export interface CoreWorkflowMeta {
    * @memberof CoreWorkflowMeta
    */
   entry?: string
+  /**
+   * FinishTime represents the time when the workflow was deleted from Kubernetes.
+   * @type {string}
+   * @memberof CoreWorkflowMeta
+   */
+  finish_time?: string
   /**
    *
    * @type {number}
@@ -846,6 +858,117 @@ export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedul
 /**
  *
  * @export
+ * @interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+ */
+export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate {
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  namespace?: string
+  /**
+   *
+   * @type {V1alpha1StatusCheckTemplate}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  spec?: V1alpha1StatusCheckTemplate
+}
+/**
+ *
+ * @export
+ * @interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase
+ */
+export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase {
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  created_at?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  namespace?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  uid?: string
+}
+/**
+ *
+ * @export
+ * @interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+ */
+export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail {
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  created_at?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  namespace?: string
+  /**
+   *
+   * @type {V1alpha1StatusCheckTemplate}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  spec?: V1alpha1StatusCheckTemplate
+  /**
+   *
+   * @type {string}
+   * @memberof GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  uid?: string
+}
+/**
+ *
+ * @export
  * @interface GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse
  */
 export interface GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse {
@@ -1216,6 +1339,117 @@ export interface PkgDashboardApiserverScheduleSchedule {
    *
    * @type {string}
    * @memberof PkgDashboardApiserverScheduleSchedule
+   */
+  uid?: string
+}
+/**
+ *
+ * @export
+ * @interface PkgDashboardApiserverTemplateStatusCheckTemplate
+ */
+export interface PkgDashboardApiserverTemplateStatusCheckTemplate {
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  namespace?: string
+  /**
+   *
+   * @type {V1alpha1StatusCheckTemplate}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplate
+   */
+  spec?: V1alpha1StatusCheckTemplate
+}
+/**
+ *
+ * @export
+ * @interface PkgDashboardApiserverTemplateStatusCheckTemplateBase
+ */
+export interface PkgDashboardApiserverTemplateStatusCheckTemplateBase {
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  created_at?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  namespace?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateBase
+   */
+  uid?: string
+}
+/**
+ *
+ * @export
+ * @interface PkgDashboardApiserverTemplateStatusCheckTemplateDetail
+ */
+export interface PkgDashboardApiserverTemplateStatusCheckTemplateDetail {
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  created_at?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  namespace?: string
+  /**
+   *
+   * @type {V1alpha1StatusCheckTemplate}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateDetail
+   */
+  spec?: V1alpha1StatusCheckTemplate
+  /**
+   *
+   * @type {string}
+   * @memberof PkgDashboardApiserverTemplateStatusCheckTemplateDetail
    */
   uid?: string
 }
@@ -4002,6 +4236,61 @@ export interface V1alpha1AttrOverrideSpec {
 /**
  *
  * @export
+ * @interface V1alpha1AzureChaosSpec
+ */
+export interface V1alpha1AzureChaosSpec {
+  /**
+   * Action defines the specific azure chaos action. Supported action: vm-stop / vm-restart / disk-detach Default action: vm-stop +kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  action?: string
+  /**
+   * DiskName indicates the name of the disk. Needed in disk-detach. +optional
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  diskName?: string
+  /**
+   * Duration represents the duration of the chaos action. +optional
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  duration?: string
+  /**
+   * LUN indicates the Logical Unit Number of the data disk. Needed in disk-detach. +optional
+   * @type {number}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  lun?: number
+  /**
+   * ResourceGroupName defines the name of ResourceGroup
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  resourceGroupName?: string
+  /**
+   * SecretName defines the name of kubernetes secret. It is used for Azure credentials. +optional
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  secretName?: string
+  /**
+   * SubscriptionID defines the id of Azure subscription.
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  subscriptionID?: string
+  /**
+   * VMName defines the name of Virtual Machine
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  vmName?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1BandwidthSpec
  */
 export interface V1alpha1BandwidthSpec {
@@ -4159,6 +4448,12 @@ export interface V1alpha1ChaosOnlyScheduleSpec {
    * @memberof V1alpha1ChaosOnlyScheduleSpec
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1AzureChaosSpec}
+   * @memberof V1alpha1ChaosOnlyScheduleSpec
+   */
+  azureChaos?: V1alpha1AzureChaosSpec
   /**
    *
    * @type {V1alpha1BlockChaosSpec}
@@ -4685,6 +4980,56 @@ export interface V1alpha1HTTPChaosSpec {
 /**
  *
  * @export
+ * @interface V1alpha1HTTPCriteria
+ */
+export interface V1alpha1HTTPCriteria {
+  /**
+   * StatusCode defines the expected http status code for the request. A statusCode string could be a single code (e.g. 200), or an inclusive range (e.g. 200-400, both `200` and `400` are included).
+   * @type {string}
+   * @memberof V1alpha1HTTPCriteria
+   */
+  statusCode?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1HTTPStatusCheck
+ */
+export interface V1alpha1HTTPStatusCheck {
+  /**
+   * +optional
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  body?: string
+  /**
+   *
+   * @type {V1alpha1HTTPCriteria}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  criteria?: V1alpha1HTTPCriteria
+  /**
+   *
+   * @type {{ [key: string]: Array<string>; }}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  headers?: { [key: string]: Array<string> }
+  /**
+   * +optional +kubebuilder:validation:Enum=GET;POST +kubebuilder:default=GET
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  method?: string
+  /**
+   *
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  url?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1IOChaosSpec
  */
 export interface V1alpha1IOChaosSpec {
@@ -4749,7 +5094,7 @@ export interface V1alpha1IOChaosSpec {
    */
   path?: string
   /**
-   * Percent defines the percentage of injection errors and provides a number from 0-100. default: 100. +optional
+   * Percent defines the percentage of injection errors and provides a number from 0-100. default: 100. +optional +kubebuilder:default=100
    * @type {number}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -6209,6 +6554,12 @@ export interface V1alpha1ScheduleSpec {
   awsChaos?: V1alpha1AWSChaosSpec
   /**
    *
+   * @type {V1alpha1AzureChaosSpec}
+   * @memberof V1alpha1ScheduleSpec
+   */
+  azureChaos?: V1alpha1AzureChaosSpec
+  /**
+   *
    * @type {V1alpha1BlockChaosSpec}
    * @memberof V1alpha1ScheduleSpec
    */
@@ -6334,6 +6685,67 @@ export interface V1alpha1ScheduleStatus {
    * @memberof V1alpha1ScheduleStatus
    */
   time?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1StatusCheckTemplate
+ */
+export interface V1alpha1StatusCheckTemplate {
+  /**
+   * Duration defines the duration of the whole status check if the number of failed execution does not exceed the failure threshold. Duration is available to both `Synchronous` and `Continuous` mode. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". +optional
+   * @type {string}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  duration?: string
+  /**
+   * FailureThreshold defines the minimum consecutive failure for the status check to be considered failed. +optional +kubebuilder:default=3 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  failureThreshold?: number
+  /**
+   *
+   * @type {V1alpha1HTTPStatusCheck}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  http?: V1alpha1HTTPStatusCheck
+  /**
+   * IntervalSeconds defines how often (in seconds) to perform an execution of status check. +optional +kubebuilder:default=10 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  intervalSeconds?: number
+  /**
+   * Mode defines the execution mode of the status check. Support type: Synchronous / Continuous +optional +kubebuilder:validation:Enum=Synchronous;Continuous
+   * @type {string}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  mode?: string
+  /**
+   * RecordsHistoryLimit defines the number of record to retain. +optional +kubebuilder:default=100 +kubebuilder:validation:Minimum=1 +kubebuilder:validation:Maximum=1000
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  recordsHistoryLimit?: number
+  /**
+   * SuccessThreshold defines the minimum consecutive successes for the status check to be considered successful. SuccessThreshold only works for `Synchronous` mode. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  successThreshold?: number
+  /**
+   * TimeoutSeconds defines the number of seconds after which an execution of status check times out. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  timeoutSeconds?: number
+  /**
+   * Type defines the specific status check type. Support type: HTTP +kubebuilder:default=HTTP +kubebuilder:validation:Enum=HTTP
+   * @type {string}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  type?: string
 }
 /**
  *
@@ -6478,6 +6890,12 @@ export interface V1alpha1Template {
    * @memberof V1alpha1Template
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1AzureChaosSpec}
+   * @memberof V1alpha1Template
+   */
+  azureChaos?: V1alpha1AzureChaosSpec
   /**
    *
    * @type {V1alpha1BlockChaosSpec}
@@ -7337,7 +7755,12 @@ export const ArchivesApiFp = function (configuration?: Configuration) {
       name?: string,
       kind?: 'PodChaos' | 'IOChaos' | 'NetworkChaos' | 'TimeChaos' | 'KernelChaos' | 'StressChaos',
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverArchiveArchive>>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveArchive>>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archivesGet(namespace, name, kind, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -7367,7 +7790,12 @@ export const ArchivesApiFp = function (configuration?: Configuration) {
       namespace?: string,
       name?: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverArchiveArchive>>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveArchive>>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archivesSchedulesGet(namespace, name, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -7395,7 +7823,12 @@ export const ArchivesApiFp = function (configuration?: Configuration) {
     async archivesSchedulesUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverArchiveDetail>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveDetail>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archivesSchedulesUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -7423,7 +7856,12 @@ export const ArchivesApiFp = function (configuration?: Configuration) {
     async archivesUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverArchiveDetail>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveDetail>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archivesUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -7453,7 +7891,12 @@ export const ArchivesApiFp = function (configuration?: Configuration) {
       namespace?: string,
       name?: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverArchiveArchive>>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveArchive>>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archivesWorkflowsGet(namespace, name, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -7481,7 +7924,12 @@ export const ArchivesApiFp = function (configuration?: Configuration) {
     async archivesWorkflowsUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverArchiveDetail>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveDetail>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archivesWorkflowsUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -7519,7 +7967,7 @@ export const ArchivesApiFactory = function (configuration?: Configuration, baseP
       name?: string,
       kind?: 'PodChaos' | 'IOChaos' | 'NetworkChaos' | 'TimeChaos' | 'KernelChaos' | 'StressChaos',
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverArchiveArchive>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveArchive>> {
       return localVarFp.archivesGet(namespace, name, kind, options).then((request) => request(axios, basePath))
     },
     /**
@@ -7544,7 +7992,7 @@ export const ArchivesApiFactory = function (configuration?: Configuration, baseP
       namespace?: string,
       name?: string,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverArchiveArchive>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveArchive>> {
       return localVarFp.archivesSchedulesGet(namespace, name, options).then((request) => request(axios, basePath))
     },
     /**
@@ -7564,7 +8012,10 @@ export const ArchivesApiFactory = function (configuration?: Configuration, baseP
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    archivesSchedulesUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverArchiveDetail> {
+    archivesSchedulesUidGet(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveDetail> {
       return localVarFp.archivesSchedulesUidGet(uid, options).then((request) => request(axios, basePath))
     },
     /**
@@ -7584,7 +8035,10 @@ export const ArchivesApiFactory = function (configuration?: Configuration, baseP
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    archivesUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverArchiveDetail> {
+    archivesUidGet(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveDetail> {
       return localVarFp.archivesUidGet(uid, options).then((request) => request(axios, basePath))
     },
     /**
@@ -7609,7 +8063,7 @@ export const ArchivesApiFactory = function (configuration?: Configuration, baseP
       namespace?: string,
       name?: string,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverArchiveArchive>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveArchive>> {
       return localVarFp.archivesWorkflowsGet(namespace, name, options).then((request) => request(axios, basePath))
     },
     /**
@@ -7629,7 +8083,10 @@ export const ArchivesApiFactory = function (configuration?: Configuration, baseP
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    archivesWorkflowsUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverArchiveDetail> {
+    archivesWorkflowsUidGet(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverArchiveDetail> {
       return localVarFp.archivesWorkflowsUidGet(uid, options).then((request) => request(axios, basePath))
     },
   }
@@ -8548,10 +9005,7 @@ export const CommonApiFp = function (configuration?: Configuration) {
       request: V1alpha1PhysicalMachineSelectorSpec,
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPhysicalMachine>>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverCommonPhysicalMachine>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.commonPhysicalmachinesPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -8566,12 +9020,7 @@ export const CommonApiFp = function (configuration?: Configuration) {
     async commonPodsPost(
       request: V1alpha1PodSelectorSpec,
       options?: AxiosRequestConfig
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPod>>
-    > {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverCommonPod>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.commonPodsPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -8698,7 +9147,7 @@ export const CommonApiFactory = function (configuration?: Configuration, basePat
     commonPhysicalmachinesPost(
       request: V1alpha1PhysicalMachineSelectorSpec,
       options?: any
-    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPhysicalMachine>> {
+    ): AxiosPromise<Array<PkgDashboardApiserverCommonPhysicalMachine>> {
       return localVarFp.commonPhysicalmachinesPost(request, options).then((request) => request(axios, basePath))
     },
     /**
@@ -8711,7 +9160,7 @@ export const CommonApiFactory = function (configuration?: Configuration, basePat
     commonPodsPost(
       request: V1alpha1PodSelectorSpec,
       options?: any
-    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPod>> {
+    ): AxiosPromise<Array<PkgDashboardApiserverCommonPod>> {
       return localVarFp.commonPodsPost(request, options).then((request) => request(axios, basePath))
     },
     /**
@@ -9850,10 +10299,7 @@ export const ExperimentsApiFp = function (configuration?: Configuration) {
       status?: 'Injecting' | 'Running' | 'Finished' | 'Paused',
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentExperiment>>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverExperimentExperiment>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.experimentsGet(namespace, name, kind, status, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -9940,12 +10386,7 @@ export const ExperimentsApiFp = function (configuration?: Configuration) {
     async experimentsUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentDetail>
-    > {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverExperimentDetail>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.experimentsUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -10001,7 +10442,7 @@ export const ExperimentsApiFactory = function (
         | 'HTTPChaos',
       status?: 'Injecting' | 'Running' | 'Finished' | 'Paused',
       options?: any
-    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentExperiment>> {
+    ): AxiosPromise<Array<PkgDashboardApiserverExperimentExperiment>> {
       return localVarFp
         .experimentsGet(namespace, name, kind, status, options)
         .then((request) => request(axios, basePath))
@@ -10064,10 +10505,7 @@ export const ExperimentsApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    experimentsUidGet(
-      uid: string,
-      options?: any
-    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentDetail> {
+    experimentsUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverExperimentDetail> {
       return localVarFp.experimentsUidGet(uid, options).then((request) => request(axios, basePath))
     },
   }
@@ -10643,10 +11081,7 @@ export const SchedulesApiFp = function (configuration?: Configuration) {
       name?: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedule>>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverScheduleSchedule>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesGet(namespace, name, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -10717,12 +11152,7 @@ export const SchedulesApiFp = function (configuration?: Configuration) {
     async schedulesUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleDetail>
-    > {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverScheduleDetail>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -10758,7 +11188,7 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
       namespace?: string,
       name?: string,
       options?: any
-    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedule>> {
+    ): AxiosPromise<Array<PkgDashboardApiserverScheduleSchedule>> {
       return localVarFp.schedulesGet(namespace, name, options).then((request) => request(axios, basePath))
     },
     /**
@@ -10808,10 +11238,7 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    schedulesUidGet(
-      uid: string,
-      options?: any
-    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleDetail> {
+    schedulesUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverScheduleDetail> {
       return localVarFp.schedulesUidGet(uid, options).then((request) => request(axios, basePath))
     },
   }
@@ -11030,6 +11457,645 @@ export class SchedulesApi extends BaseAPI {
   public schedulesUidGet(requestParameters: SchedulesApiSchedulesUidGetRequest, options?: AxiosRequestConfig) {
     return SchedulesApiFp(this.configuration)
       .schedulesUidGet(requestParameters.uid, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+}
+
+/**
+ * TemplateApi - axios parameter creator
+ * @export
+ */
+export const TemplateApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     * Get status check templates from k8s cluster in real time.
+     * @summary List status check templates.
+     * @param {string} [namespace] filter status check templates by namespace
+     * @param {string} [name] filter status check templates by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksGet: async (
+      namespace?: string,
+      name?: string,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/templates/statuschecks`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (namespace !== undefined) {
+        localVarQueryParameter['namespace'] = namespace
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
+
+/**
+ * TemplateApi - functional programming interface
+ * @export
+ */
+export const TemplateApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = TemplateApiAxiosParamCreator(configuration)
+  return {
+    /**
+     * Get status check templates from k8s cluster in real time.
+     * @summary List status check templates.
+     * @param {string} [namespace] filter status check templates by namespace
+     * @param {string} [name] filter status check templates by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksGet(
+      namespace?: string,
+      name?: string,
+      options?: AxiosRequestConfig
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase>>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksGet(namespace, name, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+  }
+}
+
+/**
+ * TemplateApi - factory interface
+ * @export
+ */
+export const TemplateApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+  const localVarFp = TemplateApiFp(configuration)
+  return {
+    /**
+     * Get status check templates from k8s cluster in real time.
+     * @summary List status check templates.
+     * @param {string} [namespace] filter status check templates by namespace
+     * @param {string} [name] filter status check templates by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksGet(
+      namespace?: string,
+      name?: string,
+      options?: any
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase>> {
+      return localVarFp.templatesStatuschecksGet(namespace, name, options).then((request) => request(axios, basePath))
+    },
+  }
+}
+
+/**
+ * Request parameters for templatesStatuschecksGet operation in TemplateApi.
+ * @export
+ * @interface TemplateApiTemplatesStatuschecksGetRequest
+ */
+export interface TemplateApiTemplatesStatuschecksGetRequest {
+  /**
+   * filter status check templates by namespace
+   * @type {string}
+   * @memberof TemplateApiTemplatesStatuschecksGet
+   */
+  readonly namespace?: string
+
+  /**
+   * filter status check templates by name
+   * @type {string}
+   * @memberof TemplateApiTemplatesStatuschecksGet
+   */
+  readonly name?: string
+}
+
+/**
+ * TemplateApi - object-oriented interface
+ * @export
+ * @class TemplateApi
+ * @extends {BaseAPI}
+ */
+export class TemplateApi extends BaseAPI {
+  /**
+   * Get status check templates from k8s cluster in real time.
+   * @summary List status check templates.
+   * @param {TemplateApiTemplatesStatuschecksGetRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplateApi
+   */
+  public templatesStatuschecksGet(
+    requestParameters: TemplateApiTemplatesStatuschecksGetRequest = {},
+    options?: AxiosRequestConfig
+  ) {
+    return TemplateApiFp(this.configuration)
+      .templatesStatuschecksGet(requestParameters.namespace, requestParameters.name, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+}
+
+/**
+ * TemplatesApi - axios parameter creator
+ * @export
+ */
+export const TemplatesApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     * Pass a JSON object to create a new status check template.
+     * @summary Create a new status check template.
+     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksPost: async (
+      statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'statuscheck' is not null or undefined
+      assertParamExists('templatesStatuschecksPost', 'statuscheck', statuscheck)
+      const localVarPath = `/templates/statuschecks`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(statuscheck, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Delete the status check template by namespaced name.
+     * @summary Delete a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckDelete: async (
+      namespace: string,
+      name: string,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'namespace' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckDelete', 'namespace', namespace)
+      // verify required parameter 'name' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckDelete', 'name', name)
+      const localVarPath = `/templates/statuschecks/statuscheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (namespace !== undefined) {
+        localVarQueryParameter['namespace'] = namespace
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get the status check template\'s detail by namespaced name.
+     * @summary Get a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckGet: async (
+      namespace: string,
+      name: string,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'namespace' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckGet', 'namespace', namespace)
+      // verify required parameter 'name' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckGet', 'name', name)
+      const localVarPath = `/templates/statuschecks/statuscheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (namespace !== undefined) {
+        localVarQueryParameter['namespace'] = namespace
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Update a status check template by namespaced name.
+     * @summary Update a status check template.
+     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckPut: async (
+      request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckPut', 'request', request)
+      const localVarPath = `/templates/statuschecks/statuscheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
+
+/**
+ * TemplatesApi - functional programming interface
+ * @export
+ */
+export const TemplatesApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = TemplatesApiAxiosParamCreator(configuration)
+  return {
+    /**
+     * Pass a JSON object to create a new status check template.
+     * @summary Create a new status check template.
+     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksPost(
+      statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      options?: AxiosRequestConfig
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksPost(statuscheck, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Delete the status check template by namespaced name.
+     * @summary Delete a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksStatuscheckDelete(
+      namespace: string,
+      name: string,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckDelete(
+        namespace,
+        name,
+        options
+      )
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Get the status check template\'s detail by namespaced name.
+     * @summary Get a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksStatuscheckGet(
+      namespace: string,
+      name: string,
+      options?: AxiosRequestConfig
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckGet(
+        namespace,
+        name,
+        options
+      )
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Update a status check template by namespaced name.
+     * @summary Update a status check template.
+     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksStatuscheckPut(
+      request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      options?: AxiosRequestConfig
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckPut(request, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+  }
+}
+
+/**
+ * TemplatesApi - factory interface
+ * @export
+ */
+export const TemplatesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+  const localVarFp = TemplatesApiFp(configuration)
+  return {
+    /**
+     * Pass a JSON object to create a new status check template.
+     * @summary Create a new status check template.
+     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksPost(
+      statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate> {
+      return localVarFp.templatesStatuschecksPost(statuscheck, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Delete the status check template by namespaced name.
+     * @summary Delete a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckDelete(
+      namespace: string,
+      name: string,
+      options?: any
+    ): AxiosPromise<UtilsResponse> {
+      return localVarFp
+        .templatesStatuschecksStatuscheckDelete(namespace, name, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get the status check template\'s detail by namespaced name.
+     * @summary Get a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckGet(
+      namespace: string,
+      name: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail> {
+      return localVarFp
+        .templatesStatuschecksStatuscheckGet(namespace, name, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Update a status check template by namespaced name.
+     * @summary Update a status check template.
+     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckPut(
+      request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate> {
+      return localVarFp
+        .templatesStatuschecksStatuscheckPut(request, options)
+        .then((request) => request(axios, basePath))
+    },
+  }
+}
+
+/**
+ * Request parameters for templatesStatuschecksPost operation in TemplatesApi.
+ * @export
+ * @interface TemplatesApiTemplatesStatuschecksPostRequest
+ */
+export interface TemplatesApiTemplatesStatuschecksPostRequest {
+  /**
+   * the status check definition
+   * @type {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate}
+   * @memberof TemplatesApiTemplatesStatuschecksPost
+   */
+  readonly statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+}
+
+/**
+ * Request parameters for templatesStatuschecksStatuscheckDelete operation in TemplatesApi.
+ * @export
+ * @interface TemplatesApiTemplatesStatuschecksStatuscheckDeleteRequest
+ */
+export interface TemplatesApiTemplatesStatuschecksStatuscheckDeleteRequest {
+  /**
+   * the namespace of status check templates
+   * @type {string}
+   * @memberof TemplatesApiTemplatesStatuschecksStatuscheckDelete
+   */
+  readonly namespace: string
+
+  /**
+   * the name of status check templates
+   * @type {string}
+   * @memberof TemplatesApiTemplatesStatuschecksStatuscheckDelete
+   */
+  readonly name: string
+}
+
+/**
+ * Request parameters for templatesStatuschecksStatuscheckGet operation in TemplatesApi.
+ * @export
+ * @interface TemplatesApiTemplatesStatuschecksStatuscheckGetRequest
+ */
+export interface TemplatesApiTemplatesStatuschecksStatuscheckGetRequest {
+  /**
+   * the namespace of status check templates
+   * @type {string}
+   * @memberof TemplatesApiTemplatesStatuschecksStatuscheckGet
+   */
+  readonly namespace: string
+
+  /**
+   * the name of status check templates
+   * @type {string}
+   * @memberof TemplatesApiTemplatesStatuschecksStatuscheckGet
+   */
+  readonly name: string
+}
+
+/**
+ * Request parameters for templatesStatuschecksStatuscheckPut operation in TemplatesApi.
+ * @export
+ * @interface TemplatesApiTemplatesStatuschecksStatuscheckPutRequest
+ */
+export interface TemplatesApiTemplatesStatuschecksStatuscheckPutRequest {
+  /**
+   * Request body
+   * @type {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate}
+   * @memberof TemplatesApiTemplatesStatuschecksStatuscheckPut
+   */
+  readonly request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+}
+
+/**
+ * TemplatesApi - object-oriented interface
+ * @export
+ * @class TemplatesApi
+ * @extends {BaseAPI}
+ */
+export class TemplatesApi extends BaseAPI {
+  /**
+   * Pass a JSON object to create a new status check template.
+   * @summary Create a new status check template.
+   * @param {TemplatesApiTemplatesStatuschecksPostRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksPost(
+    requestParameters: TemplatesApiTemplatesStatuschecksPostRequest,
+    options?: AxiosRequestConfig
+  ) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksPost(requestParameters.statuscheck, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Delete the status check template by namespaced name.
+   * @summary Delete a status check template.
+   * @param {TemplatesApiTemplatesStatuschecksStatuscheckDeleteRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksStatuscheckDelete(
+    requestParameters: TemplatesApiTemplatesStatuschecksStatuscheckDeleteRequest,
+    options?: AxiosRequestConfig
+  ) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksStatuscheckDelete(requestParameters.namespace, requestParameters.name, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get the status check template\'s detail by namespaced name.
+   * @summary Get a status check template.
+   * @param {TemplatesApiTemplatesStatuschecksStatuscheckGetRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksStatuscheckGet(
+    requestParameters: TemplatesApiTemplatesStatuschecksStatuscheckGetRequest,
+    options?: AxiosRequestConfig
+  ) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksStatuscheckGet(requestParameters.namespace, requestParameters.name, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Update a status check template by namespaced name.
+   * @summary Update a status check template.
+   * @param {TemplatesApiTemplatesStatuschecksStatuscheckPutRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksStatuscheckPut(
+    requestParameters: TemplatesApiTemplatesStatuschecksStatuscheckPutRequest,
+    options?: AxiosRequestConfig
+  ) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksStatuscheckPut(requestParameters.request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }
@@ -11409,10 +12475,7 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       uid: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverWorkflowStatusResponse>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsUidDelete(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -11523,10 +12586,7 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsUidDelete(
-      uid: string,
-      options?: any
-    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse> {
+    workflowsUidDelete(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverWorkflowStatusResponse> {
       return localVarFp.workflowsUidDelete(uid, options).then((request) => request(axios, basePath))
     },
     /**

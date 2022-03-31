@@ -1805,7 +1805,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/template.StatusCheckTemplateBase"
+                                "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateBase"
                             }
                         }
                     },
@@ -1842,7 +1842,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
                         }
                     }
                 ],
@@ -1850,7 +1850,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
                         }
                     },
                     "400": {
@@ -1898,7 +1898,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplateDetail"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateDetail"
                         }
                     },
                     "400": {
@@ -1937,7 +1937,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
                         }
                     }
                 ],
@@ -1945,7 +1945,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
                         }
                     },
                     "400": {
@@ -2868,10 +2868,79 @@ var doc = `{
                 }
             }
         },
+        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                }
+            }
+        },
+        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateBase": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
         "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse": {
             "type": "object",
             "properties": {
                 "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.Header": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
                     "type": "string"
                 }
             }
@@ -3083,6 +3152,66 @@ var doc = `{
                 }
             }
         },
+        "pkg_dashboard_apiserver_template.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                }
+            }
+        },
+        "pkg_dashboard_apiserver_template.StatusCheckTemplateBase": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "pkg_dashboard_apiserver_template.StatusCheckTemplateDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
         "pkg_dashboard_apiserver_workflow.StatusResponse": {
             "type": "object",
             "properties": {
@@ -3116,68 +3245,6 @@ var doc = `{
                 },
                 "running": {
                     "type": "integer"
-                }
-            }
-        },
-        "template.StatusCheckTemplate": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "spec": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
-                }
-            }
-        },
-        "template.StatusCheckTemplateBase": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "template.StatusCheckTemplateDetail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "spec": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
-                },
-                "uid": {
-                    "type": "string"
                 }
             }
         },
@@ -5277,7 +5344,6 @@ var doc = `{
                 },
                 "azureChaos": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
@@ -5673,12 +5739,11 @@ var doc = `{
                 },
                 "criteria": {
                     "description": "Criteria defines how to determine the result of the status check.",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.HTTPCriteria"
                 },
                 "headers": {
                     "description": "+optional",
-                    "type": "string"
+                    "$ref": "#/definitions/http.Header"
                 },
                 "method": {
                     "description": "+optional\n+kubebuilder:validation:Enum=GET;POST\n+kubebuilder:default=GET",
@@ -6811,7 +6876,6 @@ var doc = `{
                 },
                 "azureChaos": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
@@ -6916,7 +6980,6 @@ var doc = `{
                 },
                 "http": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
                 },
                 "intervalSeconds": {
@@ -7049,7 +7112,6 @@ var doc = `{
                 },
                 "azureChaos": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {

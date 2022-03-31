@@ -352,10 +352,55 @@ definitions:
       uid:
         type: string
     type: object
+  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+    type: object
+  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateBase:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateDetail:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+      uid:
+        type: string
+    type: object
   github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse:
     properties:
       status:
         type: string
+    type: object
+  http.Header:
+    additionalProperties:
+      items:
+        type: string
+      type: array
     type: object
   intstr.IntOrString:
     properties:
@@ -492,6 +537,45 @@ definitions:
       uid:
         type: string
     type: object
+  pkg_dashboard_apiserver_template.StatusCheckTemplate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+    type: object
+  pkg_dashboard_apiserver_template.StatusCheckTemplateBase:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  pkg_dashboard_apiserver_template.StatusCheckTemplateDetail:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+      uid:
+        type: string
+    type: object
   pkg_dashboard_apiserver_workflow.StatusResponse:
     properties:
       status:
@@ -514,47 +598,6 @@ definitions:
         type: integer
       running:
         type: integer
-    type: object
-  template.StatusCheckTemplate:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      spec:
-        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
-        type: object
-    type: object
-  template.StatusCheckTemplateBase:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  template.StatusCheckTemplateDetail:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      spec:
-        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
-        type: object
-      uid:
-        type: string
     type: object
   utils.APIError:
     properties:
@@ -3418,11 +3461,9 @@ definitions:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
-        type: object
       azureChaos:
         $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
-        type: object
       blockChaos:
         $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
@@ -3840,10 +3881,9 @@ definitions:
       criteria:
         $ref: '#/definitions/v1alpha1.HTTPCriteria'
         description: Criteria defines how to determine the result of the status check.
-        type: object
       headers:
+        $ref: '#/definitions/http.Header'
         description: +optional
-        type: string
       method:
         description: |-
           +optional
@@ -5130,11 +5170,9 @@ definitions:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
-        type: object
       azureChaos:
         $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
-        type: object
       blockChaos:
         $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
@@ -5236,7 +5274,6 @@ definitions:
       http:
         $ref: '#/definitions/v1alpha1.HTTPStatusCheck'
         description: +optional
-        type: object
       intervalSeconds:
         description: |-
           IntervalSeconds defines how often (in seconds) to perform
@@ -5392,11 +5429,9 @@ definitions:
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
-        type: object
       azureChaos:
         $ref: '#/definitions/v1alpha1.AzureChaosSpec'
         description: +optional
-        type: object
       blockChaos:
         $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
@@ -6990,7 +7025,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/template.StatusCheckTemplateBase'
+              $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateBase'
             type: array
         "400":
           description: Bad Request
@@ -7013,14 +7048,14 @@ paths:
         name: statuscheck
         required: true
         schema:
-          $ref: '#/definitions/template.StatusCheckTemplate'
+          $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/template.StatusCheckTemplate'
+            $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
         "400":
           description: Bad Request
           schema:
@@ -7087,7 +7122,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/template.StatusCheckTemplateDetail'
+            $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateDetail'
         "400":
           description: Bad Request
           schema:
@@ -7111,14 +7146,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/template.StatusCheckTemplate'
+          $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/template.StatusCheckTemplate'
+            $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
         "400":
           description: Bad Request
           schema:
