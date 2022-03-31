@@ -21,9 +21,21 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
+// PartialPod is a subset of the Pod type.
+// It contains necessary information for forced recovery.
+type PartialPod struct {
+	Namespace string
+	Name      string
+	Processes []struct {
+		Pid, Command string
+	}
+	TcQdisc  []string
+	Iptables []string
+}
+
 type Recover interface {
 	// Recover target pod forcedly
-	Recover(ctx context.Context, pod *ctrlclient.PartialPod) error
+	Recover(ctx context.Context, pod *PartialPod) error
 }
 
 type RecoverBuilder func(client *ctrlclient.CtrlClient) Recover
@@ -34,6 +46,6 @@ func NewNoopRecover(client *ctrlclient.CtrlClient) Recover {
 	return &noopRecover{}
 }
 
-func (r *noopRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+func (r *noopRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	return nil
 }

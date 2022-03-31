@@ -155,7 +155,7 @@ func (o *RecoverOptions) List(client *ctrlclient.CtrlClient) ([]string, cobra.Sh
 	return names, cobra.ShellCompDirectiveNoFileComp
 }
 
-func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []string) ([]*ctrlclient.PartialPod, error) {
+func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []string) ([]*recover.PartialPod, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -179,5 +179,5 @@ func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []strin
 		}
 	}
 
-	return client.SelectPods(ctx, selector)
+	return recover.SelectPods(ctx, client, selector)
 }

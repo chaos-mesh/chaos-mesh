@@ -19,25 +19,11 @@ import (
 	"context"
 
 	"github.com/hasura/go-graphql-client"
-	"github.com/pingcap/errors"
-
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
 type CtrlClient struct {
 	QueryClient        *graphql.Client
 	SubscriptionClient *graphql.SubscriptionClient
-}
-
-type PartialPod struct {
-	Namespace string
-	Name      string
-	Processes []struct {
-		Pid, Command string
-	}
-	TcQdisc  []string
-	Iptables []string
 }
 
 func NewCtrlClient(url string) *CtrlClient {
@@ -65,48 +51,4 @@ func (c *CtrlClient) ListNamespace(ctx context.Context) ([]string, error) {
 	}
 
 	return namespaces, nil
-}
-
-func (c *CtrlClient) SelectPods(ctx context.Context, selector v1alpha1.PodSelectorSpec) ([]*PartialPod, error) {
-	selectInput := model.PodSelectorInput{
-		Pods:                map[string]interface{}{},
-		NodeSelectors:       map[string]interface{}{},
-		Nodes:               selector.Nodes,
-		PodPhaseSelectors:   selector.PodPhaseSelectors,
-		Namespaces:          selector.Namespaces,
-		FieldSelectors:      map[string]interface{}{},
-		LabelSelectors:      map[string]interface{}{},
-		AnnotationSelectors: map[string]interface{}{},
-	}
-
-	for k, v := range selector.Pods {
-		selectInput.Pods[k] = v
-	}
-
-	for k, v := range selector.NodeSelectors {
-		selectInput.NodeSelectors[k] = v
-	}
-
-	for k, v := range selector.FieldSelectors {
-		selectInput.FieldSelectors[k] = v
-	}
-
-	for k, v := range selector.LabelSelectors {
-		selectInput.LabelSelectors[k] = v
-	}
-
-	for k, v := range selector.AnnotationSelectors {
-		selectInput.AnnotationSelectors[k] = v
-	}
-
-	podsQuery := new(struct {
-		Pods []*PartialPod `graphql:"pods(selector: $selector)"`
-	})
-
-	err := c.QueryClient.Query(ctx, podsQuery, map[string]interface{}{"selector": selectInput})
-	if err != nil {
-		return nil, errors.Wrapf(err, "select pods with selector: %+v", selector)
-	}
-
-	return podsQuery.Pods, nil
 }
