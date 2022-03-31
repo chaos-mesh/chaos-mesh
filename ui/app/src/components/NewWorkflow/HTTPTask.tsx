@@ -26,7 +26,7 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import { RequestForm } from 'api/workflows.type'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 import { useIntl } from 'react-intl'
 import { validateName } from 'lib/formikhelpers'
@@ -115,7 +115,7 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
   return (
     <Paper>
       <Space>
-        <PaperTop title={T('newW.httpTitle')} />
+        <PaperTop title={i18n('newW.httpTitle')} />
         <Formik
           innerRef={formRef}
           initialValues={initialValues}
@@ -129,17 +129,17 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                 <Space>
                   <TextField
                     name="name"
-                    label={T('common.name')}
-                    validate={validateName(T('newW.node.nameValidation', intl))}
-                    helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                    label={i18n('common.name')}
+                    validate={validateName(i18n('newW.node.nameValidation', intl))}
+                    helperText={errors.name && touched.name ? errors.name : i18n('newW.node.nameHelper')}
                     error={errors.name && touched.name ? true : false}
                     size="small"
                     fullWidth
                   />
                   <TextField
                     name="url"
-                    label={T('newW.node.httpRequest.url')}
-                    helperText={errors.url && touched.url ? errors.url : T('newW.node.httpRequest.urlHelper')}
+                    label={i18n('newW.node.httpRequest.url')}
+                    helperText={errors.url && touched.url ? errors.url : i18n('newW.node.httpRequest.urlHelper')}
                     error={errors.url && touched.url ? true : false}
                     size="small"
                     fullWidth
@@ -148,9 +148,9 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                   <SelectField
                     className={classes.field}
                     name="method"
-                    label={T('newW.node.httpRequest.method')}
+                    label={i18n('newW.node.httpRequest.method')}
                     helperText={
-                      errors.method && touched.method ? errors.method : T('newW.node.httpRequest.methodHelper')
+                      errors.method && touched.method ? errors.method : i18n('newW.node.httpRequest.methodHelper')
                     }
                     size="small"
                   >
@@ -163,8 +163,8 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
                   {(values.method === 'POST' || values.method === 'PUT') && (
                     <TextField
                       name="body"
-                      label={T('newW.node.httpRequest.body')}
-                      helperText={errors.body && touched.body ? errors.body : T('newW.node.httpRequest.bodyHelper')}
+                      label={i18n('newW.node.httpRequest.body')}
+                      helperText={errors.body && touched.body ? errors.body : i18n('newW.node.httpRequest.bodyHelper')}
                       size="small"
                       fullWidth
                     />
@@ -172,13 +172,13 @@ const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
 
                   <FormControlLabel
                     style={{ marginRight: 0 }}
-                    label={T('newW.node.httpRequest.follow')}
+                    label={i18n('newW.node.httpRequest.follow')}
                     control={<Switch name="followLocation" onChange={handleChange} />}
                   />
 
                   <FormControlLabel
                     style={{ marginRight: 0 }}
-                    label={T('newW.node.httpRequest.json')}
+                    label={i18n('newW.node.httpRequest.json')}
                     control={<Switch name="jsonContent" onChange={handleChange} />}
                   />
                   <Submit />

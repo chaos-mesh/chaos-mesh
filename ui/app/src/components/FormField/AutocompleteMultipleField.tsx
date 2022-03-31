@@ -18,7 +18,7 @@ import { Autocomplete, Chip, TextField, TextFieldProps } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 
 import Paper from '@ui/mui-extends/esm/Paper'
-import T from 'components/T'
+import i18n from 'components/T'
 
 interface AutocompleteMultipleFieldProps {
   options: string[]
@@ -51,7 +51,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
       freeSolo
       multiple
       options={!props.disabled ? options : []}
-      noOptionsText={T('common.noOptions')}
+      noOptionsText={i18n('common.noOptions')}
       value={labels}
       onChange={onChange}
       renderTags={(value: string[], getTagProps) =>

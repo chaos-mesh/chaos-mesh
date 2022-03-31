@@ -19,7 +19,7 @@ import { setDebugMode, setEnableKubeSystemNS } from 'slices/settings'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import T from 'components/T'
+import i18n from 'components/T'
 
 const Experiments = () => {
   const { settings } = useStoreSelector((state) => state)
@@ -32,14 +32,14 @@ const Experiments = () => {
 
   return (
     <>
-      <PaperTop title={T('experiments.title')} divider />
+      <PaperTop title={i18n('experiments.title')} divider />
       <FormGroup>
         <FormControl>
           <FormControlLabel
             control={<Checkbox color="primary" checked={debugMode} onChange={handleChangeDebugMode} />}
-            label={T('settings.debugMode.title')}
+            label={i18n('settings.debugMode.title')}
           />
-          <FormHelperText>{T('settings.debugMode.choose')}</FormHelperText>
+          <FormHelperText>{i18n('settings.debugMode.choose')}</FormHelperText>
         </FormControl>
 
         <FormControl>
@@ -47,9 +47,9 @@ const Experiments = () => {
             control={
               <Checkbox color="primary" checked={enableKubeSystemNS} onChange={handleChangeEnableKubeSystemNS} />
             }
-            label={T('settings.enableKubeSystemNS.title')}
+            label={i18n('settings.enableKubeSystemNS.title')}
           />
-          <FormHelperText>{T('settings.enableKubeSystemNS.choose')}</FormHelperText>
+          <FormHelperText>{i18n('settings.enableKubeSystemNS.choose')}</FormHelperText>
         </FormControl>
       </FormGroup>
     </>
