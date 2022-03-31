@@ -13,6 +13,8 @@ jobs:
       - name: checkout codes
         uses: actions/checkout@v2
       - name: build e2e images
+        env:
+          DOCKER_REGISTRY: ghcr.io
         run: |
           make image e2e-image
       - name: save docker images
