@@ -20,7 +20,6 @@ import DateTime, { format } from 'lib/luxon'
 
 import { CoreEvent } from 'openapi'
 import NotFound from 'components/NotFound'
-import T from 'components/T'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
 import TimelineContent from '@mui/lab/TimelineContent'
@@ -28,6 +27,7 @@ import TimelineDot from '@mui/lab/TimelineDot'
 import TimelineItem from '@mui/lab/TimelineItem'
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent'
 import TimelineSeparator from '@mui/lab/TimelineSeparator'
+import i18n from 'components/T'
 import { iconByKind } from 'lib/byKind'
 import { useStoreSelector } from 'store'
 
@@ -66,7 +66,7 @@ const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
       ))}
     </Timeline>
   ) : (
-    <NotFound>{T('events.notFound')}</NotFound>
+    <NotFound>{i18n('events.notFound')}</NotFound>
   )
 }
 

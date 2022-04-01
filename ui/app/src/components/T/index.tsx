@@ -15,13 +15,27 @@
  *
  */
 
-import { FormattedMessage, IntlShape } from 'react-intl'
+/*
+ * This component was created to provide localized translations.
+ *
+ * It has three ways to use:
+ *
+ * 1. **DEPRECATED** `i18n(string)` will return a `FormattedMessage` component with the given string as id.
+ * 2. `i18n(string, intl)` will use intl object to return a translated string.
+ * 3. `T` is an alias of `FormattedMessage`. Mostly you will often use `T` instead of `i18n`.
+ *
+ */
+
+import { FormattedMessage } from 'react-intl'
+import type { IntlShape } from 'react-intl'
 
 // https://github.com/microsoft/TypeScript/issues/24929
-function T(id: string): JSX.Element
-function T(id: string, intl: IntlShape): string
-function T(id: string, intl?: IntlShape) {
+function i18n(id: string): JSX.Element // DEPRECATED, but preserve for backward compatibility.
+function i18n(id: string, intl: IntlShape): string
+function i18n(id: string, intl?: IntlShape) {
   return intl ? intl.formatMessage({ id }) : <FormattedMessage id={id} />
 }
 
-export default T
+// Re-export an alias for FormattedMessage.
+export const T = FormattedMessage
+export default i18n

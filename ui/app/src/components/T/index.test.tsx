@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,24 @@
  * limitations under the License.
  *
  */
-import { Box, Button, ButtonProps } from '@mui/material'
 
-import PublishIcon from '@mui/icons-material/Publish'
-import i18n from 'components/T'
+import { act, render, screen } from 'test-utils'
+import i18n, { T } from '.'
 
-export default function Submit({ mt = 6, onClick, ...rest }: ButtonProps & { mt?: number }) {
-  return (
-    <Box mt={mt} textAlign="right">
-      <Button
-        type={onClick ? undefined : 'submit'}
-        variant="contained"
-        startIcon={<PublishIcon />}
-        onClick={onClick}
-        {...rest}
-      >
-        {i18n('common.submit')}
-      </Button>
-    </Box>
-  )
-}
+describe('i18n() and <T />', () => {
+  test('displays k8s.title with i18n(string)', async () => {
+    await act(async () => {
+      render(<div>{i18n('k8s.title')}</div>)
+    })
+
+    screen.getByText('Kubernetes')
+  })
+
+  test('displays k8s.title with <T />', async () => {
+    await act(async () => {
+      render(<T id="k8s.title" />)
+    })
+
+    screen.getByText('Kubernetes')
+  })
+})

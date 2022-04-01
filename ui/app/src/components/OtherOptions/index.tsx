@@ -19,7 +19,7 @@ import { Box, Button } from '@mui/material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { useState } from 'react'
 
 interface OtherOptionsProps {
@@ -59,7 +59,7 @@ const OtherOptions: React.FC<OtherOptionsProps> = ({
           onClick={setOpen}
           disabled={disabled}
         >
-          {title ? title : T('common.otherOptions')}
+          {title ? title : i18n('common.otherOptions')}
         </Button>
       </Box>
       <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>

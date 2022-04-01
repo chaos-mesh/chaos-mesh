@@ -22,7 +22,7 @@ import ErrorIcon from '@mui/icons-material/Error'
 import HelpIcon from '@mui/icons-material/Help'
 import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled'
 import { StatusAllChaosStatus } from 'openapi'
-import T from 'components/T'
+import i18n from 'components/T'
 import { useIntl } from 'react-intl'
 
 interface StatusLabelProps {
@@ -33,7 +33,7 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
   const intl = useIntl()
   const theme = useTheme()
 
-  const label = T(`status.${status}`, intl)
+  const label = i18n(`status.${status}`, intl)
 
   let color
   switch (status) {

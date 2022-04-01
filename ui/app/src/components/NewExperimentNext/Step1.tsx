@@ -27,10 +27,10 @@ import RadioButtonCheckedOutlinedIcon from '@mui/icons-material/RadioButtonCheck
 import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined'
 import React from 'react'
 import Stress from './form/Stress'
-import T from 'components/T'
 import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@mui/icons-material/Undo'
 import clsx from 'clsx'
+import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 
 const useStyles = makeStyles((theme) => {
@@ -81,7 +81,7 @@ const TypeCard: React.FC<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
           {iconByKind(name)}
         </Box>
         <Box flex={1.5} textAlign="center">
-          <Typography variant="button">{T(title)}</Typography>
+          <Typography variant="button">{i18n(title)}</Typography>
         </Box>
       </Box>
     </Card>
@@ -150,7 +150,7 @@ const Step1 = () => {
               <CheckIcon className={classes.submitIcon} />
             </Box>
           )}
-          <Typography>{T('newE.titleStep1')}</Typography>
+          <Typography>{i18n('newE.titleStep1')}</Typography>
         </Box>
         {step1 && <UndoIcon className={classes.asButton} onClick={handleUndo} />}
       </Box>

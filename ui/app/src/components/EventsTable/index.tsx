@@ -35,7 +35,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import LastPageIcon from '@mui/icons-material/LastPage'
 import Paper from '@ui/mui-extends/esm/Paper'
-import T from 'components/T'
+import i18n from 'components/T'
 import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useState } from 'react'
@@ -111,7 +111,7 @@ const Head: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
             onClick={handleSortEvents(cell.id)}
           >
             <TableSortLabel active={orderBy === cell.id} direction={orderBy === cell.id ? order : 'desc'}>
-              {cell.label && T(`events.event.${cell.label}`)}
+              {cell.label && i18n(`events.event.${cell.label}`)}
             </TableSortLabel>
           </TableCell>
         ))}
@@ -227,7 +227,7 @@ const EventsTable: React.FC<EventsTableProps> = ({ events: allEvents }) => {
                 onRowsPerPageChange={handleRowsPerPageChange}
                 ActionsComponent={TablePaginationActions as any}
                 labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                labelRowsPerPage={T('events.eventsPerPage', intl)}
+                labelRowsPerPage={i18n('events.eventsPerPage', intl)}
               />
             )}
           </TableRow>

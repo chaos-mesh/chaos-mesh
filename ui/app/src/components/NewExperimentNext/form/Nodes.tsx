@@ -19,7 +19,7 @@ import { getIn, useFormikContext } from 'formik'
 
 import { LabelField } from 'components/FormField'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 
 const Nodes = () => {
   const { errors, touched } = useFormikContext()
@@ -28,11 +28,11 @@ const Nodes = () => {
     <Space>
       <LabelField
         name={'spec.address'}
-        label={T('physic.address')}
+        label={i18n('physic.address')}
         helperText={
           getIn(touched, 'spec.address') && getIn(errors, 'spec.address')
             ? getIn(errors, 'spec.address')
-            : T('physic.addressHelper')
+            : i18n('physic.addressHelper')
         }
         error={getIn(errors, 'spec.address') && getIn(touched, 'spec.address') ? true : false}
       />

@@ -4200,6 +4200,15 @@ definitions:
     type: object
   v1alpha1.MemoryStressor:
     properties:
+      oomScoreAdj:
+        description: |-
+          OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
+          about this option.
+          +kubebuilder:validation:Minimum=-1000
+          +kubebuilder:validation:Maximm=1000
+          +kubebuilder:default=0
+          +optional
+        type: integer
       options:
         description: |-
           extend stress-ng options
@@ -4926,6 +4935,9 @@ definitions:
     properties:
       process:
         description: the process name or the process ID
+        type: string
+      recoverCmd:
+        description: the command to be run when recovering experiment
         type: string
       signal:
         description: the signal number to send

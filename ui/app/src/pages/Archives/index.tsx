@@ -28,12 +28,12 @@ import ObjectListItem from 'components/ObjectListItem'
 import { PkgDashboardApiserverArchiveArchive } from 'openapi'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
+import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -152,7 +152,7 @@ export default function Archives() {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.success.${action}`, intl),
+              message: i18n(`confirm.success.${action}`, intl),
             })
           )
 
@@ -177,8 +177,8 @@ export default function Archives() {
 
   const handleBatchDelete = () =>
     handleSelect({
-      title: T('archives.deleteMulti', intl),
-      description: T('archives.deleteDesc', intl),
+      title: i18n('archives.deleteMulti', intl),
+      description: i18n('archives.deleteDesc', intl),
       handle: handleAction('deleteMulti'),
     })
 
@@ -214,9 +214,9 @@ export default function Archives() {
     <TabContext value={panel}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <TabList onChange={onTabChange}>
-          <Tab label={T('workflows.title')} value="workflow" />
-          <Tab label={T('schedules.title')} value="schedule" />
-          <Tab label={T('experiments.title')} value="experiment" />
+          <Tab label={i18n('workflows.title')} value="workflow" />
+          <Tab label={i18n('schedules.title')} value="schedule" />
+          <Tab label={i18n('experiments.title')} value="experiment" />
         </TabList>
       </Box>
 
@@ -227,15 +227,15 @@ export default function Archives() {
           onClick={handleBatchSelect}
           disabled={archives.length === 0}
         >
-          {T(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
+          {i18n(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
         </Button>
         {!isBatchEmpty && (
           <>
             <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
-              {T('common.selectAll')}
+              {i18n('common.selectAll')}
             </Button>
             <Button variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />} onClick={handleBatchDelete}>
-              {T('common.delete')}
+              {i18n('common.delete')}
             </Button>
           </>
         )}
@@ -259,7 +259,7 @@ export default function Archives() {
 
       {!loading && archives.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('archives.notFound')}</Typography>
+          <Typography>{i18n('archives.notFound')}</Typography>
         </NotFound>
       )}
 

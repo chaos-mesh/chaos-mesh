@@ -20,7 +20,7 @@ import { SelectField, TextField } from '../../FormField'
 import { getIn, useFormikContext } from 'formik'
 
 import React from 'react'
-import T from '../../T'
+import i18n from '../../T'
 
 const modes = [
   { name: 'Random One', value: 'one' },
@@ -42,8 +42,8 @@ const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
     <>
       <SelectField
         name={`${modeScope}.mode`}
-        label={T('newE.scope.mode')}
-        helperText={T('newE.scope.modeHelper')}
+        label={i18n('newE.scope.mode')}
+        helperText={i18n('newE.scope.modeHelper')}
         disabled={disabled}
       >
         <MenuItem value="all">All</MenuItem>
@@ -57,8 +57,8 @@ const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
       {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
         <TextField
           name={`${modeScope}.value`}
-          label={T('newE.scope.modeValue')}
-          helperText={T('newE.scope.modeValueHelper')}
+          label={i18n('newE.scope.modeValue')}
+          helperText={i18n('newE.scope.modeValueHelper')}
           InputProps={{
             endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
               <InputAdornment position="end">%</InputAdornment>
