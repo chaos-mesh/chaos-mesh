@@ -181,6 +181,7 @@ message ExecStressRequest {
   string cpuStressors = 3;
   bool enterNS = 4;
   string memoryStressors = 5;
+  int32 oomScoreAdj = 7;
 }
 
 message ExecStressResponse {
