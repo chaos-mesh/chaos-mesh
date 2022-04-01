@@ -16,8 +16,8 @@
  */
 import { Grid } from '@mui/material'
 import NewExperiment from 'components/NewExperimentNext'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
@@ -37,7 +37,7 @@ const New = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: T('confirm.success.create', intl),
+            message: i18n('confirm.success.create', intl),
           })
         )
 

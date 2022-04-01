@@ -21,8 +21,8 @@ import { useEffect, useState } from 'react'
 import NotFound from 'components/NotFound'
 import { PropertyAccessor } from '@nivo/core'
 import { StatusOfExperiments } from 'api/experiments.type'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 import { schemeTableau10 } from 'd3-scale-chromatic'
 import { useIntl } from 'react-intl'
 import { useTheme } from '@mui/material/styles'
@@ -40,7 +40,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
   const [s, setS] = useState<SingleData[]>([])
 
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
-    d.value + ' ' + T(`status.${d.id}`, intl)
+    d.value + ' ' + i18n(`status.${d.id}`, intl)
 
   const tooltip = ({ datum }: PieTooltipProps<SingleData>) => (
     <Box
@@ -50,7 +50,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
       style={{ background: theme.palette.background.default, fontSize: theme.typography.caption.fontSize }}
     >
       <Box mr={1.5} style={{ width: 12, height: 12, background: datum.color }} />
-      {(datum.value < 1 ? 0 : datum.value) + ' ' + T(`status.${datum.id}`, intl)}
+      {(datum.value < 1 ? 0 : datum.value) + ' ' + i18n(`status.${datum.id}`, intl)}
     </Box>
   )
 
@@ -62,7 +62,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
           setS(
             (Object.entries(resp.data) as [keyof StatusOfExperiments, number][]).map(([k, v]) => ({
               id: k,
-              label: T(`status.${k}`, intl),
+              label: i18n(`status.${k}`, intl),
               value: v === 0 ? 0.01 : v,
             }))
           )
@@ -110,7 +110,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
           ]}
         />
       ) : (
-        <NotFound>{T('experiments.notFound')}</NotFound>
+        <NotFound>{i18n('experiments.notFound')}</NotFound>
       )}
     </Box>
   )

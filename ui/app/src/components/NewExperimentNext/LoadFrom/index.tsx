@@ -25,8 +25,8 @@ import RadioLabel from './RadioLabel'
 import { Schedule } from 'api/schedules.type'
 import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -100,7 +100,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
       dispatch(
         setAlert({
           type: 'success',
-          message: T('confirm.success.load', intl),
+          message: i18n('confirm.success.load', intl),
         })
       )
 
@@ -130,7 +130,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
           dispatch(
             setAlert({
               type: 'success',
-              message: T('confirm.success.load', intl),
+              message: i18n('confirm.success.load', intl),
             })
           )
         })
@@ -144,7 +144,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
         <Space>
           {inSchedule && (
             <>
-              <Typography>{T('schedules.title')}</Typography>
+              <Typography>{i18n('schedules.title')}</Typography>
 
               {loading ? (
                 <SkeletonN n={3} />
@@ -161,7 +161,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
                 </Box>
               ) : (
                 <Typography variant="body2" color="textSecondary">
-                  {T('schedules.notFound')}
+                  {i18n('schedules.notFound')}
                 </Typography>
               )}
 
@@ -171,7 +171,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
           {!inSchedule && (
             <>
-              <Typography>{T('experiments.title')}</Typography>
+              <Typography>{i18n('experiments.title')}</Typography>
 
               {loading ? (
                 <SkeletonN n={3} />
@@ -188,7 +188,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
                 </Box>
               ) : (
                 <Typography variant="body2" color="textSecondary">
-                  {T('experiments.notFound')}
+                  {i18n('experiments.notFound')}
                 </Typography>
               )}
 
@@ -196,7 +196,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
             </>
           )}
 
-          <Typography>{T('archives.title')}</Typography>
+          <Typography>{i18n('archives.title')}</Typography>
 
           {loading ? (
             <SkeletonN n={3} />
@@ -213,13 +213,13 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
             </Box>
           ) : (
             <Typography variant="body2" color="textSecondary">
-              {T('archives.notFound')}
+              {i18n('archives.notFound')}
             </Typography>
           )}
 
           <Divider />
 
-          <Typography>{T('dashboard.predefined')}</Typography>
+          <Typography>{i18n('dashboard.predefined')}</Typography>
 
           {loading ? (
             <SkeletonN n={3} />
@@ -236,7 +236,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
             </Box>
           ) : (
             <Typography variant="body2" color="textSecondary">
-              {T('dashboard.noPredefinedFound')}
+              {i18n('dashboard.noPredefinedFound')}
             </Typography>
           )}
         </Space>

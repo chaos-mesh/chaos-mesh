@@ -25,8 +25,8 @@ import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 import loadable from '@loadable/component'
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'lib/hooks'
@@ -94,7 +94,7 @@ const Single = () => {
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
       {single.data && (
         <Space display="flex" flexDirection="column" height="100%">
-          <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
+          <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
           <Box flex={1}>
             <YAMLEditor
               name={single.data.name}
@@ -123,7 +123,7 @@ const Single = () => {
               <Grid container>
                 <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                   <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                    <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                    <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                     <Box flex={1} overflow="scroll">
                       <EventsTimeline events={events} />
                     </Box>
