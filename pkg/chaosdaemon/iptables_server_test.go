@@ -17,7 +17,6 @@ package chaosdaemon
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -103,7 +102,7 @@ var _ = Describe("iptables server", func() {
 
 		It("should fail on command error", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
