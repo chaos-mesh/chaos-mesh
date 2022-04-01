@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -50,7 +51,7 @@ var _ = Describe("ipset server", func() {
 				Expect(args[6]).To(Equal("hash:net"))
 				return exec.Command("echo", "mock command")
 			})()
-			err := createIPSet(context.TODO(), logger, true, 1, "name")
+			err := createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).To(BeNil())
 		})
 
@@ -69,7 +70,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = createIPSet(context.TODO(), logger, true, 1, "name")
+			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).To(BeNil())
 		})
 
@@ -84,7 +85,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = createIPSet(context.TODO(), logger, true, 1, "name")
+			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).ToNot(BeNil())
 		})
 
@@ -99,21 +100,21 @@ exit 1
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = createIPSet(context.TODO(), logger, true, 1, "name")
+			err = createIPSet(context.TODO(), logger, true, 1, "name", v1alpha1.NetIPSet)
 			Expect(err).ToNot(BeNil())
 		})
 	})
 
-	Context("addIpsToIPSet", func() {
+	Context("addToIPSet", func() {
 		It("should work", func() {
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			err := addCIDRsToIPSet(context.TODO(), logger, true, 1, "name", []string{"1.1.1.1"})
+			err := addToIPSet(context.TODO(), logger, true, 1, "name", "1.1.1.1")
 			Expect(err).To(BeNil())
 		})
 
-		It("should work since ip exist", func() {
+		It("should work if ipset exists", func() {
 			// The mockfail.sh will fail
 			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
@@ -124,7 +125,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipExistErr)
 			})()
-			err = addCIDRsToIPSet(context.TODO(), logger, true, 1, "name", []string{"1.1.1.1"})
+			err = addToIPSet(context.TODO(), logger, true, 1, "name", "1.1.1.1")
 			Expect(err).To(BeNil())
 		})
 
@@ -139,7 +140,7 @@ exit 1
 			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = addCIDRsToIPSet(context.TODO(), logger, true, 1, "name", []string{"1.1.1.1"})
+			err = addToIPSet(context.TODO(), logger, true, 1, "name", "1.1.1.1")
 			Expect(err).ToNot(BeNil())
 		})
 	})
@@ -209,10 +210,26 @@ exit 1
 				return exec.Command("echo", "mock command")
 			})()
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
-				Ipsets: []*pb.IPSet{{
-					Name:  "ipset-name",
-					Cidrs: []string{"1.1.1.1/32"},
-				}},
+				Ipsets: []*pb.IPSet{
+					{
+						Name:     "ipset-set-name",
+						Type:     "list:set",
+						SetNames: []string{"set-1", "set-2"},
+					},
+					{
+						Name:  "ipset-net-name",
+						Type:  "hash:net",
+						Cidrs: []string{"0.0.0.0/24"},
+					},
+					{
+						Name: "ipset-net-port-name",
+						Type: "hash:net,port",
+						CidrAndPorts: []*pb.CidrAndPort{{
+							Cidr: "1.1.1.1/32",
+							Port: 80,
+						}},
+					},
+				},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
@@ -224,14 +241,27 @@ exit 1
 			defer mock.With("TaskError", errors.New(errorStr))()
 			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
 				Ipsets: []*pb.IPSet{{
-					Name:  "ipset-name",
-					Cidrs: []string{"1.1.1.1/32"},
+					Name:     "ipset-name",
+					SetNames: []string{"set-1", "set-2"},
 				}},
 				ContainerId: "containerd://container-id",
 				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(errorStr))
+		})
+
+		It("should fail on unknown type", func() {
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
+					Name: "ipset-name",
+					Type: "foo:bar",
+				}},
+				ContainerId: "containerd://container-id",
+				EnterNS:     true,
+			})
+			Expect(err).ToNot(BeNil())
+			Expect(err.Error()).To(Equal("unexpected IP set type: foo:bar"))
 		})
 	})
 })
