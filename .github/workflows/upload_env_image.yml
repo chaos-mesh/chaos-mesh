@@ -24,10 +24,8 @@ jobs:
       - name: Extract Image Tag
         shell: bash
         run: |
-          IMAGE_TAG=${GITHUB_REF##*/}
-          if [ "${IMAGE_TAG}" = "master" ] ; then
-            IMAGE_TAG=latest; 
-          fi
+          # we assume that both image tags of build-env and dev-env are same during this workflow
+          IMAGE_TAG=$(./hack/env-image-tag.sh build-env)
 
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
         id: image_tag
@@ -80,7 +78,7 @@ jobs:
           docker manifest create ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-arm64
-          
+
           docker manifest annotate ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG \
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-amd64 \
             --os linux --arch amd64
