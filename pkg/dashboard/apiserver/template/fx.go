@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,31 +13,14 @@
 // limitations under the License.
 //
 
-package timechaos
+package template
 
 import (
-	"fmt"
-	"io"
-	"net/http"
-	"time"
+	"github.com/go-logr/logr"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 )
 
-// get pod current time in nanosecond
-func getPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
-	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/time", port))
-	if err != nil {
-		return nil, err
-	}
-
-	out, err := io.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := time.Parse(time.RFC3339Nano, string(out))
-	if err != nil {
-		return nil, err
-	}
-	return &t, nil
+func Bootstrap(conf *config.ChaosDashboardConfig, logger logr.Logger) *Service {
+	return &Service{conf: conf, logger: logger.WithName("template-api")}
 }

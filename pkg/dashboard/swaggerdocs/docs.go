@@ -1759,6 +1759,246 @@ var doc = `{
                 }
             }
         },
+        "/templates/statuschecks": {
+            "get": {
+                "description": "Get status check templates from k8s cluster in real time.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "template"
+                ],
+                "summary": "List status check templates.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "filter status check templates by namespace",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter status check templates by name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/template.StatusCheckTemplateBase"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Pass a JSON object to create a new status check template.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Create a new status check template.",
+                "parameters": [
+                    {
+                        "description": "the status check definition",
+                        "name": "statuscheck",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/templates/statuschecks/statuscheck": {
+            "get": {
+                "description": "Get the status check template's detail by namespaced name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Get a status check template.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the namespace of status check templates",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of status check templates",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplateDetail"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a status check template by namespaced name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Update a status check template.",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the status check template by namespaced name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Delete a status check template.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the namespace of status check templates",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of status check templates",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workflows": {
             "get": {
                 "description": "List workflows from Kubernetes cluster.",
@@ -2382,10 +2622,15 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2420,10 +2665,15 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2608,6 +2858,68 @@ var doc = `{
                 },
                 "running": {
                     "type": "integer"
+                }
+            }
+        },
+        "template.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                }
+            }
+        },
+        "template.StatusCheckTemplateBase": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "template.StatusCheckTemplateDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                },
+                "uid": {
+                    "type": "string"
                 }
             }
         },
@@ -3280,6 +3592,40 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.HTTPCriteria": {
+            "type": "object",
+            "properties": {
+                "statusCode": {
+                    "description": "StatusCode defines the expected http status code for the request.\nA statusCode string could be a single code (e.g. 200), or\nan inclusive range (e.g. 200-400, both ` + "`" + `200` + "`" + ` and ` + "`" + `400` + "`" + ` are included).",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPStatusCheck": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "criteria": {
+                    "description": "Criteria defines how to determine the result of the status check.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPCriteria"
+                },
+                "headers": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "+optional\n+kubebuilder:validation:Enum=GET;POST\n+kubebuilder:default=GET",
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.IOChaosSpec": {
             "type": "object",
             "properties": {
@@ -3588,6 +3934,10 @@ var doc = `{
         "v1alpha1.MemoryStressor": {
             "type": "object",
             "properties": {
+                "oomScoreAdj": {
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximm=1000\n+kubebuilder:default=0\n+optional",
+                    "type": "integer"
+                },
                 "options": {
                     "description": "extend stress-ng options\n+optional",
                     "type": "array",
@@ -4453,6 +4803,48 @@ var doc = `{
                 },
                 "time": {
                     "description": "+optional\n+nullable",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration defines the duration of the whole status check if the\nnumber of failed execution does not exceed the failure threshold.\nDuration is available to both ` + "`" + `Synchronous` + "`" + ` and ` + "`" + `Continuous` + "`" + ` mode.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "failureThreshold": {
+                    "description": "FailureThreshold defines the minimum consecutive failure\nfor the status check to be considered failed.\n+optional\n+kubebuilder:default=3\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "http": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
+                },
+                "intervalSeconds": {
+                    "description": "IntervalSeconds defines how often (in seconds) to perform\nan execution of status check.\n+optional\n+kubebuilder:default=10\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the execution mode of the status check.\nSupport type: Synchronous / Continuous\n+optional\n+kubebuilder:validation:Enum=Synchronous;Continuous",
+                    "type": "string"
+                },
+                "recordsHistoryLimit": {
+                    "description": "RecordsHistoryLimit defines the number of record to retain.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:Minimum=1\n+kubebuilder:validation:Maximum=1000",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "SuccessThreshold defines the minimum consecutive successes\nfor the status check to be considered successful.\nSuccessThreshold only works for ` + "`" + `Synchronous` + "`" + ` mode.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "description": "TimeoutSeconds defines the number of seconds after which\nan execution of status check times out.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type defines the specific status check type.\nSupport type: HTTP\n+kubebuilder:default=HTTP\n+kubebuilder:validation:Enum=HTTP",
                     "type": "string"
                 }
             }
