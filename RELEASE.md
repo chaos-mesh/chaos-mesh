@@ -98,6 +98,10 @@ This step is required for all the releases(major, minor, bugfix/patch).
 
 Create a new PR for updating the `CHANGELOG.md` on master branch, you could copy the content from "Step 4".
 
+### Step 11 Update document site
+
+TODO: waiting for guide for release new version on document site.
+
 ## What should I do if any step failed
 
 If some CI job failed, please profile the reason, and
