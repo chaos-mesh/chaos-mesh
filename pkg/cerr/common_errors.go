@@ -74,7 +74,7 @@ func (h *errHelper) WrapErr(err error) *errHelper {
 }
 
 func (h errHelper) Wrapf(format string, args ...interface{}) *errHelper {
-	return &errHelper{inner: errors.Wrapf(h.inner, format, args)}
+	return &errHelper{inner: errors.Wrapf(h.inner, format, args...)}
 }
 
 func (h *errHelper) WithStack() *errHelper {
