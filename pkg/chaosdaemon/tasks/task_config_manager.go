@@ -18,20 +18,20 @@ package tasks
 import (
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 )
 
-type PID interface {
+var ErrNotFoundID = cerr.NotFound("ID")
+var ErrNotFoundTypeUID = cerr.NotFoundType[TaskID]()
+var ErrNotFoundTypeTaskConfig = cerr.NotFoundType[TaskConfig]()
+
+var ErrDiffID = cerr.FromErr(errors.New("different IsID"))
+
+var ErrTaskConfigMapNotInit = cerr.NotInit[map[TaskID]TaskConfig]().WrapName("TaskConfigMap").Err()
+
+type IsID interface {
 	ToID() string
 }
-type UID = string
-
-// TODO: use generic error after golang 1.18 updated
-var ErrPIDNotFound = chaoserr.NotFound("PID")
-var ErrUIDNotFound = chaoserr.NotFound("UID")
-var ErrTaskConfigNotFound = chaoserr.NotFound("task config")
-var ErrTaskConfigMapNotInit = errors.New("TaskConfigMap not init")
-var ErrDiffPID = errors.New("different pid")
 
 // Object ensure the outer config change will not change
 // the data inside the TaskManager.
@@ -48,76 +48,78 @@ type Mergeable interface {
 // TaskConfig.Main is the ID of task.
 // TaskConfig.Data is the config provided by developer.
 type TaskConfig struct {
-	Main PID
+	Main IsID
 	Data Object
 }
 
-func NewTaskConfig(main PID, data Object) TaskConfig {
+func NewTaskConfig(main IsID, data Object) TaskConfig {
 	return TaskConfig{
 		main,
 		data.DeepCopy(),
 	}
 }
 
+type TaskID = string
+
 // TaskConfigManager provides some basic methods on TaskConfig.
 // If developers wants to use MergeTaskConfig, they must implement Mergeable for the TaskConfig.
 type TaskConfigManager struct {
-	TaskConfigMap map[UID]TaskConfig
+	TaskConfigMap map[TaskID]TaskConfig
 }
 
 func NewTaskConfigManager() TaskConfigManager {
-	return TaskConfigManager{make(map[UID]TaskConfig)}
+	return TaskConfigManager{make(map[TaskID]TaskConfig)}
 }
 
-func (m TaskConfigManager) AddTaskConfig(id UID, task TaskConfig) error {
+func (m TaskConfigManager) AddTaskConfig(id TaskID, task TaskConfig) error {
 	if m.TaskConfigMap == nil {
 		return ErrTaskConfigMapNotInit
 	}
 	if _, ok := m.TaskConfigMap[id]; ok {
-		return errors.Wrapf(chaoserr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
+		return errors.Wrapf(cerr.ErrDuplicateEntity, "uid: %s, task: %v", id, task)
 	}
 	m.TaskConfigMap[id] = task
 	return nil
 }
 
-func (m TaskConfigManager) UpdateTaskConfig(id UID, task TaskConfig) (TaskConfig, error) {
+func (m TaskConfigManager) UpdateTaskConfig(id TaskID, task TaskConfig) (TaskConfig, error) {
 	if m.TaskConfigMap == nil {
 		return TaskConfig{}, ErrTaskConfigMapNotInit
 	}
 	taskOld, ok := m.TaskConfigMap[id]
 	if !ok {
-		return TaskConfig{}, errors.Wrapf(ErrUIDNotFound, "uid: %s, task: %v", id, task)
+		return TaskConfig{}, ErrNotFoundTypeUID.WrapInput(id).WrapInput(task).Err()
 	}
 	if taskOld.Main != task.Main {
-		return TaskConfig{}, errors.Wrapf(ErrDiffPID, "uid: %s, task: %v", id, task)
+		return TaskConfig{}, ErrDiffID.Wrapf("expect: %v, input: %v", taskOld.Main, task.Main).Err()
 	}
 	m.TaskConfigMap[id] = task
 	return taskOld, nil
 }
 
 // DeleteTaskConfig Delete task inside the TaskConfigManager
-func (m TaskConfigManager) DeleteTaskConfig(id UID) error {
+func (m TaskConfigManager) DeleteTaskConfig(id TaskID) error {
 	if m.TaskConfigMap == nil {
 		return ErrTaskConfigMapNotInit
 	}
 	_, ok := m.TaskConfigMap[id]
 	if !ok {
-		return errors.Wrapf(ErrTaskConfigNotFound, "UID : %s", id)
+		return ErrNotFoundTypeTaskConfig.WrapInput(id).Err()
 	}
 	delete(m.TaskConfigMap, id)
 	return nil
 }
 
-func (m TaskConfigManager) GetConfigWithUID(id UID) (TaskConfig, error) {
+func (m TaskConfigManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
 	t, ok := m.TaskConfigMap[id]
 	if !ok {
-		return TaskConfig{}, ErrUIDNotFound
+		return TaskConfig{}, ErrNotFoundTypeUID.WrapInput(id).Err()
 	}
 	return t, nil
 }
 
-func (m TaskConfigManager) GetUIDsWithPID(id PID) []UID {
-	uIds := make([]UID, 0)
+func (m TaskConfigManager) GetUIDsWithPID(id IsID) []TaskID {
+	uIds := make([]TaskID, 0)
 	for uid, task := range m.TaskConfigMap {
 		if task.Main == id {
 			uIds = append(uIds, uid)
@@ -126,13 +128,13 @@ func (m TaskConfigManager) GetUIDsWithPID(id PID) []UID {
 	return uIds
 }
 
-func (m TaskConfigManager) CheckTask(uid UID, pid PID) error {
+func (m TaskConfigManager) CheckTask(uid TaskID, pid IsID) error {
 	t, ok := m.TaskConfigMap[uid]
 	if !ok {
-		return ErrUIDNotFound
+		return ErrNotFoundTypeUID.WrapInput(uid).Err()
 	}
 	if t.Main != pid {
-		return ErrDiffPID
+		return ErrDiffID.Wrapf("expect: %v, input: %v", t.Main, pid).Err()
 	}
 	return nil
 }
@@ -141,13 +143,13 @@ func (m TaskConfigManager) CheckTask(uid UID, pid PID) error {
 // If developers want to use it with type T, they must implement Mergeable for *T.
 // IMPORTANT: Just here , we do not assume A.Merge(B) == B.Merge(A).
 // What MergeTaskConfig do : A := new(TaskConfig), A.Merge(B).Merge(C).Merge(D)... , A marked as uid.
-func (m TaskConfigManager) MergeTaskConfig(uid UID) (TaskConfig, error) {
+func (m TaskConfigManager) MergeTaskConfig(uid TaskID) (TaskConfig, error) {
 	if m.TaskConfigMap == nil {
 		return TaskConfig{}, ErrTaskConfigMapNotInit
 	}
 	taskRaw, ok := m.TaskConfigMap[uid]
 	if !ok {
-		return TaskConfig{}, ErrUIDNotFound
+		return TaskConfig{}, ErrNotFoundTypeUID.WrapInput(uid).Err()
 	}
 
 	task := TaskConfig{
@@ -162,15 +164,15 @@ func (m TaskConfigManager) MergeTaskConfig(uid UID) (TaskConfig, error) {
 		}
 		taskTemp, ok := m.TaskConfigMap[uidTemp]
 		if !ok {
-			return TaskConfig{}, ErrTaskConfigNotFound
+			return TaskConfig{}, ErrNotFoundTypeTaskConfig.WrapInput(uidTemp).Err()
 		}
 		AddableData, ok := task.Data.(Mergeable)
 		if !ok {
-			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Mergeable"), "task.Data")
+			return TaskConfig{}, cerr.NotImpl[Mergeable]().WrapInput(task.Data).Err()
 		}
 		AddableTempData, ok := taskTemp.Data.(Mergeable)
 		if !ok {
-			return TaskConfig{}, errors.Wrapf(chaoserr.NotImplemented("Mergeable"), "taskTemp.Data")
+			return TaskConfig{}, cerr.NotImpl[Mergeable]().WrapInput(taskTemp.Data).Err()
 		}
 		err := AddableData.Merge(AddableTempData)
 		if err != nil {

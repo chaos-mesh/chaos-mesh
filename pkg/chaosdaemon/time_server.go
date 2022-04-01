@@ -22,9 +22,9 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 )
 
@@ -38,7 +38,7 @@ func (s *TimeChaosServer) SetPodProcess(podID tasks.PodID, sysID tasks.SysPID) {
 	s.podProcessMap.Write(podID, sysID)
 }
 
-func (s *TimeChaosServer) SetTimeOffset(uid tasks.UID, pid tasks.PID, config time.Config) error {
+func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, pid tasks.IsID, config time.Config) error {
 	paras := time.ConfigCreatorParas{
 		Logger:        s.logger,
 		Config:        config,
@@ -46,13 +46,13 @@ func (s *TimeChaosServer) SetTimeOffset(uid tasks.UID, pid tasks.PID, config tim
 	}
 
 	// We assume the base time skew is not sensitive with process changes which
-	// means time skew will not return error when the task target pod changes container id & PID.
+	// means time skew will not return error when the task target pod changes container id & IsID.
 	// We assume controller will never update tasks.
 	// According to the above, we do not handle error from s.manager.Apply like
-	// ErrDuplicateEntity(task UID).
+	// ErrDuplicateEntity(task TaskID).
 	err := s.manager.Create(uid, pid, &config, paras)
 	if err != nil {
-		if errors.Cause(err) == chaoserr.ErrDuplicateEntity {
+		if errors.Cause(err) == cerr.ErrDuplicateEntity {
 			err := s.manager.Apply(uid, pid, &config)
 			if err != nil {
 				return err
@@ -71,7 +71,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		logger.Error(err, "error while getting PID")
+		logger.Error(err, "error while getting IsID")
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		logger.Error(err, "error while getting PID")
+		logger.Error(err, "error while getting IsID")
 		return nil, err
 	}
 

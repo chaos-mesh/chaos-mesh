@@ -18,13 +18,13 @@ import (
 	"sync"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 )
 
-// TODO: is not PodID -> NotType[PodPID] after update to go 1.18
-var ErrNotPodPID = errors.New("pid is not PodPID")
+var ErrNotPodPID = cerr.NotType[PodID]()
+
+var ErrPodProcessMapNotInit = cerr.NotInit[map[PodID]SysPID]().WrapName("PodProcessMap").Err()
 
 type PodID string
 
@@ -55,7 +55,7 @@ func (p *PodProcessMap) Read(podPID PodID) (SysPID, error) {
 	defer p.rwLock.RUnlock()
 	sysPID, ok := p.m[podPID]
 	if !ok {
-		return SysPID(0), chaoserr.NotFound("SysPID")
+		return SysPID(0), ErrNotFoundSysID.WithStack().Err()
 	}
 	return sysPID, nil
 }
@@ -81,15 +81,15 @@ func NewPodHandler(podProcessMap *PodProcessMap, main ChaosOnPOD, logger logr.Lo
 	}
 }
 
-// Inject get the container process PID and Inject it with Main injector.
+// Inject get the container process IsID and Inject it with Main injector.
 // Be careful about the error handling here.
-func (p *PodHandler) Inject(pid PID) error {
+func (p *PodHandler) Inject(pid IsID) error {
 	podPID, ok := pid.(PodID)
 	if !ok {
-		return ErrNotPodPID
+		return ErrNotPodPID.WrapInput(pid).Err()
 	}
 	if p.PodProcessMap == nil {
-		return errors.New("PodProcessMap not init")
+		return ErrPodProcessMapNotInit
 	}
 
 	sysPID, err := p.PodProcessMap.Read(podPID)
@@ -101,15 +101,15 @@ func (p *PodHandler) Inject(pid PID) error {
 	return err
 }
 
-// Recover get the container process PID and Recover it with Main injector.
+// Recover get the container process IsID and Recover it with Main injector.
 // Be careful about the error handling here.
-func (p *PodHandler) Recover(pid PID) error {
+func (p *PodHandler) Recover(pid IsID) error {
 	podPID, ok := pid.(PodID)
 	if !ok {
-		return ErrNotPodPID
+		return ErrNotPodPID.WrapInput(pid).Err()
 	}
 	if p.PodProcessMap == nil {
-		return errors.New("PodProcessMap not init")
+		return ErrPodProcessMapNotInit
 	}
 
 	sysPID, err := p.PodProcessMap.Read(podPID)

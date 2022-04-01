@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 )
 
@@ -71,7 +72,7 @@ func (c *Config) DeepCopy() tasks.Object {
 	}
 }
 
-// Add implement how to merge time skew tasks.
+// Merge implement how to merge time skew tasks.
 func (c *Config) Merge(a tasks.Mergeable) error {
 	A, OK := a.(*Config)
 	if OK {
@@ -80,7 +81,7 @@ func (c *Config) Merge(a tasks.Mergeable) error {
 		c.clockIDsMask |= A.clockIDsMask
 		return nil
 	}
-	return errors.Wrapf(tasks.ErrCanNotAdd, "expect type : *time.Config, got : %T", a)
+	return cerr.NotType[*Config]().WrapInput(a).Err()
 }
 
 type ConfigCreatorParas struct {
@@ -177,15 +178,15 @@ func (s *Skew) Assign(injectable tasks.Injectable) error {
 		I.SkewConfig = *s.SkewConfig.DeepCopy().(*Config)
 		return nil
 	}
-	return errors.Wrapf(tasks.ErrCanNotAssign, "expect type : *time.Skew, got : %T", injectable)
+	return cerr.NotType[*Skew]().WrapInput(injectable).Err()
 }
 
-func (s *Skew) Inject(pid tasks.PID) error {
+func (s *Skew) Inject(pid tasks.IsID) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()
 	sysPID, ok := pid.(tasks.SysPID)
 	if !ok {
-		return tasks.ErrNotSysPID
+		return tasks.ErrNotTypeSysID.WrapInput(pid).Err()
 	}
 
 	s.logger.Info("injecting time skew", "pid", pid)
@@ -212,12 +213,12 @@ func (s *Skew) Inject(pid tasks.PID) error {
 // Recover clock_get_time & get_time_of_day one by one ,
 // if error comes from clock_get_time.Recover we will continue recover another fake image
 // and merge errors.
-func (s *Skew) Recover(pid tasks.PID) error {
+func (s *Skew) Recover(pid tasks.IsID) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()
 	sysPID, ok := pid.(tasks.SysPID)
 	if !ok {
-		return tasks.ErrNotSysPID
+		return tasks.ErrNotTypeSysID.WrapInput(pid).Err()
 	}
 
 	s.logger.Info("recovering time skew", "pid", pid)

@@ -19,14 +19,13 @@ import (
 	"strconv"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
 )
 
-// TODO: is not SysPID -> NotType[SysPID] after update to go 1.18
-var ErrNotSysPID = errors.New("pid is not SysPID")
+var ErrNotTypeSysID = cerr.NotType[SysPID]()
+var ErrNotFoundSysID = cerr.NotFoundType[SysPID]()
 
 type SysPID uint32
 
@@ -48,34 +47,34 @@ type ChaosOnProcessGroup interface {
 // ProcessGroupHandler implements injecting & recovering on a linux process group.
 type ProcessGroupHandler struct {
 	Main     ChaosOnProcessGroup
-	childMap map[PID]ChaosOnProcessGroup
+	childMap map[IsID]ChaosOnProcessGroup
 	Logger   logr.Logger
 }
 
 func NewProcessGroupHandler(logger logr.Logger, main ChaosOnProcessGroup) ProcessGroupHandler {
 	return ProcessGroupHandler{
 		Main:     main,
-		childMap: make(map[PID]ChaosOnProcessGroup),
+		childMap: make(map[IsID]ChaosOnProcessGroup),
 		Logger:   logr.New(logger.GetSink()),
 	}
 }
 
 // Inject try to inject the main process and then try to inject child process.
 // If something wrong in injecting a child process, Inject will just log error & continue.
-func (gp *ProcessGroupHandler) Inject(pid PID) error {
+func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 	sysPID, ok := pid.(SysPID)
 	if !ok {
-		return ErrNotSysPID
+		return ErrNotTypeSysID.WrapInput(pid).Err()
 	}
 
 	err := gp.Main.Inject(sysPID)
 	if err != nil {
-		return errors.Wrapf(err, "inject main process : %v", pid)
+		return cerr.FromErr(err).Wrapf("inject main process: %v", sysPID).Err()
 	}
 
 	childPIDs, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
 	if err != nil {
-		return errors.Wrapf(chaoserr.NotFound("child process"), "cause : %v", err)
+		return cerr.NotFound("child process").WrapErr(err).Err()
 	}
 
 	for _, childPID := range childPIDs {
@@ -108,19 +107,19 @@ func (gp *ProcessGroupHandler) Inject(pid PID) error {
 }
 
 // Recover try to recover the main process and then try to recover child process.
-func (gp *ProcessGroupHandler) Recover(pid PID) error {
+func (gp *ProcessGroupHandler) Recover(pid IsID) error {
 	sysPID, ok := pid.(SysPID)
 	if !ok {
-		return ErrNotSysPID
+		return ErrNotTypeSysID.WrapInput(pid).Err()
 	}
 	err := gp.Main.Recover(pid)
 	if err != nil {
-		return errors.Wrapf(err, "recovery main process : %v", pid)
+		return cerr.FromErr(err).Wrapf("recovery main process : %v", pid).Err()
 	}
 
 	childPids, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
 	if err != nil {
-		return errors.Wrapf(chaoserr.NotFound("child process"), "cause : %v", err)
+		return cerr.NotFound("child process").WrapErr(err).Err()
 	}
 
 	for _, childPID := range childPids {

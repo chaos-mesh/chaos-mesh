@@ -22,7 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
@@ -129,7 +129,7 @@ func FindVDSOEntry(program *ptrace.TracedProgram) (*mapreader.Entry, error) {
 		}
 	}
 	if vdsoEntry == nil {
-		return nil, chaoserr.NotFound("VDSOEntry")
+		return nil, cerr.NotFound("VDSOEntry").Err()
 	}
 	return vdsoEntry, nil
 }
