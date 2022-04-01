@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -111,12 +110,12 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 	path := filepath.Join(s.dataDir, "e2e-test")
 	origData := []byte("hello world!!!!!!!!!!!!")
 
-	err := ioutil.WriteFile(path, origData, 0644)
+	err := os.WriteFile(path, origData, 0644)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("failed to write file %v", err)))
 		return
 	}
-	gotData, err := ioutil.ReadFile(path)
+	gotData, err := os.ReadFile(path)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
@@ -127,7 +126,7 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	for i := 0; i < 10; i++ {
-		tmp, err := ioutil.ReadFile(path)
+		tmp, err := os.ReadFile(path)
 		if err != nil {
 			w.Write([]byte(err.Error()))
 		}
@@ -142,7 +141,7 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 // a handler to test io chaos
 func (s *server) ioTest(w http.ResponseWriter, _ *http.Request) {
 	t1 := time.Now()
-	f, err := ioutil.TempFile(s.dataDir, "e2e-test")
+	f, err := os.CreateTemp(s.dataDir, "e2e-test")
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("failed to create temp file %v", err)))
 		return
@@ -205,7 +204,7 @@ func (s *server) networkPingTest(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	endTime := time.Now()
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

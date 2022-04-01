@@ -17,7 +17,6 @@ package chaosdaemon
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -57,7 +56,7 @@ var _ = Describe("ipset server", func() {
 
 		It("should work since ipset exist", func() {
 			// The mockfail.sh will fail only once
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 cat > /tmp/mockfail.sh << EOF
 #! /bin/sh
@@ -76,7 +75,7 @@ exit 1
 
 		It("shoud fail on the first command", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 exit 1
 			`), 0755)
@@ -91,7 +90,7 @@ exit 1
 
 		It("shoud fail on the second command", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 exit 1
 			`), 0755)
@@ -116,7 +115,7 @@ exit 1
 
 		It("should work since ip exist", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 exit 1
 			`), 0755)
@@ -131,7 +130,7 @@ exit 1
 
 		It("should fail", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 exit 1
 			`), 0755)
@@ -156,7 +155,7 @@ exit 1
 
 		It("should work since ipset exist", func() {
 			// The mockfail.sh will fail only once
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 cat > /tmp/mockfail.sh << EOF
 #! /bin/sh
@@ -175,7 +174,7 @@ exit 1
 
 		It("shoud fail on the first command", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 exit 1
 			`), 0755)
@@ -190,7 +189,7 @@ exit 1
 
 		It("shoud fail on the second command", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 echo $1
 exit 1
 			`), 0755)

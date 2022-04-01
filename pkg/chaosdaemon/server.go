@@ -20,9 +20,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -134,7 +134,7 @@ func newGRPCServer(daemonServer *DaemonServer, reg prometheus.Registerer, tlsCon
 	}
 
 	if tlsConf != (tlsConfig{}) {
-		caCert, err := ioutil.ReadFile(tlsConf.CaCert)
+		caCert, err := os.ReadFile(tlsConf.CaCert)
 		if err != nil {
 			return nil, err
 		}

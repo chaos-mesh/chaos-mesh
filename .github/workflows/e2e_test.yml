@@ -1,0 +1,160 @@
+name: E2E Test
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - master
+      - release-*
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout codes
+        uses: actions/checkout@v2
+      - name: build e2e images
+        run: |
+          make image e2e-image
+      - name: save docker images
+        run: |
+          mkdir -p ./output/saved-images
+          docker image save ghcr.io/chaos-mesh/chaos-dashboard:latest > ./output/saved-images/chaos-dashboard.tgz
+          docker image save ghcr.io/chaos-mesh/chaos-daemon:latest > ./output/saved-images/chaos-daemon.tgz
+          docker image save ghcr.io/chaos-mesh/chaos-mesh:latest > ./output/saved-images/chaos-mesh.tgz
+          docker image save ghcr.io/pingcap/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
+      - name: upload saved images
+        uses: actions/upload-artifact@v2
+        with:
+          name: saved-images
+          path: ./output/saved-images
+          retention-days: 7
+  build-e2e-binary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout codes
+        uses: actions/checkout@v2
+      - name: build e2e binary
+        run: |
+          make e2e-build
+      - name: upload e2e binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: e2e-binary
+          path: ./e2e-test/image/e2e/bin
+          retention-days: 7
+  e2e-test-matrix:
+    needs:
+      - build-image
+      - build-e2e-binary
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes-version:
+          - v1.15.12
+          - v1.20.15
+          - v1.23.4
+        focus:
+          - '[Graceful-Shutdown] [IOChaos]'
+          - '[Graceful-Shutdown] [HTTPChaos]'
+          - '[Basic] [PodChaos]'
+          - '[Basic] [TimeChaos]'
+          - '[Basic] [IOChaos]'
+          - '[Basic] [HTTPChaos]'
+          - '[Basic] [Sidecar Config]'
+          - '[Basic] [NetworkChaos]'
+          - '[Basic] [DNSChaos]'
+          - '[Basic] [StressChaos]'
+    steps:
+      - name: checkout codes
+        uses: actions/checkout@v2
+      - name: download saved images
+        uses: actions/download-artifact@v2
+        with:
+          name: saved-images
+          path: ./output/saved-images
+      - name: restore e2e images
+        run: |
+          docker load -i ./output/saved-images/chaos-dashboard.tgz
+          docker load -i ./output/saved-images/chaos-daemon.tgz
+          docker load -i ./output/saved-images/chaos-mesh.tgz
+          docker load -i ./output/saved-images/e2e-helper.tgz
+      - name: download e2e binary
+        uses: actions/download-artifact@v2
+        with:
+          name: e2e-binary
+          path: ./output/e2e-binary
+      - name: move e2e binary
+        run: |
+          mkdir -p ./e2e-test/image/e2e/bin
+          mv ./output/e2e-binary/ginkgo ./e2e-test/image/e2e/bin/ginkgo
+          mv ./output/e2e-binary/e2e.test ./e2e-test/image/e2e/bin/e2e.test
+          chmod +x ./e2e-test/image/e2e/bin/ginkgo
+          chmod +x ./e2e-test/image/e2e/bin/e2e.test
+      - name: Setup minikube
+        uses: manusa/actions-setup-minikube@v2.4.3
+        with:
+          driver: docker
+          minikube version: v1.24.0
+          kubernetes version: ${{ matrix.kubernetes-version }}
+          start args: --cni flannel
+          github token: ${{ secrets.GITHUB_TOKEN }}
+      - name: load image into minikube
+        run: |
+          minikube image load ghcr.io/chaos-mesh/chaos-dashboard:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-daemon:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-mesh:latest
+          minikube image load ghcr.io/pingcap/e2e-helper:latest
+      - name: Setup Helm
+        uses: azure/setup-helm@v1
+      - name: Install Chaos Mesh
+        run: |
+          # if kubernetes does not support apiextensions.k8s.io/v1, fallback to apiextensions.k8s.io/v1beta1
+          if kubectl api-resources | grep -w apiextensions.k8s.io/v1; then
+            helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dnsServer.create=true --set dashboard.create=true
+          else
+            kubectl create --validate=false -f ./manifests/crd-v1beta1.yaml && \
+            helm install --skip-crds --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dnsServer.create=true --set dashboard.create=true
+          fi
+      - name: e2e tests
+        env:
+          FOCUS: ${{ matrix.focus }}
+        run: |
+          # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
+          export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
+          KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -p -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/pingcap/e2e-helper:latest
+      - name: post run - extract profile info from kubernetes
+        if: always()
+        env:
+          PROFILE_DIRECTORY: ./output/chaos-mesh-profile
+        run: |
+          mkdir -p $PROFILE_DIRECTORY/logs
+          mkdir -p $PROFILE_DIRECTORY/manifests/pods
+          mkdir -p $PROFILE_DIRECTORY/manifests/services
+          for item in $(kubectl -n chaos-testing get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-testing logs $item > $PROFILE_DIRECTORY/logs/$item.log; done;
+          for item in $(kubectl -n chaos-testing get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-testing get pod $item -oyaml > $PROFILE_DIRECTORY/manifests/pods/pod-$item.yaml; done;
+          for item in $(kubectl -n chaos-testing get services --no-headers | awk '{print $1}'); do kubectl -n chaos-testing get services $item -oyaml > $PROFILE_DIRECTORY/manifests/services/service-$item.yaml; done;
+          for item in $(kubectl -n chaos-testing get endpoints --no-headers | awk '{print $1}'); do kubectl -n chaos-testing get endpoints $item -oyaml > $PROFILE_DIRECTORY/manifests/services/endpoint-$item.yaml; done;
+      - name: post run - upload Chaos Mesh profile info
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          path: ./output/chaos-mesh-profile
+          retention-days: 7
+      - name: post run - upload junit test reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          path: "**/*.xml"
+          retention-days: 7
+  pass:
+    name: E2E Test Passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 0
+    needs:
+      - e2e-test-matrix
+      - build-image
+      - build-e2e-binary

@@ -220,6 +220,9 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	processBuilder := bpm.DefaultProcessBuilder("memStress", strings.Fields(req.MemoryStressors)...).
 		EnablePause()
 
+	if req.OomScoreAdj != 0 {
+		processBuilder = processBuilder.SetOOMScoreAdj(int(req.OomScoreAdj))
+	}
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
 	}

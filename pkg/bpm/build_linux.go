@@ -18,6 +18,7 @@ package bpm
 import (
 	"context"
 	"os/exec"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -47,6 +48,11 @@ func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 	if b.pause {
 		args = append([]string{cmd}, args...)
 		cmd = pausePath
+	}
+
+	if b.oomScoreAdj != 0 {
+		args = append([]string{"-n", strconv.Itoa(b.oomScoreAdj), "--", cmd}, args...)
+		cmd = "choom"
 	}
 
 	if c := mock.On("MockProcessBuild"); c != nil {
