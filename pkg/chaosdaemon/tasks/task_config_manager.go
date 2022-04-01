@@ -22,7 +22,7 @@ import (
 )
 
 var ErrNotFoundID = cerr.NotFound("ID")
-var ErrNotFoundTypeUID = cerr.NotFoundType[TaskID]()
+var ErrNotFoundTaskID = cerr.NotFound("TaskID")
 var ErrNotFoundTypeTaskConfig = cerr.NotFoundType[TaskConfig]()
 
 var ErrDiffID = cerr.FromErr(errors.New("different IsID"))
@@ -88,7 +88,7 @@ func (m TaskConfigManager) UpdateTaskConfig(id TaskID, task TaskConfig) (TaskCon
 	}
 	taskOld, ok := m.TaskConfigMap[id]
 	if !ok {
-		return TaskConfig{}, ErrNotFoundTypeUID.WrapInput(id).WrapInput(task).Err()
+		return TaskConfig{}, ErrNotFoundTaskID.WrapInput(id).WrapInput(task).Err()
 	}
 	if taskOld.Main != task.Main {
 		return TaskConfig{}, ErrDiffID.Wrapf("expect: %v, input: %v", taskOld.Main, task.Main).Err()
@@ -113,7 +113,7 @@ func (m TaskConfigManager) DeleteTaskConfig(id TaskID) error {
 func (m TaskConfigManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
 	t, ok := m.TaskConfigMap[id]
 	if !ok {
-		return TaskConfig{}, ErrNotFoundTypeUID.WrapInput(id).Err()
+		return TaskConfig{}, ErrNotFoundTaskID.WrapInput(id).Err()
 	}
 	return t, nil
 }
@@ -131,7 +131,7 @@ func (m TaskConfigManager) GetUIDsWithPID(id IsID) []TaskID {
 func (m TaskConfigManager) CheckTask(uid TaskID, pid IsID) error {
 	t, ok := m.TaskConfigMap[uid]
 	if !ok {
-		return ErrNotFoundTypeUID.WrapInput(uid).Err()
+		return ErrNotFoundTaskID.WrapInput(uid).Err()
 	}
 	if t.Main != pid {
 		return ErrDiffID.Wrapf("expect: %v, input: %v", t.Main, pid).Err()
@@ -149,7 +149,7 @@ func (m TaskConfigManager) MergeTaskConfig(uid TaskID) (TaskConfig, error) {
 	}
 	taskRaw, ok := m.TaskConfigMap[uid]
 	if !ok {
-		return TaskConfig{}, ErrNotFoundTypeUID.WrapInput(uid).Err()
+		return TaskConfig{}, ErrNotFoundTaskID.WrapInput(uid).Err()
 	}
 
 	task := TaskConfig{

@@ -145,14 +145,14 @@ func TestTasksManagerError(t *testing.T) {
 	err = m.Recover(uid1, SysPID(1))
 	assert.NoError(t, err)
 	err = m.Recover(uid1, SysPID(1))
-	assert.Equal(t, errors.Cause(err), ErrNotFoundID.Err())
+	assert.Equal(t, errors.Cause(err), ErrNotFoundTaskID.Err())
 
 	chaos.ErrWhenInject = true
 	tasks2 := FakeConfig{i: 1}
 	err = m.Create(uid1, SysPID(1), &tasks2, &chaos)
 	assert.Equal(t, errors.Cause(err).Error(), cerr.NotImpl[Injectable]().Err().Error())
 	_, err = m.GetConfigWithUID(uid1)
-	assert.Equal(t, errors.Cause(err), ErrNotFoundTypeUID.Err())
+	assert.Equal(t, errors.Cause(err), ErrNotFoundTaskID.Err())
 
 	chaos.ErrWhenInject = false
 	chaos.ErrWhenRecover = true

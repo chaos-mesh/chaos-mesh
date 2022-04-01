@@ -208,11 +208,11 @@ func (cm TaskManager) Update(uid TaskID, pid IsID, config TaskExecutor) error {
 func (cm TaskManager) Recover(uid TaskID, pid IsID) error {
 	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
 	if len(uIDs) == 0 {
-		return ErrNotFoundTypeUID.WrapInput(pid).Err()
+		return ErrNotFoundTaskID.WrapInput(pid).Err()
 	}
 	if len(uIDs) == 1 {
 		if uIDs[0] != uid {
-			return ErrNotFoundTypeUID.WrapInput(uid).Err()
+			return ErrNotFoundTaskID.WrapInput(uid).Err()
 		}
 		err := cm.ClearTask(pid, false)
 		if err != nil {
