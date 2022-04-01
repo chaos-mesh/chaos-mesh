@@ -74,7 +74,7 @@ func (x Chain_Direction) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Chain_Direction.Descriptor instead.
 func (Chain_Direction) EnumDescriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{16, 0}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{17, 0}
 }
 
 type ContainerAction_Action int32
@@ -120,7 +120,7 @@ func (x ContainerAction_Action) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ContainerAction_Action.Descriptor instead.
 func (ContainerAction_Action) EnumDescriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{18, 0}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{19, 0}
 }
 
 type ExecStressRequest_Scope int32
@@ -166,7 +166,7 @@ func (x ExecStressRequest_Scope) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ExecStressRequest_Scope.Descriptor instead.
 func (ExecStressRequest_Scope) EnumDescriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{19, 0}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{20, 0}
 }
 
 type Tc_Type int32
@@ -212,7 +212,7 @@ func (x Tc_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Tc_Type.Descriptor instead.
 func (Tc_Type) EnumDescriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{27, 0}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{28, 0}
 }
 
 type TcHandle struct {
@@ -1150,8 +1150,11 @@ type IPSet struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name  string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Cidrs []string `protobuf:"bytes,2,rep,name=cidrs,proto3" json:"cidrs,omitempty"`
+	Name         string         `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Cidrs        []string       `protobuf:"bytes,2,rep,name=cidrs,proto3" json:"cidrs,omitempty"`
+	CidrAndPorts []*CidrAndPort `protobuf:"bytes,3,rep,name=cidr_and_ports,json=cidrAndPorts,proto3" json:"cidr_and_ports,omitempty"`
+	SetNames     []string       `protobuf:"bytes,4,rep,name=set_names,json=setNames,proto3" json:"set_names,omitempty"`
+	Type         string         `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
 }
 
 func (x *IPSet) Reset() {
@@ -1200,6 +1203,82 @@ func (x *IPSet) GetCidrs() []string {
 	return nil
 }
 
+func (x *IPSet) GetCidrAndPorts() []*CidrAndPort {
+	if x != nil {
+		return x.CidrAndPorts
+	}
+	return nil
+}
+
+func (x *IPSet) GetSetNames() []string {
+	if x != nil {
+		return x.SetNames
+	}
+	return nil
+}
+
+func (x *IPSet) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+type CidrAndPort struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Cidr string `protobuf:"bytes,1,opt,name=cidr,proto3" json:"cidr,omitempty"`
+	Port uint32 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+}
+
+func (x *CidrAndPort) Reset() {
+	*x = CidrAndPort{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_chaosdaemon_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CidrAndPort) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CidrAndPort) ProtoMessage() {}
+
+func (x *CidrAndPort) ProtoReflect() protoreflect.Message {
+	mi := &file_chaosdaemon_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CidrAndPort.ProtoReflect.Descriptor instead.
+func (*CidrAndPort) Descriptor() ([]byte, []int) {
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CidrAndPort) GetCidr() string {
+	if x != nil {
+		return x.Cidr
+	}
+	return ""
+}
+
+func (x *CidrAndPort) GetPort() uint32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
 type IptablesChainsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1213,7 +1292,7 @@ type IptablesChainsRequest struct {
 func (x *IptablesChainsRequest) Reset() {
 	*x = IptablesChainsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[15]
+		mi := &file_chaosdaemon_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1226,7 +1305,7 @@ func (x *IptablesChainsRequest) String() string {
 func (*IptablesChainsRequest) ProtoMessage() {}
 
 func (x *IptablesChainsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[15]
+	mi := &file_chaosdaemon_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1239,7 +1318,7 @@ func (x *IptablesChainsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IptablesChainsRequest.ProtoReflect.Descriptor instead.
 func (*IptablesChainsRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{15}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *IptablesChainsRequest) GetChains() []*Chain {
@@ -1282,7 +1361,7 @@ type Chain struct {
 func (x *Chain) Reset() {
 	*x = Chain{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[16]
+		mi := &file_chaosdaemon_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1295,7 +1374,7 @@ func (x *Chain) String() string {
 func (*Chain) ProtoMessage() {}
 
 func (x *Chain) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[16]
+	mi := &file_chaosdaemon_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1308,7 +1387,7 @@ func (x *Chain) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Chain.ProtoReflect.Descriptor instead.
 func (*Chain) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{16}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *Chain) GetName() string {
@@ -1390,7 +1469,7 @@ type TimeRequest struct {
 func (x *TimeRequest) Reset() {
 	*x = TimeRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[17]
+		mi := &file_chaosdaemon_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1403,7 +1482,7 @@ func (x *TimeRequest) String() string {
 func (*TimeRequest) ProtoMessage() {}
 
 func (x *TimeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[17]
+	mi := &file_chaosdaemon_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1416,7 +1495,7 @@ func (x *TimeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TimeRequest.ProtoReflect.Descriptor instead.
 func (*TimeRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{17}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *TimeRequest) GetContainerId() string {
@@ -1472,7 +1551,7 @@ type ContainerAction struct {
 func (x *ContainerAction) Reset() {
 	*x = ContainerAction{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[18]
+		mi := &file_chaosdaemon_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1485,7 +1564,7 @@ func (x *ContainerAction) String() string {
 func (*ContainerAction) ProtoMessage() {}
 
 func (x *ContainerAction) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[18]
+	mi := &file_chaosdaemon_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1498,7 +1577,7 @@ func (x *ContainerAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContainerAction.ProtoReflect.Descriptor instead.
 func (*ContainerAction) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{18}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ContainerAction) GetAction() ContainerAction_Action {
@@ -1524,7 +1603,7 @@ type ExecStressRequest struct {
 func (x *ExecStressRequest) Reset() {
 	*x = ExecStressRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[19]
+		mi := &file_chaosdaemon_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1537,7 +1616,7 @@ func (x *ExecStressRequest) String() string {
 func (*ExecStressRequest) ProtoMessage() {}
 
 func (x *ExecStressRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[19]
+	mi := &file_chaosdaemon_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1550,7 +1629,7 @@ func (x *ExecStressRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecStressRequest.ProtoReflect.Descriptor instead.
 func (*ExecStressRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{19}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ExecStressRequest) GetScope() ExecStressRequest_Scope {
@@ -1611,7 +1690,7 @@ type ExecStressResponse struct {
 func (x *ExecStressResponse) Reset() {
 	*x = ExecStressResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[20]
+		mi := &file_chaosdaemon_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1624,7 +1703,7 @@ func (x *ExecStressResponse) String() string {
 func (*ExecStressResponse) ProtoMessage() {}
 
 func (x *ExecStressResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[20]
+	mi := &file_chaosdaemon_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1637,7 +1716,7 @@ func (x *ExecStressResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecStressResponse.ProtoReflect.Descriptor instead.
 func (*ExecStressResponse) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{20}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ExecStressResponse) GetCpuInstance() string {
@@ -1698,7 +1777,7 @@ type CancelStressRequest struct {
 func (x *CancelStressRequest) Reset() {
 	*x = CancelStressRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[21]
+		mi := &file_chaosdaemon_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1711,7 +1790,7 @@ func (x *CancelStressRequest) String() string {
 func (*CancelStressRequest) ProtoMessage() {}
 
 func (x *CancelStressRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[21]
+	mi := &file_chaosdaemon_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1724,7 +1803,7 @@ func (x *CancelStressRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelStressRequest.ProtoReflect.Descriptor instead.
 func (*CancelStressRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{21}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CancelStressRequest) GetCpuInstance() string {
@@ -1786,7 +1865,7 @@ type ApplyIOChaosRequest struct {
 func (x *ApplyIOChaosRequest) Reset() {
 	*x = ApplyIOChaosRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[22]
+		mi := &file_chaosdaemon_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1799,7 +1878,7 @@ func (x *ApplyIOChaosRequest) String() string {
 func (*ApplyIOChaosRequest) ProtoMessage() {}
 
 func (x *ApplyIOChaosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[22]
+	mi := &file_chaosdaemon_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1812,7 +1891,7 @@ func (x *ApplyIOChaosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyIOChaosRequest.ProtoReflect.Descriptor instead.
 func (*ApplyIOChaosRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{22}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ApplyIOChaosRequest) GetActions() string {
@@ -1877,7 +1956,7 @@ type ApplyIOChaosResponse struct {
 func (x *ApplyIOChaosResponse) Reset() {
 	*x = ApplyIOChaosResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[23]
+		mi := &file_chaosdaemon_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1890,7 +1969,7 @@ func (x *ApplyIOChaosResponse) String() string {
 func (*ApplyIOChaosResponse) ProtoMessage() {}
 
 func (x *ApplyIOChaosResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[23]
+	mi := &file_chaosdaemon_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1903,7 +1982,7 @@ func (x *ApplyIOChaosResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyIOChaosResponse.ProtoReflect.Descriptor instead.
 func (*ApplyIOChaosResponse) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{23}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ApplyIOChaosResponse) GetInstance() int64 {
@@ -1944,7 +2023,7 @@ type ApplyHttpChaosRequest struct {
 func (x *ApplyHttpChaosRequest) Reset() {
 	*x = ApplyHttpChaosRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[24]
+		mi := &file_chaosdaemon_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1957,7 +2036,7 @@ func (x *ApplyHttpChaosRequest) String() string {
 func (*ApplyHttpChaosRequest) ProtoMessage() {}
 
 func (x *ApplyHttpChaosRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[24]
+	mi := &file_chaosdaemon_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1970,7 +2049,7 @@ func (x *ApplyHttpChaosRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyHttpChaosRequest.ProtoReflect.Descriptor instead.
 func (*ApplyHttpChaosRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{24}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ApplyHttpChaosRequest) GetRules() string {
@@ -2037,7 +2116,7 @@ type ApplyHttpChaosResponse struct {
 func (x *ApplyHttpChaosResponse) Reset() {
 	*x = ApplyHttpChaosResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[25]
+		mi := &file_chaosdaemon_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2050,7 +2129,7 @@ func (x *ApplyHttpChaosResponse) String() string {
 func (*ApplyHttpChaosResponse) ProtoMessage() {}
 
 func (x *ApplyHttpChaosResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[25]
+	mi := &file_chaosdaemon_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2063,7 +2142,7 @@ func (x *ApplyHttpChaosResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyHttpChaosResponse.ProtoReflect.Descriptor instead.
 func (*ApplyHttpChaosResponse) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{25}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ApplyHttpChaosResponse) GetInstance() int64 {
@@ -2114,7 +2193,7 @@ type TcsRequest struct {
 func (x *TcsRequest) Reset() {
 	*x = TcsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[26]
+		mi := &file_chaosdaemon_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2127,7 +2206,7 @@ func (x *TcsRequest) String() string {
 func (*TcsRequest) ProtoMessage() {}
 
 func (x *TcsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[26]
+	mi := &file_chaosdaemon_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2140,7 +2219,7 @@ func (x *TcsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TcsRequest.ProtoReflect.Descriptor instead.
 func (*TcsRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{26}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *TcsRequest) GetTcs() []*Tc {
@@ -2182,7 +2261,7 @@ type Tc struct {
 func (x *Tc) Reset() {
 	*x = Tc{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[27]
+		mi := &file_chaosdaemon_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2195,7 +2274,7 @@ func (x *Tc) String() string {
 func (*Tc) ProtoMessage() {}
 
 func (x *Tc) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[27]
+	mi := &file_chaosdaemon_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2208,7 +2287,7 @@ func (x *Tc) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tc.ProtoReflect.Descriptor instead.
 func (*Tc) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{27}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *Tc) GetType() Tc_Type {
@@ -2281,7 +2360,7 @@ type SetDNSServerRequest struct {
 func (x *SetDNSServerRequest) Reset() {
 	*x = SetDNSServerRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[28]
+		mi := &file_chaosdaemon_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2294,7 +2373,7 @@ func (x *SetDNSServerRequest) String() string {
 func (*SetDNSServerRequest) ProtoMessage() {}
 
 func (x *SetDNSServerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[28]
+	mi := &file_chaosdaemon_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2307,7 +2386,7 @@ func (x *SetDNSServerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetDNSServerRequest.ProtoReflect.Descriptor instead.
 func (*SetDNSServerRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{28}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *SetDNSServerRequest) GetContainerId() string {
@@ -2352,7 +2431,7 @@ type InstallJVMRulesRequest struct {
 func (x *InstallJVMRulesRequest) Reset() {
 	*x = InstallJVMRulesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[29]
+		mi := &file_chaosdaemon_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2365,7 +2444,7 @@ func (x *InstallJVMRulesRequest) String() string {
 func (*InstallJVMRulesRequest) ProtoMessage() {}
 
 func (x *InstallJVMRulesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[29]
+	mi := &file_chaosdaemon_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2378,7 +2457,7 @@ func (x *InstallJVMRulesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InstallJVMRulesRequest.ProtoReflect.Descriptor instead.
 func (*InstallJVMRulesRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{29}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *InstallJVMRulesRequest) GetContainerId() string {
@@ -2423,7 +2502,7 @@ type UninstallJVMRulesRequest struct {
 func (x *UninstallJVMRulesRequest) Reset() {
 	*x = UninstallJVMRulesRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_chaosdaemon_proto_msgTypes[30]
+		mi := &file_chaosdaemon_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2436,7 +2515,7 @@ func (x *UninstallJVMRulesRequest) String() string {
 func (*UninstallJVMRulesRequest) ProtoMessage() {}
 
 func (x *UninstallJVMRulesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_chaosdaemon_proto_msgTypes[30]
+	mi := &file_chaosdaemon_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2449,7 +2528,7 @@ func (x *UninstallJVMRulesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UninstallJVMRulesRequest.ProtoReflect.Descriptor instead.
 func (*UninstallJVMRulesRequest) Descriptor() ([]byte, []int) {
-	return file_chaosdaemon_proto_rawDescGZIP(), []int{30}
+	return file_chaosdaemon_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *UninstallJVMRulesRequest) GetContainerId() string {
@@ -2591,10 +2670,20 @@ var file_chaosdaemon_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x0b, 0x63, 0x6f, 0x6e, 0x74, 0x61, 0x69, 0x6e, 0x65, 0x72, 0x49, 0x64, 0x12,
 	0x18, 0x0a, 0x07, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x4e, 0x53, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08,
-	0x52, 0x07, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x4e, 0x53, 0x22, 0x31, 0x0a, 0x05, 0x49, 0x50, 0x53,
-	0x65, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x69, 0x64, 0x72, 0x73, 0x18,
-	0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x63, 0x69, 0x64, 0x72, 0x73, 0x22, 0x77, 0x0a, 0x15,
+	0x52, 0x07, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x4e, 0x53, 0x22, 0x99, 0x01, 0x0a, 0x05, 0x49, 0x50,
+	0x53, 0x65, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x69, 0x64, 0x72, 0x73,
+	0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x63, 0x69, 0x64, 0x72, 0x73, 0x12, 0x35, 0x0a,
+	0x0e, 0x63, 0x69, 0x64, 0x72, 0x5f, 0x61, 0x6e, 0x64, 0x5f, 0x70, 0x6f, 0x72, 0x74, 0x73, 0x18,
+	0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x69, 0x64, 0x72, 0x41,
+	0x6e, 0x64, 0x50, 0x6f, 0x72, 0x74, 0x52, 0x0c, 0x63, 0x69, 0x64, 0x72, 0x41, 0x6e, 0x64, 0x50,
+	0x6f, 0x72, 0x74, 0x73, 0x12, 0x1b, 0x0a, 0x09, 0x73, 0x65, 0x74, 0x5f, 0x6e, 0x61, 0x6d, 0x65,
+	0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x73, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65,
+	0x73, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0x35, 0x0a, 0x0b, 0x43, 0x69, 0x64, 0x72, 0x41, 0x6e, 0x64,
+	0x50, 0x6f, 0x72, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x69, 0x64, 0x72, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x63, 0x69, 0x64, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x72, 0x74,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x70, 0x6f, 0x72, 0x74, 0x22, 0x77, 0x0a, 0x15,
 	0x49, 0x70, 0x74, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x43, 0x68, 0x61, 0x69, 0x6e, 0x73, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x21, 0x0a, 0x06, 0x63, 0x68, 0x61, 0x69, 0x6e, 0x73, 0x18,
 	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x70, 0x62, 0x2e, 0x43, 0x68, 0x61, 0x69, 0x6e,
@@ -2860,7 +2949,7 @@ func file_chaosdaemon_proto_rawDescGZIP() []byte {
 }
 
 var file_chaosdaemon_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_chaosdaemon_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_chaosdaemon_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_chaosdaemon_proto_goTypes = []interface{}{
 	(Chain_Direction)(0),             // 0: pb.Chain.Direction
 	(ContainerAction_Action)(0),      // 1: pb.ContainerAction.Action
@@ -2881,26 +2970,27 @@ var file_chaosdaemon_proto_goTypes = []interface{}{
 	(*TcFilter)(nil),                 // 16: pb.TcFilter
 	(*IPSetsRequest)(nil),            // 17: pb.IPSetsRequest
 	(*IPSet)(nil),                    // 18: pb.IPSet
-	(*IptablesChainsRequest)(nil),    // 19: pb.IptablesChainsRequest
-	(*Chain)(nil),                    // 20: pb.Chain
-	(*TimeRequest)(nil),              // 21: pb.TimeRequest
-	(*ContainerAction)(nil),          // 22: pb.ContainerAction
-	(*ExecStressRequest)(nil),        // 23: pb.ExecStressRequest
-	(*ExecStressResponse)(nil),       // 24: pb.ExecStressResponse
-	(*CancelStressRequest)(nil),      // 25: pb.CancelStressRequest
-	(*ApplyIOChaosRequest)(nil),      // 26: pb.ApplyIOChaosRequest
-	(*ApplyIOChaosResponse)(nil),     // 27: pb.ApplyIOChaosResponse
-	(*ApplyHttpChaosRequest)(nil),    // 28: pb.ApplyHttpChaosRequest
-	(*ApplyHttpChaosResponse)(nil),   // 29: pb.ApplyHttpChaosResponse
-	(*TcsRequest)(nil),               // 30: pb.TcsRequest
-	(*Tc)(nil),                       // 31: pb.Tc
-	(*SetDNSServerRequest)(nil),      // 32: pb.SetDNSServerRequest
-	(*InstallJVMRulesRequest)(nil),   // 33: pb.InstallJVMRulesRequest
-	(*UninstallJVMRulesRequest)(nil), // 34: pb.UninstallJVMRulesRequest
-	(*empty.Empty)(nil),              // 35: google.protobuf.Empty
+	(*CidrAndPort)(nil),              // 19: pb.CidrAndPort
+	(*IptablesChainsRequest)(nil),    // 20: pb.IptablesChainsRequest
+	(*Chain)(nil),                    // 21: pb.Chain
+	(*TimeRequest)(nil),              // 22: pb.TimeRequest
+	(*ContainerAction)(nil),          // 23: pb.ContainerAction
+	(*ExecStressRequest)(nil),        // 24: pb.ExecStressRequest
+	(*ExecStressResponse)(nil),       // 25: pb.ExecStressResponse
+	(*CancelStressRequest)(nil),      // 26: pb.CancelStressRequest
+	(*ApplyIOChaosRequest)(nil),      // 27: pb.ApplyIOChaosRequest
+	(*ApplyIOChaosResponse)(nil),     // 28: pb.ApplyIOChaosResponse
+	(*ApplyHttpChaosRequest)(nil),    // 29: pb.ApplyHttpChaosRequest
+	(*ApplyHttpChaosResponse)(nil),   // 30: pb.ApplyHttpChaosResponse
+	(*TcsRequest)(nil),               // 31: pb.TcsRequest
+	(*Tc)(nil),                       // 32: pb.Tc
+	(*SetDNSServerRequest)(nil),      // 33: pb.SetDNSServerRequest
+	(*InstallJVMRulesRequest)(nil),   // 34: pb.InstallJVMRulesRequest
+	(*UninstallJVMRulesRequest)(nil), // 35: pb.UninstallJVMRulesRequest
+	(*empty.Empty)(nil),              // 36: google.protobuf.Empty
 }
 var file_chaosdaemon_proto_depIdxs = []int32{
-	22, // 0: pb.ContainerRequest.action:type_name -> pb.ContainerAction
+	23, // 0: pb.ContainerRequest.action:type_name -> pb.ContainerAction
 	8,  // 1: pb.NetemRequest.netem:type_name -> pb.Netem
 	4,  // 2: pb.NetemRequest.handle:type_name -> pb.TcHandle
 	4,  // 3: pb.NetemRequest.parent:type_name -> pb.TcHandle
@@ -2916,47 +3006,48 @@ var file_chaosdaemon_proto_depIdxs = []int32{
 	16, // 13: pb.TcFilterRequest.filter:type_name -> pb.TcFilter
 	4,  // 14: pb.TcFilter.parent:type_name -> pb.TcHandle
 	18, // 15: pb.IPSetsRequest.ipsets:type_name -> pb.IPSet
-	20, // 16: pb.IptablesChainsRequest.chains:type_name -> pb.Chain
-	0,  // 17: pb.Chain.direction:type_name -> pb.Chain.Direction
-	1,  // 18: pb.ContainerAction.action:type_name -> pb.ContainerAction.Action
-	2,  // 19: pb.ExecStressRequest.scope:type_name -> pb.ExecStressRequest.Scope
-	31, // 20: pb.TcsRequest.tcs:type_name -> pb.Tc
-	3,  // 21: pb.Tc.type:type_name -> pb.Tc.Type
-	8,  // 22: pb.Tc.netem:type_name -> pb.Netem
-	10, // 23: pb.Tc.tbf:type_name -> pb.Tbf
-	30, // 24: pb.ChaosDaemon.SetTcs:input_type -> pb.TcsRequest
-	17, // 25: pb.ChaosDaemon.FlushIPSets:input_type -> pb.IPSetsRequest
-	19, // 26: pb.ChaosDaemon.SetIptablesChains:input_type -> pb.IptablesChainsRequest
-	21, // 27: pb.ChaosDaemon.SetTimeOffset:input_type -> pb.TimeRequest
-	21, // 28: pb.ChaosDaemon.RecoverTimeOffset:input_type -> pb.TimeRequest
-	5,  // 29: pb.ChaosDaemon.ContainerKill:input_type -> pb.ContainerRequest
-	5,  // 30: pb.ChaosDaemon.ContainerGetPid:input_type -> pb.ContainerRequest
-	23, // 31: pb.ChaosDaemon.ExecStressors:input_type -> pb.ExecStressRequest
-	25, // 32: pb.ChaosDaemon.CancelStressors:input_type -> pb.CancelStressRequest
-	26, // 33: pb.ChaosDaemon.ApplyIOChaos:input_type -> pb.ApplyIOChaosRequest
-	28, // 34: pb.ChaosDaemon.ApplyHttpChaos:input_type -> pb.ApplyHttpChaosRequest
-	32, // 35: pb.ChaosDaemon.SetDNSServer:input_type -> pb.SetDNSServerRequest
-	33, // 36: pb.ChaosDaemon.InstallJVMRules:input_type -> pb.InstallJVMRulesRequest
-	34, // 37: pb.ChaosDaemon.UninstallJVMRules:input_type -> pb.UninstallJVMRulesRequest
-	35, // 38: pb.ChaosDaemon.SetTcs:output_type -> google.protobuf.Empty
-	35, // 39: pb.ChaosDaemon.FlushIPSets:output_type -> google.protobuf.Empty
-	35, // 40: pb.ChaosDaemon.SetIptablesChains:output_type -> google.protobuf.Empty
-	35, // 41: pb.ChaosDaemon.SetTimeOffset:output_type -> google.protobuf.Empty
-	35, // 42: pb.ChaosDaemon.RecoverTimeOffset:output_type -> google.protobuf.Empty
-	35, // 43: pb.ChaosDaemon.ContainerKill:output_type -> google.protobuf.Empty
-	6,  // 44: pb.ChaosDaemon.ContainerGetPid:output_type -> pb.ContainerResponse
-	24, // 45: pb.ChaosDaemon.ExecStressors:output_type -> pb.ExecStressResponse
-	35, // 46: pb.ChaosDaemon.CancelStressors:output_type -> google.protobuf.Empty
-	27, // 47: pb.ChaosDaemon.ApplyIOChaos:output_type -> pb.ApplyIOChaosResponse
-	29, // 48: pb.ChaosDaemon.ApplyHttpChaos:output_type -> pb.ApplyHttpChaosResponse
-	35, // 49: pb.ChaosDaemon.SetDNSServer:output_type -> google.protobuf.Empty
-	35, // 50: pb.ChaosDaemon.InstallJVMRules:output_type -> google.protobuf.Empty
-	35, // 51: pb.ChaosDaemon.UninstallJVMRules:output_type -> google.protobuf.Empty
-	38, // [38:52] is the sub-list for method output_type
-	24, // [24:38] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	19, // 16: pb.IPSet.cidr_and_ports:type_name -> pb.CidrAndPort
+	21, // 17: pb.IptablesChainsRequest.chains:type_name -> pb.Chain
+	0,  // 18: pb.Chain.direction:type_name -> pb.Chain.Direction
+	1,  // 19: pb.ContainerAction.action:type_name -> pb.ContainerAction.Action
+	2,  // 20: pb.ExecStressRequest.scope:type_name -> pb.ExecStressRequest.Scope
+	32, // 21: pb.TcsRequest.tcs:type_name -> pb.Tc
+	3,  // 22: pb.Tc.type:type_name -> pb.Tc.Type
+	8,  // 23: pb.Tc.netem:type_name -> pb.Netem
+	10, // 24: pb.Tc.tbf:type_name -> pb.Tbf
+	31, // 25: pb.ChaosDaemon.SetTcs:input_type -> pb.TcsRequest
+	17, // 26: pb.ChaosDaemon.FlushIPSets:input_type -> pb.IPSetsRequest
+	20, // 27: pb.ChaosDaemon.SetIptablesChains:input_type -> pb.IptablesChainsRequest
+	22, // 28: pb.ChaosDaemon.SetTimeOffset:input_type -> pb.TimeRequest
+	22, // 29: pb.ChaosDaemon.RecoverTimeOffset:input_type -> pb.TimeRequest
+	5,  // 30: pb.ChaosDaemon.ContainerKill:input_type -> pb.ContainerRequest
+	5,  // 31: pb.ChaosDaemon.ContainerGetPid:input_type -> pb.ContainerRequest
+	24, // 32: pb.ChaosDaemon.ExecStressors:input_type -> pb.ExecStressRequest
+	26, // 33: pb.ChaosDaemon.CancelStressors:input_type -> pb.CancelStressRequest
+	27, // 34: pb.ChaosDaemon.ApplyIOChaos:input_type -> pb.ApplyIOChaosRequest
+	29, // 35: pb.ChaosDaemon.ApplyHttpChaos:input_type -> pb.ApplyHttpChaosRequest
+	33, // 36: pb.ChaosDaemon.SetDNSServer:input_type -> pb.SetDNSServerRequest
+	34, // 37: pb.ChaosDaemon.InstallJVMRules:input_type -> pb.InstallJVMRulesRequest
+	35, // 38: pb.ChaosDaemon.UninstallJVMRules:input_type -> pb.UninstallJVMRulesRequest
+	36, // 39: pb.ChaosDaemon.SetTcs:output_type -> google.protobuf.Empty
+	36, // 40: pb.ChaosDaemon.FlushIPSets:output_type -> google.protobuf.Empty
+	36, // 41: pb.ChaosDaemon.SetIptablesChains:output_type -> google.protobuf.Empty
+	36, // 42: pb.ChaosDaemon.SetTimeOffset:output_type -> google.protobuf.Empty
+	36, // 43: pb.ChaosDaemon.RecoverTimeOffset:output_type -> google.protobuf.Empty
+	36, // 44: pb.ChaosDaemon.ContainerKill:output_type -> google.protobuf.Empty
+	6,  // 45: pb.ChaosDaemon.ContainerGetPid:output_type -> pb.ContainerResponse
+	25, // 46: pb.ChaosDaemon.ExecStressors:output_type -> pb.ExecStressResponse
+	36, // 47: pb.ChaosDaemon.CancelStressors:output_type -> google.protobuf.Empty
+	28, // 48: pb.ChaosDaemon.ApplyIOChaos:output_type -> pb.ApplyIOChaosResponse
+	30, // 49: pb.ChaosDaemon.ApplyHttpChaos:output_type -> pb.ApplyHttpChaosResponse
+	36, // 50: pb.ChaosDaemon.SetDNSServer:output_type -> google.protobuf.Empty
+	36, // 51: pb.ChaosDaemon.InstallJVMRules:output_type -> google.protobuf.Empty
+	36, // 52: pb.ChaosDaemon.UninstallJVMRules:output_type -> google.protobuf.Empty
+	39, // [39:53] is the sub-list for method output_type
+	25, // [25:39] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_chaosdaemon_proto_init() }
@@ -3146,7 +3237,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IptablesChainsRequest); i {
+			switch v := v.(*CidrAndPort); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3158,7 +3249,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Chain); i {
+			switch v := v.(*IptablesChainsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3170,7 +3261,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TimeRequest); i {
+			switch v := v.(*Chain); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3182,7 +3273,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ContainerAction); i {
+			switch v := v.(*TimeRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3194,7 +3285,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExecStressRequest); i {
+			switch v := v.(*ContainerAction); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3206,7 +3297,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExecStressResponse); i {
+			switch v := v.(*ExecStressRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3218,7 +3309,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CancelStressRequest); i {
+			switch v := v.(*ExecStressResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3230,7 +3321,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyIOChaosRequest); i {
+			switch v := v.(*CancelStressRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3242,7 +3333,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyIOChaosResponse); i {
+			switch v := v.(*ApplyIOChaosRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3254,7 +3345,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyHttpChaosRequest); i {
+			switch v := v.(*ApplyIOChaosResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3266,7 +3357,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ApplyHttpChaosResponse); i {
+			switch v := v.(*ApplyHttpChaosRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3278,7 +3369,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*TcsRequest); i {
+			switch v := v.(*ApplyHttpChaosResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3290,7 +3381,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Tc); i {
+			switch v := v.(*TcsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3302,7 +3393,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SetDNSServerRequest); i {
+			switch v := v.(*Tc); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3314,7 +3405,7 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*InstallJVMRulesRequest); i {
+			switch v := v.(*SetDNSServerRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3326,6 +3417,18 @@ func file_chaosdaemon_proto_init() {
 			}
 		}
 		file_chaosdaemon_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*InstallJVMRulesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_chaosdaemon_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UninstallJVMRulesRequest); i {
 			case 0:
 				return &v.state
@@ -3344,7 +3447,7 @@ func file_chaosdaemon_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_chaosdaemon_proto_rawDesc,
 			NumEnums:      4,
-			NumMessages:   31,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
