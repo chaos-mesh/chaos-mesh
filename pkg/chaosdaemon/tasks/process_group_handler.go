@@ -46,16 +46,16 @@ type ChaosOnProcessGroup interface {
 
 // ProcessGroupHandler implements injecting & recovering on a linux process group.
 type ProcessGroupHandler struct {
-	Main     ChaosOnProcessGroup
-	childMap map[IsID]ChaosOnProcessGroup
-	Logger   logr.Logger
+	LeaderProcess ChaosOnProcessGroup
+	childMap      map[IsID]ChaosOnProcessGroup
+	Logger        logr.Logger
 }
 
-func NewProcessGroupHandler(logger logr.Logger, main ChaosOnProcessGroup) ProcessGroupHandler {
+func NewProcessGroupHandler(logger logr.Logger, leader ChaosOnProcessGroup) ProcessGroupHandler {
 	return ProcessGroupHandler{
-		Main:     main,
-		childMap: make(map[IsID]ChaosOnProcessGroup),
-		Logger:   logr.New(logger.GetSink()),
+		LeaderProcess: leader,
+		childMap:      make(map[IsID]ChaosOnProcessGroup),
+		Logger:        logr.New(logger.GetSink()),
 	}
 }
 
@@ -67,7 +67,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 		return ErrNotTypeSysID.WrapInput(pid).Err()
 	}
 
-	err := gp.Main.Inject(sysPID)
+	err := gp.LeaderProcess.Inject(sysPID)
 	if err != nil {
 		return cerr.FromErr(err).Wrapf("inject main process: %v", sysPID).Err()
 	}
@@ -80,7 +80,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 	for _, childPID := range childPIDs {
 		childSysPID := SysPID(childPID)
 		if childProcessChaos, ok := gp.childMap[childSysPID]; ok {
-			err := gp.Main.Assign(childProcessChaos)
+			err := gp.LeaderProcess.Assign(childProcessChaos)
 			if err != nil {
 				gp.Logger.Error(err, "failed to assign old child process")
 				continue
@@ -90,7 +90,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 				gp.Logger.Error(err, "failed to inject old child process")
 			}
 		} else {
-			childProcessChaos, err := gp.Main.Fork()
+			childProcessChaos, err := gp.LeaderProcess.Fork()
 			if err != nil {
 				gp.Logger.Error(err, "failed to create child process")
 				continue
@@ -112,7 +112,7 @@ func (gp *ProcessGroupHandler) Recover(pid IsID) error {
 	if !ok {
 		return ErrNotTypeSysID.WrapInput(pid).Err()
 	}
-	err := gp.Main.Recover(pid)
+	err := gp.LeaderProcess.Recover(pid)
 	if err != nil {
 		return cerr.FromErr(err).Wrapf("recovery main process : %v", pid).Err()
 	}

@@ -69,14 +69,14 @@ func (p *PodProcessMap) Write(podPID PodID, sysPID SysPID) {
 // PodHandler implements injecting & recovering on a kubernetes POD.
 type PodHandler struct {
 	PodProcessMap *PodProcessMap
-	Main          ChaosOnPOD
+	SubProcess    ChaosOnPOD
 	Logger        logr.Logger
 }
 
-func NewPodHandler(podProcessMap *PodProcessMap, main ChaosOnPOD, logger logr.Logger) PodHandler {
+func NewPodHandler(podProcessMap *PodProcessMap, sub ChaosOnPOD, logger logr.Logger) PodHandler {
 	return PodHandler{
 		PodProcessMap: podProcessMap,
-		Main:          main,
+		SubProcess:    sub,
 		Logger:        logr.New(logger.GetSink()),
 	}
 }
@@ -97,7 +97,7 @@ func (p *PodHandler) Inject(pid IsID) error {
 		return err
 	}
 
-	err = p.Main.Inject(sysPID)
+	err = p.SubProcess.Inject(sysPID)
 	return err
 }
 
@@ -117,6 +117,6 @@ func (p *PodHandler) Recover(pid IsID) error {
 		return err
 	}
 
-	err = p.Main.Recover(sysPID)
+	err = p.SubProcess.Recover(sysPID)
 	return err
 }

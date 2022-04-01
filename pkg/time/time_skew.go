@@ -118,13 +118,13 @@ func (c *Config) Assign(injectable tasks.Injectable) error {
 	if !ok {
 		return errors.New(fmt.Sprintf("type %t is not *tasks.PodHandler", injectable))
 	}
-	groupProcessHandler, ok := podHandler.Main.(*tasks.ProcessGroupHandler)
+	groupProcessHandler, ok := podHandler.SubProcess.(*tasks.ProcessGroupHandler)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %t is not *tasks.ProcessGroupHandler", podHandler.Main))
+		return errors.New(fmt.Sprintf("type %t is not *tasks.ProcessGroupHandler", podHandler.SubProcess))
 	}
-	I, ok := groupProcessHandler.Main.(*Skew)
+	I, ok := groupProcessHandler.LeaderProcess.(*Skew)
 	if !ok {
-		return errors.New(fmt.Sprintf("type %t is not *Skew", groupProcessHandler.Main))
+		return errors.New(fmt.Sprintf("type %t is not *Skew", groupProcessHandler.LeaderProcess))
 	}
 
 	I.SkewConfig = *c
