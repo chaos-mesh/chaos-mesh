@@ -2438,6 +2438,11 @@ definitions:
     type: object
   v1alpha1.Template:
     properties:
+      abort:
+        description: |-
+          Abort describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck.
+          +optional
+        type: boolean
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
@@ -2511,7 +2516,7 @@ definitions:
           Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
           +optional
         type: object
-      statuscheck:
+      statusCheck:
         $ref: '#/definitions/v1alpha1.StatusCheckSpec'
         description: |-
           StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.

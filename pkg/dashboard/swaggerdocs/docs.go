@@ -4632,6 +4632,10 @@ var doc = `{
         "v1alpha1.Template": {
             "type": "object",
             "properties": {
+                "abort": {
+                    "description": "Abort describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck.\n+optional",
+                    "type": "boolean"
+                },
                 "awsChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -4718,7 +4722,7 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ChaosOnlyScheduleSpec"
                 },
-                "statuscheck": {
+                "statusCheck": {
                     "description": "StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.StatusCheckSpec"

@@ -72,6 +72,8 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 					ConditionalBranches: template.ConditionalBranches,
 					EmbedChaos:          template.EmbedChaos,
 					Schedule:            conversionSchedule(template.Schedule),
+					StatusCheck:         template.StatusCheck,
+					Abort:               template.Abort,
 				},
 			}
 

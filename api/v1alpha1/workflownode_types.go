@@ -24,6 +24,7 @@ import (
 const (
 	LabelControlledBy = "chaos-mesh.org/controlled-by"
 	LabelWorkflow     = "chaos-mesh.org/workflow"
+	AnnotationAbort   = "chaos-mesh.org/abort"
 )
 
 const KindWorkflowNode = "WorkflowNode"
@@ -60,6 +61,10 @@ type WorkflowNodeSpec struct {
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
 	Schedule *ScheduleSpec `json:"schedule,omitempty"`
+	// +optional
+	StatusCheck *StatusCheckSpec `json:"statusCheck,omitempty"`
+	// +optional
+	Abort bool `json:"abort,omitempty"`
 }
 
 type WorkflowNodeStatus struct {
@@ -113,6 +118,7 @@ const (
 	ConditionAccomplished   WorkflowNodeConditionType = "Accomplished"
 	ConditionDeadlineExceed WorkflowNodeConditionType = "DeadlineExceed"
 	ConditionChaosInjected  WorkflowNodeConditionType = "ChaosInjected"
+	ConditionAborted        WorkflowNodeConditionType = "Aborted"
 )
 
 type WorkflowNodeCondition struct {
@@ -134,25 +140,33 @@ func init() {
 
 // Reasons
 const (
-	EntryCreated                string = "EntryCreated"
-	InvalidEntry                string = "InvalidEntry"
-	WorkflowAccomplished        string = "WorkflowAccomplished"
-	NodeAccomplished            string = "NodeAccomplished"
-	NodesCreated                string = "NodesCreated"
-	NodeDeadlineExceed          string = "NodeDeadlineExceed"
-	NodeDeadlineNotExceed       string = "NodeDeadlineNotExceed"
-	NodeDeadlineOmitted         string = "NodeDeadlineOmitted"
-	ParentNodeDeadlineExceed    string = "ParentNodeDeadlineExceed"
-	ChaosCRCreated              string = "ChaosCRCreated"
-	ChaosCRCreateFailed         string = "ChaosCRCreateFailed"
-	ChaosCRDeleted              string = "ChaosCRDeleted"
-	ChaosCRDeleteFailed         string = "ChaosCRDeleteFailed"
-	ChaosCRNotExists            string = "ChaosCRNotExists"
-	TaskPodSpawned              string = "TaskPodSpawned"
-	TaskPodSpawnFailed          string = "TaskPodSpawnFailed"
-	TaskPodPodCompleted         string = "TaskPodPodCompleted"
-	ConditionalBranchesSelected string = "ConditionalBranchesSelected"
-	RerunBySpecChanged          string = "RerunBySpecChanged"
+	EntryCreated                         string = "EntryCreated"
+	InvalidEntry                         string = "InvalidEntry"
+	WorkflowAccomplished                 string = "WorkflowAccomplished"
+	NodeAccomplished                     string = "NodeAccomplished"
+	NodesCreated                         string = "NodesCreated"
+	NodeDeadlineExceed                   string = "NodeDeadlineExceed"
+	NodeDeadlineNotExceed                string = "NodeDeadlineNotExceed"
+	NodeDeadlineOmitted                  string = "NodeDeadlineOmitted"
+	ParentNodeDeadlineExceed             string = "ParentNodeDeadlineExceed"
+	ChaosCRCreated                       string = "ChaosCRCreated"
+	ChaosCRCreateFailed                  string = "ChaosCRCreateFailed"
+	ChaosCRDeleted                       string = "ChaosCRDeleted"
+	ChaosCRDeleteFailed                  string = "ChaosCRDeleteFailed"
+	ChaosCRNotExists                     string = "ChaosCRNotExists"
+	TaskPodSpawned                       string = "TaskPodSpawned"
+	TaskPodSpawnFailed                   string = "TaskPodSpawnFailed"
+	TaskPodPodCompleted                  string = "TaskPodPodCompleted"
+	ConditionalBranchesSelected          string = "ConditionalBranchesSelected"
+	RerunBySpecChanged                   string = "RerunBySpecChanged"
+	StatusCheckCreated                   string = "StatusCheckCreated"
+	StatusCheckCreatedFailed             string = "StatusCheckCreatedFailed"
+	StatusCheckDeleted                   string = "StatusCheckDeleted"
+	StatusCheckDeletedFailed             string = "StatusCheckDeletedFailed"
+	StatusCheckCompleted                 string = "StatusCheckCompleted"
+	StatusCheckNotExceedSuccessThreshold string = "StatusCheckNotExceedSuccessThreshold"
+	ParentNodeAborted                    string = "ParentNodeAborted"
+	WorkflowAborted                      string = "WorkflowAborted"
 )
 
 // GenericChaosList only use to list GenericChaos by certain EmbedChaos

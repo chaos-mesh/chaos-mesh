@@ -42,6 +42,11 @@ spec:
               templates:
                 items:
                   properties:
+                    abort:
+                      description: Abort describe whether to abort the workflow when
+                        the failure threshold of StatusCheck is exceeded. Only used
+                        when Type is TypeStatusCheck.
+                      type: boolean
                     awsChaos:
                       description: AWSChaosSpec is the content of the specification
                         for an AWSChaos
@@ -5381,7 +5386,7 @@ spec:
                       - schedule
                       - type
                       type: object
-                    statuscheck:
+                    statusCheck:
                       description: StatusCheck describe the behavior of StatusCheck.
                         Only used when Type is TypeStatusCheck.
                       properties:
