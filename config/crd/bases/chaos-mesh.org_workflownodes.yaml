@@ -4969,6 +4969,13 @@ spec:
                           memory:
                             description: MemoryStressor stresses virtual memory out
                             properties:
+                              oomScoreAdj:
+                                default: 0
+                                description: OOMScoreAdj sets the oom_score_adj of
+                                  the stress process. See `man 5 proc` to know more
+                                  about this option.
+                                minimum: -1000
+                                type: integer
                               options:
                                 description: extend stress-ng options
                                 items:
@@ -10641,6 +10648,13 @@ spec:
                                           description: MemoryStressor stresses virtual
                                             memory out
                                           properties:
+                                            oomScoreAdj:
+                                              default: 0
+                                              description: OOMScoreAdj sets the oom_score_adj
+                                                of the stress process. See `man 5
+                                                proc` to know more about this option.
+                                              minimum: -1000
+                                              type: integer
                                             options:
                                               description: extend stress-ng options
                                               items:
@@ -11021,6 +11035,13 @@ spec:
                                       description: MemoryStressor stresses virtual
                                         memory out
                                       properties:
+                                        oomScoreAdj:
+                                          default: 0
+                                          description: OOMScoreAdj sets the oom_score_adj
+                                            of the stress process. See `man 5 proc`
+                                            to know more about this option.
+                                          minimum: -1000
+                                          type: integer
                                         options:
                                           description: extend stress-ng options
                                           items:
@@ -14643,6 +14664,13 @@ spec:
                       memory:
                         description: MemoryStressor stresses virtual memory out
                         properties:
+                          oomScoreAdj:
+                            default: 0
+                            description: OOMScoreAdj sets the oom_score_adj of the
+                              stress process. See `man 5 proc` to know more about
+                              this option.
+                            minimum: -1000
+                            type: integer
                           options:
                             description: extend stress-ng options
                             items:

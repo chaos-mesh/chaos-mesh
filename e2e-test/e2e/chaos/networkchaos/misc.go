@@ -18,7 +18,7 @@ package networkchaos
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -46,7 +46,7 @@ func recvUDPPacket(c http.Client, port uint16) (string, error) {
 		return "", err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return "", err
@@ -65,7 +65,7 @@ func sendUDPPacket(c http.Client, port uint16, targetIP string) error {
 		return err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func testNetworkDelay(c http.Client, port uint16, targetIP string) (int64, error
 		return 0, err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return 0, err

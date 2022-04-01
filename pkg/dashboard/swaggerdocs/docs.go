@@ -2622,10 +2622,15 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2660,10 +2665,15 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -3924,6 +3934,10 @@ var doc = `{
         "v1alpha1.MemoryStressor": {
             "type": "object",
             "properties": {
+                "oomScoreAdj": {
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximm=1000\n+kubebuilder:default=0\n+optional",
+                    "type": "integer"
+                },
                 "options": {
                     "description": "extend stress-ng options\n+optional",
                     "type": "array",
