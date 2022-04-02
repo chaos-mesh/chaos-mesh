@@ -20,7 +20,7 @@ jobs:
           DOCKER_CLI_EXPERIMENTAL: enabled 
         run: |
           docker buildx create --use --name chaos-mesh-builder
-          make image e2e-image
+          make -j4 image e2e-image
       - name: upload build cache
         uses: martijnhols/actions-cache/save@main
         with:
