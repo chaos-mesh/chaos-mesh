@@ -145,7 +145,7 @@ func (collector *Collector) collectArchivedWorkflows() {
 
 type Params struct {
 	fx.In
-
+	log             logr.Logger
 	Registry        *prometheus.Registry
 	ExperimentStore core.ExperimentStore
 	ScheduleStore   core.ScheduleStore
