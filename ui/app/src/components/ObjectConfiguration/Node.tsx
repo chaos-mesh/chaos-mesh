@@ -18,8 +18,8 @@ import { Box, Table, TableBody, TableRow, Typography } from '@mui/material'
 
 import { Branch } from 'slices/workflows'
 import ObjectConfiguration from '.'
-import T from 'components/T'
 import { TableCell } from './common'
+import i18n from 'components/T'
 
 interface NodeConfigurationProps {
   template: any
@@ -29,7 +29,7 @@ const Suspend = ({ template: t }: NodeConfigurationProps) => (
   <Table size="small">
     <TableBody>
       <TableRow>
-        <TableCell>{T('common.name')}</TableCell>
+        <TableCell>{i18n('common.name')}</TableCell>
         <TableCell>
           <Typography variant="body2" color="textSecondary">
             {t.name}
@@ -37,7 +37,7 @@ const Suspend = ({ template: t }: NodeConfigurationProps) => (
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell>{T('newE.target.kind')}</TableCell>
+        <TableCell>{i18n('newE.target.kind')}</TableCell>
         <TableCell>
           <Typography variant="body2" color="textSecondary">
             {t.templateType}
@@ -45,7 +45,7 @@ const Suspend = ({ template: t }: NodeConfigurationProps) => (
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell>{T('newW.node.deadline')}</TableCell>
+        <TableCell>{i18n('newW.node.deadline')}</TableCell>
         <TableCell>
           <Typography variant="body2" color="textSecondary">
             {t.deadline}
@@ -62,12 +62,12 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
   return (
     <>
       <Typography variant="subtitle2" gutterBottom>
-        {T('newE.steps.basic')}
+        {i18n('newE.steps.basic')}
       </Typography>
       <Table size="small">
         <TableBody>
           <TableRow>
-            <TableCell>{T('common.name')}</TableCell>
+            <TableCell>{i18n('common.name')}</TableCell>
             <TableCell>
               <Typography variant="body2" color="textSecondary">
                 {t.name}
@@ -77,11 +77,11 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
         </TableBody>
       </Table>
       <Typography variant="subtitle2" gutterBottom>
-        {T('newW.node.container.title')}
+        {i18n('newW.node.container.title')}
       </Typography>
       <Table size="small">
         <TableRow>
-          <TableCell>{T('common.name')}</TableCell>
+          <TableCell>{i18n('common.name')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {container.name}
@@ -89,7 +89,7 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
           </TableCell>
         </TableRow>
         <TableRow>
-          <TableCell>{T('newW.node.container.image')}</TableCell>
+          <TableCell>{i18n('newW.node.container.image')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {container.image}
@@ -98,7 +98,7 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
         </TableRow>
         {container.command && (
           <TableRow>
-            <TableCell>{T('newW.node.container.command')}</TableCell>
+            <TableCell>{i18n('newW.node.container.command')}</TableCell>
             <TableCell>
               {container.command.map((d: string, i: number) => (
                 <Typography key={i} variant="body2" color="textSecondary">
@@ -110,17 +110,17 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
         )}
       </Table>
       <Typography variant="subtitle2" gutterBottom>
-        {T('newW.node.conditionalBranches.title')}
+        {i18n('newW.node.conditionalBranches.title')}
       </Typography>
       {t.conditionalBranches &&
         t.conditionalBranches.map((d: Branch, i: number) => (
           <Box key={i}>
             <Typography variant="subtitle2" gutterBottom>
-              {T('newW.node.conditionalBranches.branch')} {i + 1}
+              {i18n('newW.node.conditionalBranches.branch')} {i + 1}
             </Typography>
             <Table size="small">
               <TableRow>
-                <TableCell>{T('newW.node.conditionalBranches.target')}</TableCell>
+                <TableCell>{i18n('newW.node.conditionalBranches.target')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
                     {d.target}
@@ -128,7 +128,7 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>{T('newW.node.conditionalBranches.expression')}</TableCell>
+                <TableCell>{i18n('newW.node.conditionalBranches.expression')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
                     {d.expression}

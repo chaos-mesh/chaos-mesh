@@ -17,7 +17,7 @@ package httpchaos
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -57,7 +57,7 @@ func TestcaseHttpReplaceThenRecover(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -113,7 +113,7 @@ func TestcaseHttpReplaceThenRecover(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -142,7 +142,7 @@ func TestcaseHttpReplaceThenRecover(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -181,7 +181,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -258,7 +258,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -308,7 +308,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -356,7 +356,7 @@ func TestcaseHttpReplacePauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -400,7 +400,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -458,7 +458,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -487,7 +487,7 @@ func TestcaseHttpReplaceBodyThenRecover(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -527,7 +527,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -606,7 +606,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -656,7 +656,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -704,7 +704,7 @@ func TestcaseHttpReplaceBodyPauseAndUnPause(
 		defer resp.Body.Close()
 
 		s := resp.Header.Get(SECRET)
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}

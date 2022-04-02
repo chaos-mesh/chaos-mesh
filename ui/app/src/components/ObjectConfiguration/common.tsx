@@ -28,7 +28,7 @@ import {
 } from '@mui/material'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
-import T from 'components/T'
+import i18n from 'components/T'
 import { objToArrBySep } from 'lib/utils'
 
 export const TableCell = (props: TableCellProps) => (
@@ -42,7 +42,7 @@ export const Selector = ({ data }: any) => (
     <TableBody>
       {data.namespaces && (
         <TableRow>
-          <TableCell>{T('k8s.namespaceSelectors')}</TableCell>
+          <TableCell>{i18n('k8s.namespaceSelectors')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {data.namespaces.join('; ')}
@@ -52,7 +52,7 @@ export const Selector = ({ data }: any) => (
       )}
       {data.labelSelectors && (
         <TableRow>
-          <TableCell>{T('k8s.labelSelectors')}</TableCell>
+          <TableCell>{i18n('k8s.labelSelectors')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {objToArrBySep(data.labelSelectors, ': ').join('; ')}
@@ -62,7 +62,7 @@ export const Selector = ({ data }: any) => (
       )}
       {data.annotationSelectors && (
         <TableRow>
-          <TableCell>{T('k8s.annotationSelectors')}</TableCell>
+          <TableCell>{i18n('k8s.annotationSelectors')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {objToArrBySep(data.annotationSelectors, ': ').join('; ')}
@@ -309,7 +309,7 @@ export const Experiment = ({ kind, data }: { kind: ExperimentKind; data: any }) 
   <Table size="small">
     <TableBody>
       <TableRow>
-        <TableCell>{T('newE.target.kind')}</TableCell>
+        <TableCell>{i18n('newE.target.kind')}</TableCell>
         <TableCell>
           <Typography variant="body2" color="textSecondary">
             {kind}
@@ -318,7 +318,7 @@ export const Experiment = ({ kind, data }: { kind: ExperimentKind; data: any }) 
       </TableRow>
       {['PodChaos', 'NetworkChaos', 'IOChaos'].includes(kind) && (
         <TableRow>
-          <TableCell>{T('newE.target.action')}</TableCell>
+          <TableCell>{i18n('newE.target.action')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {data.action}

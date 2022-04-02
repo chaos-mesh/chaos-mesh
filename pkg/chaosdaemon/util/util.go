@@ -17,7 +17,7 @@ package util
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strconv"
 	"sync"
@@ -37,7 +37,7 @@ func ReadCommName(pid int) (string, error) {
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +48,7 @@ func ReadCommName(pid int) (string, error) {
 // GetChildProcesses will return all child processes's pid. Include all generations.
 // only return error when /proc/pid/tasks cannot be read
 func GetChildProcesses(ppid uint32, logger logr.Logger) ([]uint32, error) {
-	procs, err := ioutil.ReadDir(bpm.DefaultProcPrefix)
+	procs, err := os.ReadDir(bpm.DefaultProcPrefix)
 	if err != nil {
 		return nil, errors.Wrapf(err, "read /proc/pid/tasks , ppid : %d", ppid)
 	}
