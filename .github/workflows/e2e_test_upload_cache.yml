@@ -17,7 +17,9 @@ jobs:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
           GO_BUILD_CACHE: ${{github.workspace}}/cache
+          DOCKER_CLI_EXPERIMENTAL: enabled 
         run: |
+          docker buildx create --use --name chaos-mesh-builder
           make image e2e-image
       - name: upload build cache
         uses: martijnhols/actions-cache/restore@main
