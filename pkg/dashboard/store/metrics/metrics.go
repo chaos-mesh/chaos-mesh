@@ -153,6 +153,6 @@ type Params struct {
 }
 
 func Register(params Params) {
-	collector := NewCollector(params.ExperimentStore, params.ScheduleStore, params.WorkflowStore)
+	collector := NewCollector(params.log, params.ExperimentStore, params.ScheduleStore, params.WorkflowStore)
 	params.Registry.MustRegister(collector)
 }
