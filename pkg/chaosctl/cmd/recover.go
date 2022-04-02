@@ -40,7 +40,7 @@ func NewRecoverCommand(logger logr.Logger, builders map[string]recover.RecoverBu
 	o := &RecoverOptions{namespace: "default"}
 
 	recoverCmd := &cobra.Command{
-		Use:   `recover (CHAOSTYPE) (PODs) [-n NAMESPACE]`,
+		Use:   `recover (CHAOSTYPE) POD[,POD[,POD...]] [-n NAMESPACE]`,
 		Short: `Recover certain chaos from certain pods`,
 		Long: `Recover certain chaos from certain pods.
 Currently unimplemented.
@@ -93,7 +93,7 @@ Examples:
 
 func recoverResourceCommand(option *RecoverOptions, chaosType string, builder recover.RecoverBuilder) *cobra.Command {
 	return &cobra.Command{
-		Use:   fmt.Sprintf(`%s (PODs) [-n NAMESPACE]`, chaosType),
+		Use:   fmt.Sprintf(`%s POD[,POD[,POD...]] [-n NAMESPACE]`, chaosType),
 		Short: fmt.Sprintf(`Recover %s from certain pods`, chaosType),
 		Long:  fmt.Sprintf(`Recover %s from certain pods`, chaosType),
 		RunE: func(cmd *cobra.Command, args []string) error {
