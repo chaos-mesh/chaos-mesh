@@ -106,12 +106,6 @@ jobs:
         with:
           name: saved-images
           path: ./output/saved-images
-      - name: restore e2e images
-        run: |
-          docker load -i ./output/saved-images/chaos-dashboard.tgz
-          docker load -i ./output/saved-images/chaos-daemon.tgz
-          docker load -i ./output/saved-images/chaos-mesh.tgz
-          docker load -i ./output/saved-images/e2e-helper.tgz
       - name: download e2e binary
         uses: actions/download-artifact@v2
         with:
@@ -133,10 +127,10 @@ jobs:
           start args: --cni flannel
       - name: load image into minikube
         run: |
-          minikube image load ghcr.io/chaos-mesh/chaos-dashboard:latest
-          minikube image load ghcr.io/chaos-mesh/chaos-daemon:latest
-          minikube image load ghcr.io/chaos-mesh/chaos-mesh:latest
-          minikube image load ghcr.io/pingcap/e2e-helper:latest
+          minikube image load ./output/saved-images/chaos-dashboard.tgz
+          minikube image load ./output/saved-images/chaos-daemon.tgz
+          minikube image load ./output/saved-images/chaos-mesh.tgz
+          minikube image load ./output/saved-images/e2e-helper.tgz
       - name: Setup Helm
         uses: azure/setup-helm@v1
       - name: Install Chaos Mesh
