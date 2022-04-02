@@ -17,6 +17,15 @@ OUTPUT_BIN=$(ROOT)/output/bin
 HELM_BIN=$(OUTPUT_BIN)/helm
 
 # Every branch should have its own image tag for build-env and dev-env
+# using := with ifeq instead of ?= for performance issue
+ifeq ($(IMAGE_BUILD_ENV_TAG),)
+IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+endif
+ifeq ($(IMAGE_DEV_ENV_TAG),)
+IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+endif
+
+# Every branch should have its own image tag for build-env and dev-env
 IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
 IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 IMAGE_BUILD_ENV_BUILD ?= 0
@@ -134,7 +143,7 @@ endif
 GO_TARGET_PHONY += $(1)
 endef
 
-BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTTPS_PROXY=${HTTPS_PROXY} --env GOPROXY=${GOPROXY} --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1 --env HTTP_PROXY=${HTTP_PROXY} --env HTTPS_PROXY=${HTTPS_PROXY} --env GOPROXY=${GOPROXY} --env IMAGE_BUILD_ENV_TAG=${IMAGE_BUILD_ENV_TAG} --env IMAGE_DEV_ENV_TAG=${IMAGE_DEV_ENV_TAG} --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
 
 ifneq ($(TARGET_PLATFORM),)
 	BUILD_INDOCKER_ARG += --platform=linux/$(TARGET_PLATFORM)
