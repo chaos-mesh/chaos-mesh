@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -735,7 +735,7 @@ func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
 		return "", err
 	}
 	defer logs.Close()
-	data, err := ioutil.ReadAll(logs)
+	data, err := io.ReadAll(logs)
 	if err != nil {
 		return "", err
 	}
