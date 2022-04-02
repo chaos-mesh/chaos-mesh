@@ -20,8 +20,8 @@ import Experiments from './Experiments'
 import Other from './Other'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import Token from './Token'
+import i18n from 'components/T'
 import logo from 'images/logo.svg'
 import logoWhite from 'images/logo-white.svg'
 import { useStoreSelector } from 'store'
@@ -40,7 +40,7 @@ const Settings = () => {
             <Experiments />
             <Other />
 
-            <PaperTop title={T('common.version')} divider />
+            <PaperTop title={i18n('common.version')} divider />
             <Box>
               <img src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" style={{ width: 192 }} />
               <Typography variant="body2" color="textSecondary">

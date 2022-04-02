@@ -124,6 +124,14 @@ message IPSetsRequest {
 message IPSet {
   string name = 1;
   repeated string cidrs = 2;
+  repeated CidrAndPort cidr_and_ports = 3;
+  repeated string set_names = 4;
+  string type = 5;
+}
+
+message CidrAndPort {
+  string cidr = 1;
+  uint32 port = 2;
 }
 
 message IptablesChainsRequest {
@@ -171,8 +179,9 @@ message ExecStressRequest {
   Scope scope = 1;
   string target = 2;
   string cpuStressors = 3;
-  string memoryStressors = 5;
   bool enterNS = 4;
+  string memoryStressors = 5;
+  int32 oomScoreAdj = 7;
 }
 
 message ExecStressResponse {
@@ -180,6 +189,8 @@ message ExecStressResponse {
   int64 cpuStartTime = 2;
   string memoryInstance = 3;
   int64 memoryStartTime = 4;
+  string cpuInstanceUid = 5;
+  string memoryInstanceUid = 6;
 }
 
 message CancelStressRequest {
@@ -187,6 +198,8 @@ message CancelStressRequest {
   int64 cpuStartTime = 2;
   string memoryInstance = 3;
   int64 memoryStartTime = 4;
+  string cpuInstanceUid = 5;
+  string memoryInstanceUid = 6;
 }
 
 message ApplyIOChaosRequest {
@@ -197,11 +210,13 @@ message ApplyIOChaosRequest {
   int64 instance = 4;
   int64 startTime = 5;
   bool enterNS = 6;
+  string instance_uid = 7;
 }
 
 message ApplyIOChaosResponse {
   int64 instance = 1;
   int64 startTime = 2;
+  string instance_uid = 3;
 }
 
 message ApplyHttpChaosRequest {
@@ -212,6 +227,7 @@ message ApplyHttpChaosRequest {
   int64 instance = 4;
   int64 startTime = 5;
   bool enterNS = 6;
+  string instance_uid = 7;
 }
 
 message ApplyHttpChaosResponse {
@@ -219,6 +235,7 @@ message ApplyHttpChaosResponse {
   int64 startTime = 2;
   int32 statusCode = 3;
   string error = 4;
+  string instance_uid = 5;
 }
 
 

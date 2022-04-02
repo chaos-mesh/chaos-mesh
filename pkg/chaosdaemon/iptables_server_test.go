@@ -17,7 +17,6 @@ package chaosdaemon
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -28,12 +27,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil)
+	logger, err := log.NewDefaultZapLogger()
+	Expect(err).To(BeNil())
+	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil, logger)
 
 	Context("FlushIptables", func() {
 		It("should work", func() {
@@ -100,7 +102,7 @@ var _ = Describe("iptables server", func() {
 
 		It("should fail on command error", func() {
 			// The mockfail.sh will fail
-			err := ioutil.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
+			err := os.WriteFile("/tmp/mockfail.sh", []byte(`#! /bin/sh
 exit 1
 			`), 0755)
 			Expect(err).To(BeNil())

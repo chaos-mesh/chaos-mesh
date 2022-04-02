@@ -22,8 +22,8 @@ import (
 	"sort"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
@@ -32,8 +32,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
-
-var log = ctrl.Log.WithName("workflow api")
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
@@ -54,12 +52,13 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 // Service defines a handler service for workflows.
 type Service struct {
-	conf  *config.ChaosDashboardConfig
-	store core.WorkflowStore
+	conf   *config.ChaosDashboardConfig
+	store  core.WorkflowStore
+	logger logr.Logger
 }
 
-func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore) *Service {
-	return &Service{conf: conf, store: store}
+func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore, logger logr.Logger) *Service {
+	return &Service{conf: conf, store: store, logger: logger}
 }
 
 // @Summary Render a task which sends HTTP request
@@ -172,7 +171,7 @@ func (it *Service) listWorkflows(c *gin.Context) {
 	for index, item := range result {
 		entity, err := it.store.FindByUID(c.Request.Context(), string(item.UID))
 		if err != nil {
-			log.Info("warning: workflow does not have a record in database",
+			it.logger.Info("warning: workflow does not have a record in database",
 				"namespaced name", fmt.Sprintf("%s/%s", item.Namespace, item.Name),
 				"uid", item.UID,
 			)
@@ -254,7 +253,7 @@ func (it *Service) getWorkflowDetailByUID(c *gin.Context) {
 // @Success 200 {object} core.WorkflowDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /workflows/new [post]
+// @Router /workflows [post]
 func (it *Service) createWorkflow(c *gin.Context) {
 	payload := v1alpha1.Workflow{}
 

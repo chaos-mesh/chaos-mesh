@@ -20,8 +20,8 @@ import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 import { useIntl } from 'react-intl'
 import { validateName } from 'lib/formikhelpers'
 
@@ -29,7 +29,7 @@ function validateToken(value: string) {
   let error
 
   if (value === '') {
-    error = T('settings.addToken.tokenValidation') as unknown as string
+    error = i18n('settings.addToken.tokenValidation') as unknown as string
   }
 
   return error
@@ -60,7 +60,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       dispatch(
         setAlert({
           type: 'warning',
-          message: T('settings.addToken.duplicateDesc', intl),
+          message: i18n('settings.addToken.duplicateDesc', intl),
         })
       )
 
@@ -103,18 +103,18 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
           <Space>
             <TextField
               name="name"
-              label={T('common.name')}
-              validate={validateName(T('settings.addToken.nameValidation') as unknown as string)}
-              helperText={errors.name && touched.name ? errors.name : T('settings.addToken.nameHelper')}
+              label={i18n('common.name')}
+              validate={validateName(i18n('settings.addToken.nameValidation') as unknown as string)}
+              helperText={errors.name && touched.name ? errors.name : i18n('settings.addToken.nameHelper')}
               error={errors.name && touched.name ? true : false}
             />
             <TextField
               name="token"
-              label={T('settings.addToken.token')}
+              label={i18n('settings.addToken.token')}
               multiline
               rows={12}
               validate={validateToken}
-              helperText={errors.token && touched.token ? errors.token : T('settings.addToken.tokenHelper')}
+              helperText={errors.token && touched.token ? errors.token : i18n('settings.addToken.tokenHelper')}
               error={errors.token && touched.token ? true : false}
             />
           </Space>
