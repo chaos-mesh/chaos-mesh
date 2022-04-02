@@ -28,8 +28,8 @@ jobs:
       - name: build e2e images
         env:
           DOCKER_CACHE: 1
-          DOCKER_CACHE_DIR: cache
-          GO_BUILD_CACHE: cache
+          DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
+          GO_BUILD_CACHE: ${{ github.workspace }}/cache
         run: |
           make image e2e-image
 
@@ -62,8 +62,8 @@ jobs:
       - name: build e2e binary
         env:
           DOCKER_CACHE: 1
-          DOCKER_CACHE_DIR: ${{env.GITHUB_WORKSPACE}}/cache
-          GO_BUILD_CACHE: ${{env.GITHUB_WORKSPACE}}/cache
+          DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
+          GO_BUILD_CACHE: ${{ github.workspace }}/cache
         run: |
           make e2e-build
       - name: upload e2e binary
