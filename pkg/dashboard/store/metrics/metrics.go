@@ -41,7 +41,7 @@ type Collector struct {
 // NewCollector initializes metrics and collector
 func NewCollector(log logr.Logger, experimentStore core.ExperimentStore, scheduleStore core.ScheduleStore, workflowStore core.WorkflowStore) *Collector {
 	return &Collector{
-		log:             NewDefaultZapLogger(),
+		log:             log,
 		experimentStore: experimentStore,
 		scheduleStore:   scheduleStore,
 		workflowStore:   workflowStore,
