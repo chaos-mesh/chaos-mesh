@@ -61,8 +61,9 @@ jobs:
           key: e2e-binary-build-cache-${{ runner.os }}
       - name: build e2e binary
         env:
-          DOCKER_BUILD_CACHE: 1
-          GO_BUILD_CACHE: 1
+          DOCKER_CACHE: 1
+          DOCKER_CACHE_DIR: ${{env.GITHUB_WORKSPACE}}/cache
+          GO_BUILD_CACHE: ${{env.GITHUB_WORKSPACE}}/cache
         run: |
           make e2e-build
       - name: upload e2e binary
