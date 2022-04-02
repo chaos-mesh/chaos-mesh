@@ -1314,6 +1314,12 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         value: 9,
         helperText: 'The process signal value',
       },
+      recoverCmd: {
+        field: 'text',
+        label: 'Recover Command',
+        value: '',
+        helperText: 'The command to be run when recovering experiment',
+      },
     },
   },
   StressChaos: {

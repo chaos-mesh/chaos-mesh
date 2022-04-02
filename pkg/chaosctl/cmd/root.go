@@ -22,6 +22,7 @@ import (
 
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
 )
 
 var managerNamespace, managerSvc string
@@ -96,6 +97,19 @@ func Execute() {
 		os.Exit(1)
 	}
 
+	// TODO: register recovers
+	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecoverBuilder{
+		networkChaos: recover.NewNoopRecover,
+		ioChaos:      recover.NewNoopRecover,
+		httpChaos:    recover.NewNoopRecover,
+		stressChaos:  recover.NewNoopRecover,
+	})
+	if err != nil {
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("recover command: "+err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
 	physicalMachineCommand, err := NewPhysicalMachineCommand()
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
@@ -104,6 +118,7 @@ func Execute() {
 	}
 
 	rootCmd.AddCommand(debugCommand)
+	rootCmd.AddCommand(recoverCommand)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(physicalMachineCommand)

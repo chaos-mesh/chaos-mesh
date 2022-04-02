@@ -361,6 +361,9 @@ type ProcessSpec struct {
 	Process string `json:"process,omitempty"`
 	// the signal number to send
 	Signal int `json:"signal,omitempty"`
+
+	// the command to be run when recovering experiment
+	RecoverCmd string `json:"recoverCmd,omitempty"`
 }
 
 type JVMCommonSpec struct {

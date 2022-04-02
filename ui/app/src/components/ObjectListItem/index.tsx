@@ -27,7 +27,7 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Schedule } from 'api/schedules.type'
 import Space from '@ui/mui-extends/esm/Space'
 import StatusLabel from 'components/StatusLabel'
-import T from 'components/T'
+import i18n from 'components/T'
 import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -52,8 +52,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     switch (action) {
       case 'archive':
         onSelect({
-          title: `${T('archives.single', intl)} ${data.name}`,
-          description: T(`${type}s.deleteDesc`, intl),
+          title: `${i18n('archives.single', intl)} ${data.name}`,
+          description: i18n(`${type}s.deleteDesc`, intl),
           action,
           uuid: data.uid,
         })
@@ -61,8 +61,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         return
       case 'pause':
         onSelect({
-          title: `${T('common.pause', intl)} ${data.name}`,
-          description: T('experiments.pauseDesc', intl),
+          title: `${i18n('common.pause', intl)} ${data.name}`,
+          description: i18n('experiments.pauseDesc', intl),
           action,
           uuid: data.uid,
         })
@@ -70,8 +70,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         return
       case 'start':
         onSelect({
-          title: `${T('common.start', intl)} ${data.name}`,
-          description: T('experiments.startDesc', intl),
+          title: `${i18n('common.start', intl)} ${data.name}`,
+          description: i18n('experiments.startDesc', intl),
           action,
           uuid: data.uid,
         })
@@ -79,8 +79,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         return
       case 'delete':
         onSelect({
-          title: `${T('common.delete', intl)} ${data.name}`,
-          description: T('archives.deleteDesc', intl),
+          title: `${i18n('common.delete', intl)} ${data.name}`,
+          description: i18n('archives.deleteDesc', intl),
           action,
           uuid: data.uid,
         })
@@ -109,28 +109,33 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
   const Actions = () => (
     <Space direction="row" justifyContent="end" alignItems="center">
       <Typography variant="body2" title={format(data.created_at)}>
-        {T('table.created')}{' '}
+        {i18n('table.created')}{' '}
         {DateTime.fromISO(data.created_at, {
           locale: lang,
         }).toRelative()}
       </Typography>
       {(type === 'schedule' || type === 'experiment') &&
         ((data as Experiment).status === 'paused' ? (
-          <IconButton color="primary" title={T('common.start', intl)} size="small" onClick={handleAction('start')}>
+          <IconButton color="primary" title={i18n('common.start', intl)} size="small" onClick={handleAction('start')}>
             <PlayCircleOutlineIcon />
           </IconButton>
         ) : (data as Experiment).status !== 'finished' ? (
-          <IconButton color="primary" title={T('common.pause', intl)} size="small" onClick={handleAction('pause')}>
+          <IconButton color="primary" title={i18n('common.pause', intl)} size="small" onClick={handleAction('pause')}>
             <PauseCircleOutlineIcon />
           </IconButton>
         ) : null)}
       {type !== 'archive' && (
-        <IconButton color="primary" title={T('archives.single', intl)} size="small" onClick={handleAction('archive')}>
+        <IconButton
+          color="primary"
+          title={i18n('archives.single', intl)}
+          size="small"
+          onClick={handleAction('archive')}
+        >
           <ArchiveOutlinedIcon />
         </IconButton>
       )}
       {type === 'archive' && (
-        <IconButton color="primary" title={T('common.delete', intl)} size="small" onClick={handleAction('delete')}>
+        <IconButton color="primary" title={i18n('common.delete', intl)} size="small" onClick={handleAction('delete')}>
           <DeleteOutlinedIcon />
         </IconButton>
       )}

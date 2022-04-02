@@ -30,7 +30,7 @@ import (
 	"debug/elf"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"syscall"
@@ -84,7 +84,7 @@ func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 	tidMap := make(map[int]bool)
 	retryCount := make(map[int]int)
 	for {
-		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
+		threads, err := os.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
 			logger.Error(err, "read failed", "pid", pid)
 			return nil, errors.WithStack(err)

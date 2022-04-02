@@ -2131,6 +2131,9 @@ spec:
                       process:
                         description: the process name or the process ID
                         type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
+                        type: string
                       signal:
                         description: the signal number to send
                         type: integer
@@ -4528,6 +4531,9 @@ spec:
                           process:
                             description: the process name or the process ID
                             type: string
+                          recoverCmd:
+                            description: the command to be run when recovering experiment
+                            type: string
                           signal:
                             description: the signal number to send
                             type: integer
@@ -4963,6 +4969,13 @@ spec:
                           memory:
                             description: MemoryStressor stresses virtual memory out
                             properties:
+                              oomScoreAdj:
+                                default: 0
+                                description: OOMScoreAdj sets the oom_score_adj of
+                                  the stress process. See `man 5 proc` to know more
+                                  about this option.
+                                minimum: -1000
+                                type: integer
                               options:
                                 description: extend stress-ng options
                                 items:
@@ -7466,6 +7479,10 @@ spec:
                                     process:
                                       description: the process name or the process
                                         ID
+                                      type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
                                       type: string
                                     signal:
                                       description: the signal number to send
@@ -10137,6 +10154,10 @@ spec:
                                           description: the process name or the process
                                             ID
                                           type: string
+                                        recoverCmd:
+                                          description: the command to be run when
+                                            recovering experiment
+                                          type: string
                                         signal:
                                           description: the signal number to send
                                           type: integer
@@ -10627,6 +10648,13 @@ spec:
                                           description: MemoryStressor stresses virtual
                                             memory out
                                           properties:
+                                            oomScoreAdj:
+                                              default: 0
+                                              description: OOMScoreAdj sets the oom_score_adj
+                                                of the stress process. See `man 5
+                                                proc` to know more about this option.
+                                              minimum: -1000
+                                              type: integer
                                             options:
                                               description: extend stress-ng options
                                               items:
@@ -11007,6 +11035,13 @@ spec:
                                       description: MemoryStressor stresses virtual
                                         memory out
                                       properties:
+                                        oomScoreAdj:
+                                          default: 0
+                                          description: OOMScoreAdj sets the oom_score_adj
+                                            of the stress process. See `man 5 proc`
+                                            to know more about this option.
+                                          minimum: -1000
+                                          type: integer
                                         options:
                                           description: extend stress-ng options
                                           items:
@@ -14629,6 +14664,13 @@ spec:
                       memory:
                         description: MemoryStressor stresses virtual memory out
                         properties:
+                          oomScoreAdj:
+                            default: 0
+                            description: OOMScoreAdj sets the oom_score_adj of the
+                              stress process. See `man 5 proc` to know more about
+                              this option.
+                            minimum: -1000
+                            type: integer
                           options:
                             description: extend stress-ng options
                             items:

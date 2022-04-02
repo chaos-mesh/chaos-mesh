@@ -19,7 +19,7 @@ import { RenderOptions, render } from '@testing-library/react'
 
 import App from './App'
 import { IntlProvider } from 'react-intl'
-import { ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import flat from 'flat'
 import messages from 'i18n/messages'
 

@@ -23,9 +23,9 @@ import DateTime from 'lib/luxon'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 import StatusLabel from 'components/StatusLabel'
-import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
+import i18n from 'components/T'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
@@ -67,7 +67,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.success.${action}`, intl),
+              message: i18n(`confirm.success.${action}`, intl),
             })
           )
 
@@ -82,11 +82,11 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            <TableCell>{T('common.name')}</TableCell>
+            <TableCell>{i18n('common.name')}</TableCell>
             {/* <TableCell>{T('workflow.time')}</TableCell> */}
-            <TableCell>{T('common.status')}</TableCell>
-            <TableCell>{T('table.created')}</TableCell>
-            <TableCell>{T('common.operation')}</TableCell>
+            <TableCell>{i18n('common.status')}</TableCell>
+            <TableCell>{i18n('table.created')}</TableCell>
+            <TableCell>{i18n('common.operation')}</TableCell>
           </TableRow>
         </TableHead>
 
@@ -107,12 +107,12 @@ const DataTable: React.FC<DataTableProps> = ({ data, fetchData }) => {
                 <Space direction="row">
                   <IconButton
                     color="primary"
-                    title={T('archives.single', intl)}
+                    title={i18n('archives.single', intl)}
                     component="span"
                     size="small"
                     onClick={handleSelect({
-                      title: `${T('archives.single', intl)} ${d.name}`,
-                      description: T('workflows.deleteDesc', intl),
+                      title: `${i18n('archives.single', intl)} ${d.name}`,
+                      description: i18n('workflows.deleteDesc', intl),
                       handle: handleAction('archive', d.uid),
                     })}
                   >
