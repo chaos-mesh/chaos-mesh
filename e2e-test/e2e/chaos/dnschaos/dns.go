@@ -18,7 +18,7 @@ package networkchaos
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -170,7 +170,7 @@ func testDNSServer(c http.Client, port uint16, url string) (string, error) {
 		return "", err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return "", err

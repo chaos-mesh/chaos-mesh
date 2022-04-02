@@ -18,7 +18,6 @@ package watcher
 import (
 	"context"
 	"html/template"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -62,7 +61,7 @@ func New(cfg Config, metrics *metrics.ChaosControllerManagerMetricsCollector, lo
 	if strings.TrimSpace(c.TemplateNamespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md
 		// load from file on disk for serviceaccount: /var/run/secrets/kubernetes.io/serviceaccount/namespace
-		nsBytes, err := ioutil.ReadFile(serviceAccountNamespaceFilePath)
+		nsBytes, err := os.ReadFile(serviceAccountNamespaceFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				return nil, errors.Wrapf(err, "service account namespace file %s does not exist", serviceAccountNamespaceFilePath)

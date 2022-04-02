@@ -18,7 +18,7 @@ package server
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -84,7 +84,7 @@ func exec(ctx context.Context, pod *v1.Pod, cmd string, c *kubernetes.Clientset)
 func (r *Resolver) ExecBypass(ctx context.Context, pod *v1.Pod, cmd string, nsTypes ...bpm.NsType) (string, error) {
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// See grpc/grpc-go#3918 for detail. Could be resolved in the future
-	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
+	grpclog.SetLoggerV2(grpclog.NewLoggerV2(io.Discard, io.Discard, io.Discard))
 	pid, err := r.GetPidFromPod(ctx, pod)
 	if err != nil {
 		return "", err

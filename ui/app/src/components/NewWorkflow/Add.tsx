@@ -29,8 +29,8 @@ import HTTPTask from './HTTPTask'
 import SerialOrParallel from './SerailOrParallel'
 import Space from '@ui/mui-extends/esm/Space'
 import Suspend from './Suspend'
-import T from 'components/T'
 import Task from './Task'
+import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 import { parseYAML } from 'lib/formikhelpers'
 import { setAlert } from 'slices/globalStatus'
@@ -224,7 +224,7 @@ const Add: React.FC<AddProps> = ({
       dispatch(
         setAlert({
           type: 'warning',
-          message: T('newW.messages.redundant', intl),
+          message: i18n('newW.messages.redundant', intl),
         })
       )
 
@@ -298,10 +298,10 @@ const Add: React.FC<AddProps> = ({
             <>
               <StepLabel icon={<AddCircleIcon color="primary" />}>
                 <Space direction="row">
-                  <SelectField className={classes.field} name="type" label={T('newW.node.choose')}>
+                  <SelectField className={classes.field} name="type" label={i18n('newW.node.choose')}>
                     {types.map((d) => (
                       <MenuItem key={d} value={d}>
-                        <Typography variant="body2">{T(`newW.node.${d}`)}</Typography>
+                        <Typography variant="body2">{i18n(`newW.node.${d}`)}</Typography>
                       </MenuItem>
                     ))}
                   </SelectField>
@@ -310,13 +310,13 @@ const Add: React.FC<AddProps> = ({
                       className={classes.field}
                       type="number"
                       name="num"
-                      label={T('newW.node.number')}
+                      label={i18n('newW.node.number')}
                       inputProps={{ min: 1 }}
                     />
                   )}
                   {update !== undefined && (
                     <Button variant="outlined" startIcon={<CloseIcon />} onClick={updateCallback}>
-                      {T('common.cancelEdit')}
+                      {i18n('common.cancelEdit')}
                     </Button>
                   )}
                 </Space>
