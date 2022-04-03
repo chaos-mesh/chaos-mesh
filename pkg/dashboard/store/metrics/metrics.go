@@ -18,10 +18,11 @@ package metrics
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/fx"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
 const chaosDashboardSubsystem = "chaos_dashboard"
