@@ -22,7 +22,7 @@ import Cookies from 'js-cookie'
 import GoogleIcon from '@mui/icons-material/Google'
 import LS from 'lib/localStorage'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import T from 'components/T'
+import i18n from 'components/T'
 import { setConfirm } from 'slices/globalStatus'
 import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
@@ -36,7 +36,7 @@ const Token = () => {
   const tokenDesc =
     tokenName === 'gcp' ? (
       <Box display="flex" alignItems="center">
-        {T('settings.addToken.gcp')}
+        {i18n('settings.addToken.gcp')}
         <GoogleIcon sx={{ ml: 1 }} />
       </Box>
     ) : (
@@ -47,8 +47,8 @@ const Token = () => {
   const handleRemoveToken = () =>
     dispatch(
       setConfirm({
-        title: T('common.logout', intl),
-        description: T('common.logoutDesc', intl),
+        title: i18n('common.logout', intl),
+        description: i18n('common.logoutDesc', intl),
         handle: handleRemoveTokenConfirm,
       })
     )
@@ -67,7 +67,7 @@ const Token = () => {
   }
 
   return (
-    <PaperTop title={T('settings.addToken.token')} subtitle={tokenDesc}>
+    <PaperTop title={i18n('settings.addToken.token')} subtitle={tokenDesc}>
       <Button
         variant="outlined"
         size="small"
@@ -75,7 +75,7 @@ const Token = () => {
         sx={{ width: 64, height: 32 }}
         onClick={handleRemoveToken}
       >
-        {T('common.logout')}
+        {i18n('common.logout')}
       </Button>
     </PaperTop>
   )
