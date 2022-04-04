@@ -32,6 +32,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if .Values.dashboard.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.dashboard.ingress.ingressClassName }}
+  {{- end }}
   rules:
   {{- range .Values.dashboard.ingress.hosts }}
     - host: {{ .name | quote }}
