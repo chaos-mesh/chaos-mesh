@@ -19,6 +19,6 @@ import (
 	"github.com/go-logr/logr"
 )
 
-func Bootstrap(experiment core.ExperimentStore, event core.EventStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *TTLconfig, logger logr.Logger) *Controller {
+func Bootstrap(experiment core.ExperimentStore, event core.EventStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *TTLConfig, logger logr.Logger) *Controller {
 	return NewController(experiment, event, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
 }
