@@ -52,20 +52,20 @@ type TTLconfig struct {
 
 // NewController returns a new database ttl controller
 func NewController(
-	logger logr.Logger,
 	experiment core.ExperimentStore,
 	event core.EventStore,
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
 	ttlc *TTLconfig,
+	logger logr.Logger,
 ) *Controller {
 	return &Controller{
-		logger:     logger,
 		experiment: experiment,
 		event:      event,
 		schedule:   schedule,
 		workflow:   workflow,
 		ttlconfig:  ttlc,
+		logger:     logger,
 	}
 }
 
