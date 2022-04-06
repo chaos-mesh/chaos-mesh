@@ -37,6 +37,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
 )
 
+var ErrNoPodSelected = errors.New("no pod is selected")
+
 type SelectImpl struct {
 	c client.Client
 	r client.Reader
@@ -114,8 +116,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	}
 
 	if len(pods) == 0 {
-		err = errors.New("no pod is selected")
-		return nil, err
+		return nil, ErrNoPodSelected
 	}
 
 	filteredPod, err := filterPodsByMode(pods, mode, value)

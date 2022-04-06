@@ -19,11 +19,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-logr/logr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
+	"github.com/go-logr/logr"
 )
 
 // Controller defines the database ttl controller
@@ -36,7 +36,7 @@ type Controller struct {
 	ttlconfig  *TTLConfig
 }
 
-// TTLconfig defines the ttl
+// TTLConfig defines the ttl
 type TTLConfig struct {
 	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database
 	DatabaseTTLResyncPeriod time.Duration
@@ -87,5 +87,5 @@ func (c *Controller) runWorker() {
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
 	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
 	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
-	c.workflow.DeleteByEndTime(ctx, c.ttlconfig.WorkflowTTL)
+	c.workflow.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
 }

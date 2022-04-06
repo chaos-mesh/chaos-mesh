@@ -23,7 +23,6 @@ package pidfile
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -45,7 +44,7 @@ func processExists(pid int) bool {
 }
 
 func checkPIDFileAlreadyExists(path string) error {
-	if pidByte, err := ioutil.ReadFile(path); err == nil {
+	if pidByte, err := os.ReadFile(path); err == nil {
 		pidString := strings.TrimSpace(string(pidByte))
 		if pid, err := strconv.Atoi(pidString); err == nil {
 			if processExists(pid) {
@@ -65,7 +64,7 @@ func New(path string) (*PIDFile, error) {
 	if err := os.MkdirAll(filepath.Dir(path), os.FileMode(0755)); err != nil {
 		return nil, err
 	}
-	if err := ioutil.WriteFile(path, []byte(fmt.Sprintf("%d", os.Getpid())), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(fmt.Sprintf("%d", os.Getpid())), 0644); err != nil {
 		return nil, err
 	}
 

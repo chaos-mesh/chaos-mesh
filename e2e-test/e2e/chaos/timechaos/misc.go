@@ -17,7 +17,7 @@ package timechaos
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -29,7 +29,7 @@ func getPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
 		return nil, err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
