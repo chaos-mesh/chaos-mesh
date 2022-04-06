@@ -979,8 +979,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							JVMCommonSpec: JVMCommonSpec{
 								Pid: 10,
 							},
-							CPUCount:   0,
-							MemoryType: "",
+							JVMStressCfgSpec: JVMStressCfgSpec{
+								CPUCount:   0,
+								MemoryType: "",
+							},
 						},
 					},
 					"one of cpu-count and mem-type is required",
@@ -992,8 +994,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							JVMCommonSpec: JVMCommonSpec{
 								Pid: 10,
 							},
-							CPUCount:   1,
-							MemoryType: "heap",
+							JVMStressCfgSpec: JVMStressCfgSpec{
+								CPUCount:   1,
+								MemoryType: "heap",
+							},
 						},
 					},
 					"inject stress on both CPU and memory is not support",
@@ -1005,8 +1009,10 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							JVMCommonSpec: JVMCommonSpec{
 								Pid: 10,
 							},
-							CPUCount:   0,
-							MemoryType: "heap",
+							JVMStressCfgSpec: JVMStressCfgSpec{
+								CPUCount:   0,
+								MemoryType: "heap",
+							},
 						},
 					},
 					"",
