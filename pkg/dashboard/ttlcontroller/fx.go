@@ -15,8 +15,9 @@
 package ttlcontroller
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	"github.com/go-logr/logr"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
 func Bootstrap(experiment core.ExperimentStore, event core.EventStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *TTLConfig, logger logr.Logger) *Controller {
