@@ -19,11 +19,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-logr/logr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
-	"github.com/go-logr/logr"
 )
 
 // Controller defines the database ttl controller
