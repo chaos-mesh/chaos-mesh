@@ -47,7 +47,7 @@ func TcsRecover(client *ctrlclient.CtrlClient) Recover {
 }
 
 // Recover clean all tc qdisc rules
-func (r *tcsRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+func (r *tcsRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	deviceSet := map[string]bool{}
 	for _, rule := range pod.TcQdisc {
 		matches := tcRegexp.FindStringSubmatch(rule)
@@ -109,7 +109,7 @@ func IptablesRecover(client *ctrlclient.CtrlClient) Recover {
 }
 
 // Recover clean all tables rules in chains CHAOS-INPUT and CHAOS-OUTPUT
-func (r *iptablesRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+func (r *iptablesRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	chainSet := map[string]bool{
 		"CHAOS-INPUT":  false,
 		"CHAOS-OUTPUT": false,

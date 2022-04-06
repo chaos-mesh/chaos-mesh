@@ -28,8 +28,8 @@ import { Ace } from 'ace-builds'
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined'
 import PublishIcon from '@mui/icons-material/Publish'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import fileDownload from 'js-file-download'
+import i18n from 'components/T'
 import { memo } from 'react'
 import { setConfirm } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
@@ -62,7 +62,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
   const handleSelect = () => {
     dispatch(
       setConfirm({
-        title: `${T('common.update', intl)} ${name}`,
+        title: `${i18n('common.update', intl)} ${name}`,
         handle: handleOnUpdate,
       })
     )
@@ -98,12 +98,12 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
               startIcon={<CloudDownloadOutlinedIcon />}
               onClick={handleDownloadExperiment}
             >
-              {T('common.download')}
+              {i18n('common.download')}
             </Button>
           )}
           {typeof onUpdate === 'function' && (
             <Button variant="outlined" color="primary" size="small" startIcon={<PublishIcon />} onClick={handleSelect}>
-              {T('common.update')}
+              {i18n('common.update')}
             </Button>
           )}
         </Space>

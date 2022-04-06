@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
+	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 )
 
 type RecoverOptions struct {
@@ -39,17 +40,20 @@ func NewRecoverCommand(logger logr.Logger, builders map[string]recover.RecoverBu
 	o := &RecoverOptions{namespace: "default"}
 
 	recoverCmd := &cobra.Command{
-		Use:   `recover (CHAOSTYPE) (PODs) [-n NAMESPACE]`,
+		Use:   `recover (CHAOSTYPE) POD[,POD[,POD...]] [-n NAMESPACE]`,
 		Short: `Recover certain chaos from certain pods`,
 		Long: `Recover certain chaos from certain pods.
-Currently support networkchaos, stresschaos, iochaos and httpchaos.
+Currently unimplemented.
 
 Examples:
   # Recover network chaos from pods in namespace default
-  chaosctl debug networkchaos
+  chaosctl recover networkchaos
 
-  # Recover network chaos from certain pod in 
-  chaosctl debug networkchaos PODs -n NAMESPACE`,
+  # Recover network chaos from certain pods in certain namespace
+  chaosctl recover networkchaos pod1 pod2 pod3 -n NAMESPACE
+  
+  # Recover network chaos from pods with label key=value
+  chaosctl recover networkchaos -l key=value`,
 		ValidArgsFunction: noCompletions,
 	}
 
@@ -89,7 +93,7 @@ Examples:
 
 func recoverResourceCommand(option *RecoverOptions, chaosType string, builder recover.RecoverBuilder) *cobra.Command {
 	return &cobra.Command{
-		Use:   fmt.Sprintf(`%s (PODs) [-n NAMESPACE]`, chaosType),
+		Use:   fmt.Sprintf(`%s POD[,POD[,POD...]] [-n NAMESPACE]`, chaosType),
 		Short: fmt.Sprintf(`Recover %s from certain pods`, chaosType),
 		Long:  fmt.Sprintf(`Recover %s from certain pods`, chaosType),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -140,6 +144,7 @@ func (o *RecoverOptions) List(client *ctrlclient.CtrlClient) ([]string, cobra.Sh
 	pods, err := o.selectPods(client, []string{})
 	if err != nil {
 		common.PrettyPrint(errors.Wrap(err, "select pods").Error(), 0, common.Red)
+		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
 
 	var names []string
@@ -150,7 +155,7 @@ func (o *RecoverOptions) List(client *ctrlclient.CtrlClient) ([]string, cobra.Sh
 	return names, cobra.ShellCompDirectiveNoFileComp
 }
 
-func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []string) ([]*ctrlclient.PartialPod, error) {
+func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []string) ([]*recover.PartialPod, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -160,19 +165,19 @@ func (o *RecoverOptions) selectPods(client *ctrlclient.CtrlClient, names []strin
 		},
 	}
 
-	labelSelector := map[string]string{}
+	if len(names) != 0 {
+		selector.Pods = map[string][]string{o.namespace: names}
+	}
+
 	if o.labels != nil && len(*o.labels) > 0 {
-		for _, label := range *o.labels {
-			pair := strings.Split(label, "=")
-			if len(pair) == 2 {
-				labelSelector[pair[0]] = pair[1]
-			}
+		labels, err := label.ParseLabel(strings.Join(*o.labels, ","))
+		if err != nil {
+			return nil, errors.Wrap(err, "parse labels")
+		}
+		if len(labels) != 0 {
+			selector.LabelSelectors = labels
 		}
 	}
 
-	if len(labelSelector) != 0 {
-		selector.LabelSelectors = labelSelector
-	}
-
-	return client.SelectPods(ctx, selector)
+	return recover.SelectPods(ctx, client, selector)
 }

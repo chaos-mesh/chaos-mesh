@@ -26,8 +26,8 @@ import { ObjectSchema } from 'yup'
 import OtherOptions from 'components/OtherOptions'
 import Scope from './Scope'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import basicData from '../data/basic'
+import i18n from 'components/T'
 
 interface TargetGeneratedProps {
   env: Env
@@ -206,7 +206,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
             <Space>{parseDataToFormFields(errors, touched)}</Space>
             {env === 'k8s' && kind === 'NetworkChaos' && (
               <OtherOptions
-                title={T('newE.target.network.target.title')}
+                title={i18n('newE.target.network.target.title')}
                 beforeOpen={beforeTargetOpen}
                 afterClose={afterTargetClose}
               >
@@ -215,8 +215,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                     namespaces={namespaces}
                     scope="target.selector"
                     modeScope="target"
-                    podsPreviewTitle={T('newE.target.network.target.podsPreview')}
-                    podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
+                    podsPreviewTitle={i18n('newE.target.network.target.podsPreview')}
+                    podsPreviewDesc={i18n('newE.target.network.target.podsPreviewHelper')}
                   />
                 )}
               </OtherOptions>

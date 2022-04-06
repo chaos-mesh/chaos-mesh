@@ -25,9 +25,9 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
-import T from 'components/T'
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined'
 import clsx from 'clsx'
+import i18n from 'components/T'
 import logo from 'images/logo.svg'
 import logoMini from 'images/logo-mini.svg'
 import logoMiniWhite from 'images/logo-mini-white.svg'
@@ -179,7 +179,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
                 button
               >
                 <ListItemIcon className={classes.listItemIcon}>{icon}</ListItemIcon>
-                <ListItemText primary={T(`${text}.title`)} />
+                <ListItemText primary={i18n(`${text}.title`)} />
               </ListItem>
             ))}
           </List>
@@ -196,7 +196,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             <ListItemIcon className={classes.listItemIcon}>
               <MenuBookOutlinedIcon />
             </ListItemIcon>
-            <ListItemText primary={T('common.doc')} />
+            <ListItemText primary={i18n('common.doc')} />
           </ListItem>
 
           <ListItem

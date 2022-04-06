@@ -31,7 +31,7 @@ func IORecover(client *ctrlclient.CtrlClient) Recover {
 	}
 }
 
-func (r *ioRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+func (r *ioRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	// TODO: need hostPath to store replaced fds
 	return nil
 }

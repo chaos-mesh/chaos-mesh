@@ -26,9 +26,21 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
+// PartialPod is a subset of the Pod type.
+// It contains necessary information for forced recovery.
+type PartialPod struct {
+	Namespace string
+	Name      string
+	Processes []struct {
+		Pid, Command string
+	}
+	TcQdisc  []string
+	Iptables []string
+}
+
 type Recover interface {
 	// Recover target pod forcedly
-	Recover(ctx context.Context, pod *ctrlclient.PartialPod) error
+	Recover(ctx context.Context, pod *PartialPod) error
 }
 
 type RecoverBuilder func(client *ctrlclient.CtrlClient) Recover
@@ -53,7 +65,7 @@ func PipelineBuilder(chaosName string, builders ...RecoverBuilder) RecoverBuilde
 	}
 }
 
-func (r *PipelineRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+func (r *PipelineRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	printRecover(fmt.Sprintf("recovering %s from pod %s/%s", r.chaosName, pod.Namespace, pod.Name))
 	for _, recover := range r.recovers {
 		if err := recover.Recover(ctx, pod); err != nil {
@@ -72,7 +84,7 @@ func CleanProcessRecoverBuilder(process string) RecoverBuilder {
 	}
 }
 
-func (r *CleanProcessRecover) Recover(ctx context.Context, pod *ctrlclient.PartialPod) error {
+func (r *CleanProcessRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	var pids []graphql.String
 	for _, process := range pod.Processes {
 		if process.Command == r.process {
