@@ -86,6 +86,7 @@ type JVMParameter struct {
 	LatencyDuration int `json:"latency"`
 
 	// +optional
+	// the byteman rule's data for action 'ruleData'
 	RuleData string `json:"ruleData"`
 }
 
@@ -95,7 +96,7 @@ type JVMCommonSpec struct {
 	// the port of agent server, default 9277
 	Port int32 `json:"port,omitempty"`
 
-	// the pid of Java process which need to attach
+	// the pid of Java process which needs to attach
 	Pid int `json:"pid,omitempty"`
 }
 
@@ -113,11 +114,11 @@ type JVMClassMethodSpec struct {
 // JVMStressSpec is the specification for stress
 type JVMStressCfgSpec struct {
 	// +optional
-	// the CPU core number need to use, only set it when action is stress
+	// the CPU core number needs to use, only set it when action is stress
 	CPUCount int `json:"cpuCount,omitempty"`
 
 	// +optional
-	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+	// the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
 	MemoryType string `json:"memType,omitempty"`
 }
 

@@ -157,7 +157,7 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
                     description: the port of agent server, default 9277
@@ -167,7 +167,7 @@ spec:
               jvm-gc:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
                     description: the port of agent server, default 9277
@@ -186,7 +186,7 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
                     description: the port of agent server, default 9277
@@ -202,7 +202,7 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
                     description: the port of agent server, default 9277
@@ -215,7 +215,7 @@ spec:
               jvm-rule-data:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
                     description: the port of agent server, default 9277
@@ -237,7 +237,7 @@ spec:
                       action is stress, the value can be 'stack' or 'heap'
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
                     description: the port of agent server, default 9277

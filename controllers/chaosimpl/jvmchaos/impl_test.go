@@ -109,7 +109,7 @@ func TestGenerateRuleData(t *testing.T) {
 					},
 				},
 			},
-			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.StressHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tinjectMemStress(\"test\", heap);\nENDRULE\n",
+			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.StressHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tinjectMemStress(\"test\", \"heap\");\nENDRULE\n",
 		},
 		{
 			&v1alpha1.JVMChaosSpec{
