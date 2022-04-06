@@ -17,7 +17,9 @@ package server
 
 import (
 	"context"
+	"strings"
 
+	"github.com/pingcap/errors"
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -30,13 +32,49 @@ func (r *Resolver) GetIpset(ctx context.Context, obj *v1.Pod) (string, error) {
 }
 
 // GetIpset returns result of tc qdisc list
-func (r *Resolver) GetTcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *Resolver) GetTcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	cmd := "tc qdisc list"
-	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	rules, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	if err != nil {
+		return nil, errors.Wrapf(err, "exec `%s`", cmd)
+	}
+	return strings.Split(rules, "\n"), nil
 }
 
 // GetIptables returns result of iptables --list
-func (r *Resolver) GetIptables(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *Resolver) GetIptables(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	cmd := "iptables --list"
-	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	rules, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+	if err != nil {
+		return nil, errors.Wrapf(err, "exec `%s`", cmd)
+	}
+	return strings.Split(rules, "\n"), nil
+}
+
+// cleanTcs returns actually cleaned devices
+func (r *Resolver) cleanTcs(ctx context.Context, obj *v1.Pod, devices []string) ([]string, error) {
+	var cleaned []string
+	for _, device := range devices {
+		cmd := "tc qdisc del dev " + device + " root"
+		_, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+		if err != nil {
+			return cleaned, errors.Wrapf(err, "exec `%s`", cmd)
+		}
+		cleaned = append(cleaned, device)
+	}
+	return cleaned, nil
+}
+
+// cleanIptables returns actually cleaned chains
+func (r *Resolver) cleanIptables(ctx context.Context, obj *v1.Pod, chains []string) ([]string, error) {
+	var cleaned []string
+	for _, chain := range chains {
+		cmd := "iptables -F " + chain
+		_, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.NetNS)
+		if err != nil {
+			return cleaned, errors.Wrapf(err, "exec `%s`", cmd)
+		}
+		cleaned = append(cleaned, chain)
+	}
+	return cleaned, nil
 }

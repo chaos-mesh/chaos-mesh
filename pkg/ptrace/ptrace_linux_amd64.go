@@ -30,7 +30,7 @@ import (
 	"debug/elf"
 	"encoding/binary"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"syscall"
@@ -38,17 +38,9 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 )
-
-var log = ctrl.Log.WithName("ptrace")
-
-// RegisterLogger registers a logger on ptrace pkg
-func RegisterLogger(logger logr.Logger) {
-	log = logger
-}
 
 const waitPidErrorMessage = "waitpid ret value: %d"
 
@@ -67,6 +59,8 @@ type TracedProgram struct {
 
 	backupRegs *syscall.PtraceRegs
 	backupCode []byte
+
+	logger logr.Logger
 }
 
 // Pid return the pid of traced program
@@ -84,15 +78,15 @@ func waitPid(pid int) error {
 }
 
 // Trace ptrace all threads of a process
-func Trace(pid int) (*TracedProgram, error) {
+func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 	traceSuccess := false
 
 	tidMap := make(map[int]bool)
 	retryCount := make(map[int]int)
 	for {
-		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
+		threads, err := os.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
-			log.Error(err, "read failed", "pid", pid)
+			logger.Error(err, "read failed", "pid", pid)
 			return nil, errors.WithStack(err)
 		}
 
@@ -123,12 +117,12 @@ func Trace(pid int) (*TracedProgram, error) {
 					retryCount[tid]++
 				}
 				if retryCount[tid] < threadRetryLimit {
-					log.Info("retry attaching thread", "tid", tid, "retryCount", retryCount[tid], "limit", threadRetryLimit)
+					logger.Info("retry attaching thread", "tid", tid, "retryCount", retryCount[tid], "limit", threadRetryLimit)
 					continue
 				}
 
 				if !strings.Contains(err.Error(), "no such process") {
-					log.Error(err, "attach failed", "tid", tid)
+					logger.Error(err, "attach failed", "tid", tid)
 					return nil, errors.WithStack(err)
 				}
 				continue
@@ -138,7 +132,7 @@ func Trace(pid int) (*TracedProgram, error) {
 					err = syscall.PtraceDetach(tid)
 					if err != nil {
 						if !strings.Contains(err.Error(), "no such process") {
-							log.Error(err, "detach failed", "tid", tid)
+							logger.Error(err, "detach failed", "tid", tid)
 						}
 					}
 				}
@@ -149,7 +143,7 @@ func Trace(pid int) (*TracedProgram, error) {
 				return nil, errors.WithStack(err)
 			}
 
-			log.Info("attach successfully", "tid", tid)
+			logger.Info("attach successfully", "tid", tid)
 			tids[tid] = true
 			tidMap[tid] = true
 		}
@@ -176,6 +170,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		Entries:    entries,
 		backupRegs: &syscall.PtraceRegs{},
 		backupCode: make([]byte, ptrSize),
+		logger:     logger,
 	}
 
 	traceSuccess = true
@@ -186,19 +181,19 @@ func Trace(pid int) (*TracedProgram, error) {
 // Detach detaches from all threads of the processes
 func (p *TracedProgram) Detach() error {
 	for _, tid := range p.tids {
-		log.Info("detaching", "tid", tid)
+		p.logger.Info("detaching", "tid", tid)
 
 		err := syscall.PtraceDetach(tid)
 
 		if err != nil {
 			if !strings.Contains(err.Error(), "no such process") {
-				log.Error(err, "detach failed", "tid", tid)
+				p.logger.Error(err, "detach failed", "tid", tid)
 				return errors.WithStack(err)
 			}
 		}
 	}
 
-	log.Info("Successfully detach and rerun process", "pid", p.pid)
+	p.logger.Info("Successfully detach and rerun process", "pid", p.pid)
 	return nil
 }
 

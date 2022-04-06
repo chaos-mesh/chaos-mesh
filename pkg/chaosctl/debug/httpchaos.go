@@ -55,7 +55,7 @@ func (d *httpDebugger) Collect(ctx context.Context, namespace, chaosName string)
 					Name      string
 					Spec      *v1alpha1.PodHttpChaosSpec
 					Pod       struct {
-						Iptables  string
+						Iptables  []string
 						Processes []struct {
 							Pid     string
 							Command string
@@ -93,7 +93,7 @@ func (d *httpDebugger) Collect(ctx context.Context, namespace, chaosName string)
 				Name: string(podhttpchaos.Name),
 			}
 
-			podResult.Items = append(podResult.Items, common.ItemResult{Name: "iptables list", Value: string(podhttpchaos.Pod.Iptables)})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "iptables list", Value: strings.Join(podhttpchaos.Pod.Iptables, "\n")})
 			for _, process := range podhttpchaos.Pod.Processes {
 				var fds []string
 				for _, fd := range process.Fds {

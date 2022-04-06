@@ -144,6 +144,147 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
+  name: azurechaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: AzureChaos
+    listKind: AzureChaosList
+    plural: azurechaos
+    singular: azurechaos
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: AzureChaos is the Schema for the azurechaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AzureChaosSpec is the content of the specification for an
+              AzureChaos
+            properties:
+              action:
+                description: 'Action defines the specific azure chaos action. Supported
+                  action: vm-stop / vm-restart / disk-detach Default action: vm-stop'
+                enum:
+                - vm-stop
+                - vm-restart
+                - disk-detach
+                type: string
+              diskName:
+                description: DiskName indicates the name of the disk. Needed in disk-detach.
+                type: string
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              lun:
+                description: LUN indicates the Logical Unit Number of the data disk.
+                  Needed in disk-detach.
+                type: integer
+              resourceGroupName:
+                description: ResourceGroupName defines the name of ResourceGroup
+                type: string
+              secretName:
+                description: SecretName defines the name of kubernetes secret. It
+                  is used for Azure credentials.
+                type: string
+              subscriptionID:
+                description: SubscriptionID defines the id of Azure subscription.
+                type: string
+              vmName:
+                description: VMName defines the name of Virtual Machine
+                type: string
+            required:
+            - action
+            - resourceGroupName
+            - subscriptionID
+            - vmName
+            type: object
+          status:
+            description: AzureChaosStatus represents the status of an AzureChaos
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        phase:
+                          type: string
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - phase
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: blockchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -1302,6 +1443,7 @@ spec:
                   action.
                 type: string
               percent:
+                default: 100
                 description: 'Percent defines the percentage of injection errors and
                   provides a number from 0-100. default: 100.'
                 type: integer
@@ -2970,6 +3112,9 @@ spec:
                   process:
                     description: the process name or the process ID
                     type: string
+                  recoverCmd:
+                    description: the command to be run when recovering experiment
+                    type: string
                   signal:
                     description: the signal number to send
                     type: integer
@@ -3909,18 +4054,45 @@ spec:
                 items:
                   description: RawIPSet represents an ipset on specific pod
                   properties:
+                    cidrAndPorts:
+                      description: The contents of ipset. Only available when IPSetType
+                        is NetPortIPSet.
+                      items:
+                        description: CidrAndPort represents CIDR and port pair
+                        properties:
+                          cidr:
+                            type: string
+                          port:
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                        required:
+                        - cidr
+                        - port
+                        type: object
+                      type: array
                     cidrs:
-                      description: The contents of ipset
+                      description: The contents of ipset. Only available when IPSetType
+                        is NetIPSet.
                       items:
                         type: string
                       type: array
+                    ipsetType:
+                      description: IPSetType represents the type of IP set
+                      type: string
                     name:
                       description: The name of ipset
                       type: string
+                    setNames:
+                      description: The contents of ipset. Only available when IPSetType
+                        is SetIPSet.
+                      items:
+                        type: string
+                      type: array
                     source:
                       type: string
                   required:
-                  - cidrs
+                  - ipsetType
                   - name
                   - source
                   type: object
@@ -4177,6 +4349,49 @@ spec:
                 - action
                 - awsRegion
                 - ec2Instance
+                type: object
+              azureChaos:
+                description: AzureChaosSpec is the content of the specification for
+                  an AzureChaos
+                properties:
+                  action:
+                    description: 'Action defines the specific azure chaos action.
+                      Supported action: vm-stop / vm-restart / disk-detach Default
+                      action: vm-stop'
+                    enum:
+                    - vm-stop
+                    - vm-restart
+                    - disk-detach
+                    type: string
+                  diskName:
+                    description: DiskName indicates the name of the disk. Needed in
+                      disk-detach.
+                    type: string
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  lun:
+                    description: LUN indicates the Logical Unit Number of the data
+                      disk. Needed in disk-detach.
+                    type: integer
+                  resourceGroupName:
+                    description: ResourceGroupName defines the name of ResourceGroup
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of kubernetes secret.
+                      It is used for Azure credentials.
+                    type: string
+                  subscriptionID:
+                    description: SubscriptionID defines the id of Azure subscription.
+                    type: string
+                  vmName:
+                    description: VMName defines the name of Virtual Machine
+                    type: string
+                required:
+                - action
+                - resourceGroupName
+                - subscriptionID
+                - vmName
                 type: object
               blockChaos:
                 description: BlockChaosSpec is the content of the specification for
@@ -4907,6 +5122,7 @@ spec:
                       chaos action.
                     type: string
                   percent:
+                    default: 100
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
@@ -6181,6 +6397,9 @@ spec:
                       process:
                         description: the process name or the process ID
                         type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
+                        type: string
                       signal:
                         description: the signal number to send
                         type: integer
@@ -6607,6 +6826,13 @@ spec:
                       memory:
                         description: MemoryStressor stresses virtual memory out
                         properties:
+                          oomScoreAdj:
+                            default: 0
+                            description: OOMScoreAdj sets the oom_score_adj of the
+                              stress process. See `man 5 proc` to know more about
+                              this option.
+                            minimum: -1000
+                            type: integer
                           options:
                             description: extend stress-ng options
                             items:
@@ -6835,6 +7061,51 @@ spec:
                           - action
                           - awsRegion
                           - ec2Instance
+                          type: object
+                        azureChaos:
+                          description: AzureChaosSpec is the content of the specification
+                            for an AzureChaos
+                          properties:
+                            action:
+                              description: 'Action defines the specific azure chaos
+                                action. Supported action: vm-stop / vm-restart / disk-detach
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              - disk-detach
+                              type: string
+                            diskName:
+                              description: DiskName indicates the name of the disk.
+                                Needed in disk-detach.
+                              type: string
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            lun:
+                              description: LUN indicates the Logical Unit Number of
+                                the data disk. Needed in disk-detach.
+                              type: integer
+                            resourceGroupName:
+                              description: ResourceGroupName defines the name of ResourceGroup
+                              type: string
+                            secretName:
+                              description: SecretName defines the name of kubernetes
+                                secret. It is used for Azure credentials.
+                              type: string
+                            subscriptionID:
+                              description: SubscriptionID defines the id of Azure
+                                subscription.
+                              type: string
+                            vmName:
+                              description: VMName defines the name of Virtual Machine
+                              type: string
+                          required:
+                          - action
+                          - resourceGroupName
+                          - subscriptionID
+                          - vmName
                           type: object
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification
@@ -7637,6 +7908,7 @@ spec:
                                 I/O chaos action.
                               type: string
                             percent:
+                              default: 100
                               description: 'Percent defines the percentage of injection
                                 errors and provides a number from 0-100. default:
                                 100.'
@@ -9012,6 +9284,10 @@ spec:
                                 process:
                                   description: the process name or the process ID
                                   type: string
+                                recoverCmd:
+                                  description: the command to be run when recovering
+                                    experiment
+                                  type: string
                                 signal:
                                   description: the signal number to send
                                   type: integer
@@ -9343,6 +9619,53 @@ spec:
                               - action
                               - awsRegion
                               - ec2Instance
+                              type: object
+                            azureChaos:
+                              description: AzureChaosSpec is the content of the specification
+                                for an AzureChaos
+                              properties:
+                                action:
+                                  description: 'Action defines the specific azure
+                                    chaos action. Supported action: vm-stop / vm-restart
+                                    / disk-detach Default action: vm-stop'
+                                  enum:
+                                  - vm-stop
+                                  - vm-restart
+                                  - disk-detach
+                                  type: string
+                                diskName:
+                                  description: DiskName indicates the name of the
+                                    disk. Needed in disk-detach.
+                                  type: string
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                lun:
+                                  description: LUN indicates the Logical Unit Number
+                                    of the data disk. Needed in disk-detach.
+                                  type: integer
+                                resourceGroupName:
+                                  description: ResourceGroupName defines the name
+                                    of ResourceGroup
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of kubernetes
+                                    secret. It is used for Azure credentials.
+                                  type: string
+                                subscriptionID:
+                                  description: SubscriptionID defines the id of Azure
+                                    subscription.
+                                  type: string
+                                vmName:
+                                  description: VMName defines the name of Virtual
+                                    Machine
+                                  type: string
+                              required:
+                              - action
+                              - resourceGroupName
+                              - subscriptionID
+                              - vmName
                               type: object
                             blockChaos:
                               description: BlockChaosSpec is the content of the specification
@@ -10141,6 +10464,7 @@ spec:
                                     injecting I/O chaos action.
                                   type: string
                                 percent:
+                                  default: 100
                                   description: 'Percent defines the percentage of
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
@@ -11561,6 +11885,10 @@ spec:
                                       description: the process name or the process
                                         ID
                                       type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
+                                      type: string
                                     signal:
                                       description: the signal number to send
                                       type: integer
@@ -12034,6 +12362,13 @@ spec:
                                       description: MemoryStressor stresses virtual
                                         memory out
                                       properties:
+                                        oomScoreAdj:
+                                          default: 0
+                                          description: OOMScoreAdj sets the oom_score_adj
+                                            of the stress process. See `man 5 proc`
+                                            to know more about this option.
+                                          minimum: -1000
+                                          type: integer
                                         options:
                                           description: extend stress-ng options
                                           items:
@@ -12400,6 +12735,13 @@ spec:
                                   description: MemoryStressor stresses virtual memory
                                     out
                                   properties:
+                                    oomScoreAdj:
+                                      default: 0
+                                      description: OOMScoreAdj sets the oom_score_adj
+                                        of the stress process. See `man 5 proc` to
+                                        know more about this option.
+                                      minimum: -1000
+                                      type: integer
                                     options:
                                       description: extend stress-ng options
                                       items:
@@ -16147,6 +16489,12 @@ spec:
                   memory:
                     description: MemoryStressor stresses virtual memory out
                     properties:
+                      oomScoreAdj:
+                        default: 0
+                        description: OOMScoreAdj sets the oom_score_adj of the stress
+                          process. See `man 5 proc` to know more about this option.
+                        minimum: -1000
+                        type: integer
                       options:
                         description: extend stress-ng options
                         items:
@@ -16574,6 +16922,49 @@ spec:
                 - action
                 - awsRegion
                 - ec2Instance
+                type: object
+              azureChaos:
+                description: AzureChaosSpec is the content of the specification for
+                  an AzureChaos
+                properties:
+                  action:
+                    description: 'Action defines the specific azure chaos action.
+                      Supported action: vm-stop / vm-restart / disk-detach Default
+                      action: vm-stop'
+                    enum:
+                    - vm-stop
+                    - vm-restart
+                    - disk-detach
+                    type: string
+                  diskName:
+                    description: DiskName indicates the name of the disk. Needed in
+                      disk-detach.
+                    type: string
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  lun:
+                    description: LUN indicates the Logical Unit Number of the data
+                      disk. Needed in disk-detach.
+                    type: integer
+                  resourceGroupName:
+                    description: ResourceGroupName defines the name of ResourceGroup
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of kubernetes secret.
+                      It is used for Azure credentials.
+                    type: string
+                  subscriptionID:
+                    description: SubscriptionID defines the id of Azure subscription.
+                    type: string
+                  vmName:
+                    description: VMName defines the name of Virtual Machine
+                    type: string
+                required:
+                - action
+                - resourceGroupName
+                - subscriptionID
+                - vmName
                 type: object
               blockChaos:
                 description: BlockChaosSpec is the content of the specification for
@@ -17319,6 +17710,7 @@ spec:
                       chaos action.
                     type: string
                   percent:
+                    default: 100
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
@@ -18593,6 +18985,9 @@ spec:
                       process:
                         description: the process name or the process ID
                         type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
+                        type: string
                       signal:
                         description: the signal number to send
                         type: integer
@@ -18903,6 +19298,50 @@ spec:
                     - action
                     - awsRegion
                     - ec2Instance
+                    type: object
+                  azureChaos:
+                    description: AzureChaosSpec is the content of the specification
+                      for an AzureChaos
+                    properties:
+                      action:
+                        description: 'Action defines the specific azure chaos action.
+                          Supported action: vm-stop / vm-restart / disk-detach Default
+                          action: vm-stop'
+                        enum:
+                        - vm-stop
+                        - vm-restart
+                        - disk-detach
+                        type: string
+                      diskName:
+                        description: DiskName indicates the name of the disk. Needed
+                          in disk-detach.
+                        type: string
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      lun:
+                        description: LUN indicates the Logical Unit Number of the
+                          data disk. Needed in disk-detach.
+                        type: integer
+                      resourceGroupName:
+                        description: ResourceGroupName defines the name of ResourceGroup
+                        type: string
+                      secretName:
+                        description: SecretName defines the name of kubernetes secret.
+                          It is used for Azure credentials.
+                        type: string
+                      subscriptionID:
+                        description: SubscriptionID defines the id of Azure subscription.
+                        type: string
+                      vmName:
+                        description: VMName defines the name of Virtual Machine
+                        type: string
+                    required:
+                    - action
+                    - resourceGroupName
+                    - subscriptionID
+                    - vmName
                     type: object
                   blockChaos:
                     description: BlockChaosSpec is the content of the specification
@@ -19655,6 +20094,7 @@ spec:
                           I/O chaos action.
                         type: string
                       percent:
+                        default: 100
                         description: 'Percent defines the percentage of injection
                           errors and provides a number from 0-100. default: 100.'
                         type: integer
@@ -20955,6 +21395,9 @@ spec:
                           process:
                             description: the process name or the process ID
                             type: string
+                          recoverCmd:
+                            description: the command to be run when recovering experiment
+                            type: string
                           signal:
                             description: the signal number to send
                             type: integer
@@ -21390,6 +21833,13 @@ spec:
                           memory:
                             description: MemoryStressor stresses virtual memory out
                             properties:
+                              oomScoreAdj:
+                                default: 0
+                                description: OOMScoreAdj sets the oom_score_adj of
+                                  the stress process. See `man 5 proc` to know more
+                                  about this option.
+                                minimum: -1000
+                                type: integer
                               options:
                                 description: extend stress-ng options
                                 items:
@@ -21622,6 +22072,53 @@ spec:
                               - action
                               - awsRegion
                               - ec2Instance
+                              type: object
+                            azureChaos:
+                              description: AzureChaosSpec is the content of the specification
+                                for an AzureChaos
+                              properties:
+                                action:
+                                  description: 'Action defines the specific azure
+                                    chaos action. Supported action: vm-stop / vm-restart
+                                    / disk-detach Default action: vm-stop'
+                                  enum:
+                                  - vm-stop
+                                  - vm-restart
+                                  - disk-detach
+                                  type: string
+                                diskName:
+                                  description: DiskName indicates the name of the
+                                    disk. Needed in disk-detach.
+                                  type: string
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                lun:
+                                  description: LUN indicates the Logical Unit Number
+                                    of the data disk. Needed in disk-detach.
+                                  type: integer
+                                resourceGroupName:
+                                  description: ResourceGroupName defines the name
+                                    of ResourceGroup
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of kubernetes
+                                    secret. It is used for Azure credentials.
+                                  type: string
+                                subscriptionID:
+                                  description: SubscriptionID defines the id of Azure
+                                    subscription.
+                                  type: string
+                                vmName:
+                                  description: VMName defines the name of Virtual
+                                    Machine
+                                  type: string
+                              required:
+                              - action
+                              - resourceGroupName
+                              - subscriptionID
+                              - vmName
                               type: object
                             blockChaos:
                               description: BlockChaosSpec is the content of the specification
@@ -22442,6 +22939,7 @@ spec:
                                     injecting I/O chaos action.
                                   type: string
                                 percent:
+                                  default: 100
                                   description: 'Percent defines the percentage of
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
@@ -23864,6 +24362,10 @@ spec:
                                       description: the process name or the process
                                         ID
                                       type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
+                                      type: string
                                     signal:
                                       description: the signal number to send
                                       type: integer
@@ -24208,6 +24710,53 @@ spec:
                                   - action
                                   - awsRegion
                                   - ec2Instance
+                                  type: object
+                                azureChaos:
+                                  description: AzureChaosSpec is the content of the
+                                    specification for an AzureChaos
+                                  properties:
+                                    action:
+                                      description: 'Action defines the specific azure
+                                        chaos action. Supported action: vm-stop /
+                                        vm-restart / disk-detach Default action: vm-stop'
+                                      enum:
+                                      - vm-stop
+                                      - vm-restart
+                                      - disk-detach
+                                      type: string
+                                    diskName:
+                                      description: DiskName indicates the name of
+                                        the disk. Needed in disk-detach.
+                                      type: string
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    lun:
+                                      description: LUN indicates the Logical Unit
+                                        Number of the data disk. Needed in disk-detach.
+                                      type: integer
+                                    resourceGroupName:
+                                      description: ResourceGroupName defines the name
+                                        of ResourceGroup
+                                      type: string
+                                    secretName:
+                                      description: SecretName defines the name of
+                                        kubernetes secret. It is used for Azure credentials.
+                                      type: string
+                                    subscriptionID:
+                                      description: SubscriptionID defines the id of
+                                        Azure subscription.
+                                      type: string
+                                    vmName:
+                                      description: VMName defines the name of Virtual
+                                        Machine
+                                      type: string
+                                  required:
+                                  - action
+                                  - resourceGroupName
+                                  - subscriptionID
+                                  - vmName
                                   type: object
                                 blockChaos:
                                   description: BlockChaosSpec is the content of the
@@ -25031,6 +25580,7 @@ spec:
                                         for injecting I/O chaos action.
                                       type: string
                                     percent:
+                                      default: 100
                                       description: 'Percent defines the percentage
                                         of injection errors and provides a number
                                         from 0-100. default: 100.'
@@ -26504,6 +27054,10 @@ spec:
                                           description: the process name or the process
                                             ID
                                           type: string
+                                        recoverCmd:
+                                          description: the command to be run when
+                                            recovering experiment
+                                          type: string
                                         signal:
                                           description: the signal number to send
                                           type: integer
@@ -26994,6 +27548,13 @@ spec:
                                           description: MemoryStressor stresses virtual
                                             memory out
                                           properties:
+                                            oomScoreAdj:
+                                              default: 0
+                                              description: OOMScoreAdj sets the oom_score_adj
+                                                of the stress process. See `man 5
+                                                proc` to know more about this option.
+                                              minimum: -1000
+                                              type: integer
                                             options:
                                               description: extend stress-ng options
                                               items:
@@ -27374,6 +27935,13 @@ spec:
                                       description: MemoryStressor stresses virtual
                                         memory out
                                       properties:
+                                        oomScoreAdj:
+                                          default: 0
+                                          description: OOMScoreAdj sets the oom_score_adj
+                                            of the stress process. See `man 5 proc`
+                                            to know more about this option.
+                                          minimum: -1000
+                                          type: integer
                                         options:
                                           description: extend stress-ng options
                                           items:
@@ -30996,6 +31564,13 @@ spec:
                       memory:
                         description: MemoryStressor stresses virtual memory out
                         properties:
+                          oomScoreAdj:
+                            default: 0
+                            description: OOMScoreAdj sets the oom_score_adj of the
+                              stress process. See `man 5 proc` to know more about
+                              this option.
+                            minimum: -1000
+                            type: integer
                           options:
                             description: extend stress-ng options
                             items:
@@ -34134,6 +34709,50 @@ spec:
                       - awsRegion
                       - ec2Instance
                       type: object
+                    azureChaos:
+                      description: AzureChaosSpec is the content of the specification
+                        for an AzureChaos
+                      properties:
+                        action:
+                          description: 'Action defines the specific azure chaos action.
+                            Supported action: vm-stop / vm-restart / disk-detach Default
+                            action: vm-stop'
+                          enum:
+                          - vm-stop
+                          - vm-restart
+                          - disk-detach
+                          type: string
+                        diskName:
+                          description: DiskName indicates the name of the disk. Needed
+                            in disk-detach.
+                          type: string
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action.
+                          type: string
+                        lun:
+                          description: LUN indicates the Logical Unit Number of the
+                            data disk. Needed in disk-detach.
+                          type: integer
+                        resourceGroupName:
+                          description: ResourceGroupName defines the name of ResourceGroup
+                          type: string
+                        secretName:
+                          description: SecretName defines the name of kubernetes secret.
+                            It is used for Azure credentials.
+                          type: string
+                        subscriptionID:
+                          description: SubscriptionID defines the id of Azure subscription.
+                          type: string
+                        vmName:
+                          description: VMName defines the name of Virtual Machine
+                          type: string
+                      required:
+                      - action
+                      - resourceGroupName
+                      - subscriptionID
+                      - vmName
+                      type: object
                     blockChaos:
                       description: BlockChaosSpec is the content of the specification
                         for a BlockChaos
@@ -34910,6 +35529,7 @@ spec:
                             I/O chaos action.
                           type: string
                         percent:
+                          default: 100
                           description: 'Percent defines the percentage of injection
                             errors and provides a number from 0-100. default: 100.'
                           type: integer
@@ -36239,6 +36859,9 @@ spec:
                             process:
                               description: the process name or the process ID
                               type: string
+                            recoverCmd:
+                              description: the command to be run when recovering experiment
+                              type: string
                             signal:
                               description: the signal number to send
                               type: integer
@@ -36561,6 +37184,51 @@ spec:
                           - action
                           - awsRegion
                           - ec2Instance
+                          type: object
+                        azureChaos:
+                          description: AzureChaosSpec is the content of the specification
+                            for an AzureChaos
+                          properties:
+                            action:
+                              description: 'Action defines the specific azure chaos
+                                action. Supported action: vm-stop / vm-restart / disk-detach
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              - disk-detach
+                              type: string
+                            diskName:
+                              description: DiskName indicates the name of the disk.
+                                Needed in disk-detach.
+                              type: string
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            lun:
+                              description: LUN indicates the Logical Unit Number of
+                                the data disk. Needed in disk-detach.
+                              type: integer
+                            resourceGroupName:
+                              description: ResourceGroupName defines the name of ResourceGroup
+                              type: string
+                            secretName:
+                              description: SecretName defines the name of kubernetes
+                                secret. It is used for Azure credentials.
+                              type: string
+                            subscriptionID:
+                              description: SubscriptionID defines the id of Azure
+                                subscription.
+                              type: string
+                            vmName:
+                              description: VMName defines the name of Virtual Machine
+                              type: string
+                          required:
+                          - action
+                          - resourceGroupName
+                          - subscriptionID
+                          - vmName
                           type: object
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification
@@ -37342,6 +38010,7 @@ spec:
                                 I/O chaos action.
                               type: string
                             percent:
+                              default: 100
                               description: 'Percent defines the percentage of injection
                                 errors and provides a number from 0-100. default:
                                 100.'
@@ -38715,6 +39384,10 @@ spec:
                                 process:
                                   description: the process name or the process ID
                                   type: string
+                                recoverCmd:
+                                  description: the command to be run when recovering
+                                    experiment
+                                  type: string
                                 signal:
                                   description: the signal number to send
                                   type: integer
@@ -39170,6 +39843,13 @@ spec:
                                   description: MemoryStressor stresses virtual memory
                                     out
                                   properties:
+                                    oomScoreAdj:
+                                      default: 0
+                                      description: OOMScoreAdj sets the oom_score_adj
+                                        of the stress process. See `man 5 proc` to
+                                        know more about this option.
+                                      minimum: -1000
+                                      type: integer
                                     options:
                                       description: extend stress-ng options
                                       items:
@@ -39527,6 +40207,13 @@ spec:
                               description: MemoryStressor stresses virtual memory
                                 out
                               properties:
+                                oomScoreAdj:
+                                  default: 0
+                                  description: OOMScoreAdj sets the oom_score_adj
+                                    of the stress process. See `man 5 proc` to know
+                                    more about this option.
+                                  minimum: -1000
+                                  type: integer
                                 options:
                                   description: extend stress-ng options
                                   items:

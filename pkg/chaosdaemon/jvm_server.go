@@ -18,7 +18,6 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -197,7 +196,7 @@ func (s *DaemonServer) UninstallJVMRules(ctx context.Context,
 }
 
 func writeDataIntoFile(data string, filename string) (string, error) {
-	tmpfile, err := ioutil.TempFile("", filename)
+	tmpfile, err := os.CreateTemp("", filename)
 	if err != nil {
 		return "", err
 	}
