@@ -111,6 +111,7 @@ var _ = Describe("webhook config watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.TemplateNamespace = "testNamespace"
+			cmw.logger = rootLogger
 			k8sConfig, _ := MockClusterConfig()
 			clientset, _ := kubernetesNewForConfig(k8sConfig)
 			cmw.client = clientset.CoreV1()
@@ -127,6 +128,7 @@ var _ = Describe("webhook config watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.TemplateNamespace = "testNamespace"
+			cmw.logger = rootLogger
 			k8sConfig, _ := MockClusterConfig()
 			clientset, _ := kubernetesNewForConfig(k8sConfig)
 			cmw.client = clientset.CoreV1()
