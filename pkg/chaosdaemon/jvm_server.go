@@ -22,7 +22,9 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pingcap/log"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -67,7 +69,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		return nil, errors.New("environment variable BYTEMAN_HOME not set")
 	}
 
-	// copy agent.jar to container's namespace
+	// copy byteman.jar and byteman-helper.jar to container's namespace
 	if req.EnterNS {
 		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
 		output, err := processBuilder.Build(ctx).CombinedOutput()
@@ -78,18 +80,14 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 			log.Info("mkdir", "output", string(output))
 		}
 
-		agentFile, err := os.Open(fmt.Sprintf("%s/lib/byteman.jar", bytemanHome))
+		err = copyFileAcrossNS(ctx, fmt.Sprintf("%s/lib/byteman.jar", bytemanHome), "/usr/local/byteman/lib/byteman.jar", pid)
 		if err != nil {
 			return nil, err
 		}
-		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", "cat > /usr/local/byteman/lib/byteman.jar").SetContext(ctx)
-		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(agentFile)
-		output, err = processBuilder.Build(ctx).CombinedOutput()
+
+		err = copyFileAcrossNS(ctx, fmt.Sprintf("%s/lib/byteman-helper.jar", bytemanHome), "/usr/local/byteman/lib/byteman-helper.jar", pid)
 		if err != nil {
 			return nil, err
-		}
-		if len(output) > 0 {
-			log.Info("copy agent.jar", "output", string(output))
 		}
 	}
 
@@ -122,13 +120,28 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		log.Info("exec comamnd", "cmd", cmd.String(), "output", string(output), "error", err.Error())
 	}
 
+	// submit helper jar
+	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "b", fmt.Sprintf("%s/lib/byteman-helper.jar", os.Getenv("BYTEMAN_HOME")))
+	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
+	if req.EnterNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
+	}
+	output, err = processBuilder.Build(ctx).CombinedOutput()
+	if err != nil {
+		log.Error(err, string(output))
+		return nil, err
+	}
+	if len(output) > 0 {
+		log.Info("submit helper jar", "output", string(output))
+	}
+
 	// submit rules
 	filename, err := writeDataIntoFile(req.Rule, "rule.btm")
 	if err != nil {
 		return nil, err
 	}
 
-	bmSubmitCmd := fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
+	bmSubmitCmd = fmt.Sprintf(bmSubmitCommand, req.Port, "l", filename)
 	processBuilder = bpm.DefaultProcessBuilder("sh", "-c", bmSubmitCmd).SetContext(ctx)
 	if req.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
@@ -197,4 +210,24 @@ func writeDataIntoFile(data string, filename string) (string, error) {
 	}
 
 	return tmpfile.Name(), err
+}
+
+func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) error {
+	sourceFile, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cat > %s", dest)).SetContext(ctx)
+	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(sourceFile)
+	output, err := processBuilder.Build(ctx).CombinedOutput()
+	if err != nil {
+		return err
+	}
+	if len(output) > 0 {
+		log.Info("copy file", zap.String("source", source), zap.String("destination", dest), zap.String("output", string(output)))
+	}
+
+	return nil
 }

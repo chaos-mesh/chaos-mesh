@@ -366,28 +366,22 @@ type ProcessSpec struct {
 	RecoverCmd string `json:"recoverCmd,omitempty"`
 }
 
-type JVMCommonSpec struct {
-	// the port of agent server
-	Port int `json:"port,omitempty"`
-
-	// the pid of Java process which need to attach
-	Pid int `json:"pid,omitempty"`
-}
-
-type JVMClassMethodSpec struct {
-	// Java class
-	Class string `json:"class,omitempty"`
-
-	// the method in Java class
-	Method string `json:"method,omitempty"`
-}
-
 type JVMExceptionSpec struct {
 	JVMCommonSpec      `json:",inline"`
 	JVMClassMethodSpec `json:",inline"`
 
 	// the exception which needs to throw for action `exception`
 	ThrowException string `json:"exception,omitempty"`
+}
+
+type JVMStressSpec struct {
+	JVMCommonSpec `json:",inline"`
+
+	// the CPU core number need to use, only set it when action is stress
+	CPUCount int `json:"cpu-count,omitempty"`
+
+	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+	MemoryType string `json:"mem-type,omitempty"`
 }
 
 type JVMGCSpec struct {
@@ -408,16 +402,6 @@ type JVMReturnSpec struct {
 
 	// the return value for action 'return'
 	ReturnValue string `json:"value,omitempty"`
-}
-
-type JVMStressSpec struct {
-	JVMCommonSpec `json:",inline"`
-
-	// the CPU core number need to use, only set it when action is stress
-	CPUCount int `json:"cpu-count,omitempty"`
-
-	// the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
-	MemoryType string `json:"mem-type,omitempty"`
 }
 
 type JVMRuleDataSpec struct {
