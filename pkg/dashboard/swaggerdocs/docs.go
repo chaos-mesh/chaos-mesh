@@ -3715,7 +3715,7 @@ var doc = `{
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
                     "type": "integer"
                 },
                 "duration": {
@@ -3731,7 +3731,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "string"
                 },
                 "method": {
@@ -3747,7 +3747,7 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3755,7 +3755,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "ruleData": {
-                    "description": "+optional",
+                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
                     "type": "string"
                 },
                 "selector": {
@@ -3785,7 +3785,7 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3798,7 +3798,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3823,7 +3823,7 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3844,7 +3844,7 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3861,7 +3861,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3886,7 +3886,7 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {

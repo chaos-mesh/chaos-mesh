@@ -3699,7 +3699,7 @@
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
                     "type": "integer"
                 },
                 "duration": {
@@ -3715,7 +3715,7 @@
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "string"
                 },
                 "method": {
@@ -3731,7 +3731,7 @@
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3739,7 +3739,7 @@
                     "type": "integer"
                 },
                 "ruleData": {
-                    "description": "+optional",
+                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
                     "type": "string"
                 },
                 "selector": {
@@ -3769,7 +3769,7 @@
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3782,7 +3782,7 @@
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3807,7 +3807,7 @@
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3828,7 +3828,7 @@
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3845,7 +3845,7 @@
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
@@ -3870,7 +3870,7 @@
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
