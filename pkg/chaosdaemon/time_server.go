@@ -29,24 +29,24 @@ import (
 )
 
 type TimeChaosServer struct {
-	podProcessMap tasks.PodProcessMap
-	manager       tasks.TaskManager
-	logger        logr.Logger
+	podContainerNameProcessMap tasks.PodContainerNameProcessMap
+	manager                    tasks.TaskManager
+	logger                     logr.Logger
 }
 
-func (s *TimeChaosServer) SetPodProcess(podID tasks.PodID, sysID tasks.SysPID) {
-	s.podProcessMap.Write(podID, sysID)
+func (s *TimeChaosServer) SetPodContainerNameProcess(idName tasks.PodContainerName, sysID tasks.SysPID) {
+	s.podContainerNameProcessMap.Write(idName, sysID)
 }
 
-func (s *TimeChaosServer) DelPodProcess(podID tasks.PodID) {
-	s.podProcessMap.Delete(podID)
+func (s *TimeChaosServer) DelPodContainerNameProcess(idName tasks.PodContainerName) {
+	s.podContainerNameProcessMap.Delete(idName)
 }
 
-func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, pid tasks.IsID, config time.Config) error {
+func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, id tasks.IsID, config time.Config) error {
 	paras := time.ConfigCreatorParas{
 		Logger:        s.logger,
 		Config:        config,
-		PodProcessMap: &s.podProcessMap,
+		PodProcessMap: &s.podContainerNameProcessMap,
 	}
 
 	// We assume the base time skew is not sensitive with process changes which
@@ -54,10 +54,10 @@ func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, pid tasks.IsID, config
 	// We assume controller will never update tasks.
 	// According to the above, we do not handle error from s.manager.Apply like
 	// ErrDuplicateEntity(task TaskID).
-	err := s.manager.Create(uid, pid, &config, paras)
+	err := s.manager.Create(uid, id, &config, paras)
 	if err != nil {
 		if errors.Cause(err) == cerr.ErrDuplicateEntity {
-			err := s.manager.Apply(uid, pid, &config)
+			err := s.manager.Apply(uid, id, &config)
 			if err != nil {
 				return err
 			}
@@ -79,8 +79,8 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	s.timeChaosServer.SetPodProcess(tasks.PodID(req.PodId), tasks.SysPID(pid))
-	err = s.timeChaosServer.SetTimeOffset(req.Uid, tasks.PodID(req.PodId),
+	s.timeChaosServer.SetPodContainerNameProcess(tasks.PodContainerName(req.PodContainerName), tasks.SysPID(pid))
+	err = s.timeChaosServer.SetTimeOffset(req.Uid, tasks.PodContainerName(req.PodContainerName),
 		time.NewConfig(req.Sec, req.Nsec, req.ClkIdsMask))
 	if err != nil {
 		return nil, err
@@ -99,13 +99,13 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	s.timeChaosServer.SetPodProcess(tasks.PodID(req.PodId), tasks.SysPID(pid))
+	s.timeChaosServer.SetPodContainerNameProcess(tasks.PodContainerName(req.PodContainerName), tasks.SysPID(pid))
 
-	err = s.timeChaosServer.manager.Recover(req.Uid, tasks.PodID(req.PodId))
+	err = s.timeChaosServer.manager.Recover(req.Uid, tasks.PodContainerName(req.PodContainerName))
 	if err != nil {
 		return nil, err
 	}
-	s.timeChaosServer.DelPodProcess(tasks.PodID(req.PodId))
+	s.timeChaosServer.DelPodContainerNameProcess(tasks.PodContainerName(req.PodContainerName))
 
 	return &empty.Empty{}, nil
 }

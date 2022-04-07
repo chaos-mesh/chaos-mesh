@@ -87,7 +87,7 @@ func (c *Config) Merge(a tasks.Mergeable) error {
 type ConfigCreatorParas struct {
 	Logger        logr.Logger
 	Config        Config
-	PodProcessMap *tasks.PodProcessMap
+	PodProcessMap *tasks.PodContainerNameProcessMap
 }
 
 // New assumes we get ConfigCreatorParas from values.

@@ -111,9 +111,9 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		tproxyLocker:             new(sync.Map),
 		rootLogger:               log,
 		timeChaosServer: TimeChaosServer{
-			podProcessMap: tasks.NewPodProcessMap(),
-			manager:       tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
-			logger:        logr.New(log.GetSink()).WithName("TimeChaos"),
+			podContainerNameProcessMap: tasks.NewPodProcessMap(),
+			manager:                    tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
+			logger:                     logr.New(log.GetSink()).WithName("TimeChaos"),
 		},
 	}
 }

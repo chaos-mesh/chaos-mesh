@@ -22,13 +22,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 )
 
-var ErrNotPodPID = cerr.NotType[PodID]()
+var ErrNotPodContainerName = cerr.NotType[PodContainerName]()
 
-var ErrPodProcessMapNotInit = cerr.NotInit[map[PodID]SysPID]().WrapName("PodProcessMap").Err()
+var ErrPodProcessMapNotInit = cerr.NotInit[map[PodContainerName]SysPID]().WrapName("PodContainerNameProcessMap").Err()
 
-type PodID string
+type PodContainerName string
 
-func (p PodID) ToID() string {
+func (p PodContainerName) ToID() string {
 	return string(p)
 }
 
@@ -38,35 +38,35 @@ type ChaosOnPOD interface {
 	Recoverable
 }
 
-type PodProcessMap struct {
-	m      map[PodID]SysPID
+type PodContainerNameProcessMap struct {
+	m      map[PodContainerName]SysPID
 	rwLock sync.RWMutex
 }
 
-func NewPodProcessMap() PodProcessMap {
-	return PodProcessMap{
-		m:      make(map[PodID]SysPID),
+func NewPodProcessMap() PodContainerNameProcessMap {
+	return PodContainerNameProcessMap{
+		m:      make(map[PodContainerName]SysPID),
 		rwLock: sync.RWMutex{},
 	}
 }
 
-func (p *PodProcessMap) Read(podPID PodID) (SysPID, error) {
+func (p *PodContainerNameProcessMap) Read(PodContainerName PodContainerName) (SysPID, error) {
 	p.rwLock.RLock()
 	defer p.rwLock.RUnlock()
-	sysPID, ok := p.m[podPID]
+	sysPID, ok := p.m[PodContainerName]
 	if !ok {
 		return SysPID(0), ErrNotFoundSysID.WithStack().Err()
 	}
 	return sysPID, nil
 }
 
-func (p *PodProcessMap) Write(podPID PodID, sysPID SysPID) {
+func (p *PodContainerNameProcessMap) Write(PodContainerName PodContainerName, sysPID SysPID) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
-	p.m[podPID] = sysPID
+	p.m[PodContainerName] = sysPID
 }
 
-func (p *PodProcessMap) Delete(podPID PodID) {
+func (p *PodContainerNameProcessMap) Delete(podPID PodContainerName) {
 	p.rwLock.Lock()
 	defer p.rwLock.Unlock()
 
@@ -75,12 +75,12 @@ func (p *PodProcessMap) Delete(podPID PodID) {
 
 // PodHandler implements injecting & recovering on a kubernetes POD.
 type PodHandler struct {
-	PodProcessMap *PodProcessMap
+	PodProcessMap *PodContainerNameProcessMap
 	SubProcess    ChaosOnPOD
 	Logger        logr.Logger
 }
 
-func NewPodHandler(podProcessMap *PodProcessMap, sub ChaosOnPOD, logger logr.Logger) PodHandler {
+func NewPodHandler(podProcessMap *PodContainerNameProcessMap, sub ChaosOnPOD, logger logr.Logger) PodHandler {
 	return PodHandler{
 		PodProcessMap: podProcessMap,
 		SubProcess:    sub,
@@ -90,10 +90,10 @@ func NewPodHandler(podProcessMap *PodProcessMap, sub ChaosOnPOD, logger logr.Log
 
 // Inject get the container process IsID and Inject it with Main injector.
 // Be careful about the error handling here.
-func (p *PodHandler) Inject(pid IsID) error {
-	podPID, ok := pid.(PodID)
+func (p *PodHandler) Inject(id IsID) error {
+	podPID, ok := id.(PodContainerName)
 	if !ok {
-		return ErrNotPodPID.WrapInput(pid).Err()
+		return ErrNotPodContainerName.WrapInput(id).Err()
 	}
 	if p.PodProcessMap == nil {
 		return ErrPodProcessMapNotInit
@@ -110,10 +110,10 @@ func (p *PodHandler) Inject(pid IsID) error {
 
 // Recover get the container process IsID and Recover it with Main injector.
 // Be careful about the error handling here.
-func (p *PodHandler) Recover(pid IsID) error {
-	podPID, ok := pid.(PodID)
+func (p *PodHandler) Recover(id IsID) error {
+	podPID, ok := id.(PodContainerName)
 	if !ok {
-		return ErrNotPodPID.WrapInput(pid).Err()
+		return ErrNotPodContainerName.WrapInput(id).Err()
 	}
 	if p.PodProcessMap == nil {
 		return ErrPodProcessMapNotInit

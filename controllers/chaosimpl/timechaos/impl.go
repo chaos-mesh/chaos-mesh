@@ -17,6 +17,7 @@ package timechaos
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -65,12 +66,12 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	impl.Log.Info("setting time shift", "mask", mask, "sec", sec, "nsec", nsec, "containerId", containerId)
 	_, err = pbClient.SetTimeOffset(ctx, &pb.TimeRequest{
-		ContainerId: containerId,
-		Sec:         sec,
-		Nsec:        nsec,
-		ClkIdsMask:  mask,
-		Uid:         string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
-		PodId:       string(decodedContainer.Pod.GetUID()),
+		ContainerId:      containerId,
+		Sec:              sec,
+		Nsec:             nsec,
+		ClkIdsMask:       mask,
+		Uid:              string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
+		PodContainerName: fmt.Sprintf("%s:%s", decodedContainer.Pod.GetUID(), decodedContainer.ContainerName),
 	})
 	if err != nil {
 		return v1alpha1.NotInjected, err
@@ -96,9 +97,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	impl.Log.Info("recover for container", "containerId", containerId)
 	_, err = pbClient.RecoverTimeOffset(ctx, &pb.TimeRequest{
-		ContainerId: containerId,
-		Uid:         string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
-		PodId:       string(decodedContainer.Pod.GetUID()),
+		ContainerId:      containerId,
+		Uid:              string(obj.GetUID()) + string(decodedContainer.Pod.GetUID()),
+		PodContainerName: fmt.Sprintf("%s:%s", decodedContainer.Pod.GetUID(), decodedContainer.ContainerName),
 	})
 	if err != nil {
 		return v1alpha1.Injected, err
