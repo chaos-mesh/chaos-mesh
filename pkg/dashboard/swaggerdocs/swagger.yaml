@@ -1240,7 +1240,7 @@ definitions:
       cpuCount:
         description: |-
           +optional
-          the CPU core number need to use, only set it when action is stress
+          the CPU core number needs to use, only set it when action is stress
         type: integer
       duration:
         description: |-
@@ -1260,7 +1260,7 @@ definitions:
       memType:
         description: |-
           +optional
-          the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+          the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
         type: string
       method:
         description: |-
@@ -1278,13 +1278,18 @@ definitions:
           +optional
           byteman rule name, should be unique, and will use JVMChaos' name if not set
         type: string
+      pid:
+        description: the pid of Java process which needs to attach
+        type: integer
       port:
         description: |-
           +optional
           the port of agent server, default 9277
         type: integer
       ruleData:
-        description: +optional
+        description: |-
+          +optional
+          the byteman rule's data for action 'ruleData'
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -1300,61 +1305,81 @@ definitions:
   v1alpha1.JVMExceptionSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       exception:
         description: the exception which needs to throw for action `exception`
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMGCSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMLatencySpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       latency:
         description: the latency duration for action 'latency', unit ms
         type: integer
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMReturnSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       value:
         description: the return value for action 'return'
@@ -1363,10 +1388,12 @@ definitions:
   v1alpha1.JVMRuleDataSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       rule-data:
         description: RuleData used to save the rule file's data, will use it when
@@ -1383,10 +1410,12 @@ definitions:
           the value can be 'stack' or 'heap'
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.KernelChaosSpec:
