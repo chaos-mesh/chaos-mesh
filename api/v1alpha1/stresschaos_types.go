@@ -120,6 +120,10 @@ func (in *Stressors) Normalize() (string, string, error) {
 		}
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
+		// Without these two args, we may not reach the resource limit of pod,
+		// especially when we set cpu workers > 1
+		// More details see: https://github.com/chaos-mesh/chaos-mesh/issues/3100
+		cpuStressors += " --cpu-load-slice 10 --cpu-method sqrt"
 		cpuStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
 			cpuStressors += fmt.Sprintf(" --cpu-load %d",

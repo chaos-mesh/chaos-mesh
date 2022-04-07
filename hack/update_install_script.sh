@@ -29,8 +29,8 @@ sed -i.bak 's/ca.crt:.*/ca.crt: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
 sed -i.bak 's/tls.crt:.*/tls.crt: \"\$\{TLS_CRT\}\"/g' $tmp_file
 sed -i.bak 's/tls.key:.*/tls.key: \"\$\{TLS_KEY\}\"/g' $tmp_file
 sed -i.bak 's/caBundle:.*/caBundle: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
-sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $tmp_file
-sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
+sed -i.bak 's/\/host-run\/docker.sock/\/host-run\/$\{socketName\}/g' $tmp_file
+sed -i.bak 's/path: \/var\/run/path: \$\{socketDir\}/g' $tmp_file
 sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
 sed -i.bak 's/hostNetwork: true/hostNetwork: \$\{host_network\}/g' $tmp_file
 sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh:.*/\${IMAGE_REGISTRY_PREFIX}\/chaos-mesh\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
