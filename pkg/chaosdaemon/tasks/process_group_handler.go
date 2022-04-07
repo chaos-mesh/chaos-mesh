@@ -108,7 +108,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 
 // Recover try to recover the main process and then try to recover child process.
 func (gp *ProcessGroupHandler) Recover(pid IsID) error {
-	sysPID, ok := pid.(SysPID)
+	_, ok := pid.(SysPID)
 	if !ok {
 		return ErrNotTypeSysID.WrapInput(pid).Err()
 	}
@@ -117,18 +117,16 @@ func (gp *ProcessGroupHandler) Recover(pid IsID) error {
 		return cerr.FromErr(err).Wrapf("recovery main process : %v", pid).Err()
 	}
 
-	childPids, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
-	if err != nil {
-		return cerr.NotFound("child process").WrapErr(err).Err()
-	}
+	for childID, group := range gp.childMap {
+		childSysPID, ok := childID.(SysPID)
+		if !ok {
+			gp.Logger.Error(cerr.NotType[SysPID]().WrapInput(childID).Err(),
+				"failed to recover old child process")
+		}
 
-	for _, childPID := range childPids {
-		childSysPID := SysPID(childPID)
-		if childProcessChaos, ok := gp.childMap[childSysPID]; ok {
-			err := childProcessChaos.Recover(childSysPID)
-			if err != nil {
-				gp.Logger.Error(err, "failed to recover old child process")
-			}
+		err := group.Recover(childSysPID)
+		if err != nil {
+			gp.Logger.Error(err, "failed to recover old child process")
 		}
 	}
 	return nil
