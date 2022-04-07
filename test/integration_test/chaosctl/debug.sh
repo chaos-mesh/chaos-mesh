@@ -23,9 +23,7 @@ function must_contains() {
   fi
 
   echo $message | grep $match "$substring"
-  if [ "$?" = "0" ]; then
-      exit 0
-  else
+  if [ "$?" != "0" ]; then
       echo "'$substring' not found in '$message'"
       exit 1
   fi
@@ -63,7 +61,7 @@ EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl logs"
-logs=$(./chaosctl logs)
+logs=$(./bin/chaosctl logs)
 if [ $? -ne 0 ]; then
     echo "chaosctl logs failed"
     code=1
@@ -73,7 +71,7 @@ must_contains "$logs" "Chaos-daemon Version:" true
 must_contains "$logs" "[chaos-dashboard" true
 
 echo "Checking chaosctl debug networkchaos"
-logs=$(./chaosctl debug networkchaos web-show-network-delay)
+logs=$(./bin/chaosctl debug networkchaos web-show-network-delay)
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
     code=1
@@ -110,7 +108,7 @@ EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl debug httpchaos"
-logs=$(./chaosctl debug httpchaos web-show-http-delay)
+logs=$(./bin/chaosctl debug httpchaos web-show-http-delay)
 if [ $? -ne 0 ]; then
     echo "chaosctl debug httpchaos failed"
     code=1
@@ -146,7 +144,7 @@ EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl debug iochaos"
-logs=$(./chaosctl debug iochaos web-show-io-delay)
+logs=$(./bin/chaosctl debug iochaos web-show-io-delay)
 if [ $? -ne 0 ]; then
     echo "chaosctl debug iochaos failed"
     code=1
@@ -182,7 +180,7 @@ EOF
 kubectl apply -f stress.yaml
 
 echo "Checking chaosctl debug stresschaos"
-logs=$(./chaosctl debug stresschaos web-show-memory-stress)
+logs=$(./bin/chaosctl debug stresschaos web-show-memory-stress)
 if [ $? -ne 0 ]; then
     echo "chaosctl debug stresschaos failed"
     code=1

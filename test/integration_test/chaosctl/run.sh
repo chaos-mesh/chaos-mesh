@@ -25,7 +25,7 @@ function run() {
     bash +x "$script"
 }
 
-scripts=(debug.sh)
+scripts=(debug.sh recover.sh)
 
 for name in $scripts; do
     script="$test_dir/chaosctl/$name"
