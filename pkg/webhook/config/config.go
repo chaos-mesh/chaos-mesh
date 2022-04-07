@@ -17,7 +17,6 @@ package config
 
 import (
 	"io"
-	"io/ioutil"
 	"sync"
 
 	"github.com/ghodss/yaml"
@@ -126,7 +125,7 @@ func (c *Config) GetRequestedConfig(namespace, key string) (*InjectionConfig, er
 
 // LoadTemplateArgs takes an io.Reader and parses out an template args
 func LoadTemplateArgs(reader io.Reader) (*TemplateArgs, error) {
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

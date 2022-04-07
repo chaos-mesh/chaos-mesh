@@ -29,10 +29,10 @@ import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Schedule } from 'api/schedules.type'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import { Typography } from '@mui/material'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
+import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -114,7 +114,7 @@ const Schedules = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.success.${action}`, intl),
+              message: i18n(`confirm.success.${action}`, intl),
             })
           )
 
@@ -139,8 +139,8 @@ const Schedules = () => {
 
   const handleBatchDelete = () =>
     handleSelect({
-      title: T('schedules.deleteMulti', intl),
-      description: T('schedules.deleteDesc', intl),
+      title: i18n('schedules.deleteMulti', intl),
+      description: i18n('schedules.deleteDesc', intl),
       handle: handleAction('archiveMulti'),
     })
 
@@ -171,7 +171,7 @@ const Schedules = () => {
     <>
       <Space direction="row" mb={6}>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate('/schedules/new')}>
-          {T('newS.title')}
+          {i18n('newS.title')}
         </Button>
         <Button
           variant="outlined"
@@ -179,15 +179,15 @@ const Schedules = () => {
           onClick={handleBatchSelect}
           disabled={schedules.length === 0}
         >
-          {T(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
+          {i18n(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
         </Button>
         {!isBatchEmpty && (
           <>
             <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
-              {T('common.selectAll')}
+              {i18n('common.selectAll')}
             </Button>
             <Button variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />} onClick={handleBatchDelete}>
-              {T('archives.single')}
+              {i18n('archives.single')}
             </Button>
           </>
         )}
@@ -211,7 +211,7 @@ const Schedules = () => {
 
       {!loading && schedules.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('schedules.notFound')}</Typography>
+          <Typography>{i18n('schedules.notFound')}</Typography>
         </NotFound>
       )}
 

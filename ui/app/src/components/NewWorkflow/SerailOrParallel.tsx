@@ -28,7 +28,7 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import React from 'react'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
@@ -84,7 +84,7 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
         setAlert({
           type: 'warning',
           // Please fill in the current branch first
-          message: T('newW.messages.m1', intl),
+          message: i18n('newW.messages.m1', intl),
         })
       )
 
@@ -122,20 +122,22 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
           <Box mt={3} ml={8}>
             <Form>
               <Paper>
-                <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
+                <PaperTop title={i18n(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
                 <Space direction="row">
                   <TextField
                     name="name"
-                    label={T('common.name')}
-                    validate={validateName(T('newW.nameValidation', intl))}
-                    helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                    label={i18n('common.name')}
+                    validate={validateName(i18n('newW.nameValidation', intl))}
+                    helperText={errors.name && touched.name ? errors.name : i18n('newW.node.nameHelper')}
                     error={errors.name && touched.name ? true : false}
                   />
                   <TextField
                     name="deadline"
-                    label={T('newW.node.deadline')}
-                    validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                    helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                    label={i18n('newW.node.deadline')}
+                    validate={validateDeadline(i18n('newW.node.deadlineValidation', intl))}
+                    helperText={
+                      errors.deadline && touched.deadline ? errors.deadline : i18n('newW.node.deadlineHelper')
+                    }
                     error={errors.deadline && touched.deadline ? true : false}
                   />
                 </Space>
@@ -161,7 +163,7 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
                       <Typography component="div" sx={{ ml: 1 }}>
                         {templates.length > index
                           ? templates[index].name
-                          : `${T('newW.node.child', intl)} ${index + 1}`}
+                          : `${i18n('newW.node.child', intl)} ${index + 1}`}
                       </Typography>
                     </Box>
                   </Paper>

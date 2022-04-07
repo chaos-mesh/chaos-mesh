@@ -157,6 +157,14 @@ type MemoryStressor struct {
 	// +optional
 	Size string `json:"size,omitempty" webhook:"Bytes"`
 
+	// OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
+	// about this option.
+	// +kubebuilder:validation:Minimum=-1000
+	// +kubebuilder:validation:Maximm=1000
+	// +kubebuilder:default=0
+	// +optional
+	OOMScoreAdj int `json:"oomScoreAdj,omitempty"`
+
 	// extend stress-ng options
 	// +optional
 	Options []string `json:"options,omitempty"`

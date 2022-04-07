@@ -630,6 +630,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Namespace func(childComplexity int, ns *string) int
+		Pods      func(childComplexity int, selector model.PodSelectorInput) int
 	}
 
 	RawIPSet struct {
@@ -866,8 +867,8 @@ type PodResolver interface {
 	Processes(ctx context.Context, obj *v1.Pod) ([]*model.Process, error)
 	Mounts(ctx context.Context, obj *v1.Pod) ([]string, error)
 	Ipset(ctx context.Context, obj *v1.Pod) (string, error)
-	TcQdisc(ctx context.Context, obj *v1.Pod) (string, error)
-	Iptables(ctx context.Context, obj *v1.Pod) (string, error)
+	TcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error)
+	Iptables(ctx context.Context, obj *v1.Pod) ([]string, error)
 }
 type PodConditionResolver interface {
 	Type(ctx context.Context, obj *v1.PodCondition) (string, error)
@@ -944,6 +945,7 @@ type ProcessResolver interface {
 }
 type QueryResolver interface {
 	Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error)
+	Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -3679,6 +3681,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Namespace(childComplexity, args["ns"].(*string)), true
 
+	case "Query.pods":
+		if e.complexity.Query.Pods == nil {
+			break
+		}
+
+		args, err := ec.field_Query_pods_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Pods(childComplexity, args["selector"].(model.PodSelectorInput)), true
+
 	case "RawIPSet.cidrs":
 		if e.complexity.RawIPSet.Cidrs == nil {
 			break
@@ -4174,6 +4188,7 @@ schema {
 
 type Query {
     namespace(ns: String): [Namespace!]
+    pods(selector: PodSelectorInput!): [Pod!]
 }
 
 type Logger {
@@ -4222,6 +4237,42 @@ type Fd {
     target: String!
 }
 
+# PodSelectorInput defines the some selectors to select objects.
+# If the all selectors are empty, all objects will be used in chaos experiment.
+input PodSelectorInput {
+    # namespaces is a set of namespace to which objects belong.
+    namespaces: [String!]
+
+    # nodes is a set of node name and objects must belong to these nodes.
+    nodes: [String!]
+
+    # pods is a map of string keys and a set values that used to select pods.
+    # The key defines the namespace which pods belong,
+    # and the each values is a set of pod names.
+    pods: Map
+
+    # map of string keys and values that can be used to select nodes.
+    # Selector which must match a node's labels,
+    # and objects must belong to these selected nodes.
+    nodeSelectors: Map
+
+    # map of string keys and values that can be used to select objects.
+    # A selector based on fields.
+    fieldSelectors: Map
+
+    # map of string keys and values that can be used to select objects.
+    # A selector based on labels.
+    labelSelectors: Map
+
+    # map of string keys and values that can be used to select objects.
+    # A selector based on annotations.
+    annotationSelectors: Map
+
+    # podPhaseSelectors is a set of condition of a pod at the current time.
+    # supported value: Pending / Running / Succeeded / Failed / Unknown
+    podPhaseSelectors: [String!]
+}
+
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     kind: String!
     apiVersion: String!
@@ -4249,8 +4300,8 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     processes: [Process!] 	@goField(forceResolver: true)
     mounts: [String!]      	@goField(forceResolver: true)
     ipset: String! 			@goField(forceResolver: true)
-    tcQdisc: String! 		@goField(forceResolver: true)
-    iptables: String!		@goField(forceResolver: true)
+    tcQdisc: [String!] 		@goField(forceResolver: true)
+    iptables: [String!]		@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
@@ -5531,6 +5582,21 @@ func (ec *executionContext) field_Query_namespace_args(ctx context.Context, rawA
 		}
 	}
 	args["ns"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_pods_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.PodSelectorInput
+	if tmp, ok := rawArgs["selector"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("selector"))
+		arg0, err = ec.unmarshalNPodSelectorInput2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐPodSelectorInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["selector"] = arg0
 	return args, nil
 }
 
@@ -13342,14 +13408,11 @@ func (ec *executionContext) _Pod_tcQdisc(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Pod_iptables(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
@@ -13377,14 +13440,11 @@ func (ec *executionContext) _Pod_iptables(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodCondition_type(ctx context.Context, field graphql.CollectedField, obj *v1.PodCondition) (ret graphql.Marshaler) {
@@ -18218,6 +18278,45 @@ func (ec *executionContext) _Query_namespace(ctx context.Context, field graphql.
 	return ec.marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespaceᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_pods(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_pods_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Pods(rctx, args["selector"].(model.PodSelectorInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*v1.Pod)
+	fc.Result = res
+	return ec.marshalOPod2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPodᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -21350,6 +21449,85 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputPodSelectorInput(ctx context.Context, obj interface{}) (model.PodSelectorInput, error) {
+	var it model.PodSelectorInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "namespaces":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespaces"))
+			it.Namespaces, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nodes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nodes"))
+			it.Nodes, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "pods":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pods"))
+			it.Pods, err = ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "nodeSelectors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nodeSelectors"))
+			it.NodeSelectors, err = ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "fieldSelectors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fieldSelectors"))
+			it.FieldSelectors, err = ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "labelSelectors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("labelSelectors"))
+			it.LabelSelectors, err = ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "annotationSelectors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("annotationSelectors"))
+			it.AnnotationSelectors, err = ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "podPhaseSelectors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("podPhaseSelectors"))
+			it.PodPhaseSelectors, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
 
 // endregion **************************** input.gotpl *****************************
 
@@ -24790,9 +24968,6 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					}
 				}()
 				res = ec._Pod_tcQdisc(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -24810,9 +24985,6 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 					}
 				}()
 				res = ec._Pod_iptables(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -26970,6 +27142,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
+		case "pods":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_pods(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
 		case "__type":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -28529,6 +28721,11 @@ func (ec *executionContext) marshalNPodNetworkChaosSpec2githubᚗcomᚋchaosᚑm
 
 func (ec *executionContext) marshalNPodNetworkChaosStatus2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodNetworkChaosStatus(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodNetworkChaosStatus) graphql.Marshaler {
 	return ec._PodNetworkChaosStatus(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalNPodSelectorInput2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐPodSelectorInput(ctx context.Context, v interface{}) (model.PodSelectorInput, error) {
+	res, err := ec.unmarshalInputPodSelectorInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPodSelectorSpec2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodSelectorSpec(ctx context.Context, sel ast.SelectionSet, v v1alpha1.PodSelectorSpec) graphql.Marshaler {

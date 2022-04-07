@@ -17,7 +17,7 @@
 import { Button, ButtonProps } from '@mui/material'
 
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
-import T from 'components/T'
+import i18n from 'components/T'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -44,7 +44,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
       dispatch(
         setAlert({
           type: 'success',
-          message: T('confirm.success.load', intl),
+          message: i18n('confirm.success.load', intl),
         })
       )
     }
@@ -53,7 +53,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
 
   return (
     <Button {...buttonProps} component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
-      {T('common.upload')}
+      {i18n('common.upload')}
       <input type="file" hidden onChange={handleUploadYAML} />
     </Button>
   )

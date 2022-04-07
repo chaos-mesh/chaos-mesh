@@ -17,7 +17,7 @@
 import { Box, Button, ButtonProps } from '@mui/material'
 
 import PublishIcon from '@mui/icons-material/Publish'
-import T from 'components/T'
+import i18n from 'components/T'
 
 export default function Submit({ mt = 6, onClick, ...rest }: ButtonProps & { mt?: number }) {
   return (
@@ -29,7 +29,7 @@ export default function Submit({ mt = 6, onClick, ...rest }: ButtonProps & { mt?
         onClick={onClick}
         {...rest}
       >
-        {T('common.submit')}
+        {i18n('common.submit')}
       </Button>
     </Box>
   )

@@ -7,8 +7,9 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -19,6 +20,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
+	podSelector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
@@ -733,7 +735,7 @@ func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
 		return "", err
 	}
 	defer logs.Close()
-	data, err := ioutil.ReadAll(logs)
+	data, err := io.ReadAll(logs)
 	if err != nil {
 		return "", err
 	}
@@ -765,11 +767,11 @@ func (r *podResolver) Ipset(ctx context.Context, obj *v1.Pod) (string, error) {
 	return r.GetIpset(ctx, obj)
 }
 
-func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	return r.GetTcQdisc(ctx, obj)
 }
 
-func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	return r.GetIptables(ctx, obj)
 }
 
@@ -1060,6 +1062,73 @@ func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Nam
 		return namespaces, nil
 	}
 	return []*model.Namespace{{Ns: *ns}}, nil
+}
+
+func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error) {
+	spec := v1alpha1.PodSelectorSpec{
+		Pods:              map[string][]string{},
+		NodeSelectors:     map[string]string{},
+		Nodes:             selector.Nodes,
+		PodPhaseSelectors: selector.PodPhaseSelectors,
+		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+			Namespaces:          selector.Namespaces,
+			FieldSelectors:      map[string]string{},
+			LabelSelectors:      map[string]string{},
+			AnnotationSelectors: map[string]string{},
+		},
+	}
+
+	for ns, p := range selector.Pods {
+		if pod, ok := p.(string); ok {
+			spec.Pods[ns] = []string{pod}
+		}
+
+		if pods, ok := p.([]string); ok {
+			spec.Pods[ns] = pods
+		}
+	}
+
+	for k, s := range selector.NodeSelectors {
+		if selector, ok := s.(string); ok {
+			spec.NodeSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.FieldSelectors {
+		if selector, ok := s.(string); ok {
+			spec.FieldSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.LabelSelectors {
+		if selector, ok := s.(string); ok {
+			spec.LabelSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.AnnotationSelectors {
+		if selector, ok := s.(string); ok {
+			spec.AnnotationSelectors[k] = selector
+		}
+	}
+
+	selectImpl := podSelector.New(podSelector.Params{
+		Client: r.Client,
+		Reader: r.Client,
+	})
+	pods, err := selectImpl.Select(ctx, &v1alpha1.PodSelector{Selector: spec, Mode: v1alpha1.AllMode})
+	if err != nil {
+		if errors.Is(err, podSelector.ErrNoPodSelected) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var list []*v1.Pod
+	for _, pod := range pods {
+		p := pod
+		list = append(list, &p.Pod)
+	}
+	return list, nil
 }
 
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {

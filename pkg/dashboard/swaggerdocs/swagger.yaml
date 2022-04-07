@@ -186,9 +186,14 @@ definitions:
       created_at:
         type: string
       end_time:
+        description: EndTime represents the time when the workflow completed all steps.
         type: string
       entry:
         description: the entry node name
+        type: string
+      finish_time:
+        description: FinishTime represents the time when the workflow was deleted
+          from Kubernetes.
         type: string
       id:
         type: integer
@@ -212,9 +217,14 @@ definitions:
       created_at:
         type: string
       end_time:
+        description: EndTime represents the time when the workflow completed all steps.
         type: string
       entry:
         description: the entry node name
+        type: string
+      finish_time:
+        description: FinishTime represents the time when the workflow was deleted
+          from Kubernetes.
         type: string
       id:
         type: integer
@@ -337,6 +347,47 @@ definitions:
         type: integer
       running:
         type: integer
+    type: object
+  template.StatusCheckTemplate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+        type: object
+    type: object
+  template.StatusCheckTemplateBase:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  template.StatusCheckTemplateDetail:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+        type: object
+      uid:
+        type: string
     type: object
   utils.APIError:
     properties:
@@ -1035,6 +1086,36 @@ definitions:
           +optional
         type: string
     type: object
+  v1alpha1.HTTPCriteria:
+    properties:
+      statusCode:
+        description: |-
+          StatusCode defines the expected http status code for the request.
+          A statusCode string could be a single code (e.g. 200), or
+          an inclusive range (e.g. 200-400, both `200` and `400` are included).
+        type: string
+    type: object
+  v1alpha1.HTTPStatusCheck:
+    properties:
+      body:
+        description: +optional
+        type: string
+      criteria:
+        $ref: '#/definitions/v1alpha1.HTTPCriteria'
+        description: Criteria defines how to determine the result of the status check.
+        type: object
+      headers:
+        description: +optional
+        type: string
+      method:
+        description: |-
+          +optional
+          +kubebuilder:validation:Enum=GET;POST
+          +kubebuilder:default=GET
+        type: string
+      url:
+        type: string
+    type: object
   v1alpha1.IOChaosSpec:
     properties:
       action:
@@ -1159,7 +1240,7 @@ definitions:
       cpuCount:
         description: |-
           +optional
-          the CPU core number need to use, only set it when action is stress
+          the CPU core number needs to use, only set it when action is stress
         type: integer
       duration:
         description: |-
@@ -1179,7 +1260,7 @@ definitions:
       memType:
         description: |-
           +optional
-          the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+          the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
         type: string
       method:
         description: |-
@@ -1197,13 +1278,18 @@ definitions:
           +optional
           byteman rule name, should be unique, and will use JVMChaos' name if not set
         type: string
+      pid:
+        description: the pid of Java process which needs to attach
+        type: integer
       port:
         description: |-
           +optional
           the port of agent server, default 9277
         type: integer
       ruleData:
-        description: +optional
+        description: |-
+          +optional
+          the byteman rule's data for action 'ruleData'
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -1219,61 +1305,81 @@ definitions:
   v1alpha1.JVMExceptionSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       exception:
         description: the exception which needs to throw for action `exception`
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMGCSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMLatencySpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       latency:
         description: the latency duration for action 'latency', unit ms
         type: integer
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMReturnSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       value:
         description: the return value for action 'return'
@@ -1282,10 +1388,12 @@ definitions:
   v1alpha1.JVMRuleDataSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       rule-data:
         description: RuleData used to save the rule file's data, will use it when
@@ -1302,10 +1410,12 @@ definitions:
           the value can be 'stack' or 'heap'
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.KernelChaosSpec:
@@ -1348,6 +1458,15 @@ definitions:
     type: object
   v1alpha1.MemoryStressor:
     properties:
+      oomScoreAdj:
+        description: |-
+          OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
+          about this option.
+          +kubebuilder:validation:Minimum=-1000
+          +kubebuilder:validation:Maximm=1000
+          +kubebuilder:default=0
+          +optional
+        type: integer
       options:
         description: |-
           extend stress-ng options
@@ -2106,6 +2225,9 @@ definitions:
       process:
         description: the process name or the process ID
         type: string
+      recoverCmd:
+        description: the command to be run when recovering experiment
+        type: string
       signal:
         description: the signal number to send
         type: integer
@@ -2227,6 +2349,79 @@ definitions:
         description: |-
           +optional
           +nullable
+        type: string
+    type: object
+  v1alpha1.StatusCheckTemplate:
+    properties:
+      duration:
+        description: |-
+          Duration defines the duration of the whole status check if the
+          number of failed execution does not exceed the failure threshold.
+          Duration is available to both `Synchronous` and `Continuous` mode.
+          A duration string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "-1.5h" or "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      failureThreshold:
+        description: |-
+          FailureThreshold defines the minimum consecutive failure
+          for the status check to be considered failed.
+          +optional
+          +kubebuilder:default=3
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      http:
+        $ref: '#/definitions/v1alpha1.HTTPStatusCheck'
+        description: +optional
+        type: object
+      intervalSeconds:
+        description: |-
+          IntervalSeconds defines how often (in seconds) to perform
+          an execution of status check.
+          +optional
+          +kubebuilder:default=10
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      mode:
+        description: |-
+          Mode defines the execution mode of the status check.
+          Support type: Synchronous / Continuous
+          +optional
+          +kubebuilder:validation:Enum=Synchronous;Continuous
+        type: string
+      recordsHistoryLimit:
+        description: |-
+          RecordsHistoryLimit defines the number of record to retain.
+          +optional
+          +kubebuilder:default=100
+          +kubebuilder:validation:Minimum=1
+          +kubebuilder:validation:Maximum=1000
+        type: integer
+      successThreshold:
+        description: |-
+          SuccessThreshold defines the minimum consecutive successes
+          for the status check to be considered successful.
+          SuccessThreshold only works for `Synchronous` mode.
+          +optional
+          +kubebuilder:default=1
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      timeoutSeconds:
+        description: |-
+          TimeoutSeconds defines the number of seconds after which
+          an execution of status check times out.
+          +optional
+          +kubebuilder:default=1
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      type:
+        description: |-
+          Type defines the specific status check type.
+          Support type: HTTP
+          +kubebuilder:default=HTTP
+          +kubebuilder:validation:Enum=HTTP
         type: string
     type: object
   v1alpha1.StressCPUSpec:
@@ -3713,6 +3908,165 @@ paths:
       summary: Start a schedule.
       tags:
       - schedules
+  /templates/statuschecks:
+    get:
+      description: Get status check templates from k8s cluster in real time.
+      parameters:
+      - description: filter status check templates by namespace
+        in: query
+        name: namespace
+        type: string
+      - description: filter status check templates by name
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/template.StatusCheckTemplateBase'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: List status check templates.
+      tags:
+      - template
+    post:
+      consumes:
+      - application/json
+      description: Pass a JSON object to create a new status check template.
+      parameters:
+      - description: the status check definition
+        in: body
+        name: statuscheck
+        required: true
+        schema:
+          $ref: '#/definitions/template.StatusCheckTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/template.StatusCheckTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Create a new status check template.
+      tags:
+      - templates
+  /templates/statuschecks/statuscheck:
+    delete:
+      description: Delete the status check template by namespaced name.
+      parameters:
+      - description: the namespace of status check templates
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the name of status check templates
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Delete a status check template.
+      tags:
+      - templates
+    get:
+      description: Get the status check template's detail by namespaced name.
+      parameters:
+      - description: the namespace of status check templates
+        in: query
+        name: namespace
+        required: true
+        type: string
+      - description: the name of status check templates
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/template.StatusCheckTemplateDetail'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Get a status check template.
+      tags:
+      - templates
+    put:
+      description: Update a status check template by namespaced name.
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/template.StatusCheckTemplate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/template.StatusCheckTemplate'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.APIError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.APIError'
+      summary: Update a status check template.
+      tags:
+      - templates
   /workflows:
     get:
       description: List workflows from Kubernetes cluster.

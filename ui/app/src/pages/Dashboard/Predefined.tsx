@@ -23,10 +23,10 @@ import { Ace } from 'ace-builds'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import YAML from 'components/YAML'
 import api from 'api'
 import clsx from 'clsx'
+import i18n from 'components/T'
 import { iconByKind } from 'lib/byKind'
 import loadable from '@loadable/component'
 import { makeStyles } from '@mui/styles'
@@ -115,7 +115,7 @@ const Predefined = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: T('confirm.success.create', intl),
+            message: i18n('confirm.success.create', intl),
           })
         )
       })
@@ -125,8 +125,8 @@ const Predefined = () => {
   const handleDeleteConfirm = () => {
     dispatch(
       setConfirm({
-        title: `${T('common.delete', intl)} ${experiment!.name}`,
-        description: T('common.deleteDesc', intl),
+        title: `${i18n('common.delete', intl)} ${experiment!.name}`,
+        description: i18n('common.deleteDesc', intl),
         handle: handleDeleteExperiment,
       })
     )
@@ -142,7 +142,7 @@ const Predefined = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('confirm.success.delete', intl),
+        message: i18n('confirm.success.delete', intl),
       })
     )
   }
@@ -176,10 +176,10 @@ const Predefined = () => {
                   <PaperTop title={experiment.name}>
                     <Space direction="row">
                       <Button color="secondary" size="small" onClick={handleDeleteConfirm}>
-                        {T('common.delete')}
+                        {i18n('common.delete')}
                       </Button>
                       <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
-                        {T('common.submit')}
+                        {i18n('common.submit')}
                       </Button>
                     </Space>
                   </PaperTop>
