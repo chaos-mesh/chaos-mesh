@@ -193,6 +193,9 @@ chaosDaemon:
   # runtime: crio
   # socketPath: /var/run/crio/crio.sock
 
+  # You can customize socket dir via socketDir
+  # If you set socketPath and socketDir at the same time, only socketPath will work.
+
   # CPU/Memory resource requests/limits for chaosDaemon container
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
