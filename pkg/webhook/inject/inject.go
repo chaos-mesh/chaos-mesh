@@ -56,20 +56,20 @@ const (
 	StatusInjected = "injected"
 )
 
-func NewInjector(kubeclient client.Client, config *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *Injector {
+// NewInjector creates a new injector
+func NewInjector(kubeclient client.Client, config *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector, log logr.Logger) *Injector {
 	return &Injector{
 		kubeclient:    kubeclient,
 		cfg:           config,
 		ControllerCfg: controllerCfg,
 		Metrics:       metrics,
+		logger:        log,
 	}
 }
 
 // Inject do pod template config inject
-func (i *Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosControllerManagerMetricsCollector) *v1.AdmissionResponse {
+func (i *Injector) Inject(res *v1.AdmissionRequest) *v1.AdmissionResponse {
 	var pod corev1.Pod
-
-	i = NewInjector(cli, cfg, controllerCfg, metrics)
 
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		i.logger.Error(err, "Could not unmarshal raw object")
@@ -100,8 +100,8 @@ func (i *Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *conf
 		}
 	}
 
-	if metrics != nil {
-		metrics.InjectRequired.WithLabelValues(res.Namespace, requiredKey).Inc()
+	if i.Metrics != nil {
+		i.Metrics.InjectRequired.WithLabelValues(res.Namespace, requiredKey).Inc()
 	}
 	injectionConfig, err := i.cfg.GetRequestedConfig(pod.Namespace, requiredKey)
 	if err != nil {
@@ -144,8 +144,8 @@ func (i *Injector) Inject(res *v1.AdmissionRequest, cli client.Client, cfg *conf
 	}
 
 	i.logger.Info("AdmissionResponse: patch", "patchBytes", string(patchBytes))
-	if metrics != nil {
-		metrics.Injections.WithLabelValues(res.Namespace, requiredKey).Inc()
+	if i.Metrics != nil {
+		i.Metrics.Injections.WithLabelValues(res.Namespace, requiredKey).Inc()
 	}
 
 	patchType := v1.PatchTypeJSONPatch

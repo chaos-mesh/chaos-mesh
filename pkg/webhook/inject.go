@@ -34,10 +34,7 @@ import (
 
 // PodInjector is pod template config injector
 
-var (
-	i   *inject.Injector
-	log logr.Logger
-)
+var log logr.Logger
 
 type PodInjector struct {
 	client        client.Client
@@ -57,10 +54,12 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
+	i := *inject.NewInjector(v.client, v.Config, v.ControllerCfg, v.Metrics, v.Logger)
+
 	v.Logger.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
-		AdmissionResponse: *i.Inject(&req.AdmissionRequest, v.client, v.Config, v.ControllerCfg, v.Metrics),
+		AdmissionResponse: *i.Inject(&req.AdmissionRequest),
 	}
 }
 
