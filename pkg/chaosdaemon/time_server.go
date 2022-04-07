@@ -38,6 +38,10 @@ func (s *TimeChaosServer) SetPodProcess(podID tasks.PodID, sysID tasks.SysPID) {
 	s.podProcessMap.Write(podID, sysID)
 }
 
+func (s *TimeChaosServer) DelPodProcess(podID tasks.PodID) {
+	s.podProcessMap.Delete(podID)
+}
+
 func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, pid tasks.IsID, config time.Config) error {
 	paras := time.ConfigCreatorParas{
 		Logger:        s.logger,
@@ -101,6 +105,7 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 	if err != nil {
 		return nil, err
 	}
+	s.timeChaosServer.DelPodProcess(tasks.PodID(req.PodId))
 
 	return &empty.Empty{}, nil
 }

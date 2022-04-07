@@ -66,6 +66,13 @@ func (p *PodProcessMap) Write(podPID PodID, sysPID SysPID) {
 	p.m[podPID] = sysPID
 }
 
+func (p *PodProcessMap) Delete(podPID PodID) {
+	p.rwLock.Lock()
+	defer p.rwLock.Unlock()
+
+	delete(p.m, podPID)
+}
+
 // PodHandler implements injecting & recovering on a kubernetes POD.
 type PodHandler struct {
 	PodProcessMap *PodProcessMap
