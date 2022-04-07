@@ -31,7 +31,9 @@ import (
 type TimeChaosServer struct {
 	podContainerNameProcessMap tasks.PodContainerNameProcessMap
 	manager                    tasks.TaskManager
-	logger                     logr.Logger
+
+	nameLocker tasks.LockMap[tasks.PodContainerName]
+	logger     logr.Logger
 }
 
 func (s *TimeChaosServer) SetPodContainerNameProcess(idName tasks.PodContainerName, sysID tasks.SysPID) {
@@ -42,13 +44,15 @@ func (s *TimeChaosServer) DelPodContainerNameProcess(idName tasks.PodContainerNa
 	s.podContainerNameProcessMap.Delete(idName)
 }
 
-func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, id tasks.IsID, config time.Config) error {
+func (s *TimeChaosServer) SetTimeOffset(uid tasks.TaskID, id tasks.PodContainerName, config time.Config) error {
 	paras := time.ConfigCreatorParas{
 		Logger:        s.logger,
 		Config:        config,
 		PodProcessMap: &s.podContainerNameProcessMap,
 	}
 
+	unlock := s.nameLocker.Lock(id)
+	defer unlock()
 	// We assume the base time skew is not sensitive with process changes which
 	// means time skew will not return error when the task target pod changes container id & IsID.
 	// We assume controller will never update tasks.
@@ -99,13 +103,22 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	s.timeChaosServer.SetPodContainerNameProcess(tasks.PodContainerName(req.PodContainerName), tasks.SysPID(pid))
+	nameID := tasks.PodContainerName(req.PodContainerName)
 
-	err = s.timeChaosServer.manager.Recover(req.Uid, tasks.PodContainerName(req.PodContainerName))
+	s.timeChaosServer.SetPodContainerNameProcess(nameID, tasks.SysPID(pid))
+
+	unlock := s.timeChaosServer.nameLocker.Lock(nameID)
+	defer unlock()
+
+	err = s.timeChaosServer.manager.Recover(req.Uid, nameID)
 	if err != nil {
 		return nil, err
 	}
-	s.timeChaosServer.DelPodContainerNameProcess(tasks.PodContainerName(req.PodContainerName))
+
+	if len(s.timeChaosServer.manager.GetUIDsWithPID(nameID)) == 0 {
+		s.timeChaosServer.DelPodContainerNameProcess(nameID)
+		s.timeChaosServer.nameLocker.Del(nameID)
+	}
 
 	return &empty.Empty{}, nil
 }
