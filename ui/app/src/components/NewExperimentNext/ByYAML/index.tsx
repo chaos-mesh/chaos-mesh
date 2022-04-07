@@ -20,8 +20,8 @@ import { Ace } from 'ace-builds'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PublishIcon from '@mui/icons-material/Publish'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import YAML from 'components/YAML'
+import i18n from 'components/T'
 import loadable from '@loadable/component'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
@@ -55,7 +55,7 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('confirm.success.load', intl),
+        message: i18n('confirm.success.load', intl),
       })
     )
   }
@@ -63,7 +63,7 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
   return (
     <Space spacing={6}>
       <Typography variant="body2" color="textSecondary">
-        {T('newE.byYAMLDesc')}
+        {i18n('newE.byYAMLDesc')}
       </Typography>
       <Paper sx={{ height: 600, p: 0 }}>
         <YAMLEditor mountEditor={setYAMLEditor} aceProps={{ onChange }} />
@@ -78,7 +78,7 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
           disabled={empty}
           onClick={handleSubmit}
         >
-          {T('common.submit')}
+          {i18n('common.submit')}
         </Button>
       </Space>
     </Space>

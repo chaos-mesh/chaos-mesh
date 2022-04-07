@@ -74,13 +74,17 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		}
 	}
 
-	res, err := pbClient.ExecStressors(ctx, &pb.ExecStressRequest{
+	req := pb.ExecStressRequest{
 		Scope:           pb.ExecStressRequest_CONTAINER,
 		Target:          containerId,
 		CpuStressors:    cpuStressors,
 		MemoryStressors: memoryStressors,
 		EnterNS:         true,
-	})
+	}
+	if stresschaos.Spec.Stressors.MemoryStressor != nil {
+		req.OomScoreAdj = int32(stresschaos.Spec.Stressors.MemoryStressor.OOMScoreAdj)
+	}
+	res, err := pbClient.ExecStressors(ctx, &req)
 
 	if err != nil {
 		return v1alpha1.NotInjected, err

@@ -23,6 +23,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add time skew for gettimeofday [#2742](https://github.com/chaos-mesh/chaos-mesh/pull/2742)
 - Add support of the Unified cgroup mode (tested with containerd runtime only) for linux stress experiments [#2928](https://github.com/chaos-mesh/chaos-mesh/pull/2928)
 - Add `StatusCheck` CRD [#2954](https://github.com/chaos-mesh/chaos-mesh/pull/2954)
+- Add support for declaring ports in external targets in NetworkChaos experiments [#2932](https://github.com/chaos-mesh/chaos-mesh/pull/2932)
 
 ### Changed
 
@@ -47,6 +48,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Re-implement chaosctl based on ctrlserver [#2950](https://github.com/chaos-mesh/chaos-mesh/pull/2950)
 - Fix wrong zero value of httpchaos replace-body-action[#2990](https://github.com/chaos-mesh/chaos-mesh/pull/2990)
 - Bump gqlgen to v0.17.2 [#3038](https://github.com/chaos-mesh/chaos-mesh/pull/3038)
+- Bump go to v1.18 [#3055](https://github.com/chaos-mesh/chaos-mesh/pull/3055)
 
 ### Deprecated
 

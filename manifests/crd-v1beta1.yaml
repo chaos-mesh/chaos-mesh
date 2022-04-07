@@ -1681,7 +1681,7 @@ spec:
                 type: string
               type: array
             cpuCount:
-              description: the CPU core number need to use, only set it when action
+              description: the CPU core number needs to use, only set it when action
                 is stress
               type: integer
             duration:
@@ -1694,7 +1694,7 @@ spec:
               description: the latency duration for action 'latency', unit ms
               type: integer
             memType:
-              description: the memory type need to locate, only set it when action
+              description: the memory type needs to locate, only set it when action
                 is stress, the value can be 'stack' or 'heap'
               type: string
             method:
@@ -1714,11 +1714,15 @@ spec:
               description: byteman rule name, should be unique, and will use JVMChaos'
                 name if not set
               type: string
+            pid:
+              description: the pid of Java process which needs to attach
+              type: integer
             port:
               description: the port of agent server, default 9277
               format: int32
               type: integer
             ruleData:
+              description: the byteman rule's data for action 'ruleData'
               type: string
             selector:
               description: Selector is used to select pods that are used to inject
@@ -2795,19 +2799,21 @@ spec:
                   description: the method in Java class
                   type: string
                 pid:
-                  description: the pid of Java process which need to attach
+                  description: the pid of Java process which needs to attach
                   type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
               type: object
             jvm-gc:
               properties:
                 pid:
-                  description: the pid of Java process which need to attach
+                  description: the pid of Java process which needs to attach
                   type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
               type: object
             jvm-latency:
@@ -2822,10 +2828,11 @@ spec:
                   description: the method in Java class
                   type: string
                 pid:
-                  description: the pid of Java process which need to attach
+                  description: the pid of Java process which needs to attach
                   type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
               type: object
             jvm-return:
@@ -2837,10 +2844,11 @@ spec:
                   description: the method in Java class
                   type: string
                 pid:
-                  description: the pid of Java process which need to attach
+                  description: the pid of Java process which needs to attach
                   type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
                 value:
                   description: the return value for action 'return'
@@ -2849,10 +2857,11 @@ spec:
             jvm-rule-data:
               properties:
                 pid:
-                  description: the pid of Java process which need to attach
+                  description: the pid of Java process which needs to attach
                   type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
                 rule-data:
                   description: RuleData used to save the rule file's data, will use
@@ -2870,10 +2879,11 @@ spec:
                     is stress, the value can be 'stack' or 'heap'
                   type: string
                 pid:
-                  description: the pid of Java process which need to attach
+                  description: the pid of Java process which needs to attach
                   type: integer
                 port:
-                  description: the port of agent server
+                  description: the port of agent server, default 9277
+                  format: int32
                   type: integer
               type: object
             mode:
@@ -3091,6 +3101,9 @@ spec:
               properties:
                 process:
                   description: the process name or the process ID
+                  type: string
+                recoverCmd:
+                  description: the command to be run when recovering experiment
                   type: string
                 signal:
                   description: the signal number to send
@@ -4034,18 +4047,45 @@ spec:
               items:
                 description: RawIPSet represents an ipset on specific pod
                 properties:
+                  cidrAndPorts:
+                    description: The contents of ipset. Only available when IPSetType
+                      is NetPortIPSet.
+                    items:
+                      description: CidrAndPort represents CIDR and port pair
+                      properties:
+                        cidr:
+                          type: string
+                        port:
+                          maximum: 65535
+                          minimum: 1
+                          type: integer
+                      required:
+                      - cidr
+                      - port
+                      type: object
+                    type: array
                   cidrs:
-                    description: The contents of ipset
+                    description: The contents of ipset. Only available when IPSetType
+                      is NetIPSet.
                     items:
                       type: string
                     type: array
+                  ipsetType:
+                    description: IPSetType represents the type of IP set
+                    type: string
                   name:
                     description: The name of ipset
                     type: string
+                  setNames:
+                    description: The contents of ipset. Only available when IPSetType
+                      is SetIPSet.
+                    items:
+                      type: string
+                    type: array
                   source:
                     type: string
                 required:
-                - cidrs
+                - ipsetType
                 - name
                 - source
                 type: object
@@ -5205,8 +5245,8 @@ spec:
                     type: string
                   type: array
                 cpuCount:
-                  description: the CPU core number need to use, only set it when action
-                    is stress
+                  description: the CPU core number needs to use, only set it when
+                    action is stress
                   type: integer
                 duration:
                   description: Duration represents the duration of the chaos action
@@ -5218,7 +5258,7 @@ spec:
                   description: the latency duration for action 'latency', unit ms
                   type: integer
                 memType:
-                  description: the memory type need to locate, only set it when action
+                  description: the memory type needs to locate, only set it when action
                     is stress, the value can be 'stack' or 'heap'
                   type: string
                 method:
@@ -5238,11 +5278,15 @@ spec:
                   description: byteman rule name, should be unique, and will use JVMChaos'
                     name if not set
                   type: string
+                pid:
+                  description: the pid of Java process which needs to attach
+                  type: integer
                 port:
                   description: the port of agent server, default 9277
                   format: int32
                   type: integer
                 ruleData:
+                  description: the byteman rule's data for action 'ruleData'
                   type: string
                 selector:
                   description: Selector is used to select pods that are used to inject
@@ -6021,19 +6065,21 @@ spec:
                       description: the method in Java class
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 jvm-gc:
                   properties:
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 jvm-latency:
@@ -6049,10 +6095,11 @@ spec:
                       description: the method in Java class
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 jvm-return:
@@ -6064,10 +6111,11 @@ spec:
                       description: the method in Java class
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                     value:
                       description: the return value for action 'return'
@@ -6076,10 +6124,11 @@ spec:
                 jvm-rule-data:
                   properties:
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                     rule-data:
                       description: RuleData used to save the rule file's data, will
@@ -6097,10 +6146,11 @@ spec:
                         action is stress, the value can be 'stack' or 'heap'
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 mode:
@@ -6327,6 +6377,9 @@ spec:
                   properties:
                     process:
                       description: the process name or the process ID
+                      type: string
+                    recoverCmd:
+                      description: the command to be run when recovering experiment
                       type: string
                     signal:
                       description: the signal number to send
@@ -6753,6 +6806,11 @@ spec:
                     memory:
                       description: MemoryStressor stresses virtual memory out
                       properties:
+                        oomScoreAdj:
+                          description: OOMScoreAdj sets the oom_score_adj of the stress
+                            process. See `man 5 proc` to know more about this option.
+                          minimum: -1000
+                          type: integer
                         options:
                           description: extend stress-ng options
                           items:
@@ -7952,7 +8010,7 @@ spec:
                               type: string
                             type: array
                           cpuCount:
-                            description: the CPU core number need to use, only set
+                            description: the CPU core number needs to use, only set
                               it when action is stress
                             type: integer
                           duration:
@@ -7968,7 +8026,7 @@ spec:
                               unit ms
                             type: integer
                           memType:
-                            description: the memory type need to locate, only set
+                            description: the memory type needs to locate, only set
                               it when action is stress, the value can be 'stack' or
                               'heap'
                             type: string
@@ -7990,11 +8048,15 @@ spec:
                             description: byteman rule name, should be unique, and
                               will use JVMChaos' name if not set
                             type: string
+                          pid:
+                            description: the pid of Java process which needs to attach
+                            type: integer
                           port:
                             description: the port of agent server, default 9277
                             format: int32
                             type: integer
                           ruleData:
+                            description: the byteman rule's data for action 'ruleData'
                             type: string
                           selector:
                             description: Selector is used to select pods that are
@@ -8820,21 +8882,23 @@ spec:
                                 description: the method in Java class
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           jvm-gc:
                             properties:
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           jvm-latency:
@@ -8850,11 +8914,12 @@ spec:
                                 description: the method in Java class
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           jvm-return:
@@ -8866,11 +8931,12 @@ spec:
                                 description: the method in Java class
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                               value:
                                 description: the return value for action 'return'
@@ -8879,11 +8945,12 @@ spec:
                           jvm-rule-data:
                             properties:
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                               rule-data:
                                 description: RuleData used to save the rule file's
@@ -8902,11 +8969,12 @@ spec:
                                   or 'heap'
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           mode:
@@ -9143,6 +9211,10 @@ spec:
                             properties:
                               process:
                                 description: the process name or the process ID
+                                type: string
+                              recoverCmd:
+                                description: the command to be run when recovering
+                                  experiment
                                 type: string
                               signal:
                                 description: the signal number to send
@@ -10444,7 +10516,7 @@ spec:
                                   type: string
                                 type: array
                               cpuCount:
-                                description: the CPU core number need to use, only
+                                description: the CPU core number needs to use, only
                                   set it when action is stress
                                 type: integer
                               duration:
@@ -10460,7 +10532,7 @@ spec:
                                   unit ms
                                 type: integer
                               memType:
-                                description: the memory type need to locate, only
+                                description: the memory type needs to locate, only
                                   set it when action is stress, the value can be 'stack'
                                   or 'heap'
                                 type: string
@@ -10482,11 +10554,16 @@ spec:
                                 description: byteman rule name, should be unique,
                                   and will use JVMChaos' name if not set
                                 type: string
+                              pid:
+                                description: the pid of Java process which needs to
+                                  attach
+                                type: integer
                               port:
                                 description: the port of agent server, default 9277
                                 format: int32
                                 type: integer
                               ruleData:
+                                description: the byteman rule's data for action 'ruleData'
                                 type: string
                               selector:
                                 description: Selector is used to select pods that
@@ -11334,21 +11411,25 @@ spec:
                                     description: the method in Java class
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               jvm-gc:
                                 properties:
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               jvm-latency:
@@ -11364,11 +11445,13 @@ spec:
                                     description: the method in Java class
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               jvm-return:
@@ -11380,11 +11463,13 @@ spec:
                                     description: the method in Java class
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                   value:
                                     description: the return value for action 'return'
@@ -11393,11 +11478,13 @@ spec:
                               jvm-rule-data:
                                 properties:
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                   rule-data:
                                     description: RuleData used to save the rule file's
@@ -11416,11 +11503,13 @@ spec:
                                       be 'stack' or 'heap'
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               mode:
@@ -11667,6 +11756,10 @@ spec:
                                 properties:
                                   process:
                                     description: the process name or the process ID
+                                    type: string
+                                  recoverCmd:
+                                    description: the command to be run when recovering
+                                      experiment
                                     type: string
                                   signal:
                                     description: the signal number to send
@@ -12127,6 +12220,12 @@ spec:
                                     description: MemoryStressor stresses virtual memory
                                       out
                                     properties:
+                                      oomScoreAdj:
+                                        description: OOMScoreAdj sets the oom_score_adj
+                                          of the stress process. See `man 5 proc`
+                                          to know more about this option.
+                                        minimum: -1000
+                                        type: integer
                                       options:
                                         description: extend stress-ng options
                                         items:
@@ -12486,6 +12585,12 @@ spec:
                                 description: MemoryStressor stresses virtual memory
                                   out
                                 properties:
+                                  oomScoreAdj:
+                                    description: OOMScoreAdj sets the oom_score_adj
+                                      of the stress process. See `man 5 proc` to know
+                                      more about this option.
+                                    minimum: -1000
+                                    type: integer
                                   options:
                                     description: extend stress-ng options
                                     items:
@@ -16163,6 +16268,11 @@ spec:
                 memory:
                   description: MemoryStressor stresses virtual memory out
                   properties:
+                    oomScoreAdj:
+                      description: OOMScoreAdj sets the oom_score_adj of the stress
+                        process. See `man 5 proc` to know more about this option.
+                      minimum: -1000
+                      type: integer
                     options:
                       description: extend stress-ng options
                       items:
@@ -17514,8 +17624,8 @@ spec:
                     type: string
                   type: array
                 cpuCount:
-                  description: the CPU core number need to use, only set it when action
-                    is stress
+                  description: the CPU core number needs to use, only set it when
+                    action is stress
                   type: integer
                 duration:
                   description: Duration represents the duration of the chaos action
@@ -17527,7 +17637,7 @@ spec:
                   description: the latency duration for action 'latency', unit ms
                   type: integer
                 memType:
-                  description: the memory type need to locate, only set it when action
+                  description: the memory type needs to locate, only set it when action
                     is stress, the value can be 'stack' or 'heap'
                   type: string
                 method:
@@ -17547,11 +17657,15 @@ spec:
                   description: byteman rule name, should be unique, and will use JVMChaos'
                     name if not set
                   type: string
+                pid:
+                  description: the pid of Java process which needs to attach
+                  type: integer
                 port:
                   description: the port of agent server, default 9277
                   format: int32
                   type: integer
                 ruleData:
+                  description: the byteman rule's data for action 'ruleData'
                   type: string
                 selector:
                   description: Selector is used to select pods that are used to inject
@@ -18330,19 +18444,21 @@ spec:
                       description: the method in Java class
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 jvm-gc:
                   properties:
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 jvm-latency:
@@ -18358,10 +18474,11 @@ spec:
                       description: the method in Java class
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 jvm-return:
@@ -18373,10 +18490,11 @@ spec:
                       description: the method in Java class
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                     value:
                       description: the return value for action 'return'
@@ -18385,10 +18503,11 @@ spec:
                 jvm-rule-data:
                   properties:
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                     rule-data:
                       description: RuleData used to save the rule file's data, will
@@ -18406,10 +18525,11 @@ spec:
                         action is stress, the value can be 'stack' or 'heap'
                       type: string
                     pid:
-                      description: the pid of Java process which need to attach
+                      description: the pid of Java process which needs to attach
                       type: integer
                     port:
-                      description: the port of agent server
+                      description: the port of agent server, default 9277
+                      format: int32
                       type: integer
                   type: object
                 mode:
@@ -18636,6 +18756,9 @@ spec:
                   properties:
                     process:
                       description: the process name or the process ID
+                      type: string
+                    recoverCmd:
+                      description: the command to be run when recovering experiment
                       type: string
                     signal:
                       description: the signal number to send
@@ -19864,7 +19987,7 @@ spec:
                         type: string
                       type: array
                     cpuCount:
-                      description: the CPU core number need to use, only set it when
+                      description: the CPU core number needs to use, only set it when
                         action is stress
                       type: integer
                     duration:
@@ -19878,7 +20001,7 @@ spec:
                         ms
                       type: integer
                     memType:
-                      description: the memory type need to locate, only set it when
+                      description: the memory type needs to locate, only set it when
                         action is stress, the value can be 'stack' or 'heap'
                       type: string
                     method:
@@ -19898,11 +20021,15 @@ spec:
                       description: byteman rule name, should be unique, and will use
                         JVMChaos' name if not set
                       type: string
+                    pid:
+                      description: the pid of Java process which needs to attach
+                      type: integer
                     port:
                       description: the port of agent server, default 9277
                       format: int32
                       type: integer
                     ruleData:
+                      description: the byteman rule's data for action 'ruleData'
                       type: string
                     selector:
                       description: Selector is used to select pods that are used to
@@ -20693,19 +20820,21 @@ spec:
                           description: the method in Java class
                           type: string
                         pid:
-                          description: the pid of Java process which need to attach
+                          description: the pid of Java process which needs to attach
                           type: integer
                         port:
-                          description: the port of agent server
+                          description: the port of agent server, default 9277
+                          format: int32
                           type: integer
                       type: object
                     jvm-gc:
                       properties:
                         pid:
-                          description: the pid of Java process which need to attach
+                          description: the pid of Java process which needs to attach
                           type: integer
                         port:
-                          description: the port of agent server
+                          description: the port of agent server, default 9277
+                          format: int32
                           type: integer
                       type: object
                     jvm-latency:
@@ -20721,10 +20850,11 @@ spec:
                           description: the method in Java class
                           type: string
                         pid:
-                          description: the pid of Java process which need to attach
+                          description: the pid of Java process which needs to attach
                           type: integer
                         port:
-                          description: the port of agent server
+                          description: the port of agent server, default 9277
+                          format: int32
                           type: integer
                       type: object
                     jvm-return:
@@ -20736,10 +20866,11 @@ spec:
                           description: the method in Java class
                           type: string
                         pid:
-                          description: the pid of Java process which need to attach
+                          description: the pid of Java process which needs to attach
                           type: integer
                         port:
-                          description: the port of agent server
+                          description: the port of agent server, default 9277
+                          format: int32
                           type: integer
                         value:
                           description: the return value for action 'return'
@@ -20748,10 +20879,11 @@ spec:
                     jvm-rule-data:
                       properties:
                         pid:
-                          description: the pid of Java process which need to attach
+                          description: the pid of Java process which needs to attach
                           type: integer
                         port:
-                          description: the port of agent server
+                          description: the port of agent server, default 9277
+                          format: int32
                           type: integer
                         rule-data:
                           description: RuleData used to save the rule file's data,
@@ -20769,10 +20901,11 @@ spec:
                             when action is stress, the value can be 'stack' or 'heap'
                           type: string
                         pid:
-                          description: the pid of Java process which need to attach
+                          description: the pid of Java process which needs to attach
                           type: integer
                         port:
-                          description: the port of agent server
+                          description: the port of agent server, default 9277
+                          format: int32
                           type: integer
                       type: object
                     mode:
@@ -20999,6 +21132,9 @@ spec:
                       properties:
                         process:
                           description: the process name or the process ID
+                          type: string
+                        recoverCmd:
+                          description: the command to be run when recovering experiment
                           type: string
                         signal:
                           description: the signal number to send
@@ -21428,6 +21564,12 @@ spec:
                         memory:
                           description: MemoryStressor stresses virtual memory out
                           properties:
+                            oomScoreAdj:
+                              description: OOMScoreAdj sets the oom_score_adj of the
+                                stress process. See `man 5 proc` to know more about
+                                this option.
+                              minimum: -1000
+                              type: integer
                             options:
                               description: extend stress-ng options
                               items:
@@ -22654,7 +22796,7 @@ spec:
                                   type: string
                                 type: array
                               cpuCount:
-                                description: the CPU core number need to use, only
+                                description: the CPU core number needs to use, only
                                   set it when action is stress
                                 type: integer
                               duration:
@@ -22670,7 +22812,7 @@ spec:
                                   unit ms
                                 type: integer
                               memType:
-                                description: the memory type need to locate, only
+                                description: the memory type needs to locate, only
                                   set it when action is stress, the value can be 'stack'
                                   or 'heap'
                                 type: string
@@ -22692,11 +22834,16 @@ spec:
                                 description: byteman rule name, should be unique,
                                   and will use JVMChaos' name if not set
                                 type: string
+                              pid:
+                                description: the pid of Java process which needs to
+                                  attach
+                                type: integer
                               port:
                                 description: the port of agent server, default 9277
                                 format: int32
                                 type: integer
                               ruleData:
+                                description: the byteman rule's data for action 'ruleData'
                                 type: string
                               selector:
                                 description: Selector is used to select pods that
@@ -23546,21 +23693,25 @@ spec:
                                     description: the method in Java class
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               jvm-gc:
                                 properties:
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               jvm-latency:
@@ -23576,11 +23727,13 @@ spec:
                                     description: the method in Java class
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               jvm-return:
@@ -23592,11 +23745,13 @@ spec:
                                     description: the method in Java class
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                   value:
                                     description: the return value for action 'return'
@@ -23605,11 +23760,13 @@ spec:
                               jvm-rule-data:
                                 properties:
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                   rule-data:
                                     description: RuleData used to save the rule file's
@@ -23628,11 +23785,13 @@ spec:
                                       be 'stack' or 'heap'
                                     type: string
                                   pid:
-                                    description: the pid of Java process which need
+                                    description: the pid of Java process which needs
                                       to attach
                                     type: integer
                                   port:
-                                    description: the port of agent server
+                                    description: the port of agent server, default
+                                      9277
+                                    format: int32
                                     type: integer
                                 type: object
                               mode:
@@ -23879,6 +24038,10 @@ spec:
                                 properties:
                                   process:
                                     description: the process name or the process ID
+                                    type: string
+                                  recoverCmd:
+                                    description: the command to be run when recovering
+                                      experiment
                                     type: string
                                   signal:
                                     description: the signal number to send
@@ -25220,7 +25383,7 @@ spec:
                                       type: string
                                     type: array
                                   cpuCount:
-                                    description: the CPU core number need to use,
+                                    description: the CPU core number needs to use,
                                       only set it when action is stress
                                     type: integer
                                   duration:
@@ -25236,9 +25399,9 @@ spec:
                                       unit ms
                                     type: integer
                                   memType:
-                                    description: the memory type need to locate, only
-                                      set it when action is stress, the value can
-                                      be 'stack' or 'heap'
+                                    description: the memory type needs to locate,
+                                      only set it when action is stress, the value
+                                      can be 'stack' or 'heap'
                                     type: string
                                   method:
                                     description: the method in Java class
@@ -25258,12 +25421,18 @@ spec:
                                     description: byteman rule name, should be unique,
                                       and will use JVMChaos' name if not set
                                     type: string
+                                  pid:
+                                    description: the pid of Java process which needs
+                                      to attach
+                                    type: integer
                                   port:
                                     description: the port of agent server, default
                                       9277
                                     format: int32
                                     type: integer
                                   ruleData:
+                                    description: the byteman rule's data for action
+                                      'ruleData'
                                     type: string
                                   selector:
                                     description: Selector is used to select pods that
@@ -26144,20 +26313,24 @@ spec:
                                         type: string
                                       pid:
                                         description: the pid of Java process which
-                                          need to attach
+                                          needs to attach
                                         type: integer
                                       port:
-                                        description: the port of agent server
+                                        description: the port of agent server, default
+                                          9277
+                                        format: int32
                                         type: integer
                                     type: object
                                   jvm-gc:
                                     properties:
                                       pid:
                                         description: the pid of Java process which
-                                          need to attach
+                                          needs to attach
                                         type: integer
                                       port:
-                                        description: the port of agent server
+                                        description: the port of agent server, default
+                                          9277
+                                        format: int32
                                         type: integer
                                     type: object
                                   jvm-latency:
@@ -26174,10 +26347,12 @@ spec:
                                         type: string
                                       pid:
                                         description: the pid of Java process which
-                                          need to attach
+                                          needs to attach
                                         type: integer
                                       port:
-                                        description: the port of agent server
+                                        description: the port of agent server, default
+                                          9277
+                                        format: int32
                                         type: integer
                                     type: object
                                   jvm-return:
@@ -26190,10 +26365,12 @@ spec:
                                         type: string
                                       pid:
                                         description: the pid of Java process which
-                                          need to attach
+                                          needs to attach
                                         type: integer
                                       port:
-                                        description: the port of agent server
+                                        description: the port of agent server, default
+                                          9277
+                                        format: int32
                                         type: integer
                                       value:
                                         description: the return value for action 'return'
@@ -26203,10 +26380,12 @@ spec:
                                     properties:
                                       pid:
                                         description: the pid of Java process which
-                                          need to attach
+                                          needs to attach
                                         type: integer
                                       port:
-                                        description: the port of agent server
+                                        description: the port of agent server, default
+                                          9277
+                                        format: int32
                                         type: integer
                                       rule-data:
                                         description: RuleData used to save the rule
@@ -26226,10 +26405,12 @@ spec:
                                         type: string
                                       pid:
                                         description: the pid of Java process which
-                                          need to attach
+                                          needs to attach
                                         type: integer
                                       port:
-                                        description: the port of agent server
+                                        description: the port of agent server, default
+                                          9277
+                                        format: int32
                                         type: integer
                                     type: object
                                   mode:
@@ -26491,6 +26672,10 @@ spec:
                                       process:
                                         description: the process name or the process
                                           ID
+                                        type: string
+                                      recoverCmd:
+                                        description: the command to be run when recovering
+                                          experiment
                                         type: string
                                       signal:
                                         description: the signal number to send
@@ -26969,6 +27154,12 @@ spec:
                                         description: MemoryStressor stresses virtual
                                           memory out
                                         properties:
+                                          oomScoreAdj:
+                                            description: OOMScoreAdj sets the oom_score_adj
+                                              of the stress process. See `man 5 proc`
+                                              to know more about this option.
+                                            minimum: -1000
+                                            type: integer
                                           options:
                                             description: extend stress-ng options
                                             items:
@@ -27338,6 +27529,12 @@ spec:
                                     description: MemoryStressor stresses virtual memory
                                       out
                                     properties:
+                                      oomScoreAdj:
+                                        description: OOMScoreAdj sets the oom_score_adj
+                                          of the stress process. See `man 5 proc`
+                                          to know more about this option.
+                                        minimum: -1000
+                                        type: integer
                                       options:
                                         description: extend stress-ng options
                                         items:
@@ -30862,6 +31059,11 @@ spec:
                     memory:
                       description: MemoryStressor stresses virtual memory out
                       properties:
+                        oomScoreAdj:
+                          description: OOMScoreAdj sets the oom_score_adj of the stress
+                            process. See `man 5 proc` to know more about this option.
+                          minimum: -1000
+                          type: integer
                         options:
                           description: extend stress-ng options
                           items:
@@ -34904,7 +35106,7 @@ spec:
                           type: string
                         type: array
                       cpuCount:
-                        description: the CPU core number need to use, only set it
+                        description: the CPU core number needs to use, only set it
                           when action is stress
                         type: integer
                       duration:
@@ -34920,8 +35122,8 @@ spec:
                           ms
                         type: integer
                       memType:
-                        description: the memory type need to locate, only set it when
-                          action is stress, the value can be 'stack' or 'heap'
+                        description: the memory type needs to locate, only set it
+                          when action is stress, the value can be 'stack' or 'heap'
                         type: string
                       method:
                         description: the method in Java class
@@ -34940,11 +35142,15 @@ spec:
                         description: byteman rule name, should be unique, and will
                           use JVMChaos' name if not set
                         type: string
+                      pid:
+                        description: the pid of Java process which needs to attach
+                        type: integer
                       port:
                         description: the port of agent server, default 9277
                         format: int32
                         type: integer
                       ruleData:
+                        description: the byteman rule's data for action 'ruleData'
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -35747,19 +35953,21 @@ spec:
                             description: the method in Java class
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       jvm-gc:
                         properties:
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       jvm-latency:
@@ -35775,10 +35983,11 @@ spec:
                             description: the method in Java class
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       jvm-return:
@@ -35790,10 +35999,11 @@ spec:
                             description: the method in Java class
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                           value:
                             description: the return value for action 'return'
@@ -35802,10 +36012,11 @@ spec:
                       jvm-rule-data:
                         properties:
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                           rule-data:
                             description: RuleData used to save the rule file's data,
@@ -35824,10 +36035,11 @@ spec:
                               'heap'
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       mode:
@@ -36055,6 +36267,9 @@ spec:
                         properties:
                           process:
                             description: the process name or the process ID
+                            type: string
+                          recoverCmd:
+                            description: the command to be run when recovering experiment
                             type: string
                           signal:
                             description: the signal number to send
@@ -37326,7 +37541,7 @@ spec:
                               type: string
                             type: array
                           cpuCount:
-                            description: the CPU core number need to use, only set
+                            description: the CPU core number needs to use, only set
                               it when action is stress
                             type: integer
                           duration:
@@ -37342,7 +37557,7 @@ spec:
                               unit ms
                             type: integer
                           memType:
-                            description: the memory type need to locate, only set
+                            description: the memory type needs to locate, only set
                               it when action is stress, the value can be 'stack' or
                               'heap'
                             type: string
@@ -37364,11 +37579,15 @@ spec:
                             description: byteman rule name, should be unique, and
                               will use JVMChaos' name if not set
                             type: string
+                          pid:
+                            description: the pid of Java process which needs to attach
+                            type: integer
                           port:
                             description: the port of agent server, default 9277
                             format: int32
                             type: integer
                           ruleData:
+                            description: the byteman rule's data for action 'ruleData'
                             type: string
                           selector:
                             description: Selector is used to select pods that are
@@ -38192,21 +38411,23 @@ spec:
                                 description: the method in Java class
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           jvm-gc:
                             properties:
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           jvm-latency:
@@ -38222,11 +38443,12 @@ spec:
                                 description: the method in Java class
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           jvm-return:
@@ -38238,11 +38460,12 @@ spec:
                                 description: the method in Java class
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                               value:
                                 description: the return value for action 'return'
@@ -38251,11 +38474,12 @@ spec:
                           jvm-rule-data:
                             properties:
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                               rule-data:
                                 description: RuleData used to save the rule file's
@@ -38274,11 +38498,12 @@ spec:
                                   or 'heap'
                                 type: string
                               pid:
-                                description: the pid of Java process which need to
+                                description: the pid of Java process which needs to
                                   attach
                                 type: integer
                               port:
-                                description: the port of agent server
+                                description: the port of agent server, default 9277
+                                format: int32
                                 type: integer
                             type: object
                           mode:
@@ -38515,6 +38740,10 @@ spec:
                             properties:
                               process:
                                 description: the process name or the process ID
+                                type: string
+                              recoverCmd:
+                                description: the command to be run when recovering
+                                  experiment
                                 type: string
                               signal:
                                 description: the signal number to send
@@ -38961,6 +39190,12 @@ spec:
                                 description: MemoryStressor stresses virtual memory
                                   out
                                 properties:
+                                  oomScoreAdj:
+                                    description: OOMScoreAdj sets the oom_score_adj
+                                      of the stress process. See `man 5 proc` to know
+                                      more about this option.
+                                    minimum: -1000
+                                    type: integer
                                   options:
                                     description: extend stress-ng options
                                     items:
@@ -39310,6 +39545,12 @@ spec:
                           memory:
                             description: MemoryStressor stresses virtual memory out
                             properties:
+                              oomScoreAdj:
+                                description: OOMScoreAdj sets the oom_score_adj of
+                                  the stress process. See `man 5 proc` to know more
+                                  about this option.
+                                minimum: -1000
+                                type: integer
                               options:
                                 description: extend stress-ng options
                                 items:

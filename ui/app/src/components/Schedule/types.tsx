@@ -20,7 +20,7 @@ import { FormikProps, FormikValues, getIn } from 'formik'
 import { InputAdornment, MenuItem } from '@mui/material'
 import { SelectField, TextField } from 'components/FormField'
 
-import T from 'components/T'
+import i18n from 'components/T'
 
 export interface ScheduleSpecific {
   schedule: string
@@ -42,39 +42,39 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       fast
       type="number"
       name="spec.historyLimit"
-      label={T('newS.basic.historyLimit')}
+      label={i18n('newS.basic.historyLimit')}
       helperText={
         getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit')
           ? getIn(errors, 'spec.historyLimit')
-          : T('newS.basic.historyLimitHelper')
+          : i18n('newS.basic.historyLimitHelper')
       }
       error={getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit') ? true : false}
     />
     <SelectField
       name="spec.concurrencyPolicy"
-      label={T('newS.basic.concurrencyPolicy')}
+      label={i18n('newS.basic.concurrencyPolicy')}
       helperText={
         getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy')
           ? getIn(errors, 'spec.concurrencyPolicy')
-          : T('newS.basic.concurrencyPolicyHelper')
+          : i18n('newS.basic.concurrencyPolicyHelper')
       }
       error={getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy') ? true : false}
     >
-      <MenuItem value="Forbid">{T('newS.basic.forbid')}</MenuItem>
-      <MenuItem value="Allow">{T('newS.basic.allow')}</MenuItem>
+      <MenuItem value="Forbid">{i18n('newS.basic.forbid')}</MenuItem>
+      <MenuItem value="Allow">{i18n('newS.basic.allow')}</MenuItem>
     </SelectField>
     <TextField
       fast
       type="number"
       name="spec.startingDeadlineSeconds"
-      label={T('newS.basic.startingDeadlineSeconds')}
+      label={i18n('newS.basic.startingDeadlineSeconds')}
       InputProps={{
-        endAdornment: <InputAdornment position="end">{T('common.seconds')}</InputAdornment>,
+        endAdornment: <InputAdornment position="end">{i18n('common.seconds')}</InputAdornment>,
       }}
       helperText={
         getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds')
           ? getIn(errors, 'spec.startingDeadlineSeconds')
-          : T('newS.basic.startingDeadlineSecondsHelper')
+          : i18n('newS.basic.startingDeadlineSecondsHelper')
       }
       error={
         getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds') ? true : false
