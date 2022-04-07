@@ -28,7 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
@@ -127,12 +127,17 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Info("Pod seems already recovered", "pod", decodedContainer.Pod.UID)
 		return v1alpha1.NotInjected, nil
 	}
-	if _, err = pbClient.CancelStressors(ctx, &pb.CancelStressRequest{
-		CpuInstance:     instance.UID,
-		CpuStartTime:    instance.StartTime.UnixNano() / int64(time.Millisecond),
-		MemoryInstance:  instance.MemoryUID,
-		MemoryStartTime: instance.MemoryStartTime.UnixNano() / int64(time.Millisecond),
-	}); err != nil {
+	req := &pb.CancelStressRequest{
+		CpuInstance:    instance.UID,
+		MemoryInstance: instance.MemoryUID,
+	}
+	if instance.StartTime != nil {
+		req.CpuStartTime = instance.StartTime.UnixNano() / int64(time.Millisecond)
+	}
+	if instance.MemoryStartTime != nil {
+		req.MemoryStartTime = instance.MemoryStartTime.UnixNano() / int64(time.Millisecond)
+	}
+	if _, err = pbClient.CancelStressors(ctx, req); err != nil {
 		impl.Log.Error(err, "cancel stressors")
 		return v1alpha1.Injected, nil
 	}
