@@ -24,7 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -33,7 +33,8 @@ var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &test.MockClient{})()
 	logger, err := log.NewDefaultZapLogger()
 	Expect(err).To(BeNil())
-	s, _ := newDaemonServer(crclients.ContainerRuntimeContainerd, nil, logger)
+	s, _ := newDaemonServer(&crclients.CrClientConfig{
+		Runtime: crclients.ContainerRuntimeContainerd}, nil, logger)
 
 	Context("ContainerKill", func() {
 		It("should work", func() {
