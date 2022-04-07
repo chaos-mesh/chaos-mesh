@@ -33,29 +33,69 @@ echo "Deploy web-show for testing"
 wget https://mirrors.chaos-mesh.org/v1.1.2/web-show/deploy.sh
 bash deploy.sh
 
-echo "Deploy busybox for test"
-kubectl run busybox --image=radial/busyboxplus:curl -- sleep 3600
+echo "Deploy busyboxplus for test"
+kubectl run busyboxplus --image=radial/busyboxplus:curl -- sleep 3600
 
 echo "wait pods status to running"
 for ((k=0; k<30; k++)); do
-    if [ $(kubectl get pods -l app=web-show | grep "Running" | wc -l) == 1 ] && [ $(kubectl get pods busybox | grep "Running" | wc -l) == 1 ]; then
+    if [ $(kubectl get pods -l app=web-show | grep "Running" | wc -l) == 1 ] && [ $(kubectl get pods busyboxplus | grep "Running" | wc -l) == 1 ]; then
         break
     fi
     sleep 1
 done
 
 echo "Confirm web-show works well"
-must_contains "$(kubectl exec busybox -- sh -c "curl -I web-show.default:8081")" "HTTP/1.1 200 OK" true
+must_contains "$(kubectl exec busyboxplus -- sh -c "curl -I web-show.default:8081")" "HTTP/1.1 200 OK" true
 
-echo "Run networkchaos"
+# echo "Run networkchaos"
+
+# cat <<EOF >delay.yaml
+# apiVersion: chaos-mesh.org/v1alpha1
+# kind: NetworkChaos
+# metadata:
+#   name: web-show-network-delay
+# spec:
+#   action: delay # the specific chaos action to inject
+#   mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
+#   selector: # pods where to inject chaos actions
+#     namespaces:
+#       - default
+#     labelSelectors:
+#       "app": "web-show"  # the label of the pod for chaos injection
+#   delay:
+#     latency: "10ms"
+# EOF
+# kubectl apply -f delay.yaml
+
+# echo "Confirm networkchaos works well"
+# sleep 1 # TODO: better way to wait for chaos being injected
+
+# latencies=$(kubectl exec busyboxplus -- sh -c "ping -c 10 web-show.default" | grep "bytes from"  | sed 's/.*time=\([0-9]*\).[0-9]* ms.*/\1/g')
+# high_latency_num=0
+# for latency in $latencies
+# do
+#     if [[ "$latency" -ge "10" ]]; then
+#         high_latency_num=`expr $high_latency_num + 1`
+#     fi
+# done
+
+# # about half of the latency should be greater than 10ms
+# if [[ "$high_latency_num" -lt "3" ]] || [[ "$high_latency_num" -gt "6" ]]; then
+#     echo "the chaos dosen't work as expect"
+#     exit 1
+# fi
+
+# echo "Cleaning up networkchaos"
+# kubectl delete -f delay.yaml
+# rm delay.yaml
 
 echo "Run httpchaos"
 
-cat <<EOF >delay.yaml
+cat <<EOF >replace.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: HTTPChaos
 metadata:
-  name: web-show-http-delay
+  name: web-show-http-replace
 spec:
   mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
   selector: # pods where to inject chaos actions
@@ -69,22 +109,22 @@ spec:
   replace:
     code: 404
 EOF
-kubectl apply -f delay.yaml
+kubectl apply -f replace.yaml
 
 echo "Confirm httpchaos works well"
-sleep 5 # TODO: better way to wait for chaos being injected
-must_contains "$(kubectl exec busybox -- sh -c "curl -I web-show.default:8081")" "HTTP/1.1 404 Not Found" true
+sleep 1 # TODO: better way to wait for chaos being injected
+must_contains "$(kubectl exec busyboxplus -- sh -c "curl -I web-show.default:8081")" "HTTP/1.1 404 Not Found" true
 
 echo "Recover"
 ./bin/chaosctl recover httpchaos -l app=web-show
 
 echo "Confirm httpchaos recovered"
-must_contains "$(kubectl exec busybox -- sh -c "curl -I web-show.default:8081")" "HTTP/1.1 200 OK" true
+must_contains "$(kubectl exec busyboxplus -- sh -c "curl -I web-show.default:8081")" "HTTP/1.1 200 OK" true
 
 echo "Cleaning up httpchaos"
-kubectl delete -f delay.yaml
-rm delay.yaml
+kubectl delete -f replace.yaml
+rm replace.yaml
 
-kubectl delete pod busybox
+kubectl delete pod busyboxplus
 bash deploy.sh -d
 rm deploy.sh
