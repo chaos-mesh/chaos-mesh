@@ -38,7 +38,10 @@ Interacting with chaos mesh
   chaosctl debug networkchaos
 
   # show logs of all chaos-mesh components
-  chaosctl logs`,
+  chaosctl logs
+
+  # forcedly recover chaos from pods
+  chaosctl recover networkchaos pod1 -n test`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
