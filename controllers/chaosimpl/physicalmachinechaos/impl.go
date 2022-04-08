@@ -23,8 +23,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -223,7 +223,7 @@ func securityHTTPClient(url string) (*http.Client, error) {
 	}
 
 	pool := x509.NewCertPool()
-	ca, err := ioutil.ReadFile(config.ControllerCfg.ChaosdCACert)
+	ca, err := os.ReadFile(config.ControllerCfg.ChaosdCACert)
 	if err != nil {
 		return nil, errors.Wrap(err, "read ChaosdCACert file failed")
 	}

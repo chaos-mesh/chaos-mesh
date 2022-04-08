@@ -20,7 +20,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import messages from 'i18n/messages'
 
 const Other = () => {
@@ -33,22 +33,22 @@ const Other = () => {
 
   return (
     <>
-      <PaperTop title={T('common.other')} divider />
+      <PaperTop title={i18n('common.other')} divider />
       <Space>
         <TextField
           select
           size="small"
           style={{ width: '50%' }}
-          label={T('settings.theme.title')}
-          helperText={T('settings.theme.choose')}
+          label={i18n('settings.theme.title')}
+          helperText={i18n('settings.theme.choose')}
           value={theme}
           onChange={handleChangeTheme}
         >
           <MenuItem value="light">
-            <Typography>{T('settings.theme.light')}</Typography>
+            <Typography>{i18n('settings.theme.light')}</Typography>
           </MenuItem>
           <MenuItem value="dark">
-            <Typography>{T('settings.theme.dark')}</Typography>
+            <Typography>{i18n('settings.theme.dark')}</Typography>
           </MenuItem>
         </TextField>
 
@@ -56,14 +56,14 @@ const Other = () => {
           select
           size="small"
           style={{ width: '50%' }}
-          label={T('settings.lang.title')}
-          helperText={T('settings.lang.choose')}
+          label={i18n('settings.lang.title')}
+          helperText={i18n('settings.lang.choose')}
           value={lang}
           onChange={handleChangeLang}
         >
           {Object.keys(messages).map((lang) => (
             <MenuItem key={lang} value={lang}>
-              <Typography>{T(`settings.lang.${lang}`)}</Typography>
+              <Typography>{i18n(`settings.lang.${lang}`)}</Typography>
             </MenuItem>
           ))}
         </TextField>

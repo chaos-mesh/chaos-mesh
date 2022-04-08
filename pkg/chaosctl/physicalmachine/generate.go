@@ -18,24 +18,20 @@ package physicalmachine
 import (
 	"crypto"
 	"crypto/x509"
-	"io/ioutil"
+	"os"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 type PhysicalMachineGenerateOptions struct {
-	logger     logr.Logger
 	outputPath string
 	caCertFile string
 	caKeyFile  string
 }
 
-func NewPhysicalMachineGenerateCmd(logger logr.Logger) (*cobra.Command, error) {
-	generateOption := &PhysicalMachineGenerateOptions{
-		logger: logger,
-	}
+func NewPhysicalMachineGenerateCmd() (*cobra.Command, error) {
+	generateOption := &PhysicalMachineGenerateOptions{}
 
 	generateCmd := &cobra.Command{
 		Use:           `generate`,
@@ -81,12 +77,12 @@ func (o *PhysicalMachineGenerateOptions) Run() error {
 }
 
 func GetChaosdCAFileFromFile(caCertFile, caKeyFile string) (*x509.Certificate, crypto.Signer, error) {
-	certData, err := ioutil.ReadFile(caCertFile)
+	certData, err := os.ReadFile(caCertFile)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "cannot read cert file")
 	}
 
-	keyData, err := ioutil.ReadFile(caKeyFile)
+	keyData, err := os.ReadFile(caKeyFile)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "cannot read private key file")
 	}

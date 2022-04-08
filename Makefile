@@ -6,23 +6,27 @@ export IMAGE_REGISTRY ?= ghcr.io
 IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
 
 export IMAGE_TAG ?= latest
-export IMAGE_PROJECT ?= pingcap
+export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
 
-export IMAGE_CHAOS_MESH_PROJECT ?= chaos-mesh
-export IMAGE_CHAOS_DAEMON_PROJECT ?= chaos-mesh
-export IMAGE_CHAOS_DASHBOARD_PROJECT ?= chaos-mesh
+# todo: rename the project/repository of e2e-helper to chaos-mesh
+export IMAGE_E2E_HELPER_PROJECT ?= pingcap
+export IMAGE_CHAOS_MESH_E2E_PROJECT ?= pingcap
 
 ROOT=$(shell pwd)
 HELM_BIN=$(ROOT)/output/bin/helm
 
-# Every branch should have its own image tag for build-env and dev-env
-export IMAGE_BUILD_ENV_PROJECT ?= chaos-mesh
-export IMAGE_BUILD_ENV_REGISTRY ?= ghcr.io
 export IMAGE_BUILD_ENV_BUILD ?= 0
-export IMAGE_DEV_ENV_PROJECT ?= chaos-mesh
-export IMAGE_DEV_ENV_REGISTRY ?= ghcr.io
 export IMAGE_DEV_ENV_BUILD ?= 0
+
+# Every branch should have its own image tag for build-env and dev-env
+# using := with ifeq instead of ?= for performance issue
+ifeq ($(IMAGE_BUILD_ENV_TAG),)
+IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+endif
+ifeq ($(IMAGE_DEV_ENV_TAG),)
+IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+endif
 
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
 GOENV  	:= CGO_ENABLED=0
@@ -299,7 +303,7 @@ tidy: images/dev-env/.dockerbuilt
 
 generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy
-	$(GO) generate ./pkg/ctrlserver/graph
+	$(GO) generate ./pkg/ctrl/server
 
 generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-deepcopy: images/dev-env/.dockerbuilt chaos-build

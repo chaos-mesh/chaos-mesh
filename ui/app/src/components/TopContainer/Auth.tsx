@@ -21,8 +21,8 @@ import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
 import GoogleIcon from '@mui/icons-material/Google'
 import RBACGenerator from 'components/RBACGenerator'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import Token from 'components/Token'
+import i18n from 'components/T'
 import { useNavigate } from 'react-router-dom'
 import { useStoreSelector } from 'store'
 
@@ -48,7 +48,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   return (
     <ConfirmDialog
       open={open}
-      title={T('settings.addToken.prompt')}
+      title={i18n('settings.addToken.prompt')}
       dialogProps={{
         disableEscapeKeyDown: true,
         PaperProps: {
@@ -58,9 +58,9 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
     >
       <Space>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.prompt2')}
+          {i18n('settings.addToken.prompt2')}
           <Link sx={{ cursor: 'pointer' }} onClick={() => setTokenGenOpen(true)}>
-            {T('settings.addToken.prompt3')}
+            {i18n('settings.addToken.prompt3')}
           </Link>
         </Typography>
         <Token onSubmitCallback={handleSubmitCallback} />
@@ -68,7 +68,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
       {gcpSecurityMode && (
         <>
           <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>
-            {T('settings.addToken.or')}
+            {i18n('settings.addToken.or')}
           </Divider>
           <Box textAlign="center">
             <IconButton color="primary" onClick={handleAuthGCP}>
@@ -80,7 +80,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
 
       <ConfirmDialog
         open={tokenGenOpen}
-        title={T('settings.addToken.generator')}
+        title={i18n('settings.addToken.generator')}
         dialogProps={{
           PaperProps: {
             style: { width: 750, maxWidth: 'unset' }, // max-width: 600
@@ -89,7 +89,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
       >
         <RBACGenerator />
         <Box mt={3} textAlign="right">
-          <Button onClick={() => setTokenGenOpen(false)}>{T('common.close')}</Button>
+          <Button onClick={() => setTokenGenOpen(false)}>{i18n('common.close')}</Button>
         </Box>
       </ConfirmDialog>
     </ConfirmDialog>

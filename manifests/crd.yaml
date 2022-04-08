@@ -144,6 +144,147 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
+  name: azurechaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: AzureChaos
+    listKind: AzureChaosList
+    plural: azurechaos
+    singular: azurechaos
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: AzureChaos is the Schema for the azurechaos API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AzureChaosSpec is the content of the specification for an
+              AzureChaos
+            properties:
+              action:
+                description: 'Action defines the specific azure chaos action. Supported
+                  action: vm-stop / vm-restart / disk-detach Default action: vm-stop'
+                enum:
+                - vm-stop
+                - vm-restart
+                - disk-detach
+                type: string
+              diskName:
+                description: DiskName indicates the name of the disk. Needed in disk-detach.
+                type: string
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              lun:
+                description: LUN indicates the Logical Unit Number of the data disk.
+                  Needed in disk-detach.
+                type: integer
+              resourceGroupName:
+                description: ResourceGroupName defines the name of ResourceGroup
+                type: string
+              secretName:
+                description: SecretName defines the name of kubernetes secret. It
+                  is used for Azure credentials.
+                type: string
+              subscriptionID:
+                description: SubscriptionID defines the id of Azure subscription.
+                type: string
+              vmName:
+                description: VMName defines the name of Virtual Machine
+                type: string
+            required:
+            - action
+            - resourceGroupName
+            - subscriptionID
+            - vmName
+            type: object
+          status:
+            description: AzureChaosStatus represents the status of an AzureChaos
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        phase:
+                          type: string
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - phase
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: blockchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -1302,6 +1443,7 @@ spec:
                   action.
                 type: string
               percent:
+                default: 100
                 description: 'Percent defines the percentage of injection errors and
                   provides a number from 0-100. default: 100.'
                 type: integer
@@ -1540,7 +1682,7 @@ spec:
                   type: string
                 type: array
               cpuCount:
-                description: the CPU core number need to use, only set it when action
+                description: the CPU core number needs to use, only set it when action
                   is stress
                 type: integer
               duration:
@@ -1553,7 +1695,7 @@ spec:
                 description: the latency duration for action 'latency', unit ms
                 type: integer
               memType:
-                description: the memory type need to locate, only set it when action
+                description: the memory type needs to locate, only set it when action
                   is stress, the value can be 'stack' or 'heap'
                 type: string
               method:
@@ -1573,11 +1715,15 @@ spec:
                 description: byteman rule name, should be unique, and will use JVMChaos'
                   name if not set
                 type: string
+              pid:
+                description: the pid of Java process which needs to attach
+                type: integer
               port:
                 description: the port of agent server, default 9277
                 format: int32
                 type: integer
               ruleData:
+                description: the byteman rule's data for action 'ruleData'
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -2655,19 +2801,21 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-gc:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-latency:
@@ -2682,10 +2830,11 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-return:
@@ -2697,10 +2846,11 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                   value:
                     description: the return value for action 'return'
@@ -2709,10 +2859,11 @@ spec:
               jvm-rule-data:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                   rule-data:
                     description: RuleData used to save the rule file's data, will
@@ -2730,10 +2881,11 @@ spec:
                       action is stress, the value can be 'stack' or 'heap'
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               mode:
@@ -2959,6 +3111,9 @@ spec:
                 properties:
                   process:
                     description: the process name or the process ID
+                    type: string
+                  recoverCmd:
+                    description: the command to be run when recovering experiment
                     type: string
                   signal:
                     description: the signal number to send
@@ -3899,18 +4054,45 @@ spec:
                 items:
                   description: RawIPSet represents an ipset on specific pod
                   properties:
+                    cidrAndPorts:
+                      description: The contents of ipset. Only available when IPSetType
+                        is NetPortIPSet.
+                      items:
+                        description: CidrAndPort represents CIDR and port pair
+                        properties:
+                          cidr:
+                            type: string
+                          port:
+                            maximum: 65535
+                            minimum: 1
+                            type: integer
+                        required:
+                        - cidr
+                        - port
+                        type: object
+                      type: array
                     cidrs:
-                      description: The contents of ipset
+                      description: The contents of ipset. Only available when IPSetType
+                        is NetIPSet.
                       items:
                         type: string
                       type: array
+                    ipsetType:
+                      description: IPSetType represents the type of IP set
+                      type: string
                     name:
                       description: The name of ipset
                       type: string
+                    setNames:
+                      description: The contents of ipset. Only available when IPSetType
+                        is SetIPSet.
+                      items:
+                        type: string
+                      type: array
                     source:
                       type: string
                   required:
-                  - cidrs
+                  - ipsetType
                   - name
                   - source
                   type: object
@@ -4167,6 +4349,49 @@ spec:
                 - action
                 - awsRegion
                 - ec2Instance
+                type: object
+              azureChaos:
+                description: AzureChaosSpec is the content of the specification for
+                  an AzureChaos
+                properties:
+                  action:
+                    description: 'Action defines the specific azure chaos action.
+                      Supported action: vm-stop / vm-restart / disk-detach Default
+                      action: vm-stop'
+                    enum:
+                    - vm-stop
+                    - vm-restart
+                    - disk-detach
+                    type: string
+                  diskName:
+                    description: DiskName indicates the name of the disk. Needed in
+                      disk-detach.
+                    type: string
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  lun:
+                    description: LUN indicates the Logical Unit Number of the data
+                      disk. Needed in disk-detach.
+                    type: integer
+                  resourceGroupName:
+                    description: ResourceGroupName defines the name of ResourceGroup
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of kubernetes secret.
+                      It is used for Azure credentials.
+                    type: string
+                  subscriptionID:
+                    description: SubscriptionID defines the id of Azure subscription.
+                    type: string
+                  vmName:
+                    description: VMName defines the name of Virtual Machine
+                    type: string
+                required:
+                - action
+                - resourceGroupName
+                - subscriptionID
+                - vmName
                 type: object
               blockChaos:
                 description: BlockChaosSpec is the content of the specification for
@@ -4897,6 +5122,7 @@ spec:
                       chaos action.
                     type: string
                   percent:
+                    default: 100
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
@@ -5033,7 +5259,7 @@ spec:
                       type: string
                     type: array
                   cpuCount:
-                    description: the CPU core number need to use, only set it when
+                    description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
                   duration:
@@ -5046,7 +5272,7 @@ spec:
                     description: the latency duration for action 'latency', unit ms
                     type: integer
                   memType:
-                    description: the memory type need to locate, only set it when
+                    description: the memory type needs to locate, only set it when
                       action is stress, the value can be 'stack' or 'heap'
                     type: string
                   method:
@@ -5066,11 +5292,15 @@ spec:
                     description: byteman rule name, should be unique, and will use
                       JVMChaos' name if not set
                     type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
                   port:
                     description: the port of agent server, default 9277
                     format: int32
                     type: integer
                   ruleData:
+                    description: the byteman rule's data for action 'ruleData'
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -5854,19 +6084,21 @@ spec:
                         description: the method in Java class
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   jvm-gc:
                     properties:
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   jvm-latency:
@@ -5882,10 +6114,11 @@ spec:
                         description: the method in Java class
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   jvm-return:
@@ -5897,10 +6130,11 @@ spec:
                         description: the method in Java class
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                       value:
                         description: the return value for action 'return'
@@ -5909,10 +6143,11 @@ spec:
                   jvm-rule-data:
                     properties:
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                       rule-data:
                         description: RuleData used to save the rule file's data, will
@@ -5930,10 +6165,11 @@ spec:
                           action is stress, the value can be 'stack' or 'heap'
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   mode:
@@ -6160,6 +6396,9 @@ spec:
                     properties:
                       process:
                         description: the process name or the process ID
+                        type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
                         type: string
                       signal:
                         description: the signal number to send
@@ -6587,6 +6826,13 @@ spec:
                       memory:
                         description: MemoryStressor stresses virtual memory out
                         properties:
+                          oomScoreAdj:
+                            default: 0
+                            description: OOMScoreAdj sets the oom_score_adj of the
+                              stress process. See `man 5 proc` to know more about
+                              this option.
+                            minimum: -1000
+                            type: integer
                           options:
                             description: extend stress-ng options
                             items:
@@ -6815,6 +7061,51 @@ spec:
                           - action
                           - awsRegion
                           - ec2Instance
+                          type: object
+                        azureChaos:
+                          description: AzureChaosSpec is the content of the specification
+                            for an AzureChaos
+                          properties:
+                            action:
+                              description: 'Action defines the specific azure chaos
+                                action. Supported action: vm-stop / vm-restart / disk-detach
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              - disk-detach
+                              type: string
+                            diskName:
+                              description: DiskName indicates the name of the disk.
+                                Needed in disk-detach.
+                              type: string
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            lun:
+                              description: LUN indicates the Logical Unit Number of
+                                the data disk. Needed in disk-detach.
+                              type: integer
+                            resourceGroupName:
+                              description: ResourceGroupName defines the name of ResourceGroup
+                              type: string
+                            secretName:
+                              description: SecretName defines the name of kubernetes
+                                secret. It is used for Azure credentials.
+                              type: string
+                            subscriptionID:
+                              description: SubscriptionID defines the id of Azure
+                                subscription.
+                              type: string
+                            vmName:
+                              description: VMName defines the name of Virtual Machine
+                              type: string
+                          required:
+                          - action
+                          - resourceGroupName
+                          - subscriptionID
+                          - vmName
                           type: object
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification
@@ -7617,6 +7908,7 @@ spec:
                                 I/O chaos action.
                               type: string
                             percent:
+                              default: 100
                               description: 'Percent defines the percentage of injection
                                 errors and provides a number from 0-100. default:
                                 100.'
@@ -7762,8 +8054,8 @@ spec:
                                 type: string
                               type: array
                             cpuCount:
-                              description: the CPU core number need to use, only set
-                                it when action is stress
+                              description: the CPU core number needs to use, only
+                                set it when action is stress
                               type: integer
                             duration:
                               description: Duration represents the duration of the
@@ -7778,7 +8070,7 @@ spec:
                                 unit ms
                               type: integer
                             memType:
-                              description: the memory type need to locate, only set
+                              description: the memory type needs to locate, only set
                                 it when action is stress, the value can be 'stack'
                                 or 'heap'
                               type: string
@@ -7800,11 +8092,16 @@ spec:
                               description: byteman rule name, should be unique, and
                                 will use JVMChaos' name if not set
                               type: string
+                            pid:
+                              description: the pid of Java process which needs to
+                                attach
+                              type: integer
                             port:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
                             ruleData:
+                              description: the byteman rule's data for action 'ruleData'
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -8651,21 +8948,23 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-gc:
                               properties:
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-latency:
@@ -8681,11 +8980,12 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-return:
@@ -8697,11 +8997,12 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 value:
                                   description: the return value for action 'return'
@@ -8710,11 +9011,12 @@ spec:
                             jvm-rule-data:
                               properties:
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 rule-data:
                                   description: RuleData used to save the rule file's
@@ -8733,11 +9035,12 @@ spec:
                                     'stack' or 'heap'
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             mode:
@@ -8980,6 +9283,10 @@ spec:
                               properties:
                                 process:
                                   description: the process name or the process ID
+                                  type: string
+                                recoverCmd:
+                                  description: the command to be run when recovering
+                                    experiment
                                   type: string
                                 signal:
                                   description: the signal number to send
@@ -9312,6 +9619,53 @@ spec:
                               - action
                               - awsRegion
                               - ec2Instance
+                              type: object
+                            azureChaos:
+                              description: AzureChaosSpec is the content of the specification
+                                for an AzureChaos
+                              properties:
+                                action:
+                                  description: 'Action defines the specific azure
+                                    chaos action. Supported action: vm-stop / vm-restart
+                                    / disk-detach Default action: vm-stop'
+                                  enum:
+                                  - vm-stop
+                                  - vm-restart
+                                  - disk-detach
+                                  type: string
+                                diskName:
+                                  description: DiskName indicates the name of the
+                                    disk. Needed in disk-detach.
+                                  type: string
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                lun:
+                                  description: LUN indicates the Logical Unit Number
+                                    of the data disk. Needed in disk-detach.
+                                  type: integer
+                                resourceGroupName:
+                                  description: ResourceGroupName defines the name
+                                    of ResourceGroup
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of kubernetes
+                                    secret. It is used for Azure credentials.
+                                  type: string
+                                subscriptionID:
+                                  description: SubscriptionID defines the id of Azure
+                                    subscription.
+                                  type: string
+                                vmName:
+                                  description: VMName defines the name of Virtual
+                                    Machine
+                                  type: string
+                              required:
+                              - action
+                              - resourceGroupName
+                              - subscriptionID
+                              - vmName
                               type: object
                             blockChaos:
                               description: BlockChaosSpec is the content of the specification
@@ -10110,6 +10464,7 @@ spec:
                                     injecting I/O chaos action.
                                   type: string
                                 percent:
+                                  default: 100
                                   description: 'Percent defines the percentage of
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
@@ -10260,7 +10615,7 @@ spec:
                                     type: string
                                   type: array
                                 cpuCount:
-                                  description: the CPU core number need to use, only
+                                  description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
                                 duration:
@@ -10276,7 +10631,7 @@ spec:
                                     unit ms
                                   type: integer
                                 memType:
-                                  description: the memory type need to locate, only
+                                  description: the memory type needs to locate, only
                                     set it when action is stress, the value can be
                                     'stack' or 'heap'
                                   type: string
@@ -10298,11 +10653,17 @@ spec:
                                   description: byteman rule name, should be unique,
                                     and will use JVMChaos' name if not set
                                   type: string
+                                pid:
+                                  description: the pid of Java process which needs
+                                    to attach
+                                  type: integer
                                 port:
                                   description: the port of agent server, default 9277
                                   format: int32
                                   type: integer
                                 ruleData:
+                                  description: the byteman rule's data for action
+                                    'ruleData'
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -11173,21 +11534,25 @@ spec:
                                       description: the method in Java class
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 jvm-gc:
                                   properties:
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 jvm-latency:
@@ -11203,11 +11568,13 @@ spec:
                                       description: the method in Java class
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 jvm-return:
@@ -11219,11 +11586,13 @@ spec:
                                       description: the method in Java class
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                     value:
                                       description: the return value for action 'return'
@@ -11232,11 +11601,13 @@ spec:
                                 jvm-rule-data:
                                   properties:
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                     rule-data:
                                       description: RuleData used to save the rule
@@ -11255,11 +11626,13 @@ spec:
                                         can be 'stack' or 'heap'
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 mode:
@@ -11511,6 +11884,10 @@ spec:
                                     process:
                                       description: the process name or the process
                                         ID
+                                      type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
                                       type: string
                                     signal:
                                       description: the signal number to send
@@ -11985,6 +12362,13 @@ spec:
                                       description: MemoryStressor stresses virtual
                                         memory out
                                       properties:
+                                        oomScoreAdj:
+                                          default: 0
+                                          description: OOMScoreAdj sets the oom_score_adj
+                                            of the stress process. See `man 5 proc`
+                                            to know more about this option.
+                                          minimum: -1000
+                                          type: integer
                                         options:
                                           description: extend stress-ng options
                                           items:
@@ -12351,6 +12735,13 @@ spec:
                                   description: MemoryStressor stresses virtual memory
                                     out
                                   properties:
+                                    oomScoreAdj:
+                                      default: 0
+                                      description: OOMScoreAdj sets the oom_score_adj
+                                        of the stress process. See `man 5 proc` to
+                                        know more about this option.
+                                      minimum: -1000
+                                      type: integer
                                     options:
                                       description: extend stress-ng options
                                       items:
@@ -15714,6 +16105,208 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
+  name: statuschecks.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: StatusCheck
+    listKind: StatusCheckList
+    plural: statuschecks
+    singular: statuscheck
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a status check
+            properties:
+              duration:
+                description: Duration defines the duration of the whole status check
+                  if the number of failed execution does not exceed the failure threshold.
+                  Duration is available to both `Synchronous` and `Continuous` mode.
+                  A duration string is a possibly signed sequence of decimal numbers,
+                  each with optional fraction and a unit suffix, such as "300ms",
+                  "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
+                  "s", "m", "h".
+                type: string
+              failureThreshold:
+                default: 3
+                description: FailureThreshold defines the minimum consecutive failure
+                  for the status check to be considered failed.
+                minimum: 1
+                type: integer
+              http:
+                properties:
+                  body:
+                    type: string
+                  criteria:
+                    description: Criteria defines how to determine the result of the
+                      status check.
+                    properties:
+                      statusCode:
+                        description: StatusCode defines the expected http status code
+                          for the request. A statusCode string could be a single code
+                          (e.g. 200), or an inclusive range (e.g. 200-400, both `200`
+                          and `400` are included).
+                        type: string
+                    required:
+                    - statusCode
+                    type: object
+                  headers:
+                    additionalProperties:
+                      items:
+                        type: string
+                      type: array
+                    description: "A Header represents the key-value pairs in an HTTP
+                      header. \n The keys should be in canonical form, as returned
+                      by CanonicalHeaderKey."
+                    type: object
+                  method:
+                    default: GET
+                    enum:
+                    - GET
+                    - POST
+                    type: string
+                  url:
+                    type: string
+                required:
+                - criteria
+                - url
+                type: object
+              intervalSeconds:
+                default: 10
+                description: IntervalSeconds defines how often (in seconds) to perform
+                  an execution of status check.
+                minimum: 1
+                type: integer
+              mode:
+                description: 'Mode defines the execution mode of the status check.
+                  Support type: Synchronous / Continuous'
+                enum:
+                - Synchronous
+                - Continuous
+                type: string
+              recordsHistoryLimit:
+                default: 100
+                description: RecordsHistoryLimit defines the number of record to retain.
+                maximum: 1000
+                minimum: 1
+                type: integer
+              successThreshold:
+                default: 1
+                description: SuccessThreshold defines the minimum consecutive successes
+                  for the status check to be considered successful. SuccessThreshold
+                  only works for `Synchronous` mode.
+                minimum: 1
+                type: integer
+              timeoutSeconds:
+                default: 1
+                description: TimeoutSeconds defines the number of seconds after which
+                  an execution of status check times out.
+                minimum: 1
+                type: integer
+              type:
+                default: HTTP
+                description: 'Type defines the specific status check type. Support
+                  type: HTTP'
+                enum:
+                - HTTP
+                type: string
+            required:
+            - type
+            type: object
+          status:
+            description: Most recently observed status of status check
+            properties:
+              completionTime:
+                description: CompletionTime represents time when the status check
+                  was completed.
+                format: date-time
+                type: string
+              conditions:
+                description: Conditions represents the latest available observations
+                  of a StatusCheck's current state.
+                items:
+                  properties:
+                    lastProbeTime:
+                      format: date-time
+                      type: string
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastProbeTime
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              count:
+                description: Count represents the total number of the status check
+                  executed.
+                format: int64
+                type: integer
+              records:
+                description: Records contains the history of the execution of StatusCheck.
+                items:
+                  properties:
+                    outcome:
+                      type: string
+                    startTime:
+                      format: date-time
+                      type: string
+                  required:
+                  - outcome
+                  - startTime
+                  type: object
+                type: array
+              startTime:
+                description: StartTime represents time when the status check started
+                  to execute.
+                format: date-time
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: stresschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -15896,6 +16489,12 @@ spec:
                   memory:
                     description: MemoryStressor stresses virtual memory out
                     properties:
+                      oomScoreAdj:
+                        default: 0
+                        description: OOMScoreAdj sets the oom_score_adj of the stress
+                          process. See `man 5 proc` to know more about this option.
+                        minimum: -1000
+                        type: integer
                       options:
                         description: extend stress-ng options
                         items:
@@ -16323,6 +16922,49 @@ spec:
                 - action
                 - awsRegion
                 - ec2Instance
+                type: object
+              azureChaos:
+                description: AzureChaosSpec is the content of the specification for
+                  an AzureChaos
+                properties:
+                  action:
+                    description: 'Action defines the specific azure chaos action.
+                      Supported action: vm-stop / vm-restart / disk-detach Default
+                      action: vm-stop'
+                    enum:
+                    - vm-stop
+                    - vm-restart
+                    - disk-detach
+                    type: string
+                  diskName:
+                    description: DiskName indicates the name of the disk. Needed in
+                      disk-detach.
+                    type: string
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  lun:
+                    description: LUN indicates the Logical Unit Number of the data
+                      disk. Needed in disk-detach.
+                    type: integer
+                  resourceGroupName:
+                    description: ResourceGroupName defines the name of ResourceGroup
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of kubernetes secret.
+                      It is used for Azure credentials.
+                    type: string
+                  subscriptionID:
+                    description: SubscriptionID defines the id of Azure subscription.
+                    type: string
+                  vmName:
+                    description: VMName defines the name of Virtual Machine
+                    type: string
+                required:
+                - action
+                - resourceGroupName
+                - subscriptionID
+                - vmName
                 type: object
               blockChaos:
                 description: BlockChaosSpec is the content of the specification for
@@ -17068,6 +17710,7 @@ spec:
                       chaos action.
                     type: string
                   percent:
+                    default: 100
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
@@ -17204,7 +17847,7 @@ spec:
                       type: string
                     type: array
                   cpuCount:
-                    description: the CPU core number need to use, only set it when
+                    description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
                   duration:
@@ -17217,7 +17860,7 @@ spec:
                     description: the latency duration for action 'latency', unit ms
                     type: integer
                   memType:
-                    description: the memory type need to locate, only set it when
+                    description: the memory type needs to locate, only set it when
                       action is stress, the value can be 'stack' or 'heap'
                     type: string
                   method:
@@ -17237,11 +17880,15 @@ spec:
                     description: byteman rule name, should be unique, and will use
                       JVMChaos' name if not set
                     type: string
+                  pid:
+                    description: the pid of Java process which needs to attach
+                    type: integer
                   port:
                     description: the port of agent server, default 9277
                     format: int32
                     type: integer
                   ruleData:
+                    description: the byteman rule's data for action 'ruleData'
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -18025,19 +18672,21 @@ spec:
                         description: the method in Java class
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   jvm-gc:
                     properties:
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   jvm-latency:
@@ -18053,10 +18702,11 @@ spec:
                         description: the method in Java class
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   jvm-return:
@@ -18068,10 +18718,11 @@ spec:
                         description: the method in Java class
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                       value:
                         description: the return value for action 'return'
@@ -18080,10 +18731,11 @@ spec:
                   jvm-rule-data:
                     properties:
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                       rule-data:
                         description: RuleData used to save the rule file's data, will
@@ -18101,10 +18753,11 @@ spec:
                           action is stress, the value can be 'stack' or 'heap'
                         type: string
                       pid:
-                        description: the pid of Java process which need to attach
+                        description: the pid of Java process which needs to attach
                         type: integer
                       port:
-                        description: the port of agent server
+                        description: the port of agent server, default 9277
+                        format: int32
                         type: integer
                     type: object
                   mode:
@@ -18331,6 +18984,9 @@ spec:
                     properties:
                       process:
                         description: the process name or the process ID
+                        type: string
+                      recoverCmd:
+                        description: the command to be run when recovering experiment
                         type: string
                       signal:
                         description: the signal number to send
@@ -18642,6 +19298,50 @@ spec:
                     - action
                     - awsRegion
                     - ec2Instance
+                    type: object
+                  azureChaos:
+                    description: AzureChaosSpec is the content of the specification
+                      for an AzureChaos
+                    properties:
+                      action:
+                        description: 'Action defines the specific azure chaos action.
+                          Supported action: vm-stop / vm-restart / disk-detach Default
+                          action: vm-stop'
+                        enum:
+                        - vm-stop
+                        - vm-restart
+                        - disk-detach
+                        type: string
+                      diskName:
+                        description: DiskName indicates the name of the disk. Needed
+                          in disk-detach.
+                        type: string
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      lun:
+                        description: LUN indicates the Logical Unit Number of the
+                          data disk. Needed in disk-detach.
+                        type: integer
+                      resourceGroupName:
+                        description: ResourceGroupName defines the name of ResourceGroup
+                        type: string
+                      secretName:
+                        description: SecretName defines the name of kubernetes secret.
+                          It is used for Azure credentials.
+                        type: string
+                      subscriptionID:
+                        description: SubscriptionID defines the id of Azure subscription.
+                        type: string
+                      vmName:
+                        description: VMName defines the name of Virtual Machine
+                        type: string
+                    required:
+                    - action
+                    - resourceGroupName
+                    - subscriptionID
+                    - vmName
                     type: object
                   blockChaos:
                     description: BlockChaosSpec is the content of the specification
@@ -19394,6 +20094,7 @@ spec:
                           I/O chaos action.
                         type: string
                       percent:
+                        default: 100
                         description: 'Percent defines the percentage of injection
                           errors and provides a number from 0-100. default: 100.'
                         type: integer
@@ -19533,7 +20234,7 @@ spec:
                           type: string
                         type: array
                       cpuCount:
-                        description: the CPU core number need to use, only set it
+                        description: the CPU core number needs to use, only set it
                           when action is stress
                         type: integer
                       duration:
@@ -19549,8 +20250,8 @@ spec:
                           ms
                         type: integer
                       memType:
-                        description: the memory type need to locate, only set it when
-                          action is stress, the value can be 'stack' or 'heap'
+                        description: the memory type needs to locate, only set it
+                          when action is stress, the value can be 'stack' or 'heap'
                         type: string
                       method:
                         description: the method in Java class
@@ -19569,11 +20270,15 @@ spec:
                         description: byteman rule name, should be unique, and will
                           use JVMChaos' name if not set
                         type: string
+                      pid:
+                        description: the pid of Java process which needs to attach
+                        type: integer
                       port:
                         description: the port of agent server, default 9277
                         format: int32
                         type: integer
                       ruleData:
+                        description: the byteman rule's data for action 'ruleData'
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -20375,19 +21080,21 @@ spec:
                             description: the method in Java class
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       jvm-gc:
                         properties:
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       jvm-latency:
@@ -20403,10 +21110,11 @@ spec:
                             description: the method in Java class
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       jvm-return:
@@ -20418,10 +21126,11 @@ spec:
                             description: the method in Java class
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                           value:
                             description: the return value for action 'return'
@@ -20430,10 +21139,11 @@ spec:
                       jvm-rule-data:
                         properties:
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                           rule-data:
                             description: RuleData used to save the rule file's data,
@@ -20452,10 +21162,11 @@ spec:
                               'heap'
                             type: string
                           pid:
-                            description: the pid of Java process which need to attach
+                            description: the pid of Java process which needs to attach
                             type: integer
                           port:
-                            description: the port of agent server
+                            description: the port of agent server, default 9277
+                            format: int32
                             type: integer
                         type: object
                       mode:
@@ -20683,6 +21394,9 @@ spec:
                         properties:
                           process:
                             description: the process name or the process ID
+                            type: string
+                          recoverCmd:
+                            description: the command to be run when recovering experiment
                             type: string
                           signal:
                             description: the signal number to send
@@ -21119,6 +21833,13 @@ spec:
                           memory:
                             description: MemoryStressor stresses virtual memory out
                             properties:
+                              oomScoreAdj:
+                                default: 0
+                                description: OOMScoreAdj sets the oom_score_adj of
+                                  the stress process. See `man 5 proc` to know more
+                                  about this option.
+                                minimum: -1000
+                                type: integer
                               options:
                                 description: extend stress-ng options
                                 items:
@@ -21351,6 +22072,53 @@ spec:
                               - action
                               - awsRegion
                               - ec2Instance
+                              type: object
+                            azureChaos:
+                              description: AzureChaosSpec is the content of the specification
+                                for an AzureChaos
+                              properties:
+                                action:
+                                  description: 'Action defines the specific azure
+                                    chaos action. Supported action: vm-stop / vm-restart
+                                    / disk-detach Default action: vm-stop'
+                                  enum:
+                                  - vm-stop
+                                  - vm-restart
+                                  - disk-detach
+                                  type: string
+                                diskName:
+                                  description: DiskName indicates the name of the
+                                    disk. Needed in disk-detach.
+                                  type: string
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                lun:
+                                  description: LUN indicates the Logical Unit Number
+                                    of the data disk. Needed in disk-detach.
+                                  type: integer
+                                resourceGroupName:
+                                  description: ResourceGroupName defines the name
+                                    of ResourceGroup
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of kubernetes
+                                    secret. It is used for Azure credentials.
+                                  type: string
+                                subscriptionID:
+                                  description: SubscriptionID defines the id of Azure
+                                    subscription.
+                                  type: string
+                                vmName:
+                                  description: VMName defines the name of Virtual
+                                    Machine
+                                  type: string
+                              required:
+                              - action
+                              - resourceGroupName
+                              - subscriptionID
+                              - vmName
                               type: object
                             blockChaos:
                               description: BlockChaosSpec is the content of the specification
@@ -22171,6 +22939,7 @@ spec:
                                     injecting I/O chaos action.
                                   type: string
                                 percent:
+                                  default: 100
                                   description: 'Percent defines the percentage of
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
@@ -22321,7 +23090,7 @@ spec:
                                     type: string
                                   type: array
                                 cpuCount:
-                                  description: the CPU core number need to use, only
+                                  description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
                                 duration:
@@ -22337,7 +23106,7 @@ spec:
                                     unit ms
                                   type: integer
                                 memType:
-                                  description: the memory type need to locate, only
+                                  description: the memory type needs to locate, only
                                     set it when action is stress, the value can be
                                     'stack' or 'heap'
                                   type: string
@@ -22359,11 +23128,17 @@ spec:
                                   description: byteman rule name, should be unique,
                                     and will use JVMChaos' name if not set
                                   type: string
+                                pid:
+                                  description: the pid of Java process which needs
+                                    to attach
+                                  type: integer
                                 port:
                                   description: the port of agent server, default 9277
                                   format: int32
                                   type: integer
                                 ruleData:
+                                  description: the byteman rule's data for action
+                                    'ruleData'
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -23236,21 +24011,25 @@ spec:
                                       description: the method in Java class
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 jvm-gc:
                                   properties:
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 jvm-latency:
@@ -23266,11 +24045,13 @@ spec:
                                       description: the method in Java class
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 jvm-return:
@@ -23282,11 +24063,13 @@ spec:
                                       description: the method in Java class
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                     value:
                                       description: the return value for action 'return'
@@ -23295,11 +24078,13 @@ spec:
                                 jvm-rule-data:
                                   properties:
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                     rule-data:
                                       description: RuleData used to save the rule
@@ -23318,11 +24103,13 @@ spec:
                                         can be 'stack' or 'heap'
                                       type: string
                                     pid:
-                                      description: the pid of Java process which need
+                                      description: the pid of Java process which needs
                                         to attach
                                       type: integer
                                     port:
-                                      description: the port of agent server
+                                      description: the port of agent server, default
+                                        9277
+                                      format: int32
                                       type: integer
                                   type: object
                                 mode:
@@ -23574,6 +24361,10 @@ spec:
                                     process:
                                       description: the process name or the process
                                         ID
+                                      type: string
+                                    recoverCmd:
+                                      description: the command to be run when recovering
+                                        experiment
                                       type: string
                                     signal:
                                       description: the signal number to send
@@ -23919,6 +24710,53 @@ spec:
                                   - action
                                   - awsRegion
                                   - ec2Instance
+                                  type: object
+                                azureChaos:
+                                  description: AzureChaosSpec is the content of the
+                                    specification for an AzureChaos
+                                  properties:
+                                    action:
+                                      description: 'Action defines the specific azure
+                                        chaos action. Supported action: vm-stop /
+                                        vm-restart / disk-detach Default action: vm-stop'
+                                      enum:
+                                      - vm-stop
+                                      - vm-restart
+                                      - disk-detach
+                                      type: string
+                                    diskName:
+                                      description: DiskName indicates the name of
+                                        the disk. Needed in disk-detach.
+                                      type: string
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    lun:
+                                      description: LUN indicates the Logical Unit
+                                        Number of the data disk. Needed in disk-detach.
+                                      type: integer
+                                    resourceGroupName:
+                                      description: ResourceGroupName defines the name
+                                        of ResourceGroup
+                                      type: string
+                                    secretName:
+                                      description: SecretName defines the name of
+                                        kubernetes secret. It is used for Azure credentials.
+                                      type: string
+                                    subscriptionID:
+                                      description: SubscriptionID defines the id of
+                                        Azure subscription.
+                                      type: string
+                                    vmName:
+                                      description: VMName defines the name of Virtual
+                                        Machine
+                                      type: string
+                                  required:
+                                  - action
+                                  - resourceGroupName
+                                  - subscriptionID
+                                  - vmName
                                   type: object
                                 blockChaos:
                                   description: BlockChaosSpec is the content of the
@@ -24742,6 +25580,7 @@ spec:
                                         for injecting I/O chaos action.
                                       type: string
                                     percent:
+                                      default: 100
                                       description: 'Percent defines the percentage
                                         of injection errors and provides a number
                                         from 0-100. default: 100.'
@@ -24897,7 +25736,7 @@ spec:
                                         type: string
                                       type: array
                                     cpuCount:
-                                      description: the CPU core number need to use,
+                                      description: the CPU core number needs to use,
                                         only set it when action is stress
                                       type: integer
                                     duration:
@@ -24913,7 +25752,7 @@ spec:
                                         'latency', unit ms
                                       type: integer
                                     memType:
-                                      description: the memory type need to locate,
+                                      description: the memory type needs to locate,
                                         only set it when action is stress, the value
                                         can be 'stack' or 'heap'
                                       type: string
@@ -24935,12 +25774,18 @@ spec:
                                       description: byteman rule name, should be unique,
                                         and will use JVMChaos' name if not set
                                       type: string
+                                    pid:
+                                      description: the pid of Java process which needs
+                                        to attach
+                                      type: integer
                                     port:
                                       description: the port of agent server, default
                                         9277
                                       format: int32
                                       type: integer
                                     ruleData:
+                                      description: the byteman rule's data for action
+                                        'ruleData'
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -25843,20 +26688,24 @@ spec:
                                           type: string
                                         pid:
                                           description: the pid of Java process which
-                                            need to attach
+                                            needs to attach
                                           type: integer
                                         port:
-                                          description: the port of agent server
+                                          description: the port of agent server, default
+                                            9277
+                                          format: int32
                                           type: integer
                                       type: object
                                     jvm-gc:
                                       properties:
                                         pid:
                                           description: the pid of Java process which
-                                            need to attach
+                                            needs to attach
                                           type: integer
                                         port:
-                                          description: the port of agent server
+                                          description: the port of agent server, default
+                                            9277
+                                          format: int32
                                           type: integer
                                       type: object
                                     jvm-latency:
@@ -25873,10 +26722,12 @@ spec:
                                           type: string
                                         pid:
                                           description: the pid of Java process which
-                                            need to attach
+                                            needs to attach
                                           type: integer
                                         port:
-                                          description: the port of agent server
+                                          description: the port of agent server, default
+                                            9277
+                                          format: int32
                                           type: integer
                                       type: object
                                     jvm-return:
@@ -25889,10 +26740,12 @@ spec:
                                           type: string
                                         pid:
                                           description: the pid of Java process which
-                                            need to attach
+                                            needs to attach
                                           type: integer
                                         port:
-                                          description: the port of agent server
+                                          description: the port of agent server, default
+                                            9277
+                                          format: int32
                                           type: integer
                                         value:
                                           description: the return value for action
@@ -25903,10 +26756,12 @@ spec:
                                       properties:
                                         pid:
                                           description: the pid of Java process which
-                                            need to attach
+                                            needs to attach
                                           type: integer
                                         port:
-                                          description: the port of agent server
+                                          description: the port of agent server, default
+                                            9277
+                                          format: int32
                                           type: integer
                                         rule-data:
                                           description: RuleData used to save the rule
@@ -25926,10 +26781,12 @@ spec:
                                           type: string
                                         pid:
                                           description: the pid of Java process which
-                                            need to attach
+                                            needs to attach
                                           type: integer
                                         port:
-                                          description: the port of agent server
+                                          description: the port of agent server, default
+                                            9277
+                                          format: int32
                                           type: integer
                                       type: object
                                     mode:
@@ -26196,6 +27053,10 @@ spec:
                                         process:
                                           description: the process name or the process
                                             ID
+                                          type: string
+                                        recoverCmd:
+                                          description: the command to be run when
+                                            recovering experiment
                                           type: string
                                         signal:
                                           description: the signal number to send
@@ -26687,6 +27548,13 @@ spec:
                                           description: MemoryStressor stresses virtual
                                             memory out
                                           properties:
+                                            oomScoreAdj:
+                                              default: 0
+                                              description: OOMScoreAdj sets the oom_score_adj
+                                                of the stress process. See `man 5
+                                                proc` to know more about this option.
+                                              minimum: -1000
+                                              type: integer
                                             options:
                                               description: extend stress-ng options
                                               items:
@@ -27067,6 +27935,13 @@ spec:
                                       description: MemoryStressor stresses virtual
                                         memory out
                                       properties:
+                                        oomScoreAdj:
+                                          default: 0
+                                          description: OOMScoreAdj sets the oom_score_adj
+                                            of the stress process. See `man 5 proc`
+                                            to know more about this option.
+                                          minimum: -1000
+                                          type: integer
                                         options:
                                           description: extend stress-ng options
                                           items:
@@ -30689,6 +31564,13 @@ spec:
                       memory:
                         description: MemoryStressor stresses virtual memory out
                         properties:
+                          oomScoreAdj:
+                            default: 0
+                            description: OOMScoreAdj sets the oom_score_adj of the
+                              stress process. See `man 5 proc` to know more about
+                              this option.
+                            minimum: -1000
+                            type: integer
                           options:
                             description: extend stress-ng options
                             items:
@@ -33827,6 +34709,50 @@ spec:
                       - awsRegion
                       - ec2Instance
                       type: object
+                    azureChaos:
+                      description: AzureChaosSpec is the content of the specification
+                        for an AzureChaos
+                      properties:
+                        action:
+                          description: 'Action defines the specific azure chaos action.
+                            Supported action: vm-stop / vm-restart / disk-detach Default
+                            action: vm-stop'
+                          enum:
+                          - vm-stop
+                          - vm-restart
+                          - disk-detach
+                          type: string
+                        diskName:
+                          description: DiskName indicates the name of the disk. Needed
+                            in disk-detach.
+                          type: string
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action.
+                          type: string
+                        lun:
+                          description: LUN indicates the Logical Unit Number of the
+                            data disk. Needed in disk-detach.
+                          type: integer
+                        resourceGroupName:
+                          description: ResourceGroupName defines the name of ResourceGroup
+                          type: string
+                        secretName:
+                          description: SecretName defines the name of kubernetes secret.
+                            It is used for Azure credentials.
+                          type: string
+                        subscriptionID:
+                          description: SubscriptionID defines the id of Azure subscription.
+                          type: string
+                        vmName:
+                          description: VMName defines the name of Virtual Machine
+                          type: string
+                      required:
+                      - action
+                      - resourceGroupName
+                      - subscriptionID
+                      - vmName
+                      type: object
                     blockChaos:
                       description: BlockChaosSpec is the content of the specification
                         for a BlockChaos
@@ -34603,6 +35529,7 @@ spec:
                             I/O chaos action.
                           type: string
                         percent:
+                          default: 100
                           description: 'Percent defines the percentage of injection
                             errors and provides a number from 0-100. default: 100.'
                           type: integer
@@ -34743,8 +35670,8 @@ spec:
                             type: string
                           type: array
                         cpuCount:
-                          description: the CPU core number need to use, only set it
-                            when action is stress
+                          description: the CPU core number needs to use, only set
+                            it when action is stress
                           type: integer
                         duration:
                           description: Duration represents the duration of the chaos
@@ -34759,7 +35686,7 @@ spec:
                             unit ms
                           type: integer
                         memType:
-                          description: the memory type need to locate, only set it
+                          description: the memory type needs to locate, only set it
                             when action is stress, the value can be 'stack' or 'heap'
                           type: string
                         method:
@@ -34779,11 +35706,15 @@ spec:
                           description: byteman rule name, should be unique, and will
                             use JVMChaos' name if not set
                           type: string
+                        pid:
+                          description: the pid of Java process which needs to attach
+                          type: integer
                         port:
                           description: the port of agent server, default 9277
                           format: int32
                           type: integer
                         ruleData:
+                          description: the byteman rule's data for action 'ruleData'
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -35600,19 +36531,23 @@ spec:
                               description: the method in Java class
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-gc:
                           properties:
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-latency:
@@ -35628,10 +36563,12 @@ spec:
                               description: the method in Java class
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-return:
@@ -35643,10 +36580,12 @@ spec:
                               description: the method in Java class
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                             value:
                               description: the return value for action 'return'
@@ -35655,10 +36594,12 @@ spec:
                         jvm-rule-data:
                           properties:
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                             rule-data:
                               description: RuleData used to save the rule file's data,
@@ -35677,10 +36618,12 @@ spec:
                                 or 'heap'
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         mode:
@@ -35915,6 +36858,9 @@ spec:
                           properties:
                             process:
                               description: the process name or the process ID
+                              type: string
+                            recoverCmd:
+                              description: the command to be run when recovering experiment
                               type: string
                             signal:
                               description: the signal number to send
@@ -36238,6 +37184,51 @@ spec:
                           - action
                           - awsRegion
                           - ec2Instance
+                          type: object
+                        azureChaos:
+                          description: AzureChaosSpec is the content of the specification
+                            for an AzureChaos
+                          properties:
+                            action:
+                              description: 'Action defines the specific azure chaos
+                                action. Supported action: vm-stop / vm-restart / disk-detach
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              - disk-detach
+                              type: string
+                            diskName:
+                              description: DiskName indicates the name of the disk.
+                                Needed in disk-detach.
+                              type: string
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            lun:
+                              description: LUN indicates the Logical Unit Number of
+                                the data disk. Needed in disk-detach.
+                              type: integer
+                            resourceGroupName:
+                              description: ResourceGroupName defines the name of ResourceGroup
+                              type: string
+                            secretName:
+                              description: SecretName defines the name of kubernetes
+                                secret. It is used for Azure credentials.
+                              type: string
+                            subscriptionID:
+                              description: SubscriptionID defines the id of Azure
+                                subscription.
+                              type: string
+                            vmName:
+                              description: VMName defines the name of Virtual Machine
+                              type: string
+                          required:
+                          - action
+                          - resourceGroupName
+                          - subscriptionID
+                          - vmName
                           type: object
                         blockChaos:
                           description: BlockChaosSpec is the content of the specification
@@ -37019,6 +38010,7 @@ spec:
                                 I/O chaos action.
                               type: string
                             percent:
+                              default: 100
                               description: 'Percent defines the percentage of injection
                                 errors and provides a number from 0-100. default:
                                 100.'
@@ -37164,8 +38156,8 @@ spec:
                                 type: string
                               type: array
                             cpuCount:
-                              description: the CPU core number need to use, only set
-                                it when action is stress
+                              description: the CPU core number needs to use, only
+                                set it when action is stress
                               type: integer
                             duration:
                               description: Duration represents the duration of the
@@ -37180,7 +38172,7 @@ spec:
                                 unit ms
                               type: integer
                             memType:
-                              description: the memory type need to locate, only set
+                              description: the memory type needs to locate, only set
                                 it when action is stress, the value can be 'stack'
                                 or 'heap'
                               type: string
@@ -37202,11 +38194,16 @@ spec:
                               description: byteman rule name, should be unique, and
                                 will use JVMChaos' name if not set
                               type: string
+                            pid:
+                              description: the pid of Java process which needs to
+                                attach
+                              type: integer
                             port:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
                             ruleData:
+                              description: the byteman rule's data for action 'ruleData'
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -38051,21 +39048,23 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-gc:
                               properties:
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-latency:
@@ -38081,11 +39080,12 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-return:
@@ -38097,11 +39097,12 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 value:
                                   description: the return value for action 'return'
@@ -38110,11 +39111,12 @@ spec:
                             jvm-rule-data:
                               properties:
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 rule-data:
                                   description: RuleData used to save the rule file's
@@ -38133,11 +39135,12 @@ spec:
                                     'stack' or 'heap'
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             mode:
@@ -38380,6 +39383,10 @@ spec:
                               properties:
                                 process:
                                   description: the process name or the process ID
+                                  type: string
+                                recoverCmd:
+                                  description: the command to be run when recovering
+                                    experiment
                                   type: string
                                 signal:
                                   description: the signal number to send
@@ -38836,6 +39843,13 @@ spec:
                                   description: MemoryStressor stresses virtual memory
                                     out
                                   properties:
+                                    oomScoreAdj:
+                                      default: 0
+                                      description: OOMScoreAdj sets the oom_score_adj
+                                        of the stress process. See `man 5 proc` to
+                                        know more about this option.
+                                      minimum: -1000
+                                      type: integer
                                     options:
                                       description: extend stress-ng options
                                       items:
@@ -39193,6 +40207,13 @@ spec:
                               description: MemoryStressor stresses virtual memory
                                 out
                               properties:
+                                oomScoreAdj:
+                                  default: 0
+                                  description: OOMScoreAdj sets the oom_score_adj
+                                    of the stress process. See `man 5 proc` to know
+                                    more about this option.
+                                  minimum: -1000
+                                  type: integer
                                 options:
                                   description: extend stress-ng options
                                   items:

@@ -21,11 +21,11 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -38,11 +38,10 @@ var alwaysAllowedKind = []string{
 	v1alpha1.KindGCPChaos,
 	v1alpha1.KindPodHttpChaos,
 	v1alpha1.KindPhysicalMachine,
+	v1alpha1.KindStatusCheck,
 
 	"WorkflowNode",
 }
-
-var authLog = ctrl.Log.WithName("validate-auth")
 
 // +kubebuilder:webhook:path=/validate-auth,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=*,verbs=create;update,versions=v1alpha1,name=vauth.kb.io
 
@@ -56,17 +55,19 @@ type AuthValidator struct {
 	clusterScoped         bool
 	targetNamespace       string
 	enableFilterNamespace bool
+	logger                logr.Logger
 }
 
 // NewAuthValidator returns a new AuthValidator
 func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Client,
-	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) *AuthValidator {
+	clusterScoped bool, targetNamespace string, enableFilterNamespace bool, logger logr.Logger) *AuthValidator {
 	return &AuthValidator{
 		enabled:               enabled,
 		authCli:               authCli,
 		clusterScoped:         clusterScoped,
 		targetNamespace:       targetNamespace,
 		enableFilterNamespace: enableFilterNamespace,
+		logger:                logger,
 	}
 }
 
@@ -107,9 +108,9 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		if !allow {
 			return admission.Denied(fmt.Sprintf("%s is forbidden on cluster", username))
 		}
-		authLog.Info("user have the privileges on cluster, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
+		v.logger.Info("user have the privileges on cluster, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
 	} else {
-		authLog.Info("start validating user", "user", username, "groups", groups, "namespace", affectedNamespaces)
+		v.logger.Info("start validating user", "user", username, "groups", groups, "namespace", affectedNamespaces)
 
 		for namespace := range affectedNamespaces {
 			allow, err := v.auth(username, groups, namespace, requestKind)
@@ -122,7 +123,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 			}
 		}
 
-		authLog.Info("user have the privileges on namespace, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
+		v.logger.Info("user have the privileges on namespace, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
 	}
 
 	return admission.Allowed("")

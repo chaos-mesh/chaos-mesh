@@ -19,7 +19,7 @@ import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 
-export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos'>
+export type Kind = Exclude<ExperimentKind, 'PhysicalMachineChaos' | 'AzureChaos'>
 export type KindPhysic =
   | Extract<Kind, 'NetworkChaos' | 'StressChaos' | 'TimeChaos'>
   | 'DiskChaos'
@@ -1313,6 +1313,12 @@ export const dataPhysic: Record<KindPhysic, Definition> = {
         label: 'Signal',
         value: 9,
         helperText: 'The process signal value',
+      },
+      recoverCmd: {
+        field: 'text',
+        label: 'Recover Command',
+        value: '',
+        helperText: 'The command to be run when recovering experiment',
       },
     },
   },
