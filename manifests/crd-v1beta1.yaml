@@ -949,7 +949,7 @@ spec:
                   format: int64
                   type: integer
                 kind:
-                  description: FileType represents type of a file
+                  description: FileType represents type of file
                   type: string
                 mtime:
                   description: Timespec represents a time
@@ -1014,7 +1014,7 @@ spec:
                 to IO operations
               properties:
                 filling:
-                  description: Filling determines what is filled in the miskate data.
+                  description: Filling determines what is filled in the mistake data.
                   enum:
                   - zero
                   - random
@@ -3273,7 +3273,7 @@ spec:
             actions:
               description: Actions are a list of IOChaos actions
               items:
-                description: IOChaosAction defines an possible action of IOChaos
+                description: IOChaosAction defines a possible action of IOChaos
                 properties:
                   atime:
                     description: Timespec represents a time
@@ -3328,7 +3328,7 @@ spec:
                     format: int64
                     type: integer
                   kind:
-                    description: FileType represents type of a file
+                    description: FileType represents type of file
                     type: string
                   latency:
                     description: Latency represents the latency to inject
@@ -3343,7 +3343,7 @@ spec:
                     description: MistakeSpec represents the mistake to inject
                     properties:
                       filling:
-                        description: Filling determines what is filled in the miskate
+                        description: Filling determines what is filled in the mistake
                           data.
                         enum:
                         - zero
@@ -3396,7 +3396,7 @@ spec:
                     description: Source represents the source of current rules
                     type: string
                   type:
-                    description: IOChaosType represents the type of an IOChaos Action
+                    description: IOChaosType represents the type of IOChaos Action
                     type: string
                   uid:
                     format: int32
@@ -4235,7 +4235,7 @@ spec:
                       format: int64
                       type: integer
                     kind:
-                      description: FileType represents type of a file
+                      description: FileType represents type of file
                       type: string
                     mtime:
                       description: Timespec represents a time
@@ -4301,7 +4301,7 @@ spec:
                     to IO operations
                   properties:
                     filling:
-                      description: Filling determines what is filled in the miskate
+                      description: Filling determines what is filled in the mistake
                         data.
                       enum:
                       - zero
@@ -6677,7 +6677,7 @@ spec:
                                 format: int64
                                 type: integer
                               kind:
-                                description: FileType represents type of a file
+                                description: FileType represents type of file
                                 type: string
                               mtime:
                                 description: Timespec represents a time
@@ -6746,7 +6746,7 @@ spec:
                             properties:
                               filling:
                                 description: Filling determines what is filled in
-                                  the miskate data.
+                                  the mistake data.
                                 enum:
                                 - zero
                                 - random
@@ -8858,7 +8858,7 @@ spec:
                                     format: int64
                                     type: integer
                                   kind:
-                                    description: FileType represents type of a file
+                                    description: FileType represents type of file
                                     type: string
                                   mtime:
                                     description: Timespec represents a time
@@ -8929,7 +8929,7 @@ spec:
                                 properties:
                                   filling:
                                     description: Filling determines what is filled
-                                      in the miskate data.
+                                      in the mistake data.
                                     enum:
                                     - zero
                                     - random
@@ -15450,7 +15450,7 @@ spec:
                       format: int64
                       type: integer
                     kind:
-                      description: FileType represents type of a file
+                      description: FileType represents type of file
                       type: string
                     mtime:
                       description: Timespec represents a time
@@ -15516,7 +15516,7 @@ spec:
                     to IO operations
                   properties:
                     filling:
-                      description: Filling determines what is filled in the miskate
+                      description: Filling determines what is filled in the mistake
                         data.
                       enum:
                       - zero
@@ -17510,7 +17510,7 @@ spec:
                           format: int64
                           type: integer
                         kind:
-                          description: FileType represents type of a file
+                          description: FileType represents type of file
                           type: string
                         mtime:
                           description: Timespec represents a time
@@ -17577,7 +17577,7 @@ spec:
                         injected to IO operations
                       properties:
                         filling:
-                          description: Filling determines what is filled in the miskate
+                          description: Filling determines what is filled in the mistake
                             data.
                           enum:
                           - zero
@@ -19986,7 +19986,7 @@ spec:
                                     format: int64
                                     type: integer
                                   kind:
-                                    description: FileType represents type of a file
+                                    description: FileType represents type of file
                                     type: string
                                   mtime:
                                     description: Timespec represents a time
@@ -20057,7 +20057,7 @@ spec:
                                 properties:
                                   filling:
                                     description: Filling determines what is filled
-                                      in the miskate data.
+                                      in the mistake data.
                                     enum:
                                     - zero
                                     - random
@@ -22231,8 +22231,7 @@ spec:
                                         format: int64
                                         type: integer
                                       kind:
-                                        description: FileType represents type of a
-                                          file
+                                        description: FileType represents type of file
                                         type: string
                                       mtime:
                                         description: Timespec represents a time
@@ -22305,7 +22304,7 @@ spec:
                                     properties:
                                       filling:
                                         description: Filling determines what is filled
-                                          in the miskate data.
+                                          in the mistake data.
                                         enum:
                                         - zero
                                         - random
@@ -31629,7 +31628,7 @@ spec:
                             format: int64
                             type: integer
                           kind:
-                            description: FileType represents type of a file
+                            description: FileType represents type of file
                             type: string
                           mtime:
                             description: Timespec represents a time
@@ -31697,7 +31696,7 @@ spec:
                         properties:
                           filling:
                             description: Filling determines what is filled in the
-                              miskate data.
+                              mistake data.
                             enum:
                             - zero
                             - random
@@ -33748,7 +33747,7 @@ spec:
                                 format: int64
                                 type: integer
                               kind:
-                                description: FileType represents type of a file
+                                description: FileType represents type of file
                                 type: string
                               mtime:
                                 description: Timespec represents a time
@@ -33817,7 +33816,7 @@ spec:
                             properties:
                               filling:
                                 description: Filling determines what is filled in
-                                  the miskate data.
+                                  the mistake data.
                                 enum:
                                 - zero
                                 - random
