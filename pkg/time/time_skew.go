@@ -76,6 +76,7 @@ func (c *Config) DeepCopy() tasks.Object {
 func (c *Config) Merge(a tasks.Mergeable) error {
 	A, OK := a.(*Config)
 	if OK {
+		// TODO: Add more reasonable merge method
 		c.deltaSeconds += A.deltaSeconds
 		c.deltaNanoSeconds += A.deltaNanoSeconds
 		c.clockIDsMask |= A.clockIDsMask
