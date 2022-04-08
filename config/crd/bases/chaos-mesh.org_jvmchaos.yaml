@@ -64,7 +64,7 @@ spec:
                   type: string
                 type: array
               cpuCount:
-                description: the CPU core number need to use, only set it when action
+                description: the CPU core number needs to use, only set it when action
                   is stress
                 type: integer
               duration:
@@ -77,7 +77,7 @@ spec:
                 description: the latency duration for action 'latency', unit ms
                 type: integer
               memType:
-                description: the memory type need to locate, only set it when action
+                description: the memory type needs to locate, only set it when action
                   is stress, the value can be 'stack' or 'heap'
                 type: string
               method:
@@ -97,11 +97,15 @@ spec:
                 description: byteman rule name, should be unique, and will use JVMChaos'
                   name if not set
                 type: string
+              pid:
+                description: the pid of Java process which needs to attach
+                type: integer
               port:
                 description: the port of agent server, default 9277
                 format: int32
                 type: integer
               ruleData:
+                description: the byteman rule's data for action 'ruleData'
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject

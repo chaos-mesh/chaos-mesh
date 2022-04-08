@@ -157,19 +157,21 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-gc:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-latency:
@@ -184,10 +186,11 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-return:
@@ -199,10 +202,11 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                   value:
                     description: the return value for action 'return'
@@ -211,10 +215,11 @@ spec:
               jvm-rule-data:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                   rule-data:
                     description: RuleData used to save the rule file's data, will
@@ -232,10 +237,11 @@ spec:
                       action is stress, the value can be 'stack' or 'heap'
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               mode:
