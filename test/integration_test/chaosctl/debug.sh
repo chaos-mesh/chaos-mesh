@@ -14,25 +14,25 @@
 # limitations under the License.
 #
 
-function must_contains() {
-  message=$1
+function file_must_contains() {
+  file=$1
   substring=$2
   match=""
   if [ "$3" = "false" ]; then
       match="-v"
   fi
 
-  echo $message | grep $match "$substring"
+  grep $match "$substring" $file
   if [ "$?" != "0" ]; then
-      echo "'$substring' not found in '$message'"
+      echo "'$substring' not found in '$file'"
       exit 1
   fi
 }
 
 set -u
+log_file="debug.log"
 code=0
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-cd $cur/../../../bin
 
 pwd
 echo "Deploy deployments and chaos for testing"
@@ -61,26 +61,26 @@ EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl logs"
-logs=$(./chaosctl logs)
+./bin/chaosctl logs >$log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl logs failed"
     code=1
 fi
-must_contains "$logs" "Controller manager Version:" true
-must_contains "$logs" "Chaos-daemon Version:" true
-must_contains "$logs" "[chaos-dashboard" true
+file_must_contains $log_file "Controller manager Version:" true
+file_must_contains $log_file "Chaos-daemon Version:" true
+file_must_contains $log_file "\[chaos-dashboard" true
 
 echo "Checking chaosctl debug networkchaos"
-logs=$(./chaosctl debug networkchaos web-show-network-delay)
+./bin/chaosctl debug networkchaos web-show-network-delay >$log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
     code=1
 fi
-must_contains "$logs" "[Chaos]: web-show-network-delay" true
-must_contains "$logs" "1. [ipset list]" true
-must_contains "$logs" "2. [tc qdisc list]" true
-must_contains "$logs" "3. [iptables list]" true
-must_contains "$logs" "4. [podnetworkchaos]" true
+file_must_contains $log_file "\[Chaos\]: web-show-network-delay" true
+file_must_contains $log_file "1. \[ipset list\]" true
+file_must_contains $log_file "2. \[tc qdisc list\]" true
+file_must_contains $log_file "3. \[iptables list\]" true
+file_must_contains $log_file "4. \[podnetworkchaos\]" true
 echo "Cleaning up networkchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
@@ -108,14 +108,14 @@ EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl debug httpchaos"
-logs=$(./chaosctl debug httpchaos web-show-http-delay)
+./bin/chaosctl debug httpchaos web-show-http-delay >$log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl debug httpchaos failed"
     code=1
 fi
-must_contains "$logs" "[Chaos]: web-show-http-delay" true
-must_contains "$logs" "[file descriptors of PID:" true
-must_contains "$logs" "[podhttpchaos]" true
+file_must_contains $log_file "\[Chaos\]: web-show-http-delay" true
+file_must_contains $log_file "\[file descriptors of PID:" true
+file_must_contains $log_file "\[podhttpchaos\]" true
 echo "Cleaning up httpchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
@@ -144,15 +144,15 @@ EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl debug iochaos"
-logs=$(./chaosctl debug iochaos web-show-io-delay)
+./bin/chaosctl debug iochaos web-show-io-delay >$log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl debug iochaos failed"
     code=1
 fi
-must_contains "$logs" "[Chaos]: web-show-io-delay" true
-must_contains "$logs" "1. [Mount Information]" true
-must_contains "$logs" "[file descriptors of PID:" true
-must_contains "$logs" "[podiochaos]" true
+file_must_contains $log_file "\[Chaos\]: web-show-io-delay" true
+file_must_contains $log_file "1. \[Mount Information\]" true
+file_must_contains $log_file "\[file descriptors of PID:" true
+file_must_contains $log_file "\[podiochaos\]" true
 echo "Cleaning up iochaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
@@ -180,18 +180,19 @@ EOF
 kubectl apply -f stress.yaml
 
 echo "Checking chaosctl debug stresschaos"
-logs=$(./chaosctl debug stresschaos web-show-memory-stress)
+./bin/chaosctl debug stresschaos web-show-memory-stress >$log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl debug stresschaos failed"
     code=1
 fi
-must_contains "$logs" "[Chaos]: web-show-memory-stress" true
-must_contains "$logs" "1. [cat /proc/cgroups]" true
-must_contains "$logs" "[memory.limit_in_bytes]" true
+file_must_contains $log_file "$logs" "\[Chaos\]: web-show-memory-stress" true
+file_must_contains $log_file "$logs" "1. \[cat /proc/cgroups\]" true
+file_must_contains $log_file "$logs" "\[memory.limit_in_bytes\]" true
 echo "Cleaning up stresschaos"
 kubectl delete -f stress.yaml
 rm stress.yaml
 
+rm $log_file
 bash deploy.sh -d
 rm deploy.sh
 exit $code
