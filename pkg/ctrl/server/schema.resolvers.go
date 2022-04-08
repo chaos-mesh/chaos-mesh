@@ -127,6 +127,10 @@ func (r *chaosConditionResolver) Status(ctx context.Context, obj *v1alpha1.Chaos
 	return string(obj.Status), nil
 }
 
+func (r *cidrAndPortResolver) Port(ctx context.Context, obj *v1alpha1.CidrAndPort) (int, error) {
+	return int(obj.Port), nil
+}
+
 func (r *containerStateRunningResolver) StartedAt(ctx context.Context, obj *v1.ContainerStateRunning) (*time.Time, error) {
 	return &obj.StartedAt.Time, nil
 }
@@ -1152,6 +1156,10 @@ func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInpu
 	return list, nil
 }
 
+func (r *rawIPSetResolver) IPSetType(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
 	return string(obj.Direction), nil
 }
@@ -1229,6 +1237,9 @@ func (r *Resolver) BandwidthSpec() generated.BandwidthSpecResolver { return &ban
 func (r *Resolver) ChaosCondition() generated.ChaosConditionResolver {
 	return &chaosConditionResolver{r}
 }
+
+// CidrAndPort returns generated.CidrAndPortResolver implementation.
+func (r *Resolver) CidrAndPort() generated.CidrAndPortResolver { return &cidrAndPortResolver{r} }
 
 // ContainerStateRunning returns generated.ContainerStateRunningResolver implementation.
 func (r *Resolver) ContainerStateRunning() generated.ContainerStateRunningResolver {
@@ -1345,6 +1356,9 @@ func (r *Resolver) Process() generated.ProcessResolver { return &processResolver
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// RawIPSet returns generated.RawIPSetResolver implementation.
+func (r *Resolver) RawIPSet() generated.RawIPSetResolver { return &rawIPSetResolver{r} }
+
 // RawIptables returns generated.RawIptablesResolver implementation.
 func (r *Resolver) RawIptables() generated.RawIptablesResolver { return &rawIptablesResolver{r} }
 
@@ -1372,6 +1386,7 @@ func (r *Resolver) StressChaosStatus() generated.StressChaosStatusResolver {
 type attrOverrideSpecResolver struct{ *Resolver }
 type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
+type cidrAndPortResolver struct{ *Resolver }
 type containerStateRunningResolver struct{ *Resolver }
 type containerStateTerminatedResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
@@ -1403,6 +1418,7 @@ type podStatusResolver struct{ *Resolver }
 type podStressChaosResolver struct{ *Resolver }
 type processResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type rawIPSetResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }

@@ -44,6 +44,7 @@ type ResolverRoot interface {
 	AttrOverrideSpec() AttrOverrideSpecResolver
 	BandwidthSpec() BandwidthSpecResolver
 	ChaosCondition() ChaosConditionResolver
+	CidrAndPort() CidrAndPortResolver
 	ContainerStateRunning() ContainerStateRunningResolver
 	ContainerStateTerminated() ContainerStateTerminatedResolver
 	ExperimentStatus() ExperimentStatusResolver
@@ -75,6 +76,7 @@ type ResolverRoot interface {
 	PodStressChaos() PodStressChaosResolver
 	Process() ProcessResolver
 	Query() QueryResolver
+	RawIPSet() RawIPSetResolver
 	RawIptables() RawIptablesResolver
 	RawTrafficControl() RawTrafficControlResolver
 	Record() RecordResolver
@@ -135,6 +137,11 @@ type ComplexityRoot struct {
 		Reason func(childComplexity int) int
 		Status func(childComplexity int) int
 		Type   func(childComplexity int) int
+	}
+
+	CidrAndPort struct {
+		Cidr func(childComplexity int) int
+		Port func(childComplexity int) int
 	}
 
 	ContainerState struct {
@@ -652,9 +659,12 @@ type ComplexityRoot struct {
 	}
 
 	RawIPSet struct {
-		Cidrs  func(childComplexity int) int
-		Name   func(childComplexity int) int
-		Source func(childComplexity int) int
+		CidrAndPorts func(childComplexity int) int
+		Cidrs        func(childComplexity int) int
+		IPSetType    func(childComplexity int) int
+		Name         func(childComplexity int) int
+		SetNames     func(childComplexity int) int
+		Source       func(childComplexity int) int
 	}
 
 	RawIptables struct {
@@ -759,6 +769,9 @@ type BandwidthSpecResolver interface {
 type ChaosConditionResolver interface {
 	Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
 	Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
+}
+type CidrAndPortResolver interface {
+	Port(ctx context.Context, obj *v1alpha1.CidrAndPort) (int, error)
 }
 type ContainerStateRunningResolver interface {
 	StartedAt(ctx context.Context, obj *v1.ContainerStateRunning) (*time.Time, error)
@@ -972,6 +985,9 @@ type ProcessResolver interface {
 type QueryResolver interface {
 	Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error)
 	Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error)
+}
+type RawIPSetResolver interface {
+	IPSetType(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -1217,6 +1233,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChaosCondition.Type(childComplexity), true
+
+	case "CidrAndPort.cidr":
+		if e.complexity.CidrAndPort.Cidr == nil {
+			break
+		}
+
+		return e.complexity.CidrAndPort.Cidr(childComplexity), true
+
+	case "CidrAndPort.port":
+		if e.complexity.CidrAndPort.Port == nil {
+			break
+		}
+
+		return e.complexity.CidrAndPort.Port(childComplexity), true
 
 	case "ContainerState.running":
 		if e.complexity.ContainerState.Running == nil {
@@ -3788,6 +3818,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["selector"].(model.PodSelectorInput)), true
 
+	case "RawIPSet.cidrAndPorts":
+		if e.complexity.RawIPSet.CidrAndPorts == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.CidrAndPorts(childComplexity), true
+
 	case "RawIPSet.cidrs":
 		if e.complexity.RawIPSet.Cidrs == nil {
 			break
@@ -3795,12 +3832,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RawIPSet.Cidrs(childComplexity), true
 
+	case "RawIPSet.ipSetType":
+		if e.complexity.RawIPSet.IPSetType == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.IPSetType(childComplexity), true
+
 	case "RawIPSet.name":
 		if e.complexity.RawIPSet.Name == nil {
 			break
 		}
 
 		return e.complexity.RawIPSet.Name(childComplexity), true
+
+	case "RawIPSet.setNames":
+		if e.complexity.RawIPSet.SetNames == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.SetNames(childComplexity), true
 
 	case "RawIPSet.source":
 		if e.complexity.RawIPSet.Source == nil {
@@ -5223,11 +5274,26 @@ type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Raw
     # The name of ipset
     name: String!
 
+    ipSetType: String!
+
     # The contents of ipset
     cidrs: [String!]!
 
+	# The contents of ipset.
+	# Only available when IPSetType is NetPortIPSet.
+    cidrAndPorts: [CidrAndPort!]
+
+	# The contents of ipset.
+	# Only available when IPSetType is SetIPSet.
+    setNames: [String!]!
+
     # The name and namespace of the source network chaos
     source: String!
+}
+
+type CidrAndPort @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CidrAndPort") {
+    cidr: String!
+    port: Int!
 }
 
 # RawIptables represents the iptables rules on specific pod
@@ -6789,6 +6855,76 @@ func (ec *executionContext) _ChaosCondition_reason(ctx context.Context, field gr
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CidrAndPort_cidr(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CidrAndPort) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CidrAndPort",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cidr, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CidrAndPort_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CidrAndPort) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CidrAndPort",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.CidrAndPort().Port(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ContainerState_waiting(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerState) (ret graphql.Marshaler) {
@@ -18879,6 +19015,41 @@ func (ec *executionContext) _RawIPSet_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RawIPSet_ipSetType(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.RawIPSet().IPSetType(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RawIPSet_cidrs(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -18898,6 +19069,73 @@ func (ec *executionContext) _RawIPSet_cidrs(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cidrs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIPSet_cidrAndPorts(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CidrAndPorts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.CidrAndPort)
+	fc.Result = res
+	return ec.marshalOCidrAndPort2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPortᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIPSet_setNames(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SetNames, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22512,6 +22750,57 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 
 			out.Values[i] = innerFunc(ctx)
 
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var cidrAndPortImplementors = []string{"CidrAndPort"}
+
+func (ec *executionContext) _CidrAndPort(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CidrAndPort) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cidrAndPortImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CidrAndPort")
+		case "cidr":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CidrAndPort_cidr(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "port":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._CidrAndPort_port(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -27821,8 +28110,28 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "ipSetType":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RawIPSet_ipSetType(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "cidrs":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._RawIPSet_cidrs(ctx, field, obj)
@@ -27831,7 +28140,24 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "cidrAndPorts":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_cidrAndPorts(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "setNames":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_setNames(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "source":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -27841,7 +28167,7 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -29055,6 +29381,10 @@ func (ec *executionContext) marshalNChaosCondition2githubᚗcomᚋchaosᚑmesh�
 	return ec._ChaosCondition(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNCidrAndPort2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPort(ctx context.Context, sel ast.SelectionSet, v v1alpha1.CidrAndPort) graphql.Marshaler {
+	return ec._CidrAndPort(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐComponent(ctx context.Context, v interface{}) (model.Component, error) {
 	var res model.Component
 	err := res.UnmarshalGQL(v)
@@ -29857,6 +30187,53 @@ func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmes
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNChaosCondition2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐChaosCondition(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalOCidrAndPort2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPortᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.CidrAndPort) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCidrAndPort2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPort(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

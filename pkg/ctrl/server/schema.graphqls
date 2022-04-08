@@ -960,11 +960,26 @@ type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Raw
     # The name of ipset
     name: String!
 
+    ipSetType: String!
+
     # The contents of ipset
     cidrs: [String!]!
 
+	# The contents of ipset.
+	# Only available when IPSetType is NetPortIPSet.
+    cidrAndPorts: [CidrAndPort!]
+
+	# The contents of ipset.
+	# Only available when IPSetType is SetIPSet.
+    setNames: [String!]!
+
     # The name and namespace of the source network chaos
     source: String!
+}
+
+type CidrAndPort @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CidrAndPort") {
+    cidr: String!
+    port: Int!
 }
 
 # RawIptables represents the iptables rules on specific pod
