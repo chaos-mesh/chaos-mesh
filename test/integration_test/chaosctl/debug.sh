@@ -185,9 +185,9 @@ if [ $? -ne 0 ]; then
     echo "chaosctl debug stresschaos failed"
     code=1
 fi
-file_must_contains $log_file "$logs" "\[Chaos\]: web-show-memory-stress" true
-file_must_contains $log_file "$logs" "1. \[cat /proc/cgroups\]" true
-file_must_contains $log_file "$logs" "\[memory.limit_in_bytes\]" true
+file_must_contains $log_file "\[Chaos\]: web-show-memory-stress" true
+file_must_contains $log_file "1. \[cat /proc/cgroups\]" true
+file_must_contains $log_file "\[memory.limit_in_bytes\]" true
 echo "Cleaning up stresschaos"
 kubectl delete -f stress.yaml
 rm stress.yaml

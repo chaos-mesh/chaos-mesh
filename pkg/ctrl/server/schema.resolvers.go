@@ -773,7 +773,7 @@ func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) 
 		return nil, err
 	}
 
-	daemon, exist := daemons[obj.Name]
+	daemon, exist := daemons[obj.Spec.NodeName]
 	if !exist {
 		return nil, fmt.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
 	}
