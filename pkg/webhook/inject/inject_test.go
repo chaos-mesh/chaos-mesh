@@ -16,8 +16,6 @@
 package inject
 
 import (
-	"github.com/go-logr/logr"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -26,12 +24,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 )
 
 var _ = Describe("webhook inject", func() {
-	var i Injector
+	i := Injector{}
 
 	Context("Inject", func() {
 		It("should return unexpected end of JSON input", func() {
@@ -39,10 +38,11 @@ var _ = Describe("webhook inject", func() {
 			var cfg *config.Config
 			var controllerCfg *controllerCfg.ChaosControllerConfig
 			var metrics *metrics.ChaosControllerManagerMetricsCollector
-			var log logr.Logger
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
 
-			ij := NewInjector(testClient, cfg, controllerCfg, metrics, log)
-			res := ij.Inject(&admissionv1.AdmissionRequest{})
+			i := NewInjector(testClient, cfg, controllerCfg, metrics, logger)
+			res := i.Inject(&admissionv1.AdmissionRequest{})
 			Expect(res.Result.Message).To(ContainSubstring("unexpected end of JSON input"))
 		})
 	})
