@@ -18,9 +18,6 @@ package containerd
 import (
 	"context"
 	"fmt"
-	"github.com/containerd/containerd/cio"
-	"io"
-	"os"
 	"syscall"
 
 	"github.com/containerd/containerd"
@@ -49,21 +46,6 @@ type ContainerdClient struct {
 	client ContainerdClientInterface
 }
 
-type stdinCloser struct {
-	stdin  *os.File
-	closer func()
-}
-
-func (s *stdinCloser) Read(p []byte) (int, error) {
-	n, err := s.stdin.Read(p)
-	if err == io.EOF {
-		if s.closer != nil {
-			s.closer()
-		}
-	}
-	return n, err
-}
-
 // FormatContainerID strips protocol prefix from the container ID
 func (c ContainerdClient) FormatContainerID(ctx context.Context, containerID string) (string, error) {
 	if len(containerID) < len(containerdProtocolPrefix) {
@@ -90,61 +72,6 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 		return 0, err
 	}
 	return task.Pid(), nil
-}
-
-// todo implementation exec  command functions
-func (c ContainerdClient) ExecCommandByContainerID(ctx context.Context, containerID string, cmd []string) ([]byte, error) {
-	id, err := c.FormatContainerID(ctx, containerID)
-	if err != nil {
-		return []byte{}, err
-	}
-	container, err := c.client.LoadContainer(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	task, err := container.Task(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	spec, err := container.Spec(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var stdinC = &stdinCloser{
-		stdin: os.Stdin,
-	}
-	ioOpts := []cio.Opt{cio.WithFIFODir("")}
-	pspec := spec.Process
-	pspec.Args = cmd
-
-	ioCreator := cio.NewCreator(append([]cio.Opt{cio.WithStreams(stdinC, os.Stdout, os.Stderr)}, ioOpts...)...)
-	process, err := task.Exec(ctx, "0", pspec, ioCreator)
-	if err != nil {
-		return nil, err
-	}
-	stdinC.closer = func() {
-		process.CloseIO(ctx, containerd.WithStdinCloser)
-	}
-
-	statusC, err := process.Wait(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := process.Start(ctx); err != nil {
-		return nil, err
-	}
-	status := <-statusC
-	code, _, err := status.Result()
-	if err != nil {
-		return nil, err
-	}
-	if code != 0 {
-		return nil, fmt.Errorf("status code is %d ", code)
-	}
-
-	return []byte{}, nil
 }
 
 // ContainerKillByContainerID kills container according to container id
