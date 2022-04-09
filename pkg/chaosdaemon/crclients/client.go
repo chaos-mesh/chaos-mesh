@@ -39,7 +39,6 @@ const (
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
-	ExecCommandByContainerID(ctx context.Context, containerID string, cmd []string) ([]byte, error)
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
 	FormatContainerID(ctx context.Context, containerID string) (string, error)

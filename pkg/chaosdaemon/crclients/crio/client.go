@@ -85,11 +85,6 @@ func (c CrioClient) GetPidFromContainerID(ctx context.Context, containerID strin
 	return 0, errors.New("fail to get pid from container info")
 }
 
-// todo implementation exec  command functions
-func (c CrioClient) ExecCommandByContainerID(ctx context.Context, containerID string, cmd []string) ([]byte, error) {
-	return []byte{}, nil
-}
-
 // ContainerKillByContainerID kills container according to container id
 func (c CrioClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
 	pid, err := c.GetPidFromContainerID(ctx, containerID)
