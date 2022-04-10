@@ -751,7 +751,7 @@ spec:
                         format: int64
                         type: integer
                       kind:
-                        description: FileType represents type of a file
+                        description: FileType represents type of file
                         type: string
                       mtime:
                         description: Timespec represents a time
@@ -817,7 +817,7 @@ spec:
                       to IO operations
                     properties:
                       filling:
-                        description: Filling determines what is filled in the miskate
+                        description: Filling determines what is filled in the mistake
                           data.
                         enum:
                         - zero
@@ -3532,7 +3532,7 @@ spec:
                                   format: int64
                                   type: integer
                                 kind:
-                                  description: FileType represents type of a file
+                                  description: FileType represents type of file
                                   type: string
                                 mtime:
                                   description: Timespec represents a time
@@ -3602,7 +3602,7 @@ spec:
                               properties:
                                 filling:
                                   description: Filling determines what is filled in
-                                    the miskate data.
+                                    the mistake data.
                                   enum:
                                   - zero
                                   - random
@@ -6087,7 +6087,7 @@ spec:
                                       format: int64
                                       type: integer
                                     kind:
-                                      description: FileType represents type of a file
+                                      description: FileType represents type of file
                                       type: string
                                     mtime:
                                       description: Timespec represents a time
@@ -6158,7 +6158,7 @@ spec:
                                   properties:
                                     filling:
                                       description: Filling determines what is filled
-                                        in the miskate data.
+                                        in the mistake data.
                                       enum:
                                       - zero
                                       - random
