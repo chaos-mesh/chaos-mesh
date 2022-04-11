@@ -91,7 +91,7 @@ func main() {
 			},
 			store.NewDBStore,
 			collector.NewServer,
-			ttlcontroller.NewController,
+			ttlcontroller.Bootstrap,
 		),
 		store.Module,
 		apiserver.Module,
