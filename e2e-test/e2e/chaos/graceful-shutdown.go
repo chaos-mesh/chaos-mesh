@@ -59,7 +59,7 @@ var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {
 		framework.ExpectNoError(err, "failed to load raw config")
 		logger, err := log.NewDefaultZapLogger()
 		framework.ExpectNoError(err, "failed to create logger")
-		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true), logger
+		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true, logger)
 		framework.ExpectNoError(err, "failed to create port forwarder")
 		fwCancel = cancel
 		kubeCli = f.ClientSet
