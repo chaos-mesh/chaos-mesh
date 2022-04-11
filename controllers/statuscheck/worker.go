@@ -33,7 +33,7 @@ type Executor interface {
 	// 1. the result status (true for success, false for failure).
 	// 2. output of execution.
 	// 3. errors if any, it will lead to throw away the result of the execution.
-	Do(spec v1alpha1.StatusCheckSpec) (bool, string, error)
+	Do() (bool, string, error)
 	// Type provides the type of executor
 	Type() string
 }
@@ -103,7 +103,7 @@ func (w *worker) stop() {
 // Returns whether the worker should continue.
 func (w *worker) execute() bool {
 	startTime := time.Now()
-	result, output, err := w.executor.Do(w.statusCheck.Spec)
+	result, output, err := w.executor.Do()
 	if err != nil {
 		// executor error, throw away the result.
 		w.logger.Error(err, "executor internal error")
@@ -120,6 +120,7 @@ func (w *worker) execute() bool {
 	key := types.NamespacedName{Namespace: w.statusCheck.Namespace, Name: w.statusCheck.Name}
 	if result {
 		w.logger.V(1).Info("status check execution succeed", "msg", output)
+		w.eventRecorder.Event(&w.statusCheck, recorder.StatusCheckExecutionSucceed{ExecutorType: w.executor.Type()})
 		w.manager.results.append(key, v1alpha1.StatusCheckRecord{
 			StartTime: &metav1.Time{Time: startTime},
 			Outcome:   v1alpha1.StatusCheckOutcomeSuccess,

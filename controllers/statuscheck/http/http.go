@@ -32,10 +32,13 @@ import (
 
 type httpExecutor struct {
 	logger logr.Logger
+
+	timeoutSeconds  int
+	httpStatusCheck v1alpha1.HTTPStatusCheck
 }
 
-func NewExecutor(logger logr.Logger) *httpExecutor {
-	return &httpExecutor{logger: logger}
+func NewExecutor(logger logr.Logger, timeoutSeconds int, httpStatusCheck v1alpha1.HTTPStatusCheck) *httpExecutor {
+	return &httpExecutor{logger: logger, timeoutSeconds: timeoutSeconds, httpStatusCheck: httpStatusCheck}
 }
 
 type response struct {
@@ -47,16 +50,12 @@ func (e *httpExecutor) Type() string {
 	return "HTTP"
 }
 
-func (e *httpExecutor) Do(spec v1alpha1.StatusCheckSpec) (bool, string, error) {
+func (e *httpExecutor) Do() (bool, string, error) {
 	client := &http.Client{
-		Timeout: time.Duration(spec.TimeoutSeconds) * time.Second,
-	}
-	if spec.EmbedStatusCheck == nil || spec.EmbedStatusCheck.HTTPStatusCheck == nil {
-		// this should not happen, if the webhook works as expected
-		return false, "illegal status check, http should not be empty", nil
+		Timeout: time.Duration(e.timeoutSeconds) * time.Second,
 	}
 
-	httpStatusCheck := spec.HTTPStatusCheck
+	httpStatusCheck := e.httpStatusCheck
 	return e.DoHTTPRequest(client,
 		httpStatusCheck.RequestUrl,
 		string(httpStatusCheck.RequestMethod),
@@ -92,7 +91,7 @@ func validate(logger logr.Logger, criteria v1alpha1.HTTPCriteria, resp response)
 	if !ok {
 		logger.Info("validate status code failed",
 			"criteria", criteria.StatusCode,
-			"statusCode", resp.statusCode, "body", resp.body)
+			"statusCode", resp.statusCode)
 		return false, fmt.Sprintf("unexpected status code: %d", resp.statusCode), nil
 	}
 	return ok, "", nil

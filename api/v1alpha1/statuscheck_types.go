@@ -180,6 +180,7 @@ const (
 	StatusCheckFailureThresholdExceed StatusCheckReason = "StatusCheckFailureThresholdExceed"
 	StatusCheckSuccessThresholdExceed StatusCheckReason = "StatusCheckSuccessThresholdExceed"
 	StatusCheckExecutionFailed        StatusCheckReason = "StatusCheckExecutionFailed"
+	StatusCheckExecutionSucceed       StatusCheckReason = "StatusCheckExecutionSucceed"
 )
 
 type StatusCheckCondition struct {

@@ -204,7 +204,13 @@ func newExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor
 	var executor Executor
 	switch statusCheck.Spec.Type {
 	case v1alpha1.TypeHTTP:
-		executor = http.NewExecutor(logger.WithName("http-executor"))
+		if statusCheck.Spec.EmbedStatusCheck == nil || statusCheck.Spec.HTTPStatusCheck == nil {
+			// this should not happen, if the webhook works as expected
+			return nil, errors.New("illegal status check, http should not be empty")
+		}
+		executor = http.NewExecutor(
+			logger.WithName("http-executor").WithValues("url", statusCheck.Spec.HTTPStatusCheck.RequestUrl),
+			statusCheck.Spec.TimeoutSeconds, *statusCheck.Spec.HTTPStatusCheck)
 	default:
 		return nil, errors.New("unsupported type")
 	}

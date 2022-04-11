@@ -17,6 +17,7 @@ package statuscheck
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -51,17 +52,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	obj := &v1alpha1.StatusCheck{}
 	if err := r.kubeClient.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.logger.Info("status check is deleted")
+			r.logger.Info("status check is deleted", "statuscheck", req.NamespacedName)
 			// the StatusCheck is deleted, remove it from manger
 			r.manager.Delete(req.NamespacedName)
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, errors.Wrap(err, "get status check")
 	}
 
 	// if status check was completed previously, we don't want to redo the termination
 	if obj.IsCompleted() {
-		r.logger.Info("status check is already completed")
+		r.logger.V(1).Info("status check is already completed", "statuscheck", req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
 
@@ -70,7 +71,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// if nil, add status check to manager
 		err := r.manager.Add(*obj)
 		if err != nil {
-			return ctrl.Result{}, err
+			return ctrl.Result{}, errors.Wrap(err, "add status check to manager")
 		}
 		result, _ = r.manager.Get(*obj)
 	}
@@ -84,8 +85,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, req ctrl.Request, result 
 	return func() error {
 		statusCheck := &v1alpha1.StatusCheck{}
 		if err := r.kubeClient.Get(ctx, req.NamespacedName, statusCheck); err != nil {
-			r.logger.Error(err, "unable to get status check")
-			return err
+			return errors.Wrap(err, "get status check")
 		}
 
 		if statusCheck.Status.StartTime == nil {
@@ -96,7 +96,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, req ctrl.Request, result 
 
 		conditions, err := r.generateConditions(*statusCheck)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "generate status check conditions")
 		}
 
 		if conditions.isCompleted() {
@@ -128,7 +128,7 @@ func (r *Reconciler) generateConditions(statusCheck v1alpha1.StatusCheck) (condi
 	conditions := toConditionMap(statusCheck.Status.Conditions)
 
 	if err := setDurationExceedCondition(statusCheck, conditions); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "set duration exceed condition")
 	}
 	setFailureThresholdExceedCondition(statusCheck, conditions)
 	setSuccessThresholdExceedCondition(statusCheck, conditions)

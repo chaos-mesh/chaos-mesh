@@ -56,6 +56,22 @@ func (it StatusCheckExecutionFailed) Message() string {
 	return fmt.Sprintf("%s execution of status check failed: %s", it.ExecutorType, it.Msg)
 }
 
+type StatusCheckExecutionSucceed struct {
+	ExecutorType string
+}
+
+func (it StatusCheckExecutionSucceed) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it StatusCheckExecutionSucceed) Reason() string {
+	return string(v1alpha1.StatusCheckExecutionSucceed)
+}
+
+func (it StatusCheckExecutionSucceed) Message() string {
+	return fmt.Sprintf("%s execution of status check succeed", it.ExecutorType)
+}
+
 type StatusCheckDurationExceed struct {
 }
 

@@ -27,14 +27,13 @@ import (
 // fakeHTTPExecutor
 type fakeHTTPExecutor struct {
 	logger logr.Logger
+
+	httpStatusCheck v1alpha1.HTTPStatusCheck
+	timeoutSeconds  int
 }
 
-func (e *fakeHTTPExecutor) Do(spec v1alpha1.StatusCheckSpec) (bool, string, error) {
-	if spec.EmbedStatusCheck == nil || spec.EmbedStatusCheck.HTTPStatusCheck == nil {
-		// this should not happen, if the webhook works as expected
-		return false, "illegal status check, http should not be empty", nil
-	}
-	return e.handle(spec)
+func (e *fakeHTTPExecutor) Do() (bool, string, error) {
+	return e.handle()
 }
 
 func (e *fakeHTTPExecutor) Type() string {
@@ -45,19 +44,27 @@ func newFakeExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Exec
 	var executor Executor
 	switch statusCheck.Spec.Type {
 	case v1alpha1.TypeHTTP:
-		executor = &fakeHTTPExecutor{logger: logger.WithName("fake-http-executor")}
+		if statusCheck.Spec.EmbedStatusCheck == nil || statusCheck.Spec.HTTPStatusCheck == nil {
+			// this should not happen, if the webhook works as expected
+			return nil, errors.New("illegal status check, http should not be empty")
+		}
+		executor = &fakeHTTPExecutor{
+			logger:          logger.WithName("fake-http-executor"),
+			httpStatusCheck: *statusCheck.Spec.HTTPStatusCheck,
+			timeoutSeconds:  statusCheck.Spec.TimeoutSeconds,
+		}
 	default:
 		return nil, errors.New("unsupported type")
 	}
 	return executor, nil
 }
 
-func (e *fakeHTTPExecutor) handle(spec v1alpha1.StatusCheckSpec) (bool, string, error) {
-	switch spec.HTTPStatusCheck.RequestBody {
+func (e *fakeHTTPExecutor) handle() (bool, string, error) {
+	switch e.httpStatusCheck.RequestBody {
 	case "failure":
 		return false, "failure", nil
 	case "timeout":
-		time.Sleep(time.Duration(spec.TimeoutSeconds) * time.Second)
+		time.Sleep(time.Duration(e.timeoutSeconds) * time.Second)
 		return false, "timeout", nil
 	default:
 		return true, "", nil
