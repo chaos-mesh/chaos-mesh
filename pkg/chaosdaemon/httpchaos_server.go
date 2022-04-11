@@ -21,7 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"sync"
@@ -49,7 +49,7 @@ func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err 
 		return &http.Response{
 			StatusCode: http.StatusLocked,
 			Status:     http.StatusText(http.StatusLocked),
-			Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			Body:       io.NopCloser(bytes.NewBufferString("")),
 			Request:    req,
 		}, nil
 	}
@@ -151,7 +151,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	log.Info("http chaos applied")
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "read response body")
 	}

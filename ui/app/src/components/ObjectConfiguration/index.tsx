@@ -22,8 +22,8 @@ import { ArchiveSingle } from 'api/archives.type'
 import { ExperimentSingle } from 'api/experiments.type'
 import Space from '@ui/mui-extends/esm/Space'
 import StatusLabel from 'components/StatusLabel'
-import T from 'components/T'
 import { format } from 'lib/luxon'
+import i18n from 'components/T'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
 import { useStoreSelector } from 'store'
 
@@ -64,13 +64,13 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
         {!inNode && (
           <Grid item xs={vertical ? 12 : 3}>
             <Typography variant="subtitle2" gutterBottom>
-              {T('newE.steps.basic')}
+              {i18n('newE.steps.basic')}
             </Typography>
 
             <Table size="small">
               <TableBody>
                 <TableRow>
-                  <TableCell>{T('k8s.namespace')}</TableCell>
+                  <TableCell>{i18n('k8s.namespace')}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
                       {config.namespace}
@@ -79,7 +79,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                 </TableRow>
 
                 <TableRow>
-                  <TableCell>{T('common.uuid')}</TableCell>
+                  <TableCell>{i18n('common.uuid')}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
                       {config.uid}
@@ -88,7 +88,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                 </TableRow>
 
                 <TableRow>
-                  <TableCell>{T('table.created')}</TableCell>
+                  <TableCell>{i18n('table.created')}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
                       {format(config.created_at, lang)}
@@ -102,7 +102,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
 
         <Grid item xs={vertical ? 12 : 3}>
           <Typography variant="subtitle2" gutterBottom>
-            {T('newE.steps.scope')}
+            {i18n('newE.steps.scope')}
           </Typography>
 
           {(inNode
@@ -118,7 +118,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
             : (config.kind as any) === 'PhysicalMachineChaos') && (
             <Table>
               <TableRow>
-                <TableCell>{T('physic.address')}</TableCell>
+                <TableCell>{i18n('physic.address')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
                     {inNode
@@ -135,7 +135,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
 
         <Grid item xs={vertical ? 12 : 3}>
           <Typography variant="subtitle2" gutterBottom>
-            {T('experiments.single')}
+            {i18n('experiments.single')}
           </Typography>
 
           <Experiment
@@ -146,17 +146,17 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
 
         <Grid item xs={vertical ? 12 : 3}>
           <Typography variant="subtitle2" gutterBottom>
-            {T('newE.steps.run')}
+            {i18n('newE.steps.run')}
           </Typography>
 
           <Table size="small">
             <TableBody>
               {!inSchedule && (
                 <TableRow>
-                  <TableCell>{T(inNode ? 'newW.node.deadline' : 'common.duration')}</TableCell>
+                  <TableCell>{i18n(inNode ? 'newW.node.deadline' : 'common.duration')}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      {inNode ? (config as any).deadline : spec.duration ? spec.duration : T('newE.run.continuous')}
+                      {inNode ? (config as any).deadline : spec.duration ? spec.duration : i18n('newE.run.continuous')}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -164,7 +164,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
               {inSchedule && (
                 <>
                   <TableRow>
-                    <TableCell>{T('schedules.single')}</TableCell>
+                    <TableCell>{i18n('schedules.single')}</TableCell>
                     <TableCell>
                       <Typography variant="body2" color="textSecondary">
                         {spec.schedule}
@@ -173,7 +173,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                   </TableRow>
                   {spec.historyLimit && (
                     <TableRow>
-                      <TableCell>{T('newS.basic.historyLimit')}</TableCell>
+                      <TableCell>{i18n('newS.basic.historyLimit')}</TableCell>
                       <TableCell>
                         <Typography variant="body2" color="textSecondary">
                           {spec.historyLimit}
@@ -183,7 +183,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                   )}
                   {spec.concurrencyPolicy && (
                     <TableRow>
-                      <TableCell>{T('newS.basic.concurrencyPolicy')}</TableCell>
+                      <TableCell>{i18n('newS.basic.concurrencyPolicy')}</TableCell>
                       <TableCell>
                         <Typography variant="body2" color="textSecondary">
                           {spec.concurrencyPolicy}
@@ -193,7 +193,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                   )}
                   {spec.startingDeadlineSeconds && (
                     <TableRow>
-                      <TableCell>{T('newS.basic.startingDeadlineSeconds')}</TableCell>
+                      <TableCell>{i18n('newS.basic.startingDeadlineSeconds')}</TableCell>
                       <TableCell>
                         <Typography variant="body2" color="textSecondary">
                           {spec.startingDeadlineSeconds}

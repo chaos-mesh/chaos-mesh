@@ -44,11 +44,11 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PublishIcon from '@mui/icons-material/Publish'
 import RemoveIcon from '@mui/icons-material/Remove'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import UndoIcon from '@mui/icons-material/Undo'
 import _isEmpty from 'lodash.isempty'
 import api from 'api'
 import { constructWorkflow } from 'lib/formikhelpers'
+import i18n from 'components/T'
 import loadable from '@loadable/component'
 import { makeStyles } from '@mui/styles'
 import { resetNewExperiment } from 'slices/experiments'
@@ -134,7 +134,7 @@ const NewWorkflow = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('confirm.success.delete', intl) as string,
+        message: i18n('confirm.success.delete', intl) as string,
       })
     )
     resetRestore()
@@ -146,8 +146,8 @@ const NewWorkflow = () => {
         dispatch(
           setConfirm({
             index,
-            title: `${T('common.delete', intl)} ${name}`,
-            description: T('newW.node.deleteDesc', intl) as string,
+            title: `${i18n('common.delete', intl)} ${name}`,
+            description: i18n('newW.node.deleteDesc', intl) as string,
             handle: handleAction(action, index),
           })
         )
@@ -191,7 +191,7 @@ const NewWorkflow = () => {
     <Grid container spacing={9}>
       <Grid item xs={12} md={8}>
         <Space spacing={6}>
-          <Typography>{T('common.process')}</Typography>
+          <Typography>{i18n('common.process')}</Typography>
           <Stepper orientation="vertical" sx={{ mt: -1, p: 0 }}>
             {steps.length > 0 &&
               steps.map((step, index) => (
@@ -201,13 +201,17 @@ const NewWorkflow = () => {
                       <Paper sx={{ p: 3, borderColor: 'success.main' }}>
                         <Box display="flex" justifyContent="space-between">
                           <Space direction="row" alignItems="center">
-                            <Chip label={T(`newW.node.${step.type}`)} color="primary" size="small" />
+                            <Chip label={i18n(`newW.node.${step.type}`)} color="primary" size="small" />
                             <Typography component="div" variant="body1">
                               {step.name}
                             </Typography>
                           </Space>
                           <Space direction="row">
-                            <IconButton size="small" title={T('common.edit', intl)} onClick={restoreExperiment(index)}>
+                            <IconButton
+                              size="small"
+                              title={i18n('common.edit', intl)}
+                              onClick={restoreExperiment(index)}
+                            >
                               <UndoIcon />
                             </IconButton>
                             <Menu>
@@ -215,7 +219,7 @@ const NewWorkflow = () => {
                                 <ListItemIcon>
                                   <RemoveIcon fontSize="small" />
                                 </ListItemIcon>
-                                <Typography variant="inherit">{T('common.delete')}</Typography>
+                                <Typography variant="inherit">{i18n('common.delete')}</Typography>
                               </MenuItem>
                             </Menu>
                           </Space>
@@ -245,15 +249,19 @@ const NewWorkflow = () => {
           {({ errors, touched }) => (
             <Form style={{ height: '100%' }}>
               <Space height="100%">
-                <Typography>{T('newW.titleBasic')}</Typography>
+                <Typography>{i18n('newW.titleBasic')}</Typography>
                 <TextField
                   name="name"
-                  label={T('common.name')}
-                  validate={validateName(T('newW.nameValidation', intl))}
-                  helperText={errors.name && touched.name ? errors.name : T('newW.nameHelper')}
+                  label={i18n('common.name')}
+                  validate={validateName(i18n('newW.nameValidation', intl))}
+                  helperText={errors.name && touched.name ? errors.name : i18n('newW.nameHelper')}
                   error={errors.name && touched.name ? true : false}
                 />
-                <SelectField name="namespace" label={T('k8s.namespace')} helperText={T('newE.basic.namespaceHelper')}>
+                <SelectField
+                  name="namespace"
+                  label={i18n('k8s.namespace')}
+                  helperText={i18n('newE.basic.namespaceHelper')}
+                >
                   {namespaces.map((n) => (
                     <MenuItem key={n} value={n}>
                       {n}
@@ -262,12 +270,12 @@ const NewWorkflow = () => {
                 </SelectField>
                 <TextField
                   name="deadline"
-                  label={T('newW.node.deadline')}
-                  validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                  helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                  label={i18n('newW.node.deadline')}
+                  validate={validateDeadline(i18n('newW.node.deadlineValidation', intl))}
+                  helperText={errors.deadline && touched.deadline ? errors.deadline : i18n('newW.node.deadlineHelper')}
                   error={errors.deadline && touched.deadline ? true : false}
                 />
-                <Typography>{T('common.preview')}</Typography>
+                <Typography>{i18n('common.preview')}</Typography>
                 <Box flex={1}>
                   <Paper sx={{ p: 0 }}>
                     <YAMLEditor
@@ -284,7 +292,7 @@ const NewWorkflow = () => {
                   fullWidth
                   disabled={_isEmpty(templates)}
                 >
-                  {T('newW.submit')}
+                  {i18n('newW.submit')}
                 </Button>
               </Space>
             </Form>

@@ -124,6 +124,14 @@ message IPSetsRequest {
 message IPSet {
   string name = 1;
   repeated string cidrs = 2;
+  repeated CidrAndPort cidr_and_ports = 3;
+  repeated string set_names = 4;
+  string type = 5;
+}
+
+message CidrAndPort {
+  string cidr = 1;
+  uint32 port = 2;
 }
 
 message IptablesChainsRequest {
@@ -173,6 +181,7 @@ message ExecStressRequest {
   string cpuStressors = 3;
   bool enterNS = 4;
   string memoryStressors = 5;
+  int32 oomScoreAdj = 7;
 }
 
 message ExecStressResponse {
