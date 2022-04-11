@@ -21,8 +21,8 @@ import { validateDuration, validateSchedule } from 'lib/formikhelpers'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
 import { FormattedMessage } from 'react-intl'
-import T from 'components/T'
 import { TextField } from 'components/FormField'
+import i18n from 'components/T'
 import { useStoreSelector } from 'store'
 
 function isInstant(kind: ExperimentKind | '', action: string) {
@@ -67,14 +67,14 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography>{T('newE.steps.run')}</Typography>
+        <Typography>{i18n('newE.steps.run')}</Typography>
         {!inSchedule && (
           <FormControlLabel
             style={{ marginRight: 0 }}
             control={
               <Switch name="continuous" color="primary" size="small" checked={continuous} onChange={handleChecked} />
             }
-            label={T('newE.run.continuous')}
+            label={i18n('newE.run.continuous')}
             disabled={instant}
           />
         )}
@@ -84,7 +84,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
         <TextField
           fast
           name="spec.schedule"
-          label={T('schedules.single')}
+          label={i18n('schedules.single')}
           validate={validateSchedule()}
           helperText={
             getIn(errors, 'spec.schedule') && getIn(touched, 'spec.schedule') ? (
@@ -109,12 +109,12 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
       {!continuous && (
         <TextField
           name="spec.duration"
-          label={T('common.duration')}
+          label={i18n('common.duration')}
           validate={instant ? undefined : validateDuration()}
           helperText={
             getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration')
               ? getIn(errors, 'spec.duration')
-              : T('common.durationHelper')
+              : i18n('common.durationHelper')
           }
           error={getIn(errors, 'spec.duration') && getIn(touched, 'spec.duration') ? true : false}
           disabled={instant}

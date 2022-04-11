@@ -86,12 +86,12 @@ func main() {
 		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
 		fx.Supply(rootLogger),
 		fx.Provide(
-			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
+			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLConfig) {
 				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
 			store.NewDBStore,
 			collector.NewServer,
-			ttlcontroller.NewController,
+			ttlcontroller.Bootstrap,
 		),
 		store.Module,
 		apiserver.Module,

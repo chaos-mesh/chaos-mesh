@@ -18,7 +18,7 @@ package physicalmachine
 import (
 	"crypto"
 	"crypto/x509"
-	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -77,12 +77,12 @@ func (o *PhysicalMachineGenerateOptions) Run() error {
 }
 
 func GetChaosdCAFileFromFile(caCertFile, caKeyFile string) (*x509.Certificate, crypto.Signer, error) {
-	certData, err := ioutil.ReadFile(caCertFile)
+	certData, err := os.ReadFile(caCertFile)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "cannot read cert file")
 	}
 
-	keyData, err := ioutil.ReadFile(caKeyFile)
+	keyData, err := os.ReadFile(caKeyFile)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "cannot read private key file")
 	}

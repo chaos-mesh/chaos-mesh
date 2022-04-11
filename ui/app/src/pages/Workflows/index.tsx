@@ -20,10 +20,10 @@ import AddIcon from '@mui/icons-material/Add'
 import DataTable from './DataTable'
 import Loading from '@ui/mui-extends/esm/Loading'
 import NotFound from 'components/NotFound'
-import T from 'components/T'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
 import { comparator } from 'lib/luxon'
+import i18n from 'components/T'
 import { useIntervalFetch } from 'lib/hooks'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -56,7 +56,7 @@ const Workflows = () => {
         <div>
           <Box mb={6}>
             <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate('/workflows/new')}>
-              {T('newW.title')}
+              {i18n('newW.title')}
             </Button>
           </Box>
 
@@ -66,7 +66,7 @@ const Workflows = () => {
 
       {!loading && workflows.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('workflows.notFound')}</Typography>
+          <Typography>{i18n('workflows.notFound')}</Typography>
         </NotFound>
       )}
 

@@ -27,10 +27,10 @@ import NodeConfiguration from 'components/ObjectConfiguration/Node'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import { WorkflowSingle } from 'api/workflows.type'
 import api from 'api'
 import { constructWorkflowTopology } from 'lib/cytoscape'
+import i18n from 'components/T'
 import loadable from '@loadable/component'
 import { makeStyles } from '@mui/styles'
 import { useIntervalFetch } from 'lib/hooks'
@@ -148,7 +148,7 @@ const Single = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.success.${action}`, intl),
+              message: i18n(`confirm.success.${action}`, intl),
             })
           )
 
@@ -182,19 +182,19 @@ const Single = () => {
                 size="small"
                 startIcon={<ArchiveOutlinedIcon />}
                 onClick={handleSelect({
-                  title: `${T('archives.single', intl)} ${single?.name}`,
-                  description: T('workflows.deleteDesc', intl),
+                  title: `${i18n('archives.single', intl)} ${single?.name}`,
+                  description: i18n('workflows.deleteDesc', intl),
                   handle: handleAction('archive'),
                 })}
               >
-                {T('archives.single')}
+                {i18n('archives.single')}
               </Button>
             </Space>
             <Paper sx={{ display: 'flex', flexDirection: 'column', height: 450 }}>
               <PaperTop
                 title={
                   <Space spacing={1.5} alignItems="center">
-                    <Box>{T('workflow.topology')}</Box>
+                    <Box>{i18n('workflow.topology')}</Box>
                   </Space>
                 }
               ></PaperTop>
@@ -204,7 +204,7 @@ const Single = () => {
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                  <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                   <Box flex={1} overflow="scroll">
                     <EventsTimeline events={events} />
                   </Box>
@@ -214,7 +214,7 @@ const Single = () => {
                 <Paper sx={{ height: 600, p: 0 }}>
                   {single && (
                     <Space display="flex" flexDirection="column" height="100%">
-                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
+                      <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
                         <YAMLEditor
                           name={single.name}

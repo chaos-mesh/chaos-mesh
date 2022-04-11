@@ -29,9 +29,9 @@ import NotFound from 'components/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
+import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
 import { useIntervalFetch } from 'lib/hooks'
 import { useIntl } from 'react-intl'
@@ -121,7 +121,7 @@ export default function Experiments() {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.success.${action}`, intl),
+              message: i18n(`confirm.success.${action}`, intl),
             })
           )
 
@@ -146,8 +146,8 @@ export default function Experiments() {
 
   const handleBatchDelete = () =>
     handleSelect({
-      title: T('experiments.deleteMulti', intl),
-      description: T('experiments.deleteDesc', intl),
+      title: i18n('experiments.deleteMulti', intl),
+      description: i18n('experiments.deleteDesc', intl),
       handle: handleAction('archiveMulti'),
     })
 
@@ -178,7 +178,7 @@ export default function Experiments() {
     <>
       <Space direction="row" mb={6}>
         <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate('/experiments/new')}>
-          {T('newE.title')}
+          {i18n('newE.title')}
         </Button>
         <Button
           variant="outlined"
@@ -186,12 +186,12 @@ export default function Experiments() {
           onClick={handleBatchSelect}
           disabled={experiments.length === 0}
         >
-          {T(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
+          {i18n(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
         </Button>
         {!isBatchEmpty && (
           <>
             <Button variant="outlined" startIcon={<PlaylistAddCheckIcon />} onClick={handleBatchSelectAll}>
-              {T('common.selectAll')}
+              {i18n('common.selectAll')}
             </Button>
             <Button
               variant="outlined"
@@ -199,7 +199,7 @@ export default function Experiments() {
               startIcon={<ArchiveOutlinedIcon />}
               onClick={handleBatchDelete}
             >
-              {T('archives.single')}
+              {i18n('archives.single')}
             </Button>
           </>
         )}
@@ -223,7 +223,7 @@ export default function Experiments() {
 
       {!loading && experiments.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('experiments.notFound')}</Typography>
+          <Typography>{i18n('experiments.notFound')}</Typography>
         </NotFound>
       )}
 
