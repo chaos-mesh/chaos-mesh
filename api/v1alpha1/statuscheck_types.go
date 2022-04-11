@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"github.com/pkg/errors"
 	"net/http"
 	"time"
 
@@ -238,7 +239,7 @@ func (in *StatusCheckSpec) GetDuration() (*time.Duration, error) {
 	}
 	duration, err := time.ParseDuration(string(*in.Duration))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "parse duration")
 	}
 	return &duration, nil
 }
@@ -249,7 +250,7 @@ func (in *StatusCheck) DurationExceed(now time.Time) (bool, time.Duration, error
 	}
 	duration, err := in.Spec.GetDuration()
 	if err != nil {
-		return false, 0, err
+		return false, 0, errors.Wrap(err, "get duration")
 	}
 
 	if duration != nil {
