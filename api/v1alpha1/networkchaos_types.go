@@ -201,10 +201,13 @@ type ReorderSpec struct {
 }
 
 func (obj *NetworkChaos) GetSelectorSpecs() map[string]interface{} {
-	return map[string]interface{}{
-		".":       &obj.Spec.PodSelector,
-		".Target": obj.Spec.Target,
+	selectors := map[string]interface{}{
+		".": &obj.Spec.PodSelector,
 	}
+	if obj.Spec.Target != nil {
+		selectors[".Target"] = obj.Spec.Target
+	}
+	return selectors
 }
 
 func (obj *NetworkChaos) GetCustomStatus() interface{} {
