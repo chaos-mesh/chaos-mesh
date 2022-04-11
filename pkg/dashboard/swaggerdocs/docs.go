@@ -3963,7 +3963,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "filling": {
-                    "description": "Filling determines what is filled in the miskate data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
+                    "description": "Filling determines what is filled in the mistake data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
                     "type": "string"
                 },
                 "maxLength": {
