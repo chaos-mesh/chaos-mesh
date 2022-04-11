@@ -22,8 +22,8 @@ import { ExperimentKind } from 'components/NewExperiment/types'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import { Submit } from 'components/FormField'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 import { parseSubmit } from 'lib/formikhelpers'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
@@ -72,7 +72,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
             dispatch(
               setAlert({
                 type: 'success',
-                message: T('confirm.success.create', intl),
+                message: i18n('confirm.success.create', intl),
               })
             )
 
@@ -89,10 +89,10 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
     <>
       {step1 && step2 && (
         <Paper>
-          <PaperTop title={T('common.submit')} boxProps={{ mb: 6 }} />
+          <PaperTop title={i18n('common.submit')} boxProps={{ mb: 6 }} />
           <Box textAlign="center">
             <DoneAllIcon fontSize="large" />
-            <Typography>{T('newE.complete')}</Typography>
+            <Typography>{i18n('newE.complete')}</Typography>
           </Box>
           <Submit onClick={submitExperiment} />
         </Paper>

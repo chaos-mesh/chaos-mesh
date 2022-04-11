@@ -30,7 +30,7 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
@@ -88,7 +88,7 @@ const Task: React.FC<TaskProps> = (props) => {
         setAlert({
           type: 'warning',
           // Please fill in the current branch first
-          message: T('newW.messages.m1', intl),
+          message: i18n('newW.messages.m1', intl),
         })
       )
 
@@ -128,7 +128,7 @@ const Task: React.FC<TaskProps> = (props) => {
               dispatch(
                 setAlert({
                   type: 'warning',
-                  message: T('newW.messages.m2', intl),
+                  message: i18n('newW.messages.m2', intl),
                 })
               )
 
@@ -184,47 +184,47 @@ const Task: React.FC<TaskProps> = (props) => {
               <Box mt={3} ml={8}>
                 <Form>
                   <Paper>
-                    <PaperTop title={T(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
+                    <PaperTop title={i18n(`newW.${values.type}Title`)} boxProps={{ mb: 3 }} />
                     <Space>
                       <TextField
                         fast
                         name="name"
-                        label={T('common.name')}
-                        validate={validateName(T('newW.node.nameValidation', intl))}
-                        helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                        label={i18n('common.name')}
+                        validate={validateName(i18n('newW.node.nameValidation', intl))}
+                        helperText={errors.name && touched.name ? errors.name : i18n('newW.node.nameHelper')}
                         error={errors.name && touched.name ? true : false}
                       />
-                      <Typography variant="body2">{T('newW.node.container.title')}</Typography>
+                      <Typography variant="body2">{i18n('newW.node.container.title')}</Typography>
                       <TextField
                         fast
                         name="container.name"
-                        label={T('common.name')}
-                        validate={validateName(T('newW.node.container.nameValidation', intl))}
+                        label={i18n('common.name')}
+                        validate={validateName(i18n('newW.node.container.nameValidation', intl))}
                         helperText={
                           errors.container?.name && touched.container?.name
                             ? errors.container.name
-                            : T('newW.node.container.nameHelper')
+                            : i18n('newW.node.container.nameHelper')
                         }
                         error={errors.container?.name && touched.container?.name ? true : false}
                       />
                       <TextField
                         fast
                         name="container.image"
-                        label={T('newW.node.container.image')}
-                        validate={validateImage(T('newW.node.container.imageValidation', intl))}
+                        label={i18n('newW.node.container.image')}
+                        validate={validateImage(i18n('newW.node.container.imageValidation', intl))}
                         helperText={
                           errors.container?.image && touched.container?.image
                             ? errors.container.image
-                            : T('newW.node.container.imageHelper')
+                            : i18n('newW.node.container.imageHelper')
                         }
                         error={errors.container?.image && touched.container?.image ? true : false}
                       />
                       <LabelField
                         name="container.command"
-                        label={T('newW.node.container.command')}
-                        helperText={T('newW.node.container.commandHelper')}
+                        label={i18n('newW.node.container.command')}
+                        helperText={i18n('newW.node.container.commandHelper')}
                       />
-                      <Typography variant="body2">{T('newW.node.conditionalBranches.title')}</Typography>
+                      <Typography variant="body2">{i18n('newW.node.conditionalBranches.title')}</Typography>
                       {conditionalBranches.length > 0 &&
                         conditionalBranches.map((d, i) => (
                           <Space key={i} direction="row" alignItems="center">
@@ -233,7 +233,7 @@ const Task: React.FC<TaskProps> = (props) => {
                             </Typography>
                             <TextField
                               name={`conditionalBranches[${i}].expression`}
-                              label={T('newW.node.conditionalBranches.expression')}
+                              label={i18n('newW.node.conditionalBranches.expression')}
                             />
                             <Typography component="div" variant="button">
                               then
@@ -241,7 +241,7 @@ const Task: React.FC<TaskProps> = (props) => {
                             <Autocomplete
                               sx={{ width: 360 }}
                               options={templateNames}
-                              noOptionsText={T('common.noOptions')}
+                              noOptionsText={i18n('common.noOptions')}
                               value={(function () {
                                 if (templates[i] && templates[i].name !== conditionalBranches[i].target) {
                                   const name = templates[i].name
@@ -258,7 +258,7 @@ const Task: React.FC<TaskProps> = (props) => {
                                 <MUITextField
                                   {...params}
                                   name={`conditionalBranches[${i}].target`}
-                                  label={T('newW.node.conditionalBranches.target')}
+                                  label={i18n('newW.node.conditionalBranches.target')}
                                   size="small"
                                   fullWidth
                                 />
@@ -300,7 +300,7 @@ const Task: React.FC<TaskProps> = (props) => {
                           <Typography component="div" sx={{ ml: 1 }}>
                             {templates.length > index
                               ? templates[index].name
-                              : `${T('newW.node.child', intl)} ${index + 1}`}
+                              : `${i18n('newW.node.child', intl)} ${index + 1}`}
                           </Typography>
                         </Box>
                       </Paper>

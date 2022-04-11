@@ -17,7 +17,6 @@ package physicalmachine
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
@@ -48,7 +47,7 @@ func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, err
 		User:    user,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeysCallback(func() ([]ssh.Signer, error) {
-				key, err := ioutil.ReadFile(privateKeyFile)
+				key, err := os.ReadFile(privateKeyFile)
 				if err != nil {
 					return nil, errors.Wrap(err, "ssh key file read failed")
 				}

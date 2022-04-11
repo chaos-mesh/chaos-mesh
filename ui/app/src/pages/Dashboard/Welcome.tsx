@@ -24,7 +24,7 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 import { useTour } from '@reactour/tour'
 
@@ -47,7 +47,7 @@ const Welcome = () => {
       <Grid item xs={6}>
         <Paper style={{ height: '100%' }}>
           <Space className={classes.space}>
-            <PaperTop title={T('dashboard.tutorial.title')} subtitle={T('dashboard.tutorial.desc')} />
+            <PaperTop title={i18n('dashboard.tutorial.title')} subtitle={i18n('dashboard.tutorial.desc')} />
             <Button
               className="tutorial-end"
               variant="contained"
@@ -55,9 +55,9 @@ const Welcome = () => {
               fullWidth
               onClick={() => setIsOpen(true)}
             >
-              {T('common.tutorial')}
+              {i18n('common.tutorial')}
             </Button>
-            <PaperTop title={T('dashboard.newbie')} subtitle={T('dashboard.newbieDesc')} />
+            <PaperTop title={i18n('dashboard.newbie')} subtitle={i18n('dashboard.newbieDesc')} />
             <Button
               className="tutorial-newE"
               component={Link}
@@ -67,7 +67,7 @@ const Welcome = () => {
               fullWidth
               startIcon={<ExperimentIcon />}
             >
-              {T('newE.title')}
+              {i18n('newE.title')}
             </Button>
           </Space>
         </Paper>
@@ -75,7 +75,7 @@ const Welcome = () => {
       <Grid item xs={6}>
         <Paper style={{ height: '100%' }}>
           <Space className={classes.space}>
-            <PaperTop title={T('dashboard.startAWorkflow')} subtitle={T('dashboard.startAWorkflowDesc')} />
+            <PaperTop title={i18n('dashboard.startAWorkflow')} subtitle={i18n('dashboard.startAWorkflowDesc')} />
             <Button
               className="tutorial-newW"
               component={Link}
@@ -85,9 +85,9 @@ const Welcome = () => {
               fullWidth
               startIcon={<AccountTreeOutlinedIcon />}
             >
-              {T('newW.title')}
+              {i18n('newW.title')}
             </Button>
-            <PaperTop title={T('dashboard.startASchedule')} subtitle={T('dashboard.startAScheduleDesc')} />
+            <PaperTop title={i18n('dashboard.startASchedule')} subtitle={i18n('dashboard.startAScheduleDesc')} />
             <Button
               className="tutorial-newS"
               component={Link}
@@ -97,7 +97,7 @@ const Welcome = () => {
               fullWidth
               startIcon={<ScheduleIcon />}
             >
-              {T('newS.title')}
+              {i18n('newS.title')}
             </Button>
           </Space>
         </Paper>

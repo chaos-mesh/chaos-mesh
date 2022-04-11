@@ -358,6 +358,8 @@ type CommandBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
+	oomScoreAdj int
+
 	// the context is used to kill the process and will be passed into
 	// `exec.CommandContext`
 	ctx context.Context
@@ -437,6 +439,13 @@ func (b *CommandBuilder) SetStdout(stdout io.ReadWriteCloser) *CommandBuilder {
 func (b *CommandBuilder) SetStderr(stderr io.ReadWriteCloser) *CommandBuilder {
 	b.stderr = stderr
 
+	return b
+}
+
+// SetOOMScoreAdj sets the oom_score_adj for a process
+// oom_score_adj ranges from -1000 to 1000
+func (b *CommandBuilder) SetOOMScoreAdj(scoreAdj int) *CommandBuilder {
+	b.oomScoreAdj = scoreAdj
 	return b
 }
 

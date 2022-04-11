@@ -45,6 +45,17 @@ type Namespace struct {
 	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos"`
 }
 
+type PodSelectorInput struct {
+	Namespaces          []string               `json:"namespaces"`
+	Nodes               []string               `json:"nodes"`
+	Pods                map[string]interface{} `json:"pods"`
+	NodeSelectors       map[string]interface{} `json:"nodeSelectors"`
+	FieldSelectors      map[string]interface{} `json:"fieldSelectors"`
+	LabelSelectors      map[string]interface{} `json:"labelSelectors"`
+	AnnotationSelectors map[string]interface{} `json:"annotationSelectors"`
+	PodPhaseSelectors   []string               `json:"podPhaseSelectors"`
+}
+
 type PodStressChaos struct {
 	StressChaos   *v1alpha1.StressChaos `json:"stressChaos"`
 	Pod           *v1.Pod               `json:"pod"`

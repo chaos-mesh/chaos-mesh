@@ -17,6 +17,7 @@ package debug
 
 import (
 	"context"
+	"strings"
 
 	"github.com/hasura/go-graphql-client"
 
@@ -54,8 +55,8 @@ func (d *networkDebugger) Collect(ctx context.Context, namespace, chaosName stri
 					Name      string
 					Pod       struct {
 						Ipset    string
-						TcQdisc  string
-						Iptables string
+						TcQdisc  []string
+						Iptables []string
 					}
 				}
 			} `graphql:"networkchaos(name: $name)"`
@@ -87,8 +88,8 @@ func (d *networkDebugger) Collect(ctx context.Context, namespace, chaosName stri
 			}
 
 			podResult.Items = append(podResult.Items, common.ItemResult{Name: "ipset list", Value: podNetworkChaos.Pod.Ipset})
-			podResult.Items = append(podResult.Items, common.ItemResult{Name: "tc qdisc list", Value: podNetworkChaos.Pod.TcQdisc})
-			podResult.Items = append(podResult.Items, common.ItemResult{Name: "iptables list", Value: podNetworkChaos.Pod.Iptables})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "tc qdisc list", Value: strings.Join(podNetworkChaos.Pod.TcQdisc, "\n")})
+			podResult.Items = append(podResult.Items, common.ItemResult{Name: "iptables list", Value: strings.Join(podNetworkChaos.Pod.Iptables, "\n")})
 			output, err := common.MarshalChaos(podNetworkChaos.Spec)
 			if err != nil {
 				return nil, err
