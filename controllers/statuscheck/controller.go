@@ -17,6 +17,7 @@ package statuscheck
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -57,7 +58,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			r.manager.Delete(req.NamespacedName)
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, errors.Wrap(err, "get status check")
+		return ctrl.Result{}, errors.Wrapf(err, "get status check '%s'", req.NamespacedName.String())
 	}
 
 	// if status check was completed previously, we don't want to redo the termination
@@ -71,7 +72,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// if nil, add status check to manager
 		err := r.manager.Add(*obj)
 		if err != nil {
-			return ctrl.Result{}, errors.Wrap(err, "add status check to manager")
+			return ctrl.Result{}, errors.Wrapf(err, "add status check '%s' to manager", req.NamespacedName.String())
 		}
 		result, _ = r.manager.Get(*obj)
 	}
@@ -85,7 +86,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, req ctrl.Request, result 
 	return func() error {
 		statusCheck := &v1alpha1.StatusCheck{}
 		if err := r.kubeClient.Get(ctx, req.NamespacedName, statusCheck); err != nil {
-			return errors.Wrap(err, "get status check")
+			return errors.Wrapf(err, "get status check '%s'", req.NamespacedName.String())
 		}
 
 		if statusCheck.Status.StartTime == nil {
@@ -96,7 +97,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, req ctrl.Request, result 
 
 		conditions, err := r.generateConditions(*statusCheck)
 		if err != nil {
-			return errors.Wrap(err, "generate status check conditions")
+			return errors.Wrapf(err, "generate conditions for status check '%s'", req.NamespacedName.String())
 		}
 
 		if conditions.isCompleted() {
@@ -128,7 +129,7 @@ func (r *Reconciler) generateConditions(statusCheck v1alpha1.StatusCheck) (condi
 	conditions := toConditionMap(statusCheck.Status.Conditions)
 
 	if err := setDurationExceedCondition(statusCheck, conditions); err != nil {
-		return nil, errors.Wrap(err, "set duration exceed condition")
+		return nil, errors.Wrapf(err, "set duration exceed condition for status check '%s'", fmt.Sprintf("%s/%s", statusCheck.Namespace, statusCheck.Name))
 	}
 	setFailureThresholdExceedCondition(statusCheck, conditions)
 	setSuccessThresholdExceedCondition(statusCheck, conditions)

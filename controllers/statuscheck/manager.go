@@ -212,7 +212,7 @@ func newExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor
 			logger.WithName("http-executor").WithValues("url", statusCheck.Spec.HTTPStatusCheck.RequestUrl),
 			statusCheck.Spec.TimeoutSeconds, *statusCheck.Spec.HTTPStatusCheck)
 	default:
-		return nil, errors.New("unsupported type")
+		return nil, errors.Errorf("unsupported type '%s'", statusCheck.Spec.Type)
 	}
 	return executor, nil
 }

@@ -423,6 +423,78 @@ var _ = Describe("StatusCheck", func() {
 					Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
 				}
 			})
+
+			It("failure threshold exceed", func() {
+				key := types.NamespacedName{
+					Name:      "foo1",
+					Namespace: "default",
+				}
+				duration := "10s"
+				statusCheck := &v1alpha1.StatusCheck{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "foo1",
+						Namespace: "default",
+					},
+					Spec: v1alpha1.StatusCheckSpec{
+						Mode:                v1alpha1.StatusCheckContinuous,
+						Type:                v1alpha1.TypeHTTP,
+						Duration:            &duration,
+						IntervalSeconds:     1,
+						TimeoutSeconds:      1,
+						FailureThreshold:    3,
+						SuccessThreshold:    1,
+						RecordsHistoryLimit: 10,
+						EmbedStatusCheck: &v1alpha1.EmbedStatusCheck{
+							HTTPStatusCheck: &v1alpha1.HTTPStatusCheck{
+								RequestUrl:  "http://123.123.123.123",
+								RequestBody: "failure",
+								Criteria: v1alpha1.HTTPCriteria{
+									StatusCode: "200",
+								},
+							},
+						},
+					},
+				}
+
+				By("creating a status check")
+				{
+					Expect(k8sClient.Create(context.TODO(), statusCheck)).To(Succeed())
+				}
+
+				By("reconciling status check, failure threshold exceed and completed (duration not exceed)")
+				{
+					Eventually(func() ([]v1alpha1.StatusCheckCondition, error) {
+						err := k8sClient.Get(context.TODO(), key, statusCheck)
+						if err != nil {
+							return nil, err
+						}
+						return statusCheck.Status.Conditions, nil
+					}, 5*time.Second, time.Second).Should(
+						ConsistOf(
+							MatchFields(IgnoreExtras, Fields{
+								"Type":   Equal(v1alpha1.StatusCheckConditionCompleted),
+								"Status": Equal(corev1.ConditionTrue),
+							}),
+							MatchFields(IgnoreExtras, Fields{
+								"Type":   Equal(v1alpha1.StatusCheckConditionSuccessThresholdExceed),
+								"Status": Equal(corev1.ConditionFalse),
+							}),
+							MatchFields(IgnoreExtras, Fields{
+								"Type":   Equal(v1alpha1.StatusCheckConditionFailureThresholdExceed),
+								"Status": Equal(corev1.ConditionTrue),
+							}),
+							MatchFields(IgnoreExtras, Fields{
+								"Type":   Equal(v1alpha1.StatusCheckConditionDurationExceed),
+								"Status": Equal(corev1.ConditionFalse),
+							}),
+						))
+				}
+
+				By("deleting the created object")
+				{
+					Expect(k8sClient.Delete(context.TODO(), statusCheck)).To(Succeed())
+				}
+			})
 		})
 	})
 })

@@ -125,6 +125,11 @@ func (w *worker) execute() bool {
 			StartTime: &metav1.Time{Time: startTime},
 			Outcome:   v1alpha1.StatusCheckOutcomeSuccess,
 		})
+
+		// check if the success threshold is exceeded
+		// Notice: the function `setSuccessThresholdExceedCondition` in `controllers/statuscheck/conditions.go`
+		// also checks the success threshold, so if you want to modify the logic here, don't forget to modify that
+		// function as well.
 		if w.statusCheck.Spec.Mode == v1alpha1.StatusCheckSynchronous &&
 			w.sameResultCount >= w.statusCheck.Spec.SuccessThreshold {
 			w.logger.Info("exceed the success threshold")
@@ -139,6 +144,11 @@ func (w *worker) execute() bool {
 			StartTime: &metav1.Time{Time: startTime},
 			Outcome:   v1alpha1.StatusCheckOutcomeFailure,
 		})
+
+		// check if the failure threshold is exceeded
+		// Notice: the function `setFailureThresholdExceedCondition` in `controllers/statuscheck/conditions.go`
+		// also checks the failure threshold, so if you want to modify the logic here, don't forget to modify that
+		// function as well.
 		if w.sameResultCount >= w.statusCheck.Spec.FailureThreshold {
 			w.logger.Info("exceed the failure threshold")
 			// if it exceeds the FailureThreshold, stop the worker

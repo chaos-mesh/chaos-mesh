@@ -238,9 +238,9 @@ func (in *StatusCheckSpec) GetDuration() (*time.Duration, error) {
 	if in.Duration == nil {
 		return nil, nil
 	}
-	duration, err := time.ParseDuration(string(*in.Duration))
+	duration, err := time.ParseDuration(*in.Duration)
 	if err != nil {
-		return nil, errors.Wrap(err, "parse duration")
+		return nil, errors.Wrapf(err, "parse duration %s", *in.Duration)
 	}
 	return &duration, nil
 }

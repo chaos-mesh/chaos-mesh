@@ -103,6 +103,9 @@ func setDurationExceedCondition(statusCheck v1alpha1.StatusCheck, conditions con
 	return nil
 }
 
+// setFailureThresholdExceedCondition check if the failure threshold is exceeded, and then set the condition into conditionMap
+// Notice: the method `execute` of `worker` struct in `controllers/statuscheck/worker.go` checks the failure threshold,
+// so if you want to modify the logic here, don't forget to modify that function as well.
 func setFailureThresholdExceedCondition(statusCheck v1alpha1.StatusCheck, conditions conditionMap) {
 	if isThresholdExceed(statusCheck.Status.Records, v1alpha1.StatusCheckOutcomeFailure, statusCheck.Spec.FailureThreshold) {
 		conditions.setCondition(v1alpha1.StatusCheckConditionFailureThresholdExceed, corev1.ConditionTrue, "")
@@ -111,6 +114,9 @@ func setFailureThresholdExceedCondition(statusCheck v1alpha1.StatusCheck, condit
 	}
 }
 
+// setSuccessThresholdExceedCondition check if the success threshold is exceeded, and then set the condition into conditionMap
+// Notice: the method `execute` of `worker` struct in `controllers/statuscheck/worker.go` checks the success threshold,
+// so if you want to modify the logic here, don't forget to modify that function as well.
 func setSuccessThresholdExceedCondition(statusCheck v1alpha1.StatusCheck, conditions conditionMap) {
 	if isThresholdExceed(statusCheck.Status.Records, v1alpha1.StatusCheckOutcomeSuccess, statusCheck.Spec.SuccessThreshold) {
 		conditions.setCondition(v1alpha1.StatusCheckConditionSuccessThresholdExceed, corev1.ConditionTrue, "")
