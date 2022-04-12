@@ -56,8 +56,8 @@ func (it *AbortWorkflowReconciler) Reconcile(ctx context.Context, request reconc
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		workflowNeedUpdate := v1alpha1.Workflow{}
 		err := it.kubeClient.Get(ctx, request.NamespacedName, &workflowNeedUpdate)
-		if client.IgnoreNotFound(err) != nil {
-			return errors.Wrap(err, "get workflow")
+		if err != nil {
+			return errors.Wrapf(err, "get workflow")
 		}
 
 		entryNodes, err := fetchEntryNode(ctx, it.kubeClient, workflowNeedUpdate)

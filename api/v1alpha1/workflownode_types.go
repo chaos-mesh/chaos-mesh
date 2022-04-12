@@ -22,9 +22,9 @@ import (
 )
 
 const (
-	LabelControlledBy = "chaos-mesh.org/controlled-by"
-	LabelWorkflow     = "chaos-mesh.org/workflow"
-	AnnotationAbort   = "chaos-mesh.org/abort"
+	LabelControlledBy       = "chaos-mesh.org/controlled-by"
+	LabelWorkflow           = "chaos-mesh.org/workflow"
+	WorkflowAnnotationAbort = "workflow.chaos-mesh.org/abort"
 )
 
 const KindWorkflowNode = "WorkflowNode"

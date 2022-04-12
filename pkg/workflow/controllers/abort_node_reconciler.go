@@ -43,7 +43,8 @@ func NewAbortNodeReconciler(kubeClient client.Client, eventRecorder recorder.Cha
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
 		eventRecorder:     eventRecorder,
-		logger:            logger}
+		logger:            logger,
+	}
 }
 
 // Reconcile watches `WorkflowNodes`, if:
@@ -142,6 +143,6 @@ func (it *AbortNodeReconciler) abortWorkflow(ctx context.Context, node v1alpha1.
 	it.logger.Info("add abort annotation to parent workflow",
 		"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
 		"workflow", fmt.Sprintf("%s/%s", parentWorkflow.Namespace, parentWorkflow.Name))
-	parentWorkflow.Annotations[v1alpha1.AnnotationAbort] = "true"
+	parentWorkflow.Annotations[v1alpha1.WorkflowAborted] = "true"
 	return it.kubeClient.Update(ctx, parentWorkflow)
 }
