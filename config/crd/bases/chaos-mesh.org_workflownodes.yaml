@@ -4972,6 +4972,8 @@ spec:
                                 description: Load specifies P percent loading per
                                   CPU worker. 0 is effectively a sleep (no load) and
                                   100 is full loading.
+                                maximum: 100
+                                minimum: 0
                                 type: integer
                               options:
                                 description: extend stress-ng options
@@ -4994,6 +4996,7 @@ spec:
                                 description: OOMScoreAdj sets the oom_score_adj of
                                   the stress process. See `man 5 proc` to know more
                                   about this option.
+                                maximum: 1000
                                 minimum: -1000
                                 type: integer
                               options:
@@ -10685,6 +10688,8 @@ spec:
                                                 loading per CPU worker. 0 is effectively
                                                 a sleep (no load) and 100 is full
                                                 loading.
+                                              maximum: 100
+                                              minimum: 0
                                               type: integer
                                             options:
                                               description: extend stress-ng options
@@ -10709,6 +10714,7 @@ spec:
                                               description: OOMScoreAdj sets the oom_score_adj
                                                 of the stress process. See `man 5
                                                 proc` to know more about this option.
+                                              maximum: 1000
                                               minimum: -1000
                                               type: integer
                                             options:
@@ -11072,6 +11078,8 @@ spec:
                                           description: Load specifies P percent loading
                                             per CPU worker. 0 is effectively a sleep
                                             (no load) and 100 is full loading.
+                                          maximum: 100
+                                          minimum: 0
                                           type: integer
                                         options:
                                           description: extend stress-ng options
@@ -11096,6 +11104,7 @@ spec:
                                           description: OOMScoreAdj sets the oom_score_adj
                                             of the stress process. See `man 5 proc`
                                             to know more about this option.
+                                          maximum: 1000
                                           minimum: -1000
                                           type: integer
                                         options:
@@ -14703,6 +14712,8 @@ spec:
                             description: Load specifies P percent loading per CPU
                               worker. 0 is effectively a sleep (no load) and 100 is
                               full loading.
+                            maximum: 100
+                            minimum: 0
                             type: integer
                           options:
                             description: extend stress-ng options
@@ -14725,6 +14736,7 @@ spec:
                             description: OOMScoreAdj sets the oom_score_adj of the
                               stress process. See `man 5 proc` to know more about
                               this option.
+                            maximum: 1000
                             minimum: -1000
                             type: integer
                           options:
