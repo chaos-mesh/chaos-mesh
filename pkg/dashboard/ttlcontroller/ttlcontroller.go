@@ -19,19 +19,16 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-logr/logr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-var (
-	log = ctrl.Log.WithName("ttlcontroller")
-)
-
 // Controller defines the database ttl controller
 type Controller struct {
+	logger     logr.Logger
 	experiment core.ExperimentStore
 	event      core.EventStore
 	schedule   core.ScheduleStore
@@ -60,6 +57,7 @@ func NewController(
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
 	ttlc *TTLConfig,
+	logger logr.Logger,
 ) *Controller {
 	return &Controller{
 		experiment: experiment,
@@ -67,6 +65,7 @@ func NewController(
 		schedule:   schedule,
 		workflow:   workflow,
 		ttlconfig:  ttlc,
+		logger:     logger,
 	}
 }
 
@@ -74,14 +73,14 @@ func NewController(
 func Register(ctx context.Context, c *Controller) {
 	defer utilruntime.HandleCrash()
 
-	log.Info("Starting database TTL controller")
+	c.logger.Info("Starting database TTL controller")
 
 	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, ctx.Done())
 }
 
 // runWorker is a long-running function that will be called in order to delete the events, archives, schedule, and workflow.
 func (c *Controller) runWorker() {
-	log.Info("Deleting expired data from the database")
+	c.logger.Info("Deleting expired data from the database")
 
 	ctx := context.Background()
 
