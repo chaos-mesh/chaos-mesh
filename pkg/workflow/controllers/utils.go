@@ -73,7 +73,7 @@ func WorkflowNodeFinished(status v1alpha1.WorkflowNodeStatus) bool {
 }
 
 func WorkflowAborted(workflow v1alpha1.Workflow) bool {
-	return workflow.Annotations[v1alpha1.WorkflowAborted] == "true"
+	return workflow.Annotations[v1alpha1.WorkflowAnnotationAbort] == "true"
 }
 
 func SetWorkflowCondition(status *v1alpha1.WorkflowStatus, condition v1alpha1.WorkflowCondition) {
