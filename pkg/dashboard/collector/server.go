@@ -102,7 +102,7 @@ func NewServer(
 	for kind, chaosKind := range v1alpha1.AllKinds() {
 		if err = (&ChaosCollector{
 			Client:  s.Manager.GetClient(),
-			Log:     logger,
+			Log:     logger.WithName(kind),
 			archive: experimentArchive,
 			event:   event,
 		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
