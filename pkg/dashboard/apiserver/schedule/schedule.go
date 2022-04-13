@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,14 +40,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
-var log = u.Log.WithName("schedules")
-
 // Service defines a handler service for schedules.
 type Service struct {
 	schedule core.ScheduleStore
 	event    core.EventStore
 	config   *config.ChaosDashboardConfig
 	scheme   *runtime.Scheme
+	log      logr.Logger
 }
 
 func NewService(
@@ -54,12 +54,14 @@ func NewService(
 	event core.EventStore,
 	config *config.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
+	log logr.Logger,
 ) *Service {
 	return &Service{
 		schedule: schedule,
 		event:    event,
 		config:   config,
 		scheme:   scheme,
+		log:      log,
 	}
 }
 
@@ -112,7 +114,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
 		ns = s.config.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	ScheduleList := v1alpha1.ScheduleList{}
