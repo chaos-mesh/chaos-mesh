@@ -34,6 +34,7 @@ var (
 	PMNetworkDelayAction     PhysicalMachineChaosAction = "network-delay"
 	PMNetworkPartitionAction PhysicalMachineChaosAction = "network-partition"
 	PMNetworkBandwidthAction PhysicalMachineChaosAction = "network-bandwidth"
+	PMNetworkDownAction      PhysicalMachineChaosAction = "network-down"
 	PMNetworkDNSAction       PhysicalMachineChaosAction = "network-dns"
 	PMProcessAction          PhysicalMachineChaosAction = "process"
 	PMJVMExceptionAction     PhysicalMachineChaosAction = "jvm-exception"
@@ -65,7 +66,7 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-down;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -183,6 +184,10 @@ type ExpInfo struct {
 	// +ui:form:when=action=='network-partition'
 	// +optional
 	NetworkPartition *NetworkPartitionSpec `json:"network-partition,omitempty"`
+
+	// +ui:form:when=action=='network-down'
+	// +optional
+	NetworkDown *NetworkDownSpec `json:"network-down,omitempty"`
 
 	// +ui:form:when=action=='network-dns'
 	// +optional
@@ -330,6 +335,13 @@ type NetworkPartitionSpec struct {
 	// only the packet which match the tcp flag can be accepted, others will be dropped.
 	// only set when the IPProtocol is tcp, used for partition.
 	AcceptTCPFlags string `json:"accept-tcp-flags,omitempty"`
+}
+
+type NetworkDownSpec struct {
+	// the network interface to impact
+	Device string `json:"device,omitempty"`
+	// NIC down time, time units: ns, us (or µs), ms, s, m, h.
+	Duration string `json:"duration,omitempty"`
 }
 
 type NetworkDNSSpec struct {

@@ -1801,6 +1801,7 @@ spec:
                           - network-loss
                           - network-delay
                           - network-partition
+                          - network-down
                           - network-dns
                           - network-bandwidth
                           - process
@@ -2115,6 +2116,15 @@ spec:
                                 ports, use a ',' to separate or to indicate the range,
                                 such as 80, 8001:8010. it can only be used in conjunction
                                 with -p tcp or -p udp
+                              type: string
+                          type: object
+                        network-down:
+                          properties:
+                            device:
+                              description: the network interface to impact
+                              type: string
+                            duration:
+                              description: 'NIC down time, time units: ns, us (or µs), ms, s, m, h.'
                               type: string
                           type: object
                         network-dns:
@@ -4315,6 +4325,7 @@ spec:
                               - network-loss
                               - network-delay
                               - network-partition
+                              - network-down
                               - network-dns
                               - network-bandwidth
                               - process
@@ -4635,6 +4646,15 @@ spec:
                                     source ports, use a ',' to separate or to indicate
                                     the range, such as 80, 8001:8010. it can only
                                     be used in conjunction with -p tcp or -p udp
+                                  type: string
+                              type: object
+                            network-down:
+                              properties:
+                                device:
+                                  description: the network interface to impact
+                                  type: string
+                                duration:
+                                  description: 'NIC down time, time units: ns, us (or µs), ms, s, m, h.'
                                   type: string
                               type: object
                             network-dns:

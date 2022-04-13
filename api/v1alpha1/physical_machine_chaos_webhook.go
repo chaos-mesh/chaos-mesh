@@ -114,6 +114,8 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateNetworkPartitionAction(in.NetworkPartition)
 	case PMNetworkBandwidthAction:
 		validateConfigErr = validateNetworkBandwidthAction(in.NetworkBandwidth)
+	case PMNetworkDownAction:
+		validateConfigErr = validateNetworkDownAction(in.NetworkDown)
 	case PMNetworkDNSAction:
 		validateConfigErr = validateNetworkDNSAction(in.NetworkDNS)
 	case PMProcessAction:
@@ -291,6 +293,17 @@ func validateNetworkBandwidthAction(spec *NetworkBandwidthSpec) error {
 
 	return nil
 }
+
+func validateNetworkDownAction(spec *NetworkDownSpec) error {
+	if len(spec.Device) == 0 {
+		return errors.New("device is required")
+	}
+	if len(spec.Duration) == 0 {
+		return errors.New("duration is required")
+	}
+
+	return nil
+	}
 
 func validateNetworkDNSAction(spec *NetworkDNSSpec) error {
 	if (len(spec.DNSDomainName) != 0 && len(spec.DNSIp) == 0) || (len(spec.DNSDomainName) == 0 && len(spec.DNSIp) != 0) {
