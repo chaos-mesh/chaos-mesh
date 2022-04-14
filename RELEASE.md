@@ -23,9 +23,25 @@ As we maintain a `CHANGELOG.md` on each active branch, we could use it to draft 
 
 ### Step 2 Checkout New Branch
 
-This step is only required for major or minor version release. You should skip this step if you are going to release a bugfix/patch version.
+**This step is only required for major or minor version release.** You should skip this step if you are going to release a bugfix/patch version.
 
 Checkout a new branch with the name of `release-x.y` from `master` where `x.y` is the semantic version number of the release.
+
+Change the content in `env-images.yaml`, update the branch name from `master` to `release-x.y`.
+
+For example, if we are going to release `10.11.0`, you should:
+
+- checkout new branch `release-10.11.0` from `master`
+- update the content of `env-images.yaml` to:
+
+```yaml
+# specify which tag of ghcr.io/chaos-mesh/build-env image should be used with the current branch
+build-env:
+  tag: "release-10.11"
+# specify which tag of ghcr.io/chaos-mesh/dev-env image should be used with the current branch
+dev-env:
+  tag: "release-10.11"
+```
 
 ### Step 3 Update Versions in Helm Charts and install.sh
 
