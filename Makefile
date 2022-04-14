@@ -161,10 +161,12 @@ images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
 
 pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/build-env/.dockerbuilt
-	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
+	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
+	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o $$CFLAGS
 pkg/time/fakeclock/fake_gettimeofday.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c images/build-env/.dockerbuilt
-	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o
+	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
+	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))

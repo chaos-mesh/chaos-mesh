@@ -105,13 +105,10 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 	}
 
 	for k, v := range variables {
-		if offset, ok := it.offset[k]; ok {
-			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(offset), v)
-			if err != nil {
-				return errors.Wrapf(err, "set %s for time skew, pid: %d", k, pid)
-			}
-		} else {
-			return errors.Errorf("no such extern variable in fake image: %s", k)
+		err = it.SetVarUint64(program, fakeEntry, k, v)
+
+		if err != nil {
+			return errors.Wrapf(err, "set %s for time skew, pid: %d", k, pid)
 		}
 	}
 
