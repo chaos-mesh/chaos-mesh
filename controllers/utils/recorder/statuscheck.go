@@ -32,7 +32,7 @@ func (it StatusCheckCompleted) Type() string {
 }
 
 func (it StatusCheckCompleted) Reason() string {
-	return string(v1alpha1.StatusCheckCompleted)
+	return v1alpha1.StatusCheckCompleted
 }
 
 func (it StatusCheckCompleted) Message() string {
