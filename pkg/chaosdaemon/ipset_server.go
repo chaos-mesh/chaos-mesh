@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
@@ -68,34 +69,51 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 func flushIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, set *pb.IPSet) error {
 	name := set.Name
 
-	// If the ipset already exists, the ipset will be renamed to this temp name.
+	// If the IP set already exists, it will be renamed to this temp name.
 	tmpName := fmt.Sprintf("%sold", name)
 
-	// the ipset while existing iptables rules are using them can not be deleted,.
-	// so we creates an temp ipset and swap it with existing one.
-	if err := createIPSet(ctx, log, enterNS, pid, tmpName); err != nil {
+	ipSetType := v1alpha1.IPSetType(set.Type)
+	var values []string
+
+	switch ipSetType {
+	case v1alpha1.SetIPSet:
+		values = set.SetNames
+	case v1alpha1.NetIPSet:
+		values = set.Cidrs
+	case v1alpha1.NetPortIPSet:
+		for _, cidrAndPort := range set.CidrAndPorts {
+			values = append(values, fmt.Sprintf("%s,%d", cidrAndPort.Cidr, cidrAndPort.Port))
+		}
+	default:
+		return fmt.Errorf("unexpected IP set type: %s", ipSetType)
+	}
+
+	// IP sets can't be deleted if there are iptables rules referencing them.
+	// Therefore, we create new sets and swap them.
+	if err := createIPSet(ctx, log, enterNS, pid, tmpName, ipSetType); err != nil {
 		return err
 	}
 
-	// add ips to the temp ipset
-	if err := addCIDRsToIPSet(ctx, log, enterNS, pid, tmpName, set.Cidrs); err != nil {
-		return err
+	// Populate the IP set.
+	for _, value := range values {
+		if err := addToIPSet(ctx, log, enterNS, pid, tmpName, value); err != nil {
+			return err
+		}
 	}
 
-	// rename the temp ipset with the target name of ipset if the taget ipset not exists,
-	// otherwise swap  them with each other.
+	// Finally, rename the IP set to target name.
 	err := renameIPSet(ctx, log, enterNS, pid, tmpName, name)
 
 	return err
 }
 
-func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string) error {
+func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, ipSetType v1alpha1.IPSetType) error {
 	// ipset name cannot be longer than 31 bytes
 	if len(name) > 31 {
 		name = name[:31]
 	}
 
-	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, "hash:net").SetContext(ctx)
+	processBuilder := bpm.DefaultProcessBuilder("ipset", "create", name, string(ipSetType)).SetContext(ctx)
 	if enterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}
@@ -129,22 +147,20 @@ func createIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32,
 	return nil
 }
 
-func addCIDRsToIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, cidrs []string) error {
-	for _, cidr := range cidrs {
-		processBuilder := bpm.DefaultProcessBuilder("ipset", "add", name, cidr).SetContext(ctx)
-		if enterNS {
-			processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
-		}
-		cmd := processBuilder.Build(ctx)
-		log.Info("add CIDR to ipset", "command", cmd.String())
+func addToIPSet(ctx context.Context, log logr.Logger, enterNS bool, pid uint32, name string, value string) error {
+	processBuilder := bpm.DefaultProcessBuilder("ipset", "add", name, value).SetContext(ctx)
+	if enterNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build(ctx)
+	log.Info("add to ipset", "command", cmd.String())
 
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			output := string(out)
-			if !strings.Contains(output, ipExistErr) {
-				log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
-				return util.EncodeOutputToError(out, err)
-			}
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		output := string(out)
+		if !strings.Contains(output, ipExistErr) {
+			log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
+			return util.EncodeOutputToError(out, err)
 		}
 	}
 

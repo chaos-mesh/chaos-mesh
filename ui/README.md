@@ -136,6 +136,15 @@ yarn workspace @ui/mui-extends build
 
 to build them.
 
+We provide [storybook](https://storybook.js.org/) for previewing the components, you can run:
+
+```sh
+yarn workspace @ui/mui-extends build && \
+yarn workspace @ui/mui-extends storybook
+```
+
+to open it.
+
 ## License
 
 Same as Chaos Mesh.

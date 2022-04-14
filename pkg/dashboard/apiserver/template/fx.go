@@ -1,4 +1,4 @@
-// Copyright 2022 Chaos Mesh Authors.
+// Copyright Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,28 +13,14 @@
 // limitations under the License.
 //
 
-package chaoserr
+package template
 
 import (
-	"github.com/pkg/errors"
+	"github.com/go-logr/logr"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 )
 
-func NotFound(name string) error {
-	return errors.Errorf("%s not found.", name)
+func Bootstrap(conf *config.ChaosDashboardConfig, logger logr.Logger) *Service {
+	return &Service{conf: conf, logger: logger.WithName("template-api")}
 }
-
-type ErrNotImplemented struct {
-	name string
-}
-
-func (e ErrNotImplemented) Error() string {
-	return e.name + " not implement"
-}
-
-func NotImplemented(name string) error {
-	return ErrNotImplemented{name: name}
-}
-
-var (
-	ErrDuplicateEntity = errors.New("duplicate entity")
-)

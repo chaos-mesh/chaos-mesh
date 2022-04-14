@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,25 +13,33 @@
 // limitations under the License.
 //
 
-package time
+package tasks
 
-import (
-	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
+import "sync"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-)
+type LockMap[K comparable] struct {
+	sync.Map
+}
 
-// ModifyTime modifies time of target process
-func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64, logger logr.Logger) error {
-	// Mock point to return error in unit test
-	if err := mock.On("ModifyTimeError"); err != nil {
-		if e, ok := err.(error); ok {
-			return e
-		}
-		if ignore, ok := err.(bool); ok && ignore {
-			return nil
+func NewLockMap[K comparable]() LockMap[K] {
+	return LockMap[K]{
+		sync.Map{},
+	}
+}
+
+func (l *LockMap[K]) Lock(key K) func() {
+	value, _ := l.LoadOrStore(key, &sync.Mutex{})
+	mtx := value.(*sync.Mutex)
+	mtx.Lock()
+
+	return func() {
+		if mtx != nil {
+			mtx.Unlock()
 		}
 	}
-	return errors.New("darwin is not supported")
+}
+
+// Del :TODO: Fix bug on deleting a using value
+func (l *LockMap[K]) Del(key K) {
+	l.Delete(key)
 }

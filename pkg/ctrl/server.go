@@ -16,10 +16,9 @@
 package ctrl
 
 import (
-	"net/http"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-logr/logr"
+	"go.uber.org/fx"
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -28,12 +27,23 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 )
 
-func Handler(logger logr.Logger, client client.Client, clientset *kubernetes.Clientset, daemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder) http.Handler {
+type ServerParams struct {
+	fx.In
+
+	NoCacheReader       client.Reader `name:"no-cache"`
+	Logger              logr.Logger
+	Client              client.Client
+	Clientset           *kubernetes.Clientset
+	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
+}
+
+func New(param ServerParams) *handler.Server {
 	resolvers := &server.Resolver{
-		DaemonHelper: &server.DaemonHelper{Builder: daemonClientBuilder},
-		Log:          logger,
-		Client:       client,
-		Clientset:    clientset,
+		DaemonHelper:  &server.DaemonHelper{Builder: param.DaemonClientBuilder},
+		Log:           param.Logger.WithName("ctrl-server"),
+		Client:        param.Client,
+		Clientset:     param.Clientset,
+		NoCacheReader: param.NoCacheReader,
 	}
 	return handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolvers}))
 }

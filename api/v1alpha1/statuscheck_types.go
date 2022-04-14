@@ -175,7 +175,6 @@ const (
 type StatusCheckReason string
 
 const (
-	StatusCheckCompleted              StatusCheckReason = "StatusCheckCompleted"
 	StatusCheckDurationExceed         StatusCheckReason = "StatusCheckDurationExceed"
 	StatusCheckFailureThresholdExceed StatusCheckReason = "StatusCheckFailureThresholdExceed"
 	StatusCheckSuccessThresholdExceed StatusCheckReason = "StatusCheckSuccessThresholdExceed"
@@ -266,6 +265,7 @@ func (in *StatusCheck) DurationExceed(now time.Time) (bool, time.Duration, error
 	return false, 0, nil
 }
 
+// IsCompleted checks if the status check is completed, according to the StatusCheckConditionCompleted condition.
 func (in *StatusCheck) IsCompleted() bool {
 	for _, condition := range in.Status.Conditions {
 		if condition.Type == StatusCheckConditionCompleted &&

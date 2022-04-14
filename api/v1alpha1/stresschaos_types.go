@@ -120,6 +120,10 @@ func (in *Stressors) Normalize() (string, string, error) {
 		}
 	}
 	if in.CPUStressor != nil && in.CPUStressor.Workers != 0 {
+		// Without these two args, we may not reach the resource limit of pod,
+		// especially when we set cpu workers > 1
+		// More details see: https://github.com/chaos-mesh/chaos-mesh/issues/3100
+		cpuStressors += " --cpu-load-slice 10 --cpu-method sqrt"
 		cpuStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
 			cpuStressors += fmt.Sprintf(" --cpu-load %d",
@@ -153,6 +157,14 @@ type MemoryStressor struct {
 	// +optional
 	Size string `json:"size,omitempty" webhook:"Bytes"`
 
+	// OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
+	// about this option.
+	// +kubebuilder:validation:Minimum=-1000
+	// +kubebuilder:validation:Maximum=1000
+	// +kubebuilder:default=0
+	// +optional
+	OOMScoreAdj int `json:"oomScoreAdj,omitempty"`
+
 	// extend stress-ng options
 	// +optional
 	Options []string `json:"options,omitempty"`
@@ -163,6 +175,8 @@ type CPUStressor struct {
 	Stressor `json:",inline"`
 	// Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
 	// is full loading.
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=100
 	// +optional
 	Load *int `json:"load,omitempty"`
 

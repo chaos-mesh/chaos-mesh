@@ -17,7 +17,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -36,7 +35,7 @@ func main() {
 		fmt.Println("migrator <old-yaml> <new-yaml>")
 		os.Exit(1)
 	}
-	data, err := ioutil.ReadFile(os.Args[1])
+	data, err := os.ReadFile(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -80,7 +79,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	err = ioutil.WriteFile(os.Args[2], data, 0644)
+	err = os.WriteFile(os.Args[2], data, 0644)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

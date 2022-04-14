@@ -31,12 +31,12 @@ import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Predefined from './Predefined'
 import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@mui/icons-material/Schedule'
-import T from 'components/T'
 import TotalStatus from './TotalStatus'
 import { TourProvider } from '@reactour/tour'
 import Welcome from './Welcome'
 import { Workflow } from 'api/workflows.type'
 import api from 'api'
+import i18n from 'components/T'
 import { useTheme } from '@mui/material/styles'
 
 const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Element }> = ({
@@ -99,55 +99,55 @@ export default function Dashboard() {
   const steps = [
     {
       selector: '.tutorial-dashboard',
-      content: T('dashboard.tutorial.steps.dashboard'),
+      content: i18n('dashboard.tutorial.steps.dashboard'),
     },
     {
       selector: '.tutorial-workflows',
-      content: T('dashboard.tutorial.steps.workflows'),
+      content: i18n('dashboard.tutorial.steps.workflows'),
     },
     {
       selector: '.tutorial-schedules',
-      content: T('dashboard.tutorial.steps.schedules'),
+      content: i18n('dashboard.tutorial.steps.schedules'),
     },
     {
       selector: '.tutorial-experiments',
-      content: T('dashboard.tutorial.steps.experiments'),
+      content: i18n('dashboard.tutorial.steps.experiments'),
     },
     {
       selector: '.tutorial-events',
-      content: T('dashboard.tutorial.steps.events'),
+      content: i18n('dashboard.tutorial.steps.events'),
     },
     {
       selector: '.tutorial-archives',
-      content: T('dashboard.tutorial.steps.archives'),
+      content: i18n('dashboard.tutorial.steps.archives'),
     },
     {
       selector: '.tutorial-newW',
-      content: T('dashboard.tutorial.steps.newW'),
+      content: i18n('dashboard.tutorial.steps.newW'),
     },
     {
       selector: '.tutorial-newS',
-      content: T('dashboard.tutorial.steps.newS'),
+      content: i18n('dashboard.tutorial.steps.newS'),
     },
     {
       selector: '.tutorial-newE',
-      content: T('dashboard.tutorial.steps.newE'),
+      content: i18n('dashboard.tutorial.steps.newE'),
     },
     {
       selector: '.tutorial-search',
-      content: T('dashboard.tutorial.steps.search'),
+      content: i18n('dashboard.tutorial.steps.search'),
     },
     {
       selector: '.tutorial-namespace',
-      content: T('dashboard.tutorial.steps.namespace'),
+      content: i18n('dashboard.tutorial.steps.namespace'),
     },
     {
       selector: '.tutorial-predefined',
-      content: T('dashboard.tutorial.steps.predefined'),
+      content: i18n('dashboard.tutorial.steps.predefined'),
     },
     {
       selector: '.tutorial-end',
-      content: T('dashboard.tutorial.steps.end'),
+      content: i18n('dashboard.tutorial.steps.end'),
     },
   ]
 
@@ -179,21 +179,21 @@ export default function Dashboard() {
           <Grid container spacing={6} alignContent="flex-start" item xs={12} lg={8}>
             <Grid item xs={4}>
               <NumPanel
-                title={T('experiments.title')}
+                title={i18n('experiments.title')}
                 num={data.experiments.length}
                 background={<ExperimentIcon color="primary" style={{ fontSize: '3em' }} />}
               />
             </Grid>
             <Grid item xs={4}>
               <NumPanel
-                title={T('schedules.title')}
+                title={i18n('schedules.title')}
                 num={data.schedules.length}
                 background={<ScheduleIcon color="primary" style={{ fontSize: '3em' }} />}
               />
             </Grid>
             <Grid item xs={4}>
               <NumPanel
-                title={T('workflows.title')}
+                title={i18n('workflows.title')}
                 num={data.workflows.length}
                 background={<AccountTreeOutlinedIcon color="primary" style={{ fontSize: '3em' }} />}
               />
@@ -204,8 +204,8 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop
-                  title={T('dashboard.predefined')}
-                  subtitle={T('dashboard.predefinedDesc')}
+                  title={i18n('dashboard.predefined')}
+                  subtitle={i18n('dashboard.predefinedDesc')}
                   boxProps={{ mb: 3 }}
                 />
                 <Predefined />
@@ -213,7 +213,7 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12}>
               <Paper>
-                <PaperTop title={T('common.timeline')} boxProps={{ mb: 3 }} />
+                <PaperTop title={i18n('common.timeline')} boxProps={{ mb: 3 }} />
                 <EventsChart events={data.events} position="relative" height={300} />
               </Paper>
             </Grid>
@@ -222,13 +222,13 @@ export default function Dashboard() {
           <Grid container spacing={6} item xs={12} lg={4}>
             <Grid item xs={12}>
               <Paper>
-                <PaperTop title={T('dashboard.totalStatus')} boxProps={{ sx: { mb: 3 } }} />
+                <PaperTop title={i18n('dashboard.totalStatus')} boxProps={{ sx: { mb: 3 } }} />
                 <TotalStatus position="relative" height={data.experiments.length > 0 ? 300 : '100%'} />
               </Paper>
             </Grid>
             <Grid item xs={12}>
               <Paper>
-                <PaperTop title={T('dashboard.recent')} boxProps={{ mb: 3 }} />
+                <PaperTop title={i18n('dashboard.recent')} boxProps={{ mb: 3 }} />
                 <EventsTimeline events={data.events.slice(0, 6)} />
               </Paper>
             </Grid>

@@ -32,10 +32,21 @@ import (
 
 var log = ctrl.Log.WithName("ipset")
 
-// BuildIPSet builds an ipset with provided pod ip list
-func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
-	name := GenerateIPSetName(networkchaos, namePostFix)
-	cidrs := externalCidrs
+// BuildIPSets builds IP sets with provided pod ip list.
+func BuildIPSets(pods []v1.Pod, externalCidrs []v1alpha1.CidrAndPort, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) []v1alpha1.RawIPSet {
+	netName := GenerateIPSetName(networkchaos, "net_"+namePostFix)
+	netPortName := GenerateIPSetName(networkchaos, "netport_"+namePostFix)
+
+	cidrs := []string{}
+	cidrAndPorts := []v1alpha1.CidrAndPort{}
+
+	for _, cidr := range externalCidrs {
+		if cidr.Port == 0 {
+			cidrs = append(cidrs, cidr.Cidr)
+		} else {
+			cidrAndPorts = append(cidrAndPorts, cidr)
+		}
+	}
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) > 0 {
@@ -43,9 +54,39 @@ func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.Ne
 		}
 	}
 
+	return []v1alpha1.RawIPSet{
+		{
+			Name:      netName,
+			IPSetType: v1alpha1.NetIPSet,
+			Cidrs:     cidrs,
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
+		},
+		{
+			Name:         netPortName,
+			IPSetType:    v1alpha1.NetPortIPSet,
+			CidrAndPorts: cidrAndPorts,
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
+		},
+	}
+}
+
+// BuildSetIPSet builds list:set IP set that stores given sets
+func BuildSetIPSet(sets []v1alpha1.RawIPSet, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
+	name := GenerateIPSetName(networkchaos, "set_"+namePostFix)
+	setNames := []string{}
+
+	for _, set := range sets {
+		setNames = append(setNames, set.Name)
+	}
+
 	return v1alpha1.RawIPSet{
-		Name:  name,
-		Cidrs: cidrs,
+		Name:      name,
+		IPSetType: v1alpha1.SetIPSet,
+		SetNames:  setNames,
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: source,
 		},

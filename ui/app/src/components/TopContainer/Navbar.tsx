@@ -22,7 +22,7 @@ import Namespace from './Namespace'
 import { NavigationBreadCrumbProps } from 'slices/navigation'
 import Search from 'components/Search'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 
 const useStyles = makeStyles((theme) => ({
@@ -77,7 +77,7 @@ const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
               <Breadcrumbs className={classes.nav} aria-label="breadcrumb">
                 <Typography variant="h2">
                   {hasLocalBreadcrumb(b.name)
-                    ? T(
+                    ? i18n(
                         `${
                           breadcrumbs[1] && breadcrumbs[1].name === 'new'
                             ? 'new' + b.name.charAt(0).toUpperCase()

@@ -124,5 +124,43 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger, recor
 			recorderBuilder.Build("workflow-task-reconciler"),
 			logger.WithName("workflow-task-reconciler"),
 		))
+	if err != nil {
+		return err
+	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.WorkflowNode{}).
+		Owns(&v1alpha1.StatusCheck{}).
+		Named("workflow-statuscheck-reconciler").
+		Complete(NewStatusCheckReconciler(
+			noCacheClient,
+			recorderBuilder.Build("workflow-statuscheck-reconciler"),
+			logger.WithName("workflow-statuscheck-reconciler"),
+		))
+	if err != nil {
+		return err
+	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.WorkflowNode{}).
+		Named("workflow-abort-node-reconciler").
+		Complete(NewAbortNodeReconciler(
+			noCacheClient,
+			recorderBuilder.Build("workflow-abort-node-reconciler"),
+			logger.WithName("workflow-abort-node-reconciler"),
+		))
+	if err != nil {
+		return err
+	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.Workflow{}).
+		Named("workflow-abort-workflow-reconciler").
+		Complete(NewAbortWorkflowReconciler(
+			noCacheClient,
+			recorderBuilder.Build("workflow-abort-workflow-reconciler"),
+			logger.WithName("workflow-abort-workflow-reconciler"),
+		))
 	return err
 }
