@@ -49,6 +49,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix wrong zero value of httpchaos replace-body-action[#2990](https://github.com/chaos-mesh/chaos-mesh/pull/2990)
 - Bump gqlgen to v0.17.2 [#3038](https://github.com/chaos-mesh/chaos-mesh/pull/3038)
 - Bump go to v1.18 [#3055](https://github.com/chaos-mesh/chaos-mesh/pull/3055)
+- Bump toda to v0.2.3 [#3131](https://github.com/chaos-mesh/chaos-mesh/pull/3131)
 
 ### Deprecated
 

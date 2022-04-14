@@ -132,7 +132,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
-              hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
 {{- if .Values.bpfki.create }}
@@ -162,7 +161,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.bpfki.grpcPort }}
-              hostPort: {{ .Values.bpfki.grpcPort }}
 {{- end }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv

@@ -3171,7 +3171,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "load": {
-                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+optional",
+                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -3939,7 +3939,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "oomScoreAdj": {
-                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximm=1000\n+kubebuilder:default=0\n+optional",
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
                     "type": "integer"
                 },
                 "options": {
