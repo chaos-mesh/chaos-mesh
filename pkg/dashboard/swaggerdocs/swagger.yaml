@@ -1243,7 +1243,7 @@ definitions:
     properties:
       filling:
         description: |-
-          Filling determines what is filled in the miskate data.
+          Filling determines what is filled in the mistake data.
           +optional
           +kubebuilder:validation:Enum=zero;random
         type: string
