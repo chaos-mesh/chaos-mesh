@@ -112,8 +112,8 @@ func (c *Config) New(values interface{}) (tasks.Injectable, error) {
 }
 
 // Assign assumes the input injectable is *tasks.PodHandler.
-// We also assume the Main of PodHandler is *tasks.ProcessGroupHandler
-// and the Main of ProcessGroupHandler is *Skew.
+// We also assume the SubProcess of podHandler is *tasks.ProcessGroupHandler
+// and the LeaderProcess of ProcessGroupHandler is *Skew.
 func (c *Config) Assign(injectable tasks.Injectable) error {
 	podHandler, ok := injectable.(*tasks.PodHandler)
 	if !ok {
