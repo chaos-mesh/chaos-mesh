@@ -143,10 +143,10 @@ func setCompletedCondition(statusCheck v1alpha1.StatusCheck, conditions conditio
 	conditions.setCondition(v1alpha1.StatusCheckConditionCompleted, corev1.ConditionFalse, "")
 }
 
-func isThresholdExceed(records []v1alpha1.StatusCheckRecord, want v1alpha1.StatusCheckOutcome, threshold int) bool {
+func isThresholdExceed(records []v1alpha1.StatusCheckRecord, outcome v1alpha1.StatusCheckOutcome, threshold int) bool {
 	count := 0
 	for i := len(records) - 1; i >= 0; i-- {
-		if records[i].Outcome != want {
+		if records[i].Outcome != outcome {
 			return false
 		}
 		count++

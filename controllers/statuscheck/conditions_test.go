@@ -24,7 +24,7 @@ import (
 func Test_isThresholdExceed(t *testing.T) {
 	type args struct {
 		records   []v1alpha1.StatusCheckRecord
-		want      v1alpha1.StatusCheckOutcome
+		outcome   v1alpha1.StatusCheckOutcome
 		threshold int
 	}
 	tests := []struct {
@@ -40,7 +40,7 @@ func Test_isThresholdExceed(t *testing.T) {
 					{Outcome: v1alpha1.StatusCheckOutcomeSuccess},
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 				},
-				want:      v1alpha1.StatusCheckOutcomeFailure,
+				outcome:   v1alpha1.StatusCheckOutcomeFailure,
 				threshold: 2,
 			},
 			want: false,
@@ -51,7 +51,7 @@ func Test_isThresholdExceed(t *testing.T) {
 				records: []v1alpha1.StatusCheckRecord{
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 				},
-				want:      v1alpha1.StatusCheckOutcomeFailure,
+				outcome:   v1alpha1.StatusCheckOutcomeFailure,
 				threshold: 1,
 			},
 			want: true,
@@ -64,7 +64,7 @@ func Test_isThresholdExceed(t *testing.T) {
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 				},
-				want:      v1alpha1.StatusCheckOutcomeFailure,
+				outcome:   v1alpha1.StatusCheckOutcomeFailure,
 				threshold: 2,
 			},
 			want: true,
@@ -76,7 +76,7 @@ func Test_isThresholdExceed(t *testing.T) {
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 					{Outcome: v1alpha1.StatusCheckOutcomeFailure},
 				},
-				want:      v1alpha1.StatusCheckOutcomeFailure,
+				outcome:   v1alpha1.StatusCheckOutcomeFailure,
 				threshold: 3,
 			},
 			want: false,
@@ -84,7 +84,7 @@ func Test_isThresholdExceed(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isThresholdExceed(tt.args.records, tt.args.want, tt.args.threshold); got != tt.want {
+			if got := isThresholdExceed(tt.args.records, tt.args.outcome, tt.args.threshold); got != tt.want {
 				t.Errorf("isThresholdExceed() = %v, want %v", got, tt.want)
 			}
 		})
