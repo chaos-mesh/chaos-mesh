@@ -42,10 +42,10 @@ func NewContainerRecordDecoder(c client.Client, builder *chaosdaemon.ChaosDaemon
 }
 
 type DecodedContainerRecord struct {
-	PbClient    chaosdaemonclient.ChaosDaemonClientInterface
-	ContainerId string
-
-	Pod *v1.Pod
+	PbClient      chaosdaemonclient.ChaosDaemonClientInterface
+	ContainerId   string
+	ContainerName string
+	Pod           *v1.Pod
 }
 
 func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, record *v1alpha1.Record, obj v1alpha1.InnerObject) (decoded DecodedContainerRecord, err error) {
@@ -69,6 +69,7 @@ func (d *ContainerRecordDecoder) DecodeContainerRecord(ctx context.Context, reco
 	for _, container := range pod.Status.ContainerStatuses {
 		if container.Name == containerName {
 			decoded.ContainerId = container.ContainerID
+			decoded.ContainerName = containerName
 			break
 		}
 	}
