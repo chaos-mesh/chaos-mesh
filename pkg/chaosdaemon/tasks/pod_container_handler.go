@@ -88,7 +88,7 @@ func NewPodHandler(podProcessMap *PodContainerNameProcessMap, sub ChaosOnPOD, lo
 	}
 }
 
-// Inject get the container process IsID and Inject it with Main injector.
+// Inject get the container process IsID and Inject it with major injector.
 // Be careful about the error handling here.
 func (p *PodHandler) Inject(id IsID) error {
 	podPID, ok := id.(PodContainerName)
@@ -108,7 +108,7 @@ func (p *PodHandler) Inject(id IsID) error {
 	return err
 }
 
-// Recover get the container process IsID and Recover it with Main injector.
+// Recover get the container process IsID and Recover it with major injector.
 // Be careful about the error handling here.
 func (p *PodHandler) Recover(id IsID) error {
 	podPID, ok := id.(PodContainerName)

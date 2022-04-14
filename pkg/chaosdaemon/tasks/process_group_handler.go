@@ -59,7 +59,7 @@ func NewProcessGroupHandler(logger logr.Logger, leader ChaosOnProcessGroup) Proc
 	}
 }
 
-// Inject try to inject the main process and then try to inject child process.
+// Inject try to inject the leader process and then try to inject child process.
 // If something wrong in injecting a child process, Inject will just log error & continue.
 func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 	sysPID, ok := pid.(SysPID)
@@ -69,7 +69,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 
 	err := gp.LeaderProcess.Inject(sysPID)
 	if err != nil {
-		return cerr.FromErr(err).Wrapf("inject main process: %v", sysPID).Err()
+		return cerr.FromErr(err).Wrapf("inject leader process: %v", sysPID).Err()
 	}
 
 	childPIDs, err := util.GetChildProcesses(uint32(sysPID), gp.Logger)
@@ -106,7 +106,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 	return nil
 }
 
-// Recover try to recover the main process and then try to recover child process.
+// Recover try to recover the leader process and then try to recover child process.
 func (gp *ProcessGroupHandler) Recover(pid IsID) error {
 	_, ok := pid.(SysPID)
 	if !ok {
@@ -114,7 +114,7 @@ func (gp *ProcessGroupHandler) Recover(pid IsID) error {
 	}
 	err := gp.LeaderProcess.Recover(pid)
 	if err != nil {
-		return cerr.FromErr(err).Wrapf("recovery main process : %v", pid).Err()
+		return cerr.FromErr(err).Wrapf("recovery leader process : %v", pid).Err()
 	}
 
 	for childID, group := range gp.childMap {

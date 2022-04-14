@@ -126,8 +126,8 @@ func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
 	if err != nil {
 		return err
 	}
-	if config.Main != pid {
-		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Main, pid).Err()
+	if config.Id != pid {
+		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Id, pid).Err()
 	}
 	return nil
 }
