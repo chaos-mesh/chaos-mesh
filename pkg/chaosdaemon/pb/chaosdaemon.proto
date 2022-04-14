@@ -124,6 +124,14 @@ message IPSetsRequest {
 message IPSet {
   string name = 1;
   repeated string cidrs = 2;
+  repeated CidrAndPort cidr_and_ports = 3;
+  repeated string set_names = 4;
+  string type = 5;
+}
+
+message CidrAndPort {
+  string cidr = 1;
+  uint32 port = 2;
 }
 
 message IptablesChainsRequest {
@@ -153,6 +161,8 @@ message TimeRequest {
   int64 sec = 2;
   int64 nsec = 3;
   uint64 clk_ids_mask = 4;
+  string uid = 5;
+  string pod_container_name = 6;
 }
 
 message ContainerAction {

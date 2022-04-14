@@ -29,7 +29,8 @@ import (
 
 type Resolver struct {
 	*DaemonHelper
-	Log       logr.Logger
-	Client    client.Client
-	Clientset *kubernetes.Clientset
+	Log           logr.Logger
+	Client        client.Client
+	Clientset     *kubernetes.Clientset
+	NoCacheReader client.Reader
 }

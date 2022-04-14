@@ -643,6 +643,8 @@ definitions:
         description: |-
           Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
           is full loading.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
           +optional
         type: integer
       options:
@@ -1240,7 +1242,7 @@ definitions:
       cpuCount:
         description: |-
           +optional
-          the CPU core number need to use, only set it when action is stress
+          the CPU core number needs to use, only set it when action is stress
         type: integer
       duration:
         description: |-
@@ -1260,7 +1262,7 @@ definitions:
       memType:
         description: |-
           +optional
-          the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+          the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
         type: string
       method:
         description: |-
@@ -1278,13 +1280,18 @@ definitions:
           +optional
           byteman rule name, should be unique, and will use JVMChaos' name if not set
         type: string
+      pid:
+        description: the pid of Java process which needs to attach
+        type: integer
       port:
         description: |-
           +optional
           the port of agent server, default 9277
         type: integer
       ruleData:
-        description: +optional
+        description: |-
+          +optional
+          the byteman rule's data for action 'ruleData'
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -1300,61 +1307,81 @@ definitions:
   v1alpha1.JVMExceptionSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       exception:
         description: the exception which needs to throw for action `exception`
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMGCSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMLatencySpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       latency:
         description: the latency duration for action 'latency', unit ms
         type: integer
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMReturnSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       value:
         description: the return value for action 'return'
@@ -1363,10 +1390,12 @@ definitions:
   v1alpha1.JVMRuleDataSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       rule-data:
         description: RuleData used to save the rule file's data, will use it when
@@ -1383,10 +1412,12 @@ definitions:
           the value can be 'stack' or 'heap'
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.KernelChaosSpec:
@@ -1434,7 +1465,7 @@ definitions:
           OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
           about this option.
           +kubebuilder:validation:Minimum=-1000
-          +kubebuilder:validation:Maximm=1000
+          +kubebuilder:validation:Maximum=1000
           +kubebuilder:default=0
           +optional
         type: integer
@@ -1463,7 +1494,7 @@ definitions:
     properties:
       filling:
         description: |-
-          Filling determines what is filled in the miskate data.
+          Filling determines what is filled in the mistake data.
           +optional
           +kubebuilder:validation:Enum=zero;random
         type: string
@@ -2195,6 +2226,9 @@ definitions:
     properties:
       process:
         description: the process name or the process ID
+        type: string
+      recoverCmd:
+        description: the command to be run when recovering experiment
         type: string
       signal:
         description: the signal number to send

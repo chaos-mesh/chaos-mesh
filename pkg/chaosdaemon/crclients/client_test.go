@@ -28,14 +28,45 @@ import (
 
 var _ = Describe("chaosdaemon util", func() {
 	Context("CreateContainerRuntimeInfoClient", func() {
-		It("should work", func() {
-			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeDocker)
+		It("should work without socket path", func() {
+			_, err := CreateContainerRuntimeInfoClient(&CrClientConfig{Runtime: ContainerRuntimeDocker})
+			Expect(err).To(BeNil())
+			_, err = CreateContainerRuntimeInfoClient(&CrClientConfig{Runtime: ContainerRuntimeDocker})
 			Expect(err).To(BeNil())
 			defer func() {
 				err := mock.With("MockContainerdClient", &test.MockClient{})()
 				Expect(err).To(BeNil())
 			}()
-			_, err = CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
+			_, err = CreateContainerRuntimeInfoClient(&CrClientConfig{Runtime: ContainerRuntimeContainerd})
+			Expect(err).To(BeNil())
+		})
+
+		It("should work with socket path", func() {
+			_, err := CreateContainerRuntimeInfoClient(&CrClientConfig{Runtime: ContainerRuntimeDocker})
+			Expect(err).To(BeNil())
+			_, err = CreateContainerRuntimeInfoClient(&CrClientConfig{
+				Runtime:    ContainerRuntimeDocker,
+				SocketPath: "/foo/bar/docker.socket"})
+			Expect(err).To(BeNil())
+			defer func() {
+				err := mock.With("MockContainerdClient", &test.MockClient{})()
+				Expect(err).To(BeNil())
+			}()
+			_, err = CreateContainerRuntimeInfoClient(&CrClientConfig{
+				Runtime:    ContainerRuntimeContainerd,
+				SocketPath: "/foo/bar/containerd.socket"})
+			Expect(err).To(BeNil())
+		})
+
+		It("should work with socket path and ns", func() {
+			defer func() {
+				err := mock.With("MockContainerdClient", &test.MockClient{})()
+				Expect(err).To(BeNil())
+			}()
+			_, err := CreateContainerRuntimeInfoClient(&CrClientConfig{
+				Runtime:      ContainerRuntimeContainerd,
+				SocketPath:   "/foo/bar/containerd.socket",
+				ContainerdNS: "chaos-mesh.org"})
 			Expect(err).To(BeNil())
 		})
 
@@ -46,7 +77,7 @@ var _ = Describe("chaosdaemon util", func() {
 				err := mock.With("NewContainerdClientError", errors.New(errorStr))()
 				Expect(err).To(BeNil())
 			}()
-			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
+			_, err := CreateContainerRuntimeInfoClient(&CrClientConfig{Runtime: ContainerRuntimeContainerd})
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
 		})

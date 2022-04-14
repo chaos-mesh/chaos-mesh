@@ -3171,7 +3171,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "load": {
-                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+optional",
+                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -3715,7 +3715,7 @@ var doc = `{
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
                     "type": "integer"
                 },
                 "duration": {
@@ -3731,7 +3731,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "string"
                 },
                 "method": {
@@ -3746,12 +3746,16 @@ var doc = `{
                     "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
                     "type": "string"
                 },
+                "pid": {
+                    "description": "the pid of Java process which needs to attach",
+                    "type": "integer"
+                },
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "ruleData": {
-                    "description": "+optional",
+                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
                     "type": "string"
                 },
                 "selector": {
@@ -3769,7 +3773,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "exception": {
@@ -3777,15 +3781,15 @@ var doc = `{
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3794,11 +3798,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3807,7 +3811,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "latency": {
@@ -3815,15 +3819,15 @@ var doc = `{
                     "type": "integer"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3832,19 +3836,19 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "value": {
@@ -3857,11 +3861,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -3882,11 +3886,11 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3935,7 +3939,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "oomScoreAdj": {
-                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximm=1000\n+kubebuilder:default=0\n+optional",
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -3959,7 +3963,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "filling": {
-                    "description": "Filling determines what is filled in the miskate data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
+                    "description": "Filling determines what is filled in the mistake data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
                     "type": "string"
                 },
                 "maxLength": {
@@ -4657,6 +4661,10 @@ var doc = `{
             "properties": {
                 "process": {
                     "description": "the process name or the process ID",
+                    "type": "string"
+                },
+                "recoverCmd": {
+                    "description": "the command to be run when recovering experiment",
                     "type": "string"
                 },
                 "signal": {
