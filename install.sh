@@ -1245,7 +1245,6 @@ spec:
           ports:
             - name: grpc
               containerPort: 31767
-              hostPort: 31767
             - name: http
               containerPort: 31766
       volumes:
