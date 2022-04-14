@@ -43,7 +43,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("blockchaos recover", "record", records[index])
 	// TODO: implement blockchaos recover
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {

@@ -89,7 +89,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 }
 
 func (impl *Impl) Recover(_ context.Context, _ int, _ []*v1alpha1.Record, _ v1alpha1.InnerObject) (v1alpha1.Phase, error) {
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *Impl {

@@ -21,7 +21,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/compute/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -123,7 +123,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	err = json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal the selector")
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Recovered, err
 	}
 
 	for _, attachedDiskString := range gcpchaos.Status.AttachedDisksStrings {
@@ -138,7 +138,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			return v1alpha1.Injected, err
 		}
 	}
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *Impl {

@@ -115,34 +115,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	for index, record := range records {
 		var err error
 		r.Log.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
-
-		// The whole running logic is a cycle:
-		// Not Injected -> Not Injected/* -> Injected -> Injected/* -> Not Injected
-		// Every step should follow the cycle. For example, if it's in "Not Injected/*" status, and it wants to recover
-		// then it has to apply and then recover, but not recover directly.
-
 		originalPhase := record.Phase
-		operation := Nothing
-		if desiredPhase == v1alpha1.RunningPhase && originalPhase != v1alpha1.Injected {
-			// The originalPhase has three possible situations: Not Injected, Not Injected/* or Injected/*
-			// In the first two situations, it should apply, in the last situation, it should recover
-
-			if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
-				operation = Apply
-			} else {
-				operation = Recover
-			}
-		}
-		if desiredPhase == v1alpha1.StoppedPhase && originalPhase != v1alpha1.NotInjected {
-			// The originalPhase has three possible situations: Not Injected/*, Injected, or Injected/*
-			// In the first one situation, it should apply, in the last two situations, it should recover
-
-			if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
-				operation = Apply
-			} else {
-				operation = Recover
-			}
-		}
+		operation := CalOperation(desiredPhase, originalPhase)
 
 		if operation == Apply {
 			r.Log.Info("apply chaos", "id", records[index].Id)
@@ -185,7 +159,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				continue
 			}
 
-			if record.Phase == v1alpha1.NotInjected {
+			if record.Phase == v1alpha1.Recovered {
 				r.Recorder.Event(obj, recorder.Recovered{
 					Id: records[index].Id,
 				})
@@ -230,4 +204,41 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		})
 	}
 	return ctrl.Result{Requeue: needRetry}, nil
+}
+
+func CalOperation(desiredPhase v1alpha1.DesiredPhase, originalPhase v1alpha1.Phase) Operation {
+	// The whole running logic is a cycle:
+	// Not Injected -> Not Injected/* -> Injected -> Injected/* -> Recovered -> Not Injected
+	// Every step should follow the cycle. For example, if it's in "Not Injected/*" status, and it wants to recover
+	// then it has to apply and then recover, but not recover directly.
+	// If the phase is Recovered, it means the record had been injected and recovered successfully.
+	// ONLY when we resume a paused experiment, the Recovered phase will step to Not Injected.
+
+	// Recovered is a stable state, we will do nothing for it
+	if originalPhase == v1alpha1.Recovered {
+		return Nothing
+	}
+
+	operation := Nothing
+	if desiredPhase == v1alpha1.RunningPhase && originalPhase != v1alpha1.Injected {
+		// The originalPhase has three possible situations: Not Injected, Not Injected/* or Injected/*
+		// In the first two situations, it should apply, in the last situation, it should recover
+
+		if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
+			operation = Apply
+		} else {
+			operation = Recover
+		}
+	}
+	if desiredPhase == v1alpha1.StoppedPhase && originalPhase != v1alpha1.NotInjected {
+		// The originalPhase has three possible situations: Not Injected/*, Injected, or Injected/*
+		// In the first one situation, it should apply, in the last two situations, it should recover
+
+		if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
+			operation = Apply
+		} else {
+			operation = Recover
+		}
+	}
+	return operation
 }

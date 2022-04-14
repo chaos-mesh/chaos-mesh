@@ -84,7 +84,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "fail to start the instance")
 		return v1alpha1.Injected, err
 	}
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *Impl {

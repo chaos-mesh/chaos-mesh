@@ -141,6 +141,19 @@ func (info *reconcileInfo) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 
 			if obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
+				if obj.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase && desiredPhase == v1alpha1.RunningPhase {
+					// this means we will resume a paused experiment
+					// we should move all record which in Recovered phase to Not Injection phase
+					originalRecords := obj.GetStatus().Experiment.Records
+					newRecords := make([]*v1alpha1.Record, len(originalRecords))
+					for _, record := range originalRecords {
+						if record.Phase == v1alpha1.Recovered {
+							record.Phase = v1alpha1.NotInjected
+						}
+						newRecords = append(newRecords, record)
+					}
+					obj.GetStatus().Experiment.Records = newRecords
+				}
 				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
 				info.Log.Info("update object", "namespace", obj.GetNamespace(), "name", obj.GetName())
 				return info.Client.Update(context.TODO(), obj)

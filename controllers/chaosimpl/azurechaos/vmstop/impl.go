@@ -82,7 +82,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	err = json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal the selector")
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Recovered, err
 	}
 
 	_, err = vmClient.Start(ctx, selected.ResourceGroupName, selected.VMName)
@@ -90,7 +90,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		impl.Log.Error(err, "fail to start the vm")
 		return v1alpha1.Injected, err
 	}
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger) *Impl {

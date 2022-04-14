@@ -174,7 +174,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, errors.Wrap(err, body)
 	}
 
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func (impl *Impl) doHttpRequest(method, url string, data io.Reader) (int, string, error) {

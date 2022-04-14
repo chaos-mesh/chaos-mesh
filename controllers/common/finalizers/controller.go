@@ -71,7 +71,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if obj.IsDeleted() {
 		resumed := true
 		for _, record := range records {
-			if record.Phase != v1alpha1.NotInjected {
+			if record.Phase != v1alpha1.Recovered {
 				resumed = false
 			}
 		}

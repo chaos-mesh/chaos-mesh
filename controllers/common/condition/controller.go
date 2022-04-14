@@ -84,7 +84,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		allInjected := corev1.ConditionTrue
 		allRecovered := corev1.ConditionTrue
 		for _, record := range obj.GetStatus().Experiment.Records {
-			if record.Phase != v1alpha1.NotInjected {
+			if record.Phase != v1alpha1.Recovered {
 				allRecovered = corev1.ConditionFalse
 			}
 

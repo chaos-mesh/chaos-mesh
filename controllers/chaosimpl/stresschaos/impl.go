@@ -113,19 +113,19 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if err != nil {
 		if errors.Is(err, utils.ErrContainerNotFound) {
 			// pretend the disappeared container has been recovered
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 		return v1alpha1.Injected, err
 	}
 
 	stresschaos := obj.(*v1alpha1.StressChaos)
 	if stresschaos.Status.Instances == nil {
-		return v1alpha1.NotInjected, nil
+		return v1alpha1.Recovered, nil
 	}
 	instance, ok := stresschaos.Status.Instances[records[index].Id]
 	if !ok {
 		impl.Log.Info("Pod seems already recovered", "pod", decodedContainer.Pod.UID)
-		return v1alpha1.NotInjected, nil
+		return v1alpha1.Recovered, nil
 	}
 	req := &pb.CancelStressRequest{
 		CpuInstance:    instance.UID,
@@ -142,7 +142,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, nil
 	}
 	delete(stresschaos.Status.Instances, records[index].Id)
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {

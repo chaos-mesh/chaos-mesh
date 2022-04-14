@@ -145,12 +145,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
-				return v1alpha1.NotInjected, nil
+				return v1alpha1.Recovered, nil
 			}
 
 			if k8sError.IsForbidden(err) {
 				if strings.Contains(err.Error(), "because it is being terminated") {
-					return v1alpha1.NotInjected, nil
+					return v1alpha1.Recovered, nil
 				}
 			}
 
@@ -162,7 +162,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 
 		if podhttpchaos.Status.ObservedGeneration >= httpchaos.Status.Instances[record.Id] {
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 
 		return waitForRecoverSync, nil
@@ -171,14 +171,14 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	podId, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Recovered, err
 	}
 	var pod v1.Pod
 	err = impl.Client.Get(ctx, podId, &pod)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 		return v1alpha1.Injected, err
 	}
@@ -192,12 +192,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	generationNumber, err := m.Commit(ctx)
 	if err != nil {
 		if err == podiochaosmanager.ErrPodNotFound || err == podiochaosmanager.ErrPodNotRunning {
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 
 		if k8sError.IsForbidden(err) {
 			if strings.Contains(err.Error(), "because it is being terminated") {
-				return v1alpha1.NotInjected, nil
+				return v1alpha1.Recovered, nil
 			}
 		}
 		return v1alpha1.Injected, err

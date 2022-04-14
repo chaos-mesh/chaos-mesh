@@ -84,6 +84,8 @@ const (
 	NotInjected Phase = "Not Injected"
 	// Injected means the target is injected. It's safe to recover it.
 	Injected Phase = "Injected"
+	// Recovered means the target had been injected and recovered successfully.
+	Recovered Phase = "Recovered"
 )
 
 var log = ctrl.Log.WithName("api")

@@ -90,7 +90,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if err != nil {
 		if errors.Is(err, utils.ErrContainerNotFound) {
 			// pretend the disappeared container has been recovered
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 		return v1alpha1.Injected, err
 	}
@@ -105,7 +105,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {

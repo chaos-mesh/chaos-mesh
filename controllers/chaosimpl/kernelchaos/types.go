@@ -34,7 +34,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	pb_kernel "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
@@ -98,7 +98,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		log.Error(err, "fail to get pod by record")
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 		return v1alpha1.Injected, err
 	}
@@ -110,7 +110,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {

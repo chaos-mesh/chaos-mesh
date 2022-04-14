@@ -99,13 +99,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	namespacedName, err := controller.ParseNamespacedName(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
-		return v1alpha1.NotInjected, err
+		return v1alpha1.Recovered, err
 	}
 	err = impl.Get(ctx, namespacedName, &origin)
 	if err != nil {
 		// TODO: handle this error
 		if k8sError.IsNotFound(err) {
-			return v1alpha1.NotInjected, nil
+			return v1alpha1.Recovered, nil
 		}
 		return v1alpha1.Injected, err
 	}
@@ -144,7 +144,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	return v1alpha1.NotInjected, nil
+	return v1alpha1.Recovered, nil
 }
 
 func NewImpl(c client.Client) *Impl {
