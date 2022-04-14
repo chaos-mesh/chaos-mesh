@@ -31,7 +31,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix `real_gettimeofday` on arm64 [#2849](https://github.com/chaos-mesh/chaos-mesh/pull/2849)
 - Fix Github Action `upload-image` [#2935](https://github.com/chaos-mesh/chaos-mesh/pull/2935)
 - Fix JVMChaos to handle the situation that the container which holds the JVM rules has been deleted [#2981](https://github.com/chaos-mesh/chaos-mesh/pull/2981)
-- Fix the CPU stress cannot reach pod limit in some situations [#3102](https://github.com/chaos-mesh/chaos-mesh/pull/3102)
 - Fix typo in comments for Chaos API [#3109](https://github.com/chaos-mesh/chaos-mesh/pull/3109)
 
 ### Security
