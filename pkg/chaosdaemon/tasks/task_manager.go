@@ -19,31 +19,28 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 )
 
-var ErrCanNotAdd = errors.New("can not add")
-var ErrCanNotAssign = errors.New("can not assign")
-
-// Injectable stand for the base behavior of task : inject a process with PID.
+// Injectable stand for the base behavior of task : inject a process with IsID.
 type Injectable interface {
-	Inject(pid PID) error
+	Inject(pid IsID) error
 }
 
 // Recoverable introduce the task recovering ability.
 // Used in Recover.
 type Recoverable interface {
-	Recover(pid PID) error
+	Recover(pid IsID) error
 }
 
 // Creator init an Injectable with values.
-// We use it in a case that TaskConfig.data init an Injectable task here.
+// We use it in a case that TaskConfig.Data init an Injectable task here.
 type Creator interface {
 	New(values interface{}) (Injectable, error)
 }
 
 // Assign change some of an Injectable task with its own values.
-// We use it in a case that we use TaskConfig.data
+// We use it in a case that we use TaskConfig.Data
 // to update an Injectable task.
 type Assign interface {
 	Assign(Injectable) error
@@ -51,22 +48,22 @@ type Assign interface {
 
 // TaskExecutor indicate that the type can be used
 // for execute task here as a task config.
-// Addable means we can sum many task config in to one for apply.
+// Mergeable means we can sum many task config in to one for apply.
 // Creator means we can use the task config to create a running task
-// which can Inject on PID.
+// which can Inject on IsID.
 // Assign means we can use the task config to update an existing running task.
 type TaskExecutor interface {
 	Object
-	Addable
+	Mergeable
 	Creator
 	Assign
 }
 
 // TaskManager is a Manager for chaos tasks.
-// A task base on a target marked with its PID.
+// A task base on a target marked with its IsID.
 // We assume task should implement Injectable.
-// We use TaskConfig.data which implement TaskExecutor to:
-//	Sum task configs on same PID into one.
+// We use TaskConfig.Data which implement TaskExecutor to:
+//	Sum task configs on same IsID into one.
 // 	Create task.
 // 	Assign or update task.
 // SO if developers wants to use functions in TaskManager ,
@@ -75,11 +72,11 @@ type TaskExecutor interface {
 // the task must implement Recoverable.
 // If not implement ,
 // the Recover function will return a ErrNotImplement("Recoverable") error.
-// IMPORTANT: We assume task config obey that TaskConfig.data A,B. A.Add(B)
-// is approximately equal to B.Add(A)
+// IMPORTANT: We assume task config obey that TaskConfig.Data A,B. A.Merge(B)
+// is approximately equal to B.Merge(A)
 type TaskManager struct {
 	taskConfigManager TaskConfigManager
-	taskMap           map[PID]Injectable
+	taskMap           map[IsID]Injectable
 
 	logger logr.Logger
 }
@@ -87,7 +84,7 @@ type TaskManager struct {
 func NewTaskManager(logger logr.Logger) TaskManager {
 	return TaskManager{
 		NewTaskConfigManager(),
-		make(map[PID]Injectable),
+		make(map[IsID]Injectable),
 		logger,
 	}
 }
@@ -100,43 +97,37 @@ func (cm TaskManager) CopyTaskConfigManager() TaskConfigManager {
 	return tm
 }
 
-func (cm TaskManager) CopyTaskMap() map[PID]Injectable {
-	pm := make(map[PID]Injectable)
+func (cm TaskManager) CopyTaskMap() map[IsID]Injectable {
+	pm := make(map[IsID]Injectable)
 	for pid, chaosOnProcess := range cm.taskMap {
 		cm.taskMap[pid] = chaosOnProcess
 	}
 	return pm
 }
 
-func (cm TaskManager) GetConfigWithUID(id UID) (interface{}, error) {
+func (cm TaskManager) GetConfigWithUID(id TaskID) (TaskConfig, error) {
 	return cm.taskConfigManager.GetConfigWithUID(id)
 }
 
-func (cm TaskManager) GetTaskWithPID(pid PID) (Injectable, error) {
+func (cm TaskManager) GetTaskWithPID(pid IsID) (Injectable, error) {
 	p, ok := cm.taskMap[pid]
 	if !ok {
-		return nil, ErrPIDNotFound
+		return nil, ErrNotFoundID.WrapInput(pid).Err()
 	}
 	return p, nil
 }
 
-func (cm TaskManager) GetUIDsWithPID(pid PID) []UID {
+func (cm TaskManager) GetUIDsWithPID(pid IsID) []TaskID {
 	return cm.taskConfigManager.GetUIDsWithPID(pid)
 }
 
-// Update the task with a same UID, PID and new task config.
-// If it comes a UID not injected , Update will return ChaosErr.NotFound("UID").
-// If it comes the import PID of task do not equal to the last one,
-// Update will return ErrUpdateTaskConfigWithPIDChanges.
-func (cm TaskManager) Update(uid UID, pid PID, config TaskExecutor) error {
-	oldTask, err := cm.taskConfigManager.UpdateTaskConfig(uid, NewTaskConfig(pid, config))
+func (cm TaskManager) CheckTasks(uid TaskID, pid IsID) error {
+	config, err := cm.GetConfigWithUID(uid)
 	if err != nil {
 		return err
 	}
-	err = cm.commit(uid, pid)
-	if err != nil {
-		_, _ = cm.taskConfigManager.UpdateTaskConfig(uid, oldTask)
-		return err
+	if config.Id != pid {
+		return ErrDiffID.Wrapf("expected: %v, input: %v", config.Id, pid).Err()
 	}
 	return nil
 }
@@ -144,11 +135,11 @@ func (cm TaskManager) Update(uid UID, pid PID, config TaskExecutor) error {
 // Create the first task,
 // the New function of TaskExecutor:Creator will only be used here.
 // values is only the import parameter of New function in TaskExecutor:Creator.
-// If it comes a task are already be injected on the PID,
+// If it comes a task are already be injected on the IsID,
 // Create will return ChaosErr.ErrDuplicateEntity.
-func (cm TaskManager) Create(uid UID, pid PID, config TaskExecutor, values interface{}) error {
+func (cm TaskManager) Create(uid TaskID, pid IsID, config TaskExecutor, values interface{}) error {
 	if _, ok := cm.taskMap[pid]; ok {
-		return errors.Wrapf(chaoserr.ErrDuplicateEntity, "create")
+		return errors.Wrapf(cerr.ErrDuplicateEntity, "create")
 	}
 
 	err := cm.taskConfigManager.AddTaskConfig(uid, NewTaskConfig(pid, config))
@@ -173,9 +164,9 @@ func (cm TaskManager) Create(uid UID, pid PID, config TaskExecutor, values inter
 }
 
 // Apply the task when the target pid of task is already be Created.
-// If it comes a UID injected , Apply will return ChaosErr.ErrDuplicateEntity.
-// If the Process has not been Created , Apply will return ChaosErr.NotFound("PID").
-func (cm TaskManager) Apply(uid UID, pid PID, config TaskExecutor) error {
+// If it comes a TaskID injected , Apply will return ChaosErr.ErrDuplicateEntity.
+// If the Process has not been Created , Apply will return ChaosErr.NotFound("IsID").
+func (cm TaskManager) Apply(uid TaskID, pid IsID, config TaskExecutor) error {
 	err := cm.taskConfigManager.AddTaskConfig(uid, NewTaskConfig(pid, config))
 	if err != nil {
 		return err
@@ -188,23 +179,40 @@ func (cm TaskManager) Apply(uid UID, pid PID, config TaskExecutor) error {
 	return nil
 }
 
-// Recover the task when there is no task config on PID or
-// recovering the task with last task config on PID.
+// Update the task with a same TaskID, IsID and new task config.
+// If it comes a TaskID not injected , Update will return ChaosErr.NotFound("TaskID").
+// If it comes the import IsID of task do not equal to the last one,
+// Update will return ErrDiffID.
+func (cm TaskManager) Update(uid TaskID, pid IsID, config TaskExecutor) error {
+	oldTask, err := cm.taskConfigManager.UpdateTaskConfig(uid, NewTaskConfig(pid, config))
+	if err != nil {
+		return err
+	}
+	err = cm.commit(uid, pid)
+	if err != nil {
+		_, _ = cm.taskConfigManager.UpdateTaskConfig(uid, oldTask)
+		return err
+	}
+	return nil
+}
+
+// Recover the task when there is no task config on IsID or
+// recovering the task with last task config on IsID.
 // Recover in Recoverable will be used here,
 // if it runs failed it will just return the error.
 // If Recover is failed but developer wants to clear it,
 // just run : TaskManager.ClearTask(pid, true).
-// If PID is already recovered successfully, Recover will return ChaosErr.NotFound("PID").
-// If UID is not Applied or Created or the target PID of UID is not the import pid,
-// Recover will return ChaosErr.NotFound("UID").
-func (cm TaskManager) Recover(uid UID, pid PID) error {
+// If IsID is already recovered successfully, Recover will return ChaosErr.NotFound("IsID").
+// If TaskID is not Applied or Created or the target IsID of TaskID is not the import pid,
+// Recover will return ChaosErr.NotFound("TaskID").
+func (cm TaskManager) Recover(uid TaskID, pid IsID) error {
 	uIDs := cm.taskConfigManager.GetUIDsWithPID(pid)
 	if len(uIDs) == 0 {
-		return ErrPIDNotFound
+		return ErrNotFoundTaskID.WrapInput(pid).Err()
 	}
 	if len(uIDs) == 1 {
 		if uIDs[0] != uid {
-			return ErrUIDNotFound
+			return ErrNotFoundTaskID.WrapInput(uid).Err()
 		}
 		err := cm.ClearTask(pid, false)
 		if err != nil {
@@ -223,6 +231,8 @@ func (cm TaskManager) Recover(uid UID, pid PID) error {
 		return nil
 	}
 
+	uIDs = cm.taskConfigManager.GetUIDsWithPID(pid)
+
 	err = cm.commit(uIDs[0], pid)
 	if err != nil {
 		return errors.Wrapf(err, "update new task")
@@ -230,16 +240,16 @@ func (cm TaskManager) Recover(uid UID, pid PID) error {
 	return nil
 }
 
-func (cm TaskManager) commit(uid UID, pid PID) error {
-	task, err := cm.taskConfigManager.SumTaskConfig(uid)
+func (cm TaskManager) commit(uid TaskID, pid IsID) error {
+	task, err := cm.taskConfigManager.MergeTaskConfig(uid)
 	if err != nil {
-		return errors.Wrapf(err, "unknown recovering in the taskConfigManager, UID: %v", uid)
+		return errors.Wrapf(err, "unknown recovering in the taskConfigManager, TaskID: %v", uid)
 	}
 	process, ok := cm.taskMap[pid]
 	if !ok {
-		return errors.Wrapf(ErrPIDNotFound, "PID : %d", pid)
+		return ErrNotFoundID.WrapInput(pid).Err()
 	}
-	tasker, ok := task.data.(TaskExecutor)
+	tasker, ok := task.Data.(TaskExecutor)
 	if !ok {
 		return errors.New("task.Data here must implement TaskExecutor")
 	}
@@ -249,7 +259,7 @@ func (cm TaskManager) commit(uid UID, pid PID) error {
 	}
 	err = process.Inject(pid)
 	if err != nil {
-		return errors.Wrapf(err, "inject existing process PID : %d", pid)
+		return errors.Wrapf(err, "inject existing process IsID : %v", pid)
 	}
 	return nil
 }
@@ -257,11 +267,11 @@ func (cm TaskManager) commit(uid UID, pid PID) error {
 // ClearTask clear the task totally.
 // IMPORTANT: Developer should only use this function
 // when want to force clear task with ignoreRecoverErr==true.
-func (cm TaskManager) ClearTask(pid PID, ignoreRecoverErr bool) error {
+func (cm TaskManager) ClearTask(pid IsID, ignoreRecoverErr bool) error {
 	if process, ok := cm.taskMap[pid]; ok {
 		pRecover, ok := process.(Recoverable)
 		if !ok {
-			return errors.Wrapf(chaoserr.NotImplemented("Recoverable"), "process")
+			return cerr.NotImpl[Recoverable]().WrapInput(process).Err()
 		}
 		err := pRecover.Recover(pid)
 		if err != nil {
@@ -275,5 +285,5 @@ func (cm TaskManager) ClearTask(pid PID, ignoreRecoverErr bool) error {
 		delete(cm.taskMap, pid)
 		return nil
 	}
-	return errors.Wrapf(ErrPIDNotFound, "recovering task")
+	return ErrNotFoundID.WrapInput(pid).Err()
 }
