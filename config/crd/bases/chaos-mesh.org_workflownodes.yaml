@@ -37,7 +37,10 @@ spec:
           spec:
             description: Spec defines the behavior of a node of workflow
             properties:
-              abort:
+              abortWithStatusCheck:
+                description: AbortWithStatusCheck describe whether to abort the workflow
+                  when the failure threshold of StatusCheck is exceeded. Only used
+                  when Type is TypeStatusCheck.
                 type: boolean
               awsChaos:
                 description: AWSChaosSpec is the content of the specification for
@@ -5160,10 +5163,10 @@ spec:
                       templates:
                         items:
                           properties:
-                            abort:
-                              description: Abort describe whether to abort the workflow
-                                when the failure threshold of StatusCheck is exceeded.
-                                Only used when Type is TypeStatusCheck.
+                            abortWithStatusCheck:
+                              description: AbortWithStatusCheck describe whether to
+                                abort the workflow when the failure threshold of StatusCheck
+                                is exceeded. Only used when Type is TypeStatusCheck.
                               type: boolean
                             awsChaos:
                               description: AWSChaosSpec is the content of the specification
@@ -14612,6 +14615,8 @@ spec:
                 format: date-time
                 type: string
               statusCheck:
+                description: StatusCheck describe the behavior of StatusCheck. Only
+                  used when Type is TypeStatusCheck.
                 properties:
                   duration:
                     description: Duration defines the duration of the whole status

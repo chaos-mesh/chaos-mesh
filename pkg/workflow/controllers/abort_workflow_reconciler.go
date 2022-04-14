@@ -41,7 +41,8 @@ func NewAbortWorkflowReconciler(kubeClient client.Client, eventRecorder recorder
 		ChildNodesFetcher: NewChildNodesFetcher(kubeClient, logger),
 		kubeClient:        kubeClient,
 		eventRecorder:     eventRecorder,
-		logger:            logger}
+		logger:            logger,
+	}
 }
 
 // Reconcile watches `Workflows`, if the workflow has the abort annotation,

@@ -124,9 +124,10 @@ type Template struct {
 	// StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.
 	// +optional
 	StatusCheck *StatusCheckSpec `json:"statusCheck,omitempty"`
-	// Abort describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck.
+	// AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+	// Only used when Type is TypeStatusCheck.
 	// +optional
-	Abort bool `json:"abort,omitempty"`
+	AbortWithStatusCheck bool `json:"abortWithStatusCheck,omitempty"`
 }
 
 // ChaosOnlyScheduleSpec is very similar with ScheduleSpec, but it could not schedule Workflow

@@ -4974,8 +4974,8 @@
         "v1alpha1.Template": {
             "type": "object",
             "properties": {
-                "abort": {
-                    "description": "Abort describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck.\n+optional",
+                "abortWithStatusCheck": {
+                    "description": "AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.\nOnly used when Type is TypeStatusCheck.\n+optional",
                     "type": "boolean"
                 },
                 "awsChaos": {

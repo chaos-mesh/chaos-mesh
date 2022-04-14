@@ -2571,9 +2571,10 @@ definitions:
     type: object
   v1alpha1.Template:
     properties:
-      abort:
+      abortWithStatusCheck:
         description: |-
-          Abort describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck.
+          AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+          Only used when Type is TypeStatusCheck.
           +optional
         type: boolean
       awsChaos:

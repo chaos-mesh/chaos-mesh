@@ -229,6 +229,7 @@ type StatusCheckList struct {
 	Items           []StatusCheck `json:"items"`
 }
 
+// IsCompleted checks if the status check is completed, according to the StatusCheckConditionCompleted condition.
 func (in *StatusCheck) IsCompleted() bool {
 	for _, condition := range in.Status.Conditions {
 		if condition.Type == StatusCheckConditionCompleted &&

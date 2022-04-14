@@ -61,10 +61,13 @@ type WorkflowNodeSpec struct {
 	*EmbedChaos `json:",inline,omitempty"`
 	// +optional
 	Schedule *ScheduleSpec `json:"schedule,omitempty"`
+	// StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.
 	// +optional
 	StatusCheck *StatusCheckSpec `json:"statusCheck,omitempty"`
+	// AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+	// Only used when Type is TypeStatusCheck.
 	// +optional
-	Abort bool `json:"abort,omitempty"`
+	AbortWithStatusCheck bool `json:"abortWithStatusCheck,omitempty"`
 }
 
 type WorkflowNodeStatus struct {

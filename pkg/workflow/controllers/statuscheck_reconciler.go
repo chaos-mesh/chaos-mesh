@@ -173,7 +173,7 @@ func (it *StatusCheckReconciler) updateNodeStatus(ctx context.Context, request r
 			})
 		}
 
-		if node.Spec.Abort && needToAbort(statusCheck) {
+		if node.Spec.AbortWithStatusCheck && needToAbort(statusCheck) {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
 				Type:   v1alpha1.ConditionAborted,
 				Status: corev1.ConditionTrue,
