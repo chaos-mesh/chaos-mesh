@@ -84,7 +84,7 @@ func (it StatusCheckDurationExceed) Reason() string {
 }
 
 func (it StatusCheckDurationExceed) Message() string {
-	return fmt.Sprintf("duration exceed")
+	return "duration exceed"
 }
 
 type StatusCheckFailureThresholdExceed struct {
@@ -99,7 +99,7 @@ func (it StatusCheckFailureThresholdExceed) Reason() string {
 }
 
 func (it StatusCheckFailureThresholdExceed) Message() string {
-	return fmt.Sprintf("failure threshold exceed")
+	return "failure threshold exceed"
 }
 
 type StatusCheckSuccessThresholdExceed struct {
@@ -114,7 +114,7 @@ func (it StatusCheckSuccessThresholdExceed) Reason() string {
 }
 
 func (it StatusCheckSuccessThresholdExceed) Message() string {
-	return fmt.Sprintf("success threshold exceed")
+	return "success threshold exceed"
 }
 
 func init() {

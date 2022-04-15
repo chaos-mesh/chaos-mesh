@@ -171,7 +171,7 @@ func (c *resultCache) append(key types.NamespacedName, obj v1alpha1.StatusCheckR
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	result, _ := c.results[key]
+	result := c.results[key]
 	result.Records = append(result.Records, obj)
 	result.Records = limitRecords(result.Records, result.recordsHistoryLimit)
 	result.Count++
