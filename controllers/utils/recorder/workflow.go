@@ -278,6 +278,102 @@ func (it RerunBySpecChanged) Message() string {
 	return fmt.Sprintf("rerun by spec changed, remove children nodes: %s", it.CleanedChildrenNode)
 }
 
+type StatusCheckCreated struct {
+	Name string
+}
+
+func (it StatusCheckCreated) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it StatusCheckCreated) Reason() string {
+	return v1alpha1.StatusCheckCreated
+}
+
+func (it StatusCheckCreated) Message() string {
+	return fmt.Sprintf("status check %s created", it.Name)
+}
+
+type StatusCheckCreatedFailed struct {
+	Name string
+}
+
+func (it StatusCheckCreatedFailed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it StatusCheckCreatedFailed) Reason() string {
+	return v1alpha1.StatusCheckCreatedFailed
+}
+
+func (it StatusCheckCreatedFailed) Message() string {
+	return fmt.Sprintf("status check %s create failed", it.Name)
+}
+
+type StatusCheckDeleted struct {
+	Name string
+}
+
+func (it StatusCheckDeleted) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it StatusCheckDeleted) Reason() string {
+	return v1alpha1.StatusCheckDeleted
+}
+
+func (it StatusCheckDeleted) Message() string {
+	return fmt.Sprintf("status check %s deleted", it.Name)
+}
+
+type StatusCheckDeletedFailed struct {
+	Name string
+}
+
+func (it StatusCheckDeletedFailed) Type() string {
+	return corev1.EventTypeWarning
+}
+
+func (it StatusCheckDeletedFailed) Reason() string {
+	return v1alpha1.StatusCheckDeletedFailed
+}
+
+func (it StatusCheckDeletedFailed) Message() string {
+	return fmt.Sprintf("status check %s delete failed", it.Name)
+}
+
+type ParentNodeAborted struct {
+	ParentNodeName string
+}
+
+func (it ParentNodeAborted) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it ParentNodeAborted) Reason() string {
+	return v1alpha1.ParentNodeAborted
+}
+
+func (it ParentNodeAborted) Message() string {
+	return fmt.Sprintf("abort the node because parent node %s aborted", it.ParentNodeName)
+}
+
+type WorkflowAborted struct {
+	WorkflowName string
+}
+
+func (it WorkflowAborted) Type() string {
+	return corev1.EventTypeNormal
+}
+
+func (it WorkflowAborted) Reason() string {
+	return v1alpha1.WorkflowAborted
+}
+
+func (it WorkflowAborted) Message() string {
+	return fmt.Sprintf("abort the node because workflow %s aborted", it.WorkflowName)
+}
+
 func init() {
 	register(
 		InvalidEntry{},
@@ -296,5 +392,10 @@ func init() {
 		TaskPodPodCompleted{},
 		ConditionalBranchesSelected{},
 		RerunBySpecChanged{},
+		StatusCheckCreated{},
+		StatusCheckCreatedFailed{},
+		StatusCheckDeleted{},
+		StatusCheckDeletedFailed{},
+		ParentNodeAborted{},
 	)
 }
