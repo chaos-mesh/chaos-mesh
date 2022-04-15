@@ -18,7 +18,7 @@ import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, Table
 import { getIn, useFormikContext } from 'formik'
 
 import PaperContainer from '@ui/mui-extends/esm/PaperContainer'
-import T from 'components/T'
+import i18n from 'components/T'
 import { setAlert } from 'slices/globalStatus'
 import { useMemo } from 'react'
 import { useStoreDispatch } from 'store'
@@ -78,10 +78,10 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>{T('common.name')}</TableCell>
-            <TableCell>{T('k8s.namespace')}</TableCell>
-            <TableCell>{T('common.ip')}</TableCell>
-            <TableCell>{T('common.status')}</TableCell>
+            <TableCell>{i18n('common.name')}</TableCell>
+            <TableCell>{i18n('k8s.namespace')}</TableCell>
+            <TableCell>{i18n('common.ip')}</TableCell>
+            <TableCell>{i18n('common.status')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

@@ -125,6 +125,7 @@ jobs:
           minikube version: v1.24.0
           kubernetes version: ${{ matrix.kubernetes-version }}
           start args: --cni flannel
+          github token: ${{ secrets.GITHUB_TOKEN }}
       - name: load image into minikube
         run: |
           minikube image load ./output/saved-images/chaos-dashboard.tgz

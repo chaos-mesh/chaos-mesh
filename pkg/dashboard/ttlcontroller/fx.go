@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,27 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
-package time
+package ttlcontroller
 
 import (
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-// ModifyTime modifies time of target process
-func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64, logger logr.Logger) error {
-	// Mock point to return error in unit test
-	if err := mock.On("ModifyTimeError"); err != nil {
-		if e, ok := err.(error); ok {
-			return e
-		}
-		if ignore, ok := err.(bool); ok && ignore {
-			return nil
-		}
-	}
-	return errors.New("arm64 is not supported")
+func Bootstrap(experiment core.ExperimentStore, event core.EventStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *TTLConfig, logger logr.Logger) *Controller {
+	return NewController(experiment, event, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
 }

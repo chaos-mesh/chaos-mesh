@@ -18,7 +18,7 @@ import { Autocomplete, Chip, TextField, TextFieldProps } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
 
-import T from 'components/T'
+import i18n from 'components/T'
 
 interface LabelFieldProps {
   isKV?: boolean // whether to use the key:value format,
@@ -123,7 +123,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
           {...props}
           size="small"
           fullWidth
-          helperText={error !== '' ? error : isKV ? T('common.isKVHelperText') : props.helperText}
+          helperText={error !== '' ? error : isKV ? i18n('common.isKVHelperText') : props.helperText}
           error={error !== ''}
           onChange={onInputChange}
           onKeyDown={onKeyDown}
