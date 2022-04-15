@@ -24,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
+	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
@@ -42,6 +43,7 @@ var Module = fx.Options(
 	fx.Invoke(podnetworkchaos.Bootstrap),
 	fx.Invoke(podiochaos.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
+	fx.Invoke(statuscheck.Bootstrap),
 
 	schedule.Module,
 	chaosimpl.AllImpl)

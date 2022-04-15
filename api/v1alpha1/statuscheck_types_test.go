@@ -55,12 +55,12 @@ var _ = Describe("StatusCheck", func() {
 				},
 				Spec: StatusCheckSpec{
 					Mode: StatusCheckSynchronous,
-					Type: TypeHttp,
+					Type: TypeHTTP,
 					EmbedStatusCheck: &EmbedStatusCheck{
 						HTTPStatusCheck: &HTTPStatusCheck{
 							RequestUrl: "http://1.1.1.1:8080/health",
 							Criteria: HTTPCriteria{
-								ResponseCode: "200",
+								StatusCode: "200",
 							},
 						},
 					},
