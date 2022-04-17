@@ -20,7 +20,6 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
-	ctrl "sigs.k8s.io/controller-runtime"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
@@ -46,7 +45,6 @@ var (
 		fx.Invoke(schedule.DeleteIncompleteSchedules),
 	)
 	sqliteDriver = "sqlite3"
-	log          = ctrl.Log.WithName("store").WithName("dbstore")
 )
 
 // NewDBStore returns a new gorm.DB
@@ -60,8 +58,6 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*gorm.DB, e
 
 	gormDB, err := gorm.Open(conf.Database.Driver, ds)
 	if err != nil {
-		log.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver)
-
 		return nil, err
 	}
 
