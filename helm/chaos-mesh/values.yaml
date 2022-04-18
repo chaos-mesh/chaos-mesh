@@ -227,7 +227,7 @@ dashboard:
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # The serviceAccount for chaos-dashboard
-  serviceAccount: chaos-controller-manager
+  serviceAccount: chaos-dashboard
   image:
     # override global registry, empty value means using the global images.registry
     registry: ""
