@@ -33,7 +33,7 @@ Please follow the Title Formats below when you open a new PR:
 
 ### Checklist
 
-CHANGELOG:
+CHANGELOG
 
 <!-- Must include at least one of them. -->
 
