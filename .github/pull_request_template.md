@@ -33,6 +33,13 @@ Please follow the Title Formats below when you open a new PR:
 
 ### Checklist
 
+CHANGELOG:
+
+<!-- Must include at least one of them. -->
+
+- [ ] I have updated the `CHANGELOG.md`
+- [ ] I have labeled this PR with "no-need-update-changelog"
+
 Tests
 
 <!-- Must include at least one of them. -->
