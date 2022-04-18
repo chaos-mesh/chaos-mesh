@@ -830,6 +830,34 @@ metadata:
     app.kubernetes.io/version: v0.9.0
     app.kubernetes.io/component: chaos-daemon
 ---
+# Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ServiceAccount for component chaos-dashboard
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: "chaos-testing"
+  name: chaos-dashboard
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/component: chaos-dashboard
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # Copyright 2021 Chaos Mesh Authors.
 #
@@ -888,6 +916,42 @@ data:
   ca.crt: "${CA_BUNDLE}"
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
+---
+# Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
+# ClusterRole for chaos-dashboard in target namespace
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dashboard-target-namespace
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/component: chaos-dashboard
+rules:
+  # chaos dashboard could list pods for selector hints
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+  # chaos dashboard could record evnets from chaos experiments
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  # chaos dashboard could record and manipulate all the Chaos Mesh resources in target namespace
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
@@ -956,6 +1020,29 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
+---
+# Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
+# binding ClusterRole to ServiceAccount for componnet chaos dashboard
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dashboard-target-namespace
+  # TODO: notice that the targetNamespace is still defined as .Values.controllerManager.targetNamespace, .Values.targetNamespace would be better.
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/component: chaos-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh-chaos-dashboard-target-namespace
+subjects:
+  - kind: ServiceAccount
+    name: chaos-dashboard
+    namespace: "chaos-testing"
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # bindings cluster level
@@ -1301,7 +1388,7 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
       annotations:
     spec:
-      serviceAccountName: chaos-controller-manager
+      serviceAccountName: chaos-dashboard
       containers:
         - name: chaos-dashboard
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-dashboard:${VERSION_TAG}
