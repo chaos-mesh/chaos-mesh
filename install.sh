@@ -918,6 +918,34 @@ data:
   tls.key: "${TLS_KEY}"
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
+# ClusterRole for chaos-dashboard at cluster scope
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dashboard-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/component: chaos-dashboard
+rules:
+  # chaos-dashboard could list namespace for selector hints
+  - apiGroups: [ "" ]
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  # chaos-dashboard use subjectaccessreviews to authorize the requests
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs: 
+      - create
+---
+# Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
 # ClusterRole for chaos-dashboard in target namespace
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -938,6 +966,7 @@ rules:
     verbs:
       - get
       - list
+      - watch
   # chaos dashboard could record evnets from chaos experiments
   - apiGroups:
       - ""
@@ -1020,6 +1049,27 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
+---
+# Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
+# ClusterRoleBinding for chaos-dashboard at cluster scope
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dashboard-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: v0.9.0
+    app.kubernetes.io/component: chaos-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh-chaos-dashboard-cluster-level
+subjects:
+  - kind: ServiceAccount
+    name: chaos-dashboard
+    namespace: "chaos-testing"
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
 # binding ClusterRole to ServiceAccount for componnet chaos dashboard
