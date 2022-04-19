@@ -13,28 +13,20 @@
 // limitations under the License.
 //
 
-package chaoserr
+package azure
 
 import (
-	"github.com/pkg/errors"
+	"context"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func NotFound(name string) error {
-	return errors.Errorf("%s not found.", name)
+type SelectImpl struct{}
+
+func (impl *SelectImpl) Select(ctx context.Context, azureSelector *v1alpha1.AzureSelector) ([]*v1alpha1.AzureSelector, error) {
+	return []*v1alpha1.AzureSelector{azureSelector}, nil
 }
 
-type ErrNotImplemented struct {
-	name string
+func New() *SelectImpl {
+	return &SelectImpl{}
 }
-
-func (e ErrNotImplemented) Error() string {
-	return e.name + " not implement"
-}
-
-func NotImplemented(name string) error {
-	return ErrNotImplemented{name: name}
-}
-
-var (
-	ErrDuplicateEntity = errors.New("duplicate entity")
-)

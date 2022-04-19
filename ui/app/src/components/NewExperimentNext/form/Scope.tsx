@@ -32,7 +32,7 @@ import Mode from './Mode'
 import OtherOptions from 'components/OtherOptions'
 import ScopePodsTable from './ScopePodsTable'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 
 interface ScopeProps {
   namespaces: string[]
@@ -120,11 +120,11 @@ const Scope: React.FC<ScopeProps> = ({
     <Space>
       <AutocompleteMultipleField
         name={`${scope}.namespaces`}
-        label={T('k8s.namespaceSelectors')}
+        label={i18n('k8s.namespaceSelectors')}
         helperText={
           getIn(touched, `${scope}.namespaces`) && getIn(errors, `${scope}.namespaces`)
             ? getIn(errors, `${scope}.namespaces`)
-            : T('common.multiOptions')
+            : i18n('common.multiOptions')
         }
         options={!enableKubeSystemNS ? namespaces.filter((d) => d !== 'kube-system') : namespaces}
         error={getIn(errors, `${scope}.namespaces`) && getIn(touched, `${scope}.namespaces`) ? true : false}
@@ -133,8 +133,8 @@ const Scope: React.FC<ScopeProps> = ({
 
       <AutocompleteMultipleField
         name={`${scope}.labelSelectors`}
-        label={T('k8s.labelSelectors')}
-        helperText={T('common.multiOptions')}
+        label={i18n('k8s.labelSelectors')}
+        helperText={i18n('common.multiOptions')}
         options={labelKVs}
         disabled={disabled}
       />
@@ -142,16 +142,16 @@ const Scope: React.FC<ScopeProps> = ({
       <OtherOptions disabled={disabled}>
         <AutocompleteMultipleField
           name={`${scope}.annotationSelectors`}
-          label={T('k8s.annotationsSelectors')}
-          helperText={T('common.multiOptions')}
+          label={i18n('k8s.annotationsSelectors')}
+          helperText={i18n('common.multiOptions')}
           options={annotationKVs}
           disabled={disabled}
         />
 
         <SelectField
           name={`${scope}.podPhaseSelectors`}
-          label={T('k8s.podPhaseSelectors')}
-          helperText={T('common.multiOptions')}
+          label={i18n('k8s.podPhaseSelectors')}
+          helperText={i18n('common.multiOptions')}
           multiple
           onChange={handleChangeIncludeAll}
           disabled={disabled}
@@ -171,23 +171,23 @@ const Scope: React.FC<ScopeProps> = ({
       </OtherOptions>
 
       <Divider />
-      <Typography>{T('newE.scope.mode')}</Typography>
+      <Typography>{i18n('newE.scope.mode')}</Typography>
       <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
       <Divider />
 
       <div>
         <Typography sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          {podsPreviewTitle || T('newE.scope.targetPodsPreview')}
+          {podsPreviewTitle || i18n('newE.scope.targetPodsPreview')}
         </Typography>
         <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>
-          {podsPreviewDesc || T('newE.scope.targetPodsPreviewHelper')}
+          {podsPreviewDesc || i18n('newE.scope.targetPodsPreviewHelper')}
         </Typography>
       </div>
       {pods.length > 0 ? (
         <ScopePodsTable scope={scope} pods={pods} />
       ) : (
         <Typography variant="subtitle2" sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          {T('newE.scope.noPodsFound')}
+          {i18n('newE.scope.noPodsFound')}
         </Typography>
       )}
     </Space>

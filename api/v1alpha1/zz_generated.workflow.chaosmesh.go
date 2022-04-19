@@ -25,6 +25,7 @@ import (
 
 const (
 	TypeAWSChaos TemplateType = "AWSChaos"
+	TypeAzureChaos TemplateType = "AzureChaos"
 	TypeBlockChaos TemplateType = "BlockChaos"
 	TypeDNSChaos TemplateType = "DNSChaos"
 	TypeGCPChaos TemplateType = "GCPChaos"
@@ -43,6 +44,7 @@ const (
 var allChaosTemplateType = []TemplateType{
 	TypeSchedule,
 	TypeAWSChaos,
+	TypeAzureChaos,
 	TypeBlockChaos,
 	TypeDNSChaos,
 	TypeGCPChaos,
@@ -61,6 +63,8 @@ var allChaosTemplateType = []TemplateType{
 type EmbedChaos struct {
 	// +optional
 	AWSChaos *AWSChaosSpec `json:"awsChaos,omitempty"`
+	// +optional
+	AzureChaos *AzureChaosSpec `json:"azureChaos,omitempty"`
 	// +optional
 	BlockChaos *BlockChaosSpec `json:"blockChaos,omitempty"`
 	// +optional
@@ -93,6 +97,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypeAWSChaos:
 		result := AWSChaos{}
 		result.Spec = *it.AWSChaos
+		return &result, nil
+	case TypeAzureChaos:
+		result := AzureChaos{}
+		result.Spec = *it.AzureChaos
 		return &result, nil
 	case TypeBlockChaos:
 		result := BlockChaos{}
@@ -153,6 +161,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *AWSChaos:
 		*it.AWSChaos = chaos.Spec
 		return nil
+	case *AzureChaos:
+		*it.AzureChaos = chaos.Spec
+		return nil
 	case *BlockChaos:
 		*it.BlockChaos = chaos.Spec
 		return nil
@@ -200,6 +211,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 	case TypeAWSChaos:
 		result := AWSChaosList{}
 		return &result, nil
+	case TypeAzureChaos:
+		result := AzureChaosList{}
+		return &result, nil
 	case TypeBlockChaos:
 		result := BlockChaosList{}
 		return &result, nil
@@ -243,6 +257,14 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 }
 
 func (in *AWSChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *AzureChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

@@ -17,7 +17,7 @@ package iochaos
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -32,7 +32,7 @@ func getPodIODelay(c http.Client, port uint16) (time.Duration, error) {
 		return 0, err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return 0, err
@@ -56,7 +56,7 @@ func getPodIoMistake(c http.Client, port uint16) (bool, error) {
 		return false, err
 	}
 
-	out, err := ioutil.ReadAll(resp.Body)
+	out, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return false, err

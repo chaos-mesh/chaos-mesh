@@ -19,8 +19,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
@@ -29,8 +29,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/inject"
 )
-
-var log = ctrl.Log.WithName("inject-webhook")
 
 // +kubebuilder:webhook:path=/inject-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
@@ -41,6 +39,7 @@ type PodInjector struct {
 	Config        *config.Config
 	ControllerCfg *controllerCfg.ChaosControllerConfig
 	Metrics       *metrics.ChaosControllerManagerMetricsCollector
+	Logger        logr.Logger
 }
 
 // Handle is pod injector handler
@@ -52,7 +51,7 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	log.Info("Get request from pod:", "pod", pod)
+	v.Logger.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
 		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.ControllerCfg, v.Metrics),
