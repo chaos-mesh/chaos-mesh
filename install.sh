@@ -831,7 +831,7 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
-# Copyright 2021 Chaos Mesh Authors.
+# Copyright 2022 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -942,7 +942,7 @@ rules:
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
       - subjectaccessreviews
-    verbs: 
+    verbs:
       - create
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
