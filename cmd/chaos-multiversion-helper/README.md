@@ -14,8 +14,8 @@ Take the `v1alpha2` as an example, following steps will show how to generate a
 new version of api from the original `v1alpha1`.
 
 1. `./bin/chaos-multiversion-helper create --from v1alpha1 --to v1alpha2
-   --as-storage-version`. It will copy the v1alpha1 to v1alpha2, and mark it as
-   the storage version
+   --as-storage-version`. It will copy the v1alpha1 to v1alpha2, and mark the
+   new one as the storage version
 2. `./bin/chaos-multiversion-helper migrate --from v1alpha1 --to v1alpha2`.  It
    will modify every reference to v1alpha1 in the chaos mesh code base to become
    `v1alpha2`
