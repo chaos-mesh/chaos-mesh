@@ -43,6 +43,7 @@ func NewAddOldObjsCmd(log logr.Logger) *cobra.Command {
 				log.Error(err, "add old objects")
 				os.Exit(1)
 			}
+			log.Info("register convert webhook of oldobjs to controller successfully")
 		},
 	}
 

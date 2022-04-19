@@ -84,6 +84,7 @@ func run(log logr.Logger, version, hub string) error {
 	if err != nil {
 		return err
 	}
+	log.Info("generate convert successfully")
 
 	return nil
 }

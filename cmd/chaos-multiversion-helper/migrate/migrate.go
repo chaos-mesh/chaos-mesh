@@ -38,7 +38,7 @@ func NewMigrateCmd(log logr.Logger) *cobra.Command {
 		Use:   "migrate --from <old-version> --to <new-version>",
 		Short: "Iterate over all Golang source codes (except a whitelist) and migrate them to the new version",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := run(from, to)
+			err := run(log, from, to)
 			if err != nil {
 				log.Error(err, "migrate source codes", "from", from, "to", to)
 				os.Exit(1)
@@ -73,7 +73,7 @@ func isWhiteListed(path string) bool {
 	return false
 }
 
-func run(from, to string) error {
+func run(log logr.Logger, from, to string) error {
 	allGoFiles, err := doublestar.Glob(os.DirFS("."), "**/*.go")
 	if err != nil {
 		return errors.WithStack(err)
@@ -84,7 +84,7 @@ func run(from, to string) error {
 			continue
 		}
 
-		err := migrateFile(file, from, to)
+		err := migrateFile(log.WithValues("file", file, "from", from, "to", to), file, from, to)
 		if err != nil {
 			return err
 		}
@@ -97,7 +97,7 @@ func quote(s string) string {
 	return fmt.Sprintf("%q", s)
 }
 
-func migrateFile(path string, from string, to string) error {
+func migrateFile(log logr.Logger, path string, from string, to string) error {
 	fileSet := token.NewFileSet()
 
 	fileAst, err := parser.ParseFile(fileSet, path, nil, parser.ParseComments)
@@ -116,6 +116,7 @@ func migrateFile(path string, from string, to string) error {
 		}
 	}
 	if needMigrate {
+		log.Info("migrate file")
 		// do migration for old package name
 		ast.Inspect(fileAst, func(node ast.Node) bool {
 			switch node := node.(type) {

@@ -78,13 +78,17 @@ func run(log logr.Logger, from, to string, asStorageVersion bool) error {
 		to,
 		asStorageVersion,
 		fileSet,
+		log,
 	}
 	for _, file := range oldFiles {
+		log.Info("copy api", "oldFile", file.Name())
+		ctx.log = log.WithValues("fileName", file.Name())
 		err := createFile(ctx, file)
 		if err != nil {
 			return err
 		}
 	}
+	log.Info("create new api successfully")
 	return nil
 }
 
@@ -95,6 +99,8 @@ type createFileContext struct {
 
 	asStorageVersion bool
 	fileSet          *token.FileSet
+
+	log logr.Logger
 }
 
 func createFile(ctx createFileContext, file fs.FileInfo) error {
