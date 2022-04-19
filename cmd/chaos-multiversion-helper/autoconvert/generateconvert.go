@@ -40,7 +40,7 @@ func generateConvert(log logr.Logger, version string, hub string) error {
 	apiDirectory := "api" + "/" + version
 	sources, err := ioutil.ReadDir(apiDirectory)
 	if err != nil {
-		return errors.Wrapf(err, "read directory", apiDirectory)
+		return errors.Wrapf(err, "read directory %s", apiDirectory)
 	}
 
 	definitionMap := map[string]*ast.GenDecl{}

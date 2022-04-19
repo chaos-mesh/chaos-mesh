@@ -23,8 +23,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 	"github.com/pkg/errors"
+
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
 func setHub(hub string) error {
