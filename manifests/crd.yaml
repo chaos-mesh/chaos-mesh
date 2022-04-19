@@ -1712,8 +1712,8 @@ spec:
                 - random-max-percent
                 type: string
               name:
-                description: byteman rule name, should be unique, and will use JVMChaos'
-                  name if not set
+                description: byteman rule name, should be unique, and will generate
+                  one if not set
                 type: string
               pid:
                 description: the pid of Java process which needs to attach
@@ -5289,8 +5289,8 @@ spec:
                     - random-max-percent
                     type: string
                   name:
-                    description: byteman rule name, should be unique, and will use
-                      JVMChaos' name if not set
+                    description: byteman rule name, should be unique, and will generate
+                      one if not set
                     type: string
                   pid:
                     description: the pid of Java process which needs to attach
@@ -8093,7 +8093,7 @@ spec:
                               type: string
                             name:
                               description: byteman rule name, should be unique, and
-                                will use JVMChaos' name if not set
+                                will generate one if not set
                               type: string
                             pid:
                               description: the pid of Java process which needs to
@@ -10654,7 +10654,7 @@ spec:
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
-                                    and will use JVMChaos' name if not set
+                                    and will generate one if not set
                                   type: string
                                 pid:
                                   description: the pid of Java process which needs
@@ -17889,8 +17889,8 @@ spec:
                     - random-max-percent
                     type: string
                   name:
-                    description: byteman rule name, should be unique, and will use
-                      JVMChaos' name if not set
+                    description: byteman rule name, should be unique, and will generate
+                      one if not set
                     type: string
                   pid:
                     description: the pid of Java process which needs to attach
@@ -20280,7 +20280,7 @@ spec:
                         type: string
                       name:
                         description: byteman rule name, should be unique, and will
-                          use JVMChaos' name if not set
+                          generate one if not set
                         type: string
                       pid:
                         description: the pid of Java process which needs to attach
@@ -23141,7 +23141,7 @@ spec:
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
-                                    and will use JVMChaos' name if not set
+                                    and will generate one if not set
                                   type: string
                                 pid:
                                   description: the pid of Java process which needs
@@ -25787,7 +25787,7 @@ spec:
                                       type: string
                                     name:
                                       description: byteman rule name, should be unique,
-                                        and will use JVMChaos' name if not set
+                                        and will generate one if not set
                                       type: string
                                     pid:
                                       description: the pid of Java process which needs
@@ -35728,7 +35728,7 @@ spec:
                           type: string
                         name:
                           description: byteman rule name, should be unique, and will
-                            use JVMChaos' name if not set
+                            generate one if not set
                           type: string
                         pid:
                           description: the pid of Java process which needs to attach
@@ -38216,7 +38216,7 @@ spec:
                               type: string
                             name:
                               description: byteman rule name, should be unique, and
-                                will use JVMChaos' name if not set
+                                will generate one if not set
                               type: string
                             pid:
                               description: the pid of Java process which needs to
