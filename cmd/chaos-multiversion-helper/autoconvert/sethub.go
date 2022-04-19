@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
+	"github.com/pkg/errors"
 )
 
 func setHub(hub string) error {
@@ -32,7 +33,7 @@ func setHub(hub string) error {
 	apiDirectory := "api" + "/" + hub
 	sources, err := ioutil.ReadDir(apiDirectory)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "read directory %s", apiDirectory)
 	}
 
 	hubTypes := []string{}
@@ -45,7 +46,7 @@ func setHub(hub string) error {
 		filePath := apiDirectory + "/" + file.Name()
 		fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "parse file %s", filePath)
 		}
 
 		cmap := ast.NewCommentMap(fileSet, fileAst, fileAst.Comments)
@@ -74,7 +75,7 @@ func setHub(hub string) error {
 	hubFilePath := apiDirectory + "/" + "zz_generated.hub.chaosmesh.go"
 	hubFile, err := os.Create(hubFilePath)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "create file %s", hubFilePath)
 	}
 	defer hubFile.Close()
 

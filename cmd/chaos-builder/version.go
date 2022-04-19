@@ -15,4 +15,6 @@
 
 package main
 
+// apiVersion specifies the version that the chaos-builder will read and generate
+// codes from.
 const apiVersion = "v1alpha1"

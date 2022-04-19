@@ -36,7 +36,7 @@ func NewAddOldObjsCmd(log logr.Logger) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "addoldobjs --version <version>",
-		Short: "addoldobjs command automatically add the old version objs to `cmd/chaos-controller-manager/provider/convert.go`",
+		Short: "Automatically add the old version objs to `cmd/chaos-controller-manager/provider/convert.go`",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := run(log, version)
 			if err != nil {
@@ -63,7 +63,7 @@ func run(log logr.Logger, version string) error {
 	fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Wrapf(err, "parse file %s", filePath)
 	}
 	ast.Inspect(fileAst, func(n ast.Node) bool {
 		node, ok := n.(*ast.GenDecl)
@@ -138,7 +138,7 @@ func run(log logr.Logger, version string) error {
 
 	newFile, err := os.OpenFile(filePath, os.O_WRONLY, 0)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "open file %s", filePath)
 	}
 	defer newFile.Close()
 	return printer.Fprint(newFile, fileSet, fileAst)
@@ -150,7 +150,7 @@ func getOldTypes(version string) ([]string, error) {
 	apiDirectory := "api" + "/" + version
 	sources, err := ioutil.ReadDir(apiDirectory)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrapf(err, "read directory %s", apiDirectory)
 	}
 
 	types := []string{}
@@ -163,7 +163,7 @@ func getOldTypes(version string) ([]string, error) {
 		filePath := apiDirectory + "/" + file.Name()
 		fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, errors.Wrapf(err, "parse file %s", filePath)
 		}
 
 		// read the comment map to decide which types need to be converted

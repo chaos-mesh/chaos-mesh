@@ -36,7 +36,7 @@ func NewMigrateCmd(log logr.Logger) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "migrate --from <old-version> --to <new-version>",
-		Short: "migrate command iterate over all golang source codes (except a whitelist) and migrate them to the new version",
+		Short: "Iterate over all Golang source codes (except a whitelist) and migrate them to the new version",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := run(from, to)
 			if err != nil {

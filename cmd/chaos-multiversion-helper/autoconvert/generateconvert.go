@@ -40,7 +40,7 @@ func generateConvert(log logr.Logger, version string, hub string) error {
 	apiDirectory := "api" + "/" + version
 	sources, err := ioutil.ReadDir(apiDirectory)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Wrapf(err, "read directory", apiDirectory)
 	}
 
 	definitionMap := map[string]*ast.GenDecl{}
@@ -54,7 +54,7 @@ func generateConvert(log logr.Logger, version string, hub string) error {
 		filePath := apiDirectory + "/" + file.Name()
 		fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)
 		if err != nil {
-			return errors.WithStack(err)
+			return errors.Wrapf(err, "parse file %s", filePath)
 		}
 
 		// add all type definition to the definitionMap
@@ -98,7 +98,7 @@ func generateConvert(log logr.Logger, version string, hub string) error {
 	convertFilePath := apiDirectory + "/" + "zz_generated.convert.chaosmesh.go"
 	convertFile, err := os.Create(convertFilePath)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Wrapf(err, "create file %s", convertFilePath)
 	}
 	defer convertFile.Close()
 
@@ -125,14 +125,17 @@ type convertImpl struct {
 
 func (c *convertImpl) generate(convertFile *os.File) error {
 	// mark the original added types.
-	// the signiture of these types will be different from other `Convert` function.
+	// the signature of these types will be different from other `Convert` function.
 	// because the `controller-runtime` requires them to convert to the `conversion.Hub`
 	hubTypes := make(map[string]struct{})
 
-	c.types.forEatch(func(typ string) error {
+	err := c.types.forEach(func(typ string) error {
 		hubTypes[typ] = struct{}{}
 		return nil
 	})
+	if err != nil {
+		return err
+	}
 
 	convertFile.WriteString(common.Boilerplate + "\n")
 	convertFile.WriteString("package " + c.version + "\n\n")
@@ -143,7 +146,7 @@ import (
 )
 	`)
 
-	c.types.forEatch(func(typ string) error {
+	c.types.forEach(func(typ string) error {
 		from, to, err := c.generateTypeConvert(typ)
 		if err != nil {
 			return err
@@ -253,7 +256,7 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string, error) {
 	// if the type spec is a pointer, deref it
 	//
 	// because for any type (other than slice, map), we will generate the convert
-	// function whose receiver is the pointer type, so we can deref the pointer here for the convinience
+	// function whose receiver is the pointer type, so we can deref the pointer here for the convenience
 	pointerTypeSpec, ok := typeSpec.Type.(*ast.StarExpr)
 	if ok {
 		derefedTypeSpec = pointerTypeSpec.X
@@ -516,7 +519,7 @@ func (c *convertImpl) generateArrayConvert(dst, src, in string, typ *ast.ArrayTy
 //
 // getFieldName for these three fields would return
 // `A`, `B`, `C`
-// Then if you hava a variable `s` with type `S`, then you can
+// Then if you have a variable `s` with type `S`, then you can
 // refer to the field with `s.A`, `s.B` and `s.C`
 func (c *convertImpl) getFieldName(field *ast.Field) (string, error) {
 	fieldName := ""
@@ -536,7 +539,7 @@ func (c *convertImpl) getFieldName(field *ast.Field) (string, error) {
 		case *ast.Ident:
 			fieldName = fieldType.Name
 		case *ast.SelectorExpr:
-			// only thrid party type is supported
+			// only third party type is supported
 			// for example, the time.Time, or kubernetes metadata
 			fieldName = fieldType.Sel.Name
 		default:
@@ -614,7 +617,7 @@ func (c *uniqueList) push(typs ...string) {
 	}
 }
 
-func (c *uniqueList) forEatch(f func(string) error) error {
+func (c *uniqueList) forEach(f func(string) error) error {
 	for e := c.convertTypes.Front(); e != nil; e = e.Next() {
 		err := f(e.Value.(string))
 		if err != nil {

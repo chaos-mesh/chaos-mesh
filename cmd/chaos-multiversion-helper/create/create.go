@@ -20,6 +20,7 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -36,7 +37,7 @@ func NewCreateCmd(log logr.Logger) *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "create --from <old-version> --to <new-version>",
-		Short: "create command create a new version of chaos api",
+		Short: "Create a new version of chaos api",
 		Run: func(cmd *cobra.Command, args []string) {
 			err := run(log, from, to, asStorageVersion)
 			if err != nil {
@@ -61,76 +62,108 @@ func run(log logr.Logger, from, to string, asStorageVersion bool) error {
 
 	oldAPIDirectory := "api/" + from
 	newAPIDirectory := "api/" + to
-	os.Mkdir(newAPIDirectory, 0755)
+	err := os.Mkdir(newAPIDirectory, 0755)
+	if err != nil {
+		return errors.Wrapf(err, "create directory %s", newAPIDirectory)
+	}
 
 	oldFiles, err := ioutil.ReadDir(oldAPIDirectory)
 	if err != nil {
-		return errors.WithStack(err)
+		return errors.Wrapf(err, "read directory %s", oldAPIDirectory)
 	}
 
+	ctx := createFileContext{
+		oldAPIDirectory,
+		newAPIDirectory,
+		to,
+		asStorageVersion,
+		fileSet,
+	}
 	for _, file := range oldFiles {
-		// skip files which are not golang source code
-		if !strings.HasSuffix(file.Name(), "go") {
-			continue
-		}
-
-		oldFilePath := oldAPIDirectory + "/" + file.Name()
-		fileAst, err := parser.ParseFile(fileSet, oldFilePath, nil, parser.ParseComments)
+		err := createFile(ctx, file)
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
-
-		// modify the package name to the new version
-		fileAst.Name.Name = to
-
-		if asStorageVersion {
-			// automatically add the storage version annotation
-			cmap := ast.NewCommentMap(fileSet, fileAst, fileAst.Comments)
-			for node, commentGroups := range cmap {
-				node, ok := node.(*ast.GenDecl)
-				if !ok || node.Tok != token.TYPE {
-					continue
-				}
-
-				for _, commentGroup := range commentGroups {
-					isObjectRoot := false
-					isStorageVersion := false
-
-					for _, comment := range commentGroup.List {
-						if strings.Contains(comment.Text, "+kubebuilder:object:root=true") {
-							isObjectRoot = true
-						}
-						if strings.Contains(comment.Text, "+kubebuilder:storageversion") {
-							isStorageVersion = true
-						}
-					}
-
-					if isObjectRoot && !isStorageVersion {
-						commentGroup.List = append(commentGroup.List, &ast.Comment{
-							Text:  "// +kubebuilder:storageversion",
-							Slash: node.Pos() - 1,
-						})
-					}
-				}
-			}
-
-			// `ast` package is not suitable for removing a comment, so the
-			// traditional string processing tool is prefered :)
-			sedProcess := exec.Command("sed", "-i", "/+kubebuilder:storageversion/d", oldFilePath)
-			sedProcess.Start()
-
-			err = sedProcess.Wait()
-			if err != nil {
-				return errors.WithStack(err)
-			}
-		}
-
-		newFile, err := os.Create(newAPIDirectory + "/" + file.Name())
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		defer newFile.Close()
-		printer.Fprint(newFile, fileSet, fileAst)
 	}
+	return nil
+}
+
+type createFileContext struct {
+	oldAPIDirectory string
+	newAPIDirectory string
+	to              string
+
+	asStorageVersion bool
+	fileSet          *token.FileSet
+}
+
+func createFile(ctx createFileContext, file fs.FileInfo) error {
+	// skip files which are not golang source code
+	if !strings.HasSuffix(file.Name(), "go") {
+		return nil
+	}
+
+	oldFilePath := ctx.oldAPIDirectory + "/" + file.Name()
+	fileAst, err := parser.ParseFile(ctx.fileSet, oldFilePath, nil, parser.ParseComments)
+	if err != nil {
+		return errors.Wrapf(err, "parse file %s", oldFilePath)
+	}
+
+	// modify the package name to the new version
+	fileAst.Name.Name = ctx.to
+
+	if ctx.asStorageVersion {
+		// automatically add the storage version annotation
+		cmap := ast.NewCommentMap(ctx.fileSet, fileAst, fileAst.Comments)
+		for node, commentGroups := range cmap {
+			node, ok := node.(*ast.GenDecl)
+			if !ok || node.Tok != token.TYPE {
+				continue
+			}
+
+			for _, commentGroup := range commentGroups {
+				isObjectRoot := false
+				isStorageVersion := false
+
+				for _, comment := range commentGroup.List {
+					if strings.Contains(comment.Text, "+kubebuilder:object:root=true") {
+						isObjectRoot = true
+					}
+					if strings.Contains(comment.Text, "+kubebuilder:storageversion") {
+						isStorageVersion = true
+					}
+				}
+
+				if isObjectRoot && !isStorageVersion {
+					commentGroup.List = append(commentGroup.List, &ast.Comment{
+						Text:  "// +kubebuilder:storageversion",
+						Slash: node.Pos() - 1,
+					})
+				}
+			}
+		}
+
+		// `ast` package is not suitable for removing a comment, so the
+		// traditional string processing tool is preferred :)
+		sedProcess := exec.Command("sed", "-i", "/+kubebuilder:storageversion/d", oldFilePath)
+		err = sedProcess.Start()
+		if err != nil {
+			return errors.Wrapf(err, "start sed program")
+		}
+
+		err = sedProcess.Wait()
+		if err != nil {
+			return errors.Wrapf(err, "remove storage version for %s", oldFilePath)
+		}
+	}
+
+	newFilePath := ctx.newAPIDirectory + "/" + file.Name()
+	newFile, err := os.Create(newFilePath)
+	if err != nil {
+		return errors.Wrapf(err, "create file %s", newFilePath)
+	}
+	defer newFile.Close()
+	printer.Fprint(newFile, ctx.fileSet, fileAst)
+
 	return nil
 }

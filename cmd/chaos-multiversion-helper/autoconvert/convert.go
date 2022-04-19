@@ -16,10 +16,10 @@
 package autoconvert
 
 import (
-	"errors"
 	"os"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
@@ -30,8 +30,8 @@ func NewConvertCmd(log logr.Logger) *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use:   "autoconvert --version <version> --hub <hub-version>",
-		Short: "autoconvert command generates code to automatically convert between two versions",
-		Long: `autoconvert will do the following things:
+		Short: "Generates code to automatically convert between two versions",
+		Long: `Autoconvert will do the following things:
 		1. remove the Hub declaration in <version>, if it is.
 		2. create the Hub tag for <hub-version>, if it is not.
 		3. generate ConvertTo and ConvertFrom function for the <version>, and assume it has 
@@ -56,13 +56,14 @@ func NewConvertCmd(log logr.Logger) *cobra.Command {
 }
 
 func removeHub(version string) error {
-	err := os.Remove(common.ChaosMeshAPIPrefix + version + "/" + "zz_generated.hub.chaosmesh.go")
+	generatedHubFile := common.ChaosMeshAPIPrefix + version + "/" + "zz_generated.hub.chaosmesh.go"
+	err := os.Remove(generatedHubFile)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil
 		}
 
-		return err
+		return errors.Wrapf(err, "remove file %s", generatedHubFile)
 	}
 
 	return nil
