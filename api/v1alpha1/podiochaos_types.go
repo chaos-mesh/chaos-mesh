@@ -34,7 +34,7 @@ type PodIOChaosSpec struct {
 	Actions []IOChaosAction `json:"actions,omitempty"`
 }
 
-// IOChaosAction defines an possible action of IOChaos
+// IOChaosAction defines a possible action of IOChaos
 type IOChaosAction struct {
 	Type IOChaosType `json:"type"`
 
@@ -60,7 +60,7 @@ type IOChaosAction struct {
 	Source string `json:"source,omitempty"`
 }
 
-// IOChaosType represents the type of an IOChaos Action
+// IOChaosType represents the type of IOChaos Action
 type IOChaosType string
 
 const (
@@ -127,7 +127,7 @@ type AttrOverrideSpec struct {
 
 // MistakeSpec represents one type of mistake
 type MistakeSpec struct {
-	// Filling determines what is filled in the miskate data.
+	// Filling determines what is filled in the mistake data.
 	// +optional
 	// +kubebuilder:validation:Enum=zero;random
 	Filling FillingType `json:"filling,omitempty"`
@@ -160,7 +160,7 @@ type Timespec struct {
 	Nsec int64 `json:"nsec"`
 }
 
-// FileType represents type of a file
+// FileType represents type of file
 type FileType string
 
 const (

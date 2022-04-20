@@ -30,12 +30,19 @@ const (
 	ContainerRuntimeContainerd = "containerd"
 	ContainerRuntimeCrio       = "crio"
 
-	// TODO(yeya24): make socket and ns configurable
 	defaultDockerSocket     = "unix:///var/run/docker.sock"
 	defaultContainerdSocket = "/run/containerd/containerd.sock"
 	defaultCrioSocket       = "/var/run/crio/crio.sock"
 	containerdDefaultNS     = "k8s.io"
 )
+
+// CrClientConfig contains the basic cr client configuration.
+type CrClientConfig struct {
+	// Support docker, containerd, crio for now
+	Runtime      string
+	SocketPath   string
+	ContainerdNS string
+}
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
@@ -47,30 +54,46 @@ type ContainerRuntimeInfoClient interface {
 }
 
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
-func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
+func CreateContainerRuntimeInfoClient(clientConfig *CrClientConfig) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
 
 	var cli ContainerRuntimeInfoClient
 	var err error
-	switch containerRuntime {
+	socketPath := clientConfig.SocketPath
+	switch clientConfig.Runtime {
 	case ContainerRuntimeDocker:
-		cli, err = docker.New(defaultDockerSocket, "", nil, nil)
+		if socketPath == "" {
+			socketPath = defaultDockerSocket
+		} else {
+			socketPath = "unix://" + socketPath
+		}
+		cli, err = docker.New(socketPath, "", nil, nil)
 		if err != nil {
 			return nil, err
 		}
 	case ContainerRuntimeContainerd:
 		// TODO(yeya24): add more options?
-		cli, err = containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
+		if socketPath == "" {
+			socketPath = defaultContainerdSocket
+		}
+		containerdNS := containerdDefaultNS
+		if clientConfig.ContainerdNS != "" {
+			containerdNS = clientConfig.ContainerdNS
+		}
+		cli, err = containerd.New(socketPath, containerd.WithDefaultNamespace(containerdNS))
 		if err != nil {
 			return nil, err
 		}
 	case ContainerRuntimeCrio:
-		cli, err = crio.New(defaultCrioSocket)
+		if socketPath == "" {
+			socketPath = defaultCrioSocket
+		}
+		cli, err = crio.New(socketPath)
 		if err != nil {
 			return nil, err
 		}
 	default:
-		return nil, errors.Errorf("only docker/containerd/crio is supported, but got %s", containerRuntime)
+		return nil, errors.Errorf("only docker/containerd/crio is supported, but got %s", clientConfig.Runtime)
 	}
 
 	return cli, nil

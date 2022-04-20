@@ -752,21 +752,21 @@ gen_chaos_mesh_manifests() {
     local host_network=$5
     local docker_registry=$6
     local microk8s=$7
-    local socketPath="/var/run/docker.sock"
-    local mountPath="/var/run/docker.sock"
+    local socketDir="/var/run"
+    local socketName="docker.sock"
     if [ "${runtime}" == "containerd" ]; then
-        socketPath="/run/containerd/containerd.sock"
-        mountPath="/run/containerd/containerd.sock"
+        socketDir="/run/containerd"
+        socketName="containerd.sock"
     fi
 
     if [ "${k3s}" == "true" ]; then
-        socketPath="/run/k3s/containerd/containerd.sock"
-        mountPath="/run/containerd/containerd.sock"
+        socketDir="/run/k3s/containerd"
+        socketName="containerd.sock"
     fi
 
     if [ "${microk8s}" == "true" ]; then
-        socketPath="/var/snap/microk8s/common/run/containerd.sock"
-        mountPath="/run/containerd/containerd.sock"
+        socketDir="/var/snap/microk8s/common/run"
+        socketName="containerd.sock"
     fi
 
     need_cmd mktemp
@@ -1225,6 +1225,8 @@ spec:
             - --grpc-port
             - !!str 31767
             - --pprof
+            - --runtime-socket-path
+            - /host-run/${socketName}
           env:
             - name: TZ
               value: ${timezone}
@@ -1235,7 +1237,7 @@ spec:
                 - SYS_PTRACE
           volumeMounts:
             - name: socket-path
-              mountPath: ${mountPath}
+              mountPath: /host-run
             - name: sys-path
               mountPath: /host-sys
             - name: lib-modules
@@ -1243,13 +1245,12 @@ spec:
           ports:
             - name: grpc
               containerPort: 31767
-              hostPort: 31767
             - name: http
               containerPort: 31766
       volumes:
         - name: socket-path
           hostPath:
-            path: ${socketPath}
+            path: ${socketDir}
         - name: sys-path
           hostPath:
             path: /sys
