@@ -24,11 +24,7 @@
 {{- end }}
 {{- $certManagerEnabled := .Values.webhook.certManager.enabled }}
 
-{{- if eq $webhookApiVersion "v1" }}
-apiVersion: admissionregistration.k8s.io/v1
-{{- else -}}
-apiVersion: admissionregistration.k8s.io/v1beta1
-{{- end }}
+apiVersion: {{ $webhookApiVersion }}
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "chaos-mesh.mutation" . }}

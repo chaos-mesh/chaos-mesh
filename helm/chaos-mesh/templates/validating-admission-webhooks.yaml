@@ -17,7 +17,6 @@
 {{- $crtPEM := include "webhook.certPEM" . -}}
 {{- $keyPEM := include "webhook.keyPEM" . -}}
 
-// TODO: use named template
 {{- $timeoutSeconds := .Values.webhook.timeoutSeconds }}
 {{- $supportTimeoutSeconds := false }}
 {{- if ge .Capabilities.KubeVersion.Minor "14" }}
