@@ -13,7 +13,7 @@
 # limitations under the License.
 
 {{- $webhookApiVersion := include "webhook.apiVersion" . -}}
-{{- $caCert := include "webhook.caBundleCert" . -}}
+{{- $caCert := include "webhook.caBundleCertPEM" . -}}
 {{- $crtPEM := include "webhook.certPEM" . -}}
 {{- $keyPEM := include "webhook.keyPEM" . -}}
 
