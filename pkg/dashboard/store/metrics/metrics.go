@@ -146,7 +146,7 @@ func (collector *Collector) collectArchivedWorkflows() {
 
 type Params struct {
 	fx.In
-	log             logr.Logger
+	Log             logr.Logger
 	Registry        *prometheus.Registry
 	ExperimentStore core.ExperimentStore
 	ScheduleStore   core.ScheduleStore
@@ -154,6 +154,6 @@ type Params struct {
 }
 
 func Register(params Params) {
-	collector := NewCollector(params.log, params.ExperimentStore, params.ScheduleStore, params.WorkflowStore)
+	collector := NewCollector(params.Log, params.ExperimentStore, params.ScheduleStore, params.WorkflowStore)
 	params.Registry.MustRegister(collector)
 }
