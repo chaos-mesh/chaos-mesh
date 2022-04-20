@@ -35,3 +35,9 @@ new version of api from the original `v1alpha1`.
    `v1alpha2`
 7. Modify the groupversion_info in api/v1alpha2 from `v1alpha1` to `v1alpha2`
 8. Add old scheme to the `cmd/chaos-controller-manager/provider/controller.go`
+
+Or, you can use a single command:
+
+```
+OLD_VERSION="v1alpha1" NEW_VERSION="v1alpha2" make migrate-version
+```
