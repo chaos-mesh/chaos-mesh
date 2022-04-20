@@ -146,7 +146,7 @@ import (
 )
 	`)
 
-	c.types.forEach(func(typ string) error {
+	return c.types.forEach(func(typ string) error {
 		from, to, err := c.generateTypeConvert(typ)
 		if err != nil {
 			return err
@@ -182,7 +182,6 @@ import (
 
 		return nil
 	})
-	return nil
 }
 
 var builtInTypes = map[string]struct{}{
@@ -333,7 +332,7 @@ func (c *convertImpl) generateTypeConvert(typ string) (string, string, error) {
 						`
 				case *ast.StarExpr:
 					// TODO: support the pointer of slice and map as the field type
-					if _, ok := fieldTyp.X.(*ast.StructType); !ok {
+					if _, ok := fieldTyp.X.(*ast.Ident); !ok {
 						return "", "", errors.Wrapf(errTypeNotSupported, "type %T", fieldTyp.X)
 					}
 
