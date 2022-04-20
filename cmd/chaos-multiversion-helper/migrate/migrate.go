@@ -105,6 +105,20 @@ func migrateFile(log logr.Logger, path string, from string, to string) error {
 		return errors.WithStack(err)
 	}
 
+	if migrateAst(log, fileAst, from, to) {
+		file, err := os.Create(path)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		defer file.Close()
+		printer.Fprint(file, fileSet, fileAst)
+	}
+
+	return nil
+}
+
+// migrateAst migrates the ast, and returns whether this ast has been modified
+func migrateAst(log logr.Logger, fileAst *ast.File, from string, to string) bool {
 	needMigrate := false
 	for _, imp := range fileAst.Imports {
 		if imp.Path.Value == quote(common.ChaosMeshAPIPrefix+from) {
@@ -112,6 +126,14 @@ func migrateFile(log logr.Logger, path string, from string, to string) error {
 				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
 
 				needMigrate = true
+			} else if imp.Name.Name == from {
+				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
+				imp.Name.Name = to
+
+				needMigrate = true
+			} else {
+				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
+				// don't need to migrate, because this package is called by alias
 			}
 		}
 	}
@@ -134,12 +156,8 @@ func migrateFile(log logr.Logger, path string, from string, to string) error {
 			return true
 		})
 
-		file, err := os.Create(path)
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		defer file.Close()
-		printer.Fprint(file, fileSet, fileAst)
+		return true
 	}
-	return nil
+
+	return false
 }
