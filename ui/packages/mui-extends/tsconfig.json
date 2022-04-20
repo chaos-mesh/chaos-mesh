@@ -15,7 +15,8 @@
     "experimentalDecorators": true,
     "outDir": "esm",
     "declaration": true,
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "sourceMap": true,
   },
   "include": ["src"]
 }

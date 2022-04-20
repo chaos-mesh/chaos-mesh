@@ -15,45 +15,72 @@
  *
  */
 
-import { FormControl, FormControlLabel, FormHelperText, FormLabel } from '@mui/material'
+import { Box, FormControl, FormControlLabel, FormHelperText, FormLabel } from '@mui/material'
 
 import React from 'react'
+import TextField from '../TextField/index'
 
-export type KVPair<K, V> = {
-  key: K
-  value?: V
-}
-
-export type KVPairListProps<K, V> = {
+export type KVPairListProps = {
+  name: string
+  value: any
   label: string
-  helperText: string
-  error: boolean
-  data: Array<KVPair<K, V>>
-  required: boolean
+  onChange: (event: any) => {}
 }
-export default <K, V>({ label, helperText, error, required, data }: KVPairListProps<K, V>) => {
+export default ({ name, value, label, onChange }: KVPairListProps) => {
+  const data = value
+
+  console.log('rendering kv list pair')
+  console.log('data')
+  console.log(data)
+
+  function fieldChange(k: string, v: any) {
+    onChange(v)
+  }
+
   return (
-    <FormControl error={error} required={required}>
+    <FormControl>
       <FormLabel>{label}</FormLabel>
-      <div>{helperText}</div>
-      {data.map((item) => {
-        return <KVPairRow data={item}></KVPairRow>
-      })}
+
+      {((value) => {
+        const valueCopy = { ...value }
+        var items: JSX.Element[] = []
+        var i = 0
+        for (const k in valueCopy) {
+          const v = valueCopy[k]
+          const item = (
+            <Box key={i} sx={{ display: 'flex' }}>
+              <TextField
+                onChange={(event) => {
+                  var newK = event.target.value
+                  var newData: any = {}
+                  for (const iterK in data) {
+                    if (iterK === k) {
+                      newData[newK] = data[k]
+                    } else {
+                      newData[iterK] = data[iterK]
+                    }
+                  }
+                  event.target.name = newK
+                  fieldChange(newData, event)
+                  console.log(data)
+                  console.log(newData)
+                }}
+                defaultValue={k}
+              ></TextField>
+              <TextField
+                onChange={(event) => {
+                  fieldChange(k, event)
+                }}
+                name={`${name}.${k}`}
+                defaultValue={v}
+              ></TextField>
+            </Box>
+          )
+          items.push(item)
+          i += 1
+        }
+        return <Box>{items}</Box>
+      })(data)}
     </FormControl>
-  )
-}
-
-export type KVPairRowProps<K extends unknown, V extends unknown> = {
-  data: KVPair<K, V>
-  renderKey?: (key: K) => JSX.Element
-  renderValue?: (value?: V) => JSX.Element
-}
-
-export const KVPairRow = <K, V>({ data, renderKey, renderValue }: KVPairRowProps<K, V>) => {
-  return (
-    <>
-      {renderKey != null ? renderKey(data.key) : <div>{data.key}</div>}
-      {renderValue != null ? renderValue(data.value) : <div>{data.value}</div>}
-    </>
   )
 }
