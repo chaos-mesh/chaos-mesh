@@ -210,6 +210,9 @@ func (c *convertImpl) printExprToNewVersion(expr ast.Expr) (string, error) {
 		if _, ok := builtInTypes[t.Name]; ok {
 			return t.Name, nil
 		}
+
+		// we assume this type is defined in current package
+		// TODO: handle the situation where there is a global import
 		return c.hub + "." + t.Name, nil
 	case *ast.SelectorExpr:
 		return types.ExprString(expr), nil
@@ -230,7 +233,7 @@ func (c *convertImpl) printExprToNewVersion(expr ast.Expr) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		newValueTyp, err := c.printExprToNewVersion(t.Key)
+		newValueTyp, err := c.printExprToNewVersion(t.Value)
 		if err != nil {
 			return "", err
 		}
@@ -244,6 +247,8 @@ func (c *convertImpl) printExprToNewVersion(expr ast.Expr) (string, error) {
 func (c *convertImpl) generateTypeConvert(typ string) (string, string, error) {
 	from := ""
 	to := ""
+
+	c.log.Info("generate convert", "type", typ)
 
 	typeDeclare, ok := c.definitionMap[typ]
 	if !ok {
