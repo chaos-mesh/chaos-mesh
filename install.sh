@@ -1707,7 +1707,9 @@ spec:
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.apiVersion: admissionregistration.k8s.io/v1beta1
+# limitations under the License.
+
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: chaos-mesh-mutation
@@ -2129,7 +2131,7 @@ webhooks:
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.// TODO: use named template
+# limitations under the License.
 
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration

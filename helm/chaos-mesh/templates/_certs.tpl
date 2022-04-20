@@ -76,7 +76,7 @@ When using this template, it requires the top-level scope
     {{- /* Generate cert key pair for webhook with 5 year validity duration. */ -}}
     {{- $webhookServerTLSKeypair := .webhookTLSKeypair | default (genSignedCert $webhookName nil (list $webhookName) 1825 $webhookCA) -}}
     {{- $_ := set . "webhookTLSKeypair" $webhookServerTLSKeypair -}}
-    {{- $webhookServerTLSKeypair.Cert -}}
+    {{- $webhookServerTLSKeypair.Key -}}
   {{- end -}}
 {{- end -}}
 
@@ -91,6 +91,7 @@ When using this template, it requires the top-level scope.
     {{- $ca := required "self-signed CA keypair is requried" .selfSignedCAKeypair -}}
     {{- /* Generate cert keypair with CN "chaos-daemon.chaos-mesh.org" and 5 years validity duration if not exists in the current scope.*/ -}}
     {{- $chaosDaemonServerTLSKeypair := .chaosDaemonServerTLSKeypair | default (genSignedCert "chaos-daemon.chaos-mesh.org" nil (list "localhost" "chaos-daemon.chaos-mesh.org") 1825 $ca) -}}
+    {{- $_ := set . "chaosDaemonServerTLSKeypair" $chaosDaemonServerTLSKeypair -}}
     {{- $chaosDaemonServerTLSKeypair.Cert -}}
 {{- end -}}
 
@@ -105,6 +106,7 @@ When using this template, it requires the top-level scope.
     {{- $ca := required "self-signed CA keypair is requried" .selfSignedCAKeypair -}}
     {{- /* Generate cert keypair with CN "chaos-daemon.chaos-mesh.org" and 5 years validity duration if not exists in the current scope.*/ -}}
     {{- $chaosDaemonServerTLSKeypair := .chaosDaemonServerTLSKeypair | default (genSignedCert "chaos-daemon.chaos-mesh.org" nil (list "localhost" "chaos-daemon.chaos-mesh.org") 1825 $ca) -}}
+    {{- $_ := set . "chaosDaemonServerTLSKeypair" $chaosDaemonServerTLSKeypair -}}
     {{- $chaosDaemonServerTLSKeypair.Key -}}
 {{- end -}}
 
@@ -118,8 +120,9 @@ When using this template, it requires the top-level scope.
 {{- define "chaosDaemon.client.certPEM" -}}
     {{- $ca := required "self-signed CA keypair is requried" .selfSignedCAKeypair -}}
     {{- /* Generate cert keypair with CN "controller-manager.chaos-mesh.org" and 5 years validity duration if not exists in the current scope.*/ -}}
-    {{- $chaosDaemonServerTLSKeypair := .chaosDaemonClientTLSKeypair | default (genSignedCert "controller-manager.chaos-mesh.org" nil (list "localhost" "controller-manager.chaos-mesh.org") 1825 $ca) -}}
-    {{- $chaosDaemonServerTLSKeypair.Cert -}}
+    {{- $chaosDaemonClientTLSKeypair := .chaosDaemonClientTLSKeypair | default (genSignedCert "controller-manager.chaos-mesh.org" nil (list "localhost" "controller-manager.chaos-mesh.org") 1825 $ca) -}}
+    {{- $_ := set . "chaosDaemonClientTLSKeypair" $chaosDaemonClientTLSKeypair -}}
+    {{- $chaosDaemonClientTLSKeypair.Cert -}}
 {{- end -}}
 
 {{/*
@@ -132,6 +135,7 @@ When using this template, it requires the top-level scope.
 {{- define "chaosDaemon.client.keyPEM" -}}
     {{- $ca := required "self-signed CA keypair is requried" .selfSignedCAKeypair -}}
     {{- /* Generate cert keypair with CN "controller-manager.chaos-mesh.org" and 5 years validity duration if not exists in the current scope.*/ -}}
-    {{- $chaosDaemonServerTLSKeypair := .chaosDaemonClientTLSKeypair | default (genSignedCert "controller-manager.chaos-mesh.org" nil (list "localhost" "controller-manager.chaos-mesh.org") 1825 $ca) -}}
-    {{- $chaosDaemonServerTLSKeypair.Key -}}
+    {{- $chaosDaemonClientTLSKeypair := .chaosDaemonClientTLSKeypair | default (genSignedCert "controller-manager.chaos-mesh.org" nil (list "localhost" "controller-manager.chaos-mesh.org") 1825 $ca) -}}
+    {{- $_ := set . "chaosDaemonClientTLSKeypair" $chaosDaemonClientTLSKeypair -}}
+    {{- $chaosDaemonClientTLSKeypair.Key -}}
 {{- end -}}
