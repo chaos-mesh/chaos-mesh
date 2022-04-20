@@ -137,7 +137,7 @@ func run(log logr.Logger, version string) error {
 		return false
 	})
 
-	newFile, err := os.OpenFile(filePath, os.O_WRONLY, 0)
+	newFile, err := os.Create(filePath)
 	if err != nil {
 		return errors.Wrapf(err, "open file %s", filePath)
 	}

@@ -24,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/autoconvert"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/create"
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/migrate"
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/registerscheme"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
@@ -43,6 +44,7 @@ func main() {
 	rootCmd.AddCommand(migrate.NewMigrateCmd(rootLogger.WithName("migrate")))
 	rootCmd.AddCommand(autoconvert.NewConvertCmd(rootLogger.WithName("autoconvert")))
 	rootCmd.AddCommand(addoldobjs.NewAddOldObjsCmd(rootLogger.WithName("addoldobjs")))
+	rootCmd.AddCommand(registerscheme.NewRegisterSchemeCmd(rootLogger.WithName("registerscheme")))
 
 	rootCmd.Execute()
 }

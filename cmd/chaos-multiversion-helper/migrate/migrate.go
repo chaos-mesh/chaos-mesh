@@ -16,7 +16,6 @@
 package migrate
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -93,10 +92,6 @@ func run(log logr.Logger, from, to string) error {
 	return nil
 }
 
-func quote(s string) string {
-	return fmt.Sprintf("%q", s)
-}
-
 func migrateFile(log logr.Logger, path string, from string, to string) error {
 	fileSet := token.NewFileSet()
 
@@ -121,18 +116,18 @@ func migrateFile(log logr.Logger, path string, from string, to string) error {
 func migrateAst(log logr.Logger, fileAst *ast.File, from string, to string) bool {
 	needMigrate := false
 	for _, imp := range fileAst.Imports {
-		if imp.Path.Value == quote(common.ChaosMeshAPIPrefix+from) {
+		if imp.Path.Value == common.Quote(common.ChaosMeshAPIPrefix+from) {
 			if imp.Name == nil {
-				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
+				imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
 
 				needMigrate = true
 			} else if imp.Name.Name == from {
-				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
+				imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
 				imp.Name.Name = to
 
 				needMigrate = true
 			} else {
-				imp.Path.Value = quote(common.ChaosMeshAPIPrefix + to)
+				imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
 				// don't need to migrate, because this package is called by alias
 			}
 		}

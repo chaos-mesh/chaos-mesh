@@ -237,6 +237,17 @@ bin/chaos-multiversion-helper: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-multiversion-helper: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-multiversion-helper ./cmd/chaos-multiversion-helper/
 
+migrate-version: SHELL:=$(RUN_IN_DEV_SHELL)
+migrate-version: bin/chaos-multiversion-helper
+	./bin/chaos-multiversion-helper create --from $(OLD_VERSION) --to $(NEW_VERSION) --as-storage-version
+	./bin/chaos-multiversion-helper migrate --from $(OLD_VERSION) --to $(NEW_VERSION)
+	./bin/chaos-multiversion-helper autoconvert --version $(OLD_VERSION) --hub $(NEW_VERSION)
+	./bin/chaos-multiversion-helper addoldobjs --version $(OLD_VERSION)
+	sed -i "s/$(OLD_VERSION)/$(NEW_VERSION)/g" pkg/ctrl/server/schema.graphqls
+	sed -i "s/$(OLD_VERSION)/$(NEW_VERSION)/g" cmd/chaos-builder/version.go
+	sed -i "s/$(OLD_VERSION)/$(NEW_VERSION)/g" api/$(NEW_VERSION)/groupversion_info.go
+	./bin/chaos-multiversion-helper registerscheme --version $(OLD_VERSION)
+
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
