@@ -11,11 +11,12 @@ jobs:
   must-update-changelog:
     name: "Must Update CHANGELOG"
     runs-on: "ubuntu-latest"
+    env:
+      LABEL_EXISTS: ${{ contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
     steps:
       - name: "Skip if label exists"
         id: "skip-if-label-exists"
-        env:
-          LABEL_EXISTS: ${{ contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
+
         run: |
           if [ "${LABEL_EXISTS}" = "true" ] ; then
             echo "no-need-update-changelog exists, skipping this check"
@@ -23,7 +24,7 @@ jobs:
           fi
       - name: "Collect changes"
         id: "collect-changes"
-        if: ${{ ! contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
+        if: ${{ ! fromJSON(env.LABEL_EXISTS) }}
         uses: dorny/paths-filter@v2
         with:
           filters: |
@@ -31,8 +32,8 @@ jobs:
             - CHANGELOG.md
       - name: "Make sure CHANGELOG.md is updated"
         id: "check-changelog"
-        if: ${{ ! contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
-        env: 
+        if: ${{ ! fromJSON(env.LABEL_EXISTS) }}
+        env:
           CHANGELOG_UPDATED: ${{ steps.collect-changes.outputs.changelog }}
         run: |
           if [ "${CHANGELOG_UPDATED}" = "true" ] ; then
