@@ -141,7 +141,7 @@ jobs:
           minikube image load ./output/saved-images/chaos-mesh.tgz
           minikube image load ./output/saved-images/e2e-helper.tgz
       - name: Setup Helm
-        uses: azure/setup-helm@0a86c98d612a24c96624184aa6db2acbc98ac9ee
+        uses: azure/setup-helm@v2.1
       - name: Setup Kubectl
         uses: azure/setup-kubectl@v2.0
         with:
