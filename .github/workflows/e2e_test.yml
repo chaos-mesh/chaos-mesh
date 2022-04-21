@@ -29,6 +29,11 @@ jobs:
           # whose target is the branch)
           key: e2e-image-build-cache-${{ runner.os }}
 
+      # TODO: install the buildx on runner image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        if: ${{ matrix.arch == "aarch64" }}
+
       - name: build e2e images
         env:
           DOCKER_CACHE: 1
