@@ -27,7 +27,7 @@ jobs:
           # don't worry about the branch, the github cache
           # is only accessible in the same branch (or a pull_request
           # whose target is the branch)
-          key: e2e-image-build-cache-${{ runner.os }}
+          key: e2e-image-build-cache-${{ runner.os }}-${{ matrix.arch }}
 
       - name: build e2e images
         env:
@@ -67,7 +67,7 @@ jobs:
         uses: martijnhols/actions-cache/restore@main
         with:
           path: cache
-          key: e2e-binary-build-cache-${{ runner.os }}
+          key: e2e-binary-build-cache-${{ runner.os }}-${{ matrix.arch }}
       - name: build e2e binary
         env:
           DOCKER_CACHE: 1
@@ -142,6 +142,10 @@ jobs:
           minikube image load ./output/saved-images/e2e-helper.tgz
       - name: Setup Helm
         uses: azure/setup-helm@v1
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: ${{ matrix.kubernetes-version }}
       - name: Install Chaos Mesh
         run: |
           # if kubernetes does not support apiextensions.k8s.io/v1, fallback to apiextensions.k8s.io/v1beta1

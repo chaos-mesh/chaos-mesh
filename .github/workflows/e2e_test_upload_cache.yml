@@ -8,7 +8,10 @@ on:
       - release-*
 jobs:
   build-image:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    runs-on: ${{ fromJson('{"x86_64":"ubuntu-latest", "aarch64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -25,10 +28,13 @@ jobs:
         uses: martijnhols/actions-cache/save@main
         with:
           path: cache
-          key: e2e-image-build-cache-${{ runner.os }}
+          key: e2e-image-build-cache-${{ runner.os }}-${{ matrix.arch }}
 
   build-e2e-binary:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    runs-on: ${{ fromJson('{"x86_64":"ubuntu-latest", "aarch64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -43,5 +49,5 @@ jobs:
         uses: martijnhols/actions-cache/save@main
         with:
           path: cache
-          key: e2e-binary-build-cache-${{ runner.os }}
+          key: e2e-binary-build-cache-${{ runner.os }}-${{ matrix.arch }}
 
