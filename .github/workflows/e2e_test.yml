@@ -6,9 +6,13 @@ on:
     branches:
       - master
       - release-*
+
 jobs:
   build-image:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    runs-on: ${{ fromJson('{"x86_64":"ubuntu-latest", "aarch64":["self-hosted", "ARM64"]}')[matrix.arch] }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -46,12 +50,15 @@ jobs:
       - name: upload saved images
         uses: actions/upload-artifact@v2
         with:
-          name: saved-images
+          name: saved-images ${{ matrix.arch }}
           path: ./output/saved-images
           retention-days: 7
 
   build-e2e-binary:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+    runs-on: ${{ fromJson('{"x86_64":"ubuntu-latest", "aarch64":["self-hosted", "ARM64"]}')[matrix.arch] }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -71,7 +78,7 @@ jobs:
       - name: upload e2e binary
         uses: actions/upload-artifact@v2
         with:
-          name: e2e-binary
+          name: e2e-binary ${{ matrix.arch }}
           path: ./e2e-test/image/e2e/bin
           retention-days: 7
 
@@ -79,10 +86,10 @@ jobs:
     needs:
       - build-image
       - build-e2e-binary
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        arch: [x86_64, aarch64]
         kubernetes-version:
           - v1.15.12
           - v1.20.15
@@ -98,18 +105,19 @@ jobs:
           - '[Basic] [NetworkChaos]'
           - '[Basic] [DNSChaos]'
           - '[Basic] [StressChaos]'
+    runs-on: ${{ fromJson('{"x86_64":"ubuntu-latest", "aarch64":["self-hosted", "ARM64"]}')[matrix.arch] }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
       - name: download saved images
         uses: actions/download-artifact@v2
         with:
-          name: saved-images
+          name: saved-images ${{ matrix.arch }}
           path: ./output/saved-images
       - name: download e2e binary
         uses: actions/download-artifact@v2
         with:
-          name: e2e-binary
+          name: e2e-binary ${{ matrix.arch }}
           path: ./output/e2e-binary
       - name: move e2e binary
         run: |
