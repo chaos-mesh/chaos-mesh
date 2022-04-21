@@ -46,3 +46,5 @@ docker environment:
 ```
 OLD_VERSION="v1alpha1" NEW_VERSION="v1alpha2" make migrate-version
 ```
+
+Before running this command, it's highly suggested to commit all your changes and start a new revision to migrate the version. If you faced any error during the process, you could clean the code base through `git add * && git reset --hard` and retry.
