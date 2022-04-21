@@ -36,7 +36,12 @@ new version of api from the original `v1alpha1`.
 7. Modify the groupversion_info in api/v1alpha2 from `v1alpha1` to `v1alpha2`
 8. Add old scheme to the `cmd/chaos-controller-manager/provider/controller.go`
 
-Or, you can use a single command:
+The former commands should work with a GNU toolchain, and have been proved to
+**NOT** work on Mac OS. If you are a developer with Mac OS environment, please 
+execute these commands in dev-env docker image.
+
+Or, you can use a single command, which will run the former tasks in the dev-env
+docker environment:
 
 ```
 OLD_VERSION="v1alpha1" NEW_VERSION="v1alpha2" make migrate-version
