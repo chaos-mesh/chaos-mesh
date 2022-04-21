@@ -32,7 +32,7 @@ spec:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
-        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/ -}}
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
         {{- if .Values.chaosDaemon.mtls.enabled }}
         rollme: {{ randAlphaNum 5 | quote }}
         {{- end }}
