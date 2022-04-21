@@ -157,12 +157,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		EnterNS:   true,
 	})
 	if err != nil {
+		err = errors.Errorf("fialed to apply for pod %s/%s, error: %v", pod.Namespace, pod.Name, err)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
 
 	if res.StatusCode != http.StatusOK {
-		err = errors.Errorf("status(%d), apply fail: %s", res.StatusCode, res.Error)
+		err = errors.Errorf("fialed to apply for pod %s/%s, status(%d), error: %s",
+			pod.Namespace, pod.Name, res.StatusCode, res.Error)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
