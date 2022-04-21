@@ -82,6 +82,17 @@ func setHub(hub string) error {
 
 	hubFile.WriteString(common.Boilerplate + "\n")
 	hubFile.WriteString("package " + hub + "\n\n")
+
+	hubFile.WriteString(`
+	import (
+		"sigs.k8s.io/controller-runtime/pkg/conversion"
+	)
+	`)
+
+	for _, typ := range hubTypes {
+		hubFile.WriteString("var _ conversion.Hub = &" + typ + "{}\n\n")
+	}
+
 	for _, typ := range hubTypes {
 		hubFile.WriteString("func (*" + typ + ") Hub() {}\n\n")
 	}

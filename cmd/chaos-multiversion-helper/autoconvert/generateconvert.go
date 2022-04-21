@@ -146,6 +146,10 @@ import (
 )
 	`)
 
+	for typ := range hubTypes {
+		convertFile.WriteString("var _ conversion.Convertible = &" + typ + "{}\n\n")
+	}
+
 	return c.types.forEach(func(typ string) error {
 		from, to, err := c.generateTypeConvert(typ)
 		if err != nil {
