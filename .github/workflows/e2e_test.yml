@@ -127,7 +127,7 @@ jobs:
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
       - name: Setup minikube
-        uses: manusa/actions-setup-minikube@v2.4.3
+        uses: YangKeao/actions-setup-minikube@support-arm
         with:
           driver: docker
           minikube version: v1.24.0
