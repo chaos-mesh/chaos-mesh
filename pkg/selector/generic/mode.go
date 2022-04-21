@@ -67,7 +67,8 @@ func FilterObjectsByMode(mode v1alpha1.SelectorMode, value string, count int) ([
 			return nil, errors.Errorf("fixed percentage value of %d is invalid, Must be (0,100]", percentage)
 		}
 
-		num := int(math.Floor(float64(count) * float64(percentage) / 100))
+		// at least one object should be selected
+		num := int(math.Ceil(float64(count) * float64(percentage) / 100))
 
 		return RandomFixedIndexes(0, uint(count), uint(num)), nil
 	case v1alpha1.RandomMaxPercentMode:
@@ -85,7 +86,7 @@ func FilterObjectsByMode(mode v1alpha1.SelectorMode, value string, count int) ([
 		}
 
 		percentage := getRandomNumber(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
-		num := int(math.Floor(float64(count) * float64(percentage) / 100))
+		num := int(math.Ceil(float64(count) * float64(percentage) / 100))
 
 		return RandomFixedIndexes(0, uint(count), uint(num)), nil
 	default:

@@ -23,6 +23,7 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
@@ -51,13 +52,9 @@ var _ = BeforeSuite(func(done Done) {
 // http://onsi.github.io/ginkgo to learn more.
 
 var _ = Describe("ModifyTime", func() {
-
-	// TODO: use logger with GinkgoWriter
+	var t *timer.Timer
 	logger, err := log.NewDefaultZapLogger()
 	Expect(err).ShouldNot(HaveOccurred())
-
-	var t *timer.Timer
-
 	BeforeEach(func() {
 		var err error
 
@@ -72,14 +69,17 @@ var _ = Describe("ModifyTime", func() {
 
 	Context("Modify Time", func() {
 		It("should move forward successfully", func() {
+
 			Expect(t).NotTo(BeNil())
+			s, err := GetSkew(logger, NewConfig(10000, 0, 1))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			now, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), 10000, 0, 1, logger)
+			err = s.Inject(tasks.SysPID(t.Pid()))
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
@@ -88,43 +88,50 @@ var _ = Describe("ModifyTime", func() {
 			newSec := newTime.Unix()
 
 			Expect(newSec-sec).Should(BeNumerically(">=", 10000), "sec %d newSec %d", sec, newSec)
+			Expect(newSec-sec).Should(BeNumerically("<=", 10010), "sec %d newSec %d", sec, newSec)
 		})
 
 		It("should move backward successfully", func() {
 			Expect(t).NotTo(BeNil())
+			s, err := GetSkew(logger, NewConfig(10000, 0, 1))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+			err = s.Inject(tasks.SysPID(t.Pid()))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			now, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), -10000, 0, 1, logger)
+			err = s.Recover(tasks.SysPID(t.Pid()))
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newSec := newTime.Unix()
-
 			Expect(10000-(sec-newSec)).Should(BeNumerically("<=", 1), "sec %d newSec %d", sec, newSec)
 		})
 
 		It("should handle nsec overflow", func() {
 			Expect(t).NotTo(BeNil())
 
+			s, err := GetSkew(logger, NewConfig(0, 1000000000, 1))
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
 			now, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), 0, 1000000000, 1, logger)
+			err = s.Inject(tasks.SysPID(t.Pid()))
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newSec := newTime.Unix()
-
 			Expect(newSec-sec).Should(BeNumerically(">=", 1), "sec %d newSec %d", sec, newSec)
 		})
 	})
