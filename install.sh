@@ -1411,8 +1411,7 @@ spec:
         app.kubernetes.io/part-of: chaos-mesh
         app.kubernetes.io/version: v0.9.0
         app.kubernetes.io/component: controller-manager
-      annotations:
-        rollme: "install.sh"
+      annotations:rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
@@ -1474,6 +1473,16 @@ spec:
             value: "false"
           - name: CHAOSD_SECURITY_MODE
             value: "false"
+          - name: CHAOS_DAEMON_CLIENT_CERT
+            value: /etc/chaos-daemon/cert/tls.crt
+          - name: CHAOS_DAEMON_CLIENT_KEY
+            value: /etc/chaos-daemon/cert/tls.key
+          - name: CHAOS_MESH_CA_CERT
+            value: /etc/chaos-daemon/cert/ca.crt
+          - name: QPS
+            value: "30"
+          - name: BURST
+            value: "50"
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
           - name: ENABLE_LEADER_ELECTION
