@@ -178,14 +178,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}-${{ matrix.arch }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}-${{ matrix.arch }}
           path: "**/*.xml"
           retention-days: 7
   pass:
