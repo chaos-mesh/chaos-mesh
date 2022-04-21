@@ -38,12 +38,8 @@ func NewCreateCmd(log logr.Logger) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "create --from <old-version> --to <new-version>",
 		Short: "Create a new version of chaos api",
-		Run: func(cmd *cobra.Command, args []string) {
-			err := run(log, from, to, asStorageVersion)
-			if err != nil {
-				log.Error(err, "create new version")
-				os.Exit(1)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(log, from, to, asStorageVersion)
 		},
 	}
 

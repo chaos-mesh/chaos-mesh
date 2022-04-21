@@ -37,13 +37,8 @@ func NewAddOldObjsCmd(log logr.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "addoldobjs --version <version>",
 		Short: "Automatically add the old version objs to `cmd/chaos-controller-manager/provider/convert.go`",
-		Run: func(cmd *cobra.Command, args []string) {
-			err := run(log, version)
-			if err != nil {
-				log.Error(err, "add old objects")
-				os.Exit(1)
-			}
-			log.Info("register convert webhook of oldobjs to controller successfully")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(log, version)
 		},
 	}
 

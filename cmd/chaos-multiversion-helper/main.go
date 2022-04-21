@@ -17,6 +17,7 @@ package main
 
 import (
 	stdlog "log"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -46,5 +47,10 @@ func main() {
 	rootCmd.AddCommand(addoldobjs.NewAddOldObjsCmd(rootLogger.WithName("addoldobjs")))
 	rootCmd.AddCommand(registerscheme.NewRegisterSchemeCmd(rootLogger.WithName("registerscheme")))
 
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		rootLogger.Error(err, "execute command")
+		os.Exit(1)
+	}
+
+	rootLogger.Info("execute command successfully")
 }

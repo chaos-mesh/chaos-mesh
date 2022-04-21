@@ -37,12 +37,8 @@ func NewConvertCmd(log logr.Logger) *cobra.Command {
 		3. generate ConvertTo and ConvertFrom function for the <version>, and assume it has 
 			a type which is deeply the same with the <hub-version>.
 		`,
-		Run: func(cmd *cobra.Command, args []string) {
-			err := run(log, version, hub)
-			if err != nil {
-				log.Error(err, "generate convert and hub")
-				os.Exit(1)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(log, version, hub)
 		},
 	}
 

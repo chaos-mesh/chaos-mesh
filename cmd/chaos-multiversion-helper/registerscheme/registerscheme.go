@@ -34,13 +34,8 @@ func NewRegisterSchemeCmd(log logr.Logger) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "registerscheme --version <version>",
 		Short: "Automatically add the scheme to `cmd/chaos-controller-manager/provider/controller.go`",
-		Run: func(cmd *cobra.Command, args []string) {
-			err := run(log, version)
-			if err != nil {
-				log.Error(err, "add scheme")
-				os.Exit(1)
-			}
-			log.Info("add scheme successfully")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(log, version)
 		},
 	}
 
