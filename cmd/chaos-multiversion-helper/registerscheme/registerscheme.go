@@ -22,10 +22,11 @@ import (
 	"go/token"
 	"os"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
 func NewRegisterSchemeCmd(log logr.Logger) *cobra.Command {
