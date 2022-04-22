@@ -158,7 +158,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		EnterNS:   true,
 	})
 	if err != nil {
-		err = errors.Errorf("fialed to apply for pod %s/%s, error: %v", pod.Namespace, pod.Name, err)
+		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
