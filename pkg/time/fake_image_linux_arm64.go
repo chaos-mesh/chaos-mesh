@@ -19,7 +19,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 )
 
