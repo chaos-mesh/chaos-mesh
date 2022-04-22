@@ -48,6 +48,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
 )
 
@@ -68,7 +69,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		clientRawConfig, err := e2econfig.LoadClientRawConfig()
 		framework.ExpectNoError(err, "failed to load raw config")
-		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true)
+		logger, err := log.NewDefaultZapLogger()
+		framework.ExpectNoError(err, "failed to create logger")
+		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true, logger)
 		framework.ExpectNoError(err, "failed to create port forwarder")
 		fwCancel = cancel
 		kubeCli = f.ClientSet

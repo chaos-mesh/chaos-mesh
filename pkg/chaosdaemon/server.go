@@ -85,8 +85,8 @@ type DaemonServer struct {
 	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
 	tproxyLocker *sync.Map
 
-	IPSetLocker      *locker.Locker
-	TimeChaosManager tasks.TaskManager
+	IPSetLocker     *locker.Locker
+	timeChaosServer TimeChaosServer
 }
 
 func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
@@ -109,8 +109,13 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
-		TimeChaosManager:         tasks.NewTaskManager(log),
 		rootLogger:               log,
+		timeChaosServer: TimeChaosServer{
+			podContainerNameProcessMap: tasks.NewPodProcessMap(),
+			manager:                    tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
+			nameLocker:                 tasks.NewLockMap[tasks.PodContainerName](),
+			logger:                     logr.New(log.GetSink()).WithName("TimeChaos"),
+		},
 	}
 }
 
