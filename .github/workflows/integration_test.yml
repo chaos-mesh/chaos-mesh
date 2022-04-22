@@ -19,6 +19,9 @@ jobs:
 
       - name: Create kind cluster
         uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
+        with:
+          kubectl_version: v1.23.1
+
       - uses: actions/setup-python@v2
         if: ${{ matrix.arch != 'aarch64' }} # We can assume the self-hosted aarch64 has a functional python
 
