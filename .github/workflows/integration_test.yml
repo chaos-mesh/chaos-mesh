@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 2
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.2.0
+        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
       - uses: actions/setup-python@v2
       - uses: actions/setup-go@v2
         with:

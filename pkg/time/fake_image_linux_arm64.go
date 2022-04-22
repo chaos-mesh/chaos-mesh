@@ -52,11 +52,9 @@ func NewFakeImage(symbolName string, content []byte, offset map[string]int, logg
 }
 
 func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err error) {
-	return cerr.NotImplemented("fake image arm64")
 	return errors.New("fake image arm64")
 }
 
 func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
-	return cerr.NotImplemented("fake image arm64")
 	return errors.New("fake image arm64")
 }
