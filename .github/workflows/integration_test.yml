@@ -17,6 +17,11 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: v1.23.4
+  
       - name: Create kind cluster
         uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
       - uses: actions/setup-python@v2
