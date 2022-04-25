@@ -44,8 +44,16 @@ func NewConvertCmd(log logr.Logger) *cobra.Command {
 	cmd.Flags().StringVar(&version, "version", "", "the version to generate the convert")
 	cmd.Flags().StringVar(&hub, "hub", "", "the hub version")
 
-	cmd.MarkFlagRequired("version")
-	cmd.MarkFlagRequired("hub")
+	err := cmd.MarkFlagRequired("version")
+	if err != nil {
+		log.Error(errors.WithStack(err), "fail to mark 'version' as required")
+		panic("unreachable")
+	}
+	err = cmd.MarkFlagRequired("hub")
+	if err != nil {
+		log.Error(errors.WithStack(err), "fail to mark 'hub' as required")
+		panic("unreachable")
+	}
 
 	return cmd
 }

@@ -43,7 +43,11 @@ func NewAddOldObjsCmd(log logr.Logger) *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&version, "version", "", "the version to iterate and add to convert")
-	cmd.MarkFlagRequired("version")
+	err := cmd.MarkFlagRequired("version")
+	if err != nil {
+		log.Error(errors.WithStack(err), "fail to mark 'version' as required")
+		panic("unreachable")
+	}
 
 	return cmd
 }

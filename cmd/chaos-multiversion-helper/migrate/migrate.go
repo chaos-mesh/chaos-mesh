@@ -44,8 +44,16 @@ func NewMigrateCmd(log logr.Logger) *cobra.Command {
 	cmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
 	cmd.Flags().StringVar(&to, "to", "", "new version of chaos api")
 
-	cmd.MarkFlagRequired("from")
-	cmd.MarkFlagRequired("to")
+	err := cmd.MarkFlagRequired("from")
+	if err != nil {
+		log.Error(errors.WithStack(err), "fail to mark 'from' as required")
+		panic("unreachable")
+	}
+	err = cmd.MarkFlagRequired("to")
+	if err != nil {
+		log.Error(errors.WithStack(err), "fail to mark 'to' as required")
+		panic("unreachable")
+	}
 
 	return cmd
 }
