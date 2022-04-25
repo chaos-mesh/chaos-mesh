@@ -91,6 +91,7 @@ func run(log logr.Logger, version string) error {
 				if !ok {
 					err := errors.New("oldObjs is not a slice")
 					log.Error(err, "oldObjs is not a slice")
+					return false
 				}
 
 				included := map[string]struct{}{}
