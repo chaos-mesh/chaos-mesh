@@ -94,7 +94,11 @@ func run(log logr.Logger, version string) error {
 					return false
 				}
 
-				included := map[string]struct{}{}
+				type includedKey struct {
+					version string
+					typ     string
+				}
+				included := map[includedKey]struct{}{}
 				for _, elt := range sliceLit.Elts {
 					referenceExpr, ok := elt.(*ast.UnaryExpr)
 					if !ok {
@@ -107,13 +111,20 @@ func run(log logr.Logger, version string) error {
 								continue
 							}
 
-							typeName := structLit.Type.(*ast.SelectorExpr).Sel.Name
-							included[typeName] = struct{}{}
+							typ := structLit.Type.(*ast.SelectorExpr)
+							typeName := typ.Sel.Name
+							included[includedKey{
+								version: typ.X.(*ast.Ident).Name,
+								typ:     typeName,
+							}] = struct{}{}
 						}
 					}
 				}
 				for _, typ := range types {
-					if _, ok := included[typ]; !ok {
+					if _, ok := included[includedKey{
+						version,
+						typ,
+					}]; !ok {
 						sliceLit.Elts = append(sliceLit.Elts, &ast.UnaryExpr{
 							Op: token.AND,
 							X: &ast.CompositeLit{
