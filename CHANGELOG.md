@@ -15,7 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Removed docker registry mirror [#2797](https://github.com/chaos-mesh/chaos-mesh/pull/2797)
-- Must update CHANGELOG [#3148](https://github.com/chaos-mesh/chaos-mesh/pull/3148)
+- Must update CHANGELOG [#3182](https://github.com/chaos-mesh/chaos-mesh/pull/3182)
 
 ### Deprecated
 
