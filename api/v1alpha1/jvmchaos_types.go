@@ -72,6 +72,8 @@ type JVMParameter struct {
 
 	JVMStressCfgSpec `json:",inline"`
 
+	JVMMySQLSpec `json:",inline"`
+
 	// +optional
 	// byteman rule name, should be unique, and will generate one if not set
 	Name string `json:"name"`
