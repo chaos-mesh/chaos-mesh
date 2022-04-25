@@ -168,4 +168,4 @@ subjects:
   - kind: ServiceAccount
     name: {{ .Values.controllerManager.serviceAccount }}
     namespace: {{ .Release.Namespace | quote }}
-  {{- end }}
+{{- end }}
