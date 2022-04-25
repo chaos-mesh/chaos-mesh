@@ -30,7 +30,6 @@ import (
 )
 
 var _ = Describe("webhook inject", func() {
-	i := Injector{}
 
 	Context("Inject", func() {
 		It("should return unexpected end of JSON input", func() {
@@ -71,8 +70,15 @@ var _ = Describe("webhook inject", func() {
 		It("should return false", func() {
 			var metadata metav1.ObjectMeta
 			metadata.Annotations = make(map[string]string)
-			var cfg config.Config
-			str, flag := i.injectByPodRequired(&metadata, &cfg)
+			var testClient client.Client
+			var controllerCfg *controllerCfg.ChaosControllerConfig
+			var cfg *config.Config
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, cfg, controllerCfg, metrics, logger)
+			str, flag := i.injectByPodRequired(&metadata, cfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -81,9 +87,16 @@ var _ = Describe("webhook inject", func() {
 			var metadata metav1.ObjectMeta
 			metadata.Annotations = make(map[string]string)
 			metadata.Annotations["testNamespace/request"] = "test"
-			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg *controllerCfg.ChaosControllerConfig
+			var cfg *config.Config
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
 			cfg.AnnotationNamespace = "testNamespace"
-			str, flag := i.injectByPodRequired(&metadata, &cfg)
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, cfg, controllerCfg, metrics, logger)
+			str, flag := i.injectByPodRequired(&metadata, cfg)
 			Expect(str).To(Equal("test"))
 			Expect(flag).To(Equal(true))
 		})
@@ -97,6 +110,11 @@ var _ = Describe("webhook inject", func() {
 			var cli client.Client
 			var cfg config.Config
 			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(cli, &cfg, &controllerCfg, metrics, logger)
 			str, flag := i.injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
@@ -110,6 +128,11 @@ var _ = Describe("webhook inject", func() {
 			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(cli, &cfg, &controllerCfg, metrics, logger)
 			str, flag := i.injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
@@ -123,6 +146,11 @@ var _ = Describe("webhook inject", func() {
 			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(cli, &cfg, &controllerCfg, metrics, logger)
 			str, flag := i.injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
@@ -133,9 +161,15 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			metadata.Annotations["testNamespace/request"] = "test"
 			metadata.Namespace = "testNamespace"
+			var testClient client.Client
 			var cfg config.Config
 			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
 			cfg.AnnotationNamespace = "testNamespace"
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			str, flag := i.injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
 			Expect(str).To(Equal("test"))
 			Expect(flag).To(Equal(true))
@@ -146,6 +180,12 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			var cfg config.Config
 			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			var testClient client.Client
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			_, flag := i.injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
 			Expect(flag).To(Equal(false))
 		})
@@ -157,6 +197,13 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			metadata.Namespace = "testNamespace"
 			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			str, flag := i.injectByNamespaceRequired(&metadata, k8sClient, &cfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
@@ -168,7 +215,15 @@ var _ = Describe("webhook inject", func() {
 			var pod corev1.Pod
 			var inj config.InjectionConfig
 			annotations := make(map[string]string)
-			_, err := i.createPatch(&pod, &inj, annotations)
+			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
+			_, err = i.createPatch(&pod, &inj, annotations)
 			Expect(err).To(BeNil())
 		})
 	})
@@ -180,6 +235,14 @@ var _ = Describe("webhook inject", func() {
 					Name: "testContainerName",
 				}}
 			postStart := make(map[string]config.ExecAction)
+			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			patch := i.setCommands(target, postStart)
 			Expect(patch).To(BeNil())
 		})
@@ -194,6 +257,14 @@ var _ = Describe("webhook inject", func() {
 				Command: []string{"nil"},
 			}
 			postStart["testContainerName"] = ce
+			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			patch := i.setCommands(target, postStart)
 			Expect(patch).ToNot(BeNil())
 		})
@@ -261,6 +332,14 @@ var _ = Describe("webhook inject", func() {
 					Name: "testContainerName",
 				}}
 			basePath := "/test"
+			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			patch := i.addContainers(target, added, basePath)
 			Expect(patch).ToNot(BeNil())
 		})
@@ -272,6 +351,14 @@ var _ = Describe("webhook inject", func() {
 					Name: "testContainerName",
 				}}
 			basePath := "/test"
+			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			patch := i.addContainers(target, added, basePath)
 			Expect(patch).ToNot(BeNil())
 		})
@@ -320,6 +407,14 @@ var _ = Describe("webhook inject", func() {
 					Name: "test",
 				}}
 			basePath := "/test"
+			var cfg config.Config
+			var testClient client.Client
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			var metrics *metrics.ChaosControllerManagerMetricsCollector
+			logger, err := log.NewDefaultZapLogger()
+			Expect(err).ToNot(HaveOccurred())
+
+			i := NewInjector(testClient, &cfg, &controllerCfg, metrics, logger)
 			patch := i.setVolumeMounts(target, added, basePath)
 			Expect(patch).ToNot(BeNil())
 		})
