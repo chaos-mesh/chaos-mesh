@@ -243,12 +243,38 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 		bytemanTemplateSpec.Bind = "flag:boolean=true"
 		bytemanTemplateSpec.Condition = "true"
 		bytemanTemplateSpec.Do = "gc()"
+	case v1alpha1.JVMMySQLAction:
+		var mysqlException string
+		bytemanTemplateSpec.Helper = SQLHelper
+		// the first parameter of matchDBTable is the database which the SQL execute in, because the SQL may not contain database, for example: select * from t1;
+		// can't get the database information now, so use a "" instead
+		// TODO: get the database information and fill it in matchDBTable function
+		bytemanTemplateSpec.Bind = fmt.Sprintf("flag:boolean=matchDBTable(\"\", $2, \"%s\", \"%s\", \"%s\")", attack.Database, attack.Table, attack.SQLType)
+		bytemanTemplateSpec.Condition = "flag"
+		if attack.MySQLConnectorVersion == "5" {
+			bytemanTemplateSpec.Class = MySQL5InjectClass
+			bytemanTemplateSpec.Method = MySQL5InjectMethod
+			mysqlException = MySQL5Exception
+		} else if attack.MySQLConnectorVersion == "8" {
+			bytemanTemplateSpec.Class = MySQL8InjectClass
+			bytemanTemplateSpec.Method = MySQL8InjectMethod
+			mysqlException = MySQL8Exception
+		} else {
+			return "", errors.Errorf("mysql connector version %s is not supported", attack.MySQLConnectorVersion)
+		}
+
+		if len(attack.ThrowException) > 0 {
+			exception := fmt.Sprintf(mysqlException, attack.ThrowException)
+			bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", exception)
+		} else if attack.LatencyDuration > 0 {
+			bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", attack.LatencyDuration)
+		}
 	}
 
 	buf := new(bytes.Buffer)
 	var t *template.Template
 	switch spec.Action {
-	case v1alpha1.JVMStressAction, v1alpha1.JVMGCAction:
+	case v1alpha1.JVMStressAction, v1alpha1.JVMGCAction, v1alpha1.JVMMySQLAction:
 		t = template.Must(template.New("byteman rule").Parse(CompleteRuleTemplate))
 	case v1alpha1.JVMExceptionAction, v1alpha1.JVMLatencyAction, v1alpha1.JVMReturnAction:
 		t = template.Must(template.New("byteman rule").Parse(SimpleRuleTemplate))
