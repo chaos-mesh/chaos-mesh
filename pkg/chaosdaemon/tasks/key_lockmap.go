@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,33 @@
 // limitations under the License.
 //
 
-package time
+package tasks
 
-// FakeClockInjector could modify the time of certain process.
-// TODO: rename this interface, it brings confusing with .c files under pkg/time/fakeclock.
-type FakeClockInjector interface {
-	Inject(pid int) error
-	Recover(pid int) error
+import "sync"
+
+type LockMap[K comparable] struct {
+	sync.Map
+}
+
+func NewLockMap[K comparable]() LockMap[K] {
+	return LockMap[K]{
+		sync.Map{},
+	}
+}
+
+func (l *LockMap[K]) Lock(key K) func() {
+	value, _ := l.LoadOrStore(key, &sync.Mutex{})
+	mtx := value.(*sync.Mutex)
+	mtx.Lock()
+
+	return func() {
+		if mtx != nil {
+			mtx.Unlock()
+		}
+	}
+}
+
+// Del :TODO: Fix bug on deleting a using value
+func (l *LockMap[K]) Del(key K) {
+	l.Delete(key)
 }

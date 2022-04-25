@@ -1,4 +1,4 @@
-// Copyright 2022 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,12 @@
 
 package time
 
-import "github.com/go-logr/logr"
+import (
+	"github.com/go-logr/logr"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+)
 
 // vdsoEntryName is the name of the vDSO entry
 const vdsoEntryName = "[vdso]"
@@ -30,10 +35,20 @@ type FakeImage struct {
 	// offset stores the table with variable name, and it's address in content.
 	// the key presents extern variable name, ths value is the address/offset within the content.
 	offset map[string]int
+	// OriginFuncCode stores the raw func code like getTimeOfDay & ClockGetTime.
+	OriginFuncCode []byte
+	// OriginAddress stores the origin address of OriginFuncCode.
+	OriginAddress uint64
+	// fakeEntry stores the fake entry
+	fakeEntry *mapreader.Entry
 
 	logger logr.Logger
 }
 
-func NewFakeImage(symbolName string, content []byte, offset map[string]int, logger logr.Logger) *FakeImage {
-	return &FakeImage{symbolName: symbolName, content: content, offset: offset, logger: logger}
+func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err error) {
+	return cerr.NotImplemented("fake image arm64")
+}
+
+func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
+	return cerr.NotImplemented("fake image arm64")
 }
