@@ -18,6 +18,7 @@ package store
 import (
 	"context"
 
+	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -48,7 +49,7 @@ var (
 )
 
 // NewDBStore returns a new gorm.DB
-func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*gorm.DB, error) {
+func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {
 	ds := conf.Database.Datasource
 
 	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
@@ -58,6 +59,7 @@ func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*gorm.DB, e
 
 	gormDB, err := gorm.Open(conf.Database.Driver, ds)
 	if err != nil {
+		logger.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver)
 		return nil, err
 	}
 
