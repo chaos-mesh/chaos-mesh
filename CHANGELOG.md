@@ -56,6 +56,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Specify image tag in e2e tests [#3147](https://github.com/chaos-mesh/chaos-mesh/pull/3147)
 - Must update CHANGELOG [#3148](https://github.com/chaos-mesh/chaos-mesh/pull/3148)
 - Use chaosDaemon.mtls.enabled instead of dashboard.securityMode for chaos-daemon mtls [#3168](https://github.com/chaos-mesh/chaos-mesh/pull/3168)
+- Helm charts: component chaos-dashboard use certain service account and roles [#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)
 
 ### Deprecated
 
