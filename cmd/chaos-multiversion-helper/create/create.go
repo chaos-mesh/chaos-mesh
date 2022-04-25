@@ -45,7 +45,7 @@ func NewCreateCmd(log logr.Logger) *cobra.Command {
 
 	cmd.Flags().StringVar(&from, "from", "", "old version of chaos api")
 	cmd.Flags().StringVar(&to, "to", "", "new version of chaos api")
-	cmd.Flags().BoolVar(&asStorageVersion, "as-storage-version", true, "new version of chaos api")
+	cmd.Flags().BoolVar(&asStorageVersion, "as-storage-version", true, "mark the old version as storage-version")
 
 	cmd.MarkFlagRequired("from")
 	cmd.MarkFlagRequired("to")

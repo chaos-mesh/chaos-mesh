@@ -16,13 +16,12 @@
 package autoconvert
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-multiversion-helper/common"
 )
 
 func NewConvertCmd(log logr.Logger) *cobra.Command {
@@ -52,7 +51,7 @@ func NewConvertCmd(log logr.Logger) *cobra.Command {
 }
 
 func removeHub(version string) error {
-	generatedHubFile := common.ChaosMeshAPIPrefix + version + "/" + "zz_generated.hub.chaosmesh.go"
+	generatedHubFile := fmt.Sprintf("api/%s/zz_generated.hub.chaosmesh.go", version)
 	err := os.Remove(generatedHubFile)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {

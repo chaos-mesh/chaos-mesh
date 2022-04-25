@@ -15,8 +15,23 @@
 
 package common
 
-import "fmt"
+import (
+	"fmt"
+	"io/ioutil"
+
+	"github.com/pkg/errors"
+)
 
 func Quote(s string) string {
 	return fmt.Sprintf("%q", s)
+}
+
+func ValidateAPI(version string) error {
+	apiDirectory := "api" + "/" + version
+	_, err := ioutil.ReadDir(apiDirectory)
+	if err != nil {
+		return errors.Wrapf(err, "api %s not exist", version)
+	}
+
+	return nil
 }

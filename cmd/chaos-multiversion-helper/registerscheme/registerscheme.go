@@ -47,6 +47,11 @@ func NewRegisterSchemeCmd(log logr.Logger) *cobra.Command {
 }
 
 func run(log logr.Logger, version string) error {
+	err := common.ValidateAPI(version)
+	if err != nil {
+		return err
+	}
+
 	fileSet := token.NewFileSet()
 	filePath := "cmd/chaos-controller-manager/provider/controller.go"
 	fileAst, err := parser.ParseFile(fileSet, filePath, nil, parser.ParseComments)

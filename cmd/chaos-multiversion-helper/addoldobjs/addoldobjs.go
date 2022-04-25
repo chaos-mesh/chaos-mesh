@@ -70,7 +70,7 @@ func run(log logr.Logger, version string) error {
 			imported := false
 
 			for _, spec := range node.Specs {
-				if spec.(*ast.ImportSpec).Path.Value == common.ChaosMeshAPIPrefix+"/"+version {
+				if spec.(*ast.ImportSpec).Path.Value == common.Quote(common.ChaosMeshAPIPrefix+version) {
 					imported = true
 				}
 			}
@@ -79,7 +79,7 @@ func run(log logr.Logger, version string) error {
 				node.Specs = append(node.Specs, &ast.ImportSpec{
 					Path: &ast.BasicLit{
 						Kind:  token.STRING,
-						Value: `"` + common.ChaosMeshAPIPrefix + version + `"`,
+						Value: common.Quote(common.ChaosMeshAPIPrefix + version),
 					},
 				})
 			}
@@ -118,7 +118,7 @@ func run(log logr.Logger, version string) error {
 							Op: token.AND,
 							X: &ast.CompositeLit{
 								Type: &ast.SelectorExpr{
-									X:   &ast.Ident{Name: "v1alpha1"},
+									X:   &ast.Ident{Name: version},
 									Sel: &ast.Ident{Name: typ},
 								},
 							},

@@ -69,6 +69,16 @@ func isWhiteListed(path string) bool {
 }
 
 func run(log logr.Logger, from, to string) error {
+	err := common.ValidateAPI(from)
+	if err != nil {
+		return err
+	}
+
+	err = common.ValidateAPI(to)
+	if err != nil {
+		return err
+	}
+
 	allGoFiles, err := doublestar.Glob(os.DirFS("."), "**/*.go")
 	if err != nil {
 		return errors.WithStack(err)
