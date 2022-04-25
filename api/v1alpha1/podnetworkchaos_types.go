@@ -163,22 +163,27 @@ type RawTrafficControl struct {
 // TcParameter represents the parameters for a traffic control chaos
 type TcParameter struct {
 	// Delay represents the detail about delay action
+	// +ui:form:when=action=='delay'
 	// +optional
 	Delay *DelaySpec `json:"delay,omitempty"`
 
 	// Loss represents the detail about loss action
+	// +ui:form:when=action=='loss'
 	// +optional
 	Loss *LossSpec `json:"loss,omitempty"`
 
 	// DuplicateSpec represents the detail about loss action
+	// +ui:form:when=action=='duplicate'
 	// +optional
 	Duplicate *DuplicateSpec `json:"duplicate,omitempty"`
 
 	// Corrupt represents the detail about corrupt action
+	// +ui:form:when=action=='corrupt'
 	// +optional
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
 	// Bandwidth represents the detail about bandwidth control action
+	// +ui:form:when=action=='bandwidth'
 	// +optional
 	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 }

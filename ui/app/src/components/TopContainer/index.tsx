@@ -15,9 +15,20 @@
  *
  */
 
-import { Alert, Box, Container, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@mui/material'
+import {
+  Alert,
+  Box,
+  BoxProps,
+  Container,
+  CssBaseline,
+  Divider,
+  Portal,
+  Snackbar,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { drawerCloseWidth, drawerWidth } from './Sidebar'
+import { closedWidth, openedWidth } from './Sidebar'
 import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 import { useEffect, useMemo, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -34,58 +45,38 @@ import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import loadable from '@loadable/component'
-import { makeStyles } from '@mui/styles'
 import messages from 'i18n/messages'
 import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
+import { styled } from '@mui/material/styles'
 import { useLocation } from 'react-router-dom'
 
 const Auth = loadable(() => import('./Auth'))
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginLeft: drawerCloseWidth,
-    width: `calc(100% - ${drawerCloseWidth})`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    [theme.breakpoints.down('sm')]: {
-      minWidth: theme.breakpoints.values.md,
-    },
-  },
-  rootShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth})`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  main: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-    zIndex: 1,
-  },
-  switchContent: {
-    display: 'flex',
-    flex: 1,
+const Root = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})<BoxProps & { open: boolean }>(({ theme, open }) => ({
+  position: 'relative',
+  width: `calc(100% - ${open ? openedWidth : closedWidth}px)`,
+  height: '100vh',
+  marginLeft: open ? openedWidth : closedWidth,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration[open ? 'enteringScreen' : 'leavingScreen'],
+  }),
+  [theme.breakpoints.down('sm')]: {
+    minWidth: theme.breakpoints.values.md,
   },
 }))
 
 const TopContainer = () => {
   const theme = useTheme()
-  const classes = useStyles()
 
   const { pathname } = useLocation()
 
-  const { settings, globalStatus, navigation } = useStoreSelector((state) => state)
+  const { settings, globalStatus } = useStoreSelector((state) => state)
   const { lang } = settings
   const { alert, alertOpen, confirm, confirmOpen } = globalStatus
-  const { breadcrumbs } = navigation
 
   const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
 
@@ -180,27 +171,26 @@ const TopContainer = () => {
 
   return (
     <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
-      <CssBaseline />
+      <Root open={openDrawer}>
+        <CssBaseline />
 
-      <Box className={openDrawer ? classes.rootShift : classes.root}>
         <Sidebar open={openDrawer} />
-        <Paper className={classes.main} component="main" elevation={0}>
-          <Box className={classes.switchContent}>
-            <Container maxWidth="xl" sx={{ position: 'relative', pb: 6 }}>
-              <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+        <Box component="main" sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+          <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} />
+          <Divider />
 
-              {loading ? (
-                <Loading />
-              ) : (
-                <Routes>
-                  <Route path="/" element={<Navigate replace to="/dashboard" />} />
-                  {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
-                </Routes>
-              )}
-            </Container>
-          </Box>
-        </Paper>
-      </Box>
+          <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 8 }}>
+            {loading ? (
+              <Loading />
+            ) : (
+              <Routes>
+                <Route path="/" element={<Navigate replace to="/dashboard" />} />
+                {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+              </Routes>
+            )}
+          </Container>
+        </Box>
+      </Root>
 
       <Auth open={authOpen} setOpen={setAuthOpen} />
 

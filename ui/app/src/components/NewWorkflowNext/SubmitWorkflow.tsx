@@ -1,0 +1,154 @@
+import * as Yup from 'yup'
+
+import { Box, Divider, MenuItem, Typography } from '@mui/material'
+import { Form, Formik } from 'formik'
+// import type { FormikHelpers } from 'formik'
+import { SelectField, Submit, TextField } from 'components/FormField'
+import { useEffect, useState } from 'react'
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
+import FormikEffect from 'components/FormikEffect'
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+import { T } from 'components/T'
+import api from 'api'
+import loadable from '@loadable/component'
+import { resetWorkflow } from 'slices/workflows'
+import { useNavigate } from 'react-router-dom'
+import yaml from 'js-yaml'
+
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+
+const validationSchema = Yup.object({
+  name: Yup.string().trim().required(),
+  namespace: Yup.string().trim().required(),
+  deadline: Yup.string().trim().required(),
+})
+
+interface WorkflowBasic {
+  name: string
+  namespace: string
+  deadline: string
+}
+
+interface SubmitWorkflowProps {
+  open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  workflow: string
+}
+
+export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkflowProps) {
+  const navigate = useNavigate()
+
+  const [data, setData] = useState(workflow)
+  const [workflowBasic, setWorkflowBasic] = useState<WorkflowBasic>({
+    name: '',
+    namespace: '',
+    deadline: '',
+  })
+
+  useEffect(() => {
+    setData((oldData) => {
+      const oldDataObj: any = yaml.load(oldData)
+      const { name, namespace, deadline } = workflowBasic
+      const metadata = { ...oldDataObj.metadata, name, namespace }
+
+      if (deadline) {
+        oldDataObj.spec.templates[0].deadline = deadline
+      }
+
+      return yaml.dump({ ...oldDataObj, metadata })
+    })
+  }, [workflowBasic])
+
+  const state = useStoreSelector((state) => state)
+  const { namespaces } = state.experiments
+  const dispatch = useStoreDispatch()
+
+  const submitWorkflow = () => {
+    api.workflows
+      .newWorkflow(yaml.load(data) as any)
+      .then(() => {
+        dispatch(resetWorkflow())
+
+        navigate('/workflows')
+      })
+      .catch(console.error)
+  }
+
+  return (
+    <ConfirmDialog
+      open={open}
+      close={() => setOpen(false)}
+      title="Fill in the basic information and submit"
+      dialogProps={{
+        PaperProps: {
+          style: { width: 1024, height: 768, maxWidth: 'unset' },
+        },
+      }}
+    >
+      <Space spacing={6} direction="row" height="100%">
+        <Box flexGrow={0} flexShrink={0} flexBasis="45%">
+          <Formik
+            initialValues={{
+              name: '',
+              namespace: '',
+              deadline: '',
+            }}
+            validationSchema={validationSchema}
+            onSubmit={submitWorkflow}
+          >
+            {({ errors, touched }) => (
+              <>
+                <FormikEffect didUpdate={setWorkflowBasic} />
+                <Form>
+                  <Space>
+                    <TextField
+                      name="name"
+                      label={<T id="common.name" />}
+                      helperText={errors.name && touched.name ? errors.name : <T id="newW.nameHelper" />}
+                      error={errors.name && touched.name ? true : false}
+                    />
+                    <SelectField
+                      name="namespace"
+                      label={<T id="k8s.namespace" />}
+                      helperText={
+                        errors.namespace && touched.namespace ? errors.namespace : <T id="newE.basic.namespaceHelper" />
+                      }
+                      error={errors.namespace && touched.namespace ? true : false}
+                    >
+                      {namespaces.map((n) => (
+                        <MenuItem key={n} value={n}>
+                          {n}
+                        </MenuItem>
+                      ))}
+                    </SelectField>
+                    <TextField
+                      name="deadline"
+                      label={<T id="newW.node.deadline" />}
+                      helperText={
+                        errors.deadline && touched.deadline ? errors.deadline : <T id="newW.node.deadlineHelper" />
+                      }
+                      error={errors.deadline && touched.deadline ? true : false}
+                    />
+                    <Submit />
+                  </Space>
+                </Form>
+              </>
+            )}
+          </Formik>
+        </Box>
+        <Divider orientation="vertical" flexItem />
+        <Space spacing={1.5} flex={1}>
+          <Typography variant="body2" fontWeight={500}>
+            Preview
+          </Typography>
+          <Paper sx={{ width: '100%', p: 0 }}>
+            <YAMLEditor data={data} />
+          </Paper>
+        </Space>
+      </Space>
+    </ConfirmDialog>
+  )
+}

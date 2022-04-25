@@ -174,7 +174,7 @@ const Single = () => {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <div>
+        <div style={{ height: '100%' }}>
           <Space spacing={6} className={classes.root}>
             <Space direction="row">
               <Button
@@ -191,13 +191,7 @@ const Single = () => {
               </Button>
             </Space>
             <Paper sx={{ display: 'flex', flexDirection: 'column', height: 450 }}>
-              <PaperTop
-                title={
-                  <Space spacing={1.5} alignItems="center">
-                    <Box>{i18n('workflow.topology')}</Box>
-                  </Space>
-                }
-              ></PaperTop>
+              <PaperTop title={i18n('workflow.topology')} />
               <div ref={topologyRef} style={{ flex: 1 }} />
             </Paper>
 

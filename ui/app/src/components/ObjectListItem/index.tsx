@@ -27,8 +27,8 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Schedule } from 'api/schedules.type'
 import Space from '@ui/mui-extends/esm/Space'
 import StatusLabel from 'components/StatusLabel'
+import _ from 'lodash'
 import i18n from 'components/T'
-import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import { useStoreSelector } from 'store'
@@ -108,18 +108,18 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
 
   const Actions = () => (
     <Space direction="row" justifyContent="end" alignItems="center">
-      <Typography variant="body2" title={format(data.created_at)}>
+      <Typography variant="body2" title={format(data.created_at!)}>
         {i18n('table.created')}{' '}
-        {DateTime.fromISO(data.created_at, {
+        {DateTime.fromISO(data.created_at!, {
           locale: lang,
         }).toRelative()}
       </Typography>
       {(type === 'schedule' || type === 'experiment') &&
-        ((data as Experiment).status === 'paused' ? (
+        ((data as any).status === 'paused' ? (
           <IconButton color="primary" title={i18n('common.start', intl)} size="small" onClick={handleAction('start')}>
             <PlayCircleOutlineIcon />
           </IconButton>
-        ) : (data as Experiment).status !== 'finished' ? (
+        ) : (data as any).status !== 'finished' ? (
           <IconButton color="primary" title={i18n('common.pause', intl)} size="small" onClick={handleAction('pause')}>
             <PauseCircleOutlineIcon />
           </IconButton>
@@ -157,10 +157,10 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         <Space direction="row" alignItems="center">
           {type !== 'archive' && <StatusLabel status={(data as Experiment).status} />}
           <Typography component="div" title={data.name}>
-            {truncate(data.name)}
+            {_.truncate(data.name!)}
           </Typography>
           <Typography component="div" variant="body2" color="textSecondary" title={data.uid}>
-            {truncate(data.uid)}
+            {_.truncate(data.uid!)}
           </Typography>
         </Space>
 

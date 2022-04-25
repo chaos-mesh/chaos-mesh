@@ -18,11 +18,11 @@
 import { Button, Grid } from '@mui/material'
 
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
-import ExperimentIcon from '@ui/mui-extends/esm/Icons/Experiment'
 import { Link } from 'react-router-dom'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import ScheduleIcon from '@mui/icons-material/Schedule'
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import Space from '@ui/mui-extends/esm/Space'
 import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
@@ -65,7 +65,7 @@ const Welcome = () => {
               variant="contained"
               color="primary"
               fullWidth
-              startIcon={<ExperimentIcon />}
+              startIcon={<ScienceOutlinedIcon />}
             >
               {i18n('newE.title')}
             </Button>

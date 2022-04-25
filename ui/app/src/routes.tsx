@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import Archive from 'pages/Archives/Single'
 import Archives from 'pages/Archives'
 import Dashboard from 'pages/Dashboard'
@@ -23,6 +24,7 @@ import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
 import NewSchedule from 'pages/Schedules/New'
 import NewWorkflow from 'components/NewWorkflow'
+import NewWorkflowNext from 'components/NewWorkflowNext'
 import { RouteProps } from 'react-router'
 import Schedule from 'pages/Schedules/Single'
 import Schedules from 'pages/Schedules'
@@ -38,6 +40,10 @@ const routes: RouteProps[] = [
   {
     element: <NewWorkflow />,
     path: '/workflows/new',
+  },
+  {
+    element: <NewWorkflowNext />,
+    path: '/workflows/new/next',
   },
   {
     element: <Workflows />,

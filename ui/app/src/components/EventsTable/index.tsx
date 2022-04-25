@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import {
   Box,
   IconButton,
@@ -35,8 +36,8 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import LastPageIcon from '@mui/icons-material/LastPage'
 import Paper from '@ui/mui-extends/esm/Paper'
+import _ from 'lodash'
 import i18n from 'components/T'
-import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useState } from 'react'
 
@@ -126,7 +127,7 @@ interface EventsTableRowProps {
 
 const Row: React.FC<EventsTableRowProps> = ({ event: e }) => (
   <TableRow hover>
-    <TableCell>{truncate(e.object_id)}</TableCell>
+    <TableCell>{_.truncate(e.object_id!)}</TableCell>
     <TableCell>{e.namespace}</TableCell>
     <TableCell>{e.name}</TableCell>
     <TableCell>{e.kind}</TableCell>

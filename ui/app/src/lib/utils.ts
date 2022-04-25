@@ -16,15 +16,7 @@
  */
 
 export function toTitleCase(s: string) {
-  return s.charAt(0).toUpperCase() + s.substr(1)
-}
-
-export function truncate(s: string) {
-  if (s.length > 25) {
-    return s.substring(0, 25) + '...'
-  }
-
-  return s
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
@@ -73,4 +65,8 @@ export function sanitize(obj: any) {
   }
 
   return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)) ?? '{}')
+}
+
+export function concatKindAction(kind: string, action?: string) {
+  return `${kind}${action ? ` / ${action}` : ''}`
 }

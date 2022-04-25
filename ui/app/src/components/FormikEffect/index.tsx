@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,19 @@
  *
  */
 
-import { Theme } from '@mui/material/styles'
+import { useEffect } from 'react'
+import { useFormikContext } from 'formik'
 
-declare module '@mui/styles' {
-  interface DefaultTheme extends Theme {}
+interface FormikEffectProps {
+  didUpdate?: (values: any) => void
+}
+
+export default function FormikEffect({ didUpdate }: FormikEffectProps) {
+  const { values } = useFormikContext()
+
+  useEffect(() => {
+    didUpdate && didUpdate(values)
+  }, [didUpdate, values])
+
+  return null
 }
