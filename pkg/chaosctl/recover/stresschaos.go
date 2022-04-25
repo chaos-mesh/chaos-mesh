@@ -23,21 +23,26 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type httpRecover struct {
-	tproxyCleaner Recover
+type stressRecover struct {
+	memStressCleaner Recover
+	stressNGCleaner  Recover
 }
 
-func HTTPRecover(client *ctrlclient.CtrlClient) Recover {
-	return &httpRecover{
-		tproxyCleaner: newCleanProcessRecover(client, "tproxy"),
+func StressRecover(client *ctrlclient.CtrlClient) Recover {
+	return &stressRecover{
+		memStressCleaner: newCleanProcessRecover(client, "memStress"),
+		stressNGCleaner:  newCleanProcessRecover(client, "stress-ng"),
 	}
 }
 
-func (r *httpRecover) Recover(ctx context.Context, pod *PartialPod) error {
-	// TODO: need hostPath to store rules
-	err := r.tproxyCleaner.Recover(ctx, pod)
+func (r *stressRecover) Recover(ctx context.Context, pod *PartialPod) error {
+	err := r.stressNGCleaner.Recover(ctx, pod)
 	if err != nil {
-		return errors.Wrap(err, "clean chaos-tproxy processes")
+		return errors.Wrap(err, "clean stress-ng processes")
+	}
+	err = r.memStressCleaner.Recover(ctx, pod)
+	if err != nil {
+		return errors.Wrap(err, "clean memStress processes")
 	}
 	return nil
 }

@@ -40,7 +40,7 @@ type tcsRecover struct {
 	client *ctrlclient.CtrlClient
 }
 
-func TcsRecover(client *ctrlclient.CtrlClient) Recover {
+func newTcsRecover(client *ctrlclient.CtrlClient) Recover {
 	return &tcsRecover{
 		client: client,
 	}
@@ -102,7 +102,7 @@ type iptablesRecover struct {
 	client *ctrlclient.CtrlClient
 }
 
-func IptablesRecover(client *ctrlclient.CtrlClient) Recover {
+func newIptablesRecover(client *ctrlclient.CtrlClient) Recover {
 	return &iptablesRecover{
 		client: client,
 	}
@@ -155,5 +155,29 @@ func (r *iptablesRecover) Recover(ctx context.Context, pod *PartialPod) error {
 		printStep(fmt.Sprintf("iptables rules in chains %s are cleaned up", strings.Join(mutation.Pod.CleanIptables, ",")))
 	}
 
+	return nil
+}
+
+type networkRecover struct {
+	tcsRecover      Recover
+	iptablesRecover Recover
+}
+
+func NetworkRecover(client *ctrlclient.CtrlClient) Recover {
+	return &networkRecover{
+		tcsRecover:      newTcsRecover(client),
+		iptablesRecover: newIptablesRecover(client),
+	}
+}
+
+func (r *networkRecover) Recover(ctx context.Context, pod *PartialPod) error {
+	err := r.tcsRecover.Recover(ctx, pod)
+	if err != nil {
+		return errors.Wrap(err, "recover tcs rules")
+	}
+	err = r.iptablesRecover.Recover(ctx, pod)
+	if err != nil {
+		return errors.Wrap(err, "recover iptables rules")
+	}
 	return nil
 }

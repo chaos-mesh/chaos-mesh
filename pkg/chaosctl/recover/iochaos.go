@@ -18,20 +18,26 @@ package recover
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
 type ioRecover struct {
-	client *ctrlclient.CtrlClient
+	todaCleaner Recover
 }
 
 func IORecover(client *ctrlclient.CtrlClient) Recover {
 	return &ioRecover{
-		client: client,
+		todaCleaner: newCleanProcessRecover(client, "tproxy"),
 	}
 }
 
 func (r *ioRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	// TODO: need hostPath to store replaced fds
+	err := r.todaCleaner.Recover(ctx, pod)
+	if err != nil {
+		return errors.Wrap(err, "clean toda processes")
+	}
 	return nil
 }

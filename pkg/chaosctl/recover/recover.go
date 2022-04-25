@@ -45,46 +45,19 @@ type Recover interface {
 
 type RecoverBuilder func(client *ctrlclient.CtrlClient) Recover
 
-type PipelineRecover struct {
-	chaosName string
-	recovers  []Recover
-}
-
-type CleanProcessRecover struct {
+type cleanProcessRecover struct {
 	client  *ctrlclient.CtrlClient
 	process string
 }
 
-func PipelineBuilder(chaosName string, builders ...RecoverBuilder) RecoverBuilder {
-	return func(client *ctrlclient.CtrlClient) Recover {
-		pipeline := &PipelineRecover{chaosName: chaosName}
-		for _, builder := range builders {
-			pipeline.recovers = append(pipeline.recovers, builder(client))
-		}
-		return pipeline
+func newCleanProcessRecover(client *ctrlclient.CtrlClient, process string) Recover {
+	return &cleanProcessRecover{
+		client:  client,
+		process: process,
 	}
 }
 
-func (r *PipelineRecover) Recover(ctx context.Context, pod *PartialPod) error {
-	printRecover(fmt.Sprintf("recovering %s from pod %s/%s", r.chaosName, pod.Namespace, pod.Name))
-	for _, recover := range r.recovers {
-		if err := recover.Recover(ctx, pod); err != nil {
-			return errors.Wrapf(err, "recover pod %s/%s", pod.Namespace, pod.Name)
-		}
-	}
-	return nil
-}
-
-func CleanProcessRecoverBuilder(process string) RecoverBuilder {
-	return func(client *ctrlclient.CtrlClient) Recover {
-		return &CleanProcessRecover{
-			client:  client,
-			process: process,
-		}
-	}
-}
-
-func (r *CleanProcessRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *cleanProcessRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	var pids []graphql.String
 	for _, process := range pod.Processes {
 		if process.Command == r.process {
