@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,25 +13,20 @@
 // limitations under the License.
 //
 
-package time
+package schedule
 
 import (
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-// ModifyTime modifies time of target process
-func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64, logger logr.Logger) error {
-	// Mock point to return error in unit test
-	if err := mock.On("ModifyTimeError"); err != nil {
-		if e, ok := err.(error); ok {
-			return e
-		}
-		if ignore, ok := err.(bool); ok && ignore {
-			return nil
-		}
-	}
-	return errors.New("arm64 is not supported")
+func Bootstrap(schedule core.ScheduleStore,
+	event core.EventStore,
+	config *config.ChaosDashboardConfig,
+	scheme *runtime.Scheme,
+	log logr.Logger) *Service {
+	return NewService(schedule, event, config, scheme, log.WithName("schedules"))
 }
