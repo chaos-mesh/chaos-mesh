@@ -21,7 +21,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -46,6 +49,8 @@ func initFlag() {
 }
 
 func main() {
+	fmt.Println("Watchmaker will not support recovery function in future," +
+		" please use time attack in chaosd.")
 	initFlag()
 
 	version.PrintVersionInfo("watchmaker")
@@ -54,22 +59,28 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger, err := log.NewDefaultZapLogger()
+	zapLog, err := zap.NewDevelopment()
 	if err != nil {
 		panic(fmt.Sprintf("error while creating zap logger: %v", err))
 	}
+	log := zapr.NewLogger(zapLog)
 
 	clkIds := strings.Split(clockIdsSlice, ",")
 	mask, err := utils.EncodeClkIds(clkIds)
 	if err != nil {
-		logger.Error(err, "error while converting clock ids to mask")
+		log.Error(err, "error while converting clock ids to mask")
 		os.Exit(1)
 	}
-	logger.Info("get clock ids mask", "mask", mask)
+	log.Info("get clock ids mask", "mask", mask)
 
-	err = time.ModifyTime(pid, secDelta, nsecDelta, mask, logger.WithName("time"))
+	s, err := time.GetSkew(log, time.NewConfig(secDelta, nsecDelta, mask))
+	if err != nil {
+		log.Error(err, "error while GetSkew")
+		os.Exit(1)
+	}
+	err = s.Inject(tasks.SysPID(pid))
 
 	if err != nil {
-		logger.Error(err, "error while modifying time", "pid", pid, "secDelta", secDelta, "nsecDelta", nsecDelta, "mask", mask)
+		log.Error(err, "error while modifying time", "pid", pid, "secDelta", secDelta, "nsecDelta", nsecDelta, "mask", mask)
 	}
 }

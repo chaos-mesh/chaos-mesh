@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 )
 
@@ -47,7 +48,11 @@ func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
 
 func ForwardSvcPorts(ctx context.Context, ns, svc string, port uint16) (context.CancelFunc, uint16, error) {
 	commonRestClientGetter := NewCommonRestClientGetter()
-	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
+	logger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		return nil, 0, errors.Wrap(err, "failed to create logger")
+	}
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false, logger)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
 	}

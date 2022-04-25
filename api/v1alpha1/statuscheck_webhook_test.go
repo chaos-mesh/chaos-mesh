@@ -130,7 +130,7 @@ var _ = Describe("statuscheck_webhook", func() {
 							},
 						},
 					},
-					expect: "invalid status code range",
+					expect: "incorrect status code format",
 				},
 			}
 
@@ -138,7 +138,7 @@ var _ = Describe("statuscheck_webhook", func() {
 				err := tc.statusCheck.ValidateCreate()
 				if len(tc.expect) != 0 {
 					Expect(err).To(HaveOccurred())
-					Expect(strings.Contains(err.Error(), tc.expect)).To(BeTrue())
+					Expect(strings.Contains(err.Error(), tc.expect)).To(BeTrue(), "expected error: %s, got: %s", tc.expect, err.Error())
 				} else {
 					Expect(err).ToNot(HaveOccurred())
 				}
