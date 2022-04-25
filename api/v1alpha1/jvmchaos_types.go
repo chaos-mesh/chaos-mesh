@@ -128,6 +128,7 @@ type JVMChaosStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment

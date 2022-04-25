@@ -18,6 +18,7 @@ package v1alpha1
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="action",type=string,JSONPath=`.spec.action`
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment

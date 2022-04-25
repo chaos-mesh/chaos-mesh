@@ -24,6 +24,7 @@ import (
 const KindSchedule = "Schedule"
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // Schedule is the cronly schedule object
 type Schedule struct {
@@ -96,6 +97,7 @@ func (in *Schedule) IsPaused() bool {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // ScheduleList contains a list of Schedule
 type ScheduleList struct {

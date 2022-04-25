@@ -20,6 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +chaos-mesh:base
 
 // PhysicalMachine is the Schema for the physical machine API
@@ -39,6 +40,7 @@ type PhysicalMachineSpec struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // PhysicalMachineList contains a list of PhysicalMachine
 type PhysicalMachineList struct {

@@ -20,6 +20,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="duration",type=string,JSONPath=`.spec.duration`
 // +chaos-mesh:experiment
 

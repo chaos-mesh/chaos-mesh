@@ -23,6 +23,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:resource:shortName=wf
 // +kubebuilder:subresource:status
 // +chaos-mesh:experiment
@@ -167,6 +168,7 @@ type Task struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 type WorkflowList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

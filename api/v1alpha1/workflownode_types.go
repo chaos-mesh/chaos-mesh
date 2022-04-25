@@ -30,6 +30,7 @@ const (
 const KindWorkflowNode = "WorkflowNode"
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:resource:shortName=wfn
 // +kubebuilder:subresource:status
 type WorkflowNode struct {
@@ -131,6 +132,7 @@ type WorkflowNodeCondition struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 type WorkflowNodeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

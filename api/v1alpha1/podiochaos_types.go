@@ -213,6 +213,7 @@ const (
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // PodIOChaos is the Schema for the podiochaos API
 type PodIOChaos struct {
@@ -243,6 +244,7 @@ type PodIOChaosStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // PodIOChaosList contains a list of PodIOChaos
 type PodIOChaosList struct {

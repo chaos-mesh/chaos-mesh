@@ -25,6 +25,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 // +kubebuilder:subresource:status
 // +chaos-mesh:base
 type StatusCheck struct {
@@ -227,6 +228,7 @@ type HTTPStatusCheck struct {
 
 // StatusCheckList contains a list of StatusCheck
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 type StatusCheckList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

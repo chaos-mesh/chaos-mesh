@@ -93,6 +93,7 @@ func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // {{.Type}}List contains a list of {{.Type}}
 type {{.Type}}List struct {

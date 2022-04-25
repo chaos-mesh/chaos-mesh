@@ -182,6 +182,7 @@ const (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // +chaos-mesh:base
 // +chaos-mesh:webhook:enableUpdate
@@ -196,6 +197,7 @@ type PodHttpChaos struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // PodHttpChaosList contains a list of PodHttpChaos
 type PodHttpChaosList struct {
