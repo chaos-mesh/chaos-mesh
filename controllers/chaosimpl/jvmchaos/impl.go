@@ -67,13 +67,22 @@ DO
 ENDRULE
 `
 
-	// for action 'gc' and 'stress'
+	// for action 'mysql', 'gc' and 'stress'
+	SQLHelper    = "org.chaos_mesh.byteman.helper.SQLHelper"
 	GCHelper     = "org.chaos_mesh.byteman.helper.GCHelper"
 	StressHelper = "org.chaos_mesh.byteman.helper.StressHelper"
 
 	// the trigger point for 'gc' and 'stress'
 	TriggerClass  = "org.chaos_mesh.chaos_agent.TriggerThread"
 	TriggerMethod = "triggerFunc"
+
+	MySQL5InjectClass  = "com.mysql.jdbc.MysqlIO"
+	MySQL5InjectMethod = "sqlQueryDirect"
+	MySQL5Exception    = "java.sql.SQLException(\"%s\")"
+
+	MySQL8InjectClass  = "com.mysql.cj.NativeSession"
+	MySQL8InjectMethod = "execSQL"
+	MySQL8Exception    = "com.mysql.cj.exceptions.CJException(\"%s\")"
 )
 
 // BytemanTemplateSpec is the template spec for byteman rule
