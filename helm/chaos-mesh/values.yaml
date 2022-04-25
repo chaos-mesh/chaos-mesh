@@ -153,6 +153,11 @@ chaosDaemon:
   env: {}
   # running chaosDaemon on host network
   hostNetwork: false
+  # configurations about mtls.
+  # currently we do not support use specified ca and cert for mtls, it would generate the ca and certs when chaos mesh deploy by helm.
+  mtls:
+    # enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon
+    enabled: true
 
   # Run chaos-daemon container in privileged mode. Processes in privileged containers
   # are essentially equivalent to root on the host.
@@ -237,9 +242,7 @@ dashboard:
     tag: ""
   # Image pull policy
   imagePullPolicy: IfNotPresent
-  # securityMode would enable both of:
-  # - rbac authentication on Chaos Dashboard
-  # - chaos-daemon mtls
+  # securityMode requires user to provide credentials on Chaos Dashboard, instead of using chaos-dashboard service account
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
   gcpSecurityMode: false
