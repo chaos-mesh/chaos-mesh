@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Must update CHANGELOG [#3148](https://github.com/chaos-mesh/chaos-mesh/pull/3148)
+- Must update CHANGELOG [#3181](https://github.com/chaos-mesh/chaos-mesh/pull/3181)
 
 ### Deprecated
 
