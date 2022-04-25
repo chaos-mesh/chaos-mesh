@@ -148,7 +148,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `prometheus.volume.storageClassName` | Storage class of PVC | `standard` |
 | `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
 | `webhook.timeoutSeconds` | Timeout for admission webhooks in seconds | `5` |
-| `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
+| `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Fail` |
 | `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos,stresschaos,awschaos,azurechaos,gcpchaos,dnschaos,jvmchaos,schedule,workflow,httpchaos,bnlockchaos,physicalmachinechaos,phsicalmachine,statuscheck]` |
 | `bpfki.create` | Enable chaos-kernel | `false` |
 | `bpfki.image.registry` | Override global registry, empty value means using the global images.registry | `` |
