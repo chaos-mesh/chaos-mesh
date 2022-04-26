@@ -45,6 +45,10 @@ type FakeImage struct {
 	logger logr.Logger
 }
 
+func NewFakeImage(symbolName string, content []byte, offset map[string]int, logger logr.Logger) *FakeImage {
+	return &FakeImage{symbolName: symbolName, content: content, offset: offset, logger: logger}
+}
+
 func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err error) {
 	return errors.New("not implement fake image arm64")
 }
