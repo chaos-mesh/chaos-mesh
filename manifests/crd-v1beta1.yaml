@@ -1722,8 +1722,8 @@ spec:
                 to 5) and 8.X.X(set to 8) now
               type: string
             name:
-              description: byteman rule name, should be unique, and will use JVMChaos'
-                name if not set
+              description: byteman rule name, should be unique, and will generate
+                one if not set
               type: string
             pid:
               description: the pid of Java process which needs to attach
@@ -5305,8 +5305,8 @@ spec:
                     to 5) and 8.X.X(set to 8) now
                   type: string
                 name:
-                  description: byteman rule name, should be unique, and will use JVMChaos'
-                    name if not set
+                  description: byteman rule name, should be unique, and will generate
+                    one if not set
                   type: string
                 pid:
                   description: the pid of Java process which needs to attach
@@ -8103,7 +8103,7 @@ spec:
                             type: string
                           name:
                             description: byteman rule name, should be unique, and
-                              will use JVMChaos' name if not set
+                              will generate one if not set
                             type: string
                           pid:
                             description: the pid of Java process which needs to attach
@@ -10629,7 +10629,7 @@ spec:
                                 type: string
                               name:
                                 description: byteman rule name, should be unique,
-                                  and will use JVMChaos' name if not set
+                                  and will generate one if not set
                                 type: string
                               pid:
                                 description: the pid of Java process which needs to
@@ -17860,8 +17860,8 @@ spec:
                     to 5) and 8.X.X(set to 8) now
                   type: string
                 name:
-                  description: byteman rule name, should be unique, and will use JVMChaos'
-                    name if not set
+                  description: byteman rule name, should be unique, and will generate
+                    one if not set
                   type: string
                 pid:
                   description: the pid of Java process which needs to attach
@@ -20243,8 +20243,8 @@ spec:
                         5.X.X(set to 5) and 8.X.X(set to 8) now
                       type: string
                     name:
-                      description: byteman rule name, should be unique, and will use
-                        JVMChaos' name if not set
+                      description: byteman rule name, should be unique, and will generate
+                        one if not set
                       type: string
                     pid:
                       description: the pid of Java process which needs to attach
@@ -23085,7 +23085,7 @@ spec:
                                 type: string
                               name:
                                 description: byteman rule name, should be unique,
-                                  and will use JVMChaos' name if not set
+                                  and will generate one if not set
                                 type: string
                               pid:
                                 description: the pid of Java process which needs to
@@ -25691,7 +25691,7 @@ spec:
                                     type: string
                                   name:
                                     description: byteman rule name, should be unique,
-                                      and will use JVMChaos' name if not set
+                                      and will generate one if not set
                                     type: string
                                   pid:
                                     description: the pid of Java process which needs
@@ -35637,7 +35637,7 @@ spec:
                         type: string
                       name:
                         description: byteman rule name, should be unique, and will
-                          use JVMChaos' name if not set
+                          generate one if not set
                         type: string
                       pid:
                         description: the pid of Java process which needs to attach
@@ -38093,7 +38093,7 @@ spec:
                             type: string
                           name:
                             description: byteman rule name, should be unique, and
-                              will use JVMChaos' name if not set
+                              will generate one if not set
                             type: string
                           pid:
                             description: the pid of Java process which needs to attach

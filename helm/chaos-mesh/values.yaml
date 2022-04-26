@@ -464,7 +464,7 @@ webhook:
   timeoutSeconds: 5
   # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
-  FailurePolicy: Ignore
+  FailurePolicy: Fail
 
   CRDS:
     - podchaos

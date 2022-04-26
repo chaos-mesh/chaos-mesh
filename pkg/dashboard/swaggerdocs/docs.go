@@ -3751,7 +3751,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
+                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
                     "type": "string"
                 },
                 "pid": {
