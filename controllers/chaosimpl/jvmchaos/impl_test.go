@@ -124,7 +124,7 @@ func TestGenerateRuleData(t *testing.T) {
 			"\nRULE test\nCLASS org.chaos_mesh.chaos_agent.TriggerThread\nMETHOD triggerFunc\nHELPER org.chaos_mesh.byteman.helper.GCHelper\nAT ENTRY\nBIND flag:boolean=true;\nIF true\nDO\n\tgc();\nENDRULE\n",
 		},
 		{
-			&core.JVMChaosSpec{
+			&v1alpha1.JVMChaosSpec{
 				Action: v1alpha1.JVMMySQLAction,
 				JVMParameter: v1alpha1.JVMParameter{
 					Name: "test",
@@ -143,14 +143,14 @@ func TestGenerateRuleData(t *testing.T) {
 			"\nRULE test\nCLASS com.mysql.cj.NativeSession\nMETHOD execSQL\nHELPER org.chaos_mesh.byteman.helper.SQLHelper\nAT ENTRY\nBIND flag:boolean=matchDBTable(\"\", $2, \"test\", \"t1\", \"select\");\nIF flag\nDO\n\tthrow new com.mysql.cj.exceptions.CJException(\"BOOM\");\nENDRULE\n",
 		},
 		{
-			&core.JVMChaosSpec{
+			&v1alpha1.JVMChaosSpec{
 				Action: v1alpha1.JVMMySQLAction,
 				JVMParameter: v1alpha1.JVMParameter{
 					Name: "test",
-					JVMCommonSpec: core.JVMCommonSpec{
+					JVMCommonSpec: v1alpha1.JVMCommonSpec{
 						Pid: 1234,
 					},
-					JVMMySQLSpec: core.JVMMySQLSpec{
+					JVMMySQLSpec: v1alpha1.JVMMySQLSpec{
 						MySQLConnectorVersion: "8",
 						Database:              "test",
 						Table:                 "t1",

@@ -25,7 +25,6 @@ echo "deploy a helloword pod which is implement with java"
 # 1. Hello World
 # ...
 
-kubectl create namespace helloworld
 kubectl apply -f ./helloworld_pod.yaml
 
 echo "wait helloworld pod status to running"
@@ -81,7 +80,7 @@ echo "delete jvm chaos, and will not print 'Got an exception!java.io.IOException
 kubectl delete -f ./exception.yaml
 check_log "Got an exception!java.io.IOException: BOOM" false
 
-echo "deploy TiDB service and mysqldemo Java application which used to query TiDB/MySQL"
+echo "deploy TiDB service and mysql query Java application which used to query TiDB/MySQL"
 kubectl apply -f tidb.yaml
 
 nodeIP=`kubectl get nodes -o wide | grep -Eo '([0-9]*\.){3}[0-9]*'`
@@ -91,6 +90,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: tidb-config
+  namespace: mysql
 data:
   DSN: "jdbc:mysql://${nodeIP}:30400/mysql"
   USER: "root"
@@ -114,12 +114,15 @@ for ((k=0; k<30; k++)); do
     sleep 1
 done
 
-curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+kubectl get events -n mysql
+kubectl get nodes -o wide
+
+docker exec -it kind-control-plane curl -X GET "http://127.0.0.1:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "root" user_info.log
 
 kubectl apply -f mysql_query_exception.yaml
 
-curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+docker exec -it kind-control-plane curl -X GET "http://127.0.0.1:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "BOOM" user_info.log
 
 # TODO: more test
