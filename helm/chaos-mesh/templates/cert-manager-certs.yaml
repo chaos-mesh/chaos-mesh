@@ -1,0 +1,158 @@
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- $certManagerEnabled := .Values.webhook.certManager.enabled }}
+
+{{- if $certManagerEnabled }}
+---
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1beta1" }}
+apiVersion: cert-manager.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha3" }}
+apiVersion: cert-manager.io/v1alpha3
+{{- else }}
+apiVersion: cert-manager.io/v1alpha2
+{{- end }}
+kind: Issuer
+metadata:
+  name: chaos-mesh-selfsigned
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-mesh-selfsigned
+spec:
+  selfSigned: {}
+---
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1beta1" }}
+apiVersion: cert-manager.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha3" }}
+apiVersion: cert-manager.io/v1alpha3
+{{- else }}
+apiVersion: cert-manager.io/v1alpha2
+{{- end }}
+kind: Certificate
+metadata:
+  name: chaos-mesh-ca
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-mesh-ca
+spec:
+  duration: 43800h0m0s #5year
+  secretName: chaos-mesh-ca
+  commonName: "chaos-mesh-ca"
+  isCA: true
+  issuerRef:
+    name: chaos-mesh-selfsigned
+---
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1beta1" }}
+apiVersion: cert-manager.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha3" }}
+apiVersion: cert-manager.io/v1alpha3
+{{- else }}
+apiVersion: cert-manager.io/v1alpha2
+{{- end }}
+kind: Issuer
+metadata:
+  name: chaos-mesh-ca
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-mesh-ca
+spec:
+  ca:
+    secretName: chaos-mesh-ca
+---
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1beta1" }}
+apiVersion: cert-manager.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha3" }}
+apiVersion: cert-manager.io/v1alpha3
+{{- else }}
+apiVersion: cert-manager.io/v1alpha2
+{{- end }}
+kind: Certificate
+metadata:
+  name: chaos-mesh-cert
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-mesh-cert
+spec:
+  duration: 43800h #5year
+  dnsNames:
+    - {{ template "chaos-mesh.svc" . }}
+    - {{ template "chaos-mesh.svc" . }}.{{ .Release.Namespace }}
+    - {{ template "chaos-mesh.svc" . }}.{{ .Release.Namespace }}.svc
+  isCA: false
+  secretName: {{ template "chaos-mesh.webhook.certs" . }}
+  issuerRef:
+    name: chaos-mesh-ca
+---
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1beta1" }}
+apiVersion: cert-manager.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha3" }}
+apiVersion: cert-manager.io/v1alpha3
+{{- else }}
+apiVersion: cert-manager.io/v1alpha2
+{{- end }}
+kind: Certificate
+metadata:
+  name: chaos-daemon-client-cert
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-daemon-client-cert
+spec:
+  duration: 43800h0m0s #5year
+  dnsNames:
+    - controller-manager.chaos-mesh.org
+  isCA: false
+  secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
+  issuerRef:
+    name: chaos-mesh-ca
+---
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+apiVersion: cert-manager.io/v1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1beta1" }}
+apiVersion: cert-manager.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "cert-manager.io/v1alpha3" }}
+apiVersion: cert-manager.io/v1alpha3
+{{- else }}
+apiVersion: cert-manager.io/v1alpha2
+{{- end }}
+kind: Certificate
+metadata:
+  name: chaos-daemon-cert
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-daemontcert
+spec:
+  duration: 43800h0m0s #5year
+  dnsNames:
+    - chaos-daemon.chaos-mesh.org
+  isCA: false
+  secretName: {{ template "chaos-mesh.daemon.certs" . }}
+  issuerRef:
+    name: chaos-mesh-ca
+{{- end }}
