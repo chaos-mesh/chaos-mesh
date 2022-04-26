@@ -74,7 +74,7 @@ webhooks:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace | quote }}
         path: /mutate-chaos-mesh-org-v1alpha1-{{ $crd }}
-    failurePolicy: Fail
+    failurePolicy: {{ $.Values.webhook.FailurePolicy }}
     name: m{{ $crd }}.kb.io
     {{- if $supportTimeoutSeconds }}
     timeoutSeconds: {{ $timeoutSeconds }}

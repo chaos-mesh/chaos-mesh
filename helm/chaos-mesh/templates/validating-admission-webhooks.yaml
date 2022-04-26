@@ -49,7 +49,7 @@ webhooks:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace | quote }}
         path: /validate-chaos-mesh-org-v1alpha1-{{ $crd }}
-    failurePolicy: Fail
+    failurePolicy: {{ $.Values.webhook.FailurePolicy }}
     name: v{{ $crd }}.kb.io
     {{- if $supportTimeoutSeconds }}
     timeoutSeconds: {{ $timeoutSeconds }}
@@ -104,7 +104,7 @@ webhooks:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace | quote }}
         path: /validate-auth
-    failurePolicy: Fail
+    failurePolicy: {{ .Values.webhook.FailurePolicy }}
     name: vauth.kb.io
     {{- if $supportTimeoutSeconds }}
     timeoutSeconds: {{ $timeoutSeconds }}
