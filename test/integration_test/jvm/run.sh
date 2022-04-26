@@ -81,6 +81,47 @@ echo "delete jvm chaos, and will not print 'Got an exception!java.io.IOException
 kubectl delete -f ./exception.yaml
 check_log "Got an exception!java.io.IOException: BOOM" false
 
+echo "deploy TiDB service and mysqldemo Java application which used to query TiDB/MySQL"
+kubectl apply -f tidb.yaml
+
+nodeIP=`kubectl get nodes -o wide | grep -Eo '([0-9]*\.){3}[0-9]*'`
+
+cat <<EOF > tidb-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tidb-config
+data:
+  DSN: "jdbc:mysql://${nodeIP}:30400/mysql"
+  USER: "root"
+  PASSWORD: ""
+EOF
+
+kubectl apply -f tidb-configmap.yaml
+kubectl apply -f mysql_query.yaml
+
+echo "wait tidb and mysql-query pod status to running"
+for ((k=0; k<30; k++)); do
+    kubectl get pods --namespace mysql > pods.status
+    cat pods.status
+
+    run_num=`grep Running pods.status | wc -l`
+    pod_num=$((`cat pods.status | wc -l` - 1))
+    if [ $run_num == $pod_num ]; then
+        break
+    fi
+
+    sleep 1
+done
+
+curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+check_contains "root" user_info.log
+
+kubectl apply -f mysql_query_exception.yaml
+
+curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+check_contains "BOOM" user_info.log
+
 # TODO: more test
 
 echo "****** finish jvm chaos test ******"
