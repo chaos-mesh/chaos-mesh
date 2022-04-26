@@ -454,6 +454,8 @@ webhook:
     # Setup the webhook using cert-manager
     enabled: false
   # if empty and disable certManager, Helm will auto-generate these fields
+  caBundlePEM: |
+
   crtPEM: |
 
   keyPEM: |
