@@ -24,7 +24,7 @@ export const scopeInitialValues = {
     namespaces: [],
     labelSelectors: [],
     annotationSelectors: [],
-    podPhaseSelectors: podPhases,
+    podPhaseSelectors: [],
     pods: [],
   },
   mode: 'all',
