@@ -8,11 +8,17 @@ import React from 'react'
 
 const common = {
   spacing: 4,
+  typography: {
+    button: {
+      textTransform: 'none',
+    },
+  },
 }
 
 // The light theme
 const theme = responsiveFontSizes(
-  createTheme(common, {
+  createTheme({
+    ...common,
     palette: {
       primary: {
         main: '#4159A9',
@@ -26,11 +32,17 @@ const theme = responsiveFontSizes(
       onSecondaryContainer: {
         main: '#161B2C',
       },
-      background: {
-        default: '#fafafa',
+      surfaceVariant: {
+        main: '#E2E1EC',
       },
       onSurfaceVariant: {
         main: '#45464E',
+      },
+      background: {
+        default: '#fafafa',
+      },
+      outline: {
+        main: '#76767F',
       },
     },
   })
