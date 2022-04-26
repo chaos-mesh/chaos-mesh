@@ -36,18 +36,18 @@ import (
 // ```
 var tcRegexp = regexp.MustCompile(`([0-9]+): dev (\w+)`)
 
-type tcsRecover struct {
+type tcsRecoverer struct {
 	client *ctrlclient.CtrlClient
 }
 
-func newTcsRecover(client *ctrlclient.CtrlClient) Recover {
-	return &tcsRecover{
+func newTcsRecoverer(client *ctrlclient.CtrlClient) Recoverer {
+	return &tcsRecoverer{
 		client: client,
 	}
 }
 
 // Recover clean all tc qdisc rules
-func (r *tcsRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *tcsRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	deviceSet := map[string]bool{}
 	for _, rule := range pod.TcQdisc {
 		matches := tcRegexp.FindStringSubmatch(rule)
@@ -98,18 +98,18 @@ func (r *tcsRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	return nil
 }
 
-type iptablesRecover struct {
+type iptablesRecoverer struct {
 	client *ctrlclient.CtrlClient
 }
 
-func newIptablesRecover(client *ctrlclient.CtrlClient) Recover {
-	return &iptablesRecover{
+func newIptablesRecoverer(client *ctrlclient.CtrlClient) Recoverer {
+	return &iptablesRecoverer{
 		client: client,
 	}
 }
 
 // Recover clean all tables rules in chains CHAOS-INPUT and CHAOS-OUTPUT
-func (r *iptablesRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *iptablesRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	chainSet := map[string]bool{
 		"CHAOS-INPUT":  false,
 		"CHAOS-OUTPUT": false,
@@ -158,24 +158,24 @@ func (r *iptablesRecover) Recover(ctx context.Context, pod *PartialPod) error {
 	return nil
 }
 
-type networkRecover struct {
-	tcsRecover      Recover
-	iptablesRecover Recover
+type networkRecoverer struct {
+	tcsRecoverer      Recoverer
+	iptablesRecoverer Recoverer
 }
 
-func NetworkRecover(client *ctrlclient.CtrlClient) Recover {
-	return &networkRecover{
-		tcsRecover:      newTcsRecover(client),
-		iptablesRecover: newIptablesRecover(client),
+func NetworkRecoverer(client *ctrlclient.CtrlClient) Recoverer {
+	return &networkRecoverer{
+		tcsRecoverer:      newTcsRecoverer(client),
+		iptablesRecoverer: newIptablesRecoverer(client),
 	}
 }
 
-func (r *networkRecover) Recover(ctx context.Context, pod *PartialPod) error {
-	err := r.tcsRecover.Recover(ctx, pod)
+func (r *networkRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
+	err := r.tcsRecoverer.Recover(ctx, pod)
 	if err != nil {
 		return errors.Wrap(err, "recover tcs rules")
 	}
-	err = r.iptablesRecover.Recover(ctx, pod)
+	err = r.iptablesRecoverer.Recover(ctx, pod)
 	if err != nil {
 		return errors.Wrap(err, "recover iptables rules")
 	}

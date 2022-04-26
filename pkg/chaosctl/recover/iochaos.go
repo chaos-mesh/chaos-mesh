@@ -23,17 +23,17 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type ioRecover struct {
-	todaCleaner Recover
+type ioRecoverer struct {
+	todaCleaner Recoverer
 }
 
-func IORecover(client *ctrlclient.CtrlClient) Recover {
-	return &ioRecover{
-		todaCleaner: newCleanProcessRecover(client, "tproxy"),
+func IORecoverer(client *ctrlclient.CtrlClient) Recoverer {
+	return &ioRecoverer{
+		todaCleaner: newCleanProcessRecoverer(client, "tproxy"),
 	}
 }
 
-func (r *ioRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *ioRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	// TODO: need hostPath to store replaced fds
 	err := r.todaCleaner.Recover(ctx, pod)
 	if err != nil {

@@ -23,19 +23,19 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type stressRecover struct {
-	memStressCleaner Recover
-	stressNGCleaner  Recover
+type stressRecoverer struct {
+	memStressCleaner Recoverer
+	stressNGCleaner  Recoverer
 }
 
-func StressRecover(client *ctrlclient.CtrlClient) Recover {
-	return &stressRecover{
-		memStressCleaner: newCleanProcessRecover(client, "memStress"),
-		stressNGCleaner:  newCleanProcessRecover(client, "stress-ng"),
+func StressRecoverer(client *ctrlclient.CtrlClient) Recoverer {
+	return &stressRecoverer{
+		memStressCleaner: newCleanProcessRecoverer(client, "memStress"),
+		stressNGCleaner:  newCleanProcessRecoverer(client, "stress-ng"),
 	}
 }
 
-func (r *stressRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *stressRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	err := r.stressNGCleaner.Recover(ctx, pod)
 	if err != nil {
 		return errors.Wrap(err, "clean stress-ng processes")

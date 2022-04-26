@@ -38,26 +38,26 @@ type PartialPod struct {
 	Iptables []string
 }
 
-type Recover interface {
+type Recoverer interface {
 	// Recover target pod forcedly
 	Recover(ctx context.Context, pod *PartialPod) error
 }
 
-type RecoverBuilder func(client *ctrlclient.CtrlClient) Recover
+type RecovererBuilder func(client *ctrlclient.CtrlClient) Recoverer
 
-type cleanProcessRecover struct {
+type cleanProcessRecoverer struct {
 	client  *ctrlclient.CtrlClient
 	process string
 }
 
-func newCleanProcessRecover(client *ctrlclient.CtrlClient, process string) Recover {
-	return &cleanProcessRecover{
+func newCleanProcessRecoverer(client *ctrlclient.CtrlClient, process string) Recoverer {
+	return &cleanProcessRecoverer{
 		client:  client,
 		process: process,
 	}
 }
 
-func (r *cleanProcessRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *cleanProcessRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	var pids []graphql.String
 	for _, process := range pod.Processes {
 		if process.Command == r.process {

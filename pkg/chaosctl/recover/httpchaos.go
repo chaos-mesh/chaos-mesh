@@ -23,17 +23,17 @@ import (
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
 )
 
-type httpRecover struct {
-	tproxyCleaner Recover
+type httpRecoverer struct {
+	tproxyCleaner Recoverer
 }
 
-func HTTPRecover(client *ctrlclient.CtrlClient) Recover {
-	return &httpRecover{
-		tproxyCleaner: newCleanProcessRecover(client, "tproxy"),
+func HTTPRecoverer(client *ctrlclient.CtrlClient) Recoverer {
+	return &httpRecoverer{
+		tproxyCleaner: newCleanProcessRecoverer(client, "tproxy"),
 	}
 }
 
-func (r *httpRecover) Recover(ctx context.Context, pod *PartialPod) error {
+func (r *httpRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	// TODO: need hostPath to store rules
 	err := r.tproxyCleaner.Recover(ctx, pod)
 	if err != nil {
