@@ -114,7 +114,6 @@ if [ $? -ne 0 ]; then
     code=1
 fi
 file_must_contains $log_file "\[Chaos\]: web-show-http-delay" true
-file_must_contains $log_file "\[file descriptors of PID:" true
 file_must_contains $log_file "\[podhttpchaos\]" true
 echo "Cleaning up httpchaos"
 kubectl delete -f delay.yaml
