@@ -90,8 +90,8 @@ func main() {
 				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
 			store.Bootstrap,
-			collector.NewServer,
-			ttlcontroller.NewController,
+			collector.Bootstrap,
+			ttlcontroller.Bootstrap,
 		),
 		store.Module,
 		apiserver.Module,

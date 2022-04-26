@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,16 @@
 
 import { Theme } from '@mui/material/styles'
 
-declare module '@mui/styles' {
-  interface DefaultTheme extends Theme {}
+declare module '@mui/material/styles' {
+  interface Palette {
+    secondaryContainer: Palette['primary']
+    onSecondaryContainer: Palette['primary']
+    onSurfaceVariant: Palette['primary']
+  }
+
+  interface PaletteOptions {
+    secondaryContainer: PaletteOptions['primary']
+    onSecondaryContainer: PaletteOptions['primary']
+    onSurfaceVariant: PaletteOptions['primary']
+  }
 }

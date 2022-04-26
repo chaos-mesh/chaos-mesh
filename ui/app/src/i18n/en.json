@@ -50,13 +50,17 @@
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
+      "namespaceSelectorsHelper": "Specifies the namespaces to which target Pods belong.",
+      "labelSelectorsHelper": "Specifies the labels that target Pods come with.",
+      "annotationSelectorsHelper": "Specifies the annotations that target Pods come with.",
+      "phaseSelectorsHelper": "Specifies the phases of target Pods.",
       "mode": "Mode",
-      "modeHelper": "Select the experiment mode",
+      "modeHelper": "Specifies the mode of the experiment.",
       "modeValue": "Mode Value",
       "modeValueHelper": "Please fill the mode value",
       "targetPods": "Target Pods",
-      "targetPodsPreview": "Target Pods Preview",
-      "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope",
+      "targetPodsPreview": "Preview of Pods to be injected",
+      "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope.",
       "noPodsFound": "No pods found"
     },
     "target": {
@@ -310,7 +314,7 @@
   },
   "common": {
     "add": "Add",
-    "otherOptions": "Other Options",
+    "moreOptions": "More Options",
     "batchOperation": "Batch operation",
     "cancel": "Cancel",
     "cancelEdit": "Cancel edit",
@@ -387,7 +391,7 @@
     "annotations": "Annotations",
     "namespaceSelectors": "Namespace Selectors",
     "labelSelectors": "Label Selectors",
-    "annotationsSelectors": "Annotation Selectors",
+    "annotationSelectors": "Annotation Selectors",
     "podPhaseSelectors": "Phase Selectors"
   },
   "physic": {

@@ -13,28 +13,33 @@
 // limitations under the License.
 //
 
-package chaoserr
+package tasks
 
-import (
-	"github.com/pkg/errors"
-)
+import "sync"
 
-func NotFound(name string) error {
-	return errors.Errorf("%s not found.", name)
+type LockMap[K comparable] struct {
+	sync.Map
 }
 
-type ErrNotImplemented struct {
-	name string
+func NewLockMap[K comparable]() LockMap[K] {
+	return LockMap[K]{
+		sync.Map{},
+	}
 }
 
-func (e ErrNotImplemented) Error() string {
-	return e.name + " not implement"
+func (l *LockMap[K]) Lock(key K) func() {
+	value, _ := l.LoadOrStore(key, &sync.Mutex{})
+	mtx := value.(*sync.Mutex)
+	mtx.Lock()
+
+	return func() {
+		if mtx != nil {
+			mtx.Unlock()
+		}
+	}
 }
 
-func NotImplemented(name string) error {
-	return ErrNotImplemented{name: name}
+// Del :TODO: Fix bug on deleting a using value
+func (l *LockMap[K]) Del(key K) {
+	l.Delete(key)
 }
-
-var (
-	ErrDuplicateEntity = errors.New("duplicate entity")
-)

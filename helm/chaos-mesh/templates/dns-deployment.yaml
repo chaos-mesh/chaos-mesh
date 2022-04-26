@@ -44,7 +44,7 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
-      serviceAccountName: chaos-dns-server
+      serviceAccountName: {{ .Values.dnsServer.serviceAccount }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

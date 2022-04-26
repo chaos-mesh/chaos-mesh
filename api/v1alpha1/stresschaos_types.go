@@ -160,7 +160,7 @@ type MemoryStressor struct {
 	// OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
 	// about this option.
 	// +kubebuilder:validation:Minimum=-1000
-	// +kubebuilder:validation:Maximm=1000
+	// +kubebuilder:validation:Maximum=1000
 	// +kubebuilder:default=0
 	// +optional
 	OOMScoreAdj int `json:"oomScoreAdj,omitempty"`
@@ -175,6 +175,8 @@ type CPUStressor struct {
 	Stressor `json:",inline"`
 	// Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
 	// is full loading.
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=100
 	// +optional
 	Load *int `json:"load,omitempty"`
 

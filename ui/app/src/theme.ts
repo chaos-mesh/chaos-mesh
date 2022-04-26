@@ -14,39 +14,59 @@
  * limitations under the License.
  *
  */
+
+// All options are based on https://www.figma.com/file/2J6PVAaitQPQFHBtF5LbII/UI-Interface.
+
 import { ThemeOptions, createTheme, responsiveFontSizes } from '@mui/material/styles'
 
 const common: ThemeOptions = {
-  mixins: {
-    toolbar: {
-      minHeight: 56,
-    },
-  },
-  palette: {
-    primary: {
-      main: '#172d72',
-    },
-    secondary: {
-      main: '#d32f2f',
-    },
-    background: {
-      default: '#fafafa',
-    },
-  },
-  spacing: (factor: number) => `${0.25 * factor}rem`,
+  spacing: 4,
   typography: {
+    // TODO: remove h2
     h2: {
       fontSize: '1.25rem',
       fontWeight: 700,
     },
+    // TODO: remove h3
     h3: {
       fontSize: '1.125rem',
       fontWeight: 500,
     },
+    button: {
+      textTransform: 'none',
+    },
   },
 }
 
-const theme = responsiveFontSizes(createTheme(common))
+// The light theme
+const theme = responsiveFontSizes(
+  createTheme({
+    ...common,
+    palette: {
+      primary: {
+        main: '#4159A9',
+      },
+      secondary: {
+        main: '#595D71',
+      },
+      secondaryContainer: {
+        main: '#DEE1F9',
+      },
+      onSecondaryContainer: {
+        main: '#161B2C',
+      },
+      background: {
+        default: '#fafafa',
+      },
+      onSurfaceVariant: {
+        main: '#45464E',
+      },
+      outline: {
+        main: '#76767F',
+      },
+    },
+  })
+)
 
 export const darkTheme = responsiveFontSizes(
   createTheme({
@@ -54,14 +74,26 @@ export const darkTheme = responsiveFontSizes(
     palette: {
       mode: 'dark',
       primary: {
-        main: '#9db0eb',
+        main: '#B4C4FF',
       },
       secondary: {
-        main: '#f44336',
+        main: '#C1C5DC',
+      },
+      secondaryContainer: {
+        main: '#424659',
+      },
+      onSecondaryContainer: {
+        main: '#DEE1F9',
       },
       background: {
-        paper: '#424242',
-        default: '#303030',
+        paper: '#000',
+        default: '#1B1B1F',
+      },
+      onSurfaceVariant: {
+        main: '#C6C6D0',
+      },
+      outline: {
+        main: '#90909A',
       },
     },
   })
