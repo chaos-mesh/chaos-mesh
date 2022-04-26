@@ -19,15 +19,9 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
 var step = color.New(color.FgGreen, color.Bold).SprintFunc()(">> ")
-
-func printRecover(line string) {
-	common.PrettyPrint(line, 0, common.Cyan)
-}
 
 func printStep(line string) {
 	fmt.Println(step + line)
