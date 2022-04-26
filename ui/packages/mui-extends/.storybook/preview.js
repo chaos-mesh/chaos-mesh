@@ -1,3 +1,6 @@
+import React from 'react'
+import ThemeProvider from './ThemeProvider'
+
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
   controls: {
@@ -6,4 +9,13 @@ export const parameters = {
       date: /Date$/,
     },
   },
+  layout: 'centered',
 }
+
+export const decorators = [
+  (Story) => (
+    <ThemeProvider>
+      <Story />
+    </ThemeProvider>
+  ),
+]

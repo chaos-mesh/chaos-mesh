@@ -70,7 +70,7 @@ type JVMParameter struct {
 	JVMStressCfgSpec `json:",inline"`
 
 	// +optional
-	// byteman rule name, should be unique, and will use JVMChaos' name if not set
+	// byteman rule name, should be unique, and will generate one if not set
 	Name string `json:"name"`
 
 	// +optional
