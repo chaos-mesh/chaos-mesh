@@ -31,6 +31,13 @@ What's Changed:
 ### Checklist
 <!-- Remove the items that are not applicable. -->
 
+CHANGELOG
+
+<!-- Must include at least one of them. -->
+
+- [ ] I have updated the `CHANGELOG.md`
+- [ ] I have labeled this PR with "no-need-update-changelog"
+
 Tests
 <!-- At least one of them must be included. -->
 
