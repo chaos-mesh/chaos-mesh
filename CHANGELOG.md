@@ -57,6 +57,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Must update CHANGELOG [#3148](https://github.com/chaos-mesh/chaos-mesh/pull/3148)
 - Use chaosDaemon.mtls.enabled instead of dashboard.securityMode for chaos-daemon mtls [#3168](https://github.com/chaos-mesh/chaos-mesh/pull/3168)
 - Helm charts: component chaos-dashboard use certain service account and roles [#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)
+- Refactor helm charts template, split out webhook configuration and secrets [#3159](https://github.com/chaos-mesh/chaos-mesh/pull/3159)
 
 ### Deprecated
 
@@ -144,6 +145,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix human unreadable logging timestamp [#2808](https://github.com/chaos-mesh/chaos-mesh/pull/2808) [#2902](https://github.com/chaos-mesh/chaos-mesh/pull/2902) [#2973](https://github.com/chaos-mesh/chaos-mesh/pull/2973)
 - Fix default value of percent field in iochaos [#3018](https://github.com/chaos-mesh/chaos-mesh/pull/3018)
 - Fix the unexpected CPU stress for StressChaos with cpu resource limit [#3102](https://github.com/chaos-mesh/chaos-mesh/pull/3102)
+- Fix the bug that create JVMChaos failed in workflow [#3156](https://github.com/chaos-mesh/chaos-mesh/pull/3156)
 
 ### Security
 

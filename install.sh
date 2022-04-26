@@ -1639,6 +1639,22 @@ spec:
           secret:
             secretName: chaos-mesh-webhook-certs
 ---
+# Source: chaos-mesh/templates/cert-manager-certs.yaml
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
 # Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
 # Copyright 2021 Chaos Mesh Authors.
 #
@@ -1815,7 +1831,21 @@ spec:
 # limitations under the License.
 #
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/mutating-admission-webhooks.yaml
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -2225,7 +2255,21 @@ webhooks:
         resources:
           - statuschecks
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/validating-admission-webhooks.yaml
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -2616,11 +2660,11 @@ webhooks:
         resources:
           - statuschecks
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/validating-admission-webhooks.yaml
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: validate-auth
+  name: chaos-mesh-validate-auth
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh

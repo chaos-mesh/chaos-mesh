@@ -15,36 +15,45 @@
  *
  */
 
-import { Box, Chip, TextFieldProps } from '@mui/material'
+import { Box, Chip, Select } from '@mui/material'
+import type { SelectProps, TextFieldProps } from '@mui/material'
 
-import TextField from '../TextField'
+import FormControl from '../FormControl'
+import OutlinedInput from '../OutlinedInput'
 
-export type SelectFieldProps = TextFieldProps & {
-  multiple?: boolean
-  onChipDelete?: (value: string) => (event: any) => void
+export type SelectFieldProps<T = string> = SelectProps<T> & {
+  label?: TextFieldProps['label']
+  helperText?: TextFieldProps['helperText']
+  onRenderValueDelete?: (value: string) => (event: any) => void
 }
 
-export default ({ multiple = false, onChipDelete, ...props }: SelectFieldProps) => {
-  const selectProps = {
-    ...props.SelectProps,
-    multiple,
-    renderValue: multiple
-      ? (selected: unknown) => (
-          <Box display="flex" flexWrap="wrap" mt={1}>
-            {(selected as string[]).map((val) => (
-              <Chip
-                key={val}
-                label={val}
-                color="primary"
-                onDelete={onChipDelete ? onChipDelete(val) : undefined}
-                onMouseDown={(e) => e.stopPropagation()}
-                style={{ height: 24, margin: 1 }}
-              />
-            ))}
-          </Box>
-        )
-      : undefined,
-  }
+export default function SelectField<T>({ label, helperText, onRenderValueDelete, ...props }: SelectFieldProps<T>) {
+  const { disabled, error, fullWidth } = props
 
-  return <TextField {...props} select SelectProps={selectProps} />
+  return (
+    <FormControl disabled={disabled} error={error} label={label} helperText={helperText} fullWidth={fullWidth}>
+      <Select
+        {...props}
+        input={<OutlinedInput />}
+        renderValue={
+          props.multiple
+            ? (selected: unknown) => (
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {(selected as string[]).map((val) => (
+                    <Chip
+                      key={val}
+                      label={val}
+                      color="primary"
+                      onDelete={onRenderValueDelete ? onRenderValueDelete(val) : undefined}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      sx={{ height: 24 }}
+                    />
+                  ))}
+                </Box>
+              )
+            : undefined
+        }
+      />
+    </FormControl>
+  )
 }
