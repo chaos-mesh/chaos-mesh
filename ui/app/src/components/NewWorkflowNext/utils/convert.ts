@@ -287,27 +287,37 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
     {
       apiVersion: 'chaos-mesh.org/v1alpha1',
       kind: 'Workflow',
-      metadata: {
-        // name,
-        // namespace,
-      },
+      metadata: {},
       spec: {
         entry: 'entry',
         templates,
       },
     },
     {
-      replacer: (_, value) => {
-        if (Array.isArray(value)) {
-          return value.length ? value : undefined
+      replacer: (keyPlaceholder, value) => {
+        if (_.isString(value) && value === '') {
+          return undefined
         }
 
-        switch (typeof value) {
-          case 'string':
-            return value !== '' ? value : undefined
-          default:
-            return value
+        // field === 'text-text'/'text-label'
+        if (_.has(value, 'key0')) {
+          if (_.isString(value['key0'].value)) {
+            return _.values(value).reduce((acc, { key, value: val }) => {
+              acc[key] = val
+
+              return acc
+            }, {})
+          } else {
+            console.log(_.values(value).map(({ key, value: val }) => _.zip(_.times(val.length, _.constant(key)), val)))
+            return _.values(value).map(({ key, value: val }) => _.zip(_.times(val.length, _.constant(key)), val))
+          }
         }
+
+        if (_.isArray(value) && _.isEmpty(value)) {
+          return undefined
+        }
+
+        return value
       },
     }
   )

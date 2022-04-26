@@ -64,6 +64,12 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     deadline: '',
   })
 
+  const { debugMode } = useStoreSelector((state) => state.settings)
+
+  useEffect(() => {
+    setData(workflow)
+  }, [workflow])
+
   useEffect(() => {
     setData((oldData) => {
       const oldDataObj: any = yaml.load(oldData)
@@ -83,8 +89,16 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
   const dispatch = useStoreDispatch()
 
   const submitWorkflow = () => {
+    const payload: any = yaml.load(data)
+
+    if (debugMode) {
+      console.debug('submitWorkflow => payload', payload)
+
+      return
+    }
+
     api.workflows
-      .newWorkflow(yaml.load(data) as any)
+      .newWorkflow(payload)
       .then(() => {
         dispatch(resetWorkflow())
 
