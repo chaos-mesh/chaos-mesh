@@ -1875,7 +1875,7 @@ webhooks:
     namespaceSelector:
       matchLabels:
         admission-webhook: enabled
-    failurePolicy: Ignore
+    failurePolicy: Fail
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
