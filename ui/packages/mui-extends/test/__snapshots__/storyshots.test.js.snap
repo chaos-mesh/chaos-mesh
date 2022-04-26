@@ -484,7 +484,7 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
     onMouseDown={[Function]}
   >
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1x2oa80-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1exuzsl-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -581,7 +581,7 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
     onMouseDown={[Function]}
   >
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1x2oa80-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1exuzsl-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -658,11 +658,11 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
       </fieldset>
     </div>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     Select a fruit
-  </p>
+  </div>
 </div>
 `;
 
@@ -683,7 +683,7 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
     onMouseDown={[Function]}
   >
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1x2oa80-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1exuzsl-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -760,20 +760,20 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
       </fieldset>
     </div>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     Select fruits
-  </p>
+  </div>
 </div>
 `;
 
 exports[`Storyshots Form/Checkbox Default 1`] = `
 <div
-  className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
+  className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-j204z7-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
       className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
@@ -792,7 +792,6 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
       tabIndex={null}
     >
       <input
-        checked={false}
         className="PrivateSwitchBase-input css-1m9pwf3"
         data-indeterminate={false}
         disabled={false}
@@ -802,7 +801,7 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
       />
       <svg
         aria-hidden={true}
-        className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+        className="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-ptiqhd-MuiSvgIcon-root"
         data-testid="CheckBoxOutlineBlankIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -818,20 +817,20 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
       Abort HTTP Request
     </span>
   </label>
-  <p
-    className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained Mui-required css-1wc848c-MuiFormHelperText-root"
+  <div
+    className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     Abort is a rule to abort a http session.
-  </p>
+  </div>
 </div>
 `;
 
 exports[`Storyshots Form/Checkbox Disabled 1`] = `
 <div
-  className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
+  className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root Mui-disabled MuiFormControlLabel-labelPlacementEnd css-j204z7-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root Mui-disabled MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
       aria-disabled={true}
@@ -851,7 +850,6 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
       tabIndex={-1}
     >
       <input
-        checked={false}
         className="PrivateSwitchBase-input css-1m9pwf3"
         data-indeterminate={false}
         disabled={true}
@@ -861,7 +859,7 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
       />
       <svg
         aria-hidden={true}
-        className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+        className="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-ptiqhd-MuiSvgIcon-root"
         data-testid="CheckBoxOutlineBlankIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -877,20 +875,20 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
       Abort HTTP Request
     </span>
   </label>
-  <p
-    className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained Mui-required css-1wc848c-MuiFormHelperText-root"
+  <div
+    className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     Abort is a rule to abort a http session.
-  </p>
+  </div>
 </div>
 `;
 
 exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
 <div
-  className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
+  className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-j204z7-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
       className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
@@ -919,7 +917,7 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
       />
       <svg
         aria-hidden={true}
-        className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+        className="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-ptiqhd-MuiSvgIcon-root"
         data-testid="CheckBoxIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -935,20 +933,20 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
       Abort HTTP Request
     </span>
   </label>
-  <p
-    className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained Mui-required css-1wc848c-MuiFormHelperText-root"
+  <div
+    className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     Abort could not be used with action: delay
-  </p>
+  </div>
 </div>
 `;
 
 exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
 <div
-  className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
+  className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-j204z7-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
       className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
@@ -977,7 +975,7 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
       />
       <svg
         aria-hidden={true}
-        className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+        className="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-ptiqhd-MuiSvgIcon-root"
         data-testid="CheckBoxIcon"
         focusable="false"
         viewBox="0 0 24 24"
@@ -993,9 +991,6 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
       Abort HTTP Request
     </span>
   </label>
-  <p
-    className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained Mui-required css-1wc848c-MuiFormHelperText-root"
-  />
 </div>
 `;
 
@@ -1004,7 +999,7 @@ exports[`Storyshots Form/SelectField Default 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
     variant="outlined"
   >
@@ -1074,7 +1069,7 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
     Fruits
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
     variant="outlined"
   >
@@ -1132,11 +1127,11 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
       </legend>
     </fieldset>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root Mui-disabled MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     You can not select a fruit for now
-  </p>
+  </div>
 </div>
 `;
 
@@ -1150,7 +1145,7 @@ exports[`Storyshots Form/SelectField Error 1`] = `
     Fruits
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
     variant="outlined"
   >
@@ -1207,11 +1202,11 @@ exports[`Storyshots Form/SelectField Error 1`] = `
       </legend>
     </fieldset>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     You must select a fruit
-  </p>
+  </div>
 </div>
 `;
 
@@ -1225,7 +1220,7 @@ exports[`Storyshots Form/SelectField Label And Helper Text 1`] = `
     Fruits
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
     variant="outlined"
   >
@@ -1282,11 +1277,11 @@ exports[`Storyshots Form/SelectField Label And Helper Text 1`] = `
       </legend>
     </fieldset>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     Select a fruit
-  </p>
+  </div>
 </div>
 `;
 
@@ -1295,7 +1290,7 @@ exports[`Storyshots Form/TextField Default 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
@@ -1338,7 +1333,7 @@ exports[`Storyshots Form/TextField Disabled 1`] = `
     Schedule
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
@@ -1368,11 +1363,11 @@ exports[`Storyshots Form/TextField Disabled 1`] = `
       </legend>
     </fieldset>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root Mui-disabled MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     if u dont know type what...
-  </p>
+  </div>
 </div>
 `;
 
@@ -1386,7 +1381,7 @@ exports[`Storyshots Form/TextField Error 1`] = `
     Schedule
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
@@ -1416,11 +1411,11 @@ exports[`Storyshots Form/TextField Error 1`] = `
       </legend>
     </fieldset>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root Mui-error MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     if u dont know type what...
-  </p>
+  </div>
 </div>
 `;
 
@@ -1437,7 +1432,7 @@ exports[`Storyshots Form/TextField Group 1`] = `
       Name
     </label>
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -1467,11 +1462,11 @@ exports[`Storyshots Form/TextField Group 1`] = `
         </legend>
       </fieldset>
     </div>
-    <p
+    <div
       className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
     >
       This field is required
-    </p>
+    </div>
   </div>
   <div
     className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
@@ -1482,7 +1477,7 @@ exports[`Storyshots Form/TextField Group 1`] = `
       Namespace
     </label>
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -1512,11 +1507,11 @@ exports[`Storyshots Form/TextField Group 1`] = `
         </legend>
       </fieldset>
     </div>
-    <p
+    <div
       className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
     >
       This field is optional
-    </p>
+    </div>
   </div>
 </div>
 `;
@@ -1526,7 +1521,7 @@ exports[`Storyshots Form/TextField Has Input Adornment 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedStart MuiInputBase-adornedEnd css-14vj36a-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedStart MuiInputBase-adornedEnd css-zdqiun-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <div
@@ -1603,7 +1598,7 @@ exports[`Storyshots Form/TextField Label And Helper Text 1`] = `
     Schedule
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-dormct-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
@@ -1633,10 +1628,10 @@ exports[`Storyshots Form/TextField Label And Helper Text 1`] = `
       </legend>
     </fieldset>
   </div>
-  <p
+  <div
     className="MuiFormHelperText-root MuiFormHelperText-sizeMedium MuiFormHelperText-contained css-1wc848c-MuiFormHelperText-root"
   >
     if u dont know type what...
-  </p>
+  </div>
 </div>
 `;
