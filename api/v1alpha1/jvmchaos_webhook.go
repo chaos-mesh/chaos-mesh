@@ -18,6 +18,7 @@ package v1alpha1
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -29,9 +30,8 @@ func (in *JVMChaosSpec) Default(root interface{}, field *reflect.StructField) {
 		return
 	}
 
-	jvmChaos := root.(*JVMChaos)
 	if len(in.Name) == 0 {
-		in.Name = jvmChaos.Name
+		in.Name = fmt.Sprintf("%s-%s-%s-%d", in.Class, in.Method, in.Action, time.Now().Unix())
 	}
 
 	if in.Port == 0 {
