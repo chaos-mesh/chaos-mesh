@@ -57,6 +57,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add forced recovery of httpchaos, iochaos, stresschaos, and networkchaos for chaosctl [#2992](https://github.com/chaos-mesh/chaos-mesh/pull/2992)
 - Add namespace and pod name in failed event for podxxxchaos crd [#3178](https://github.com/chaos-mesh/chaos-mesh/pull/3178)
 - Add next generation `New Workflow` in UI [#3185](https://github.com/chaos-mesh/chaos-mesh/pull/3185)
+- JVMChaos: support inject fault into MySQL client [#3189](https://github.com/chaos-mesh/chaos-mesh/pull/3189)
 
 ### Changed
 
