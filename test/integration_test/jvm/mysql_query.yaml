@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: mysql-query
-        image: xiang13225080/mysqldemo:demo
+        image: xiang13225080/mysqldemo:v1
         imagePullPolicy: IfNotPresent
         env:
         - name: MYSQL_DSN
