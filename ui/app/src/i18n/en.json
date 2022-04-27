@@ -261,7 +261,7 @@
       "choose": "The kube-system namespace is allowed to be selected in the scope when creating an experiment."
     },
     "useNextWorkflowInterface": {
-      "title": "Use the next workflow interface",
+      "title": "Use the next generation of workflow interface",
       "choose": "Over the past period of time, we have refactored the interface related to workflows. Now you can create workflows more easily in the form of the flowchart. (Note: This improvement is still under active development and the interface is still subject to change until it is stable.)"
     },
     "theme": {
