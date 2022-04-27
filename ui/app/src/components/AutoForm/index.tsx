@@ -68,7 +68,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
           target: scopeInitialValues,
         }
       : {}),
-    ...scopeInitialValues,
+    ...(kind !== 'PhysicalMachineChaos' ? scopeInitialValues : {}),
     ...(belong === Belong.Workflow ? { ...workflowNodeInfoInitialValues, templateType: kind } : {}),
   })
   const [form, setForm] = useState<AtomFormData[]>([])
@@ -231,7 +231,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     <Formik
       enableReinitialize
       initialValues={initialValues}
-      validationSchema={chooseSchemaByBelong(belong)}
+      validationSchema={chooseSchemaByBelong(belong, kind)}
       onSubmit={formikProps.onSubmit!}
     >
       {({ errors, touched }) => (
@@ -272,7 +272,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
             <Typography variant="h6" fontWeight="bold">
               <T id="newE.steps.scope" />
             </Typography>
-            <Scope namespaces={namespaces} />
+            {kind !== 'PhysicalMachineChaos' && <Scope namespaces={namespaces} />}
             <Divider />
             <Box>
               <Typography variant="h6" fontWeight="bold">

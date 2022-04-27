@@ -34,7 +34,7 @@ export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }
     size="small"
     startIcon={kind ? iconByKind(kind as any) : <CircleOutlinedIcon />}
     disableFocusRipple
-    sx={{ justifyContent: 'flex-start', width: 180, borderColor: 'outline.main', ...sx }}
+    sx={{ justifyContent: 'flex-start', width: 200, borderColor: 'outline.main', ...sx }}
     {...rest}
   />
 ))

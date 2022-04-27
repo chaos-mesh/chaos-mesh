@@ -30,14 +30,15 @@ const workflowNodeInfoSchema = {
   deadline: string().trim().required(),
 }
 
-const workflowSchema = object({
-  ...scopeInitialValuesSchema,
-  ...workflowNodeInfoSchema,
-})
+const workflowSchema = (kind: string) =>
+  object({
+    ...(kind !== 'PhysicalMachineChaos' ? scopeInitialValuesSchema : {}),
+    ...workflowNodeInfoSchema,
+  })
 
-export function chooseSchemaByBelong(belong: Belong) {
+export function chooseSchemaByBelong(belong: Belong, kind: string) {
   switch (belong) {
     case Belong.Workflow:
-      return workflowSchema
+      return workflowSchema(kind)
   }
 }
