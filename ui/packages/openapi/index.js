@@ -158,25 +158,41 @@ export function genForms(source) {
   })
 
   const allActionsPrint = printNode(
-    factory.createExportDefault(
-      factory.createObjectLiteralExpression(
-        Object.entries(allActions).map((d) =>
-          factory.createPropertyAssignment(
-            factory.createIdentifier(d[0]),
-            factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral))
+    factory.createVariableDeclarationList(
+      [
+        factory.createVariableDeclaration(
+          factory.createIdentifier('actions'),
+          undefined,
+          undefined,
+          factory.createObjectLiteralExpression(
+            Object.entries(allActions).map((d) =>
+              factory.createPropertyAssignment(
+                factory.createIdentifier(d[0]),
+                factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral))
+              )
+            ),
+            true
           )
         ),
-        true
-      )
+      ],
+      ts.NodeFlags.Const
     )
   )
-  fs.writeFile(`${appPath}/src/formik/actions.ts`, WARNING_MESSAGE + allActionsPrint + '\n', (err) => {
-    if (err) {
-      sig.error(err)
-    } else {
-      sig.success('All actions generated')
+  fs.writeFile(
+    `${appPath}/src/formik/actions.ts`,
+    WARNING_MESSAGE +
+      allActionsPrint +
+      '\n\n' +
+      printNode(factory.createExportDefault(factory.createIdentifier('actions'))) +
+      '\n',
+    (err) => {
+      if (err) {
+        sig.error(err)
+      } else {
+        sig.success('All actions generated')
+      }
     }
-  })
+  )
 }
 
 /**

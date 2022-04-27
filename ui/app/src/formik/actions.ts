@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export default {
+const actions = {
   AWSChaos: ['ec2-stop', 'ec2-restart', 'detach-volume'],
   DNSChaos: ['error', 'random'],
   GCPChaos: ['node-stop', 'node-reset', 'disk-loss'],
@@ -38,3 +38,5 @@ export default {
   StressChaos: [],
   TimeChaos: [],
 }
+
+export default actions
