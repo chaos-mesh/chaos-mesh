@@ -117,12 +117,15 @@ done
 kubectl get events -n mysql
 kubectl get nodes -o wide
 
-docker exec -it kind-control-plane curl -X GET "http://127.0.0.1:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+MYSQL_QUERY_POD_NAME=`kubectl get pods -n mysql | grep mysql-query | awk '{print $1}' | head -n 1`
+kubectl logs -n mysql $MYSQL_QUERY_POD_NAME
+
+docker exec -it chart-testing-control-plane curl -X GET "http://127.0.0.1:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "root" user_info.log
 
 kubectl apply -f mysql_query_exception.yaml
 
-docker exec -it kind-control-plane curl -X GET "http://127.0.0.1:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+docker exec -it chart-testing-control-plane curl -X GET "http://127.0.0.1:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "BOOM" user_info.log
 
 # TODO: more test
