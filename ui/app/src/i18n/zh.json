@@ -50,6 +50,10 @@
       "namespaceHelper": "选择命名空间"
     },
     "scope": {
+      "namespaceSelectorsHelper": "指定目标 Pod 所属的命名空间（namespace）。",
+      "labelSelectorsHelper": "指定目标 Pod 带有的标签（label）。",
+      "annotationSelectorsHelper": "指定目标 Pod 带有的注解（annotation）。",
+      "phaseSelectorsHelper": "指定目标 Pod 所处的阶段（phase）。",
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
@@ -308,7 +312,7 @@
   },
   "common": {
     "add": "添加",
-    "otherOptions": "其他选项",
+    "moreOptions": "更多选项",
     "batchOperation": "批量操作",
     "cancel": "取消",
     "cancelEdit": "取消修改",
@@ -385,7 +389,7 @@
     "annotations": "注解",
     "namespaceSelectors": "命名空间选择器",
     "labelSelectors": "标签选择器",
-    "annotationsSelectors": "注解选择器",
+    "annotationSelectors": "注解选择器",
     "podPhaseSelectors": "阶段选择器"
   },
   "physic": {
