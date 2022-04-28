@@ -29,7 +29,6 @@ It would use .selfSignedCAKeypair as the place to store the generated CA keypair
 
 When using this template, it requires the top-level scope.
 
-TODO: do not always use self signed CA, and move conditions (about should we use self-signed CA or CA provided by the user) into this named template, let user could specify caBundle in values.yaml.
 */}}
 {{- define "webhook.caBundleCertPEM" -}}
   {{- if .Values.webhook.caBundlePEM -}}
