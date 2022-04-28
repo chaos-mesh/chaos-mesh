@@ -29,12 +29,17 @@ scalar Int64
 
 schema {
     query: Query
+    mutation: Mutation
     subscription: Logger
 }
 
 type Query {
     namespace(ns: String): [Namespace!]
     pods(selector: PodSelectorInput!): [Pod!]
+}
+
+type Mutation {
+    pod(ns: String! = "default", name: String!): MutablePod
 }
 
 type Logger {
@@ -78,6 +83,11 @@ type Process {
     fds: [Fd!]      @goField(forceResolver: true)
 }
 
+type KillProcessResult {
+    pid: String!
+    command: String!
+}
+
 type Fd {
     fd: String!
     target: String!
@@ -117,6 +127,13 @@ input PodSelectorInput {
     # podPhaseSelectors is a set of condition of a pod at the current time.
     # supported value: Pending / Running / Succeeded / Failed / Unknown
     podPhaseSelectors: [String!]
+}
+
+type MutablePod {
+    pod: Pod!
+    killProcesses(pids: [String!]): [KillProcessResult!]    @goField(forceResolver: true)
+    cleanTcs(devices: [String!]): [String!]                 @goField(forceResolver: true)
+    cleanIptables(chains: [String!]): [String!]             @goField(forceResolver: true)
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
@@ -943,11 +960,26 @@ type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Raw
     # The name of ipset
     name: String!
 
+    ipSetType: String!
+
     # The contents of ipset
     cidrs: [String!]!
 
+	# The contents of ipset.
+	# Only available when IPSetType is NetPortIPSet.
+    cidrAndPorts: [CidrAndPort!]
+
+	# The contents of ipset.
+	# Only available when IPSetType is SetIPSet.
+    setNames: [String!]!
+
     # The name and namespace of the source network chaos
     source: String!
+}
+
+type CidrAndPort @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CidrAndPort") {
+    cidr: String!
+    port: Int!
 }
 
 # RawIptables represents the iptables rules on specific pod
