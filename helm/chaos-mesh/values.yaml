@@ -153,6 +153,11 @@ chaosDaemon:
   env: {}
   # running chaosDaemon on host network
   hostNetwork: false
+  # configurations about mtls.
+  # currently we do not support use specified ca and cert for mtls, it would generate the ca and certs when chaos mesh deploy by helm.
+  mtls:
+    # enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon
+    enabled: true
 
   # Run chaos-daemon container in privileged mode. Processes in privileged containers
   # are essentially equivalent to root on the host.
@@ -227,7 +232,7 @@ dashboard:
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # The serviceAccount for chaos-dashboard
-  serviceAccount: chaos-controller-manager
+  serviceAccount: chaos-dashboard
   image:
     # override global registry, empty value means using the global images.registry
     registry: ""
@@ -237,9 +242,7 @@ dashboard:
     tag: ""
   # Image pull policy
   imagePullPolicy: IfNotPresent
-  # securityMode would enable both of:
-  # - rbac authentication on Chaos Dashboard
-  # - chaos-daemon mtls
+  # securityMode requires user to provide credentials on Chaos Dashboard, instead of using chaos-dashboard service account
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
   gcpSecurityMode: false
@@ -451,6 +454,8 @@ webhook:
     # Setup the webhook using cert-manager
     enabled: false
   # if empty and disable certManager, Helm will auto-generate these fields
+  caBundlePEM: |
+
   crtPEM: |
 
   keyPEM: |
@@ -461,7 +466,7 @@ webhook:
   timeoutSeconds: 5
   # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
-  FailurePolicy: Ignore
+  FailurePolicy: Fail
 
   CRDS:
     - podchaos

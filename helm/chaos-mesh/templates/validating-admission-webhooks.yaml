@@ -1,0 +1,124 @@
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{{- $webhookApiVersion := include "webhook.apiVersion" . -}}
+{{- $caCert := include "webhook.caBundleCertPEM" . -}}
+{{- $crtPEM := include "webhook.certPEM" . -}}
+{{- $keyPEM := include "webhook.keyPEM" . -}}
+
+{{- $timeoutSeconds := .Values.webhook.timeoutSeconds }}
+{{- $supportTimeoutSeconds := false }}
+{{- if ge .Capabilities.KubeVersion.Minor "14" }}
+{{- $supportTimeoutSeconds = true }}
+{{- end }}
+{{- $certManagerEnabled := .Values.webhook.certManager.enabled }}
+
+apiVersion: {{ $webhookApiVersion }}
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "chaos-mesh.validation" . }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: admission-webhook
+  {{- if $certManagerEnabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
+  {{- end }}
+webhooks:
+  {{- range $crd := .Values.webhook.CRDS }}
+  {{- /* TODO: podiochaos and podhttpchaos are not in CRDS list, we could remove it later. */ -}}
+  {{- if not (or (eq $crd "podiochaos") (eq $crd "podhttpchaos")) }}
+  - clientConfig:
+      {{- if $certManagerEnabled }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
+      {{- end }}
+      service:
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace | quote }}
+        path: /validate-chaos-mesh-org-v1alpha1-{{ $crd }}
+    failurePolicy: {{ $.Values.webhook.FailurePolicy }}
+    name: v{{ $crd }}.kb.io
+    {{- if $supportTimeoutSeconds }}
+    timeoutSeconds: {{ $timeoutSeconds }}
+    {{- if eq $webhookApiVersion "admissionregistration.k8s.io/v1" }}
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    {{- end }}
+    {{- end }}
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          {{- if eq $crd "schedule" }}
+          - schedules
+          {{- else if eq $crd "workflow" }}
+          - workflows
+          {{- else if eq $crd "physicalmachine" }}
+          - physicalmachines
+          {{- else if eq $crd "statuscheck" }}
+          - statuschecks
+          {{- else }}
+          - {{ $crd }}
+          {{- end }}
+  {{- end }}
+  {{- end }}
+---
+
+apiVersion: {{ $webhookApiVersion }}
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-auth
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: admission-webhook
+  {{- if $certManagerEnabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
+  {{- end }}
+webhooks:
+  - clientConfig:
+      {{- if $certManagerEnabled }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
+      {{- end }}
+      service:
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace | quote }}
+        path: /validate-auth
+    failurePolicy: {{ .Values.webhook.FailurePolicy }}
+    name: vauth.kb.io
+    {{- if $supportTimeoutSeconds }}
+    timeoutSeconds: {{ $timeoutSeconds }}
+    {{- if eq $webhookApiVersion "admissionregistration.k8s.io/v1" }}
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    {{- end }}
+    {{- end }}
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources: [ "*" ]
