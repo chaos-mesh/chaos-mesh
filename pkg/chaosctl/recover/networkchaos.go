@@ -64,9 +64,9 @@ func (r *tcsRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 		}
 	}
 
-	var devices []graphql.String
+	var devices []string
 	for dev := range deviceSet {
-		devices = append(devices, graphql.String(dev))
+		devices = append(devices, dev)
 	}
 
 	if len(devices) == 0 {
@@ -75,24 +75,13 @@ func (r *tcsRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
 	}
 	printStep(fmt.Sprintf("cleaning tc rules for device %v", devices))
 
-	var mutation struct {
-		Pod struct {
-			CleanTcs []string `graphql:"cleanTcs(devices: $devices)"`
-		} `graphql:"pod(ns: $ns, name: $name)"`
-	}
-
-	err := r.client.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
-		"devices": devices,
-		"ns":      graphql.String(pod.Namespace),
-		"name":    graphql.String(pod.Name),
-	})
-
+	cleanedTcs, err := r.client.CleanTcs(ctx, pod.Namespace, pod.Name, devices)
 	if err != nil {
-		return errors.Wrapf(err, "cleaned tc rules for device %v", devices)
+		return err
 	}
 
-	if len(mutation.Pod.CleanTcs) != 0 {
-		printStep(fmt.Sprintf("tc rules on device %s are cleaned up", strings.Join(mutation.Pod.CleanTcs, ",")))
+	if len(cleanedTcs) != 0 {
+		printStep(fmt.Sprintf("tc rules on device %s are cleaned up", strings.Join(cleanedTcs, ",")))
 	}
 
 	return nil

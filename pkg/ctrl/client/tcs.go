@@ -14,3 +14,34 @@
 //
 
 package client
+
+import (
+	"context"
+
+	"github.com/hasura/go-graphql-client"
+	"github.com/pkg/errors"
+)
+
+func (c *CtrlClient) CleanTcs(ctx context.Context, namespace, name string, devices []string) ([]string, error) {
+	var graphqlDevices []graphql.String
+	for _, dev := range devices {
+		graphqlDevices = append(graphqlDevices, graphql.String(dev))
+	}
+	var mutation struct {
+		Pod struct {
+			CleanTcs []string `graphql:"cleanTcs(devices: $devices)"`
+		} `graphql:"pod(ns: $ns, name: $name)"`
+	}
+
+	err := c.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
+		"devices": graphqlDevices,
+		"ns":      graphql.String(namespace),
+		"name":    graphql.String(name),
+	})
+
+	if err != nil {
+		return nil, errors.Wrapf(err, "cleaned tc rules for device %v", devices)
+	}
+
+	return mutation.Pod.CleanTcs, nil
+}
