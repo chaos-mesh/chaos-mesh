@@ -17,6 +17,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -68,4 +69,40 @@ func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]*model.Proc
 		})
 	}
 	return processes, nil
+}
+
+// killProcess kill all alive processes in pids
+func (r *Resolver) killProcess(ctx context.Context, pod *v1.Pod, pids []string) ([]*model.KillProcessResult, error) {
+	pidSet := make(map[string]bool)
+	for _, pid := range pids {
+		pidSet[pid] = true
+	}
+
+	// all processes in target pod
+	allProcess, err := r.GetPidFromPS(ctx, pod)
+	if err != nil {
+		return nil, errors.Wrapf(err, "get process on pod %s/%s", pod.Namespace, pod.Name)
+	}
+
+	// the intersection of all processes and pids
+	var pidList []string
+	var killResults []*model.KillProcessResult
+
+	for _, process := range allProcess {
+		if _, ok := pidSet[process.Pid]; ok {
+			pidList = append(pidList, process.Pid)
+			killResults = append(killResults, &model.KillProcessResult{
+				Pid:     process.Pid,
+				Command: process.Command,
+			})
+		}
+	}
+	if len(pidList) == 0 {
+		return nil, nil
+	}
+	cmd := fmt.Sprintf("kill %s", strings.Join(pids, " "))
+	if _, err = r.ExecBypass(ctx, pod, cmd, bpm.PidNS, bpm.MountNS); err != nil {
+		return nil, errors.Wrapf(err, "run command %s", cmd)
+	}
+	return killResults, nil
 }
