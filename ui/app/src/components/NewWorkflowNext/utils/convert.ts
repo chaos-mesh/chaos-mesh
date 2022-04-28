@@ -294,7 +294,7 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
       },
     },
     {
-      replacer: (keyPlaceholder, value) => {
+      replacer: (key, value) => {
         if (_.isString(value) && value === '') {
           return undefined
         }
@@ -315,6 +315,16 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
 
         if (_.isArray(value) && _.isEmpty(value)) {
           return undefined
+        }
+
+        // Parse labels, annotations, labelSelectors, and annotationSelectors to object
+        if (['labels', 'annotations', 'labelSelectors', 'annotationSelectors'].includes(key)) {
+          return (value as string[]).reduce<Record<string, string>>((acc, val) => {
+            const [k, v] = val.replace(/\s/g, '').split(':')
+            acc[k] = v
+
+            return acc
+          }, {})
         }
 
         return value
