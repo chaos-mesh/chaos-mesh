@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-
+import loadable from '@loadable/component'
 import {
   Alert,
   Box,
@@ -27,29 +27,32 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { closedWidth, openedWidth } from './Sidebar'
-import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
-import { useEffect, useMemo, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Cookies from 'js-cookie'
-import { IntlProvider } from 'react-intl'
-import LS from 'lib/localStorage'
-import Loading from '@ui/mui-extends/esm/Loading'
-import Navbar from './Navbar'
-import Sidebar from './Sidebar'
-import { TokenFormValues } from 'components/Token'
+import { styled } from '@mui/material/styles'
 import api from 'api'
 import flat from 'flat'
-import insertCommonStyle from 'lib/d3/insertCommonStyle'
-import loadable from '@loadable/component'
 import messages from 'i18n/messages'
+import Cookies from 'js-cookie'
+import { useEffect, useMemo, useState } from 'react'
+import { IntlProvider } from 'react-intl'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import routes from 'routes'
-import { setNavigationBreadcrumbs } from 'slices/navigation'
-import { styled } from '@mui/material/styles'
-import { useLocation } from 'react-router-dom'
+
+import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
+import Loading from '@ui/mui-extends/esm/Loading'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+
+import Helmet from 'components/Helmet'
+import { TokenFormValues } from 'components/Token'
+
+import insertCommonStyle from 'lib/d3/insertCommonStyle'
+import LS from 'lib/localStorage'
+
+import Navbar from './Navbar'
+import { closedWidth, openedWidth } from './Sidebar'
+import Sidebar from './Sidebar'
 
 const Auth = loadable(() => import('./Auth'))
 
@@ -71,8 +74,6 @@ const Root = styled(Box, {
 
 const TopContainer = () => {
   const theme = useTheme()
-
-  const { pathname } = useLocation()
 
   const { settings, globalStatus } = useStoreSelector((state) => state)
   const { lang } = settings
@@ -158,10 +159,6 @@ const TopContainer = () => {
     insertCommonStyle()
   }, [dispatch])
 
-  useEffect(() => {
-    dispatch(setNavigationBreadcrumbs(pathname))
-  }, [dispatch, pathname])
-
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('md'))
   useEffect(() => {
     if (isTabletScreen) {
@@ -171,9 +168,8 @@ const TopContainer = () => {
 
   return (
     <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+      <CssBaseline />
       <Root open={openDrawer}>
-        <CssBaseline />
-
         <Sidebar open={openDrawer} />
         <Box component="main" sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} />
@@ -185,7 +181,19 @@ const TopContainer = () => {
             ) : (
               <Routes>
                 <Route path="/" element={<Navigate replace to="/dashboard" />} />
-                {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+                {!authOpen &&
+                  routes.map(({ path, element, title }) => (
+                    <Route
+                      key={path}
+                      path={path}
+                      element={
+                        <>
+                          <Helmet title={title} />
+                          {element}
+                        </>
+                      }
+                    />
+                  ))}
               </Routes>
             )}
           </Container>

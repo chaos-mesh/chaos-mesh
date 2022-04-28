@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,9 @@
  * limitations under the License.
  *
  */
-import { combineReducers } from 'redux'
+import Helmet from 'react-helmet'
+import type { HelmetProps } from 'react-helmet'
 
-import experiments from 'slices/experiments'
-import globalStatus from 'slices/globalStatus'
-import settings from 'slices/settings'
-import workflows from 'slices/workflows'
-
-export default combineReducers({
-  settings,
-  globalStatus,
-  experiments,
-  workflows,
-})
+export default function CustomHelmet(props: HelmetProps) {
+  return <Helmet {...props} titleTemplate="%s | Chaos Mesh" />
+}

@@ -15,10 +15,6 @@
  *
  */
 
-export function toTitleCase(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
   return Object.entries(obj)
     .filter((d) => !filters?.includes(d[0]))
