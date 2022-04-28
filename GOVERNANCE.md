@@ -21,7 +21,7 @@ As one continue to contribute to the project and engage with community, they may
 
 ### Member
 
-Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously active contributors in the community. They may have lightweight issues and PRs assigned to them, contribute tutorials, use cases, and are expected to remain active contributors to the project.
+Chaos Mesh [Members](https://github.com/orgs/chaos-mesh/people) are continuously active contributors in the community. There are multiple ways to stay "active" and engaged with us - contributing to codes, raising issues, writing tutorials and case studies, and even answering questions. 
 
 To become a Chaos Mesh member, you are expected to: 
 
@@ -32,7 +32,7 @@ To become a Chaos Mesh member, you are expected to:
 - Have read [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md).
 - Sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
 
-Contributors that meet the above requirements will then be nominated by their sponsor at the next available [community meeting](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit) to become a member. The existing maintainers will confer and decide whether to grant membership or not. 
+Contributors that meet the above requirements will then be nominated by their sponsor at the next available [community meeting](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit) to become a member. The maintainers will confer and decide whether to grant membership or not. Chaos Mesh members will be invited into the Chaos Mesh organization, which is recognized by the Chaos Mesh badge under the profile.
 
 Members are expected to respond to issues and PRs assigned to them, and be the owners of the code or docs they have contributed. Members that have not contributed to the project or community in any way in over 6 months will lose their membership.
 
@@ -42,7 +42,7 @@ As one gains experience and familiarity with the project and as their commitment
 
 Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. Committership allows contributors to more easily carry on with their project-related activities by giving them direct access to the project’s resources. 
 
-Typically, a potential committer will need to show that they have a sufficient understanding of the project, its objectives, and its strategy. To become a committer, you are expected to: 
+Typically, a potential committer needs to show that they have a sufficient understanding of the project, its objectives, and its strategy. To become a committer, you are expected to:  
 
 - Be a Chaos Mesh member.
 - Express interest to the existing maintainers that you are interested in becoming a committer.
