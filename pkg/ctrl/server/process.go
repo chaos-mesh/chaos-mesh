@@ -71,18 +71,22 @@ func (r *Resolver) GetPidFromPS(ctx context.Context, pod *v1.Pod) ([]*model.Proc
 	return processes, nil
 }
 
-// GetPidFromPS returns pid-command pairs
+// killProcess kill all alive processes in pids
 func (r *Resolver) killProcess(ctx context.Context, pod *v1.Pod, pids []string) ([]*model.KillProcessResult, error) {
 	pidSet := make(map[string]bool)
 	for _, pid := range pids {
 		pidSet[pid] = true
 	}
-	var pidList []string
-	var killResults []*model.KillProcessResult
+
+	// all processes in target pod
 	allProcess, err := r.GetPidFromPS(ctx, pod)
 	if err != nil {
 		return nil, errors.Wrapf(err, "get process on pod %s/%s", pod.Namespace, pod.Name)
 	}
+
+	// the intersection of all processes and pids
+	var pidList []string
+	var killResults []*model.KillProcessResult
 
 	for _, process := range allProcess {
 		if _, ok := pidSet[process.Pid]; ok {
