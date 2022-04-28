@@ -14,35 +14,18 @@
  * limitations under the License.
  *
  */
-
-import { ElementDragData, ElementTypes } from './types'
-
-import BareNode from '../BareNode'
-import type { BareNodeProps } from '../BareNode'
-import Space from '@ui/mui-extends/esm/Space'
 import { Typography } from '@mui/material'
-import _ from 'lodash'
 import _actions from 'formik/actions'
-import { useDrag } from 'react-dnd'
+import _ from 'lodash'
+
+import Space from '@ui/mui-extends/esm/Space'
+
+import DraggableBareNode from './DraggableBareNode'
+import { ElementTypes, ElementsProps } from './types'
 
 const actions: Record<string, string[]> = _.omit(_actions, 'PhysicalMachineChaos')
 
-const DraggableBareNode = ({ kind, act, sx, ...rest }: BareNodeProps & ElementDragData) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: ElementTypes.Kubernetes,
-    item: {
-      kind,
-      act,
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }))
-
-  return <BareNode sx={{ cursor: isDragging ? 'grab' : 'pointer' }} kind={kind} {...rest} ref={drag} />
-}
-
-export default function Kubernetes() {
+export default function Kubernetes({ onClickElement }: ElementsProps) {
   return (
     <Space>
       {Object.entries(actions).map(([kind, list]) => (
@@ -55,12 +38,20 @@ export default function Kubernetes() {
               .filter((action) => action !== 'netem') // TODO: support NetworkChaos/netem
               .map((action) => (
                 // TODO: refactor ExperimentKind
-                <DraggableBareNode key={action} kind={kind} act={action}>
+                <DraggableBareNode
+                  key={action}
+                  elementType={ElementTypes.Kubernetes}
+                  kind={kind}
+                  act={action}
+                  onClickNode={onClickElement}
+                >
                   {action}
                 </DraggableBareNode>
               ))
           ) : (
-            <DraggableBareNode kind={kind}>{kind}</DraggableBareNode>
+            <DraggableBareNode elementType={ElementTypes.Kubernetes} kind={kind} onClickNode={onClickElement}>
+              {kind}
+            </DraggableBareNode>
           )}
         </Space>
       ))}

@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
-
+import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import { Button } from '@mui/material'
 import type { ButtonProps } from '@mui/material'
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import { forwardRef } from 'react'
+
 import { iconByKind } from 'lib/byKind'
 
 export type BareNodeProps = ButtonProps & {

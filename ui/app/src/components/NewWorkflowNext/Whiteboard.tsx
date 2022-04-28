@@ -14,26 +14,30 @@
  * limitations under the License.
  *
  */
-
-import AutoForm, { Belong } from 'components/AutoForm'
-import { Box, Drawer } from '@mui/material'
-import { ElementDragData, ElementTypes } from './Elements/types'
-import type { Node, ReactFlowInstance } from 'react-flow-renderer'
-import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
-import { insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
 import DeleteIcon from '@mui/icons-material/Delete'
-import type { DropTargetMonitor } from 'react-dnd'
-import FlowNode from './FlowNode'
+import { Box, Drawer } from '@mui/material'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import type { DropTargetMonitor, XYCoord } from 'react-dnd'
+import { useDrop } from 'react-dnd'
+import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
+import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
+import { v4 as uuidv4 } from 'uuid'
+
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
-import { concatKindAction } from 'lib/utils'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
 import { setConfirm } from 'slices/globalStatus'
-import { useDrop } from 'react-dnd'
-import { v4 as uuidv4 } from 'uuid'
+import { insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
+
+import AutoForm, { Belong } from 'components/AutoForm'
+import { T } from 'components/T'
+
+import { concatKindAction } from 'lib/utils'
+
+import { ElementDragData, ElementTypes } from './Elements/types'
+import FlowNode from './FlowNode'
 
 type DropItem = ElementDragData
 type Identifier = DropItem
@@ -120,9 +124,17 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     cleanup()
   }
 
-  const addNode = (item: DropItem, monitor: DropTargetMonitor) => {
+  const addNode = (item: DropItem, monitor: DropTargetMonitor, xyCoord?: XYCoord) => {
     const whiteboardRect = document.getElementById('workflows-whiteboard')!.getBoundingClientRect()
-    const sourceRect = monitor.getSourceClientOffset()
+    let position: XYPosition
+
+    if (xyCoord) {
+      position = xyCoord
+    } else {
+      const sourceRect = monitor.getSourceClientOffset()
+
+      position = { x: sourceRect!.x - whiteboardRect.x, y: sourceRect!.y - whiteboardRect.y }
+    }
 
     const id = uuidv4()
 
@@ -131,7 +143,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
       {
         id,
         type: 'flowNode',
-        position: { x: sourceRect!.x - whiteboardRect.x, y: sourceRect!.y - whiteboardRect.y },
+        position,
         data: {
           origin: oldNodes.length === 0,
           tooltipProps: {
@@ -183,17 +195,19 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     dispatch(removeWorkflowNode(id))
   }
 
+  const initNode = (item: DropItem, monitor: DropTargetMonitor, xyCoord?: XYCoord) => {
+    // Add new node into flow.
+    const id = addNode(item, monitor, xyCoord)
+    // Start generating form.
+    setIdentifier({ ...item, id })
+
+    // Open form builder after adding new node.
+    setOpenDrawer(true)
+  }
+
   const [, drop] = useDrop(() => ({
     accept: [ElementTypes.Kubernetes, ElementTypes.PhysicalNodes],
-    drop: (item: DropItem, monitor) => {
-      // Add new node into flow.
-      const id = addNode(item, monitor)
-      // Start generating form.
-      setIdentifier({ ...item, id })
-
-      // Open form builder after adding new node.
-      setOpenDrawer(true)
-    },
+    drop: initNode,
   }))
 
   return (
@@ -203,6 +217,8 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         id="workflows-whiteboard"
         onInit={(flow) => {
           if (flowRef) {
+            ;(flow as any).initNode = initNode
+
             flowRef.current = flow
           }
         }}

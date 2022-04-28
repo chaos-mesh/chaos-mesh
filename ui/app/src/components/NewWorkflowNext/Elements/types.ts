@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import type { AutoFormProps } from 'components/AutoForm'
 
 export enum ElementTypes {
@@ -23,3 +22,7 @@ export enum ElementTypes {
 }
 
 export type ElementDragData = Omit<AutoFormProps, 'formikProps'>
+
+export interface ElementsProps {
+  onClickElement: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
+}

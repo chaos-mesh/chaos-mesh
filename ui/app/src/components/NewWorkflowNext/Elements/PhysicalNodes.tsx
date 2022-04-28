@@ -14,37 +14,26 @@
  * limitations under the License.
  *
  */
-
-import { ElementDragData, ElementTypes } from './types'
-
-import BareNode from '../BareNode'
-import type { BareNodeProps } from '../BareNode'
-import Space from '@ui/mui-extends/esm/Space'
 import _actions from 'formik/actions'
-import { useDrag } from 'react-dnd'
+
+import Space from '@ui/mui-extends/esm/Space'
+
+import DraggableBareNode from './DraggableBareNode'
+import { ElementTypes, ElementsProps } from './types'
 
 const actions = _actions['PhysicalMachineChaos']
 
-const DraggableBareNode = ({ kind, act, sx, ...rest }: BareNodeProps & ElementDragData) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: ElementTypes.PhysicalNodes,
-    item: {
-      kind,
-      act,
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }))
-
-  return <BareNode sx={{ cursor: isDragging ? 'grab' : 'pointer' }} kind={kind} {...rest} ref={drag} />
-}
-
-export default function PhysicalNodes() {
+export default function PhysicalNodes({ onClickElement }: ElementsProps) {
   return (
     <Space>
-      {actions.map((action) => (
-        <DraggableBareNode key={action} kind="PhysicalMachineChaos" act={action}>
+      {actions.sort().map((action) => (
+        <DraggableBareNode
+          key={action}
+          elementType={ElementTypes.PhysicalNodes}
+          kind="PhysicalMachineChaos"
+          act={action}
+          onClickNode={onClickElement}
+        >
           {action}
         </DraggableBareNode>
       ))}

@@ -14,17 +14,19 @@
  * limitations under the License.
  *
  */
-
 import { Badge, Box, Button, Divider, Grow, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
+import type { ReactFlowInstance } from 'react-flow-renderer'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import KubernetesElements from './Elements/Kubernetes'
 import { LoadRecentlyUsedExperiments } from 'slices/workflows'
-import Paper from '@ui/mui-extends/esm/Paper'
+
+import KubernetesElements from './Elements/Kubernetes'
 import PhysicalNodesElements from './Elements/PhysicalNodes'
-import type { ReactFlowInstance } from 'react-flow-renderer'
-import Space from '@ui/mui-extends/esm/Space'
 import SubmitWorkflow from './SubmitWorkflow'
 import Whiteboard from './Whiteboard'
 import { flowToWorkflow } from './utils/convert'
@@ -41,6 +43,10 @@ export default function NewWorkflow() {
   }, [dispatch])
 
   const flowRef = useRef<ReactFlowInstance>()
+
+  const handleClickElement = (kind: string, act?: string) => {
+    ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 50, y: 50 })
+  }
 
   const onFinishWorkflow = () => {
     const nds = flowRef.current?.getNodes()!
@@ -88,21 +94,21 @@ export default function NewWorkflow() {
               <Box>
                 <Typography fontWeight="medium">Kubernetes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>
-                  Drag items below into the board to create a Chaos in Kubernetes.
+                  Drag or click items below into the board to create a Chaos in Kubernetes.
                 </Typography>
               </Box>
               <Box sx={{ height: 450, overflowY: 'auto' }}>
-                <KubernetesElements />
+                <KubernetesElements onClickElement={handleClickElement} />
               </Box>
               <Divider />
               <Box>
                 <Typography fontWeight="medium">Physical Nodes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>
-                  Drag items below into the board to create a PhysicalMachineChaos.
+                  Drag or click items below into the board to create a PhysicalMachineChaos.
                 </Typography>
               </Box>
               <Box sx={{ height: 450, overflowY: 'auto' }}>
-                <PhysicalNodesElements />
+                <PhysicalNodesElements onClickElement={handleClickElement} />
               </Box>
             </Space>
             <Space sx={{ flex: 1, px: 4 }}>
