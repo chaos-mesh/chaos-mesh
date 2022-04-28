@@ -29,7 +29,7 @@ type ioRecoverer struct {
 
 func IORecoverer(client *ctrlclient.CtrlClient) Recoverer {
 	return &ioRecoverer{
-		todaCleaner: newCleanProcessRecoverer(client, "tproxy"),
+		todaCleaner: newCleanProcessRecoverer(client, "toda"),
 	}
 }
 
