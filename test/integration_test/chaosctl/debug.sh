@@ -106,7 +106,7 @@ spec:
   duration: "30s" # duration for the injected chaos experiment
 EOF
 kubectl apply -f delay.yaml
-
+sleep 3
 echo "Checking chaosctl debug httpchaos"
 ./bin/chaosctl debug httpchaos web-show-http-delay >$log_file 2>&1
 if [ $? -ne 0 ]; then
