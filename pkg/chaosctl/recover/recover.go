@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hasura/go-graphql-client"
 	"github.com/pkg/errors"
 
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
@@ -58,10 +57,10 @@ func newCleanProcessRecoverer(client *ctrlclient.CtrlClient, process string) Rec
 }
 
 func (r *cleanProcessRecoverer) Recover(ctx context.Context, pod *PartialPod) error {
-	var pids []graphql.String
+	var pids []string
 	for _, process := range pod.Processes {
 		if process.Command == r.process {
-			pids = append(pids, graphql.String(process.Pid))
+			pids = append(pids, process.Pid)
 		}
 	}
 
@@ -71,30 +70,12 @@ func (r *cleanProcessRecoverer) Recover(ctx context.Context, pod *PartialPod) er
 	}
 	printStep(fmt.Sprintf("cleaning %s processes: %v", r.process, pids))
 
-	var mutation struct {
-		Pod struct {
-			KillProcesses []struct {
-				Pid, Command string
-			} `graphql:"killProcesses(pids: $pids)"`
-		} `graphql:"pod(ns: $ns, name: $name)"`
-	}
-
-	err := r.client.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
-		"pids": pids,
-		"ns":   graphql.String(pod.Namespace),
-		"name": graphql.String(pod.Name),
-	})
-
+	killedPids, err := r.client.KillProcesses(ctx, pod.Namespace, pod.Name, pids)
 	if err != nil {
-		return errors.Wrapf(err, "kill %s processes(%v)", r.process, pids)
+		return errors.Wrapf(err, "kill %s processes", r.process)
 	}
-
-	if len(mutation.Pod.KillProcesses) != 0 {
-		var cleanedPids []string
-		for _, process := range mutation.Pod.KillProcesses {
-			cleanedPids = append(cleanedPids, process.Pid)
-		}
-		printStep(fmt.Sprintf("%s processes(%s) are cleaned up", r.process, strings.Join(cleanedPids, ", ")))
+	if len(killedPids) != 0 {
+		printStep(fmt.Sprintf("%s processes(%s) are cleaned up", r.process, strings.Join(killedPids, ", ")))
 	}
 
 	return nil
