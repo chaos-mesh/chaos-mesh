@@ -6,7 +6,7 @@ Chaos Mesh is a meritocratic, consensus-based community project. Anyone with an 
 
 ### Contributor
 
-Contributors are community members who contribute in concrete ways to the project. Anyone can contribute to the project and become a contributor, regardless of their skillset.  There is no expectation of commitment to the project, no specific skill requirements, and no selection process. There are many ways to contribute to the project, which may be one or more of the following (but not limited to):
+Contributors are community members who contribute in concrete ways to the project. Anyone can contribute to the project and become a contributor, regardless of their skillset. There is no expectation of commitment to the project, no specific skill requirements, and no selection process. There are many ways to contribute to the project, which may be one or more of the following (but not limited to):
 
 - Reporting or fixing bugs.
 - Identifying requirements, strengths, and weaknesses.
@@ -17,7 +17,7 @@ Contributors are community members who contribute in concrete ways to the projec
 
 For first-time contributors, it’s recommended to start by going through [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md), and joining our community Slack channel.
 
-As one continue to contribute to the project and engage with community, they may at some point be eligible to become a member. 
+As one continues to contribute to the project and engage with the community, he/she may at some point become eligible for a Chaos Mesh Member.  
 
 ### Member
 
