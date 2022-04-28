@@ -22,7 +22,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hasura/go-graphql-client"
 	"github.com/pingcap/errors"
 
 	ctrlclient "github.com/chaos-mesh/chaos-mesh/pkg/ctrl/client"
@@ -111,10 +110,10 @@ func (r *iptablesRecoverer) Recover(ctx context.Context, pod *PartialPod) error 
 		}
 	}
 
-	var chains []graphql.String
+	var chains []string
 	for chain, ok := range chainSet {
 		if ok {
-			chains = append(chains, graphql.String(chain))
+			chains = append(chains, chain)
 		}
 	}
 
@@ -124,24 +123,13 @@ func (r *iptablesRecoverer) Recover(ctx context.Context, pod *PartialPod) error 
 	}
 	printStep(fmt.Sprintf("cleaning iptables rules for chains %v", chains))
 
-	var mutation struct {
-		Pod struct {
-			CleanIptables []string `graphql:"cleanIptables(chains: $chains)"`
-		} `graphql:"pod(ns: $ns, name: $name)"`
-	}
-
-	err := r.client.QueryClient.Mutate(ctx, &mutation, map[string]interface{}{
-		"chains": chains,
-		"ns":     graphql.String(pod.Namespace),
-		"name":   graphql.String(pod.Name),
-	})
-
+	cleanedChains, err := r.client.CleanIptables(ctx, pod.Namespace, pod.Name, chains)
 	if err != nil {
-		return errors.Wrapf(err, "cleaned iptables rules for chains %v", chains)
+		return err
 	}
 
-	if len(mutation.Pod.CleanIptables) != 0 {
-		printStep(fmt.Sprintf("iptables rules in chains %s are cleaned up", strings.Join(mutation.Pod.CleanIptables, ",")))
+	if len(cleanedChains) != 0 {
+		printStep(fmt.Sprintf("iptables rules in chains %s are cleaned up", strings.Join(cleanedChains, ",")))
 	}
 
 	return nil
