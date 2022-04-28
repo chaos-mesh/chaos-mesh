@@ -23,7 +23,7 @@ import { ElementTypes, ElementsProps } from './types'
 
 const actions = _actions['PhysicalMachineChaos']
 
-export default function PhysicalNodes({ onClickElement }: ElementsProps) {
+export default function PhysicalNodes({ onElementClick }: ElementsProps) {
   return (
     <Space>
       {actions.sort().map((action) => (
@@ -32,7 +32,7 @@ export default function PhysicalNodes({ onClickElement }: ElementsProps) {
           elementType={ElementTypes.PhysicalNodes}
           kind="PhysicalMachineChaos"
           act={action}
-          onClickNode={onClickElement}
+          onNodeClick={onElementClick}
         >
           {action}
         </DraggableBareNode>

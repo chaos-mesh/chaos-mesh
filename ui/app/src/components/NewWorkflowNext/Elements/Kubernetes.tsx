@@ -25,7 +25,7 @@ import { ElementTypes, ElementsProps } from './types'
 
 const actions: Record<string, string[]> = _.omit(_actions, 'PhysicalMachineChaos')
 
-export default function Kubernetes({ onClickElement }: ElementsProps) {
+export default function Kubernetes({ onElementClick }: ElementsProps) {
   return (
     <Space>
       {Object.entries(actions).map(([kind, list]) => (
@@ -43,13 +43,13 @@ export default function Kubernetes({ onClickElement }: ElementsProps) {
                   elementType={ElementTypes.Kubernetes}
                   kind={kind}
                   act={action}
-                  onClickNode={onClickElement}
+                  onNodeClick={onElementClick}
                 >
                   {action}
                 </DraggableBareNode>
               ))
           ) : (
-            <DraggableBareNode elementType={ElementTypes.Kubernetes} kind={kind} onClickNode={onClickElement}>
+            <DraggableBareNode elementType={ElementTypes.Kubernetes} kind={kind} onNodeClick={onElementClick}>
               {kind}
             </DraggableBareNode>
           )}

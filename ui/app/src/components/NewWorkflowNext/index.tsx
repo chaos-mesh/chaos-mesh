@@ -45,7 +45,7 @@ export default function NewWorkflow() {
   const flowRef = useRef<ReactFlowInstance>()
 
   const handleClickElement = (kind: string, act?: string) => {
-    ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 50, y: 50 })
+    ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 50, y: 50 }) // TODO: calculate the appropriate coordinates automatically
   }
 
   const onFinishWorkflow = () => {
@@ -98,7 +98,7 @@ export default function NewWorkflow() {
                 </Typography>
               </Box>
               <Box sx={{ height: 450, overflowY: 'auto' }}>
-                <KubernetesElements onClickElement={handleClickElement} />
+                <KubernetesElements onElementClick={handleClickElement} />
               </Box>
               <Divider />
               <Box>
@@ -108,7 +108,7 @@ export default function NewWorkflow() {
                 </Typography>
               </Box>
               <Box sx={{ height: 450, overflowY: 'auto' }}>
-                <PhysicalNodesElements onClickElement={handleClickElement} />
+                <PhysicalNodesElements onElementClick={handleClickElement} />
               </Box>
             </Space>
             <Space sx={{ flex: 1, px: 4 }}>

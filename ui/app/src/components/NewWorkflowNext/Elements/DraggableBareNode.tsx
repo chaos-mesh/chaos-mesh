@@ -23,10 +23,18 @@ import { ElementTypes } from './types'
 interface DraggableBareNodeProps extends BareNodeProps {
   elementType: ElementTypes
   act?: string
-  onClickNode?: (kind: string, act?: string) => void
+
+  /**
+   * A special click handler that receives `kind` and `act` as arguments.
+   *
+   * It will be covered by the original `onClick` event.
+   *
+   * @memberof DraggableBareNodeProps
+   */
+  onNodeClick?: (kind: string, act?: string) => void
 }
 
-const DraggableBareNode = ({ elementType, kind, act, onClickNode, sx, ...rest }: DraggableBareNodeProps) => {
+const DraggableBareNode = ({ elementType, kind, act, onNodeClick, sx, ...rest }: DraggableBareNodeProps) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: elementType,
     item: {
@@ -43,8 +51,8 @@ const DraggableBareNode = ({ elementType, kind, act, onClickNode, sx, ...rest }:
       kind={kind}
       sx={{ cursor: isDragging ? 'grab' : 'pointer' }}
       {...(kind &&
-        onClickNode && {
-          onClick: () => onClickNode(kind, act),
+        onNodeClick && {
+          onClick: () => onNodeClick(kind, act),
         })}
       {...rest}
       ref={drag}

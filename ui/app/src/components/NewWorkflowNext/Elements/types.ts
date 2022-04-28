@@ -24,5 +24,5 @@ export enum ElementTypes {
 export type ElementDragData = Omit<AutoFormProps, 'formikProps'>
 
 export interface ElementsProps {
-  onClickElement: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
+  onElementClick: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
 }
