@@ -38,7 +38,10 @@ Interacting with chaos mesh
   chaosctl debug networkchaos
 
   # show logs of all chaos-mesh components
-  chaosctl logs`,
+  chaosctl logs
+
+  # forcedly recover chaos from pods
+  chaosctl recover networkchaos pod1 -n test`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -97,12 +100,11 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	// TODO: register recovers
-	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecoverBuilder{
-		networkChaos: recover.NewNoopRecover,
-		ioChaos:      recover.NewNoopRecover,
-		httpChaos:    recover.NewNoopRecover,
-		stressChaos:  recover.NewNoopRecover,
+	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecovererBuilder{
+		httpChaos:    recover.HTTPRecoverer,
+		ioChaos:      recover.IORecoverer,
+		stressChaos:  recover.StressRecoverer,
+		networkChaos: recover.NetworkRecoverer,
 	})
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
