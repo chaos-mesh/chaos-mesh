@@ -68,22 +68,6 @@ const awsCommon: Spec = {
   },
 }
 
-const blockCommon: Spec = {
-  containerNames: {
-    field: 'label',
-    label: 'Affected container names',
-    value: [],
-    helperText:
-      "Optional. Type string and end with a TAB to generate the container names. If it's empty, the first container will be injected",
-  },
-  volumeName: {
-    field: 'text',
-    label: 'Volume name',
-    value: '',
-    helperText: 'The name of the volume',
-  },
-}
-
 const dnsCommon: Spec = {
   patterns: {
     field: 'label',
@@ -339,50 +323,6 @@ const data: Record<Kind, Definition> = {
             value: '',
             helperText: 'The ID of a EBS volume',
           },
-        },
-      },
-    ],
-  },
-  BlockChaos: {
-    categories: [
-      {
-        name: 'Delay',
-        key: 'delay',
-        spec: {
-          action: 'delay' as any,
-          latency: {
-            field: 'text',
-            label: 'Latency',
-            value: '',
-            helperText: 'The latency of delay',
-          },
-          jitter: {
-            field: 'text',
-            label: 'Jitter',
-            value: '',
-            helperText: 'The jitter of delay',
-          },
-          correlation: {
-            field: 'text',
-            label: 'Correlation',
-            value: '',
-            helperText: 'The correlation of delay',
-          },
-          ...blockCommon,
-        },
-      },
-      {
-        name: 'Limit',
-        key: 'limit',
-        spec: {
-          action: 'limit' as any,
-          iops: {
-            field: 'number',
-            label: 'IOPS',
-            value: 0,
-            helperText: 'The maximum IOPS',
-          },
-          ...blockCommon,
         },
       },
     ],

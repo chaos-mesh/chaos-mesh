@@ -74,12 +74,10 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - nodes
-      - persistentvolumes
-      - persistentvolumeclaims
       {{- if .Values.clusterScoped }}
       - namespaces
       - services
-      {{- end }}
+    {{- end }}
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:

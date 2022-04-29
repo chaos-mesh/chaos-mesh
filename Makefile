@@ -42,7 +42,6 @@ PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
 
 export GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
-export YARN_BUILD_CACHE ?= $(ROOT)/.cache/yarn
 
 BUILD_TAGS ?=
 
@@ -56,7 +55,7 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REG
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) IN_DOCKER=$(IN_DOCKER) \
 	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PROJECT=$(IMAGE_PROJECT) IMAGE_REGISTRY=$(IMAGE_REGISTRY) \
 	TARGET_PLATFORM=$(TARGET_PLATFORM) \
-	GO_BUILD_CACHE=$(GO_BUILD_CACHE) YARN_BUILD_CACHE=$(YARN_BUILD_CACHE)
+	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
 RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)

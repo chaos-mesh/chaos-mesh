@@ -69,9 +69,6 @@
       "aws": {
         "title": "AWS Fault"
       },
-      "block": {
-        "title": "Block Fault"
-      },
       "disk": {
         "title": "Disk Fault"
       },
@@ -81,6 +78,7 @@
       "gcp": {
         "title": "GCP Fault"
       },
+
       "io": {
         "title": "IO Injection"
       },
