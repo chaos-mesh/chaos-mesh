@@ -14,26 +14,27 @@
  * limitations under the License.
  *
  */
-import { Chip, CircularProgress, useTheme } from '@mui/material'
 
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ErrorIcon from '@mui/icons-material/Error'
-import { Experiment } from 'api/experiments.type'
-import HelpIcon from '@mui/icons-material/Help'
-import PauseCircleFilledIcon from '@mui/icons-material/PauseCircleFilled'
-import { Workflow } from 'api/workflows.type'
-import i18n from 'components/T'
-import { useIntl } from 'react-intl'
+import { CircularProgress, Typography, styled, useTheme } from '@mui/material'
+
+import Space from '@ui/mui-extends/esm/Space'
+import { T } from 'components/T'
+
+const Circle = styled('div')((props) => ({
+  width: 8,
+  height: 8,
+  backgroundColor: props.color,
+  borderRadius: '50%',
+}))
 
 interface StatusLabelProps {
-  status: Workflow['status'] | Experiment['status']
+  status: string
 }
 
 const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
-  const intl = useIntl()
   const theme = useTheme()
 
-  const label = i18n(`status.${status}`, intl)
+  const label = <T id={`status.${status}`} />
 
   let color
   switch (status) {
@@ -60,37 +61,22 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
 
   let icon
   switch (status) {
-    case 'finished':
-      icon = <CheckCircleIcon style={{ color }} />
-
-      break
     case 'injecting':
     case 'running':
     case 'deleting':
-      icon = (
-        <CircularProgress
-          size={15}
-          disableShrink
-          sx={{ ml: (theme) => `${theme.spacing(1)} !important`, color: `${color} !important` }}
-        />
-      )
-
-      break
-    case 'paused':
-      icon = <PauseCircleFilledIcon style={{ color }} />
-
-      break
-    case 'unknown':
-      icon = <HelpIcon style={{ color }} />
-
-      break
-    case 'failed':
-      icon = <ErrorIcon style={{ color }} />
+      icon = <CircularProgress size={12} disableShrink sx={{ color }} />
 
       break
   }
 
-  return <Chip variant="outlined" size="small" icon={icon} label={label} sx={{ color, borderColor: color }} />
+  return (
+    <Space spacing={1} direction="row" alignItems="center">
+      {icon || <Circle color={color} />}
+      <Typography variant="body2" fontWeight="500" sx={{ color }}>
+        {label}
+      </Typography>
+    </Space>
+  )
 }
 
 export default StatusLabel

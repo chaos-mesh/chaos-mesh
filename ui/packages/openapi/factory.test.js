@@ -38,7 +38,7 @@ describe('openapi => factory', () => {
     expect(typeTextToInitialValue('Array<number>').elements).toBeInstanceOf(Array)
     expect(typeTextToInitialValue('{ [key: string]: string }').properties.length).toBe(0)
     expect(typeTextToInitialValue('number').text).toBe('0')
-    expect(typeTextToInitialValue('boolean').elements).toBeInstanceOf(Array)
+    expect(typeTextToInitialValue('boolean').kind).toBe(ts.SyntaxKind.FalseKeyword)
     expect(() => typeTextToInitialValue('other')).toThrowError()
   })
 

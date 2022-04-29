@@ -22,16 +22,6 @@ import { ThemeOptions, createTheme, responsiveFontSizes } from '@mui/material/st
 const common: ThemeOptions = {
   spacing: 4,
   typography: {
-    // TODO: remove h2
-    h2: {
-      fontSize: '1.25rem',
-      fontWeight: 700,
-    },
-    // TODO: remove h3
-    h3: {
-      fontSize: '1.125rem',
-      fontWeight: 500,
-    },
     button: {
       textTransform: 'none',
     },
@@ -55,11 +45,14 @@ const theme = responsiveFontSizes(
       onSecondaryContainer: {
         main: '#161B2C',
       },
-      background: {
-        default: '#fafafa',
+      surfaceVariant: {
+        main: '#E2E1EC',
       },
       onSurfaceVariant: {
         main: '#45464E',
+      },
+      background: {
+        default: '#fafafa',
       },
       outline: {
         main: '#76767F',
@@ -85,12 +78,15 @@ export const darkTheme = responsiveFontSizes(
       onSecondaryContainer: {
         main: '#DEE1F9',
       },
-      background: {
-        paper: '#000',
-        default: '#1B1B1F',
+      surfaceVariant: {
+        main: '#45464E',
       },
       onSurfaceVariant: {
         main: '#C6C6D0',
+      },
+      background: {
+        paper: '#000',
+        default: '#1B1B1F',
       },
       outline: {
         main: '#90909A',
