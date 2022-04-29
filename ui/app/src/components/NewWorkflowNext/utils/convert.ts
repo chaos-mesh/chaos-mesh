@@ -1,3 +1,9 @@
+import type { Edge } from 'react-flow-renderer'
+import { NodeExperiment } from 'slices/workflows'
+import _ from 'lodash'
+import { isDeepEmpty } from 'lib/utils'
+import { scheduleInitialValues } from 'components/AutoForm/data'
+import { v4 as uuidv4 } from 'uuid'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -15,20 +21,11 @@
  *
  */
 import yaml from 'js-yaml'
-import _ from 'lodash'
-import type { Edge } from 'react-flow-renderer'
-import { v4 as uuidv4 } from 'uuid'
-
-import { NodeExperiment } from 'slices/workflows'
-
-import { scheduleInitialValues } from 'components/AutoForm/data'
-
-import { isDeepEmpty } from 'lib/utils'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
   AzureChaos = 'AzureChaos',
-  BlockChaos = 'BlockChaos',
+  // BlockChaos = 'BlockChaos',
   DNSChaos = 'DNSChaos',
   GCPChaos = 'GCPChaos',
   HTTPChaos = 'HTTPChaos',
@@ -45,7 +42,7 @@ export enum ExperimentKind {
 const mapping = new Map<ExperimentKind, string>([
   [ExperimentKind.AWSChaos, 'awsChaos'],
   [ExperimentKind.AzureChaos, 'azureChaos'],
-  [ExperimentKind.BlockChaos, 'blockChaos'],
+  // [ExperimentKind.BlockChaos, 'blockChaos'],
   [ExperimentKind.DNSChaos, 'dnsChaos'],
   [ExperimentKind.GCPChaos, 'gcpChaos'],
   [ExperimentKind.HTTPChaos, 'httpChaos'],
