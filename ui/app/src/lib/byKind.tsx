@@ -51,10 +51,6 @@ export function iconByKind(
     case 'AWSChaos':
       icon = <AWSIcon />
       break
-    case 'BlockChaos':
-      // TODO: add icon for BlockChaos
-      icon = <FileSystemIOIcon />
-      break
     case 'DiskChaos':
       icon = <DiskIcon />
       break

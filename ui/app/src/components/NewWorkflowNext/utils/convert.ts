@@ -28,7 +28,7 @@ import { isDeepEmpty } from 'lib/utils'
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
   AzureChaos = 'AzureChaos',
-  BlockChaos = 'BlockChaos',
+  // BlockChaos = 'BlockChaos',
   DNSChaos = 'DNSChaos',
   GCPChaos = 'GCPChaos',
   HTTPChaos = 'HTTPChaos',
@@ -45,7 +45,7 @@ export enum ExperimentKind {
 const mapping = new Map<ExperimentKind, string>([
   [ExperimentKind.AWSChaos, 'awsChaos'],
   [ExperimentKind.AzureChaos, 'azureChaos'],
-  [ExperimentKind.BlockChaos, 'blockChaos'],
+  // [ExperimentKind.BlockChaos, 'blockChaos'],
   [ExperimentKind.DNSChaos, 'dnsChaos'],
   [ExperimentKind.GCPChaos, 'gcpChaos'],
   [ExperimentKind.HTTPChaos, 'httpChaos'],
