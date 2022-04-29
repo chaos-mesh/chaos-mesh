@@ -14,25 +14,26 @@
  * limitations under the License.
  *
  */
-
+import loadable from '@loadable/component'
+import { Box, Divider, MenuItem, Typography } from '@mui/material'
+import api from 'api'
+import { Form, Formik } from 'formik'
+import yaml from 'js-yaml'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
 
-import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import { Form, Formik } from 'formik'
-import { SelectField, Submit, TextField } from 'components/FormField'
-import { useEffect, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
 import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import FormikEffect from 'components/FormikEffect'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
-import api from 'api'
-import loadable from '@loadable/component'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
 import { resetWorkflow } from 'slices/workflows'
-import { useNavigate } from 'react-router-dom'
-import yaml from 'js-yaml'
+
+import { SelectField, Submit, TextField } from 'components/FormField'
+import FormikEffect from 'components/FormikEffect'
+import { T } from 'components/T'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -72,15 +73,15 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
 
   useEffect(() => {
     setData((oldData) => {
-      const oldDataObj: any = yaml.load(oldData)
+      let { metadata, spec, ...rest }: any = yaml.load(oldData)
       const { name, namespace, deadline } = workflowBasic
-      const metadata = { ...oldDataObj.metadata, name, namespace }
+      metadata = { ...metadata, name, namespace }
 
       if (deadline) {
-        oldDataObj.spec.templates[0].deadline = deadline
+        spec.templates[0].deadline = deadline
       }
 
-      return yaml.dump({ ...oldDataObj, metadata })
+      return yaml.dump({ ...rest, metadata, spec })
     })
   }, [workflowBasic])
 

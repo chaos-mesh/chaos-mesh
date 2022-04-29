@@ -14,13 +14,16 @@
  * limitations under the License.
  *
  */
-
-import type { Edge } from 'react-flow-renderer'
-import { NodeExperiment } from 'slices/workflows'
-import _ from 'lodash'
-import { scheduleInitialValues } from 'components/AutoForm/data'
-import { v4 as uuidv4 } from 'uuid'
 import yaml from 'js-yaml'
+import _ from 'lodash'
+import type { Edge } from 'react-flow-renderer'
+import { v4 as uuidv4 } from 'uuid'
+
+import { NodeExperiment } from 'slices/workflows'
+
+import { scheduleInitialValues } from 'components/AutoForm/data'
+
+import { isDeepEmpty } from 'lib/utils'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
@@ -295,7 +298,7 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
     },
     {
       replacer: (key, value) => {
-        if (_.isString(value) && value === '') {
+        if (isDeepEmpty(value)) {
           return undefined
         }
 
@@ -308,13 +311,8 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
               return acc
             }, {})
           } else {
-            console.log(_.values(value).map(({ key, value: val }) => _.zip(_.times(val.length, _.constant(key)), val)))
             return _.values(value).map(({ key, value: val }) => _.zip(_.times(val.length, _.constant(key)), val))
           }
-        }
-
-        if (_.isArray(value) && _.isEmpty(value)) {
-          return undefined
         }
 
         // Parse labels, annotations, labelSelectors, and annotationSelectors to object

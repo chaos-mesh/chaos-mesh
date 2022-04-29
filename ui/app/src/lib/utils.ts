@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import _ from 'lodash'
 
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
   return Object.entries(obj)
@@ -38,29 +39,36 @@ export function arrToObjBySep(arr: string[], sep: string) {
 }
 
 /**
+ * Recursively check if a value is empty.
+ *
+ * @export
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isDeepEmpty(value: any): boolean {
+  if (!value) {
+    return true
+  }
+
+  if (_.isArray(value) && _.isEmpty(value)) {
+    return true
+  }
+
+  if (_.isObject(value)) {
+    return _.every(value, isDeepEmpty)
+  }
+
+  return false
+}
+
+/**
  * Remove empty values from nested object.
  *
  * @export
  * @param {*} obj
  */
 export function sanitize(obj: any) {
-  function isEmpty(value: any): boolean {
-    if (!value) {
-      return true
-    }
-
-    if (Array.isArray(value) && value.length === 0) {
-      return true
-    }
-
-    if (value instanceof Object) {
-      return Object.values(value).every(isEmpty)
-    }
-
-    return false
-  }
-
-  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)) ?? '{}')
+  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isDeepEmpty(value) ? undefined : value)) ?? '{}')
 }
 
 export function concatKindAction(kind: string, action?: string) {
