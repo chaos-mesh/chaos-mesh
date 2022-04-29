@@ -1,9 +1,3 @@
-import type { Edge } from 'react-flow-renderer'
-import { NodeExperiment } from 'slices/workflows'
-import _ from 'lodash'
-import { isDeepEmpty } from 'lib/utils'
-import { scheduleInitialValues } from 'components/AutoForm/data'
-import { v4 as uuidv4 } from 'uuid'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -21,6 +15,15 @@ import { v4 as uuidv4 } from 'uuid'
  *
  */
 import yaml from 'js-yaml'
+import _ from 'lodash'
+import type { Edge } from 'react-flow-renderer'
+import { v4 as uuidv4 } from 'uuid'
+
+import { NodeExperiment } from 'slices/workflows'
+
+import { scheduleInitialValues } from 'components/AutoForm/data'
+
+import { isDeepEmpty } from 'lib/utils'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
