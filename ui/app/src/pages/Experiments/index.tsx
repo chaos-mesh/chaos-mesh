@@ -29,7 +29,7 @@ import NotFound from 'components/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import Space from '@ui/mui-extends/esm/Space'
-import _groupBy from 'lodash.groupby'
+import _ from 'lodash'
 import api from 'api'
 import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
@@ -206,7 +206,7 @@ export default function Experiments() {
       </Space>
 
       {experiments.length > 0 &&
-        Object.entries(_groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
+        Object.entries(_.groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
           <Box key={kind} mb={6}>
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
             <RWList

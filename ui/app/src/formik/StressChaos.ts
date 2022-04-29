@@ -17,7 +17,7 @@ export const actions = [],
       label: 'stressngStressors',
       value: '',
       helperText:
-        "Optional. StressngStressors defines plenty of stressors just like `Stressors` except that it\\'s an experimental feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect, however not all of the supported stressors are well tested. It maybe retired in later releases. You should always use `Stressors` to define the stressors and use this only when you want more stressors unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors` wins.",
+        "Optional. StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful. You can define stressors in `stress-ng` (see also `man stress-ng`) dialect, however not all of the supported stressors are well tested. It maybe retired in later releases. You should always use `Stressors` to define the stressors and use this only when you want more stressors unsupported by `Stressors`. When both `StressngStressors` and `Stressors` are defined, `StressngStressors` wins.",
     },
     {
       field: 'ref',
@@ -53,6 +53,13 @@ export const actions = [],
           field: 'ref',
           label: 'memory',
           children: [
+            {
+              field: 'number',
+              label: 'oomScoreAdj',
+              value: 0,
+              helperText:
+                'Optional. OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more about this option.',
+            },
             {
               field: 'label',
               label: 'options',

@@ -14,17 +14,20 @@
  * limitations under the License.
  *
  */
-
-import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
-import { sanitize, toTitleCase } from './utils'
-
-import { Env } from 'slices/experiments'
-import { ScheduleSpecific } from 'components/Schedule/types'
-import { Template } from 'slices/workflows'
-import { WorkflowBasic } from 'components/NewWorkflow'
-import basicData from 'components/NewExperimentNext/data/basic'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
 import yaml from 'js-yaml'
+import _ from 'lodash'
+
+import { Env } from 'slices/experiments'
+import { Template } from 'slices/workflows'
+
+import { podPhases } from 'components/AutoForm/data'
+import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+import basicData from 'components/NewExperimentNext/data/basic'
+import { WorkflowBasic } from 'components/NewWorkflow'
+import { ScheduleSpecific } from 'components/Schedule/types'
+
+import { sanitize } from './utils'
 
 export function parseSubmit<K extends ExperimentKind>(
   env: Env,
@@ -95,12 +98,6 @@ export function parseSubmit<K extends ExperimentKind>(
       scope.annotationSelectors = helper1(scope.annotationSelectors) as any
     } else {
       delete scope.annotationSelectors
-    }
-
-    // Parse podPhaseSelectors
-    const podPhaseSelectors = scope.podPhaseSelectors
-    if (podPhaseSelectors?.length === 1 && podPhaseSelectors[0] === 'all') {
-      delete scope.podPhaseSelectors
     }
 
     // Parse pods
@@ -297,7 +294,7 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
-      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || []
+      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || podPhases
       spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
@@ -433,7 +430,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             if (d.children) {
               pushTemplate({
                 name: d.name,
-                templateType: toTitleCase(d.type),
+                templateType: _.upperFirst(d.type),
                 deadline: d.deadline,
                 children: d.children!.map((dd) => dd.name),
               })
@@ -456,7 +453,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           pushTemplate({
             name: t.name,
-            templateType: toTitleCase(t.type === 'custom' ? 'task' : t.type),
+            templateType: _.upperFirst(t.type === 'custom' ? 'task' : t.type),
             deadline: t.type !== 'custom' ? t.deadline : undefined,
             children: t.type !== 'custom' ? t.children!.map((d) => d.name) : undefined,
             task:

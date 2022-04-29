@@ -38,7 +38,7 @@ export default function ({ label, helperText, children, ...rest }: FormControlPr
         </FormLabel>
       )}
       {children}
-      {helperText && <FormHelperText>{helperText}</FormHelperText>}
+      {helperText && <FormHelperText component="div">{helperText}</FormHelperText>}
     </FormControl>
   )
 }

@@ -36,7 +36,7 @@ import i18n from 'components/T'
 
 export function iconByKind(
   kind: ExperimentKind | 'Schedule' | 'k8s' | 'physic' | 'DiskChaos' | 'ProcessChaos',
-  size: 'small' | 'large' = 'large'
+  size: 'small' | 'medium' | 'large' = 'medium'
 ) {
   let icon
 
