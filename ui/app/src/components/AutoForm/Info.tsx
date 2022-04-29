@@ -14,24 +14,28 @@
  * limitations under the License.
  *
  */
-
-import type { FormikErrors, FormikTouched } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
-
-import { Belong } from '.'
 import { MenuItem } from '@mui/material'
+import type { FormikErrors, FormikTouched } from 'formik'
+import { getIn } from 'formik'
+
+import { useStoreSelector } from 'store'
+
+import { LabelField, SelectField, TextField } from 'components/FormField'
 import MoreOptions from 'components/MoreOptions'
 import { T } from 'components/T'
-import { getIn } from 'formik'
-import { useStoreSelector } from 'store'
+
+import { Belong } from '.'
+import { isInstant } from './validation'
 
 interface InfoProps {
   belong: Belong
+  kind: string
+  action?: string
   errors: FormikErrors<Record<string, any>>
   touched: FormikTouched<Record<string, any>>
 }
 
-export default function Info({ belong, errors, touched }: InfoProps) {
+export default function Info({ belong, kind, action, errors, touched }: InfoProps) {
   const { namespaces } = useStoreSelector((state) => state.experiments)
 
   return (
@@ -81,19 +85,21 @@ export default function Info({ belong, errors, touched }: InfoProps) {
             }
             error={getIn(errors, 'name') && getIn(touched, 'name')}
           />
-          <TextField
-            fast
-            name="deadline"
-            label={<T id="newW.node.deadline" />}
-            helperText={
-              getIn(errors, 'deadline') && getIn(touched, 'deadline') ? (
-                getIn(errors, 'deadline')
-              ) : (
-                <T id="newW.node.deadlineHelper" />
-              )
-            }
-            error={getIn(errors, 'deadline') && getIn(touched, 'deadline')}
-          />
+          {!isInstant(kind, action) && (
+            <TextField
+              fast
+              name="deadline"
+              label={<T id="newW.node.deadline" />}
+              helperText={
+                getIn(errors, 'deadline') && getIn(touched, 'deadline') ? (
+                  getIn(errors, 'deadline')
+                ) : (
+                  <T id="newW.node.deadlineHelper" />
+                )
+              }
+              error={getIn(errors, 'deadline') && getIn(touched, 'deadline')}
+            />
+          )}
         </>
       )}
     </>

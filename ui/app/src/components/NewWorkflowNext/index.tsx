@@ -74,7 +74,7 @@ export default function NewWorkflow() {
             </Box>
             {Object.keys(nodes).length > 0 && (
               <Button variant="contained" size="small" onClick={onFinishWorkflow}>
-                Finish Workflow
+                Submit Workflow
               </Button>
             )}
           </Box>

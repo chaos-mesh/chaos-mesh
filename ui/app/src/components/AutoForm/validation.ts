@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { array, object, string } from 'yup'
 
 import { Belong } from '.'
@@ -25,20 +24,28 @@ const scopeInitialValuesSchema = {
   }),
 }
 
-const workflowNodeInfoSchema = {
-  name: string().trim().required(),
-  deadline: string().trim().required(),
+export function isInstant(kind: string, action?: string) {
+  if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
+    return true
+  }
+
+  return false
 }
 
-const workflowSchema = (kind: string) =>
+const workflowNodeInfoSchema = (kind: string, action?: string) => ({
+  name: string().trim().required(),
+  ...(!isInstant(kind, action) && { deadline: string().trim().required() }),
+})
+
+const workflowSchema = (kind: string, action?: string) =>
   object({
-    ...(kind !== 'PhysicalMachineChaos' ? scopeInitialValuesSchema : {}),
-    ...workflowNodeInfoSchema,
+    ...(kind !== 'PhysicalMachineChaos' && scopeInitialValuesSchema),
+    ...workflowNodeInfoSchema(kind, action),
   })
 
-export function chooseSchemaByBelong(belong: Belong, kind: string) {
+export function chooseSchemaByBelong(belong: Belong, kind: string, action?: string) {
   switch (belong) {
     case Belong.Workflow:
-      return workflowSchema(kind)
+      return workflowSchema(kind, action)
   }
 }
