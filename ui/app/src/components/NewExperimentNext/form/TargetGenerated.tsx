@@ -88,10 +88,6 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
           k = `${data.action}.${k}`
         }
 
-        if (env === 'k8s' && kind === 'BlockChaos' && k !== 'volumeName' && k !== 'iops' && k !== 'containerNames') {
-          k = `${data.action}.${k}`
-        }
-
         switch (v.field) {
           case 'text':
             return (
