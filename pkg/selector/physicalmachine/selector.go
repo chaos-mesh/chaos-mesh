@@ -27,6 +27,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	stdLog "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
 	genericfield "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
@@ -155,11 +156,15 @@ func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 		func(listFunc generic.ListFunc, opts client.ListOptions) error {
 			var pmList v1alpha1.PhysicalMachineList
 			if len(spec.Namespaces) > 0 {
+				logger, err := stdLog.NewDefaultZapLogger()
+				if err != nil {
+					return errors.Wrap(err, "failed to create logger")
+				}
 				for _, namespace := range spec.Namespaces {
 					if enableFilterNamespace {
 						allow, ok := namespaceCheck[namespace]
 						if !ok {
-							allow = genericnamespace.CheckNamespace(ctx, c, namespace)
+							allow = genericnamespace.CheckNamespace(ctx, c, namespace, logger)
 							namespaceCheck[namespace] = allow
 						}
 						if !allow {
@@ -208,7 +213,10 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1alpha1.PhysicalMachine, error) {
 	var physicalMachines []v1alpha1.PhysicalMachine
 	namespaceCheck := make(map[string]bool)
-
+	logger, err := stdLog.NewDefaultZapLogger()
+	if err != nil {
+		return physicalMachines, errors.Wrap(err, "failed to create logger")
+	}
 	for ns, names := range spec.PhysicalMachines {
 		if !clusterScoped {
 			if targetNamespace != ns {
@@ -219,7 +227,7 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 		if enableFilterNamespace {
 			allow, ok := namespaceCheck[ns]
 			if !ok {
-				allow = genericnamespace.CheckNamespace(ctx, c, ns)
+				allow = genericnamespace.CheckNamespace(ctx, c, ns, logger)
 				namespaceCheck[ns] = allow
 			}
 			if !allow {
