@@ -18,7 +18,7 @@ import { Form, Formik, getIn } from 'formik'
 import { LabelField, Submit, TextField } from 'components/FormField'
 import { useEffect, useState } from 'react'
 
-import MoreOptions from 'components/MoreOptions'
+import OtherOptions from 'components/OtherOptions'
 import Space from '@ui/mui-extends/esm/Space'
 import { Typography } from '@mui/material'
 import typesData from '../data/types'
@@ -108,7 +108,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             />
           </Space>
 
-          <MoreOptions>
+          <OtherOptions>
             <TextField
               name="stressngStressors"
               label="Options of stress-ng"
@@ -119,7 +119,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
               label="Container Name"
               helperText="Optional. Type string and end with a space to generate the container names. If it's empty, the first container will be injected"
             />
-          </MoreOptions>
+          </OtherOptions>
 
           <Submit />
         </Form>

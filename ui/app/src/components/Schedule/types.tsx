@@ -68,7 +68,9 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       type="number"
       name="spec.startingDeadlineSeconds"
       label={i18n('newS.basic.startingDeadlineSeconds')}
-      endAdornment={<InputAdornment position="end">{i18n('common.seconds')}</InputAdornment>}
+      InputProps={{
+        endAdornment: <InputAdornment position="end">{i18n('common.seconds')}</InputAdornment>,
+      }}
       helperText={
         getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds')
           ? getIn(errors, 'spec.startingDeadlineSeconds')

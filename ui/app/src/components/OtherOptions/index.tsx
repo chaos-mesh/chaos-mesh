@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  */
-
 import { Box, Button } from '@mui/material'
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
+import i18n from 'components/T'
 import { useState } from 'react'
 
-interface MoreOptionsProps {
+interface OtherOptionsProps {
   isOpen?: boolean
   beforeOpen?: () => void
   afterClose?: () => void
@@ -31,7 +30,7 @@ interface MoreOptionsProps {
   disabled?: boolean
 }
 
-const MoreOptions: React.FC<MoreOptionsProps> = ({
+const OtherOptions: React.FC<OtherOptionsProps> = ({
   isOpen = false,
   beforeOpen,
   afterClose,
@@ -60,12 +59,12 @@ const MoreOptions: React.FC<MoreOptionsProps> = ({
           onClick={setOpen}
           disabled={disabled}
         >
-          {title ? title : <T id="common.moreOptions" />}
+          {title ? title : i18n('common.otherOptions')}
         </Button>
       </Box>
-      <Space sx={{ display: open ? 'flex' : 'none' }}>{children}</Space>
+      <Space sx={{ display: open ? 'unset' : 'none' }}>{children}</Space>
     </Space>
   )
 }
 
-export default MoreOptions
+export default OtherOptions

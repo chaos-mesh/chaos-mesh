@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Chaos Mesh Authors.
+ * Copyright 2021 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  *
  */
 
-import { AutocompleteField, SelectField } from 'components/FormField'
-import { MenuItem, Typography } from '@mui/material'
+import { AutocompleteMultipleField, SelectField } from 'components/FormField'
+import { Divider, MenuItem, Typography } from '@mui/material'
 import { arrToObjBySep, objToArrBySep } from 'lib/utils'
 import {
   getAnnotations,
@@ -29,11 +29,10 @@ import { useEffect, useMemo } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Mode from './Mode'
-import MoreOptions from 'components/MoreOptions'
+import OtherOptions from 'components/OtherOptions'
 import ScopePodsTable from './ScopePodsTable'
-import type { SelectChangeEvent } from '@mui/material'
 import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
+import i18n from 'components/T'
 
 interface ScopeProps {
   namespaces: string[]
@@ -43,7 +42,7 @@ interface ScopeProps {
   podsPreviewDesc?: string | JSX.Element
 }
 
-const phases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
+const phases = [{ label: 'All', value: 'all' }, 'Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
 const Scope: React.FC<ScopeProps> = ({
   namespaces,
@@ -72,9 +71,9 @@ const Scope: React.FC<ScopeProps> = ({
   const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
   const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
 
-  const handleChangeIncludeAll = (e: SelectChangeEvent<string[]>) => {
+  const handleChangeIncludeAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = getIn(values, e.target.name)
-    const currentValues = e.target.value as string[]
+    const currentValues = e.target.value as unknown as string[]
 
     if (!lastValues.includes('all') && currentValues.includes('all')) {
       e.target.value = ['all'] as any
@@ -119,74 +118,76 @@ const Scope: React.FC<ScopeProps> = ({
 
   return (
     <Space>
-      <AutocompleteField
-        multiple
+      <AutocompleteMultipleField
         name={`${scope}.namespaces`}
-        label={<T id="k8s.namespaceSelectors" />}
+        label={i18n('k8s.namespaceSelectors')}
         helperText={
-          getIn(touched, `${scope}.namespaces`) && getIn(errors, `${scope}.namespaces`) ? (
-            getIn(errors, `${scope}.namespaces`)
-          ) : (
-            <T id="newE.scope.namespaceSelectorsHelper" />
-          )
+          getIn(touched, `${scope}.namespaces`) && getIn(errors, `${scope}.namespaces`)
+            ? getIn(errors, `${scope}.namespaces`)
+            : i18n('common.multiOptions')
         }
         options={!enableKubeSystemNS ? namespaces.filter((d) => d !== 'kube-system') : namespaces}
         error={getIn(errors, `${scope}.namespaces`) && getIn(touched, `${scope}.namespaces`) ? true : false}
         disabled={disabled}
       />
 
-      <AutocompleteField
-        multiple
+      <AutocompleteMultipleField
         name={`${scope}.labelSelectors`}
-        label={<T id="k8s.labelSelectors" />}
-        helperText={<T id="newE.scope.labelSelectorsHelper" />}
+        label={i18n('k8s.labelSelectors')}
+        helperText={i18n('common.multiOptions')}
         options={labelKVs}
         disabled={disabled}
       />
 
-      <MoreOptions disabled={disabled}>
-        <AutocompleteField
-          multiple
+      <OtherOptions disabled={disabled}>
+        <AutocompleteMultipleField
           name={`${scope}.annotationSelectors`}
-          label={<T id="k8s.annotationSelectors" />}
-          helperText={<T id="newE.scope.annotationSelectorsHelper" />}
+          label={i18n('k8s.annotationsSelectors')}
+          helperText={i18n('common.multiOptions')}
           options={annotationKVs}
           disabled={disabled}
         />
 
-        <SelectField<string[]>
-          multiple
+        <SelectField
           name={`${scope}.podPhaseSelectors`}
-          label={<T id="k8s.podPhaseSelectors" />}
-          helperText={<T id="newE.scope.phaseSelectorsHelper" />}
+          label={i18n('k8s.podPhaseSelectors')}
+          helperText={i18n('common.multiOptions')}
+          multiple
           onChange={handleChangeIncludeAll}
           disabled={disabled}
-          fullWidth
         >
-          <MenuItem value="all">All</MenuItem>
-          {phases.map((option) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
+          {phases.map((option) =>
+            typeof option === 'string' ? (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ) : (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            )
+          )}
         </SelectField>
-      </MoreOptions>
+      </OtherOptions>
 
+      <Divider />
+      <Typography>{i18n('newE.scope.mode')}</Typography>
       <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
+      <Divider />
 
       <div>
-        <Typography variant="h6" fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          {podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}
+        <Typography sx={{ color: disabled ? 'text.disabled' : undefined }}>
+          {podsPreviewTitle || i18n('newE.scope.targetPodsPreview')}
         </Typography>
         <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>
-          {podsPreviewDesc || <T id="newE.scope.targetPodsPreviewHelper" />}
+          {podsPreviewDesc || i18n('newE.scope.targetPodsPreviewHelper')}
         </Typography>
       </div>
       {pods.length > 0 ? (
         <ScopePodsTable scope={scope} pods={pods} />
       ) : (
-        <Typography variant="body2" fontWeight="medium" sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          <T id="newE.scope.noPodsFound" />
+        <Typography variant="subtitle2" sx={{ color: disabled ? 'text.disabled' : undefined }}>
+          {i18n('newE.scope.noPodsFound')}
         </Typography>
       )}
     </Space>

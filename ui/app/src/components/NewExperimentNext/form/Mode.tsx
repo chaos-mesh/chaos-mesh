@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Chaos Mesh Authors.
+ * Copyright 2021 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
  */
 
 import { InputAdornment, MenuItem } from '@mui/material'
-import { SelectField, TextField } from 'components/FormField'
+import { SelectField, TextField } from '../../FormField'
 import { getIn, useFormikContext } from 'formik'
 
-import { T } from 'components/T'
+import React from 'react'
+import i18n from '../../T'
 
 const modes = [
   { name: 'Random One', value: 'one' },
@@ -30,20 +31,19 @@ const modes = [
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 interface ModeProps {
-  disabled: boolean
   modeScope: string
   scope: string
+  disabled: boolean
 }
 
 const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
   const { values } = useFormikContext()
-
   return (
     <>
       <SelectField
-        name={modeScope ? `${modeScope}.mode` : 'mode'}
-        label={<T id="newE.scope.mode" />}
-        helperText={<T id="newE.scope.modeHelper" />}
+        name={`${modeScope}.mode`}
+        label={i18n('newE.scope.mode')}
+        helperText={i18n('newE.scope.modeHelper')}
         disabled={disabled}
       >
         <MenuItem value="all">All</MenuItem>
@@ -56,12 +56,14 @@ const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
 
       {!['all', 'one'].includes(getIn(values, modeScope).mode) && (
         <TextField
-          name={modeScope ? `${modeScope}.value` : 'value'}
-          label={<T id="newE.scope.modeValue" />}
-          helperText={<T id="newE.scope.modeValueHelper" />}
-          endAdornment={
-            modesWithAdornment.includes(getIn(values, scope).mode) && <InputAdornment position="end">%</InputAdornment>
-          }
+          name={`${modeScope}.value`}
+          label={i18n('newE.scope.modeValue')}
+          helperText={i18n('newE.scope.modeValueHelper')}
+          InputProps={{
+            endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
+              <InputAdornment position="end">%</InputAdornment>
+            ),
+          }}
           disabled={disabled}
         />
       )}
