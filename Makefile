@@ -22,10 +22,10 @@ export IMAGE_DEV_ENV_BUILD ?= 0
 # Every branch should have its own image tag for build-env and dev-env
 # using := with ifeq instead of ?= for performance issue
 ifeq ($(IMAGE_BUILD_ENV_TAG),)
-IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
 endif
 ifeq ($(IMAGE_DEV_ENV_TAG),)
-IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
 endif
 
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
