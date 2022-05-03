@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -30,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	logz"github.com/chaos-mesh/chaos-mesh/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	// +kubebuilder:scaffold:imports
@@ -52,7 +53,7 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	logf.SetLogger(logz.NewZapLoggerWithWriter(ginkgo.GinkgoWriter))
 
 	By("bootstrapping test environment")
 	t := true

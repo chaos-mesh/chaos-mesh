@@ -58,7 +58,7 @@ func TestProvider(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	logf.SetLogger(log.NewZapLoggerWithWriter(ginkgo.GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
 	if os.Getenv("USE_EXISTING_CLUSTER") == "true" {
