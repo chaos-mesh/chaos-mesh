@@ -19,16 +19,17 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { Config } from 'api/common.type'
 import LS from 'lib/localStorage'
+import React from 'react'
 import { TokenFormValues } from 'components/Token'
 
 export interface Alert {
   type: 'success' | 'warning' | 'error'
-  message: string
+  message: React.ReactNode
 }
 
 export interface Confirm {
   title: string
-  description?: string
+  description?: React.ReactNode
   handle?: () => void
   [key: string]: any
 }

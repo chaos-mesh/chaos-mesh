@@ -65,6 +65,22 @@ export function genForms(source) {
   // 1. filter all required schemas
   const interfaces = nodes.filter((node) => node.kind === ts.SyntaxKind.InterfaceDeclaration)
 
+  const printer = ts.createPrinter({
+    omitTrailingSemicolon: true,
+  })
+  /**
+   * Encapsulate printNode method.
+   *
+   * @param {ts.Node} node
+   * @return {string}
+   */
+  function printNode(node) {
+    return printer.printNode(ts.EmitHint.Unspecified, node, sourceFile)
+  }
+
+  // Collect all actions into this object.
+  const allActions = {}
+
   chaos.forEach((child) => {
     let actions = []
     const objects = []
@@ -103,6 +119,8 @@ export function genForms(source) {
       }
     })
 
+    allActions[child] = actions
+
     // create data related fields
     //
     // export const actions = [], data = []
@@ -127,18 +145,6 @@ export function genForms(source) {
       )
     )
 
-    const printer = ts.createPrinter({
-      omitTrailingSemicolon: true,
-    })
-    /**
-     * Encapsulate printNode method.
-     *
-     * @param {ts.Node} node
-     * @return {string}
-     */
-    function printNode(node) {
-      return printer.printNode(ts.EmitHint.Unspecified, node, sourceFile)
-    }
     const dataPrint = printNode(data)
 
     const file = `${appPath}/src/formik/${child}.ts`
@@ -150,6 +156,43 @@ export function genForms(source) {
       }
     })
   })
+
+  const allActionsPrint = printNode(
+    factory.createVariableDeclarationList(
+      [
+        factory.createVariableDeclaration(
+          factory.createIdentifier('actions'),
+          undefined,
+          undefined,
+          factory.createObjectLiteralExpression(
+            Object.entries(allActions).map((d) =>
+              factory.createPropertyAssignment(
+                factory.createIdentifier(d[0]),
+                factory.createArrayLiteralExpression(d[1].map(factory.createStringLiteral))
+              )
+            ),
+            true
+          )
+        ),
+      ],
+      ts.NodeFlags.Const
+    )
+  )
+  fs.writeFile(
+    `${appPath}/src/formik/actions.ts`,
+    WARNING_MESSAGE +
+      allActionsPrint +
+      '\n\n' +
+      printNode(factory.createExportDefault(factory.createIdentifier('actions'))) +
+      '\n',
+    (err) => {
+      if (err) {
+        sig.error(err)
+      } else {
+        sig.success('All actions generated')
+      }
+    }
+  )
 }
 
 /**
@@ -169,6 +212,11 @@ export function swaggerRefToAllOf(source) {
     '["v1alpha1.HTTPChaosSpec"].properties.replace',
     '["v1alpha1.IOChaosSpec"].properties.attr',
     '["v1alpha1.IOChaosSpec"].properties.mistake',
+    '["v1alpha1.NetworkChaosSpec"].properties.bandwidth',
+    '["v1alpha1.NetworkChaosSpec"].properties.corrupt',
+    '["v1alpha1.NetworkChaosSpec"].properties.delay',
+    '["v1alpha1.NetworkChaosSpec"].properties.duplicate',
+    '["v1alpha1.NetworkChaosSpec"].properties.loss',
     '["v1alpha1.PodHttpChaosPatchActions"].properties.body',
     ...[
       'clock',

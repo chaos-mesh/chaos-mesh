@@ -24,7 +24,6 @@ const OutlinedInput = forwardRef(({ sx, ...rest }: OutlinedInputProps, ref) => (
     size="small"
     sx={{
       px: rest.startAdornment || rest.endAdornment ? 2 : 0,
-      py: 0.5,
       borderColor: 'divider',
       typography: 'body2',
       '&:hover': {

@@ -25,13 +25,11 @@ import {
   DialogTitle,
 } from '@mui/material'
 
-import React from 'react'
-
 interface ConfirmDialogProps {
   open: boolean
   close?: () => void
-  title: string | JSX.Element
-  description?: string
+  title: React.ReactNode
+  description?: React.ReactNode
   cancelText?: string
   confirmText?: string
   onConfirm?: () => void
@@ -55,18 +53,20 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   }
 
   return (
-    <Dialog open={open} onClose={close} PaperProps={{ sx: { minWidth: 300 } }} {...dialogProps}>
-      <DialogTitle sx={{ p: 4.5 }}>{title}</DialogTitle>
-      <DialogContent sx={{ p: 4.5 }}>
-        {children ? children : description ? <DialogContentText>{description}</DialogContentText> : null}
-      </DialogContent>
+    <Dialog open={open} onClose={close} {...dialogProps}>
+      <DialogTitle sx={{ p: 4 }}>{title}</DialogTitle>
+      {(children || description) && (
+        <DialogContent sx={{ p: 4 }}>
+          {description ? <DialogContentText>{description}</DialogContentText> : children}
+        </DialogContent>
+      )}
 
       {onConfirm && (
         <DialogActions>
-          <Button size="small" onClick={close}>
+          <Button color="secondary" onClick={close}>
             {cancelText}
           </Button>
-          <Button variant="contained" color="primary" size="small" autoFocus disableFocusRipple onClick={handleConfirm}>
+          <Button autoFocus onClick={handleConfirm}>
             {confirmText}
           </Button>
         </DialogActions>

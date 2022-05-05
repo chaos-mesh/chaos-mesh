@@ -18,7 +18,7 @@ import { Node, WorkflowSingle } from 'api/workflows.type'
 import cytoscape, { EdgeDefinition, EventHandler, NodeDefinition, Stylesheet } from 'cytoscape'
 
 import { Theme } from '@mui/material'
-import _flattenDeep from 'lodash.flattendeep'
+import _ from 'lodash'
 import dagre from 'cytoscape-dagre'
 
 cytoscape.use(dagre)
@@ -252,7 +252,7 @@ export const constructWorkflowTopology = (
     nodes = nodes.concat(connections)
 
     return {
-      nodes: _flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],
+      nodes: _.flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],
       edges: edges,
     }
   }

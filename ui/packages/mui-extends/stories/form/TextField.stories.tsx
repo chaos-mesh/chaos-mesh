@@ -11,7 +11,7 @@ export default {
   component: TextField,
 }
 
-const Template = (args: TextFieldProps) => <TextField fullWidth={false} {...args} />
+const Template = (args: TextFieldProps) => <TextField {...args} sx={{ width: 320 }} />
 
 export const Default = Template.bind({})
 Default.args = {
