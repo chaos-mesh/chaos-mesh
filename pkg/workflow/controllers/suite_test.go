@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
@@ -56,7 +55,7 @@ func TestWorkflow(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	logf.SetLogger(log.NewZapLoggerWithWriter(ginkgo.GinkgoWriter))
+	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
 	if os.Getenv("USE_EXISTING_CLUSTER") == "true" {

@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr"
-	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
@@ -62,7 +61,7 @@ func TestSchedule(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	logf.SetLogger(log.NewZapLoggerWithWriter(ginkgo.GinkgoWriter))
+	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
 	if os.Getenv("USE_EXISTING_CLUSTER") == "true" {

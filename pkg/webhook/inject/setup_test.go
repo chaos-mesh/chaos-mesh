@@ -22,7 +22,6 @@ import (
 	"time"
 
 	logz "github.com/chaos-mesh/chaos-mesh/pkg/log"
-	"github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -53,7 +52,7 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func(done Done) {
-	logf.SetLogger(logz.NewZapLoggerWithWriter(ginkgo.GinkgoWriter))
+	logf.SetLogger(logz.NewZapLoggerWithWriter(GinkgoWriter))
 
 	By("bootstrapping test environment")
 	t := true
