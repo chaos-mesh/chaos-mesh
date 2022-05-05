@@ -21,7 +21,6 @@ import (
 	"testing"
 	"time"
 
-	logz "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -33,6 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	logz "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	// +kubebuilder:scaffold:imports
 )
 
