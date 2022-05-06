@@ -57,6 +57,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Must update CHANGELOG [#3148](https://github.com/chaos-mesh/chaos-mesh/pull/3148)
 - Use chaosDaemon.mtls.enabled instead of dashboard.securityMode for chaos-daemon mtls [#3168](https://github.com/chaos-mesh/chaos-mesh/pull/3168)
 - Helm charts: component chaos-dashboard use certain service account and roles [#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)
+- Refine logging in pkg/dashboard/store, remove logging because it have return the error [#2880] (https://github.com/chaos-mesh/chaos-mesh/pull/3143)
 
 ### Deprecated
 
