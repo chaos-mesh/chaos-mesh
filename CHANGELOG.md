@@ -10,6 +10,33 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+
+## [2.2.0] - 2022-04-29
+
+### Added
+
 - Add metrics for archived objects in chaos-dashboard [#2568](https://github.com/chaos-mesh/chaos-mesh/pull/2568)
 - Add metrics for iptables, ipset and tc metrics in chaos-daemon [#2540](https://github.com/chaos-mesh/chaos-mesh/pull/2540)
 - Add metrics for emitted event counter in chaos-controller-manager [#2435](https://github.com/chaos-mesh/chaos-mesh/pull/2435)
@@ -24,6 +51,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add support of the Unified cgroup mode (tested with containerd runtime only) for linux stress experiments [#2928](https://github.com/chaos-mesh/chaos-mesh/pull/2928)
 - Add `StatusCheck` CRD [#2954](https://github.com/chaos-mesh/chaos-mesh/pull/2954)
 - Add support for declaring ports in external targets in NetworkChaos experiments [#2932](https://github.com/chaos-mesh/chaos-mesh/pull/2932)
+- Add forced recovery of httpchaos, iochaos, stresschaos, and networkchaos for chaosctl [#2992](https://github.com/chaos-mesh/chaos-mesh/pull/2992)
+- Add namespace and pod name in failed event for podxxxchaos crd [#3178](https://github.com/chaos-mesh/chaos-mesh/pull/3178)
+- Add next generation `New Workflow` in UI [#3185](https://github.com/chaos-mesh/chaos-mesh/pull/3185)
 
 ### Changed
 
@@ -50,6 +80,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump gqlgen to v0.17.2 [#3038](https://github.com/chaos-mesh/chaos-mesh/pull/3038)
 - Bump go to v1.18 [#3055](https://github.com/chaos-mesh/chaos-mesh/pull/3055)
 - Bump toda to v0.2.3 [#3131](https://github.com/chaos-mesh/chaos-mesh/pull/3131)
+- refactor: rename reconcileContext to reconcileInfo [#3154](https://github.com/chaos-mesh/chaos-mesh/pull/3154)
 - Migrate e2e tests from self-hosted Jenkins to Github Action [#2986](https://github.com/chaos-mesh/chaos-mesh/pull/2986)
 - Bump minimist from 1.2.5 to 1.2.6 in /ui [#3058](https://github.com/chaos-mesh/chaos-mesh/pull/3058)
 - Specify image tag of `build-env` and `dev-env` for each branch [#3071](https://github.com/chaos-mesh/chaos-mesh/pull/3071)
@@ -57,6 +88,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Must update CHANGELOG [#3148](https://github.com/chaos-mesh/chaos-mesh/pull/3148)
 - Use chaosDaemon.mtls.enabled instead of dashboard.securityMode for chaos-daemon mtls [#3168](https://github.com/chaos-mesh/chaos-mesh/pull/3168)
 - Helm charts: component chaos-dashboard use certain service account and roles [#3145](https://github.com/chaos-mesh/chaos-mesh/pull/3145)
+- Refactor helm charts template, split out webhook configuration and secrets [#3159](https://github.com/chaos-mesh/chaos-mesh/pull/3159)
+- Helm charts: apply webhook.FailurePolicy to all the webhooks with default value `Fail` [#3184](https://github.com/chaos-mesh/chaos-mesh/pull/3184)
+- Bump memStress from v0.2.1 to v0.3 [#3186](https://github.com/chaos-mesh/chaos-mesh/pull/3186)
+- Helm charts: configure ca bundle for webhook explicitly [#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)
 - Refine logging in pkg/dashboard/store, remove logging because it have return the error [#2880] (https://github.com/chaos-mesh/chaos-mesh/pull/3143)
 
 ### Deprecated

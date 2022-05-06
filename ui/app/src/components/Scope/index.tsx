@@ -31,9 +31,9 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import Mode from './Mode'
 import MoreOptions from 'components/MoreOptions'
 import ScopePodsTable from './ScopePodsTable'
-import type { SelectChangeEvent } from '@mui/material'
 import Space from '@ui/mui-extends/esm/Space'
 import { T } from 'components/T'
+import { podPhases } from 'components/AutoForm/data'
 
 interface ScopeProps {
   namespaces: string[]
@@ -43,16 +43,14 @@ interface ScopeProps {
   podsPreviewDesc?: string | JSX.Element
 }
 
-const phases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
-
 const Scope: React.FC<ScopeProps> = ({
   namespaces,
-  scope = 'spec.selector',
-  modeScope = 'spec',
+  scope = 'selector',
+  modeScope = '',
   podsPreviewTitle,
   podsPreviewDesc,
 }) => {
-  const { values, handleChange, setFieldValue, errors, touched } = useFormikContext()
+  const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
     labelSelectors: currentLabels,
@@ -71,21 +69,6 @@ const Scope: React.FC<ScopeProps> = ({
   const kvSeparator = ': '
   const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
   const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
-
-  const handleChangeIncludeAll = (e: SelectChangeEvent<string[]>) => {
-    const lastValues = getIn(values, e.target.name)
-    const currentValues = e.target.value as string[]
-
-    if (!lastValues.includes('all') && currentValues.includes('all')) {
-      e.target.value = ['all'] as any
-    }
-
-    if (lastValues.includes('all') && currentValues.length > 1) {
-      e.target.value = currentValues.filter((v) => v !== 'all') as any
-    }
-
-    handleChange(e)
-  }
 
   useEffect(() => {
     // Set ns selectors directly when CLUSTER_MODE=false.
@@ -159,12 +142,10 @@ const Scope: React.FC<ScopeProps> = ({
           name={`${scope}.podPhaseSelectors`}
           label={<T id="k8s.podPhaseSelectors" />}
           helperText={<T id="newE.scope.phaseSelectorsHelper" />}
-          onChange={handleChangeIncludeAll}
           disabled={disabled}
           fullWidth
         >
-          <MenuItem value="all">All</MenuItem>
-          {phases.map((option) => (
+          {podPhases.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
             </MenuItem>
@@ -175,7 +156,7 @@ const Scope: React.FC<ScopeProps> = ({
       <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
 
       <div>
-        <Typography variant="h6" fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
+        <Typography fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
           {podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}
         </Typography>
         <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>

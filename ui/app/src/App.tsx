@@ -15,6 +15,8 @@
  *
  */
 
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Provider } from 'react-redux'
 import { BrowserRouter as Router } from 'react-router-dom'
 import ThemeProvider from './ThemeProvider'
@@ -24,7 +26,9 @@ import store from './store'
 const App: React.FC = ({ children }) => (
   <Provider store={store}>
     <Router>
-      <ThemeProvider>{children || <TopContainer />}</ThemeProvider>
+      <ThemeProvider>
+        <DndProvider backend={HTML5Backend}>{children || <TopContainer />}</DndProvider>
+      </ThemeProvider>
     </Router>
   </Provider>
 )

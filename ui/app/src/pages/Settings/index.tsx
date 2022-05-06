@@ -14,42 +14,116 @@
  * limitations under the License.
  *
  */
-import { Box, Grid, Grow, Typography } from '@mui/material'
 
-import Experiments from './Experiments'
-import Other from './Other'
+import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
+import { setDebugMode, setEnableKubeSystemNS, setLang, setTheme, setUseNextWorkflowInterface } from 'slices/settings'
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import type { SelectChangeEvent } from '@mui/material'
+import SelectField from '@ui/mui-extends/esm/SelectField'
 import Space from '@ui/mui-extends/esm/Space'
+import { T } from 'components/T'
 import Token from './Token'
-import i18n from 'components/T'
 import logo from 'images/logo.svg'
 import logoWhite from 'images/logo-white.svg'
-import { useStoreSelector } from 'store'
+import messages from 'i18n/messages'
 
 const Settings = () => {
   const state = useStoreSelector((state) => state)
   const { securityMode, version } = state.globalStatus
-  const { theme } = state.settings
+  const { debugMode, enableKubeSystemNS, useNextWorkflowInterface, theme, lang } = state.settings
+  const dispatch = useStoreDispatch()
+
+  const handleChangeDebugMode = () => dispatch(setDebugMode(!debugMode))
+  const handleChangeEnableKubeSystemNS = () => dispatch(setEnableKubeSystemNS(!enableKubeSystemNS))
+  const handleChangeUseNextWorkflowInterface = () => dispatch(setUseNextWorkflowInterface(!useNextWorkflowInterface))
+  const handleChangeTheme = (e: SelectChangeEvent) => dispatch(setTheme(e.target.value))
+  const handleChangeLang = (e: SelectChangeEvent) => dispatch(setLang(e.target.value))
 
   return (
     <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-      <Grid container spacing={6}>
-        <Grid item sm={12} md={6}>
-          <Space spacing={6}>
-            {securityMode && <Token />}
-            <Experiments />
-            <Other />
-
-            <PaperTop title={i18n('common.version')} divider />
-            <Box>
-              <img src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" style={{ width: 192 }} />
-              <Typography variant="body2" color="textSecondary">
-                Git Version: {version}
+      <div style={{ height: '100%' }}>
+        <Space>
+          <PaperTop title={<T id="settings.title" />} h1 divider />
+          {securityMode && <Token />}
+          <PaperTop title={<T id="experiments.title" />} />
+          <Checkbox
+            label={<T id="settings.debugMode.title" />}
+            helperText={<T id="settings.debugMode.choose" />}
+            checked={debugMode}
+            onChange={handleChangeDebugMode}
+          />
+          <Checkbox
+            label={<T id="settings.enableKubeSystemNS.title" />}
+            helperText={<T id="settings.enableKubeSystemNS.choose" />}
+            checked={enableKubeSystemNS}
+            onChange={handleChangeEnableKubeSystemNS}
+          />
+          <PaperTop title={<T id="workflows.title" />} />
+          <Checkbox
+            label={
+              <Space spacing={1} direction="row" alignItems="center">
+                <Box>
+                  <T id="settings.useNextWorkflowInterface.title" />
+                </Box>
+                <Chip label="Preview" color="primary" size="small" />
+              </Space>
+            }
+            helperText={
+              <Box width={600}>
+                <T id="settings.useNextWorkflowInterface.choose" />
+              </Box>
+            }
+            checked={useNextWorkflowInterface}
+            onChange={handleChangeUseNextWorkflowInterface}
+          />
+          <PaperTop title={<T id="settings.theme.title" />} />
+          <SelectField
+            label={<T id="settings.theme.title" />}
+            helperText={<T id="settings.theme.choose" />}
+            value={theme}
+            onChange={handleChangeTheme}
+            sx={{ width: 300 }}
+          >
+            <MenuItem value="light">
+              <Typography>
+                <T id="settings.theme.light" />
               </Typography>
-            </Box>
-          </Space>
-        </Grid>
-      </Grid>
+            </MenuItem>
+            <MenuItem value="dark">
+              <Typography>
+                <T id="settings.theme.dark" />
+              </Typography>
+            </MenuItem>
+          </SelectField>
+          <PaperTop title={<T id="settings.lang.title" />} />
+          <SelectField
+            label={<T id="settings.lang.title" />}
+            helperText={<T id="settings.lang.choose" />}
+            value={lang}
+            onChange={handleChangeLang}
+            sx={{ width: 300 }}
+          >
+            {Object.keys(messages).map((lang) => (
+              <MenuItem key={lang} value={lang}>
+                <Typography>
+                  <T id={`settings.lang.${lang}`} />
+                </Typography>
+              </MenuItem>
+            ))}
+          </SelectField>
+
+          <PaperTop title={<T id="common.version" />} />
+          <Box>
+            <img src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" style={{ width: 192 }} />
+            <Typography variant="body2" color="textSecondary">
+              Git Version: {version}
+            </Typography>
+          </Box>
+        </Space>
+      </div>
     </Grow>
   )
 }
