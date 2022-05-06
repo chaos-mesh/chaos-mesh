@@ -441,7 +441,7 @@ export interface CoreWorkflowDetail {
    */
   created_at?: string
   /**
-   *
+   * EndTime represents the time when the workflow completed all steps.
    * @type {string}
    * @memberof CoreWorkflowDetail
    */
@@ -452,6 +452,12 @@ export interface CoreWorkflowDetail {
    * @memberof CoreWorkflowDetail
    */
   entry?: string
+  /**
+   * FinishTime represents the time when the workflow was deleted from Kubernetes.
+   * @type {string}
+   * @memberof CoreWorkflowDetail
+   */
+  finish_time?: string
   /**
    *
    * @type {number}
@@ -508,7 +514,7 @@ export interface CoreWorkflowMeta {
    */
   created_at?: string
   /**
-   *
+   * EndTime represents the time when the workflow completed all steps.
    * @type {string}
    * @memberof CoreWorkflowMeta
    */
@@ -519,6 +525,12 @@ export interface CoreWorkflowMeta {
    * @memberof CoreWorkflowMeta
    */
   entry?: string
+  /**
+   * FinishTime represents the time when the workflow was deleted from Kubernetes.
+   * @type {string}
+   * @memberof CoreWorkflowMeta
+   */
+  finish_time?: string
   /**
    *
    * @type {number}
@@ -841,6 +853,117 @@ export interface StatusAllChaosStatus {
 /**
  *
  * @export
+ * @interface TemplateStatusCheckTemplate
+ */
+export interface TemplateStatusCheckTemplate {
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplate
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplate
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplate
+   */
+  namespace?: string
+  /**
+   *
+   * @type {V1alpha1StatusCheckTemplate}
+   * @memberof TemplateStatusCheckTemplate
+   */
+  spec?: V1alpha1StatusCheckTemplate
+}
+/**
+ *
+ * @export
+ * @interface TemplateStatusCheckTemplateBase
+ */
+export interface TemplateStatusCheckTemplateBase {
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateBase
+   */
+  created_at?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateBase
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateBase
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateBase
+   */
+  namespace?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateBase
+   */
+  uid?: string
+}
+/**
+ *
+ * @export
+ * @interface TemplateStatusCheckTemplateDetail
+ */
+export interface TemplateStatusCheckTemplateDetail {
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateDetail
+   */
+  created_at?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateDetail
+   */
+  description?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateDetail
+   */
+  name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateDetail
+   */
+  namespace?: string
+  /**
+   *
+   * @type {V1alpha1StatusCheckTemplate}
+   * @memberof TemplateStatusCheckTemplateDetail
+   */
+  spec?: V1alpha1StatusCheckTemplate
+  /**
+   *
+   * @type {string}
+   * @memberof TemplateStatusCheckTemplateDetail
+   */
+  uid?: string
+}
+/**
+ *
+ * @export
  * @interface UtilsAPIError
  */
 export interface UtilsAPIError {
@@ -1019,6 +1142,61 @@ export interface V1alpha1AttrOverrideSpec {
 /**
  *
  * @export
+ * @interface V1alpha1AzureChaosSpec
+ */
+export interface V1alpha1AzureChaosSpec {
+  /**
+   * Action defines the specific azure chaos action. Supported action: vm-stop / vm-restart / disk-detach Default action: vm-stop +kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  action?: string
+  /**
+   * DiskName indicates the name of the disk. Needed in disk-detach. +optional
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  diskName?: string
+  /**
+   * Duration represents the duration of the chaos action. +optional
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  duration?: string
+  /**
+   * LUN indicates the Logical Unit Number of the data disk. Needed in disk-detach. +optional
+   * @type {number}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  lun?: number
+  /**
+   * ResourceGroupName defines the name of ResourceGroup
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  resourceGroupName?: string
+  /**
+   * SecretName defines the name of kubernetes secret. It is used for Azure credentials. +optional
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  secretName?: string
+  /**
+   * SubscriptionID defines the id of Azure subscription.
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  subscriptionID?: string
+  /**
+   * VMName defines the name of Virtual Machine
+   * @type {string}
+   * @memberof V1alpha1AzureChaosSpec
+   */
+  vmName?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1BandwidthSpec
  */
 export interface V1alpha1BandwidthSpec {
@@ -1146,7 +1324,7 @@ export interface V1alpha1BlockDelaySpec {
  */
 export interface V1alpha1CPUStressor {
   /**
-   * Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading. +optional
+   * Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading. +kubebuilder:validation:Minimum=0 +kubebuilder:validation:Maximum=100 +optional
    * @type {number}
    * @memberof V1alpha1CPUStressor
    */
@@ -1176,6 +1354,12 @@ export interface V1alpha1ChaosOnlyScheduleSpec {
    * @memberof V1alpha1ChaosOnlyScheduleSpec
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1AzureChaosSpec}
+   * @memberof V1alpha1ChaosOnlyScheduleSpec
+   */
+  azureChaos?: V1alpha1AzureChaosSpec
   /**
    *
    * @type {V1alpha1BlockChaosSpec}
@@ -1702,6 +1886,56 @@ export interface V1alpha1HTTPChaosSpec {
 /**
  *
  * @export
+ * @interface V1alpha1HTTPCriteria
+ */
+export interface V1alpha1HTTPCriteria {
+  /**
+   * StatusCode defines the expected http status code for the request. A statusCode string could be a single code (e.g. 200), or an inclusive range (e.g. 200-400, both `200` and `400` are included).
+   * @type {string}
+   * @memberof V1alpha1HTTPCriteria
+   */
+  statusCode?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1HTTPStatusCheck
+ */
+export interface V1alpha1HTTPStatusCheck {
+  /**
+   * +optional
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  body?: string
+  /**
+   *
+   * @type {V1alpha1HTTPCriteria}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  criteria?: V1alpha1HTTPCriteria
+  /**
+   * +optional
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  headers?: string
+  /**
+   * +optional +kubebuilder:validation:Enum=GET;POST +kubebuilder:default=GET
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  method?: string
+  /**
+   *
+   * @type {string}
+   * @memberof V1alpha1HTTPStatusCheck
+   */
+  url?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1IOChaosSpec
  */
 export interface V1alpha1IOChaosSpec {
@@ -1766,7 +2000,7 @@ export interface V1alpha1IOChaosSpec {
    */
   path?: string
   /**
-   * Percent defines the percentage of injection errors and provides a number from 0-100. default: 100. +optional
+   * Percent defines the percentage of injection errors and provides a number from 0-100. default: 100. +optional +kubebuilder:default=100
    * @type {number}
    * @memberof V1alpha1IOChaosSpec
    */
@@ -1815,7 +2049,7 @@ export interface V1alpha1JVMChaosSpec {
    */
   containerNames?: Array<string>
   /**
-   * +optional the CPU core number need to use, only set it when action is stress
+   * +optional the CPU core number needs to use, only set it when action is stress
    * @type {number}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -1839,7 +2073,7 @@ export interface V1alpha1JVMChaosSpec {
    */
   latency?: number
   /**
-   * +optional the memory type need to locate, only set it when action is stress, the value can be \'stack\' or \'heap\'
+   * +optional the memory type needs to locate, only set it when action is stress, the value can be \'stack\' or \'heap\'
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -1863,13 +2097,19 @@ export interface V1alpha1JVMChaosSpec {
    */
   name?: string
   /**
+   * the pid of Java process which needs to attach
+   * @type {number}
+   * @memberof V1alpha1JVMChaosSpec
+   */
+  pid?: number
+  /**
    * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMChaosSpec
    */
   port?: number
   /**
-   * +optional
+   * +optional the byteman rule\'s data for action \'ruleData\'
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -1894,7 +2134,7 @@ export interface V1alpha1JVMChaosSpec {
  */
 export interface V1alpha1JVMExceptionSpec {
   /**
-   * Java class
+   * +optional Java class
    * @type {string}
    * @memberof V1alpha1JVMExceptionSpec
    */
@@ -1906,19 +2146,19 @@ export interface V1alpha1JVMExceptionSpec {
    */
   exception?: string
   /**
-   * the method in Java class
+   * +optional the method in Java class
    * @type {string}
    * @memberof V1alpha1JVMExceptionSpec
    */
   method?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMExceptionSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMExceptionSpec
    */
@@ -1931,13 +2171,13 @@ export interface V1alpha1JVMExceptionSpec {
  */
 export interface V1alpha1JVMGCSpec {
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMGCSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMGCSpec
    */
@@ -1950,7 +2190,7 @@ export interface V1alpha1JVMGCSpec {
  */
 export interface V1alpha1JVMLatencySpec {
   /**
-   * Java class
+   * +optional Java class
    * @type {string}
    * @memberof V1alpha1JVMLatencySpec
    */
@@ -1962,19 +2202,19 @@ export interface V1alpha1JVMLatencySpec {
    */
   latency?: number
   /**
-   * the method in Java class
+   * +optional the method in Java class
    * @type {string}
    * @memberof V1alpha1JVMLatencySpec
    */
   method?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMLatencySpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMLatencySpec
    */
@@ -1987,25 +2227,25 @@ export interface V1alpha1JVMLatencySpec {
  */
 export interface V1alpha1JVMReturnSpec {
   /**
-   * Java class
+   * +optional Java class
    * @type {string}
    * @memberof V1alpha1JVMReturnSpec
    */
   class?: string
   /**
-   * the method in Java class
+   * +optional the method in Java class
    * @type {string}
    * @memberof V1alpha1JVMReturnSpec
    */
   method?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMReturnSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMReturnSpec
    */
@@ -2024,13 +2264,13 @@ export interface V1alpha1JVMReturnSpec {
  */
 export interface V1alpha1JVMRuleDataSpec {
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMRuleDataSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMRuleDataSpec
    */
@@ -2061,13 +2301,13 @@ export interface V1alpha1JVMStressSpec {
    */
   'mem-type'?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMStressSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMStressSpec
    */
@@ -2136,6 +2376,12 @@ export interface V1alpha1LossSpec {
  */
 export interface V1alpha1MemoryStressor {
   /**
+   * OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more about this option. +kubebuilder:validation:Minimum=-1000 +kubebuilder:validation:Maximum=1000 +kubebuilder:default=0 +optional
+   * @type {number}
+   * @memberof V1alpha1MemoryStressor
+   */
+  oomScoreAdj?: number
+  /**
    * extend stress-ng options +optional
    * @type {Array<string>}
    * @memberof V1alpha1MemoryStressor
@@ -2161,7 +2407,7 @@ export interface V1alpha1MemoryStressor {
  */
 export interface V1alpha1MistakeSpec {
   /**
-   * Filling determines what is filled in the miskate data. +optional +kubebuilder:validation:Enum=zero;random
+   * Filling determines what is filled in the mistake data. +optional +kubebuilder:validation:Enum=zero;random
    * @type {string}
    * @memberof V1alpha1MistakeSpec
    */
@@ -2247,19 +2493,19 @@ export interface V1alpha1NetworkChaosSpec {
    */
   action?: string
   /**
-   *
+   * Bandwidth represents the detail about bandwidth control action +ui:form:when=action==\'bandwidth\' +optional
    * @type {V1alpha1BandwidthSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
   bandwidth?: V1alpha1BandwidthSpec
   /**
-   *
+   * Corrupt represents the detail about corrupt action +ui:form:when=action==\'corrupt\' +optional
    * @type {V1alpha1CorruptSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
   corrupt?: V1alpha1CorruptSpec
   /**
-   *
+   * Delay represents the detail about delay action +ui:form:when=action==\'delay\' +optional
    * @type {V1alpha1DelaySpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -2277,7 +2523,7 @@ export interface V1alpha1NetworkChaosSpec {
    */
   direction?: string
   /**
-   *
+   * DuplicateSpec represents the detail about loss action +ui:form:when=action==\'duplicate\' +optional
    * @type {V1alpha1DuplicateSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -2295,7 +2541,7 @@ export interface V1alpha1NetworkChaosSpec {
    */
   externalTargets?: Array<string>
   /**
-   *
+   * Loss represents the detail about loss action +ui:form:when=action==\'loss\' +optional
    * @type {V1alpha1LossSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -3054,6 +3300,12 @@ export interface V1alpha1ProcessSpec {
    */
   process?: string
   /**
+   * the command to be run when recovering experiment
+   * @type {string}
+   * @memberof V1alpha1ProcessSpec
+   */
+  recoverCmd?: string
+  /**
    * the signal number to send
    * @type {number}
    * @memberof V1alpha1ProcessSpec
@@ -3116,6 +3368,12 @@ export interface V1alpha1ScheduleSpec {
    * @memberof V1alpha1ScheduleSpec
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1AzureChaosSpec}
+   * @memberof V1alpha1ScheduleSpec
+   */
+  azureChaos?: V1alpha1AzureChaosSpec
   /**
    *
    * @type {V1alpha1BlockChaosSpec}
@@ -3243,6 +3501,128 @@ export interface V1alpha1ScheduleStatus {
    * @memberof V1alpha1ScheduleStatus
    */
   time?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1StatusCheckSpec
+ */
+export interface V1alpha1StatusCheckSpec {
+  /**
+   * Duration defines the duration of the whole status check if the number of failed execution does not exceed the failure threshold. Duration is available to both `Synchronous` and `Continuous` mode. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". +optional
+   * @type {string}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  duration?: string
+  /**
+   * FailureThreshold defines the minimum consecutive failure for the status check to be considered failed. +optional +kubebuilder:default=3 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  failureThreshold?: number
+  /**
+   *
+   * @type {V1alpha1HTTPStatusCheck}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  http?: V1alpha1HTTPStatusCheck
+  /**
+   * IntervalSeconds defines how often (in seconds) to perform an execution of status check. +optional +kubebuilder:default=10 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  intervalSeconds?: number
+  /**
+   * Mode defines the execution mode of the status check. Support type: Synchronous / Continuous +optional +kubebuilder:validation:Enum=Synchronous;Continuous
+   * @type {string}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  mode?: string
+  /**
+   * RecordsHistoryLimit defines the number of record to retain. +optional +kubebuilder:default=100 +kubebuilder:validation:Minimum=1 +kubebuilder:validation:Maximum=1000
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  recordsHistoryLimit?: number
+  /**
+   * SuccessThreshold defines the minimum consecutive successes for the status check to be considered successful. SuccessThreshold only works for `Synchronous` mode. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  successThreshold?: number
+  /**
+   * TimeoutSeconds defines the number of seconds after which an execution of status check times out. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  timeoutSeconds?: number
+  /**
+   * Type defines the specific status check type. Support type: HTTP +kubebuilder:default=HTTP +kubebuilder:validation:Enum=HTTP
+   * @type {string}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  type?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1StatusCheckTemplate
+ */
+export interface V1alpha1StatusCheckTemplate {
+  /**
+   * Duration defines the duration of the whole status check if the number of failed execution does not exceed the failure threshold. Duration is available to both `Synchronous` and `Continuous` mode. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". +optional
+   * @type {string}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  duration?: string
+  /**
+   * FailureThreshold defines the minimum consecutive failure for the status check to be considered failed. +optional +kubebuilder:default=3 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  failureThreshold?: number
+  /**
+   *
+   * @type {V1alpha1HTTPStatusCheck}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  http?: V1alpha1HTTPStatusCheck
+  /**
+   * IntervalSeconds defines how often (in seconds) to perform an execution of status check. +optional +kubebuilder:default=10 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  intervalSeconds?: number
+  /**
+   * Mode defines the execution mode of the status check. Support type: Synchronous / Continuous +optional +kubebuilder:validation:Enum=Synchronous;Continuous
+   * @type {string}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  mode?: string
+  /**
+   * RecordsHistoryLimit defines the number of record to retain. +optional +kubebuilder:default=100 +kubebuilder:validation:Minimum=1 +kubebuilder:validation:Maximum=1000
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  recordsHistoryLimit?: number
+  /**
+   * SuccessThreshold defines the minimum consecutive successes for the status check to be considered successful. SuccessThreshold only works for `Synchronous` mode. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  successThreshold?: number
+  /**
+   * TimeoutSeconds defines the number of seconds after which an execution of status check times out. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  timeoutSeconds?: number
+  /**
+   * Type defines the specific status check type. Support type: HTTP +kubebuilder:default=HTTP +kubebuilder:validation:Enum=HTTP
+   * @type {string}
+   * @memberof V1alpha1StatusCheckTemplate
+   */
+  type?: string
 }
 /**
  *
@@ -3382,11 +3762,23 @@ export interface V1alpha1Task {
  */
 export interface V1alpha1Template {
   /**
+   * AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck. +optional
+   * @type {boolean}
+   * @memberof V1alpha1Template
+   */
+  abortWithStatusCheck?: boolean
+  /**
    *
    * @type {V1alpha1AWSChaosSpec}
    * @memberof V1alpha1Template
    */
   awsChaos?: V1alpha1AWSChaosSpec
+  /**
+   *
+   * @type {V1alpha1AzureChaosSpec}
+   * @memberof V1alpha1Template
+   */
+  azureChaos?: V1alpha1AzureChaosSpec
   /**
    *
    * @type {V1alpha1BlockChaosSpec}
@@ -3477,6 +3869,12 @@ export interface V1alpha1Template {
    * @memberof V1alpha1Template
    */
   schedule?: V1alpha1ChaosOnlyScheduleSpec
+  /**
+   *
+   * @type {V1alpha1StatusCheckSpec}
+   * @memberof V1alpha1Template
+   */
+  statusCheck?: V1alpha1StatusCheckSpec
   /**
    *
    * @type {V1alpha1StressChaosSpec}
@@ -7101,6 +7499,522 @@ export class SchedulesApi extends BaseAPI {
 }
 
 /**
+ * TemplateApi - axios parameter creator
+ * @export
+ */
+export const TemplateApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     * Get status check templates from k8s cluster in real time.
+     * @summary List status check templates.
+     * @param {string} [namespace] filter status check templates by namespace
+     * @param {string} [name] filter status check templates by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksGet: async (
+      namespace?: string,
+      name?: string,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/templates/statuschecks`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (namespace !== undefined) {
+        localVarQueryParameter['namespace'] = namespace
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
+
+/**
+ * TemplateApi - functional programming interface
+ * @export
+ */
+export const TemplateApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = TemplateApiAxiosParamCreator(configuration)
+  return {
+    /**
+     * Get status check templates from k8s cluster in real time.
+     * @summary List status check templates.
+     * @param {string} [namespace] filter status check templates by namespace
+     * @param {string} [name] filter status check templates by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksGet(
+      namespace?: string,
+      name?: string,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TemplateStatusCheckTemplateBase>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksGet(namespace, name, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+  }
+}
+
+/**
+ * TemplateApi - factory interface
+ * @export
+ */
+export const TemplateApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+  const localVarFp = TemplateApiFp(configuration)
+  return {
+    /**
+     * Get status check templates from k8s cluster in real time.
+     * @summary List status check templates.
+     * @param {string} [namespace] filter status check templates by namespace
+     * @param {string} [name] filter status check templates by name
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksGet(
+      namespace?: string,
+      name?: string,
+      options?: any
+    ): AxiosPromise<Array<TemplateStatusCheckTemplateBase>> {
+      return localVarFp.templatesStatuschecksGet(namespace, name, options).then((request) => request(axios, basePath))
+    },
+  }
+}
+
+/**
+ * TemplateApi - object-oriented interface
+ * @export
+ * @class TemplateApi
+ * @extends {BaseAPI}
+ */
+export class TemplateApi extends BaseAPI {
+  /**
+   * Get status check templates from k8s cluster in real time.
+   * @summary List status check templates.
+   * @param {string} [namespace] filter status check templates by namespace
+   * @param {string} [name] filter status check templates by name
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplateApi
+   */
+  public templatesStatuschecksGet(namespace?: string, name?: string, options?: AxiosRequestConfig) {
+    return TemplateApiFp(this.configuration)
+      .templatesStatuschecksGet(namespace, name, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+}
+
+/**
+ * TemplatesApi - axios parameter creator
+ * @export
+ */
+export const TemplatesApiAxiosParamCreator = function (configuration?: Configuration) {
+  return {
+    /**
+     * Pass a JSON object to create a new status check template.
+     * @summary Create a new status check template.
+     * @param {TemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksPost: async (
+      statuscheck: TemplateStatusCheckTemplate,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'statuscheck' is not null or undefined
+      assertParamExists('templatesStatuschecksPost', 'statuscheck', statuscheck)
+      const localVarPath = `/templates/statuschecks`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(statuscheck, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Delete the status check template by namespaced name.
+     * @summary Delete a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckDelete: async (
+      namespace: string,
+      name: string,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'namespace' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckDelete', 'namespace', namespace)
+      // verify required parameter 'name' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckDelete', 'name', name)
+      const localVarPath = `/templates/statuschecks/statuscheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (namespace !== undefined) {
+        localVarQueryParameter['namespace'] = namespace
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get the status check template\'s detail by namespaced name.
+     * @summary Get a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckGet: async (
+      namespace: string,
+      name: string,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'namespace' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckGet', 'namespace', namespace)
+      // verify required parameter 'name' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckGet', 'name', name)
+      const localVarPath = `/templates/statuschecks/statuscheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (namespace !== undefined) {
+        localVarQueryParameter['namespace'] = namespace
+      }
+
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Update a status check template by namespaced name.
+     * @summary Update a status check template.
+     * @param {TemplateStatusCheckTemplate} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckPut: async (
+      request: TemplateStatusCheckTemplate,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('templatesStatuschecksStatuscheckPut', 'request', request)
+      const localVarPath = `/templates/statuschecks/statuscheck`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
+
+/**
+ * TemplatesApi - functional programming interface
+ * @export
+ */
+export const TemplatesApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = TemplatesApiAxiosParamCreator(configuration)
+  return {
+    /**
+     * Pass a JSON object to create a new status check template.
+     * @summary Create a new status check template.
+     * @param {TemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksPost(
+      statuscheck: TemplateStatusCheckTemplate,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TemplateStatusCheckTemplate>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksPost(statuscheck, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Delete the status check template by namespaced name.
+     * @summary Delete a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksStatuscheckDelete(
+      namespace: string,
+      name: string,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckDelete(
+        namespace,
+        name,
+        options
+      )
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Get the status check template\'s detail by namespaced name.
+     * @summary Get a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksStatuscheckGet(
+      namespace: string,
+      name: string,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TemplateStatusCheckTemplateDetail>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckGet(
+        namespace,
+        name,
+        options
+      )
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Update a status check template by namespaced name.
+     * @summary Update a status check template.
+     * @param {TemplateStatusCheckTemplate} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async templatesStatuschecksStatuscheckPut(
+      request: TemplateStatusCheckTemplate,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TemplateStatusCheckTemplate>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckPut(request, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+  }
+}
+
+/**
+ * TemplatesApi - factory interface
+ * @export
+ */
+export const TemplatesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+  const localVarFp = TemplatesApiFp(configuration)
+  return {
+    /**
+     * Pass a JSON object to create a new status check template.
+     * @summary Create a new status check template.
+     * @param {TemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksPost(
+      statuscheck: TemplateStatusCheckTemplate,
+      options?: any
+    ): AxiosPromise<TemplateStatusCheckTemplate> {
+      return localVarFp.templatesStatuschecksPost(statuscheck, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Delete the status check template by namespaced name.
+     * @summary Delete a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckDelete(
+      namespace: string,
+      name: string,
+      options?: any
+    ): AxiosPromise<UtilsResponse> {
+      return localVarFp
+        .templatesStatuschecksStatuscheckDelete(namespace, name, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get the status check template\'s detail by namespaced name.
+     * @summary Get a status check template.
+     * @param {string} namespace the namespace of status check templates
+     * @param {string} name the name of status check templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckGet(
+      namespace: string,
+      name: string,
+      options?: any
+    ): AxiosPromise<TemplateStatusCheckTemplateDetail> {
+      return localVarFp
+        .templatesStatuschecksStatuscheckGet(namespace, name, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Update a status check template by namespaced name.
+     * @summary Update a status check template.
+     * @param {TemplateStatusCheckTemplate} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    templatesStatuschecksStatuscheckPut(
+      request: TemplateStatusCheckTemplate,
+      options?: any
+    ): AxiosPromise<TemplateStatusCheckTemplate> {
+      return localVarFp
+        .templatesStatuschecksStatuscheckPut(request, options)
+        .then((request) => request(axios, basePath))
+    },
+  }
+}
+
+/**
+ * TemplatesApi - object-oriented interface
+ * @export
+ * @class TemplatesApi
+ * @extends {BaseAPI}
+ */
+export class TemplatesApi extends BaseAPI {
+  /**
+   * Pass a JSON object to create a new status check template.
+   * @summary Create a new status check template.
+   * @param {TemplateStatusCheckTemplate} statuscheck the status check definition
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksPost(statuscheck: TemplateStatusCheckTemplate, options?: AxiosRequestConfig) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksPost(statuscheck, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Delete the status check template by namespaced name.
+   * @summary Delete a status check template.
+   * @param {string} namespace the namespace of status check templates
+   * @param {string} name the name of status check templates
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksStatuscheckDelete(namespace: string, name: string, options?: AxiosRequestConfig) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksStatuscheckDelete(namespace, name, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get the status check template\'s detail by namespaced name.
+   * @summary Get a status check template.
+   * @param {string} namespace the namespace of status check templates
+   * @param {string} name the name of status check templates
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksStatuscheckGet(namespace: string, name: string, options?: AxiosRequestConfig) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksStatuscheckGet(namespace, name, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Update a status check template by namespaced name.
+   * @summary Update a status check template.
+   * @param {TemplateStatusCheckTemplate} request Request body
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof TemplatesApi
+   */
+  public templatesStatuschecksStatuscheckPut(request: TemplateStatusCheckTemplate, options?: AxiosRequestConfig) {
+    return TemplatesApiFp(this.configuration)
+      .templatesStatuschecksStatuscheckPut(request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+}
+
+/**
  * WorkflowsApi - axios parameter creator
  * @export
  */
@@ -7149,16 +8063,19 @@ export const WorkflowsApiAxiosParamCreator = function (configuration?: Configura
       }
     },
     /**
-     * Create a new workflow.
-     * @summary Create a new workflow.
-     * @param {V1alpha1Workflow} request Request body
+     * Parse the rendered task back to the original request
+     * @summary Parse the rendered task back to the original request
+     * @param {V1alpha1Template} request Rendered Task
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsNewPost: async (request: V1alpha1Workflow, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+    workflowsParseTaskHttpPost: async (
+      request: V1alpha1Template,
+      options: AxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
       // verify required parameter 'request' is not null or undefined
-      assertParamExists('workflowsNewPost', 'request', request)
-      const localVarPath = `/workflows/new`
+      assertParamExists('workflowsParseTaskHttpPost', 'request', request)
+      const localVarPath = `/workflows/parse-task/http`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -7183,19 +8100,16 @@ export const WorkflowsApiAxiosParamCreator = function (configuration?: Configura
       }
     },
     /**
-     * Parse the rendered task back to the original request
-     * @summary Parse the rendered task back to the original request
-     * @param {V1alpha1Template} request Rendered Task
+     * Create a new workflow.
+     * @summary Create a new workflow.
+     * @param {V1alpha1Workflow} request Request body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsParseTaskHttpPost: async (
-      request: V1alpha1Template,
-      options: AxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
+    workflowsPost: async (request: V1alpha1Workflow, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
       // verify required parameter 'request' is not null or undefined
-      assertParamExists('workflowsParseTaskHttpPost', 'request', request)
-      const localVarPath = `/workflows/parse-task/http`
+      assertParamExists('workflowsPost', 'request', request)
+      const localVarPath = `/workflows`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -7423,20 +8337,6 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
     /**
-     * Create a new workflow.
-     * @summary Create a new workflow.
-     * @param {V1alpha1Workflow} request Request body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async workflowsNewPost(
-      request: V1alpha1Workflow,
-      options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CoreWorkflowDetail>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsNewPost(request, options)
-      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
-    },
-    /**
      * Parse the rendered task back to the original request
      * @summary Parse the rendered task back to the original request
      * @param {V1alpha1Template} request Rendered Task
@@ -7448,6 +8348,20 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       options?: AxiosRequestConfig
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CurlRequestForm>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsParseTaskHttpPost(request, options)
+      return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
+    },
+    /**
+     * Create a new workflow.
+     * @summary Create a new workflow.
+     * @param {V1alpha1Workflow} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async workflowsPost(
+      request: V1alpha1Workflow,
+      options?: AxiosRequestConfig
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CoreWorkflowDetail>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
     /**
@@ -7548,16 +8462,6 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
       return localVarFp.workflowsGet(namespace, status, options).then((request) => request(axios, basePath))
     },
     /**
-     * Create a new workflow.
-     * @summary Create a new workflow.
-     * @param {V1alpha1Workflow} request Request body
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    workflowsNewPost(request: V1alpha1Workflow, options?: any): AxiosPromise<CoreWorkflowDetail> {
-      return localVarFp.workflowsNewPost(request, options).then((request) => request(axios, basePath))
-    },
-    /**
      * Parse the rendered task back to the original request
      * @summary Parse the rendered task back to the original request
      * @param {V1alpha1Template} request Rendered Task
@@ -7566,6 +8470,16 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
      */
     workflowsParseTaskHttpPost(request: V1alpha1Template, options?: any): AxiosPromise<CurlRequestForm> {
       return localVarFp.workflowsParseTaskHttpPost(request, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Create a new workflow.
+     * @summary Create a new workflow.
+     * @param {V1alpha1Workflow} request Request body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    workflowsPost(request: V1alpha1Workflow, options?: any): AxiosPromise<CoreWorkflowDetail> {
+      return localVarFp.workflowsPost(request, options).then((request) => request(axios, basePath))
     },
     /**
      * Render a task which sends HTTP request
@@ -7648,20 +8562,6 @@ export class WorkflowsApi extends BaseAPI {
   }
 
   /**
-   * Create a new workflow.
-   * @summary Create a new workflow.
-   * @param {V1alpha1Workflow} request Request body
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof WorkflowsApi
-   */
-  public workflowsNewPost(request: V1alpha1Workflow, options?: AxiosRequestConfig) {
-    return WorkflowsApiFp(this.configuration)
-      .workflowsNewPost(request, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
    * Parse the rendered task back to the original request
    * @summary Parse the rendered task back to the original request
    * @param {V1alpha1Template} request Rendered Task
@@ -7672,6 +8572,20 @@ export class WorkflowsApi extends BaseAPI {
   public workflowsParseTaskHttpPost(request: V1alpha1Template, options?: AxiosRequestConfig) {
     return WorkflowsApiFp(this.configuration)
       .workflowsParseTaskHttpPost(request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Create a new workflow.
+   * @summary Create a new workflow.
+   * @param {V1alpha1Workflow} request Request body
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof WorkflowsApi
+   */
+  public workflowsPost(request: V1alpha1Workflow, options?: AxiosRequestConfig) {
+    return WorkflowsApiFp(this.configuration)
+      .workflowsPost(request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

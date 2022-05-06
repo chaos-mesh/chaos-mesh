@@ -25,20 +25,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaoserr"
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 )
 
 type FakeConfig struct {
 	i int
 }
 
-func (f *FakeConfig) Add(a Addable) error {
+func (f *FakeConfig) Merge(a Mergeable) error {
 	A, OK := a.(*FakeConfig)
 	if OK {
 		f.i += A.i
 		return nil
 	}
-	return errors.Wrapf(ErrCanNotAdd, "expect type : *FakeConfig, got : %T", a)
+	return cerr.NotType[*FakeConfig]().WrapInput(a).Err()
 }
 
 func (f *FakeConfig) DeepCopy() Object {
@@ -52,7 +52,7 @@ func (f *FakeConfig) Assign(c Injectable) error {
 		C.C.i = f.i
 		return nil
 	}
-	return errors.Wrapf(ErrCanNotAssign, "expect type : *FakeChaos, got : %T", c)
+	return cerr.NotType[*FakeConfig]().WrapInput(c).Err()
 }
 
 func (f *FakeConfig) New(immutableValues interface{}) (Injectable, error) {
@@ -68,16 +68,16 @@ type FakeChaos struct {
 	logger         logr.Logger
 }
 
-func (f *FakeChaos) Inject(pid PID) error {
+func (f *FakeChaos) Inject(pid IsID) error {
 	if f.ErrWhenInject {
-		return chaoserr.NotImplemented("inject")
+		return cerr.NotImpl[Injectable]().Err()
 	}
 	return nil
 }
 
-func (f *FakeChaos) Recover(pid PID) error {
+func (f *FakeChaos) Recover(pid IsID) error {
 	if f.ErrWhenRecover {
-		return chaoserr.NotImplemented("recover")
+		return cerr.NotImpl[Recoverable]().Err()
 	}
 	return nil
 }
@@ -100,8 +100,8 @@ func TestTasksManager(t *testing.T) {
 	}
 	task1 := FakeConfig{i: 1}
 	uid1 := "1"
-	err = m.Create(uid1, 1, &task1, &chaos)
-	chaosInterface, err := m.GetTaskWithPID(1)
+	err = m.Create(uid1, SysPID(1), &task1, &chaos)
+	chaosInterface, err := m.GetTaskWithPID(SysPID(1))
 	assert.NoError(t, err)
 	chaoso := chaosInterface.(*FakeChaos)
 	assert.Equal(t, chaoso.C, task1)
@@ -109,8 +109,8 @@ func TestTasksManager(t *testing.T) {
 
 	task2 := FakeConfig{i: 1}
 	uid2 := "2"
-	err = m.Apply(uid2, 1, &task2)
-	chaosInterface, err = m.GetTaskWithPID(1)
+	err = m.Apply(uid2, SysPID(1), &task2)
+	chaosInterface, err = m.GetTaskWithPID(SysPID(1))
 	assert.NoError(t, err)
 	chaoso = chaosInterface.(*FakeChaos)
 	assert.Equal(t, chaoso.C, FakeConfig{i: 2})
@@ -138,32 +138,32 @@ func TestTasksManagerError(t *testing.T) {
 	}
 	task1 := FakeConfig{i: 1}
 	uid1 := "1"
-	err = m.Create(uid1, 1, &task1, &chaos)
+	err = m.Create(uid1, SysPID(1), &task1, &chaos)
 	assert.NoError(t, err)
-	err = m.Apply(uid1, 1, &task1)
-	assert.Equal(t, errors.Cause(err), chaoserr.ErrDuplicateEntity)
-	err = m.Recover(uid1, 1)
+	err = m.Apply(uid1, SysPID(1), &task1)
+	assert.Equal(t, errors.Cause(err), cerr.ErrDuplicateEntity)
+	err = m.Recover(uid1, SysPID(1))
 	assert.NoError(t, err)
-	err = m.Recover(uid1, 1)
-	assert.Equal(t, errors.Cause(err), ErrPIDNotFound)
+	err = m.Recover(uid1, SysPID(1))
+	assert.Equal(t, errors.Cause(err), ErrNotFoundTaskID.Err())
 
 	chaos.ErrWhenInject = true
 	tasks2 := FakeConfig{i: 1}
-	err = m.Create(uid1, 1, &tasks2, &chaos)
-	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("inject"))
+	err = m.Create(uid1, SysPID(1), &tasks2, &chaos)
+	assert.Equal(t, errors.Cause(err).Error(), cerr.NotImpl[Injectable]().Err().Error())
 	_, err = m.GetConfigWithUID(uid1)
-	assert.Equal(t, errors.Cause(err), ErrUIDNotFound)
+	assert.Equal(t, errors.Cause(err), ErrNotFoundTaskID.Err())
 
 	chaos.ErrWhenInject = false
 	chaos.ErrWhenRecover = true
 	tasks3 := FakeConfig{i: 1}
-	err = m.Create(uid1, 1, &tasks3, &chaos)
+	err = m.Create(uid1, SysPID(1), &tasks3, &chaos)
 	assert.NoError(t, err)
-	err = m.Recover(uid1, 1)
-	assert.Equal(t, errors.Cause(err), chaoserr.NotImplemented("recover"))
-	p, err := m.GetTaskWithPID(1)
+	err = m.Recover(uid1, SysPID(1))
+	assert.Equal(t, errors.Cause(err).Error(), cerr.NotImpl[Recoverable]().Err().Error())
+	p, err := m.GetTaskWithPID(SysPID(1))
 	inner := p.(*FakeChaos)
 	inner.ErrWhenRecover = false
-	err = m.Recover(uid1, 1)
+	err = m.Recover(uid1, SysPID(1))
 	assert.NoError(t, err)
 }

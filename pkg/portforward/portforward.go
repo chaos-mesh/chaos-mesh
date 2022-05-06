@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +35,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/polymorphichelpers"
 )
 
@@ -55,6 +55,7 @@ type portForwarder struct {
 	config    *rest.Config
 	client    kubernetes.Interface
 	enableLog bool
+	logger    logr.Logger
 }
 
 var _ PortForward = &portForwarder{}
@@ -84,7 +85,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 		lineScanner := bufio.NewScanner(r)
 		for lineScanner.Scan() {
 			if f.enableLog {
-				klog.Infof("log from port forwarding %q: %s", podKey, lineScanner.Text())
+				f.logger.Info(fmt.Sprintf("log from port forwarding %q: %s", podKey, lineScanner.Text()))
 			}
 		}
 	}()
@@ -156,7 +157,7 @@ func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []
 }
 
 // NewPortForwarder would create a new port-forward
-func NewPortForwarder(ctx context.Context, restClientGetter genericclioptions.RESTClientGetter, enableLog bool) (PortForward, error) {
+func NewPortForwarder(ctx context.Context, restClientGetter genericclioptions.RESTClientGetter, enableLog bool, logger logr.Logger) (PortForward, error) {
 	config, err := restClientGetter.ToRESTConfig()
 	if err != nil {
 		return nil, err
@@ -171,6 +172,7 @@ func NewPortForwarder(ctx context.Context, restClientGetter genericclioptions.RE
 		config:           config,
 		client:           client,
 		enableLog:        enableLog,
+		logger:           logger,
 	}
 	return f, nil
 }

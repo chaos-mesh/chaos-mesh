@@ -14,16 +14,27 @@
 #
 
 apiVersion: chaos-mesh.org/v1alpha1
-kind: JVMChaos
+kind: Workflow
 metadata:
-  name: exception
-  namespace: helloworld
+  namespace: chaos-testing
+  name: workflow-jvm
 spec:
-  action: exception
-  class: Main
-  method: sayhello
-  exception: java.io.IOException("BOOM")
-  mode: all
-  selector:
-    namespaces:
-      - helloworld
+  entry: entry
+  templates:
+    - name: entry
+      templateType: Serial
+      deadline: 5m
+      children:
+        - exception
+    - name: exception
+      templateType: JVMChaos
+      deadline: 4m
+      jvmChaos:
+        selector:
+          namespaces:
+            - helloworld
+        mode: all
+        action: exception
+        class: Main
+        method: sayhello
+        exception: java.io.IOException("BOOM")

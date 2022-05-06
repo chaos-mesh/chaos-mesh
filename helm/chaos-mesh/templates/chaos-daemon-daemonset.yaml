@@ -36,7 +36,8 @@ spec:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
-        {{- if .Values.dashboard.securityMode }}
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
+        {{- if .Values.chaosDaemon.mtls.enabled }}
         rollme: {{ randAlphaNum 5 | quote }}
         {{- end }}
     {{- with .Values.chaosDaemon.podAnnotations }}
@@ -75,7 +76,7 @@ spec:
           {{- if .Values.enableProfiling }}
             - --pprof
           {{- end }}
-          {{- if .Values.dashboard.securityMode }}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
             - --ca
             - /etc/chaos-daemon/cert/ca.crt
             - --cert
@@ -128,7 +129,7 @@ spec:
               mountPath: /host-sys
             - name: lib-modules
               mountPath: /lib/modules
-            {{- if .Values.dashboard.securityMode}}
+            {{- if .Values.chaosDaemon.mtls.enabled}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
               readOnly: true
@@ -136,7 +137,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
-              hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
 {{- if .Values.bpfki.create }}
@@ -166,7 +166,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.bpfki.grpcPort }}
-              hostPort: {{ .Values.bpfki.grpcPort }}
 {{- end }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
@@ -205,7 +204,7 @@ spec:
         - name: lib-modules
           hostPath:
             path: /lib/modules
-        {{- if .Values.dashboard.securityMode}}
+        {{- if .Values.chaosDaemon.mtls.enabled}}
         - name: chaos-daemon-cert
           secret:
             secretName:  {{ template "chaos-mesh.daemon.certs" . }}

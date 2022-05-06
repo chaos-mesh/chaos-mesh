@@ -1,0 +1,126 @@
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- if .Values.rbac.create }}
+# ServiceAccount for component chaos-dashboard
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: {{ .Release.Namespace | quote }}
+  name: {{ .Values.dashboard.serviceAccount }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+
+---
+# ClusterRole for chaos-dashboard at cluster scope
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-chaos-dashboard-cluster-level
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+rules:
+  # chaos-dashboard could list namespace for selector hints
+  - apiGroups: [ "" ]
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  # chaos-dashboard use subjectaccessreviews to authorize the requests
+  - apiGroups: [ "authorization.k8s.io" ]
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+
+---
+# ClusterRoleBinding for chaos-dashboard at cluster scope
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-chaos-dashboard-cluster-level
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-chaos-dashboard-cluster-level
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.dashboard.serviceAccount }}
+    namespace: {{ .Release.Namespace | quote }}
+
+---
+# ClusterRole for chaos-dashboard in target namespace
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-chaos-dashboard-target-namespace
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+rules:
+  # chaos dashboard could list pods for selector hints
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  # chaos dashboard could record evnets from chaos experiments
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  # chaos dashboard could record and manipulate all the Chaos Mesh resources in target namespace
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
+
+---
+# binding ClusterRole to ServiceAccount for componnet chaos dashboard
+{{- if .Values.clusterScoped }}
+kind: ClusterRoleBinding
+{{- else }}
+kind: RoleBinding
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-chaos-dashboard-target-namespace
+  # TODO: notice that the targetNamespace is still defined as .Values.controllerManager.targetNamespace, .Values.targetNamespace would be better.
+  namespace: {{ .Values.controllerManager.targetNamespace | quote }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: chaos-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-chaos-dashboard-target-namespace
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.dashboard.serviceAccount }}
+    namespace: {{ .Release.Namespace | quote }}
+{{- end }}

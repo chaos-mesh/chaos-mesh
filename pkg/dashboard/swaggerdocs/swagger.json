@@ -3155,7 +3155,7 @@
             "type": "object",
             "properties": {
                 "load": {
-                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+optional",
+                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -3727,7 +3727,7 @@
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
+                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
                     "type": "string"
                 },
                 "pid": {
@@ -3923,7 +3923,7 @@
             "type": "object",
             "properties": {
                 "oomScoreAdj": {
-                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximm=1000\n+kubebuilder:default=0\n+optional",
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -3947,7 +3947,7 @@
             "type": "object",
             "properties": {
                 "filling": {
-                    "description": "Filling determines what is filled in the miskate data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
+                    "description": "Filling determines what is filled in the mistake data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
                     "type": "string"
                 },
                 "maxLength": {
@@ -3999,17 +3999,17 @@
                     "type": "string"
                 },
                 "bandwidth": {
-                    "description": "Bandwidth represents the detail about bandwidth control action\n+optional",
+                    "description": "Bandwidth represents the detail about bandwidth control action\n+ui:form:when=action=='bandwidth'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BandwidthSpec"
                 },
                 "corrupt": {
-                    "description": "Corrupt represents the detail about corrupt action\n+optional",
+                    "description": "Corrupt represents the detail about corrupt action\n+ui:form:when=action=='corrupt'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.CorruptSpec"
                 },
                 "delay": {
-                    "description": "Delay represents the detail about delay action\n+optional",
+                    "description": "Delay represents the detail about delay action\n+ui:form:when=action=='delay'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
@@ -4022,7 +4022,7 @@
                     "type": "string"
                 },
                 "duplicate": {
-                    "description": "DuplicateSpec represents the detail about loss action\n+optional",
+                    "description": "DuplicateSpec represents the detail about loss action\n+ui:form:when=action=='duplicate'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DuplicateSpec"
                 },
@@ -4038,7 +4038,7 @@
                     }
                 },
                 "loss": {
-                    "description": "Loss represents the detail about loss action\n+optional",
+                    "description": "Loss represents the detail about loss action\n+ui:form:when=action=='loss'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.LossSpec"
                 },
@@ -4799,6 +4799,48 @@
                 }
             }
         },
+        "v1alpha1.StatusCheckSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration defines the duration of the whole status check if the\nnumber of failed execution does not exceed the failure threshold.\nDuration is available to both `Synchronous` and `Continuous` mode.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "failureThreshold": {
+                    "description": "FailureThreshold defines the minimum consecutive failure\nfor the status check to be considered failed.\n+optional\n+kubebuilder:default=3\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "http": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
+                },
+                "intervalSeconds": {
+                    "description": "IntervalSeconds defines how often (in seconds) to perform\nan execution of status check.\n+optional\n+kubebuilder:default=10\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the execution mode of the status check.\nSupport type: Synchronous / Continuous\n+optional\n+kubebuilder:validation:Enum=Synchronous;Continuous",
+                    "type": "string"
+                },
+                "recordsHistoryLimit": {
+                    "description": "RecordsHistoryLimit defines the number of record to retain.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:Minimum=1\n+kubebuilder:validation:Maximum=1000",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "SuccessThreshold defines the minimum consecutive successes\nfor the status check to be considered successful.\nSuccessThreshold only works for `Synchronous` mode.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "description": "TimeoutSeconds defines the number of seconds after which\nan execution of status check times out.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type defines the specific status check type.\nSupport type: HTTP\n+kubebuilder:default=HTTP\n+kubebuilder:validation:Enum=HTTP",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.StatusCheckTemplate": {
             "type": "object",
             "properties": {
@@ -4940,6 +4982,10 @@
         "v1alpha1.Template": {
             "type": "object",
             "properties": {
+                "abortWithStatusCheck": {
+                    "description": "AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.\nOnly used when Type is TypeStatusCheck.\n+optional",
+                    "type": "boolean"
+                },
                 "awsChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -5025,6 +5071,11 @@
                     "description": "Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ChaosOnlyScheduleSpec"
+                },
+                "statusCheck": {
+                    "description": "StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckSpec"
                 },
                 "stressChaos": {
                     "description": "+optional",
