@@ -114,6 +114,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix Github Action `upload-image` [#2935](https://github.com/chaos-mesh/chaos-mesh/pull/2935)
 - Fix JVMChaos to handle the situation that the container which holds the JVM rules has been deleted [#2981](https://github.com/chaos-mesh/chaos-mesh/pull/2981)
 - Fix typo in comments for Chaos API [#3109](https://github.com/chaos-mesh/chaos-mesh/pull/3109)
+- Fix make check does not respect the env-images.yaml [#3210] (https://github.com/chaos-mesh/chaos-mesh/pull/3210)
 
 ### Security
 
