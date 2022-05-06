@@ -26,60 +26,69 @@ jest.mock('api', () => ({
       return Promise.resolve({ data: ns[0] === 'ns1' ? { app: 'ns1' } : { app: 'ns2' } })
     }),
     pods: jest.fn().mockImplementation(({ namespaces: ns, labelSelectors }) => {
+      const app1 = {
+        ip: '172.17.0.10',
+        name: 'app-1',
+        namespace: 'ns1',
+        state: 'Running',
+      }
+      const app2 = {
+        ip: '172.17.0.11',
+        name: 'app-2',
+        namespace: 'ns2',
+        state: 'Running',
+      }
       if (Object.keys(labelSelectors).length === 0) {
-        return Promise.resolve({
-          data: [
-            {
-              ip: '172.17.0.9',
-              name: 'hello-chaos-mesh',
-              namespace: 'ns1',
-              state: 'Running',
-            },
-          ],
-        })
-      } else {
         return Promise.resolve({
           data:
             ns[0] === 'ns1'
               ? [
                   {
-                    ip: '172.17.0.10',
-                    name: 'app-1',
+                    ip: '172.17.0.9',
+                    name: 'hello-chaos-mesh',
                     namespace: 'ns1',
                     state: 'Running',
                   },
+                  app1,
                 ]
-              : [
-                  {
-                    ip: '172.17.0.11',
-                    name: 'app-2',
-                    namespace: 'ns2',
-                    state: 'Running',
-                  },
-                ],
+              : [app2],
+        })
+      } else {
+        return Promise.resolve({
+          data: ns[0] === 'ns1' ? [app1] : [app2],
         })
       }
     }),
   },
 }))
 
+const Default = () => (
+  <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
+    <Scope namespaces={['ns1', 'ns2']} />
+  </Formik>
+)
+
 describe('<Scope />', () => {
-  it('loads with the specified namespaces', () => {
-    render(
-      <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-        <Scope namespaces={['ns1', 'ns2']} />
-      </Formik>
-    )
+  it('first load', () => {
+    render(<Default />)
 
     expect(screen.getByText('No pods found')).toBeInTheDocument()
   })
 
-  it('loads and then choose a namespace', async () => {
+  it('disables when kind is AWSChaos', () => {
     render(
       <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-        <Scope namespaces={['ns1', 'ns2']} />
+        <Scope kind="AWSChaos" namespaces={['ns1', 'ns2']} />
       </Formik>
     )
+
+    const nsSelectors = screen.getByRole('combobox', { name: 'Namespace Selectors' })
+
+    expect(nsSelectors.className).toContain('disabled')
+  })
+
+  it('loads and then choose a namespace', async () => {
+    render(<Default />)
 
     const nsSelectors = screen.getByRole('combobox', { name: 'Namespace Selectors' })
     nsSelectors.focus()
@@ -94,32 +103,47 @@ describe('<Scope />', () => {
   })
 
   it('loads and then choose a namespace and a label', async () => {
-    render(
-      <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-        <Scope namespaces={['ns1', 'ns2']} />
-      </Formik>
-    )
+    render(<Default />)
 
     const nsSelectors = screen.getByRole('combobox', { name: 'Namespace Selectors' })
     nsSelectors.focus()
 
     fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' })
-    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' }) // Move to the first option.
+    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' })
     fireEvent.keyDown(nsSelectors, { key: 'Enter' })
 
     const nsLabels = screen.getByRole('combobox', { name: 'Label Selectors' })
     nsLabels.focus()
 
     fireEvent.keyDown(nsLabels, { key: 'ArrowDown' })
-
     expect(within(screen.getByRole('listbox')).getByText('app: ns1')).toBeInTheDocument()
-
     fireEvent.keyDown(nsLabels, { key: 'ArrowDown' })
     fireEvent.keyDown(nsLabels, { key: 'Enter' })
 
     await waitFor(() => {
       expect(screen.getByText('172.17.0.10')).toBeInTheDocument()
       expect(screen.getByText('app-1')).toBeInTheDocument()
+    })
+  })
+
+  it('reselects namespace', async () => {
+    render(<Default />)
+
+    const nsSelectors = screen.getByRole('combobox', { name: 'Namespace Selectors' })
+    nsSelectors.focus()
+
+    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' })
+    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' })
+    fireEvent.keyDown(nsSelectors, { key: 'Enter' })
+    fireEvent.keyDown(nsSelectors, { key: 'Backspace' }) // Delete n1.
+    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' })
+    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' })
+    fireEvent.keyDown(nsSelectors, { key: 'ArrowDown' }) // Select n2.
+    fireEvent.keyDown(nsSelectors, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(screen.getByText('172.17.0.11')).toBeInTheDocument()
+      expect(screen.getByText('app-2')).toBeInTheDocument()
     })
   })
 })
