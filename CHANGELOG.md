@@ -26,12 +26,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Isolate `target` field and `Scope` when creating `NetworkChaos` [#3223](https://github.com/chaos-mesh/chaos-mesh/issues/3221)
 
 ### Security
 
 - Nothing
-
 
 ## [2.2.0] - 2022-04-29
 
