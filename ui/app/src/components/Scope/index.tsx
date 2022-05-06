@@ -61,8 +61,9 @@ const Scope: React.FC<ScopeProps> = ({
   const state = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = state.settings
   const { labels, annotations } = state.experiments
-  const pods = scope === 'selector' ? state.experiments.pods : state.experiments.networkTargetPods
-  const getPods = scope === 'selector' ? getCommonPods : getNetworkTargetPods
+  const isTargetField = scope.startsWith('target')
+  const pods = !isTargetField ? state.experiments.pods : state.experiments.networkTargetPods
+  const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
   const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
