@@ -179,5 +179,5 @@ if [ -n "$REPORT_DIR" ]; then
     )
 fi
 
-echo "info: docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}"
+echo "info: docker" "${docker_args[@]}" $E2E_IMAGE "${e2e_args[@]}"
 docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}
