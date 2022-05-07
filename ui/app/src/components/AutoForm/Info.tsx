@@ -1,7 +1,3 @@
-import type { FormikErrors, FormikTouched } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
-
-import { Belong } from '.'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -19,11 +15,17 @@ import { Belong } from '.'
  *
  */
 import { MenuItem } from '@mui/material'
+import type { FormikErrors, FormikTouched } from 'formik'
+import { getIn } from 'formik'
+
+import { useStoreSelector } from 'store'
+
+import { LabelField, SelectField, TextField } from 'components/FormField'
 import MoreOptions from 'components/MoreOptions'
 import { T } from 'components/T'
-import { getIn } from 'formik'
+
+import { Belong } from '.'
 import { isInstant } from './validation'
-import { useStoreSelector } from 'store'
 
 interface InfoProps {
   belong: Belong

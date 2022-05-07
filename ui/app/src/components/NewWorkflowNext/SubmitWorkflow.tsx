@@ -1,17 +1,3 @@
-import * as Yup from 'yup'
-
-import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import { Form, Formik } from 'formik'
-import { SelectField, Submit, TextField } from 'components/FormField'
-import { useEffect, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import FormikEffect from 'components/FormikEffect'
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
-import api from 'api'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -29,9 +15,25 @@ import api from 'api'
  *
  */
 import loadable from '@loadable/component'
-import { resetWorkflow } from 'slices/workflows'
-import { useNavigate } from 'react-router-dom'
+import { Box, Divider, MenuItem, Typography } from '@mui/material'
+import api from 'api'
+import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import * as Yup from 'yup'
+
+import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { resetWorkflow } from 'slices/workflows'
+
+import { SelectField, Submit, TextField } from 'components/FormField'
+import FormikEffect from 'components/FormikEffect'
+import { T } from 'components/T'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 

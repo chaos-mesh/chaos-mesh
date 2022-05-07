@@ -1,17 +1,3 @@
-import { Box, Grid, Grow } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
-
-import { ArchiveSingle } from 'api/archives.type'
-import { Event } from 'api/events.type'
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import Loading from '@ui/mui-extends/esm/Loading'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
-import i18n from 'components/T'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -29,9 +15,25 @@ import i18n from 'components/T'
  *
  */
 import loadable from '@loadable/component'
-import { useParams } from 'react-router-dom'
-import { useQuery } from 'lib/hooks'
+import { Box, Grid, Grow } from '@mui/material'
+import api from 'api'
+import { ArchiveSingle } from 'api/archives.type'
+import { Event } from 'api/events.type'
 import yaml from 'js-yaml'
+import { useCallback, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import Space from '@ui/mui-extends/esm/Space'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import ObjectConfiguration from 'components/ObjectConfiguration'
+import i18n from 'components/T'
+
+import { useQuery } from 'lib/hooks'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 

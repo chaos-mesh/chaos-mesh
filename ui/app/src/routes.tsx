@@ -1,4 +1,3 @@
-import Archive from 'pages/Archives/Single'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -16,20 +15,22 @@ import Archive from 'pages/Archives/Single'
  *
  */
 import Archives from 'pages/Archives'
+import Archive from 'pages/Archives/Single'
 import Dashboard from 'pages/Dashboard'
 import Events from 'pages/Events'
-import Experiment from 'pages/Experiments/Single'
 import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
+import Experiment from 'pages/Experiments/Single'
+import Schedules from 'pages/Schedules'
 import NewSchedule from 'pages/Schedules/New'
+import Schedule from 'pages/Schedules/Single'
+import Settings from 'pages/Settings'
+import Workflows from 'pages/Workflows'
+import Workflow from 'pages/Workflows/Single'
+import { RouteProps } from 'react-router'
+
 import NewWorkflow from 'components/NewWorkflow'
 import NewWorkflowNext from 'components/NewWorkflowNext'
-import { RouteProps } from 'react-router'
-import Schedule from 'pages/Schedules/Single'
-import Schedules from 'pages/Schedules'
-import Settings from 'pages/Settings'
-import Workflow from 'pages/Workflows/Single'
-import Workflows from 'pages/Workflows'
 
 type CustomRouteProps = RouteProps & { title: string }
 

@@ -1,6 +1,3 @@
-import BareNode from '../BareNode'
-import type { BareNodeProps } from '../BareNode'
-import { ElementTypes } from './types'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -18,6 +15,10 @@ import { ElementTypes } from './types'
  *
  */
 import { useDrag } from 'react-dnd'
+
+import BareNode from '../BareNode'
+import type { BareNodeProps } from '../BareNode'
+import { ElementTypes } from './types'
 
 interface DraggableBareNodeProps extends BareNodeProps {
   elementType: ElementTypes

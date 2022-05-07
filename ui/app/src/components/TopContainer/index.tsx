@@ -1,33 +1,3 @@
-import {
-  Alert,
-  Box,
-  BoxProps,
-  Container,
-  CssBaseline,
-  Divider,
-  Portal,
-  Snackbar,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { closedWidth, openedWidth } from './Sidebar'
-import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
-import { useEffect, useMemo, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Cookies from 'js-cookie'
-import Helmet from 'components/Helmet'
-import { IntlProvider } from 'react-intl'
-import LS from 'lib/localStorage'
-import Loading from '@ui/mui-extends/esm/Loading'
-import Navbar from './Navbar'
-import Sidebar from './Sidebar'
-import { TokenFormValues } from 'components/Token'
-import api from 'api'
-import flat from 'flat'
-import insertCommonStyle from 'lib/d3/insertCommonStyle'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -45,9 +15,44 @@ import insertCommonStyle from 'lib/d3/insertCommonStyle'
  *
  */
 import loadable from '@loadable/component'
-import messages from 'i18n/messages'
-import routes from 'routes'
+import {
+  Alert,
+  Box,
+  BoxProps,
+  Container,
+  CssBaseline,
+  Divider,
+  Portal,
+  Snackbar,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material'
 import { styled } from '@mui/material/styles'
+import api from 'api'
+import flat from 'flat'
+import messages from 'i18n/messages'
+import Cookies from 'js-cookie'
+import { useEffect, useMemo, useState } from 'react'
+import { IntlProvider } from 'react-intl'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import routes from 'routes'
+
+import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
+import Loading from '@ui/mui-extends/esm/Loading'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+
+import Helmet from 'components/Helmet'
+import { TokenFormValues } from 'components/Token'
+
+import insertCommonStyle from 'lib/d3/insertCommonStyle'
+import LS from 'lib/localStorage'
+
+import Navbar from './Navbar'
+import { closedWidth, openedWidth } from './Sidebar'
+import Sidebar from './Sidebar'
 
 const Auth = loadable(() => import('./Auth'))
 

@@ -1,13 +1,3 @@
-import AutoForm, { Belong } from 'components/AutoForm'
-import { Box, Drawer } from '@mui/material'
-import type { DropTargetMonitor, XYCoord } from 'react-dnd'
-import { ElementDragData, ElementTypes } from './Elements/types'
-import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
-import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
-import { insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -25,14 +15,29 @@ import { useStoreDispatch, useStoreSelector } from 'store'
  *
  */
 import DeleteIcon from '@mui/icons-material/Delete'
-import FlowNode from './FlowNode'
+import { Box, Drawer } from '@mui/material'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import type { DropTargetMonitor, XYCoord } from 'react-dnd'
+import { useDrop } from 'react-dnd'
+import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
+import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
+import { v4 as uuidv4 } from 'uuid'
+
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
-import { concatKindAction } from 'lib/utils'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
 import { setConfirm } from 'slices/globalStatus'
-import { useDrop } from 'react-dnd'
-import { v4 as uuidv4 } from 'uuid'
+import { insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
+
+import AutoForm, { Belong } from 'components/AutoForm'
+import { T } from 'components/T'
+
+import { concatKindAction } from 'lib/utils'
+
+import { ElementDragData, ElementTypes } from './Elements/types'
+import FlowNode from './FlowNode'
 
 type DropItem = ElementDragData
 type Identifier = DropItem

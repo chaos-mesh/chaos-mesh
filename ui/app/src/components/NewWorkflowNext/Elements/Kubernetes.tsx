@@ -1,7 +1,3 @@
-import { ElementTypes, ElementsProps } from './types'
-
-import DraggableBareNode from './DraggableBareNode'
-import Space from '@ui/mui-extends/esm/Space'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -19,8 +15,13 @@ import Space from '@ui/mui-extends/esm/Space'
  *
  */
 import { Typography } from '@mui/material'
-import _ from 'lodash'
 import _actions from 'formik/actions'
+import _ from 'lodash'
+
+import Space from '@ui/mui-extends/esm/Space'
+
+import DraggableBareNode from './DraggableBareNode'
+import { ElementTypes, ElementsProps } from './types'
 
 const actions: Record<string, string[]> = _.omit(_actions, 'PhysicalMachineChaos')
 

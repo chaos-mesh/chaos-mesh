@@ -1,4 +1,3 @@
-import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -16,21 +15,26 @@ import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from
  *
  */
 import { Box, Divider, FormHelperText, MenuItem, Typography } from '@mui/material'
+import { eval as expEval, parse } from 'expression-eval'
 import { Form, Formik, getIn } from 'formik'
 import type { FormikConfig, FormikErrors, FormikTouched, FormikValues } from 'formik'
-import { eval as expEval, parse } from 'expression-eval'
-import { removeScheduleValues, scheduleInitialValues, scopeInitialValues, workflowNodeInfoInitialValues } from './data'
 import { useEffect, useState } from 'react'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreSelector } from 'store'
+
+import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
+import Scope from 'components/Scope'
+import { T } from 'components/T'
+
+import { concatKindAction } from 'lib/utils'
+
 import Info from './Info'
 import Schedule from './Schedule'
-import Scope from 'components/Scope'
-import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
+import { removeScheduleValues, scheduleInitialValues, scopeInitialValues, workflowNodeInfoInitialValues } from './data'
 import { chooseSchemaByBelong } from './validation'
-import { concatKindAction } from 'lib/utils'
-import { useStoreSelector } from 'store'
 
 export enum Belong {
   Experiment = 'Experiment',

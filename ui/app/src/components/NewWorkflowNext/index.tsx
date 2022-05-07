@@ -16,14 +16,17 @@
  */
 import { Badge, Box, Button, Divider, Grow, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
+import type { ReactFlowInstance } from 'react-flow-renderer'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import KubernetesElements from './Elements/Kubernetes'
 import { LoadRecentlyUsedExperiments } from 'slices/workflows'
-import Paper from '@ui/mui-extends/esm/Paper'
+
+import KubernetesElements from './Elements/Kubernetes'
 import PhysicalNodesElements from './Elements/PhysicalNodes'
-import type { ReactFlowInstance } from 'react-flow-renderer'
-import Space from '@ui/mui-extends/esm/Space'
 import SubmitWorkflow from './SubmitWorkflow'
 import Whiteboard from './Whiteboard'
 import { flowToWorkflow } from './utils/convert'

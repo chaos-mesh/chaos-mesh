@@ -1,5 +1,3 @@
-import { Button } from '@mui/material'
-import type { ButtonProps } from '@mui/material'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -17,7 +15,10 @@ import type { ButtonProps } from '@mui/material'
  *
  */
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
+import { Button } from '@mui/material'
+import type { ButtonProps } from '@mui/material'
 import { forwardRef } from 'react'
+
 import { iconByKind } from 'lib/byKind'
 
 export type BareNodeProps = ButtonProps & {

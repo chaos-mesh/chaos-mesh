@@ -1,21 +1,3 @@
-import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { Event } from 'api/events.type'
-import { EventHandler } from 'cytoscape'
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import NodeConfiguration from 'components/ObjectConfiguration/Node'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
-import { WorkflowSingle } from 'api/workflows.type'
-import api from 'api'
-import { constructWorkflowTopology } from 'lib/cytoscape'
-import i18n from 'components/T'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -33,11 +15,33 @@ import i18n from 'components/T'
  *
  */
 import loadable from '@loadable/component'
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { useIntervalFetch } from 'lib/hooks'
-import { useIntl } from 'react-intl'
-import { useStoreDispatch } from 'store'
+import api from 'api'
+import { Event } from 'api/events.type'
+import { WorkflowSingle } from 'api/workflows.type'
+import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
+import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
+import { useNavigate, useParams } from 'react-router-dom'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch } from 'store'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import NodeConfiguration from 'components/ObjectConfiguration/Node'
+import i18n from 'components/T'
+
+import { constructWorkflowTopology } from 'lib/cytoscape'
+import { useIntervalFetch } from 'lib/hooks'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 

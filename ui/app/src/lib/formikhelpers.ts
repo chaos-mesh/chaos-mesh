@@ -1,13 +1,3 @@
-import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
-
-import { Env } from 'slices/experiments'
-import { ScheduleSpecific } from 'components/Schedule/types'
-import { Template } from 'slices/workflows'
-import { WorkflowBasic } from 'components/NewWorkflow'
-import _ from 'lodash'
-import basicData from 'components/NewExperimentNext/data/basic'
-import { podPhases } from 'components/AutoForm/data'
-import { sanitize } from './utils'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -26,6 +16,18 @@ import { sanitize } from './utils'
  */
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
 import yaml from 'js-yaml'
+import _ from 'lodash'
+
+import { Env } from 'slices/experiments'
+import { Template } from 'slices/workflows'
+
+import { podPhases } from 'components/AutoForm/data'
+import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+import basicData from 'components/NewExperimentNext/data/basic'
+import { WorkflowBasic } from 'components/NewWorkflow'
+import { ScheduleSpecific } from 'components/Schedule/types'
+
+import { sanitize } from './utils'
 
 export function parseSubmit<K extends ExperimentKind>(
   env: Env,
