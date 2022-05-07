@@ -46,7 +46,7 @@ EOF
 
 update_yaml () {
     local yaml=$1
-    ./schedule-migration $yaml $yaml
+    ./schedule-migration "$yaml" "$yaml"
 }
 
 reapply_crd () {
@@ -65,11 +65,11 @@ handle_namespace () {
     for kind in $CRDS
     do
         echo "  searching resources $kind"
-        resources=$(kubectl get $kind -n $namespace | sed '1d' | awk '{print $1}')
+        resources=$(kubectl get "$kind" -n "$namespace" | sed '1d' | awk '{print $1}')
         for resource in $resources
         do
             echo "      getting $resource"
-            kubectl get $kind $resource -n $namespace -o yaml > $cnt.yaml
+            kubectl get "$kind" "$resource" -n "$namespace" -o yaml > $cnt.yaml
             update_yaml $cnt.yaml
             let "cnt+=1"
         done
@@ -80,7 +80,7 @@ export_chaos () {
     for ns in $NAMESPACES
     do
         echo "searching namespace $ns"
-        handle_namespace $ns
+        handle_namespace "$ns"
     done
 }
 
@@ -88,7 +88,7 @@ import_chaos() {
     local yamls=$(find . -regex ".*\.yaml")
     for yaml in $yamls
     do
-        kubectl apply -f $yaml
+        kubectl apply -f "$yaml"
     done
 }
 

@@ -23,7 +23,7 @@ set -o nounset
 set -o pipefail
 
 ROOT=$(unset CDPATH && cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-cd $ROOT
+cd "$ROOT"
 
 source "${ROOT}/hack/lib.sh"
 
@@ -160,7 +160,7 @@ function e2e::image_build() {
 
 function e2e::create_kindconfig() {
     local tmpfile=${1}
-    cat <<EOF > $tmpfile
+    cat <<EOF > "$tmpfile"
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 kubeadmConfigPatches:
@@ -200,31 +200,31 @@ kubeadmConfigPatches:
     v: "4"
 EOF
     if [ -n "$DOCKER_IO_MIRROR" -o -n "$GCR_IO_MIRROR" -o -n "$QUAY_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
 containerdConfigPatches:
 - |-
 EOF
         if [ -n "$DOCKER_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
     endpoint = ["$DOCKER_IO_MIRROR"]
 EOF
         fi
         if [ -n "$GCR_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
     endpoint = ["$GCR_IO_MIRROR"]
 EOF
         fi
         if [ -n "$QUAY_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
     endpoint = ["$QUAY_IO_MIRROR"]
 EOF
         fi
     fi
     # control-plane
-    cat <<EOF >> $tmpfile
+    cat <<EOF >> "$tmpfile"
 nodes:
 - role: control-plane
 EOF
@@ -234,8 +234,8 @@ EOF
             exit 1
         fi
         local hostWorkerPath="${KIND_DATA_HOSTPATH}/control-plane"
-        test -d $hostWorkerPath || mkdir $hostWorkerPath
-        cat <<EOF >> $tmpfile
+        test -d "$hostWorkerPath" || mkdir "$hostWorkerPath"
+        cat <<EOF >> "$tmpfile"
   extraMounts:
   - containerPath: /mnt/disks/
     hostPath: "$hostWorkerPath"
@@ -253,8 +253,8 @@ EOF
                 exit 1
             fi
             local hostWorkerPath="${KIND_DATA_HOSTPATH}/worker${i}"
-            test -d $hostWorkerPath || mkdir $hostWorkerPath
-            cat <<EOF >> $tmpfile
+            test -d "$hostWorkerPath" || mkdir "$hostWorkerPath"
+            cat <<EOF >> "$tmpfile"
   extraMounts:
   - containerPath: /mnt/disks/
     hostPath: "$hostWorkerPath"
@@ -291,7 +291,7 @@ fi
 if [ "$PROVIDER" == "kind" ]; then
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" EXIT
-    e2e::create_kindconfig $tmpfile
+    e2e::create_kindconfig "$tmpfile"
     echo "info: print the contents of kindconfig"
     cat $tmpfile
     image=""

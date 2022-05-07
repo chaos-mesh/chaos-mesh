@@ -17,7 +17,7 @@
 set -e
 
 ROOT=$(unset CDPATH && cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-cd $ROOT
+cd "$ROOT"
 
 usage() {
     cat <<EOF
@@ -122,18 +122,18 @@ fi
 echo "############# start create cluster:[${clusterName}] #############"
 workDir=${HOME}/kind/${clusterName}
 kubeconfigPath=${workDir}/config
-mkdir -p ${workDir}
+mkdir -p "${workDir}"
 
 data_dir=${workDir}/data
 
 echo "clean data dir: ${data_dir}"
-if [ -d ${data_dir} ]; then
-    rm -rf ${data_dir}
+if [ -d "${data_dir}" ]; then
+    rm -rf "${data_dir}"
 fi
 
 configFile=${workDir}/kind-config.yaml
 
-cat <<EOF > ${configFile}
+cat <<EOF > "${configFile}"
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 kubeadmConfigPatches:
@@ -154,14 +154,14 @@ EOF
 
 for ((i=0;i<${nodeNum};i++))
 do
-    mkdir -p ${data_dir}/worker${i}
-    cat <<EOF >>  ${configFile}
+    mkdir -p "${data_dir}"/worker${i}
+    cat <<EOF >>  "${configFile}"
 - role: worker
   extraMounts:
 EOF
     for ((k=1;k<=${volumeNum};k++))
     do
-        mkdir -p ${data_dir}/worker${i}/vol${k}
+        mkdir -p "${data_dir}"/worker${i}/vol${k}
         cat <<EOF >> ${configFile}
   - containerPath: /mnt/disks/vol${k}
     hostPath: ${data_dir}/worker${i}/vol${k}
@@ -170,8 +170,8 @@ EOF
 done
 
 echo "start to create k8s cluster"
-${KIND_BIN} create cluster --config ${configFile} --image kindest/node:${k8sVersion} --name=${clusterName}
-${KIND_BIN} get kubeconfig --name=${clusterName} > ${kubeconfigPath}
+${KIND_BIN} create cluster --config "${configFile}" --image kindest/node:"${k8sVersion}" --name="${clusterName}"
+${KIND_BIN} get kubeconfig --name="${clusterName}" > "${kubeconfigPath}"
 export KUBECONFIG=${kubeconfigPath}
 
 echo "connect the local docker registry to the cluster network"
@@ -188,7 +188,7 @@ fi
 
 set -e
 
-${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
+${KUBECTL_BIN} apply -f "${ROOT}"/manifests/local-volume-provisioner.yaml
 
 $KUBECTL_BIN create ns chaos-testing
 

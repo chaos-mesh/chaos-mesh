@@ -57,9 +57,9 @@ function hack::ensure_kubectl() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o $tmpfile https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/${OS}/${ARCH}/kubectl
-    mv $tmpfile $KUBECTL_BIN
-    chmod +x $KUBECTL_BIN
+    curl --retry 10 -L -o $tmpfile https://storage.googleapis.com/kubernetes-release/release/v"${KUBECTL_VERSION}"/bin/"${OS}"/"${ARCH}"/kubectl
+    mv "$tmpfile" "$KUBECTL_BIN"
+    chmod +x "$KUBECTL_BIN"
 }
 
 function hack::verify_helm() {
@@ -76,7 +76,7 @@ function hack::ensure_helm() {
         return 0
     fi
     local HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-${ARCH}.tar.gz
-    curl --retry 10 -L -s "$HELM_URL" | tar --strip-components 1 -C $OUTPUT_BIN -zxf - ${OS}-${ARCH}/helm
+    curl --retry 10 -L -s "$HELM_URL" | tar --strip-components 1 -C "$OUTPUT_BIN" -zxf - "${OS}"-"${ARCH}"/helm
 }
 
 #
@@ -104,9 +104,9 @@ function hack::ensure_kind() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o $tmpfile https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-$(uname)-amd64
-    mv $tmpfile $KIND_BIN
-    chmod +x $KIND_BIN
+    curl --retry 10 -L -o $tmpfile https://github.com/kubernetes-sigs/kind/releases/download/v"${KIND_VERSION}"/kind-$(uname)-amd64
+    mv "$tmpfile" "$KIND_BIN"
+    chmod +x "$KIND_BIN"
 }
 
 function hack::verify_kubebuilder() {
@@ -128,9 +128,9 @@ function hack::ensure_kubebuilder() {
     # reference: https://github.com/kubernetes-sigs/kubebuilder/issues/2311#issuecomment-903940052
     # and https://github.com/chaos-mesh/chaos-mesh/issues/2248
     # kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz only works for kubebuilder v2.x, if we upgrade to v3 one day, we need to change the filename, remove the ${KUBEBUILDER_VERSION}
-    curl --retry 10 -L -o ${tmpfile} https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}.tar.gz
-    tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
-    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH} ${KUBEBUILDER_PATH}
+    curl --retry 10 -L -o ${tmpfile} https://github.com/kubernetes-sigs/kubebuilder/releases/download/v"${KUBEBUILDER_VERSION}"/kubebuilder_"${KUBEBUILDER_VERSION}"_"${OS}"_"${ARCH}".tar.gz
+    tar -C "${OUTPUT_BIN}" -xzf "${tmpfile}"
+    mv "${OUTPUT_BIN}"/kubebuilder_"${KUBEBUILDER_VERSION}"_"${OS}"_"${ARCH}" ${KUBEBUILDER_PATH}
 }
 
 function hack::verify_kustomize() {
@@ -148,16 +148,16 @@ function hack::ensure_kustomize() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o ${tmpfile} "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
-    tar -C $OUTPUT_BIN -zxf ${tmpfile}
-    chmod +x $KUSTOMIZE_BIN
+    curl --retry 10 -L -o "${tmpfile}" "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
+    tar -C "$OUTPUT_BIN" -zxf "${tmpfile}"
+    chmod +x "$KUSTOMIZE_BIN"
 }
 
 function hack::__verify_kubetest2() {
     local n="$1"
     local v="$2"
     if test -x "$OUTPUT_BIN/$n"; then
-        local tmpv=$($OUTPUT_BIN/$n --version 2>&1 | awk '{print $2}')
+        local tmpv=$("$OUTPUT_BIN"/"$n" --version 2>&1 | awk '{print $2}')
         [[ "$tmpv" == "$v" ]]
         return
     fi
@@ -166,15 +166,15 @@ function hack::__verify_kubetest2() {
 
 function hack::__ensure_kubetest2() {
     local n="$1"
-    if hack::__verify_kubetest2 $n $KUBETEST2_VERSION; then
+    if hack::__verify_kubetest2 $n "$KUBETEST2_VERSION"; then
         return 0
     fi
     local tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     echo "info: downloading $n $KUBETEST2_VERSION"
-    curl --retry 10 -L -o - https://github.com/cofyc/kubetest2-release/releases/download/$KUBETEST2_VERSION/$n-$OS-$ARCH.gz | gunzip > $tmpfile
-    mv $tmpfile $OUTPUT_BIN/$n
-    chmod +x $OUTPUT_BIN/$n
+    curl --retry 10 -L -o - https://github.com/cofyc/kubetest2-release/releases/download/"$KUBETEST2_VERSION"/"$n"-"$OS"-"$ARCH".gz | gunzip > $tmpfile
+    mv "$tmpfile" "$OUTPUT_BIN"/"$n"
+    chmod +x "$OUTPUT_BIN"/"$n"
 }
 
 function hack::ensure_kubetest2() {

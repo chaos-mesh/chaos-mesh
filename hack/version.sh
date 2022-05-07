@@ -44,7 +44,7 @@ function chaos_mesh::version::ldflags() {
 
   local buildDate=
   [[ -z ${SOURCE_DATE_EPOCH-} ]] || buildDate="--date=@${SOURCE_DATE_EPOCH}"
-  local -a ldflags=($(chaos_mesh::version::ldflag "buildDate" "$(date ${buildDate} -u +'%Y-%m-%dT%H:%M:%SZ')"))
+  local -a ldflags=($(chaos_mesh::version::ldflag "buildDate" "$(date "${buildDate}" -u +'%Y-%m-%dT%H:%M:%SZ')"))
   if [[ -n ${GIT_COMMIT-} ]]; then
     ldflags+=($(chaos_mesh::version::ldflag "gitCommit" "${GIT_COMMIT}"))
   fi

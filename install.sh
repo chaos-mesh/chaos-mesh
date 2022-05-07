@@ -333,7 +333,7 @@ install_kubectl() {
     local KUBECTL_BIN="${HOME}/local/bin/kubectl"
     local target_os=$(lowercase $(uname))
 
-    ensure curl -Lo /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/${kubectl_version}/bin/${target_os}/amd64/kubectl
+    ensure curl -Lo /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/"${kubectl_version}"/bin/"${target_os}"/amd64/kubectl
     ensure chmod +x /tmp/kubectl
     ensure mv /tmp/kubectl "${KUBECTL_BIN}"
 }
@@ -619,7 +619,7 @@ install_chaos_mesh() {
 }
 
 version_lt() {
-    vercomp $1 $2
+    vercomp "$1" "$2"
     if [ $? == 2 ];  then
         return 0
     fi
@@ -708,14 +708,14 @@ ensure_pods_ready() {
     fi
 
     count=0
-    while [ -n "$(kubectl get pods -n "${namespace}" ${labels} --no-headers | grep -v Running)" ];
+    while [ -n "$(kubectl get pods -n "${namespace}" "${labels}" --no-headers | grep -v Running)" ];
     do
         echo "Waiting for pod running" && sleep 10;
 
-        kubectl get pods -n "${namespace}" ${labels} --no-headers | >&2 grep -v Running || true
+        kubectl get pods -n "${namespace}" "${labels}" --no-headers | >&2 grep -v Running || true
 
         ((count=count+1))
-        if [ $count -gt $limit ]; then
+        if [ $count -gt "$limit" ]; then
             printf "Waiting for pod status running timeout\n"
             exit 1
         fi
@@ -780,11 +780,11 @@ gen_chaos_mesh_manifests() {
     IMAGE_REGISTRY_PREFIX="${docker_registry}"
     tmpdir=$(mktemp -d)
 
-    ensure openssl genrsa -out ${tmpdir}/ca.key 2048 > /dev/null 2>&1
-    ensure openssl req -x509 -new -nodes -key ${tmpdir}/ca.key -subj "/CN=${K8S_SERVICE}.${K8S_NAMESPACE}.svc" -days 1875 -out ${tmpdir}/ca.crt > /dev/null 2>&1
-    ensure openssl genrsa -out ${tmpdir}/server.key 2048 > /dev/null 2>&1
+    ensure openssl genrsa -out "${tmpdir}"/ca.key 2048 > /dev/null 2>&1
+    ensure openssl req -x509 -new -nodes -key "${tmpdir}"/ca.key -subj "/CN=${K8S_SERVICE}.${K8S_NAMESPACE}.svc" -days 1875 -out "${tmpdir}"/ca.crt > /dev/null 2>&1
+    ensure openssl genrsa -out "${tmpdir}"/server.key 2048 > /dev/null 2>&1
 
-    cat <<EOF > ${tmpdir}/csr.conf
+    cat <<EOF > "${tmpdir}"/csr.conf
 [req]
 prompt = no
 req_extensions = v3_req
@@ -802,12 +802,12 @@ DNS.2 = ${K8S_SERVICE}.${K8S_NAMESPACE}
 DNS.3 = ${K8S_SERVICE}.${K8S_NAMESPACE}.svc
 EOF
 
-    ensure openssl req -new -key ${tmpdir}/server.key -out ${tmpdir}/server.csr -config ${tmpdir}/csr.conf > /dev/null 2>&1
-    ensure openssl x509 -req -in ${tmpdir}/server.csr -CA ${tmpdir}/ca.crt -CAkey ${tmpdir}/ca.key -CAcreateserial -out ${tmpdir}/server.crt -days 1875 -extensions v3_req -extfile ${tmpdir}/csr.conf > /dev/null 2>&1
+    ensure openssl req -new -key "${tmpdir}"/server.key -out "${tmpdir}"/server.csr -config "${tmpdir}"/csr.conf > /dev/null 2>&1
+    ensure openssl x509 -req -in "${tmpdir}"/server.csr -CA "${tmpdir}"/ca.crt -CAkey "${tmpdir}"/ca.key -CAcreateserial -out "${tmpdir}"/server.crt -days 1875 -extensions v3_req -extfile "${tmpdir}"/csr.conf > /dev/null 2>&1
 
-    TLS_KEY=$(openssl base64 -A -in ${tmpdir}/server.key)
-    TLS_CRT=$(openssl base64 -A -in ${tmpdir}/server.crt)
-    CA_BUNDLE=$(openssl base64 -A -in ${tmpdir}/ca.crt)
+    TLS_KEY=$(openssl base64 -A -in "${tmpdir}"/server.key)
+    TLS_CRT=$(openssl base64 -A -in "${tmpdir}"/server.crt)
+    CA_BUNDLE=$(openssl base64 -A -in "${tmpdir}"/ca.crt)
 
     # chaos-mesh.yaml start
     cat <<EOF

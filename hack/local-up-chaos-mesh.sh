@@ -19,7 +19,7 @@ set -o nounset
 set -o pipefail
 
 ROOT=$(unset CDPATH && cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-cd $ROOT
+cd "$ROOT"
 
 source "${ROOT}/hack/lib.sh"
 
@@ -120,10 +120,10 @@ images=(
 )
 for n in ${images[@]}; do
     echo "info: loading image $n"
-    $KIND_BIN load docker-image --name $CLUSTER $n
+    $KIND_BIN load docker-image --name "$CLUSTER" $n
 done
 
 $KUBECTL_BIN -n "$NAMESPACE" delete deploy -l app.kubernetes.io/name=chaos-mesh
 $KUBECTL_BIN -n "$NAMESPACE" delete pods -l app.kubernetes.io/name=chaos-mesh
 
-${ROOT}/install.sh --runtime containerd --crd ${ROOT}/manifests/crd.yaml --version ${IMAGE_TAG} --docker-registry ${IMAGE_REGISTRY_PREFIX}
+"${ROOT}"/install.sh --runtime containerd --crd "${ROOT}"/manifests/crd.yaml --version "${IMAGE_TAG}" --docker-registry "${IMAGE_REGISTRY_PREFIX}"

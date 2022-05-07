@@ -19,9 +19,9 @@ set -o nounset
 set -o pipefail
 
 ROOT=$(unset CDPATH && cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-cd $ROOT
+cd "$ROOT"
 
-source $ROOT/hack/lib.sh
+source "$ROOT"/hack/lib.sh
 
 hack::ensure_kubectl
 hack::ensure_helm
@@ -71,11 +71,11 @@ function e2e::image_load() {
         pingcap/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
-        local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
-        echo $nodes
+        local nodes=$($KIND_BIN get nodes --name "$CLUSTER" | grep -v 'control-plane$')
+        echo "$nodes"
         echo "info: load images ${images[@]}"
         for image in ${images[@]}; do
-            $KIND_BIN load docker-image --name $CLUSTER ${IMAGE_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
+            $KIND_BIN load docker-image --name "$CLUSTER" "${IMAGE_REGISTRY}"/"$image":"$IMAGE_TAG" --nodes $(hack::join ',' ${nodes[@]})
         done
 
         # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
@@ -85,15 +85,15 @@ function e2e::image_load() {
         docker pull pingcap/coredns:v0.2.0
         docker pull nginx:latest
         docker pull gcr.io/google-containers/pause:latest
-        $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:v0.2.0 --nodes $(hack::join ',' ${nodes[@]})
-        $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
-        $KIND_BIN load docker-image --name $CLUSTER gcr.io/google-containers/pause:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name "$CLUSTER" pingcap/coredns:v0.2.0 --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name "$CLUSTER" nginx:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name "$CLUSTER" gcr.io/google-containers/pause:latest --nodes $(hack::join ',' ${nodes[@]})
     fi
 }
 
 
 function e2e::get_kube_version() {
-    $KUBECTL_BIN --context $KUBECONTEXT version --short | awk '/Server Version:/ {print $3}'
+    $KUBECTL_BIN --context "$KUBECONTEXT" version --short | awk '/Server Version:/ {print $3}'
 }
 
 if [ -z "$KUBECONTEXT" ]; then
@@ -180,4 +180,4 @@ if [ -n "$REPORT_DIR" ]; then
 fi
 
 echo "info: docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}"
-docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}
+docker ${docker_args[@]} "$E2E_IMAGE" ${e2e_args[@]}
