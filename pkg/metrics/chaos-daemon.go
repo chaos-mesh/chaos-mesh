@@ -23,13 +23,16 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics/utils"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
+
+// log is for logging in this package.
+var chaosdaemonmetricslog = logf.Log.WithName("chaos-daemon").WithName("metrics")
 
 var (
 	// DefaultChaosDaemonMetricsCollector is the default metrics collector for chaos daemon
-	DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector(log.L().WithName("chaos-daemon").WithName("metrics"))
+	DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector(chaosdaemonmetricslog)
 
 	// ChaosDaemonGrpcServerBuckets is the buckets for gRPC server handling histogram metrics
 	ChaosDaemonGrpcServerBuckets = []float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}

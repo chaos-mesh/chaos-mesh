@@ -27,7 +27,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
@@ -35,9 +34,13 @@ import (
 	genericlabel "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/label"
 	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var ErrNoPodSelected = errors.New("no pod is selected")
+
+// log is for logging in this package.
+var podselectorlog = logf.Log.WithName("pod-selector")
 
 type SelectImpl struct {
 	c client.Client
@@ -159,7 +162,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 	for ns, names := range spec.Pods {
 		if !clusterScoped {
 			if targetNamespace != ns {
-				log.L().WithName("pod-selector").Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
+				podselectorlog.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 				continue
 			}
 		}
@@ -186,7 +189,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 			}
 
 			if apierrors.IsNotFound(err) {
-				log.L().WithName("pod-selector").Info("pod is not found, skip it", "namespace", ns, "pod name", name)
+				podselectorlog.Info("pod is not found, skip it", "namespace", ns, "pod name", name)
 				continue
 			}
 
