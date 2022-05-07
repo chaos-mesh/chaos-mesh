@@ -22,6 +22,10 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
     {{- include "chaos-mesh.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.chaosDaemon.updateStrategy }}
+  updateStrategy:
+{{ toYaml .Values.chaosDaemon.updateStrategy | indent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "chaos-mesh.selectors" . | nindent 6 }}
