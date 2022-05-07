@@ -358,6 +358,8 @@ type CommandBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
+	log logr.Logger
+
 	oomScoreAdj int
 
 	// the context is used to kill the process and will be passed into
@@ -452,7 +454,7 @@ func (b *CommandBuilder) SetOOMScoreAdj(scoreAdj int) *CommandBuilder {
 func (b *CommandBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
 	// this logger is inherited from the global one
 	// TODO: replace it with a specific logger by passing in one or creating a new one
-	logger := log.L().WithName("background-process-manager.process-builder")
+	logger := b.log.WithName("background-process-manager.process-builder")
 	return log.EnrichLoggerWithContext(ctx, logger)
 }
 
