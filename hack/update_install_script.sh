@@ -52,8 +52,8 @@ EOF
 
 cat $tmp_file.bak >> $tmp_file
 
-let start_num=$(cat -n $install_script| grep "# chaos-mesh.yaml start" | awk '{print $1}')+1
-let end_num=$(cat -n $install_script| grep "# chaos-mesh.yaml end" | awk '{print $1}')-1
+start_num=(($(cat -n $install_script| grep "# chaos-mesh.yaml start" | awk '{print $1}')+1)) || true
+end_num=(($(cat -n $install_script| grep "# chaos-mesh.yaml end" | awk '{print $1}')-1)) || true
 
 head -$start_num $install_script > $tmp_install_script
 cat $tmp_file >> $tmp_install_script
