@@ -104,7 +104,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="stressors.memory.options"
               label="Options of Memory stressors"
-              helperText="Type string and end with a space to generate the stress-ng options"
+              helperText="Type string and end with a space to generate the memStress options"
             />
           </Space>
 
