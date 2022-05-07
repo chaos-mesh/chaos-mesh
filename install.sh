@@ -331,7 +331,8 @@ install_kubectl() {
 
     need_cmd "curl"
     local KUBECTL_BIN="${HOME}/local/bin/kubectl"
-    local target_os=$(lowercase $(uname))
+    local target_os
+    target_os=$(lowercase $(uname))
 
     ensure curl -Lo /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/${kubectl_version}/bin/${target_os}/amd64/kubectl
     ensure chmod +x /tmp/kubectl
@@ -593,7 +594,8 @@ install_kind() {
     fi
 
     local KIND_BIN="${HOME}/local/bin/kind"
-    local target_os=$(lowercase $(uname))
+    local target_os
+    target_os=$(lowercase $(uname))
     ensure curl -Lo /tmp/kind https://github.com/kubernetes-sigs/kind/releases/download/"$1"/kind-"${target_os}"-amd64
     ensure chmod +x /tmp/kind
     ensure mv /tmp/kind "$KIND_BIN"

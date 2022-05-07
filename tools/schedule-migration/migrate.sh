@@ -85,7 +85,8 @@ export_chaos () {
 }
 
 import_chaos() {
-    local yamls=$(find . -regex ".*\.yaml")
+    local yamls
+    yamls=$(find . -regex ".*\.yaml")
     for yaml in $yamls
     do
         kubectl apply -f $yaml

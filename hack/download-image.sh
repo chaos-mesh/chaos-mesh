@@ -36,12 +36,13 @@ function download_image() {
     local github_run_id=$2
 
     mkdir -p .cache/
-
-    local ARTIFACT_URL=$(curl \
+    local ARTIFACT_URL
+    ARTIFACT_URL=$(curl \
         -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/$github_repository/actions/runs/$github_run_id/artifacts 2>/dev/null |\
         jq -r ".artifacts[0].archive_download_url")
-    local TOKEN=$(echo url=https://github.com/$github_repository|\
+    local TOKEN
+    TOKEN=$(echo url=https://github.com/$github_repository|\
         gh auth git-credential get|\
         grep password|\
         cut -b 10-)
