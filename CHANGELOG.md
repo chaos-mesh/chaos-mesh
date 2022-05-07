@@ -22,7 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- Removed extra import of common pkg in chaosctl/cmd/logs.go
 
 ### Fixed
 
