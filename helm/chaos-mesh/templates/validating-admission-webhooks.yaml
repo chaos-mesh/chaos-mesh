@@ -85,7 +85,7 @@ webhooks:
 apiVersion: {{ $webhookApiVersion }}
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: validate-auth
+  name: {{ template "chaos-mesh.validation" . }}-auth
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: admission-webhook
