@@ -38,6 +38,7 @@ func NewDefaultZapLogger() (logr.Logger, error) {
 func NewZapLoggerWithWriter(out io.Writer) logr.Logger {
 	bWriter := out
 	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.FunctionKey = "function"
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(config.EncoderConfig), zapcore.AddSync(bWriter), config.Level)
 	zapLogger := zap.New(core)
 	logger := zapr.NewLogger(zapLogger)
