@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
-const varLength = 8;
+const varLength = 8
 
 func (it *FakeImage) SetVarUint64(program *ptrace.TracedProgram, entry *mapreader.Entry, symbol string, value uint64) error {
 	if offset, ok := it.offset[symbol]; ok {
