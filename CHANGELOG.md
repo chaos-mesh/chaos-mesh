@@ -22,7 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- Removed unused local function from statuscheck/manager.go
 
 ### Fixed
 
