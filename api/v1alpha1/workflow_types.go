@@ -80,11 +80,12 @@ type WorkflowCondition struct {
 type TemplateType string
 
 const (
-	TypeTask     TemplateType = "Task"
-	TypeSerial   TemplateType = "Serial"
-	TypeParallel TemplateType = "Parallel"
-	TypeSuspend  TemplateType = "Suspend"
-	TypeSchedule TemplateType = "Schedule"
+	TypeTask        TemplateType = "Task"
+	TypeSerial      TemplateType = "Serial"
+	TypeParallel    TemplateType = "Parallel"
+	TypeSuspend     TemplateType = "Suspend"
+	TypeSchedule    TemplateType = "Schedule"
+	TypeStatusCheck TemplateType = "StatusCheck"
 )
 
 func IsChaosTemplateType(target TemplateType) bool {
@@ -120,6 +121,13 @@ type Template struct {
 	// Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
 	// +optional
 	Schedule *ChaosOnlyScheduleSpec `json:"schedule,omitempty"`
+	// StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.
+	// +optional
+	StatusCheck *StatusCheckSpec `json:"statusCheck,omitempty"`
+	// AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+	// Only used when Type is TypeStatusCheck.
+	// +optional
+	AbortWithStatusCheck bool `json:"abortWithStatusCheck,omitempty"`
 }
 
 // ChaosOnlyScheduleSpec is very similar with ScheduleSpec, but it could not schedule Workflow

@@ -1711,8 +1711,8 @@ spec:
               - random-max-percent
               type: string
             name:
-              description: byteman rule name, should be unique, and will use JVMChaos'
-                name if not set
+              description: byteman rule name, should be unique, and will generate
+                one if not set
               type: string
             pid:
               description: the pid of Java process which needs to attach
@@ -5275,8 +5275,8 @@ spec:
                   - random-max-percent
                   type: string
                 name:
-                  description: byteman rule name, should be unique, and will use JVMChaos'
-                    name if not set
+                  description: byteman rule name, should be unique, and will generate
+                    one if not set
                   type: string
                 pid:
                   description: the pid of Java process which needs to attach
@@ -6998,6 +6998,11 @@ spec:
                 templates:
                   items:
                     properties:
+                      abortWithStatusCheck:
+                        description: AbortWithStatusCheck describe whether to abort
+                          the workflow when the failure threshold of StatusCheck is
+                          exceeded. Only used when Type is TypeStatusCheck.
+                        type: boolean
                       awsChaos:
                         description: AWSChaosSpec is the content of the specification
                           for an AWSChaos
@@ -8049,7 +8054,7 @@ spec:
                             type: string
                           name:
                             description: byteman rule name, should be unique, and
-                              will use JVMChaos' name if not set
+                              will generate one if not set
                             type: string
                           pid:
                             description: the pid of Java process which needs to attach
@@ -10555,7 +10560,7 @@ spec:
                                 type: string
                               name:
                                 description: byteman rule name, should be unique,
-                                  and will use JVMChaos' name if not set
+                                  and will generate one if not set
                                 type: string
                               pid:
                                 description: the pid of Java process which needs to
@@ -12426,6 +12431,101 @@ spec:
                             type: string
                         required:
                         - schedule
+                        - type
+                        type: object
+                      statusCheck:
+                        description: StatusCheck describe the behavior of StatusCheck.
+                          Only used when Type is TypeStatusCheck.
+                        properties:
+                          duration:
+                            description: Duration defines the duration of the whole
+                              status check if the number of failed execution does
+                              not exceed the failure threshold. Duration is available
+                              to both `Synchronous` and `Continuous` mode. A duration
+                              string is a possibly signed sequence of decimal numbers,
+                              each with optional fraction and a unit suffix, such
+                              as "300ms", "-1.5h" or "2h45m". Valid time units are
+                              "ns", "us" (or "µs"), "ms", "s", "m", "h".
+                            type: string
+                          failureThreshold:
+                            description: FailureThreshold defines the minimum consecutive
+                              failure for the status check to be considered failed.
+                            minimum: 1
+                            type: integer
+                          http:
+                            properties:
+                              body:
+                                type: string
+                              criteria:
+                                description: Criteria defines how to determine the
+                                  result of the status check.
+                                properties:
+                                  statusCode:
+                                    description: StatusCode defines the expected http
+                                      status code for the request. A statusCode string
+                                      could be a single code (e.g. 200), or an inclusive
+                                      range (e.g. 200-400, both `200` and `400` are
+                                      included).
+                                    type: string
+                                required:
+                                - statusCode
+                                type: object
+                              headers:
+                                additionalProperties:
+                                  items:
+                                    type: string
+                                  type: array
+                                description: "A Header represents the key-value pairs
+                                  in an HTTP header. \n The keys should be in canonical
+                                  form, as returned by CanonicalHeaderKey."
+                                type: object
+                              method:
+                                enum:
+                                - GET
+                                - POST
+                                type: string
+                              url:
+                                type: string
+                            required:
+                            - criteria
+                            - url
+                            type: object
+                          intervalSeconds:
+                            description: IntervalSeconds defines how often (in seconds)
+                              to perform an execution of status check.
+                            minimum: 1
+                            type: integer
+                          mode:
+                            description: 'Mode defines the execution mode of the status
+                              check. Support type: Synchronous / Continuous'
+                            enum:
+                            - Synchronous
+                            - Continuous
+                            type: string
+                          recordsHistoryLimit:
+                            description: RecordsHistoryLimit defines the number of
+                              record to retain.
+                            maximum: 1000
+                            minimum: 1
+                            type: integer
+                          successThreshold:
+                            description: SuccessThreshold defines the minimum consecutive
+                              successes for the status check to be considered successful.
+                              SuccessThreshold only works for `Synchronous` mode.
+                            minimum: 1
+                            type: integer
+                          timeoutSeconds:
+                            description: TimeoutSeconds defines the number of seconds
+                              after which an execution of status check times out.
+                            minimum: 1
+                            type: integer
+                          type:
+                            description: 'Type defines the specific status check type.
+                              Support type: HTTP'
+                            enum:
+                            - HTTP
+                            type: string
+                        required:
                         - type
                         type: object
                       stressChaos:
@@ -16674,6 +16774,11 @@ spec:
         spec:
           description: Spec defines the behavior of a node of workflow
           properties:
+            abortWithStatusCheck:
+              description: AbortWithStatusCheck describe whether to abort the workflow
+                when the failure threshold of StatusCheck is exceeded. Only used when
+                Type is TypeStatusCheck.
+              type: boolean
             awsChaos:
               description: AWSChaosSpec is the content of the specification for an
                 AWSChaos
@@ -17666,8 +17771,8 @@ spec:
                   - random-max-percent
                   type: string
                 name:
-                  description: byteman rule name, should be unique, and will use JVMChaos'
-                    name if not set
+                  description: byteman rule name, should be unique, and will generate
+                    one if not set
                   type: string
                 pid:
                   description: the pid of Java process which needs to attach
@@ -20030,8 +20135,8 @@ spec:
                       - random-max-percent
                       type: string
                     name:
-                      description: byteman rule name, should be unique, and will use
-                        JVMChaos' name if not set
+                      description: byteman rule name, should be unique, and will generate
+                        one if not set
                       type: string
                     pid:
                       description: the pid of Java process which needs to attach
@@ -21770,6 +21875,11 @@ spec:
                     templates:
                       items:
                         properties:
+                          abortWithStatusCheck:
+                            description: AbortWithStatusCheck describe whether to
+                              abort the workflow when the failure threshold of StatusCheck
+                              is exceeded. Only used when Type is TypeStatusCheck.
+                            type: boolean
                           awsChaos:
                             description: AWSChaosSpec is the content of the specification
                               for an AWSChaos
@@ -22847,7 +22957,7 @@ spec:
                                 type: string
                               name:
                                 description: byteman rule name, should be unique,
-                                  and will use JVMChaos' name if not set
+                                  and will generate one if not set
                                 type: string
                               pid:
                                 description: the pid of Java process which needs to
@@ -25433,7 +25543,7 @@ spec:
                                     type: string
                                   name:
                                     description: byteman rule name, should be unique,
-                                      and will use JVMChaos' name if not set
+                                      and will generate one if not set
                                     type: string
                                   pid:
                                     description: the pid of Java process which needs
@@ -27377,6 +27487,105 @@ spec:
                                 type: string
                             required:
                             - schedule
+                            - type
+                            type: object
+                          statusCheck:
+                            description: StatusCheck describe the behavior of StatusCheck.
+                              Only used when Type is TypeStatusCheck.
+                            properties:
+                              duration:
+                                description: Duration defines the duration of the
+                                  whole status check if the number of failed execution
+                                  does not exceed the failure threshold. Duration
+                                  is available to both `Synchronous` and `Continuous`
+                                  mode. A duration string is a possibly signed sequence
+                                  of decimal numbers, each with optional fraction
+                                  and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+                                  Valid time units are "ns", "us" (or "µs"), "ms",
+                                  "s", "m", "h".
+                                type: string
+                              failureThreshold:
+                                description: FailureThreshold defines the minimum
+                                  consecutive failure for the status check to be considered
+                                  failed.
+                                minimum: 1
+                                type: integer
+                              http:
+                                properties:
+                                  body:
+                                    type: string
+                                  criteria:
+                                    description: Criteria defines how to determine
+                                      the result of the status check.
+                                    properties:
+                                      statusCode:
+                                        description: StatusCode defines the expected
+                                          http status code for the request. A statusCode
+                                          string could be a single code (e.g. 200),
+                                          or an inclusive range (e.g. 200-400, both
+                                          `200` and `400` are included).
+                                        type: string
+                                    required:
+                                    - statusCode
+                                    type: object
+                                  headers:
+                                    additionalProperties:
+                                      items:
+                                        type: string
+                                      type: array
+                                    description: "A Header represents the key-value
+                                      pairs in an HTTP header. \n The keys should
+                                      be in canonical form, as returned by CanonicalHeaderKey."
+                                    type: object
+                                  method:
+                                    enum:
+                                    - GET
+                                    - POST
+                                    type: string
+                                  url:
+                                    type: string
+                                required:
+                                - criteria
+                                - url
+                                type: object
+                              intervalSeconds:
+                                description: IntervalSeconds defines how often (in
+                                  seconds) to perform an execution of status check.
+                                minimum: 1
+                                type: integer
+                              mode:
+                                description: 'Mode defines the execution mode of the
+                                  status check. Support type: Synchronous / Continuous'
+                                enum:
+                                - Synchronous
+                                - Continuous
+                                type: string
+                              recordsHistoryLimit:
+                                description: RecordsHistoryLimit defines the number
+                                  of record to retain.
+                                maximum: 1000
+                                minimum: 1
+                                type: integer
+                              successThreshold:
+                                description: SuccessThreshold defines the minimum
+                                  consecutive successes for the status check to be
+                                  considered successful. SuccessThreshold only works
+                                  for `Synchronous` mode.
+                                minimum: 1
+                                type: integer
+                              timeoutSeconds:
+                                description: TimeoutSeconds defines the number of
+                                  seconds after which an execution of status check
+                                  times out.
+                                minimum: 1
+                                type: integer
+                              type:
+                                description: 'Type defines the specific status check
+                                  type. Support type: HTTP'
+                                enum:
+                                - HTTP
+                                type: string
+                            required:
                             - type
                             type: object
                           stressChaos:
@@ -30927,6 +31136,99 @@ spec:
             startTime:
               format: date-time
               type: string
+            statusCheck:
+              description: StatusCheck describe the behavior of StatusCheck. Only
+                used when Type is TypeStatusCheck.
+              properties:
+                duration:
+                  description: Duration defines the duration of the whole status check
+                    if the number of failed execution does not exceed the failure
+                    threshold. Duration is available to both `Synchronous` and `Continuous`
+                    mode. A duration string is a possibly signed sequence of decimal
+                    numbers, each with optional fraction and a unit suffix, such as
+                    "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or
+                    "µs"), "ms", "s", "m", "h".
+                  type: string
+                failureThreshold:
+                  description: FailureThreshold defines the minimum consecutive failure
+                    for the status check to be considered failed.
+                  minimum: 1
+                  type: integer
+                http:
+                  properties:
+                    body:
+                      type: string
+                    criteria:
+                      description: Criteria defines how to determine the result of
+                        the status check.
+                      properties:
+                        statusCode:
+                          description: StatusCode defines the expected http status
+                            code for the request. A statusCode string could be a single
+                            code (e.g. 200), or an inclusive range (e.g. 200-400,
+                            both `200` and `400` are included).
+                          type: string
+                      required:
+                      - statusCode
+                      type: object
+                    headers:
+                      additionalProperties:
+                        items:
+                          type: string
+                        type: array
+                      description: "A Header represents the key-value pairs in an
+                        HTTP header. \n The keys should be in canonical form, as returned
+                        by CanonicalHeaderKey."
+                      type: object
+                    method:
+                      enum:
+                      - GET
+                      - POST
+                      type: string
+                    url:
+                      type: string
+                  required:
+                  - criteria
+                  - url
+                  type: object
+                intervalSeconds:
+                  description: IntervalSeconds defines how often (in seconds) to perform
+                    an execution of status check.
+                  minimum: 1
+                  type: integer
+                mode:
+                  description: 'Mode defines the execution mode of the status check.
+                    Support type: Synchronous / Continuous'
+                  enum:
+                  - Synchronous
+                  - Continuous
+                  type: string
+                recordsHistoryLimit:
+                  description: RecordsHistoryLimit defines the number of record to
+                    retain.
+                  maximum: 1000
+                  minimum: 1
+                  type: integer
+                successThreshold:
+                  description: SuccessThreshold defines the minimum consecutive successes
+                    for the status check to be considered successful. SuccessThreshold
+                    only works for `Synchronous` mode.
+                  minimum: 1
+                  type: integer
+                timeoutSeconds:
+                  description: TimeoutSeconds defines the number of seconds after
+                    which an execution of status check times out.
+                  minimum: 1
+                  type: integer
+                type:
+                  description: 'Type defines the specific status check type. Support
+                    type: HTTP'
+                  enum:
+                  - HTTP
+                  type: string
+              required:
+              - type
+              type: object
             stressChaos:
               description: StressChaosSpec defines the desired state of StressChaos
               properties:
@@ -34134,6 +34436,11 @@ spec:
             templates:
               items:
                 properties:
+                  abortWithStatusCheck:
+                    description: AbortWithStatusCheck describe whether to abort the
+                      workflow when the failure threshold of StatusCheck is exceeded.
+                      Only used when Type is TypeStatusCheck.
+                    type: boolean
                   awsChaos:
                     description: AWSChaosSpec is the content of the specification
                       for an AWSChaos
@@ -35163,7 +35470,7 @@ spec:
                         type: string
                       name:
                         description: byteman rule name, should be unique, and will
-                          use JVMChaos' name if not set
+                          generate one if not set
                         type: string
                       pid:
                         description: the pid of Java process which needs to attach
@@ -37600,7 +37907,7 @@ spec:
                             type: string
                           name:
                             description: byteman rule name, should be unique, and
-                              will use JVMChaos' name if not set
+                              will generate one if not set
                             type: string
                           pid:
                             description: the pid of Java process which needs to attach
@@ -39412,6 +39719,100 @@ spec:
                         type: string
                     required:
                     - schedule
+                    - type
+                    type: object
+                  statusCheck:
+                    description: StatusCheck describe the behavior of StatusCheck.
+                      Only used when Type is TypeStatusCheck.
+                    properties:
+                      duration:
+                        description: Duration defines the duration of the whole status
+                          check if the number of failed execution does not exceed
+                          the failure threshold. Duration is available to both `Synchronous`
+                          and `Continuous` mode. A duration string is a possibly signed
+                          sequence of decimal numbers, each with optional fraction
+                          and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+                          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
+                          "h".
+                        type: string
+                      failureThreshold:
+                        description: FailureThreshold defines the minimum consecutive
+                          failure for the status check to be considered failed.
+                        minimum: 1
+                        type: integer
+                      http:
+                        properties:
+                          body:
+                            type: string
+                          criteria:
+                            description: Criteria defines how to determine the result
+                              of the status check.
+                            properties:
+                              statusCode:
+                                description: StatusCode defines the expected http
+                                  status code for the request. A statusCode string
+                                  could be a single code (e.g. 200), or an inclusive
+                                  range (e.g. 200-400, both `200` and `400` are included).
+                                type: string
+                            required:
+                            - statusCode
+                            type: object
+                          headers:
+                            additionalProperties:
+                              items:
+                                type: string
+                              type: array
+                            description: "A Header represents the key-value pairs
+                              in an HTTP header. \n The keys should be in canonical
+                              form, as returned by CanonicalHeaderKey."
+                            type: object
+                          method:
+                            enum:
+                            - GET
+                            - POST
+                            type: string
+                          url:
+                            type: string
+                        required:
+                        - criteria
+                        - url
+                        type: object
+                      intervalSeconds:
+                        description: IntervalSeconds defines how often (in seconds)
+                          to perform an execution of status check.
+                        minimum: 1
+                        type: integer
+                      mode:
+                        description: 'Mode defines the execution mode of the status
+                          check. Support type: Synchronous / Continuous'
+                        enum:
+                        - Synchronous
+                        - Continuous
+                        type: string
+                      recordsHistoryLimit:
+                        description: RecordsHistoryLimit defines the number of record
+                          to retain.
+                        maximum: 1000
+                        minimum: 1
+                        type: integer
+                      successThreshold:
+                        description: SuccessThreshold defines the minimum consecutive
+                          successes for the status check to be considered successful.
+                          SuccessThreshold only works for `Synchronous` mode.
+                        minimum: 1
+                        type: integer
+                      timeoutSeconds:
+                        description: TimeoutSeconds defines the number of seconds
+                          after which an execution of status check times out.
+                        minimum: 1
+                        type: integer
+                      type:
+                        description: 'Type defines the specific status check type.
+                          Support type: HTTP'
+                        enum:
+                        - HTTP
+                        type: string
+                    required:
                     - type
                     type: object
                   stressChaos:

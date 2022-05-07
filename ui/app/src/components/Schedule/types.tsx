@@ -14,13 +14,13 @@
  * limitations under the License.
  *
  */
-import * as Yup from 'yup'
 
 import { FormikProps, FormikValues, getIn } from 'formik'
 import { InputAdornment, MenuItem } from '@mui/material'
 import { SelectField, TextField } from 'components/FormField'
+import { number, string } from 'yup'
 
-import i18n from 'components/T'
+import { T } from 'components/T'
 
 export interface ScheduleSpecific {
   schedule: string
@@ -42,49 +42,59 @@ export const Fields = ({ errors, touched }: Pick<FormikProps<FormikValues>, 'err
       fast
       type="number"
       name="spec.historyLimit"
-      label={i18n('newS.basic.historyLimit')}
+      label={<T id="newS.basic.historyLimit" />}
       helperText={
-        getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit')
-          ? getIn(errors, 'spec.historyLimit')
-          : i18n('newS.basic.historyLimitHelper')
+        getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit') ? (
+          getIn(errors, 'spec.historyLimit')
+        ) : (
+          <T id="newS.basic.historyLimitHelper" />
+        )
       }
-      error={getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit') ? true : false}
+      error={getIn(errors, 'spec.historyLimit') && getIn(touched, 'spec.historyLimit')}
     />
     <SelectField
       name="spec.concurrencyPolicy"
-      label={i18n('newS.basic.concurrencyPolicy')}
+      label={<T id="newS.basic.concurrencyPolicy" />}
       helperText={
-        getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy')
-          ? getIn(errors, 'spec.concurrencyPolicy')
-          : i18n('newS.basic.concurrencyPolicyHelper')
+        getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy') ? (
+          getIn(errors, 'spec.concurrencyPolicy')
+        ) : (
+          <T id="newS.basic.concurrencyPolicyHelper" />
+        )
       }
-      error={getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy') ? true : false}
+      error={getIn(errors, 'spec.concurrencyPolicy') && getIn(touched, 'spec.concurrencyPolicy')}
     >
-      <MenuItem value="Forbid">{i18n('newS.basic.forbid')}</MenuItem>
-      <MenuItem value="Allow">{i18n('newS.basic.allow')}</MenuItem>
+      <MenuItem value="Forbid">
+        <T id="newS.basic.forbid" />
+      </MenuItem>
+      <MenuItem value="Allow">
+        <T id="newS.basic.allow" />
+      </MenuItem>
     </SelectField>
     <TextField
       fast
       type="number"
       name="spec.startingDeadlineSeconds"
-      label={i18n('newS.basic.startingDeadlineSeconds')}
-      InputProps={{
-        endAdornment: <InputAdornment position="end">{i18n('common.seconds')}</InputAdornment>,
-      }}
+      label={<T id="newS.basic.startingDeadlineSeconds" />}
+      endAdornment={
+        <InputAdornment position="end">
+          <T id="common.seconds" />
+        </InputAdornment>
+      }
       helperText={
-        getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds')
-          ? getIn(errors, 'spec.startingDeadlineSeconds')
-          : i18n('newS.basic.startingDeadlineSecondsHelper')
+        getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds') ? (
+          getIn(errors, 'spec.startingDeadlineSeconds')
+        ) : (
+          <T id="newS.basic.startingDeadlineSecondsHelper" />
+        )
       }
-      error={
-        getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds') ? true : false
-      }
+      error={getIn(errors, 'spec.startingDeadlineSeconds') && getIn(touched, 'spec.startingDeadlineSeconds')}
     />
   </>
 )
 
 export const schema = {
-  historyLimit: Yup.number().min(1, 'The historyLimit is at least 1'),
-  concurrencyPolicy: Yup.string().required('The concurrencyPolicy is required'),
-  startingDeadlineSeconds: Yup.number().min(0, 'The startingDeadlineSeconds is at least 0').nullable(true),
+  historyLimit: number().min(1, 'The historyLimit is at least 1'),
+  concurrencyPolicy: string().required('The concurrencyPolicy is required'),
+  startingDeadlineSeconds: number().min(0, 'The startingDeadlineSeconds is at least 0').nullable(true),
 }

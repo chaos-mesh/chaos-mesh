@@ -30,7 +30,7 @@ import { FormattedMessage } from 'react-intl'
 import type { IntlShape } from 'react-intl'
 
 // https://github.com/microsoft/TypeScript/issues/24929
-function i18n(id: string): JSX.Element // DEPRECATED, but preserve for backward compatibility.
+function i18n(id: string): Exclude<React.ReactChild, number> // DEPRECATED, but preserve for backward compatibility.
 function i18n(id: string, intl: IntlShape): string
 function i18n(id: string, intl?: IntlShape) {
   return intl ? intl.formatMessage({ id }) : <FormattedMessage id={id} />

@@ -1,3 +1,23 @@
+import { Box, Button, Grid, Grow } from '@mui/material'
+import { setAlert, setConfirm } from 'slices/globalStatus'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+
+import Alert from '@mui/lab/Alert'
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+import { Event } from 'api/events.type'
+import EventsTimeline from 'components/EventsTimeline'
+import { ExperimentSingle } from 'api/experiments.type'
+import Helmet from 'components/Helmet'
+import Loading from '@ui/mui-extends/esm/Loading'
+import ObjectConfiguration from 'components/ObjectConfiguration'
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
+import Space from '@ui/mui-extends/esm/Space'
+import api from 'api'
+import i18n from 'components/T'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -14,26 +34,6 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button, Grid, Grow } from '@mui/material'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-
-import Alert from '@mui/lab/Alert'
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { Event } from 'api/events.type'
-import EventsTimeline from 'components/EventsTimeline'
-import { ExperimentSingle } from 'api/experiments.type'
-import Loading from '@ui/mui-extends/esm/Loading'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
-import i18n from 'components/T'
 import loadable from '@loadable/component'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -162,6 +162,7 @@ export default function Single() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
+          {single && <Helmet title={`Experiment ${single.name}`} />}
           <Space spacing={6}>
             <Space direction="row">
               <Button

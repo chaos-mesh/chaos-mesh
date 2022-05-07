@@ -1278,7 +1278,7 @@ definitions:
       name:
         description: |-
           +optional
-          byteman rule name, should be unique, and will use JVMChaos' name if not set
+          byteman rule name, should be unique, and will generate one if not set
         type: string
       pid:
         description: the pid of Java process which needs to attach
@@ -1545,18 +1545,21 @@ definitions:
         $ref: '#/definitions/v1alpha1.BandwidthSpec'
         description: |-
           Bandwidth represents the detail about bandwidth control action
+          +ui:form:when=action=='bandwidth'
           +optional
         type: object
       corrupt:
         $ref: '#/definitions/v1alpha1.CorruptSpec'
         description: |-
           Corrupt represents the detail about corrupt action
+          +ui:form:when=action=='corrupt'
           +optional
         type: object
       delay:
         $ref: '#/definitions/v1alpha1.DelaySpec'
         description: |-
           Delay represents the detail about delay action
+          +ui:form:when=action=='delay'
           +optional
         type: object
       device:
@@ -1575,6 +1578,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.DuplicateSpec'
         description: |-
           DuplicateSpec represents the detail about loss action
+          +ui:form:when=action=='duplicate'
           +optional
         type: object
       duration:
@@ -1591,6 +1595,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.LossSpec'
         description: |-
           Loss represents the detail about loss action
+          +ui:form:when=action=='loss'
           +optional
         type: object
       mode:
@@ -2353,6 +2358,79 @@ definitions:
           +nullable
         type: string
     type: object
+  v1alpha1.StatusCheckSpec:
+    properties:
+      duration:
+        description: |-
+          Duration defines the duration of the whole status check if the
+          number of failed execution does not exceed the failure threshold.
+          Duration is available to both `Synchronous` and `Continuous` mode.
+          A duration string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "-1.5h" or "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      failureThreshold:
+        description: |-
+          FailureThreshold defines the minimum consecutive failure
+          for the status check to be considered failed.
+          +optional
+          +kubebuilder:default=3
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      http:
+        $ref: '#/definitions/v1alpha1.HTTPStatusCheck'
+        description: +optional
+        type: object
+      intervalSeconds:
+        description: |-
+          IntervalSeconds defines how often (in seconds) to perform
+          an execution of status check.
+          +optional
+          +kubebuilder:default=10
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      mode:
+        description: |-
+          Mode defines the execution mode of the status check.
+          Support type: Synchronous / Continuous
+          +optional
+          +kubebuilder:validation:Enum=Synchronous;Continuous
+        type: string
+      recordsHistoryLimit:
+        description: |-
+          RecordsHistoryLimit defines the number of record to retain.
+          +optional
+          +kubebuilder:default=100
+          +kubebuilder:validation:Minimum=1
+          +kubebuilder:validation:Maximum=1000
+        type: integer
+      successThreshold:
+        description: |-
+          SuccessThreshold defines the minimum consecutive successes
+          for the status check to be considered successful.
+          SuccessThreshold only works for `Synchronous` mode.
+          +optional
+          +kubebuilder:default=1
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      timeoutSeconds:
+        description: |-
+          TimeoutSeconds defines the number of seconds after which
+          an execution of status check times out.
+          +optional
+          +kubebuilder:default=1
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      type:
+        description: |-
+          Type defines the specific status check type.
+          Support type: HTTP
+          +kubebuilder:default=HTTP
+          +kubebuilder:validation:Enum=HTTP
+        type: string
+    type: object
   v1alpha1.StatusCheckTemplate:
     properties:
       duration:
@@ -2532,6 +2610,12 @@ definitions:
     type: object
   v1alpha1.Template:
     properties:
+      abortWithStatusCheck:
+        description: |-
+          AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+          Only used when Type is TypeStatusCheck.
+          +optional
+        type: boolean
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
@@ -2603,6 +2687,12 @@ definitions:
         $ref: '#/definitions/v1alpha1.ChaosOnlyScheduleSpec'
         description: |-
           Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
+          +optional
+        type: object
+      statusCheck:
+        $ref: '#/definitions/v1alpha1.StatusCheckSpec'
+        description: |-
+          StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.
           +optional
         type: object
       stressChaos:

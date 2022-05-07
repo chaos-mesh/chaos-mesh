@@ -16,21 +16,14 @@
     "clean": "rimraf app/node_modules && rimraf packages/**/node_modules && rimraf node_modules"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
     "husky": "^7.0.4",
-    "import-sort-style-eslint": "^6.0.0",
     "is-ci": "^3.0.1",
     "lint-staged": "^12.1.2",
     "prettier": "^2.5.0",
-    "prettier-plugin-import-sort": "^0.0.7",
     "rimraf": "^3.0.2"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
-  },
-  "importSort": {
-    ".js, .ts, .tsx": {
-      "style": "eslint",
-      "parser": "typescript"
-    }
   }
 }

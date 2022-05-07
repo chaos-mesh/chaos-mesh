@@ -22,12 +22,12 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import { RBACConfigParams } from 'api/common.type'
 import { SelectField } from 'components/FormField'
 import Space from '@ui/mui-extends/esm/Space'
+import _ from 'lodash'
 import api from 'api'
 import copy from 'copy-text-to-clipboard'
 import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 import { setAlert } from 'slices/globalStatus'
-import { toTitleCase } from 'lib/utils'
 import { useIntl } from 'react-intl'
 
 const useStyles = makeStyles((theme) => ({
@@ -129,7 +129,7 @@ const RBACGenerator = () => {
               >
                 {['manager', 'viewer'].map((role) => (
                   <MenuItem key={role} value={role}>
-                    {toTitleCase(role)}
+                    {_.upperFirst(role)}
                   </MenuItem>
                 ))}
               </SelectField>

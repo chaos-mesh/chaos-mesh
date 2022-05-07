@@ -30,7 +30,7 @@ import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Schedule } from 'api/schedules.type'
 import Space from '@ui/mui-extends/esm/Space'
 import { Typography } from '@mui/material'
-import _groupBy from 'lodash.groupby'
+import _ from 'lodash'
 import api from 'api'
 import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
@@ -194,7 +194,7 @@ const Schedules = () => {
       </Space>
 
       {schedules.length > 0 &&
-        Object.entries(_groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
+        Object.entries(_.groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
           <Box key={type} mb={6}>
             <Typography variant="overline">{transByKind(type as any)}</Typography>
             <RWList
