@@ -18,7 +18,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Deprecated
 
-- Nothing
+- Refactor global logger from pkg to support bpm module [#3245](https://github.com/chaos-mesh/chaos-mesh/pull/3245)
 
 ### Removed
 

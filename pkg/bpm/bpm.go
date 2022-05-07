@@ -358,7 +358,7 @@ type CommandBuilder struct {
 	stdout     io.ReadWriteCloser
 	stderr     io.ReadWriteCloser
 
-	log logr.Logger
+	logger logr.Logger
 
 	oomScoreAdj int
 
@@ -454,8 +454,8 @@ func (b *CommandBuilder) SetOOMScoreAdj(scoreAdj int) *CommandBuilder {
 func (b *CommandBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
 	// this logger is inherited from the global one
 	// TODO: replace it with a specific logger by passing in one or creating a new one
-	logger := b.log.WithName("background-process-manager.process-builder")
-	return log.EnrichLoggerWithContext(ctx, logger)
+	logr := b.logger.WithName("background-process-manager.process-builder")
+	return log.EnrichLoggerWithContext(ctx, logr)
 }
 
 type nsOption struct {
