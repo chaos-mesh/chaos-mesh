@@ -63,7 +63,7 @@ function check_executable_exists() {
     while [[ $# -gt 0 ]]; do
         local executable=$1
         if ! command -v "$executable" >/dev/null 2>&1; then
-            echo "Error: "$executable" is not installed"
+            echo "Error: $executable is not installed"
             exit 1
         fi
 
