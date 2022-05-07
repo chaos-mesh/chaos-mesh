@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"io"
 	"net"
 	"net/http"
@@ -279,7 +280,11 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	io.WriteString(w, string(response))
+	tpl, err := template.New("").Parse(string(response))
+	if err != nil {
+		return
+	}
+	tpl.Execute(w, response)
 
 }
 
