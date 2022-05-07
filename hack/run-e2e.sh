@@ -71,7 +71,8 @@ function e2e::image_load() {
         pingcap/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
-        local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
+        local nodes
+        nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
         echo $nodes
         echo "info: load images ${images[@]}"
         for image in ${images[@]}; do
