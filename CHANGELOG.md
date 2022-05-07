@@ -27,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Update description of memory stressors [#3225](https://github.com/chaos-mesh/chaos-mesh/pull/3225)
+- Refactor StaticCheck for the code quality [#3227](https://github.com/chaos-mesh/chaos-mesh/pull/3227)
 
 ### Security
 
