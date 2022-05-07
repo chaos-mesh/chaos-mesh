@@ -199,7 +199,7 @@ kubeadmConfigPatches:
   controllerManagerExtraArgs:
     v: "4"
 EOF
-    if [ -n "$DOCKER_IO_MIRROR" -o -n "$GCR_IO_MIRROR" -o -n "$QUAY_IO_MIRROR" ]; then
+    if [ -n "$DOCKER_IO_MIRROR" ] || [ -n "$GCR_IO_MIRROR" ] || [ -n "$QUAY_IO_MIRROR" ]; then
 cat <<EOF >> $tmpfile
 containerdConfigPatches:
 - |-
@@ -331,7 +331,7 @@ if [ -n "${ARTIFACTS}" ]; then
     export REPORT_DIR=${ARTIFACTS}
 fi
 
-if [ -n "${ARTIFACTS}" -a -z "$SKIP_DUMP" ]; then
+if [ -n "${ARTIFACTS}"] && [ -z "$SKIP_DUMP" ]; then
     kubetest2_args+=(--dump)
 fi
 
