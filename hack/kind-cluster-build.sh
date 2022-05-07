@@ -152,14 +152,14 @@ nodes:
 - role: control-plane
 EOF
 
-for ((i=0;i<${nodeNum};i++))
+for ((i=0;i<nodeNum;i++))
 do
     mkdir -p ${data_dir}/worker${i}
     cat <<EOF >>  ${configFile}
 - role: worker
   extraMounts:
 EOF
-    for ((k=1;k<=${volumeNum};k++))
+    for ((k=1;k<=volumeNum;k++))
     do
         mkdir -p ${data_dir}/worker${i}/vol${k}
         cat <<EOF >> ${configFile}

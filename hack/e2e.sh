@@ -243,7 +243,7 @@ EOF
 EOF
     fi
     # workers
-    for ((i = 1; i <= $KUBE_WORKERS; i++)) {
+    for ((i = 1; i <= KUBE_WORKERS; i++)) {
         cat <<EOF >> $tmpfile
 - role: worker
 EOF
