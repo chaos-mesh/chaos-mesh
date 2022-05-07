@@ -688,7 +688,7 @@ check_cmd() {
 }
 
 lowercase() {
-    echo "$@" | tr "[A-Z]" "[a-z]"
+    echo "$@" | tr "A-Z" "a-z"
 }
 
 # Run a command that should never fail. If the command fails execution
