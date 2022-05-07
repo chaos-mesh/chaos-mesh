@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html/template"
 	"io"
 	"net"
 	"net/http"
@@ -279,19 +278,9 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "fail to marshal response", http.StatusInternalServerError)
 		return
 	}
-	// Template for cpuTime and memoryUsage
-	const data = `
-    "cpuTime": {{.cpuTime}},
-	"memoryUsage": {{.memoryUsage}}
-	`
-	// Make and parse the HTML template
-	t, err := template.New("").Parse(data)
-	if err != nil {
-		return
-	}
 
-	// Render the data and output using standard output
-	t.Execute(w, response)
+	io.WriteString(w, string(response))
+
 }
 
 func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
