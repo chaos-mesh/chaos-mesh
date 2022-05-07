@@ -290,7 +290,7 @@ fi
 
 if [ "$PROVIDER" == "kind" ]; then
     tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" EXIT
+    trap 'test -f $tmpfile && rm $tmpfile' EXIT
     e2e::create_kindconfig $tmpfile
     echo "info: print the contents of kindconfig"
     cat $tmpfile

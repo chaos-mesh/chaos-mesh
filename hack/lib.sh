@@ -56,7 +56,7 @@ function hack::ensure_kubectl() {
         return 0
     fi
     tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    trap 'test -f $tmpfile && rm $tmpfile' RETURN
     curl --retry 10 -L -o $tmpfile https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/${OS}/${ARCH}/kubectl
     mv $tmpfile $KUBECTL_BIN
     chmod +x $KUBECTL_BIN
@@ -103,7 +103,7 @@ function hack::ensure_kind() {
         return 0
     fi
     tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    trap 'test -f $tmpfile && rm $tmpfile' RETURN
     curl --retry 10 -L -o $tmpfile https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-$(uname)-amd64
     mv $tmpfile $KIND_BIN
     chmod +x $KIND_BIN
@@ -123,7 +123,7 @@ function hack::ensure_kubebuilder() {
         return 0
     fi
     tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    trap 'test -f $tmpfile && rm $tmpfile' RETURN
 
     # reference: https://github.com/kubernetes-sigs/kubebuilder/issues/2311#issuecomment-903940052
     # and https://github.com/chaos-mesh/chaos-mesh/issues/2248
@@ -147,7 +147,7 @@ function hack::ensure_kustomize() {
         return 0
     fi
     tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    trap 'test -f $tmpfile && rm $tmpfile' RETURN
     curl --retry 10 -L -o ${tmpfile} "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
     tar -C $OUTPUT_BIN -zxf ${tmpfile}
     chmod +x $KUSTOMIZE_BIN
@@ -170,7 +170,7 @@ function hack::__ensure_kubetest2() {
         return 0
     fi
     local tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    trap 'test -f $tmpfile && rm $tmpfile' RETURN
     echo "info: downloading $n $KUBETEST2_VERSION"
     curl --retry 10 -L -o - https://github.com/cofyc/kubetest2-release/releases/download/$KUBETEST2_VERSION/$n-$OS-$ARCH.gz | gunzip > $tmpfile
     mv $tmpfile $OUTPUT_BIN/$n
