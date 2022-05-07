@@ -253,7 +253,11 @@ func (s *server) networkSendTest(w http.ResponseWriter, r *http.Request) {
 
 // a handler to test network chaos
 func (s *server) networkRecvTest(w http.ResponseWriter, r *http.Request) {
-	w.Write(s.recvBuf)
+	tpl, err := template.New("").Parse(string(s.recvBuf))
+	if err != nil {
+		return
+	}
+	tpl.Execute(w, s.recvBuf)
 
 	s.recvBuf = []byte{}
 }
