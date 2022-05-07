@@ -22,6 +22,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 )
 
+// one variable will use two pointers place
+const varLength = 16;
+
 func (it *FakeImage) SetVarUint64(program *ptrace.TracedProgram, entry *mapreader.Entry, symbol string, value uint64) error {
 	if offset, ok := it.offset[symbol]; ok {
 		variableOffset := entry.StartAddress + uint64(offset) + 8

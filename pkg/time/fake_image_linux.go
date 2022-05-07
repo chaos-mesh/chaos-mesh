@@ -146,8 +146,8 @@ func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram, varNum int
 		if varNum*8 > len(it.content) {
 			return nil, errors.New("variable num bigger than content num")
 		}
-		contentWithoutVariable := (*content)[:len(it.content)-varNum*8]
-		expectedContentWithoutVariable := it.content[:len(it.content)-varNum*8]
+		contentWithoutVariable := (*content)[:len(it.content)-varNum*varLength]
+		expectedContentWithoutVariable := it.content[:len(it.content)-varNum*varLength]
 		it.logger.Info("successfully read slice", "content", contentWithoutVariable, "expected content", expectedContentWithoutVariable)
 
 		if bytes.Equal(contentWithoutVariable, expectedContentWithoutVariable) {
