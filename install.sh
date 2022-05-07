@@ -628,7 +628,7 @@ version_lt() {
 }
 
 vercomp () {
-    if [[ $1 == $2 ]]
+    if [[ $1 == "$2" ]]
     then
         return 0
     fi
