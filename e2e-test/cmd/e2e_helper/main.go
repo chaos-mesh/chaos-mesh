@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"text/template"
 	"time"
 
 	"github.com/containerd/cgroups"
@@ -215,7 +216,15 @@ func (s *server) networkPingTest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(fmt.Sprintf("OK %d", endTime.UnixNano()-startTime.UnixNano())))
+	const data = `OK {{.actualTime}}`
+	actualTime := endTime.UnixNano() - startTime.UnixNano()
+	// Make and parse the data
+	t, err := template.New("").Parse(data)
+	if err != nil {
+		return
+	}
+	// Render the data
+	t.Execute(w, actualTime)
 }
 
 // a handler to test network chaos
