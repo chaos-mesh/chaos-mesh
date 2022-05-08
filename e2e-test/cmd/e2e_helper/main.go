@@ -111,7 +111,7 @@ func (s *server) timer(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	// Render the data
-	t.Execute(os.Stdout, currentTime)
+	t.Execute(w, currentTime)
 }
 
 // a handler to test io chaos
