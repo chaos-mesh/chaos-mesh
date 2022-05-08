@@ -24,6 +24,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -34,7 +35,6 @@ import (
 	genericlabel "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/label"
 	genericnamespace "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var ErrNoPodSelected = errors.New("no pod is selected")
