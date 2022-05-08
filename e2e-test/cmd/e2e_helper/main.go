@@ -114,6 +114,15 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 	err := os.WriteFile(path, origData, 0644)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf("failed to write file %v", err)))
+		const data = `failed to write file {{.error}}`
+		error := map[string]error{"error": err}
+		// Make and parse the data
+		t, err := template.New("").Parse(data)
+		if err != nil {
+			return
+		}
+		// Render the data
+		t.Execute(w, error)
 		return
 	}
 	gotData, err := os.ReadFile(path)

@@ -22,7 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- Remove Sprintf while writing to http.ResponseWriter [#3251](https://github.com/chaos-mesh/chaos-mesh/pull/3251)
 
 ### Fixed
 
