@@ -103,7 +103,15 @@ func (s *server) setupUDPServer() error {
 
 // a handler to print out the current time
 func (s *server) timer(w http.ResponseWriter, _ *http.Request) {
-	w.Write([]byte(time.Now().Format(time.RFC3339Nano)))
+	currentTime := map[string]string{"curentTime": time.Now().Format(time.RFC3339Nano)}
+	const data = `{{.curentTime}}`
+	// Make and parse data
+	t, err := template.New("").Parse(data)
+	if err != nil {
+		return
+	}
+	// Render the data
+	t.Execute(os.Stdout, currentTime)
 }
 
 // a handler to test io chaos
