@@ -160,7 +160,15 @@ func (s *server) ioTest(w http.ResponseWriter, _ *http.Request) {
 	t1 := time.Now()
 	f, err := os.CreateTemp(s.dataDir, "e2e-test")
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf("failed to create temp file %v", err)))
+		const data = `failed to create temp file {{.error}}`
+		error := map[string]error{"error": err}
+		// Make and parse the data
+		t, err := template.New("").Parse(data)
+		if err != nil {
+			return
+		}
+		// Render the data
+		t.Execute(w, error)
 		return
 	}
 	if _, err := f.Write([]byte("hello world")); err != nil {
