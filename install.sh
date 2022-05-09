@@ -318,7 +318,7 @@ install_kubectl() {
     err_msg=$(kubectl version --client=true 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(kubectl version --client=true | sed 's/.*GitVersion:\"v\([0-9.]*\).*/\1/g')
-        target_version=$(echo "${kubectl_version}" | sed s/v//g)
+        target_version=${kind_version//v/g}
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesg requires kubectl version %s or later\n"  "${target_version}"
         else
