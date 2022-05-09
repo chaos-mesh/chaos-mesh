@@ -15,7 +15,7 @@
  *
  */
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Drawer, IconButton, Typography } from '@mui/material'
+import { Box, Drawer, IconButton } from '@mui/material'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
 import { useDrop } from 'react-dnd'
