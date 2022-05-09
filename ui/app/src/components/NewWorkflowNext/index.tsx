@@ -95,7 +95,7 @@ export default function NewWorkflow() {
               <Box>
                 <Typography fontWeight="medium">Functional Nodes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>
-                  Drag or click items below into the board to create a special node.
+                  Drag or click items below into the board to create a functional node.
                 </Typography>
               </Box>
               <FunctionalNodesElements onElementClick={handleClickElement} />
