@@ -134,7 +134,15 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 	}
 	gotData, err := os.ReadFile(path)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		const data = `{{.error}}`
+		error := map[string]string{"error": err.Error()}
+		// Make and parse the data
+		t, err := template.New("").Parse(data)
+		if err != nil {
+			return
+		}
+		// Render the data
+		t.Execute(w, error)
 		return
 	}
 	result := bytes.Equal(origData, gotData)
@@ -172,7 +180,15 @@ func (s *server) ioTest(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	if _, err := f.Write([]byte("hello world")); err != nil {
-		w.Write([]byte(fmt.Sprintf("failed to write file %v", err)))
+		const data = `failed to write file {{.error}}`
+		error := map[string]error{"error": err}
+		// Make and parse the data
+		t, err := template.New("").Parse(data)
+		if err != nil {
+			return
+		}
+		// Render the data
+		t.Execute(w, error)
 		return
 	}
 	t2 := time.Now()
