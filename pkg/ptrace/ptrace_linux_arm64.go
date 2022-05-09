@@ -30,12 +30,24 @@ const syscallInstrSize = 4
 const nrProcessVMReadv = 270
 const nrProcessVMWritev = 271
 
+// see kernel source /include/uapi/linux/elf.h
+const nrPRStatus = 1
+
 func getIp(regs *syscall.PtraceRegs) uintptr {
 	return uintptr(regs.Pc)
 }
 
+func getRegs(pid int, regsout *syscall.PtraceRegs) error {
+	return unix.PtraceGetRegSetArm64(pid, nrPRStatus, (*unix.PtraceRegsArm64)(regsout))
+}
+
+func setRegs(pid int, regs *syscall.PtraceRegs) error {
+	return unix.PtraceSetRegSetArm64(pid, nrPRStatus, (*unix.PtraceRegsArm64)(regs))
+}
+
 // Syscall runs a syscall at main thread of process
 func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
+	// save the original registers and the current instructions
 	err := p.Protect()
 	if err != nil {
 		return 0, err
@@ -47,6 +59,9 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	// set the registers according to the syscall convension. Learn more about
+	// it in `man 2 syscall`. In aarch64 the syscall nr is stored in w8, and the
+	// arguments are stored in x0, x1, x2, x3, x4, x5 in order
 	regs.Regs[8] = number
 	for index, arg := range args {
 		// All these registers are hard coded for x86 platform
@@ -71,11 +86,13 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 		return 0, err
 	}
 
+	// run one instruction, and stop
 	err = p.Step()
 	if err != nil {
 		return 0, err
 	}
 
+	// read registers, the return value of syscall is stored inside x0 register
 	err = getRegs(p.pid, &regs)
 	if err != nil {
 		return 0, err

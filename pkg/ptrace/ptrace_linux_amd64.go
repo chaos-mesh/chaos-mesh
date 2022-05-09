@@ -34,8 +34,17 @@ func getIp(regs *syscall.PtraceRegs) uintptr {
 	return uintptr(regs.Rip)
 }
 
+func getRegs(pid int, regsout *syscall.PtraceRegs) error {
+	return syscall.PtraceGetRegs(pid, regsout)
+}
+
+func setRegs(pid int, regs *syscall.PtraceRegs) error {
+	return syscall.PtraceSetRegs(pid, regs)
+}
+
 // Syscall runs a syscall at main thread of process
 func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
+	// save the original registers and the current instructions
 	err := p.Protect()
 	if err != nil {
 		return 0, err
@@ -43,10 +52,14 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 
 	var regs syscall.PtraceRegs
 
-	err = syscall.PtraceGetRegs(p.pid, &regs)
+	err = getRegs(p.pid, &regs)
 	if err != nil {
 		return 0, err
 	}
+	// set the registers according to the syscall convension. Learn more about
+	// it in `man 2 syscall`. In x86_64 the syscall nr is stored in rax
+	// register, and the arguments are stored in rdi, rsi, rdx, r10, r8, r9 in
+	// order
 	regs.Rax = number
 	for index, arg := range args {
 		// All these registers are hard coded for x86 platform
@@ -66,30 +79,34 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 			return 0, errors.New("too many arguments for a syscall")
 		}
 	}
-	err = syscall.PtraceSetRegs(p.pid, &regs)
+	err = setRegs(p.pid, &regs)
 	if err != nil {
 		return 0, err
 	}
 
 	ip := make([]byte, syscallInstrSize)
 
-	// We only support x86-64 platform now, so using hard coded `LittleEndian` here is ok.
+	// set the current instruction (the ip register points to) to the `syscall`
+	// instruction. In x86_64, the `syscall` instruction is 0x050f.
 	binary.LittleEndian.PutUint16(ip, 0x050f)
 	_, err = syscall.PtracePokeData(p.pid, getIp(p.backupRegs), ip)
 	if err != nil {
 		return 0, err
 	}
 
+	// run one instruction, and stop
 	err = p.Step()
 	if err != nil {
 		return 0, err
 	}
 
-	err = syscall.PtraceGetRegs(p.pid, &regs)
+	// read registers, the return value of syscall is stored inside rax register
+	err = getRegs(p.pid, &regs)
 	if err != nil {
 		return 0, err
 	}
 
+	// restore the state saved at beginning.
 	return regs.Rax, p.Restore()
 }
 

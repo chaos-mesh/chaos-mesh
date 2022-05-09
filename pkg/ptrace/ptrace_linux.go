@@ -82,6 +82,14 @@ func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 
 	tidMap := make(map[int]bool)
 	retryCount := make(map[int]int)
+
+	// iterate over the thread group, until it doens't change
+	//
+	// we have tried several ways to ensure that we have stopped all the tasks:
+	// 1. iterating over and over again to make sure all of them are tracee
+	// 2. send `SIGSTOP` signal
+	// ...
+	// only the first way finally worked for every situations
 	for {
 		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
