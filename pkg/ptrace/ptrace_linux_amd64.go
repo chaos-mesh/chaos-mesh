@@ -56,7 +56,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	// set the registers according to the syscall convension. Learn more about
+	// set the registers according to the syscall convention. Learn more about
 	// it in `man 2 syscall`. In x86_64 the syscall nr is stored in rax
 	// register, and the arguments are stored in rdi, rsi, rdx, r10, r8, r9 in
 	// order
