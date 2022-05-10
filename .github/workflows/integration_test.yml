@@ -26,7 +26,10 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v2.1
-        
+
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v2.0
+      
       - uses: actions/setup-python@v2
         if: ${{ matrix.arch != 'aarch64' }} # We can assume the self-hosted aarch64 has a functional python
 
