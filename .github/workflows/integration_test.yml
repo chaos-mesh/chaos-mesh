@@ -83,3 +83,8 @@ jobs:
       - name: Run integration test
         run: |
           bash test/integration_test/run.sh
+
+      - name: post run - print k8s info
+        if: always()
+        run: |
+          kubectl describe pods
