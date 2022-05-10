@@ -288,7 +288,7 @@ prepare_env() {
 
 check_kubernetes() {
     need_cmd "kubectl"
-    kubectl_err_msg=$(kubectl version 2>&1 1>/dev/null)
+    kubectl_err_msg=$(kubectl version --output=yaml 2>&1 1>/dev/null)
     if [ "$kubectl_err_msg" != "" ]; then
         printf "check Kubernetes failed, error: %s\n" "${kubectl_err_msg}"
         exit 1
@@ -298,7 +298,7 @@ check_kubernetes() {
 }
 
 check_kubernetes_version() {
-    version_info=$(kubectl version | sed 's/.*GitVersion:\"v\([0-9.]*\).*/\1/g')
+    version_info=$(kubectl version | sed 's/.*gitVersion:\"v\([0-9.]*\).*/\1/g')
 
     for v in $version_info
     do
