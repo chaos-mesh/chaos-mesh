@@ -8,6 +8,9 @@
     },
     {
       "pattern": "url"
+    },
+    {
+      "pattern": "^#"
     }
   ],
   "aliveStatusCodes": [200, 403, 500, 502, 503]
