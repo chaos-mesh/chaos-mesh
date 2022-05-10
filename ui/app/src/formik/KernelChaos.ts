@@ -32,7 +32,7 @@ export const actions = [],
               label: 'predicate',
               value: '',
               helperText:
-                'Predicate will access the arguments of this Frame, example with Parameters\\\'s, you can set it to `STRNCMP(name->name, \\"bananas\\", 8)` to make inject only with it, or omit it to inject for all d_alloc_parallel call chain.',
+                'Predicate will access the arguments of this Frame, example with Parameters\'s, you can set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it to inject for all d_alloc_parallel call chain.',
             },
           ],
         },
@@ -41,14 +41,14 @@ export const actions = [],
           label: 'failtype',
           value: 0,
           helperText:
-            "FailType indicates what to fail, can be set to \\'0\\' / \\'1\\' / \\'2\\' If `0`, indicates slab to fail (should_failslab) If `1`, indicates alloc_page to fail (should_fail_alloc_page) If `2`, indicates bio to fail (should_fail_bio) You can read:   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt to learn more +kubebuilder:validation:Minimum=0",
+            "FailType indicates what to fail, can be set to '0' / '1' / '2' If `0`, indicates slab to fail (should_failslab) If `1`, indicates alloc_page to fail (should_fail_alloc_page) If `2`, indicates bio to fail (should_fail_bio) You can read:   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt to learn more +kubebuilder:validation:Minimum=0",
         },
         {
           field: 'label',
           label: 'headers',
           value: [],
           helperText:
-            'Headers indicates the appropriate kernel headers you need. Eg: \\"linux/mmzone.h\\", \\"linux/blkdev.h\\" and so on',
+            'Headers indicates the appropriate kernel headers you need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on',
         },
         {
           field: 'number',

@@ -71,6 +71,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.nodeSelector` |  Node labels for chaos-daemon pod assignment | `{}` |
 | `chaosDaemon.tolerations` |  Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.affinity` |  Map of chaos-daemon node/pod affinities | `{}` |
+| `chaosDaemon.updateStrategy` | Specify DaemonSetUpdateStrategy for chaos-daemon | `{}` |
 | `dashboard.create` | Enable chaos-dashboard | `false` |
 | `dashboard.rootUrl` | Specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL. | `http://localhost:2333` |
 | `dashboard.hostNetwork` | Running chaos-dashboard on host network | `false` |
@@ -148,7 +149,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `prometheus.volume.storageClassName` | Storage class of PVC | `standard` |
 | `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
 | `webhook.timeoutSeconds` | Timeout for admission webhooks in seconds | `5` |
-| `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
+| `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Fail` |
 | `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos,stresschaos,awschaos,azurechaos,gcpchaos,dnschaos,jvmchaos,schedule,workflow,httpchaos,bnlockchaos,physicalmachinechaos,phsicalmachine,statuscheck]` |
 | `bpfki.create` | Enable chaos-kernel | `false` |
 | `bpfki.image.registry` | Override global registry, empty value means using the global images.registry | `` |

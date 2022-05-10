@@ -3743,7 +3743,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
+                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
                     "type": "string"
                 },
                 "pid": {
@@ -4015,17 +4015,17 @@ var doc = `{
                     "type": "string"
                 },
                 "bandwidth": {
-                    "description": "Bandwidth represents the detail about bandwidth control action\n+optional",
+                    "description": "Bandwidth represents the detail about bandwidth control action\n+ui:form:when=action=='bandwidth'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BandwidthSpec"
                 },
                 "corrupt": {
-                    "description": "Corrupt represents the detail about corrupt action\n+optional",
+                    "description": "Corrupt represents the detail about corrupt action\n+ui:form:when=action=='corrupt'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.CorruptSpec"
                 },
                 "delay": {
-                    "description": "Delay represents the detail about delay action\n+optional",
+                    "description": "Delay represents the detail about delay action\n+ui:form:when=action=='delay'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
@@ -4038,7 +4038,7 @@ var doc = `{
                     "type": "string"
                 },
                 "duplicate": {
-                    "description": "DuplicateSpec represents the detail about loss action\n+optional",
+                    "description": "DuplicateSpec represents the detail about loss action\n+ui:form:when=action=='duplicate'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DuplicateSpec"
                 },
@@ -4054,7 +4054,7 @@ var doc = `{
                     }
                 },
                 "loss": {
-                    "description": "Loss represents the detail about loss action\n+optional",
+                    "description": "Loss represents the detail about loss action\n+ui:form:when=action=='loss'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.LossSpec"
                 },

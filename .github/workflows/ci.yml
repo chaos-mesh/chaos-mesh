@@ -46,6 +46,7 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
     strategy:
+      fail-fast: false
       matrix:
         arch: [x86_64, aarch64]
         job:
@@ -103,6 +104,7 @@ jobs:
       run:
         working-directory: ./ui
     strategy:
+      fail-fast: false
       matrix:
         arch: [x86_64, aarch64]
         job:

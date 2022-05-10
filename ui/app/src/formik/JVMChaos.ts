@@ -22,7 +22,7 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'number',
       label: 'cpuCount',
       value: 0,
-      helperText: 'Optional.  the CPU core number need to use, only set it when action is stress',
+      helperText: 'Optional.  the CPU core number needs to use, only set it when action is stress',
     },
     {
       field: 'text',
@@ -34,14 +34,14 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'number',
       label: 'latency',
       value: 0,
-      helperText: "Optional.  the latency duration for action \\'latency\\', unit ms",
+      helperText: "Optional.  the latency duration for action 'latency', unit ms",
     },
     {
       field: 'text',
       label: 'memType',
       value: '',
       helperText:
-        "Optional.  the memory type need to locate, only set it when action is stress, the value can be \\'stack\\' or \\'heap\\'",
+        "Optional.  the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
     },
     {
       field: 'text',
@@ -53,7 +53,13 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'text',
       label: 'name',
       value: '',
-      helperText: "Optional.  byteman rule name, should be unique, and will use JVMChaos\\' name if not set",
+      helperText: "Optional.  byteman rule name, should be unique, and will use JVMChaos' name if not set",
+    },
+    {
+      field: 'number',
+      label: 'pid',
+      value: 0,
+      helperText: 'the pid of Java process which needs to attach',
     },
     {
       field: 'number',
@@ -65,6 +71,6 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
       field: 'text',
       label: 'ruleData',
       value: '',
-      helperText: 'Optional.',
+      helperText: "Optional.  the byteman rule's data for action 'ruleData'",
     },
   ]
