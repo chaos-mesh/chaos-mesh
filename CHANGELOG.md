@@ -15,6 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Helm charts: update validate-auth to chaos-mesh-validation-auth [#3193](https://github.com/chaos-mesh/chaos-mesh/pull/3193)
+- Removes a package imported two times [#3227](https://github.com/chaos-mesh/chaos-mesh/pull/3227)
 
 ### Deprecated
 
@@ -27,7 +28,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Update description of memory stressors [#3225](https://github.com/chaos-mesh/chaos-mesh/pull/3225)
-- Refactor StaticCheck for the code quality [#3227](https://github.com/chaos-mesh/chaos-mesh/pull/3227)
 
 ### Security
 
