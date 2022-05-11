@@ -110,6 +110,7 @@ const Scope: React.FC<ScopeProps> = ({
   return (
     <Space>
       <AutocompleteField
+        freeSolo
         multiple
         name={`${scope}.namespaces`}
         label={<T id="k8s.namespaceSelectors" />}
@@ -126,6 +127,7 @@ const Scope: React.FC<ScopeProps> = ({
       />
 
       <AutocompleteField
+        freeSolo
         multiple
         name={`${scope}.labelSelectors`}
         label={<T id="k8s.labelSelectors" />}
@@ -136,6 +138,7 @@ const Scope: React.FC<ScopeProps> = ({
 
       <MoreOptions disabled={disabled}>
         <AutocompleteField
+          freeSolo
           multiple
           name={`${scope}.annotationSelectors`}
           label={<T id="k8s.annotationSelectors" />}

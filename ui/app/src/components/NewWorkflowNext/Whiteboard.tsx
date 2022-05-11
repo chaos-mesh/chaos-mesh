@@ -15,8 +15,9 @@
  *
  */
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Drawer, IconButton } from '@mui/material'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { Box, Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
+import _ from 'lodash'
+import { SyntheticEvent, useCallback, useMemo, useRef, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
 import { useDrop } from 'react-dnd'
 import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
@@ -24,13 +25,14 @@ import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNo
 import { useIntl } from 'react-intl'
 import { v4 as uuidv4 } from 'uuid'
 
+import Menu from '@ui/mui-extends/esm/Menu'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { setConfirm } from 'slices/globalStatus'
-import { insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
+import { importNodes, insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
 
 import AutoForm, { Belong } from 'components/AutoForm'
 import i18n, { T } from 'components/T'
@@ -38,43 +40,18 @@ import i18n, { T } from 'components/T'
 import { concatKindAction } from 'lib/utils'
 
 import AdjustableEdge from './AdjustableEdge'
-import { ElementDragData, ElementTypes } from './Elements/types'
+import { ElementDragData } from './Elements/types'
 import FlowNode from './FlowNode'
+import GroupNode, { ResizableHandleClassName } from './GroupNode'
+import { dndAccept } from './data'
+import { SpecialTemplateType, workflowToFlow } from './utils/convert'
 
-type DropItem = ElementDragData
+export type DropItem = ElementDragData
 type Identifier = DropItem
 
 interface ControlProps {
   id: uuid
   onDelete: (id: uuid) => void
-}
-
-const NodeControl = ({ id, onDelete }: ControlProps) => {
-  const intl = useIntl()
-  const dispatch = useStoreDispatch()
-
-  const onNodeDelete = () => {
-    dispatch(
-      setConfirm({
-        title: `Delete node ${id}`,
-        description: <T id="common.deleteDesc" />,
-        handle: () => onDelete(id),
-      })
-    )
-  }
-
-  return (
-    <Space className="nodrag" direction="row" lineHeight={1}>
-      {/* TODO: Copy single Node to reuse */}
-      {/* <IconButton size="small" >
-        <FileCopyIcon fontSize="inherit" />
-      </IconButton>
-      <Divider orientation="vertical" variant="middle" flexItem /> */}
-      <IconButton size="small" onClick={onNodeDelete} title={i18n('common.delete', intl)} aria-label="delete">
-        <DeleteIcon fontSize="inherit" />
-      </IconButton>
-    </Space>
-  )
 }
 
 const EdgeControl = ({ id, onDelete }: ControlProps) => {
@@ -92,7 +69,7 @@ const EdgeControl = ({ id, onDelete }: ControlProps) => {
   }
 
   return (
-    <Space className="nodrag" direction="row" lineHeight={1}>
+    <Space direction="row" lineHeight={1}>
       <IconButton size="small" onClick={onEdgeDelete} title={i18n('common.delete', intl)} aria-label="delete">
         <DeleteIcon fontSize="inherit" />
       </IconButton>
@@ -110,21 +87,6 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   const onConnect = useCallback(
     (connection) =>
       setEdges((eds) => {
-        // A node can have only one incomer.
-        //
-        // Unless the `source` of the `connection` has the same parent as the existing incomer.
-        // const hasConnected = eds.find((e) => e.target === connection.target)
-
-        // if (hasConnected) {
-        //   const hasConnectedParent = eds.find((e) => e.target === hasConnected.source)
-
-        //   if (eds.some((e) => e.source === hasConnectedParent?.source && e.target === connection.source)) {
-        //     return addEdge({ ...connection, type: 'smoothstep' }, eds)
-        //   }
-
-        //   return eds
-        // }
-
         const id = uuidv4()
 
         return addEdge(
@@ -144,7 +106,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [setEdges]
   )
-  const nodeTypes = useMemo(() => ({ flowNode: FlowNode }), [])
+  const nodeTypes = useMemo(() => ({ flowNode: FlowNode, groupNode: GroupNode }), [])
   const edgeTypes = useMemo(() => ({ adjustableEdge: AdjustableEdge }), [])
 
   const store = useStoreSelector((state) => state.workflows)
@@ -165,48 +127,74 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     // Remove empty node.
     if (!lastWorkflowNode) {
       setNodes(nodes.filter((node) => node.id !== id))
-      dispatch(removeWorkflowNode(id))
+
+      if (store.nodes[id]) {
+        dispatch(removeWorkflowNode(id))
+      }
     }
 
     cleanup()
   }
 
-  const addNode = (item: DropItem, monitor: DropTargetMonitor, xyCoord?: XYCoord) => {
+  const addNode = (item: DropItem, monitor?: DropTargetMonitor, xyCoord?: XYCoord, parent?: uuid) => {
     const whiteboardRect = document.getElementById('workflows-whiteboard')!.getBoundingClientRect()
     let position: XYPosition
 
     if (xyCoord) {
       position = xyCoord
     } else {
-      const sourceRect = monitor.getSourceClientOffset()
+      const sourceRect = monitor?.getSourceClientOffset()
 
       position = { x: sourceRect!.x - whiteboardRect.x, y: sourceRect!.y - whiteboardRect.y }
     }
 
     const id = uuidv4()
+    const node: Node = {
+      id,
+      position,
+      data: {},
+      ...(parent && {
+        parentNode: parent,
+        extent: 'parent',
+      }),
+    }
 
-    setNodes((oldNodes) => [
-      ...oldNodes,
-      {
+    if (item.kind === SpecialTemplateType.Serial || item.kind === SpecialTemplateType.Parallel) {
+      node.type = 'groupNode'
+      node.data = {
         id,
-        type: 'flowNode',
-        position,
-        data: {
-          origin: oldNodes.length === 0,
-          tooltipProps: {
-            title: <NodeControl id={id} onDelete={deleteNode} />,
-          },
-          kind: item.kind,
-          children: concatKindAction(item.kind, item.act),
+        name: _.truncate(`${item.kind}-${id}`),
+        type: item.kind,
+        childrenNum: 1,
+        actions: {
+          initNode,
         },
-      },
-    ])
+      }
+    } else {
+      node.type = 'flowNode'
+      node.data = {
+        kind: item.kind,
+        children: concatKindAction(item.kind, item.act),
+      }
+    }
+
+    setNodes((oldNodes) => [...oldNodes, node])
     dispatch(insertWorkflowNode({ id, experiment: null })) // Insert only id to distinguish from other nodes.
 
     return id
   }
 
-  const editNode = (_: any, { id }: Node) => {
+  const editNode = (e: React.MouseEvent, { id }: Node) => {
+    // Prevent editing nodes when resizing.
+    //
+    // See `GroupNode.tsx` for more detail.
+    if (
+      (e.target as HTMLDivElement).className === 're-resizable' ||
+      (e.target as HTMLDivElement).className === ResizableHandleClassName
+    ) {
+      return
+    }
+
     const workflowNode = store.nodes[id]
 
     formInitialValues.current = workflowNode
@@ -227,21 +215,48 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
             ...node,
             data: {
               ...node.data,
-              disableRipple: true,
-              sx: {
-                alignItems: 'start',
-                '& .MuiButton-startIcon': {
-                  mt: 0.5,
+              ...(node.type === 'flowNode' && {
+                sx: {
+                  alignItems: 'start',
+                  '& .MuiButton-startIcon': {
+                    mt: 0.5,
+                  },
                 },
-              },
-              children: (
-                <Box>
+                endIcon: (
+                  <Menu
+                    IconButtonProps={{ size: 'small', sx: { position: 'absolute', right: 8, mt: -0.5 } }}
+                    IconProps={{ fontSize: 'inherit' }}
+                  >
+                    <MenuItem onClick={onNodeDelete(node.id)}>
+                      <ListItemIcon sx={{ fontSize: 18 }}>
+                        <DeleteIcon fontSize="inherit" />
+                      </ListItemIcon>
+                      <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
+                        <T id="common.delete" />
+                      </ListItemText>
+                    </MenuItem>
+                    {/* TODO: Copy single Node to reuse */}
+                    {/* <MenuItem>
+                      <ListItemIcon sx={{ fontSize: 18 }}>
+                        <ContentCopyIcon fontSize="inherit" />
+                      </ListItemIcon>
+                      <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
+                        Copy
+                      </ListItemText>
+                    </MenuItem> */}
+                  </Menu>
+                ),
+                children: (
                   <Box>
-                    {values.name} ({concatKindAction(values.kind, values.action)})
+                    <Box>{values.name}</Box>
+                    {values.deadline && <Box>deadline: {values.deadline}</Box>}
                   </Box>
-                  <Box>deadline: {values.deadline}</Box>
-                </Box>
-              ),
+                ),
+              }),
+              // Serial or Parallel.
+              ...(node.type === 'groupNode' && {
+                name: values.name,
+              }),
             },
           }
         }
@@ -259,9 +274,27 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     dispatch(removeWorkflowNode(id))
   }
 
-  const initNode = (item: DropItem, monitor: DropTargetMonitor, xyCoord?: XYCoord) => {
+  const onNodeDelete = (id: uuid) => (e: SyntheticEvent) => {
+    e.stopPropagation()
+
+    dispatch(
+      setConfirm({
+        title: `Delete node ${id}`,
+        description: <T id="common.deleteDesc" />,
+        handle: () => deleteNode(id),
+      })
+    )
+  }
+
+  const initNode = (item: DropItem, monitor?: DropTargetMonitor, xyCoord?: XYCoord, parent?: uuid) => {
+    // If `xyCoord` is `undefined`, the item isn't operated by dragging and dropping.
+    if (!monitor?.isOver({ shallow: true }) && !xyCoord) {
+      return
+    }
+
     // Add new node into flow.
-    const id = addNode(item, monitor, xyCoord)
+    const id = addNode(item, monitor, xyCoord, parent)
+
     // Start generating form.
     setIdentifier({ ...item, id })
 
@@ -270,12 +303,51 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   }
 
   const [, drop] = useDrop(() => ({
-    accept: [ElementTypes.Kubernetes, ElementTypes.PhysicalNodes, ElementTypes.Suspend],
+    accept: dndAccept,
     drop: initNode,
   }))
 
   const deleteEdge = (id: uuid) => {
     setEdges((oldEdges) => oldEdges.filter((edge) => edge.data.id !== id))
+  }
+
+  const importWorkflow = (workflow: string) => {
+    const { store, nodes, edges } = workflowToFlow(workflow)
+
+    dispatch(importNodes(store))
+    setNodes(nodes)
+    setEdges(
+      edges.map((edge) => ({
+        ...edge,
+        data: { ...edge.data, tooltipProps: { title: <EdgeControl id={edge.data.id} onDelete={deleteEdge} /> } },
+      }))
+    )
+  }
+
+  const updateNodeDraggable = (id: uuid, draggable: boolean) => {
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === id) {
+          return {
+            ...node,
+            draggable,
+          }
+        }
+
+        return node
+      })
+    )
+  }
+
+  const onNodeMouseMove = (e: React.MouseEvent, { id }: Node) => {
+    // Resume dragging nodes after resizing.
+    //
+    // See `GroupNode.tsx` for more detail.
+    if ((e.target as HTMLDivElement).className === ResizableHandleClassName) {
+      updateNodeDraggable(id, false)
+    } else {
+      updateNodeDraggable(id, true)
+    }
   }
 
   return (
@@ -286,6 +358,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         onInit={(flow) => {
           if (flowRef) {
             ;(flow as any).initNode = initNode
+            ;(flow as any).importWorkflow = importWorkflow
 
             flowRef.current = flow
           }
@@ -298,6 +371,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onNodeMouseMove={onNodeMouseMove}
       >
         <Background />
         <Controls />

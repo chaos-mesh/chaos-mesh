@@ -46,7 +46,7 @@
     "byYAML": "By YAML",
     "byYAMLDesc": "Create an experiment or schedule by filling in or uploading YAML",
     "basic": {
-      "nameHelper": "The experiment name",
+      "nameHelper": "Fill the experiment name.",
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
@@ -145,11 +145,11 @@
       "http": "HTTP Request",
       "number": "Number",
       "child": "Child task",
-      "nameHelper": "The task name",
-      "nameValidation": "The task name is required",
+      "nameHelper": "Fill the node name.",
+      "nameValidation": "The node name is required.",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
-      "deadlineValidation": "The task deadline is required",
+      "deadlineHelper": "The node will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
+      "deadlineValidation": "The node deadline is required.",
       "container": {
         "title": "Container",
         "nameHelper": "The container name",

@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import LS from 'lib/localStorage'
@@ -80,6 +79,9 @@ const workflowSlice = createSlice({
   name: 'workflows',
   initialState,
   reducers: {
+    importNodes(state, action: PayloadAction<Record<uuid, NodeExperiment>>) {
+      state.nodes = action.payload
+    },
     insertWorkflowNode(state, action: PayloadAction<WorkflowNode>) {
       const { id, experiment } = action.payload
 
@@ -93,10 +95,10 @@ const workflowSlice = createSlice({
     removeWorkflowNode(state, action: PayloadAction<uuid>) {
       delete state.nodes[action.payload]
     },
-    LoadRecentlyUsedExperiments(state) {
+    loadRecentlyUsedExperiments(state) {
       state.recentUse = LS.getObj('new-workflow-recently-used-experiments')
     },
-    SetRecentlyUsedExperiments(state, action: PayloadAction<RecentUse>) {
+    setRecentlyUsedExperiments(state, action: PayloadAction<RecentUse>) {
       const exp = action.payload
 
       state.recentUse = [...state.recentUse, exp]
@@ -129,15 +131,16 @@ const workflowSlice = createSlice({
 })
 
 export const {
+  importNodes,
   insertWorkflowNode,
   updateWorkflowNode,
   removeWorkflowNode,
-  LoadRecentlyUsedExperiments,
-  SetRecentlyUsedExperiments,
+  loadRecentlyUsedExperiments,
+  setRecentlyUsedExperiments,
+  resetWorkflow,
   setTemplate,
   updateTemplate,
   deleteTemplate,
-  resetWorkflow,
 } = workflowSlice.actions
 
 export default workflowSlice.reducer

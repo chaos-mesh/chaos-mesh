@@ -25,7 +25,7 @@ export type BareNodeProps = ButtonProps & {
   kind?: string
 }
 
-export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }: BareNodeProps, ref) => (
+export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }, ref) => (
   <Button
     ref={ref}
     component="span"

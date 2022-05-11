@@ -81,7 +81,7 @@ export default function Info({ belong, kind, action }: InfoProps) {
             name="name"
             label={<T id="common.name" />}
             helperText={
-              getIn(errors, 'name') && getIn(touched, 'name') ? getIn(errors, 'name') : <T id="newE.basic.nameHelper" />
+              getIn(errors, 'name') && getIn(touched, 'name') ? getIn(errors, 'name') : <T id="newW.node.nameHelper" />
             }
             error={getIn(errors, 'name') && getIn(touched, 'name')}
           />
