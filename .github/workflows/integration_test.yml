@@ -78,7 +78,7 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           # this is a temporary solution, kind in dind failed to connect to the internet
           docker pull localstack/localstack:latest
-          kind load docker-image --name kind localstack/localstack:latest
+          kind load docker-image --name chart-testing localstack/localstack:latest
 
           helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
