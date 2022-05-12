@@ -76,9 +76,7 @@ jobs:
       - name: Install localstack && aws client
         run: |
           helm repo add localstack-repo http://helm.localstack.cloud
-          # a better solution is to use a global docker mirror
-          # but it's a little hard to replace the kind docker configuration
-          helm upgrade --install localstack localstack-repo/localstack --set image.repository=mirror.gcr.io/localstack/localstack --version 0.1.2
+          helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
           kubectl wait --timeout=60s --for=condition=ready --all pod
 
@@ -90,3 +88,4 @@ jobs:
         if: always()
         run: |
           kubectl describe pods
+          kubectl describe pods -n chaos-testing
