@@ -23,7 +23,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- ST1019: Removed duplicate import [#3267](https://github.com/chaos-mesh/chaos-mesh/pull/3267) 
 
 ### Fixed
 
