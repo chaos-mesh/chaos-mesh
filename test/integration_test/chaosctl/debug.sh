@@ -37,6 +37,9 @@ cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 pwd
 echo "Deploy deployments and chaos for testing"
 wget https://mirrors.chaos-mesh.org/v1.1.2/web-show/deploy.sh
+# This is a temporary fix
+# TODO: remove the following line after the new deploy.sh released
+sed -i "s|image: pingcap/web-show|image: ghcr.io/chaos-mesh/web-show|g" deploy.sh
 bash deploy.sh
 
 echo "Run networkchaos"

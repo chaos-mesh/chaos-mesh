@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86_64, aarch64]
-    runs-on: ${{ fromJson('{"x86_64":"ubuntu-latest", "aarch64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+        arch: [amd64, arm64]
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@master
         with:
@@ -31,7 +31,7 @@ jobs:
         uses: azure/setup-kubectl@v2.0
 
       - name: Magic Kind DNS Fix
-        if: ${{ matrix.arch == 'aarch64' }}
+        if: ${{ matrix.arch == 'arm64' }}
         run: |
           docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/nameserver \(.*\)/nameserver 8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
           docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
@@ -39,7 +39,7 @@ jobs:
           kubectl rollout restart deployment -n kube-system coredns
 
       - uses: actions/setup-python@v2
-        if: ${{ matrix.arch != 'aarch64' }} # We can assume the self-hosted aarch64 has a functional python
+        if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
 
       - uses: actions/setup-go@v2
         with:
