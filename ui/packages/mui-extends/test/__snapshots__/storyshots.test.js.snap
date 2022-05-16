@@ -1064,7 +1064,7 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <label
-    className="MuiFormLabel-root MuiFormLabel-colorPrimary css-a5rm28-MuiFormLabel-root"
+    className="MuiFormLabel-root MuiFormLabel-colorPrimary Mui-disabled css-a5rm28-MuiFormLabel-root"
   >
     Fruits
   </label>
@@ -1328,7 +1328,7 @@ exports[`Storyshots Form/TextField Disabled 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <label
-    className="MuiFormLabel-root MuiFormLabel-colorPrimary css-a5rm28-MuiFormLabel-root"
+    className="MuiFormLabel-root MuiFormLabel-colorPrimary Mui-disabled css-a5rm28-MuiFormLabel-root"
   >
     Schedule
   </label>

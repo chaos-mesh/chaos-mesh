@@ -14,28 +14,28 @@
  * limitations under the License.
  *
  */
-
-import { AutocompleteField, SelectField } from 'components/FormField'
 import { MenuItem, Typography } from '@mui/material'
-import { arrToObjBySep, objToArrBySep } from 'lib/utils'
-import {
-  getAnnotations,
-  getCommonPodsByNamespaces as getCommonPods,
-  getLabels,
-  getNetworkTargetPodsByNamespaces as getNetworkTargetPods,
-} from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
 import { useEffect, useMemo } from 'react'
+
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import Mode from './Mode'
-import MoreOptions from 'components/MoreOptions'
-import ScopePodsTable from './ScopePodsTable'
-import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
+import { clearPods, getAnnotations, getCommonPods, getLabels, getNetworkTargetPods } from 'slices/experiments'
+
 import { podPhases } from 'components/AutoForm/data'
+import { AutocompleteField, SelectField } from 'components/FormField'
+import MoreOptions from 'components/MoreOptions'
+import { T } from 'components/T'
+
+import { arrToObjBySep, objToArrBySep } from 'lib/utils'
+
+import Mode from './Mode'
+import ScopePodsTable from './ScopePodsTable'
 
 interface ScopeProps {
+  kind?: string
   namespaces: string[]
   scope?: string
   modeScope?: string
@@ -44,6 +44,7 @@ interface ScopeProps {
 }
 
 const Scope: React.FC<ScopeProps> = ({
+  kind,
   namespaces,
   scope = 'selector',
   modeScope = '',
@@ -59,10 +60,10 @@ const Scope: React.FC<ScopeProps> = ({
 
   const state = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = state.settings
-  const { labels, annotations, kindAction } = state.experiments
-  const [kind] = kindAction
-  const pods = scope === 'spec.selector' ? state.experiments.pods : state.experiments.networkTargetPods
-  const getPods = scope === 'spec.selector' ? getCommonPods : getNetworkTargetPods
+  const { labels, annotations } = state.experiments
+  const isTargetField = scope.startsWith('target')
+  const pods = !isTargetField ? state.experiments.pods : state.experiments.networkTargetPods
+  const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
   const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
@@ -71,7 +72,13 @@ const Scope: React.FC<ScopeProps> = ({
   const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
 
   useEffect(() => {
-    // Set ns selectors directly when CLUSTER_MODE=false.
+    return () => {
+      dispatch(clearPods())
+    }
+  }, [dispatch])
+
+  useEffect(() => {
+    // Set ns selectors automatically when `CLUSTER_MODE=false` because there is only one namespace.
     if (namespaces.length === 1) {
       setFieldValue(`${scope}.namespace`, namespaces)
 
@@ -86,15 +93,15 @@ const Scope: React.FC<ScopeProps> = ({
       dispatch(getLabels(currentNamespaces))
       dispatch(getAnnotations(currentNamespaces))
     }
-  }, [dispatch, getPods, currentNamespaces])
+  }, [dispatch, currentNamespaces])
 
   useEffect(() => {
     if (currentNamespaces.length) {
       dispatch(
         getPods({
           namespaces: currentNamespaces,
-          labelSelectors: arrToObjBySep(currentLabels, kvSeparator) as any,
-          annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator) as any,
+          labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
+          annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
         })
       )
     }

@@ -271,7 +271,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
             <Typography variant="h6" fontWeight="bold">
               <T id="newE.steps.scope" />
             </Typography>
-            {kind !== 'PhysicalMachineChaos' && <Scope namespaces={namespaces} />}
+            {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
             <Divider />
             <Box>
               <Typography variant="h6" fontWeight="bold">
@@ -284,12 +284,12 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                 onChange={switchToSchedule}
               />
             </Box>
-            {scheduled && <Schedule errors={errors} touched={touched} />}
+            {scheduled && <Schedule />}
             <Divider />
             <Typography variant="h6" fontWeight="bold">
               Info
             </Typography>
-            <Info belong={belong} kind={kind} action={action} errors={errors} touched={touched} />
+            <Info belong={belong} kind={kind} action={action} />
             <Submit />
           </Space>
         </Form>
