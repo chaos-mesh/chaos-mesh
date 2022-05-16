@@ -24,18 +24,20 @@ jobs:
         with:
           kubectl_version: v1.23.1
 
-      - name: Magic Kind DNS Fix
-        if: ${{ matrix.arch == 'aarch64' }}
-        run: |
-          docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/172.20.0.1/8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
-          docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
-
       - name: Setup Helm
         uses: azure/setup-helm@v2.1
 
       - name: Setup Kubectl
         uses: azure/setup-kubectl@v2.0
-      
+
+      - name: Magic Kind DNS Fix
+        if: ${{ matrix.arch == 'aarch64' }}
+        run: |
+          docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/nameserver \(.*\)/nameserver 8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
+          docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
+
+          kubectl rollout restart deployment -n kube-system coredns
+
       - uses: actions/setup-python@v2
         if: ${{ matrix.arch != 'aarch64' }} # We can assume the self-hosted aarch64 has a functional python
 
