@@ -14,20 +14,16 @@
  * limitations under the License.
  *
  */
-
-import type { FormikErrors, FormikTouched } from 'formik'
 import { InputAdornment, Link, MenuItem } from '@mui/material'
-import { SelectField, TextField } from 'components/FormField'
-
-import { T } from 'components/T'
+import { useFormikContext } from 'formik'
 import { getIn } from 'formik'
 
-interface ScheduleProps {
-  errors: FormikErrors<Record<string, any>>
-  touched: FormikTouched<Record<string, any>>
-}
+import { SelectField, TextField } from 'components/FormField'
+import { T } from 'components/T'
 
-export default function Schedule({ errors, touched }: ScheduleProps) {
+export default function Schedule() {
+  const { errors, touched } = useFormikContext()
+
   return (
     <>
       <TextField
