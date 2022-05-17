@@ -145,19 +145,23 @@ spec:
 EOF
 kubectl apply -f delay.yaml
 
-echo "Checking chaosctl debug iochaos"
-./bin/chaosctl debug iochaos web-show-io-delay >$log_file 2>&1
-if [ $? -ne 0 ]; then
-    echo "chaosctl debug iochaos failed"
-    code=1
+# IOChaos only supports x86_64
+# TODO: support IOChaos in aarch64, and remove this condition
+if [[ "$(uname -m)" == "x86_64" ]]; then
+  echo "Checking chaosctl debug iochaos"
+  ./bin/chaosctl debug iochaos web-show-io-delay >$log_file 2>&1
+  if [ $? -ne 0 ]; then
+      echo "chaosctl debug iochaos failed"
+      code=1
+  fi
+  file_must_contains $log_file "\[Chaos\]: web-show-io-delay" true
+  file_must_contains $log_file "1. \[Mount Information\]" true
+  file_must_contains $log_file "\[file descriptors of PID:" true
+  file_must_contains $log_file "\[podiochaos\]" true
+  echo "Cleaning up iochaos"
+  kubectl delete -f delay.yaml
+  rm delay.yaml
 fi
-file_must_contains $log_file "\[Chaos\]: web-show-io-delay" true
-file_must_contains $log_file "1. \[Mount Information\]" true
-file_must_contains $log_file "\[file descriptors of PID:" true
-file_must_contains $log_file "\[podiochaos\]" true
-echo "Cleaning up iochaos"
-kubectl delete -f delay.yaml
-rm delay.yaml
 
 echo "Run stresschaos"
 
