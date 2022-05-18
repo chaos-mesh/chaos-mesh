@@ -122,6 +122,7 @@ kubectl logs -n mysql $MYSQL_QUERY_POD_NAME
 
 curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "root" user_info.log
+cat user_info.log
 
 kubectl apply -f mysql_query_exception.yaml
 
