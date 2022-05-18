@@ -26,5 +26,5 @@ spec:
   exception: BOOM
   mode: all
   selector:
-    namespaces:
-      - mysql
+    labelSelectors:
+      'app': 'mysql-query'

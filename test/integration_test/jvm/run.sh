@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+set -eu
+
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
@@ -50,8 +52,8 @@ function check_log() {
 
     success=false
     for ((k=0; k<10; k++)); do
-        kubectl logs --tail=1 helloworld -n helloworld | grep $match "$message"
-        if [ "$?" = "0" ]; then
+        line=`kubectl logs --tail=1 helloworld -n helloworld | grep $match "$message" | wc -l`
+        if [ "$line" = "1" ]; then
             success=true
             break
         fi
@@ -117,15 +119,12 @@ done
 kubectl get events -n mysql
 kubectl get nodes -o wide
 
-MYSQL_QUERY_POD_NAME=`kubectl get pods -n mysql | grep mysql-query | awk '{print $1}' | head -n 1`
-kubectl logs -n mysql $MYSQL_QUERY_POD_NAME
-
 curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "root" user_info.log
-cat user_info.log
 
 kubectl apply -f mysql_query_exception.yaml
 
+sleep 5
 curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
 check_contains "BOOM" user_info.log
 
