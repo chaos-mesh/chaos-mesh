@@ -18,6 +18,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `nameOverride` |  | `` |
 | `fullnameOverride` |  | `` |
+| `kubeVersionOverride` | Override the Kubernetes version, which is used to evaluate certain manifests | `` |
 | `customLabels` | Customized labels that will be tagged on all the resources of Chaos Mesh | `{}` |
 | `clusterScoped` | Whether chaos-mesh should manage kubernetes cluster wide chaos.Also see rbac.create and controllerManager.serviceAccount | `true` |
 | `rbac.create` | Creating rbac API Objects. Also see clusterScoped and controllerManager.serviceAccount | `true`                                                |
@@ -117,10 +118,12 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.ingress.certManager`               | Enable Cert-Manager for ingress                                                      | `false`             |
 | `dashboard.ingress.annotations`               | Annotations for the dashboard Ingress                                                   | `{}`                |
 | `dashboard.ingress.hosts[0].name`             | Hostname to your dashboard installation                                                 | `dashboard.local`     |
-| `dashboard.ingress.hosts[0].paths`            | Path within the url structure                                                         | `["/"]`             |
 | `dashboard.ingress.hosts[0].tls`              | Utilize TLS backend in ingress                                                        | `false`             |
 | `dashboard.ingress.hosts[0].tlsHosts`         | Array of TLS hosts for ingress record (defaults to `ingress.hosts[0].name` if `nil`)  | `nil`               |
 | `dashboard.ingress.hosts[0].tlsSecret`        | TLS Secret (certificates)                                                             | `dashboard.local-tls` |
+| `dashboard.ingress.paths`                     | Paths that map requests to chaos dashboard                    | `["/"]` |
+| `dashboard.ingress.apiVersionOverrides`       | Override apiVersion of ingress rendered by this helm chart    | ``      |
+| `dashboard.ingress.ingressClassName`          | Defines which ingress controller will implement the resource  | ``      |
 | `dnsServer.create` | Enable DNS Server which required by DNSChaos | `false` |
 | `dnsServer.serviceAccount` | Name of serviceaccount for chaos-dns-server. | `chaos-dns-server` |
 | `dnsServer.image` | Image of DNS Server | `pingcap/coredns:v0.2.1` |
