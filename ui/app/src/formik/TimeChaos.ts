@@ -10,7 +10,7 @@ export const actions = [],
       label: 'clockIds',
       value: [],
       helperText:
-        'ClockIds defines all affected clock id All available options are [\\"CLOCK_REALTIME\\",\\"CLOCK_MONOTONIC\\",\\"CLOCK_PROCESS_CPUTIME_ID\\",\\"CLOCK_THREAD_CPUTIME_ID\\", \\"CLOCK_MONOTONIC_RAW\\",\\"CLOCK_REALTIME_COARSE\\",\\"CLOCK_MONOTONIC_COARSE\\",\\"CLOCK_BOOTTIME\\",\\"CLOCK_REALTIME_ALARM\\", \\"CLOCK_BOOTTIME_ALARM\\"] Default value is [\\"CLOCK_REALTIME\\"]',
+        'ClockIds defines all affected clock id All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID", "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM", "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]',
     },
     {
       field: 'label',
@@ -24,6 +24,6 @@ export const actions = [],
       label: 'timeOffset',
       value: '',
       helperText:
-        'TimeOffset defines the delta time of injected program. It\\\'s a possibly signed sequence of decimal numbers, such as \\"300ms\\", \\"-1.5h\\" or \\"2h45m\\". Valid time units are \\"ns\\", \\"us\\" (or \\"\u00B5s\\"), \\"ms\\", \\"s\\", \\"m\\", \\"h\\".',
+        'TimeOffset defines the delta time of injected program. It\'s a possibly signed sequence of decimal numbers, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "\u00B5s"), "ms", "s", "m", "h".',
     },
   ]

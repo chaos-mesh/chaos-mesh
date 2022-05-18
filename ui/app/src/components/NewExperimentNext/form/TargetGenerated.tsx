@@ -100,7 +100,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                error={getIn(touched, k) && getIn(errors, k)}
                 {...v.inputProps}
               />
             )
@@ -111,7 +111,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                error={getIn(touched, k) && getIn(errors, k)}
                 multiline
                 rows={6}
                 {...v.inputProps}
@@ -125,7 +125,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(errors, k) && getIn(touched, k) ? true : false}
+                error={getIn(errors, k) && getIn(touched, k)}
                 {...v.inputProps}
               />
             )
@@ -136,7 +136,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(errors, k) && getIn(touched, k) ? true : false}
+                error={getIn(errors, k) && getIn(touched, k)}
               >
                 {v.items?.map((option: string | { label: string; value: any }) =>
                   option instanceof Object ? (
@@ -157,9 +157,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 key={k}
                 name={k}
                 label={v.label}
-                helperText={v.helperText}
-                isKV={v.isKV}
-                errorText={getIn(errors, k) && getIn(touched, k) ? getIn(errors, k) : ''}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(errors, k) && getIn(touched, k)}
               />
             )
           case 'autocomplete':

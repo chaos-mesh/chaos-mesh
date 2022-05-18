@@ -1,3 +1,4 @@
+import { DndProvider } from 'react-dnd'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -14,19 +15,31 @@
  * limitations under the License.
  *
  */
-
-import { Provider } from 'react-redux'
-import { BrowserRouter as Router } from 'react-router-dom'
+import type { FC } from 'react'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import IntlProvider from './IntlProvider'
+import { Provider as StoreProvider } from 'react-redux'
 import ThemeProvider from './ThemeProvider'
 import TopContainer from 'components/TopContainer'
 import store from './store'
 
-const App: React.FC = ({ children }) => (
-  <Provider store={store}>
-    <Router>
-      <ThemeProvider>{children || <TopContainer />}</ThemeProvider>
-    </Router>
-  </Provider>
-)
+interface AppProps {
+  forTesting?: boolean
+}
+
+const App: FC<AppProps> = ({ forTesting, children }) => {
+  const rendered = children || <TopContainer />
+  const RealWorldOnlyProviders: FC = ({ children }) => <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+
+  return (
+    <StoreProvider store={store}>
+      <ThemeProvider>
+        <IntlProvider>
+          {!forTesting ? <RealWorldOnlyProviders>{rendered}</RealWorldOnlyProviders> : rendered}
+        </IntlProvider>
+      </ThemeProvider>
+    </StoreProvider>
+  )
+}
 
 export default App

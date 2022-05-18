@@ -1,3 +1,4 @@
+import Archive from 'pages/Archives/Single'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -14,7 +15,6 @@
  * limitations under the License.
  *
  */
-import Archive from 'pages/Archives/Single'
 import Archives from 'pages/Archives'
 import Dashboard from 'pages/Dashboard'
 import Events from 'pages/Events'
@@ -23,6 +23,7 @@ import Experiments from 'pages/Experiments'
 import NewExperiment from 'pages/Experiments/New'
 import NewSchedule from 'pages/Schedules/New'
 import NewWorkflow from 'components/NewWorkflow'
+import NewWorkflowNext from 'components/NewWorkflowNext'
 import { RouteProps } from 'react-router'
 import Schedule from 'pages/Schedules/Single'
 import Schedules from 'pages/Schedules'
@@ -30,62 +31,83 @@ import Settings from 'pages/Settings'
 import Workflow from 'pages/Workflows/Single'
 import Workflows from 'pages/Workflows'
 
-const routes: RouteProps[] = [
+type CustomRouteProps = RouteProps & { title: string }
+
+const routes: CustomRouteProps[] = [
   {
     element: <Dashboard />,
     path: '/dashboard',
+    title: 'Dashboard',
   },
   {
     element: <NewWorkflow />,
     path: '/workflows/new',
+    title: 'New Workflow',
+  },
+  {
+    element: <NewWorkflowNext />,
+    path: '/workflows/new/next',
+    title: 'New Workflow',
   },
   {
     element: <Workflows />,
     path: '/workflows',
+    title: 'Workflows',
   },
   {
     element: <Workflow />,
     path: '/workflows/:uuid',
+    title: 'Workflow',
   },
   {
     element: <NewSchedule />,
     path: '/schedules/new',
+    title: 'New Schedule',
   },
   {
     element: <Schedules />,
     path: '/schedules',
+    title: 'Schedules',
   },
   {
     element: <Schedule />,
     path: '/schedules/:uuid',
+    title: 'Schedule',
   },
   {
     element: <NewExperiment />,
     path: '/experiments/new',
+    title: 'New Experiment',
   },
   {
     element: <Experiments />,
     path: '/experiments',
+    title: 'Experiments',
   },
   {
     element: <Experiment />,
     path: '/experiments/:uuid',
+    title: 'Experiment',
   },
   {
     element: <Events />,
     path: '/events',
+    title: 'Events',
   },
   {
     element: <Archives />,
     path: '/archives',
+    title: 'Archives',
   },
   {
     element: <Archive />,
     path: '/archives/:uuid',
+    title: 'Archive',
   },
   {
     element: <Settings />,
     path: '/settings',
+    title: 'Settings',
   },
 ]
 

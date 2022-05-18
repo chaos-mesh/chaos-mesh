@@ -29,13 +29,16 @@ It would use .selfSignedCAKeypair as the place to store the generated CA keypair
 
 When using this template, it requires the top-level scope.
 
-TODO: do not always use self signed CA, and move conditions (about should we use self-signed CA or CA provided by the user) into this named template, let user could specify caBundle in values.yaml.
 */}}
 {{- define "webhook.caBundleCertPEM" -}}
-  {{- /* Generate ca with CN "chaos-mesh-ca" and 5 years validity duration if not exists in the current scope.*/ -}}
-  {{- $caKeypair := .selfSignedCAKeypair | default (genCA "chaos-mesh-ca" 1825) -}}
-  {{- $_ := set . "selfSignedCAKeypair" $caKeypair -}}
-  {{- $caKeypair.Cert -}}
+  {{- if .Values.webhook.caBundlePEM -}}
+    {{- trim .Values.webhook.caBundlePEM -}}
+  {{- else -}}
+    {{- /* Generate ca with CN "chaos-mesh-ca" and 5 years validity duration if not exists in the current scope.*/ -}}
+    {{- $caKeypair := .selfSignedCAKeypair | default (genCA "chaos-mesh-ca" 1825) -}}
+    {{- $_ := set . "selfSignedCAKeypair" $caKeypair -}}
+    {{- $caKeypair.Cert -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
