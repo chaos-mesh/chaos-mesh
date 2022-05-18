@@ -163,11 +163,18 @@ Return the appropriate apiVersion for ingress
 {{- define "chaos-dashboard.ingress.apiVersion" -}}
 {{- if .Values.dashboard.ingress.apiVersionOverrides -}}
 {{- print .Values.dashboard.ingress.apiVersionOverrides -}}
-{{- else if semverCompare "<1.14-0" .Capabilities.KubeVersion.Version -}}
+{{- else if semverCompare "<1.14-0" (include "chaos-mesh.kubeVersion" $) -}}
 {{- print "extensions/v1beta1" -}}
-{{- else if semverCompare "<1.19-0" .Capabilities.KubeVersion.Version -}}
+{{- else if semverCompare "<1.19-0" (include "chaos-mesh.kubeVersion" $) -}}
 {{- print "networking.k8s.io/v1beta1" -}}
 {{- else -}}
 {{- print "networking.k8s.io/v1" -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Return the target Kubernetes version
+*/}}
+{{- define "chaos-mesh.kubeVersion" -}}
+  {{- default .Capabilities.KubeVersion.Version .Values.kubeVersionOverride }}
 {{- end -}}

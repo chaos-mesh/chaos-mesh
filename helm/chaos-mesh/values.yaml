@@ -19,6 +19,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Override the Kubernetes version, which is used to evaluate certain manifests
+kubeVersionOverride: ""
+
 # Custom labels to add
 customLabels: {}
 
