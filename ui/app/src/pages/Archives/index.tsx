@@ -14,30 +14,29 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useCallback, useEffect, useState } from 'react'
-
-import { Archive } from 'api/archives.type'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import Space from '@ui/mui-extends/esm/Space'
-import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
-import _ from 'lodash'
+import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
+import Tab from '@mui/material/Tab'
+import Loading from '@ui/mui-extends/esm/Loading'
+import Space from '@ui/mui-extends/esm/Space'
 import api from 'api'
+import { Archive } from 'api/archives.type'
+import NotFound from 'components/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
 import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
+import { useQuery } from 'lib/hooks'
+import _groupBy from 'lodash.groupby'
+import { useCallback, useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'lib/hooks'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useStoreDispatch } from 'store'
 
 const StyledCheckBox = styled(Checkbox)({
@@ -238,7 +237,7 @@ export default function Archives() {
       </Space>
 
       {archives.length > 0 &&
-        Object.entries(_.groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
+        Object.entries(_groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
           <Box key={kind} mb={6}>
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
             <RWList

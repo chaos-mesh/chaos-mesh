@@ -44,7 +44,6 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           helperText: 'Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.',
         },
       ],
-      when: "action=='bandwidth'",
     },
     {
       field: 'ref',
@@ -63,7 +62,6 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           helperText: '',
         },
       ],
-      when: "action=='corrupt'",
     },
     {
       field: 'ref',
@@ -112,7 +110,6 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           ],
         },
       ],
-      when: "action=='delay'",
     },
     {
       field: 'text',
@@ -143,7 +140,6 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           helperText: '',
         },
       ],
-      when: "action=='duplicate'",
     },
     {
       field: 'label',
@@ -168,7 +164,6 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           helperText: '',
         },
       ],
-      when: "action=='loss'",
     },
     {
       field: 'ref',
@@ -217,7 +212,7 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
               label: 'nodeSelectors',
               value: {},
               helperText:
-                "Optional. Map of string keys and values that can be used to select nodes. Selector which must match a node's labels, and objects must belong to these selected nodes.",
+                "Optional. Map of string keys and values that can be used to select nodes. Selector which must match a node\\'s labels, and objects must belong to these selected nodes.",
             },
             {
               field: 'label',

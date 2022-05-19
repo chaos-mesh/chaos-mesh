@@ -14,24 +14,21 @@
  * limitations under the License.
  *
  */
+import PublishIcon from '@mui/icons-material/Publish'
+import { Box, Button, ButtonProps } from '@mui/material'
+import i18n from 'components/T'
 
-import { Box, Button } from '@mui/material'
-
-import type { ButtonProps } from '@mui/material'
-import { T } from 'components/T'
-
-export default function Submit({ sx, ...rest }: ButtonProps) {
+export default function Submit({ mt = 6, onClick, ...rest }: ButtonProps & { mt?: number }) {
   return (
-    <Box>
+    <Box mt={mt} textAlign="right">
       <Button
-        {...rest}
-        type={rest.onClick ? undefined : 'submit'}
+        type={onClick ? undefined : 'submit'}
         variant="contained"
-        size="small"
-        fullWidth
-        sx={{ mt: 3, ...sx }}
+        startIcon={<PublishIcon />}
+        onClick={onClick}
+        {...rest}
       >
-        <T id="common.submit" />
+        {i18n('common.submit')}
       </Button>
     </Box>
   )

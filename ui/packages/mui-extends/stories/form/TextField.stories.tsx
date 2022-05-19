@@ -1,17 +1,17 @@
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import { InputAdornment } from '@mui/material'
-import React from 'react'
-import SearchIcon from '@mui/icons-material/Search'
 import Space from '../../esm/Space'
 import TextField from '../../esm/TextField'
 import type { TextFieldProps } from '../../esm/TextField'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import SearchIcon from '@mui/icons-material/Search'
+import { InputAdornment } from '@mui/material'
+import React from 'react'
 
 export default {
   title: 'Form/TextField',
   component: TextField,
 }
 
-const Template = (args: TextFieldProps) => <TextField {...args} sx={{ width: 320 }} />
+const Template = (args: TextFieldProps) => <TextField fullWidth={false} {...args} />
 
 export const Default = Template.bind({})
 Default.args = {

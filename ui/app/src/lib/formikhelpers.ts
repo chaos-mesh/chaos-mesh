@@ -1,13 +1,3 @@
-import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
-
-import { Env } from 'slices/experiments'
-import { ScheduleSpecific } from 'components/Schedule/types'
-import { Template } from 'slices/workflows'
-import { WorkflowBasic } from 'components/NewWorkflow'
-import _ from 'lodash'
-import basicData from 'components/NewExperimentNext/data/basic'
-import { podPhases } from 'components/AutoForm/data'
-import { sanitize } from './utils'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -24,8 +14,15 @@ import { sanitize } from './utils'
  * limitations under the License.
  *
  */
+import { sanitize, toTitleCase } from './utils'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
+import basicData from 'components/NewExperimentNext/data/basic'
+import { WorkflowBasic } from 'components/NewWorkflow'
+import { ScheduleSpecific } from 'components/Schedule/types'
 import yaml from 'js-yaml'
+import { Env } from 'slices/experiments'
+import { Template } from 'slices/workflows'
 
 export function parseSubmit<K extends ExperimentKind>(
   env: Env,
@@ -96,6 +93,12 @@ export function parseSubmit<K extends ExperimentKind>(
       scope.annotationSelectors = helper1(scope.annotationSelectors) as any
     } else {
       delete scope.annotationSelectors
+    }
+
+    // Parse podPhaseSelectors
+    const podPhaseSelectors = scope.podPhaseSelectors
+    if (podPhaseSelectors?.length === 1 && podPhaseSelectors[0] === 'all') {
+      delete scope.podPhaseSelectors
     }
 
     // Parse pods
@@ -292,7 +295,7 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
       spec.target.selector.annotationSelectors = spec.target.selector.annotationSelectors
         ? selectorsToArr(spec.target.selector.annotationSelectors, ': ')
         : []
-      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || podPhases
+      spec.target.selector.podPhaseSelectors = spec.target.selector.podPhaseSelectors || []
       spec.target.selector.pods = spec.target.selector.pods ? podSelectorsToArr(spec.target.selector.pods) : []
     }
   }
@@ -428,7 +431,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             if (d.children) {
               pushTemplate({
                 name: d.name,
-                templateType: _.upperFirst(d.type),
+                templateType: toTitleCase(d.type),
                 deadline: d.deadline,
                 children: d.children!.map((dd) => dd.name),
               })
@@ -451,7 +454,7 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
 
           pushTemplate({
             name: t.name,
-            templateType: _.upperFirst(t.type === 'custom' ? 'task' : t.type),
+            templateType: toTitleCase(t.type === 'custom' ? 'task' : t.type),
             deadline: t.type !== 'custom' ? t.deadline : undefined,
             children: t.type !== 'custom' ? t.children!.map((d) => d.name) : undefined,
             task:

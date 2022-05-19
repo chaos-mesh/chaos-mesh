@@ -14,103 +14,98 @@
  * limitations under the License.
  *
  */
-
-import {
-  Box,
-  CSSObject,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemTextProps,
-  Drawer as MuiDrawer,
-  ListItemText as MuiListItemText,
-} from '@mui/material'
-import { Theme, styled } from '@mui/material/styles'
-
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
+import GitHubIcon from '@mui/icons-material/GitHub'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
-import { NavLink } from 'react-router-dom'
 import ScheduleIcon from '@mui/icons-material/Schedule'
-import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined'
+import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import ExperimentIcon from '@ui/mui-extends/esm/Icons/Experiment'
+import clsx from 'clsx'
 import i18n from 'components/T'
-import logo from 'images/logo.svg'
-import logoMini from 'images/logo-mini.svg'
 import logoMiniWhite from 'images/logo-mini-white.svg'
+import logoMini from 'images/logo-mini.svg'
 import logoWhite from 'images/logo-white.svg'
+import logo from 'images/logo.svg'
+import { NavLink } from 'react-router-dom'
 import { useStoreSelector } from 'store'
 
-export const openedWidth = 256
-export const closedWidth = 64
+export const drawerWidth = '14rem'
+export const drawerCloseWidth = '5rem'
+const useStyles = makeStyles((theme) => {
+  const listItemHover = {
+    background: theme.palette.primary.main,
+    cursor: 'pointer',
+    '& svg': {
+      fill: theme.palette.primary.contrastText,
+    },
+    '& .MuiListItemText-primary': {
+      color: theme.palette.primary.contrastText,
+    },
+  }
 
-const openedMixin = (theme: Theme): CSSObject => ({
-  width: openedWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: 'hidden',
+  return {
+    drawer: {
+      width: drawerWidth,
+    },
+    drawerPaperRoot: {
+      background: theme.palette.background.default,
+      border: 'none',
+    },
+    drawerOpen: {
+      width: drawerWidth,
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
+    drawerClose: {
+      width: drawerCloseWidth,
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      overflowX: 'hidden',
+    },
+    toolbar: {
+      minHeight: 56,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: theme.spacing(6),
+    },
+    logo: {
+      width: '75%',
+    },
+    logoMini: {
+      width: 36,
+    },
+    list: {
+      padding: `${theme.spacing(6)} 0`,
+    },
+    listItem: {
+      width: `calc(100% - ${theme.spacing(6)})`,
+      height: 48,
+      marginLeft: theme.spacing(3),
+      marginBottom: theme.spacing(3),
+      borderRadius: theme.shape.borderRadius,
+      '&:last-child': {
+        marginBottom: 0,
+      },
+      '&:hover': listItemHover,
+      '&.active': {
+        ...listItemHover,
+      },
+    },
+    listItemIcon: {
+      paddingRight: theme.spacing(9),
+    },
+  }
 })
-
-const closedMixin = (theme: Theme): CSSObject => ({
-  width: closedWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: 'hidden',
-})
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
-  width: openedWidth,
-  '& .MuiDrawer-paper': {
-    ...(open ? openedMixin(theme) : closedMixin(theme)),
-  },
-  '& .MuiListItemButton-root': {
-    paddingLeft: !open ? theme.spacing(3) : 16, // original paddingLeft is 16
-  },
-}))
-
-const SidebarNavHoverProperties = (theme: Theme) => ({
-  background: theme.palette.secondaryContainer.main,
-  color: theme.palette.onSecondaryContainer.main,
-  borderRadius: 4,
-  '& .MuiListItemIcon-root': {
-    color: theme.palette.onSecondaryContainer.main,
-  },
-})
-
-const SidebarNav = styled(List)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  color: theme.palette.onSurfaceVariant.main,
-  '& .MuiListItemButton-root': {
-    width: '80%',
-    marginBottom: theme.spacing(4),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    '&:hover, &.active': SidebarNavHoverProperties(theme),
-  },
-  '& .MuiListItemIcon-root': {
-    minWidth: 0,
-    marginRight: theme.spacing(8),
-    color: theme.palette.onSurfaceVariant.main,
-  },
-}))
-
-const ListItemText = (props: ListItemTextProps) => (
-  <MuiListItemText
-    {...props}
-    primaryTypographyProps={{
-      ...props.primaryTypographyProps,
-      fontWeight: 'medium',
-    }}
-  />
-)
 
 const listItems = [
   { icon: <DashboardOutlinedIcon />, text: 'dashboard' },
@@ -123,7 +118,7 @@ const listItems = [
     text: 'schedules',
   },
   {
-    icon: <ScienceOutlinedIcon />,
+    icon: <ExperimentIcon />,
     text: 'experiments',
   },
   {
@@ -145,36 +140,77 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ open }) => {
+  const classes = useStyles()
+
   const { theme } = useStoreSelector((state) => state.settings)
 
   return (
-    <Drawer variant="permanent" open={open}>
-      <Box sx={{ width: open ? 160 : 32, m: '0 auto', my: 8 }}>
-        <NavLink to="/">
-          <img
-            src={open ? (theme === 'light' ? logo : logoWhite) : theme === 'light' ? logoMini : logoMiniWhite}
-            alt="Chaos Mesh"
-          />
-        </NavLink>
-      </Box>
+    <Drawer
+      className={clsx(classes.drawer, {
+        [classes.drawerOpen]: open,
+        [classes.drawerClose]: !open,
+      })}
+      classes={{
+        paper: clsx(classes.drawerPaperRoot, {
+          [classes.drawerOpen]: open,
+          [classes.drawerClose]: !open,
+        }),
+      }}
+      variant="permanent"
+    >
       <Box display="flex" flexDirection="column" justifyContent="space-between" height="100%">
-        <SidebarNav>
-          {listItems.map(({ icon, text }) => (
-            <ListItemButton key={text} className={`tutorial-${text}`} component={NavLink} to={'/' + text}>
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary={i18n(`${text}.title`)} />
-            </ListItemButton>
-          ))}
-        </SidebarNav>
+        <Box>
+          <NavLink to="/" className={classes.toolbar}>
+            <img
+              className={open ? classes.logo : classes.logoMini}
+              src={open ? (theme === 'light' ? logo : logoWhite) : theme === 'light' ? logoMini : logoMiniWhite}
+              alt="Chaos Mesh"
+            />
+          </NavLink>
 
-        <SidebarNav>
-          <ListItemButton component="a" href="https://chaos-mesh.org/docs" target="_blank">
-            <ListItemIcon>
+          <List className={classes.list}>
+            {listItems.map(({ icon, text }) => (
+              <ListItem
+                key={text}
+                className={clsx(classes.listItem, `tutorial-${text}`)}
+                component={NavLink}
+                to={`/${text}`}
+                button
+              >
+                <ListItemIcon className={classes.listItemIcon}>{icon}</ListItemIcon>
+                <ListItemText primary={i18n(`${text}.title`)} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+
+        <List className={classes.list}>
+          <ListItem
+            className={classes.listItem}
+            component="a"
+            href="https://chaos-mesh.org/docs"
+            target="_blank"
+            button
+          >
+            <ListItemIcon className={classes.listItemIcon}>
               <MenuBookOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary={i18n('common.doc')} />
-          </ListItemButton>
-        </SidebarNav>
+          </ListItem>
+
+          <ListItem
+            className={classes.listItem}
+            component="a"
+            href="https://github.com/chaos-mesh/chaos-mesh"
+            target="_blank"
+            button
+          >
+            <ListItemIcon className={classes.listItemIcon}>
+              <GitHubIcon />
+            </ListItemIcon>
+            <ListItemText primary="GitHub" />
+          </ListItem>
+        </List>
       </Box>
     </Drawer>
   )

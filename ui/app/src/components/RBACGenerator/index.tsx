@@ -15,20 +15,19 @@
  *
  */
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
-import { Field, Form, Formik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
+import { makeStyles } from '@mui/styles'
+import Space from '@ui/mui-extends/esm/Space'
+import api from 'api'
 import { RBACConfigParams } from 'api/common.type'
 import { SelectField } from 'components/FormField'
-import Space from '@ui/mui-extends/esm/Space'
-import _ from 'lodash'
-import api from 'api'
-import copy from 'copy-text-to-clipboard'
 import i18n from 'components/T'
-import { makeStyles } from '@mui/styles'
-import { setAlert } from 'slices/globalStatus'
+import copy from 'copy-text-to-clipboard'
+import { Field, Form, Formik } from 'formik'
+import { toTitleCase } from 'lib/utils'
+import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
+import { setAlert } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 const useStyles = makeStyles((theme) => ({
   pre: {
@@ -129,7 +128,7 @@ const RBACGenerator = () => {
               >
                 {['manager', 'viewer'].map((role) => (
                   <MenuItem key={role} value={role}>
-                    {_.upperFirst(role)}
+                    {toTitleCase(role)}
                   </MenuItem>
                 ))}
               </SelectField>

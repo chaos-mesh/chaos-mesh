@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { Theme } from '@mui/material/styles'
 
 // TODO: remove this declaration when @mui/styles isn't used anymore. See: https://mui.com/guides/migration-v4/.
@@ -26,7 +25,6 @@ declare module '@mui/material/styles' {
   interface Palette {
     secondaryContainer: Palette['primary']
     onSecondaryContainer: Palette['primary']
-    surfaceVariant: Palette['primary']
     onSurfaceVariant: Palette['primary']
     outline: Palette['primary']
   }
@@ -34,7 +32,6 @@ declare module '@mui/material/styles' {
   interface PaletteOptions {
     secondaryContainer: PaletteOptions['primary']
     onSecondaryContainer: PaletteOptions['primary']
-    surfaceVariant: PaletteOptions['primary']
     onSurfaceVariant: PaletteOptions['primary']
     outline: PaletteOptions['primary']
   }

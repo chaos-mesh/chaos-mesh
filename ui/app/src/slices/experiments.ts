@@ -15,9 +15,9 @@
  *
  */
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-
-import { Kind } from 'components/NewExperimentNext/data/types'
 import api from 'api'
+import { Scope } from 'components/NewExperiment/types'
+import { Kind } from 'components/NewExperimentNext/data/types'
 
 export const getNamespaces = createAsyncThunk(
   'common/chaos-available-namespaces',
@@ -31,13 +31,13 @@ export const getAnnotations = createAsyncThunk(
   'common/annotations',
   async (podNamespaceList: string[]) => (await api.common.annotations(podNamespaceList)).data
 )
-export const getCommonPods = createAsyncThunk(
+export const getCommonPodsByNamespaces = createAsyncThunk(
   'common/pods',
-  async (data: Record<string, any>) => (await api.common.pods(data)).data
+  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
-export const getNetworkTargetPods = createAsyncThunk(
+export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
   'network/target/pods',
-  async (data: Record<string, any>) => (await api.common.pods(data)).data
+  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
 )
 
 export type Env = 'k8s' | 'physic'
@@ -75,10 +75,6 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
-    clearPods(state) {
-      state.pods = []
-      state.networkTargetPods = []
-    },
     clearNetworkTargetPods(state) {
       state.networkTargetPods = []
     },
@@ -130,17 +126,16 @@ const experimentsSlice = createSlice({
     builder.addCase(getAnnotations.fulfilled, (state, action) => {
       state.annotations = action.payload
     })
-    builder.addCase(getCommonPods.fulfilled, (state, action) => {
-      state.pods = action.payload
+    builder.addCase(getCommonPodsByNamespaces.fulfilled, (state, action) => {
+      state.pods = action.payload as any[]
     })
-    builder.addCase(getNetworkTargetPods.fulfilled, (state, action) => {
-      state.networkTargetPods = action.payload
+    builder.addCase(getNetworkTargetPodsByNamespaces.fulfilled, (state, action) => {
+      state.networkTargetPods = action.payload as any[]
     })
   },
 })
 
 export const {
-  clearPods,
   clearNetworkTargetPods,
   setStep1,
   setStep2,

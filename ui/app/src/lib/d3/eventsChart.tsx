@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  */
-import * as d3 from 'd3'
-
-import { Box, Typography } from '@mui/material'
-import DateTime, { format, now } from 'lib/luxon'
-
-import { Event } from 'api/events.type'
-import { Theme } from 'slices/settings'
-import _ from 'lodash'
-import { renderToString } from 'react-dom/server'
+import { truncate } from '../utils'
 import wrapText from './wrapText'
+import { Box, Typography } from '@mui/material'
+import { Event } from 'api/events.type'
+import * as d3 from 'd3'
+import DateTime, { format, now } from 'lib/luxon'
+import _debounce from 'lodash.debounce'
+import { renderToString } from 'react-dom/server'
+import { Theme } from 'slices/settings'
 
 /**
  * The gen function generates the timeline of the events and returns an update function.
@@ -209,7 +208,7 @@ export default function gen({
       .insert('div')
       .attr('class', 'experiment')
       .attr('title', (d) => d.name)
-      .text((d) => _.truncate(d.name))
+      .text((d) => truncate(d.name))
   }
 
   const tooltip = d3
@@ -308,7 +307,7 @@ export default function gen({
       circles.attr('cx', (d) => x(DateTime.fromISO(d.created_at)))
     }
 
-    d3.select(window).on('resize', _.debounce(reGen, 250))
+    d3.select(window).on('resize', _debounce(reGen, 250))
   }
   update(events)
 

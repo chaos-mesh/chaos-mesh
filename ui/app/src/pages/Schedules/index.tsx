@@ -14,28 +14,27 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Checkbox, styled } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
-
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
+import { Box, Button, Checkbox, styled } from '@mui/material'
+import { Typography } from '@mui/material'
 import Loading from '@ui/mui-extends/esm/Loading'
+import Space from '@ui/mui-extends/esm/Space'
+import api from 'api'
+import { Schedule } from 'api/schedules.type'
 import NotFound from 'components/NotFound'
 import ObjectListItem from 'components/ObjectListItem'
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import { Schedule } from 'api/schedules.type'
-import Space from '@ui/mui-extends/esm/Space'
-import { Typography } from '@mui/material'
-import _ from 'lodash'
-import api from 'api'
 import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
+import _groupBy from 'lodash.groupby'
+import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
 import { useStoreDispatch } from 'store'
 
 const StyledCheckBox = styled(Checkbox)({
@@ -194,7 +193,7 @@ const Schedules = () => {
       </Space>
 
       {schedules.length > 0 &&
-        Object.entries(_.groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
+        Object.entries(_groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
           <Box key={type} mb={6}>
             <Typography variant="overline">{transByKind(type as any)}</Typography>
             <RWList

@@ -1,7 +1,3 @@
-import type { FC, ReactElement } from 'react'
-
-import App from './App'
-import type { RenderOptions } from '@testing-library/react'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -18,10 +14,20 @@ import type { RenderOptions } from '@testing-library/react'
  * limitations under the License.
  *
  */
-// Ref: https://testing-library.com/docs/react-testing-library/setup
-import { render } from '@testing-library/react'
+import App from './App'
+import { RenderOptions, render } from '@testing-library/react'
+import flat from 'flat'
+import messages from 'i18n/messages'
+import type { ReactElement } from 'react'
+import { IntlProvider } from 'react-intl'
 
-const AllTheProviders: FC = ({ children }) => <App forTesting>{children}</App>
+const AllTheProviders: React.FC = ({ children }) => (
+  <App>
+    <IntlProvider messages={flat(messages['en'])} locale="en" defaultLocale="en">
+      {children}
+    </IntlProvider>
+  </App>
+)
 
 const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
   render(ui, { wrapper: AllTheProviders, ...options })

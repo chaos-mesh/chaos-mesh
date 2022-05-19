@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
-import { getIn, useFormikContext } from 'formik'
-
 import MuiExtendsAutocompleteField from '@ui/mui-extends/esm/AutocompleteField'
 import type { AutocompleteFieldProps as MuiExtendsAutocompleteFieldProps } from '@ui/mui-extends/esm/AutocompleteField'
 import { T } from 'components/T'
+import { getIn, useFormikContext } from 'formik'
 
-export interface AutocompleteFieldProps extends MuiExtendsAutocompleteFieldProps {
+interface AutocompleteFieldProps extends MuiExtendsAutocompleteFieldProps {
   name: string
 }
 
@@ -46,7 +45,6 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ name, multiple, o
 
   return (
     <MuiExtendsAutocompleteField
-      name={name}
       {...props}
       multiple={multiple}
       options={!props.disabled ? options : []}

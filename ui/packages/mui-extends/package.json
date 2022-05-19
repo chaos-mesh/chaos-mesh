@@ -15,8 +15,8 @@
     "clean": "rimraf esm"
   },
   "peerDependencies": {
-    "@mui/icons-material": "^5.4.2",
-    "@mui/material": "^5.4.3",
+    "@mui/icons-material": "^5.2.0",
+    "@mui/material": "^5.2.1",
     "react": "^17.0.2",
     "typescript": "~4.5.2"
   },
@@ -24,8 +24,8 @@
     "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
-    "@mui/icons-material": "^5.4.2",
-    "@mui/material": "^5.4.3",
+    "@mui/icons-material": "^5.2.0",
+    "@mui/material": "^5.2.1",
     "@storybook/addon-actions": "^6.4.19",
     "@storybook/addon-essentials": "^6.4.19",
     "@storybook/addon-interactions": "^6.4.19",

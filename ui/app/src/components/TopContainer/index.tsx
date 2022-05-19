@@ -1,32 +1,3 @@
-import {
-  Alert,
-  Box,
-  BoxProps,
-  Container,
-  CssBaseline,
-  Divider,
-  Portal,
-  Snackbar,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { closedWidth, openedWidth } from './Sidebar'
-import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
-import { useEffect, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Cookies from 'js-cookie'
-import Helmet from 'components/Helmet'
-import LS from 'lib/localStorage'
-import Loading from '@ui/mui-extends/esm/Loading'
-import Navbar from './Navbar'
-import { BrowserRouter as Router } from 'react-router-dom'
-import Sidebar from './Sidebar'
-import { TokenFormValues } from 'components/Token'
-import api from 'api'
-import insertCommonStyle from 'lib/d3/insertCommonStyle'
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -43,32 +14,78 @@ import insertCommonStyle from 'lib/d3/insertCommonStyle'
  * limitations under the License.
  *
  */
+import Navbar from './Navbar'
+import { drawerCloseWidth, drawerWidth } from './Sidebar'
+import Sidebar from './Sidebar'
 import loadable from '@loadable/component'
+import { Alert, Box, Container, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
+import Loading from '@ui/mui-extends/esm/Loading'
+import api from 'api'
+import { TokenFormValues } from 'components/Token'
+import flat from 'flat'
+import messages from 'i18n/messages'
+import Cookies from 'js-cookie'
+import insertCommonStyle from 'lib/d3/insertCommonStyle'
+import LS from 'lib/localStorage'
+import { useEffect, useMemo, useState } from 'react'
+import { IntlProvider } from 'react-intl'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import routes from 'routes'
-import { styled } from '@mui/material/styles'
+import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+import { setNavigationBreadcrumbs } from 'slices/navigation'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 const Auth = loadable(() => import('./Auth'))
 
-const Root = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<BoxProps & { open: boolean }>(({ theme, open }) => ({
-  position: 'relative',
-  width: `calc(100% - ${open ? openedWidth : closedWidth}px)`,
-  height: '100vh',
-  marginLeft: open ? openedWidth : closedWidth,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration[open ? 'enteringScreen' : 'leavingScreen'],
-  }),
-  [theme.breakpoints.down('sm')]: {
-    minWidth: theme.breakpoints.values.md,
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: drawerCloseWidth,
+    width: `calc(100% - ${drawerCloseWidth})`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    [theme.breakpoints.down('sm')]: {
+      minWidth: theme.breakpoints.values.md,
+    },
+  },
+  rootShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth})`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  main: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    zIndex: 1,
+  },
+  switchContent: {
+    display: 'flex',
+    flex: 1,
   },
 }))
 
 const TopContainer = () => {
   const theme = useTheme()
+  const classes = useStyles()
 
-  const { alert, alertOpen, confirm, confirmOpen } = useStoreSelector((state) => state.globalStatus)
+  const { pathname } = useLocation()
+
+  const { settings, globalStatus, navigation } = useStoreSelector((state) => state)
+  const { lang } = settings
+  const { alert, alertOpen, confirm, confirmOpen } = globalStatus
+  const { breadcrumbs } = navigation
+
+  const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
 
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
@@ -148,6 +165,10 @@ const TopContainer = () => {
     insertCommonStyle()
   }, [dispatch])
 
+  useEffect(() => {
+    dispatch(setNavigationBreadcrumbs(pathname))
+  }, [dispatch, pathname])
+
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('md'))
   useEffect(() => {
     if (isTabletScreen) {
@@ -156,38 +177,28 @@ const TopContainer = () => {
   }, [isTabletScreen])
 
   return (
-    <Router>
+    <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
       <CssBaseline />
-      <Root open={openDrawer}>
-        <Sidebar open={openDrawer} />
-        <Box component="main" sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} />
-          <Divider />
 
-          <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 8 }}>
-            {loading ? (
-              <Loading />
-            ) : (
-              <Routes>
-                <Route path="/" element={<Navigate replace to="/dashboard" />} />
-                {!authOpen &&
-                  routes.map(({ path, element, title }) => (
-                    <Route
-                      key={path}
-                      path={path}
-                      element={
-                        <>
-                          <Helmet title={title} />
-                          {element}
-                        </>
-                      }
-                    />
-                  ))}
-              </Routes>
-            )}
-          </Container>
-        </Box>
-      </Root>
+      <Box className={openDrawer ? classes.rootShift : classes.root}>
+        <Sidebar open={openDrawer} />
+        <Paper className={classes.main} component="main" elevation={0}>
+          <Box className={classes.switchContent}>
+            <Container maxWidth="xl" sx={{ position: 'relative', pb: 6 }}>
+              <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+
+              {loading ? (
+                <Loading />
+              ) : (
+                <Routes>
+                  <Route path="/" element={<Navigate replace to="/dashboard" />} />
+                  {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+                </Routes>
+              )}
+            </Container>
+          </Box>
+        </Paper>
+      </Box>
 
       <Auth open={authOpen} setOpen={setAuthOpen} />
 
@@ -216,7 +227,7 @@ const TopContainer = () => {
           onConfirm={confirm.handle}
         />
       </Portal>
-    </Router>
+    </IntlProvider>
   )
 }
 

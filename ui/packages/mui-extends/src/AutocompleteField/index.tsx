@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
-import { Autocomplete, Chip, Paper } from '@mui/material'
-import type { AutocompleteProps, TextFieldProps } from '@mui/material'
-
 import FormControl from '../FormControl'
 import OutlinedInput from '../OutlinedInput'
+import { Autocomplete, Chip, Paper } from '@mui/material'
+import type { AutocompleteProps, TextFieldProps } from '@mui/material'
 
 export interface AutocompleteFieldProps<
   T = string,
@@ -26,7 +25,6 @@ export interface AutocompleteFieldProps<
   DisableClearable extends boolean | undefined = boolean,
   FreeSolo extends boolean | undefined = boolean
 > extends Omit<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo>, 'renderInput'> {
-  name?: string
   label?: TextFieldProps['label']
   helperText?: TextFieldProps['helperText']
   error?: boolean
@@ -34,7 +32,6 @@ export interface AutocompleteFieldProps<
 }
 
 export default function AutocompleteField<T>({
-  name,
   label,
   helperText,
   error,
@@ -44,25 +41,11 @@ export default function AutocompleteField<T>({
   const { disabled, fullWidth } = props
 
   return (
-    <FormControl
-      disabled={disabled}
-      error={error}
-      label={label}
-      LabelProps={{ htmlFor: name }}
-      helperText={helperText}
-      fullWidth={fullWidth}
-    >
+    <FormControl disabled={disabled} error={error} label={label} helperText={helperText} fullWidth={fullWidth}>
       <Autocomplete
-        id={name}
         {...props}
         renderInput={(params) => (
-          <OutlinedInput
-            name={name}
-            {...params.InputProps}
-            inputProps={params.inputProps}
-            error={error}
-            sx={{ width: '100%' }}
-          />
+          <OutlinedInput {...params.InputProps} inputProps={params.inputProps} error={error} sx={{ width: '100%' }} />
         )}
         renderTags={
           props.multiple

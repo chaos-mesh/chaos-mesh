@@ -1,16 +1,4 @@
 {
-  "importOrder": [
-    "<THIRD_PARTY_MODULES>",
-    "^@ui/(.*)$",
-    "store",
-    "^slices/(.*)$",
-    "^components/(.*)$",
-    "^lib/(.*)$",
-    "^images/(.*)$",
-    "^[./]"
-  ],
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true,
   "semi": false,
   "singleQuote": true,
   "printWidth": 120

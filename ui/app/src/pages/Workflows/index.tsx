@@ -1,11 +1,3 @@
-import { Box, Button, Grow, Typography } from '@mui/material'
-import type { GridColumns, GridRowParams } from '@mui/x-data-grid'
-import React, { useState } from 'react'
-import { comparator, format, toRelative } from 'lib/luxon'
-import i18n, { T } from 'components/T'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
 /*
  * Copyright 2021 Chaos Mesh Authors.
  *
@@ -22,51 +14,30 @@ import { useStoreDispatch, useStoreSelector } from 'store'
  * limitations under the License.
  *
  */
+import DataTable from './DataTable'
 import AddIcon from '@mui/icons-material/Add'
-import type { ButtonProps } from '@mui/material'
-import { CoreWorkflowMeta } from 'openapi'
-import DataTable from 'components/DataTable'
-import { GridActionsCellItem } from '@mui/x-data-grid'
+import { Box, Button, Grow, Typography } from '@mui/material'
 import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from 'components/NotFound'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
-import ReplayIcon from '@mui/icons-material/Replay'
-import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from 'components/StatusLabel'
-import { Workflow } from 'api/workflows.type'
-import _ from 'lodash'
 import api from 'api'
+import { Workflow } from 'api/workflows.type'
+import NotFound from 'components/NotFound'
+import i18n from 'components/T'
 import { useIntervalFetch } from 'lib/hooks'
-import { useIntl } from 'react-intl'
+import { comparator } from 'lib/luxon'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
 
 const Workflows = () => {
   const navigate = useNavigate()
-  const intl = useIntl()
 
   const [loading, setLoading] = useState(true)
   const [workflows, setWorkflows] = useState<Workflow[]>([])
-
-  const { useNextWorkflowInterface } = useStoreSelector((state) => state.settings)
-  const dispatch = useStoreDispatch()
 
   const fetchWorkflows = (intervalID?: number) => {
     api.workflows
       .workflows()
       .then(({ data }) => {
-        setWorkflows(
-          data
-            .map((d) => ({
-              ...d,
-              time:
-                d.status === 'finished'
-                  ? 'Ended at: ' + format(d.end_time!)
-                  : 'Created at: ' + toRelative(d.created_at!),
-            }))
-            .sort((a, b) => comparator(b.created_at!, a.created_at!))
-        )
+        setWorkflows(data.sort((a, b) => comparator(b.created_at, a.created_at)))
 
         if (data.every((d) => d.status === 'finished')) {
           clearInterval(intervalID)
@@ -78,151 +49,25 @@ const Workflows = () => {
 
   useIntervalFetch(fetchWorkflows)
 
-  const NewWorkflow = (props: ButtonProps) => (
-    <Button
-      variant="contained"
-      size="small"
-      startIcon={<AddIcon />}
-      onClick={() => navigate(useNextWorkflowInterface ? '/workflows/new/next' : '/workflows/new')}
-      {...props}
-    >
-      <T id="newW.title" />
-    </Button>
-  )
-
-  const handleAction = (action: string, uuid: uuid) => () => {
-    let actionFunc: any
-
-    switch (action) {
-      case 'archive':
-        actionFunc = api.workflows.del
-
-        break
-      default:
-        actionFunc = null
-    }
-
-    if (actionFunc) {
-      actionFunc(uuid)
-        .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: <T id={`confirm.success.${action}`} />,
-            })
-          )
-
-          setTimeout(fetchWorkflows, 300)
-        })
-        .catch(console.error)
-    }
-  }
-
-  const handleDelete =
-    ({ uid, name }: CoreWorkflowMeta) =>
-    (e: React.SyntheticEvent) => {
-      e.stopPropagation()
-
-      dispatch(
-        setConfirm({
-          title: `${i18n('archives.single', intl)} ${name}`,
-          description: <T id="workflows.deleteDesc" />,
-          handle: handleAction('archive', uid!),
-        })
-      )
-    }
-
-  const handleReRun = (uid: uuid) => async (e: React.SyntheticEvent) => {
-    e.stopPropagation()
-
-    const {
-      data: { name, kube_object },
-    } = await api.workflows.single(uid)
-
-    dispatch(
-      setConfirm({
-        title: `Re-run ${name}`,
-        description: 'This will re-create a new workflow with the same configuration.',
-        handle: () => {
-          api.workflows
-            .newWorkflow({
-              apiVersion: 'chaos-mesh.org/v1alpha1',
-              kind: 'Workflow',
-              metadata: {
-                ...kube_object!.metadata,
-                name: `${name}-${uuidv4()}`,
-              },
-              spec: kube_object!.spec,
-            })
-            .then(() => {
-              dispatch(
-                setAlert({
-                  type: 'success',
-                  message: <T id="confirm.success.create" />,
-                })
-              )
-
-              setTimeout(fetchWorkflows, 300)
-            })
-            .catch(console.error)
-        },
-      })
-    )
-  }
-
-  const jumpToSingleWorkflow = ({ row }: GridRowParams) => navigate(`/workflows/${row.uid}`)
-
-  const columns: GridColumns = [
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 150,
-      renderCell: ({ value }) => <StatusLabel status={value} />,
-    },
-    {
-      field: 'name',
-      headerName: 'Name',
-      renderCell: ({ value }) => <Typography variant="body2">{_.truncate(value)}</Typography>,
-    },
-    { field: 'time', headerName: 'Time' },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Operations',
-      align: 'left',
-      width: 150,
-      getActions: ({ row }) => [
-        <GridActionsCellItem icon={<RemoveCircleOutlineIcon />} label="Archive" onClick={handleDelete(row)} />,
-        ...(row.status === 'finished'
-          ? [<GridActionsCellItem icon={<ReplayIcon />} label="Re-run" onClick={handleReRun(row.uid)} />]
-          : []),
-      ],
-    },
-  ]
-
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-        <div style={{ height: '100%' }}>
-          {workflows.length > 0 ? (
-            <Space>
-              <Box display="flex" justifyContent="space-between" alignItems="center">
-                <PaperTop title="All Workflows" subtitle="Manage your workflows." h1 divider>
-                  <NewWorkflow />
-                </PaperTop>
-              </Box>
-              <DataTable columns={columns} rows={workflows} onRowClick={jumpToSingleWorkflow} />
-            </Space>
-          ) : (
-            <NotFound illustrated>
-              <Typography fontWeight="medium">
-                <T id="workflows.notFound" />
-              </Typography>
-              <NewWorkflow sx={{ mt: 3 }} />
-            </NotFound>
-          )}
+        <div>
+          <Box mb={6}>
+            <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate('/workflows/new')}>
+              {i18n('newW.title')}
+            </Button>
+          </Box>
+
+          {workflows.length > 0 && <DataTable data={workflows} fetchData={fetchWorkflows} />}
         </div>
       </Grow>
+
+      {!loading && workflows.length === 0 && (
+        <NotFound illustrated textAlign="center">
+          <Typography>{i18n('workflows.notFound')}</Typography>
+        </NotFound>
+      )}
 
       {loading && <Loading />}
     </>

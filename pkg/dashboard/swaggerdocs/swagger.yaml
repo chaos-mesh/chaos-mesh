@@ -1567,21 +1567,18 @@ definitions:
         $ref: '#/definitions/v1alpha1.BandwidthSpec'
         description: |-
           Bandwidth represents the detail about bandwidth control action
-          +ui:form:when=action=='bandwidth'
           +optional
         type: object
       corrupt:
         $ref: '#/definitions/v1alpha1.CorruptSpec'
         description: |-
           Corrupt represents the detail about corrupt action
-          +ui:form:when=action=='corrupt'
           +optional
         type: object
       delay:
         $ref: '#/definitions/v1alpha1.DelaySpec'
         description: |-
           Delay represents the detail about delay action
-          +ui:form:when=action=='delay'
           +optional
         type: object
       device:
@@ -1600,7 +1597,6 @@ definitions:
         $ref: '#/definitions/v1alpha1.DuplicateSpec'
         description: |-
           DuplicateSpec represents the detail about loss action
-          +ui:form:when=action=='duplicate'
           +optional
         type: object
       duration:
@@ -1617,7 +1613,6 @@ definitions:
         $ref: '#/definitions/v1alpha1.LossSpec'
         description: |-
           Loss represents the detail about loss action
-          +ui:form:when=action=='loss'
           +optional
         type: object
       mode:

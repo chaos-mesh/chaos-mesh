@@ -41,7 +41,7 @@ export const actions = [
           label: 'clock-ids-slice',
           value: '',
           helperText:
-            'the identifier of the particular clock on which to act. More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime. Muti clock ids should be split with ","',
+            'the identifier of the particular clock on which to act. More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime. Muti clock ids should be split with \\",\\"',
         },
         {
           field: 'number',
@@ -65,8 +65,7 @@ export const actions = [
         {
           field: 'select',
           label: 'fill-by-fallocate',
-          value: false,
-          items: [true, false],
+          value: [true, false],
           helperText: 'fill disk by fallocate',
         },
         {
@@ -148,7 +147,7 @@ export const actions = [
           field: 'text',
           label: 'class',
           value: '',
-          helperText: 'Optional.  Java class',
+          helperText: 'Java class',
         },
         {
           field: 'text',
@@ -160,19 +159,19 @@ export const actions = [
           field: 'text',
           label: 'method',
           value: '',
-          helperText: 'Optional.  the method in Java class',
+          helperText: 'the method in Java class',
         },
         {
           field: 'number',
           label: 'pid',
           value: 0,
-          helperText: 'the pid of Java process which needs to attach',
+          helperText: 'the pid of Java process which need to attach',
         },
         {
           field: 'number',
           label: 'port',
           value: 0,
-          helperText: 'Optional.  the port of agent server, default 9277',
+          helperText: 'the port of agent server',
         },
       ],
       when: "action=='jvm-exception'",
@@ -185,13 +184,13 @@ export const actions = [
           field: 'number',
           label: 'pid',
           value: 0,
-          helperText: 'the pid of Java process which needs to attach',
+          helperText: 'the pid of Java process which need to attach',
         },
         {
           field: 'number',
           label: 'port',
           value: 0,
-          helperText: 'Optional.  the port of agent server, default 9277',
+          helperText: 'the port of agent server',
         },
       ],
       when: "action=='jvm-gc'",
@@ -204,31 +203,31 @@ export const actions = [
           field: 'text',
           label: 'class',
           value: '',
-          helperText: 'Optional.  Java class',
+          helperText: 'Java class',
         },
         {
           field: 'number',
           label: 'latency',
           value: 0,
-          helperText: "the latency duration for action 'latency', unit ms",
+          helperText: "the latency duration for action \\'latency\\', unit ms",
         },
         {
           field: 'text',
           label: 'method',
           value: '',
-          helperText: 'Optional.  the method in Java class',
+          helperText: 'the method in Java class',
         },
         {
           field: 'number',
           label: 'pid',
           value: 0,
-          helperText: 'the pid of Java process which needs to attach',
+          helperText: 'the pid of Java process which need to attach',
         },
         {
           field: 'number',
           label: 'port',
           value: 0,
-          helperText: 'Optional.  the port of agent server, default 9277',
+          helperText: 'the port of agent server',
         },
       ],
       when: "action=='jvm-latency'",
@@ -241,31 +240,31 @@ export const actions = [
           field: 'text',
           label: 'class',
           value: '',
-          helperText: 'Optional.  Java class',
+          helperText: 'Java class',
         },
         {
           field: 'text',
           label: 'method',
           value: '',
-          helperText: 'Optional.  the method in Java class',
+          helperText: 'the method in Java class',
         },
         {
           field: 'number',
           label: 'pid',
           value: 0,
-          helperText: 'the pid of Java process which needs to attach',
+          helperText: 'the pid of Java process which need to attach',
         },
         {
           field: 'number',
           label: 'port',
           value: 0,
-          helperText: 'Optional.  the port of agent server, default 9277',
+          helperText: 'the port of agent server',
         },
         {
           field: 'text',
           label: 'value',
           value: '',
-          helperText: "the return value for action 'return'",
+          helperText: "the return value for action \\'return\\'",
         },
       ],
       when: "action=='jvm-return'",
@@ -278,19 +277,19 @@ export const actions = [
           field: 'number',
           label: 'pid',
           value: 0,
-          helperText: 'the pid of Java process which needs to attach',
+          helperText: 'the pid of Java process which need to attach',
         },
         {
           field: 'number',
           label: 'port',
           value: 0,
-          helperText: 'Optional.  the port of agent server, default 9277',
+          helperText: 'the port of agent server',
         },
         {
           field: 'text',
           label: 'rule-data',
           value: '',
-          helperText: "RuleData used to save the rule file's data, will use it when recover",
+          helperText: "RuleData used to save the rule file\\'s data, will use it when recover",
         },
       ],
       when: "action=='jvm-rule-data'",
@@ -310,19 +309,19 @@ export const actions = [
           label: 'mem-type',
           value: '',
           helperText:
-            "the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+            "the memory type need to locate, only set it when action is stress, the value can be \\'stack\\' or \\'heap\\'",
         },
         {
           field: 'number',
           label: 'pid',
           value: 0,
-          helperText: 'the pid of Java process which needs to attach',
+          helperText: 'the pid of Java process which need to attach',
         },
         {
           field: 'number',
           label: 'port',
           value: 0,
-          helperText: 'Optional.  the port of agent server, default 9277',
+          helperText: 'the port of agent server',
         },
       ],
       when: "action=='jvm-stress'",
@@ -403,7 +402,7 @@ export const actions = [
           label: 'egress-port',
           value: '',
           helperText:
-            "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic to these destination ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
         {
           field: 'text',
@@ -434,7 +433,7 @@ export const actions = [
           label: 'source-port',
           value: '',
           helperText:
-            "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
       when: "action=='network-corrupt'",
@@ -460,7 +459,7 @@ export const actions = [
           label: 'egress-port',
           value: '',
           helperText:
-            "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic to these destination ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
         {
           field: 'text',
@@ -497,7 +496,7 @@ export const actions = [
           label: 'source-port',
           value: '',
           helperText:
-            "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
       when: "action=='network-delay'",
@@ -548,7 +547,7 @@ export const actions = [
           label: 'egress-port',
           value: '',
           helperText:
-            "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic to these destination ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
         {
           field: 'text',
@@ -579,7 +578,7 @@ export const actions = [
           label: 'source-port',
           value: '',
           helperText:
-            "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
       when: "action=='network-duplicate'",
@@ -605,7 +604,7 @@ export const actions = [
           label: 'egress-port',
           value: '',
           helperText:
-            "only impact egress traffic to these destination ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic to these destination ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
         {
           field: 'text',
@@ -636,7 +635,7 @@ export const actions = [
           label: 'source-port',
           value: '',
           helperText:
-            "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
+            "only impact egress traffic from these source ports, use a \\',\\' to separate or to indicate the range, such as 80, 8001:8010. it can only be used in conjunction with -p tcp or -p udp",
         },
       ],
       when: "action=='network-loss'",
@@ -663,7 +662,7 @@ export const actions = [
           label: 'direction',
           value: '',
           helperText:
-            "specifies the partition direction, values can be 'from', 'to'. 'from' means packets coming from the 'IPAddress' or 'Hostname' and going to your server, 'to' means packets originating from your server and going to the 'IPAddress' or 'Hostname'.",
+            "specifies the partition direction, values can be \\'from\\', \\'to\\'. \\'from\\' means packets coming from the \\'IPAddress\\' or \\'Hostname\\' and going to your server, \\'to\\' means packets originating from your server and going to the \\'IPAddress\\' or \\'Hostname\\'.",
         },
         {
           field: 'text',
@@ -695,12 +694,6 @@ export const actions = [
           label: 'process',
           value: '',
           helperText: 'the process name or the process ID',
-        },
-        {
-          field: 'text',
-          label: 'recoverCmd',
-          value: '',
-          helperText: 'the command to be run when recovering experiment',
         },
         {
           field: 'number',

@@ -1,4 +1,3 @@
-import { AutocompleteField, SelectField } from 'components/FormField'
 /*
  * Copyright 2022 Chaos Mesh Authors.
  *
@@ -15,22 +14,26 @@ import { AutocompleteField, SelectField } from 'components/FormField'
  * limitations under the License.
  *
  */
+import Mode from './Mode'
+import ScopePodsTable from './ScopePodsTable'
 import { MenuItem, Typography } from '@mui/material'
-import { arrToObjBySep, objToArrBySep } from 'lib/utils'
-import { clearPods, getAnnotations, getCommonPods, getLabels, getNetworkTargetPods } from 'slices/experiments'
+import type { SelectChangeEvent } from '@mui/material'
+import Space from '@ui/mui-extends/esm/Space'
+import { AutocompleteField, SelectField } from 'components/FormField'
+import MoreOptions from 'components/MoreOptions'
+import { T } from 'components/T'
 import { getIn, useFormikContext } from 'formik'
+import { arrToObjBySep, objToArrBySep } from 'lib/utils'
 import { useEffect, useMemo } from 'react'
+import {
+  getAnnotations,
+  getCommonPodsByNamespaces as getCommonPods,
+  getLabels,
+  getNetworkTargetPodsByNamespaces as getNetworkTargetPods,
+} from 'slices/experiments'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import Mode from './Mode'
-import MoreOptions from 'components/MoreOptions'
-import ScopePodsTable from './ScopePodsTable'
-import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
-import { podPhases } from 'components/AutoForm/data'
-
 interface ScopeProps {
-  kind?: string
   namespaces: string[]
   scope?: string
   modeScope?: string
@@ -38,15 +41,16 @@ interface ScopeProps {
   podsPreviewDesc?: string | JSX.Element
 }
 
+const phases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
+
 const Scope: React.FC<ScopeProps> = ({
-  kind,
   namespaces,
-  scope = 'selector',
-  modeScope = '',
+  scope = 'spec.selector',
+  modeScope = 'spec',
   podsPreviewTitle,
   podsPreviewDesc,
 }) => {
-  const { values, setFieldValue, errors, touched } = useFormikContext()
+  const { values, handleChange, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
     labelSelectors: currentLabels,
@@ -55,10 +59,10 @@ const Scope: React.FC<ScopeProps> = ({
 
   const state = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = state.settings
-  const { labels, annotations } = state.experiments
-  const isTargetField = scope.startsWith('target')
-  const pods = !isTargetField ? state.experiments.pods : state.experiments.networkTargetPods
-  const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
+  const { labels, annotations, kindAction } = state.experiments
+  const [kind] = kindAction
+  const pods = scope === 'spec.selector' ? state.experiments.pods : state.experiments.networkTargetPods
+  const getPods = scope === 'spec.selector' ? getCommonPods : getNetworkTargetPods
   const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
@@ -66,14 +70,23 @@ const Scope: React.FC<ScopeProps> = ({
   const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
   const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
 
-  useEffect(() => {
-    return () => {
-      dispatch(clearPods())
+  const handleChangeIncludeAll = (e: SelectChangeEvent<string[]>) => {
+    const lastValues = getIn(values, e.target.name)
+    const currentValues = e.target.value as string[]
+
+    if (!lastValues.includes('all') && currentValues.includes('all')) {
+      e.target.value = ['all'] as any
     }
-  }, [dispatch])
+
+    if (lastValues.includes('all') && currentValues.length > 1) {
+      e.target.value = currentValues.filter((v) => v !== 'all') as any
+    }
+
+    handleChange(e)
+  }
 
   useEffect(() => {
-    // Set ns selectors automatically when `CLUSTER_MODE=false` because there is only one namespace.
+    // Set ns selectors directly when CLUSTER_MODE=false.
     if (namespaces.length === 1) {
       setFieldValue(`${scope}.namespace`, namespaces)
 
@@ -88,15 +101,15 @@ const Scope: React.FC<ScopeProps> = ({
       dispatch(getLabels(currentNamespaces))
       dispatch(getAnnotations(currentNamespaces))
     }
-  }, [dispatch, currentNamespaces])
+  }, [dispatch, getPods, currentNamespaces])
 
   useEffect(() => {
     if (currentNamespaces.length) {
       dispatch(
         getPods({
           namespaces: currentNamespaces,
-          labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
-          annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
+          labelSelectors: arrToObjBySep(currentLabels, kvSeparator) as any,
+          annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator) as any,
         })
       )
     }
@@ -144,10 +157,12 @@ const Scope: React.FC<ScopeProps> = ({
           name={`${scope}.podPhaseSelectors`}
           label={<T id="k8s.podPhaseSelectors" />}
           helperText={<T id="newE.scope.phaseSelectorsHelper" />}
+          onChange={handleChangeIncludeAll}
           disabled={disabled}
           fullWidth
         >
-          {podPhases.map((option) => (
+          <MenuItem value="all">All</MenuItem>
+          {phases.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
             </MenuItem>
@@ -158,7 +173,7 @@ const Scope: React.FC<ScopeProps> = ({
       <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
 
       <div>
-        <Typography fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
+        <Typography variant="h6" fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
           {podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}
         </Typography>
         <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>

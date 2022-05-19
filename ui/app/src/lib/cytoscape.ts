@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
+import { Theme } from '@mui/material'
 import { Node, WorkflowSingle } from 'api/workflows.type'
 import cytoscape, { EdgeDefinition, EventHandler, NodeDefinition, Stylesheet } from 'cytoscape'
-
-import { Theme } from '@mui/material'
-import _ from 'lodash'
 import dagre from 'cytoscape-dagre'
+import _flattenDeep from 'lodash.flattendeep'
 
 cytoscape.use(dagre)
 
@@ -252,7 +251,7 @@ export const constructWorkflowTopology = (
     nodes = nodes.concat(connections)
 
     return {
-      nodes: _.flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],
+      nodes: _flattenDeep(nodes).filter((d) => typeof d !== 'string') as NodeDefinition[],
       edges: edges,
     }
   }

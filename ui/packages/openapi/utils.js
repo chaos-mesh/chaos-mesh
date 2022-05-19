@@ -99,5 +99,5 @@ export function cleanMarkers(s) {
     s = s.replace(/\+kubebuilder.+$/, '') // assuming a separate marker remains
   }
 
-  return s.replace(/\\/g, '').trim()
+  return s.trim()
 }

@@ -14,14 +14,22 @@
  * limitations under the License.
  *
  */
-
 // All options are based on https://www.figma.com/file/2J6PVAaitQPQFHBtF5LbII/UI-Interface.
-
 import { ThemeOptions, createTheme, responsiveFontSizes } from '@mui/material/styles'
 
 const common: ThemeOptions = {
   spacing: 4,
   typography: {
+    // TODO: remove h2
+    h2: {
+      fontSize: '1.25rem',
+      fontWeight: 700,
+    },
+    // TODO: remove h3
+    h3: {
+      fontSize: '1.125rem',
+      fontWeight: 500,
+    },
     button: {
       textTransform: 'none',
     },
@@ -45,14 +53,11 @@ const theme = responsiveFontSizes(
       onSecondaryContainer: {
         main: '#161B2C',
       },
-      surfaceVariant: {
-        main: '#E2E1EC',
+      background: {
+        default: '#fafafa',
       },
       onSurfaceVariant: {
         main: '#45464E',
-      },
-      background: {
-        default: '#fafafa',
       },
       outline: {
         main: '#76767F',
@@ -78,15 +83,12 @@ export const darkTheme = responsiveFontSizes(
       onSecondaryContainer: {
         main: '#DEE1F9',
       },
-      surfaceVariant: {
-        main: '#45464E',
-      },
-      onSurfaceVariant: {
-        main: '#C6C6D0',
-      },
       background: {
         paper: '#000',
         default: '#1B1B1F',
+      },
+      onSurfaceVariant: {
+        main: '#C6C6D0',
       },
       outline: {
         main: '#90909A',

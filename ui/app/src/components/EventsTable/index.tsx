@@ -14,7 +14,10 @@
  * limitations under the License.
  *
  */
-
+import FirstPageIcon from '@mui/icons-material/FirstPage'
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import LastPageIcon from '@mui/icons-material/LastPage'
 import {
   Box,
   IconButton,
@@ -28,18 +31,13 @@ import {
   TableRow,
   TableSortLabel,
 } from '@mui/material'
-import { comparator, format } from 'lib/luxon'
-
-import { Event } from 'api/events.type'
-import FirstPageIcon from '@mui/icons-material/FirstPage'
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
-import LastPageIcon from '@mui/icons-material/LastPage'
 import Paper from '@ui/mui-extends/esm/Paper'
-import _ from 'lodash'
+import { Event } from 'api/events.type'
 import i18n from 'components/T'
-import { useIntl } from 'react-intl'
+import { comparator, format } from 'lib/luxon'
+import { truncate } from 'lib/utils'
 import { useState } from 'react'
+import { useIntl } from 'react-intl'
 
 function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
   if (['StartTime', 'EndTime'].includes(orderBy)) {
@@ -127,7 +125,7 @@ interface EventsTableRowProps {
 
 const Row: React.FC<EventsTableRowProps> = ({ event: e }) => (
   <TableRow hover>
-    <TableCell>{_.truncate(e.object_id!)}</TableCell>
+    <TableCell>{truncate(e.object_id)}</TableCell>
     <TableCell>{e.namespace}</TableCell>
     <TableCell>{e.name}</TableCell>
     <TableCell>{e.kind}</TableCell>

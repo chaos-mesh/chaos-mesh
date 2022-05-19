@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
-
-import { FastField, Field, FieldValidator } from 'formik'
 import MuiExtendsTextField, { TextFieldProps } from '@ui/mui-extends/esm/TextField'
+import { FastField, Field, FieldValidator } from 'formik'
 
 const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
-  fast = false, // https://formik.org/docs/api/fastfield
+  fast = false,
   ...rest
 }) => {
   return fast ? <FastField {...rest} as={MuiExtendsTextField} /> : <Field {...rest} as={MuiExtendsTextField} />

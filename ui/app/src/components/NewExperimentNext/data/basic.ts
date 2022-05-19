@@ -14,11 +14,9 @@
  * limitations under the License.
  *
  */
-
-import * as Yup from 'yup'
-
-import { Env } from 'slices/experiments'
 import { schema as scheduleSchema } from 'components/Schedule/types'
+import { Env } from 'slices/experiments'
+import * as Yup from 'yup'
 
 const data = {
   metadata: {
@@ -32,7 +30,7 @@ const data = {
       namespaces: [],
       labelSelectors: [],
       annotationSelectors: [],
-      podPhaseSelectors: [],
+      podPhaseSelectors: ['all'],
       pods: [],
     },
     mode: 'all',

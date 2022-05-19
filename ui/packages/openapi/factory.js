@@ -14,9 +14,7 @@
  * limitations under the License.
  *
  */
-
 import { cleanMarkers, getUIFormWhen, isUIFormIgnore } from './utils.js'
-
 import ts from 'typescript'
 
 const { factory } = ts
@@ -31,10 +29,6 @@ export function typeTextToFieldType(type) {
   switch (type) {
     case 'string':
       return 'text'
-    case 'number':
-      return 'number'
-    case 'boolean':
-      return 'select'
     case 'Array<string>':
       return 'label'
     case 'Array<number>':
@@ -43,6 +37,10 @@ export function typeTextToFieldType(type) {
       return 'text-text'
     case '{ [key: string]: Array<string> }':
       return 'text-label'
+    case 'number':
+      return 'number'
+    case 'boolean':
+      return 'select'
     default:
       throw new Error(`Unsupported type: ${type}`)
   }
@@ -57,17 +55,17 @@ export function typeTextToFieldType(type) {
 export function typeTextToInitialValue(type) {
   switch (type) {
     case 'string':
-      return factory.createStringLiteral('')
-    case 'number':
-      return factory.createNumericLiteral(0)
-    case 'boolean':
-      return factory.createFalse()
+      return ts.factory.createStringLiteral('')
     case 'Array<string>':
     case 'Array<number>':
-      return factory.createArrayLiteralExpression()
+      return ts.factory.createArrayLiteralExpression()
     case '{ [key: string]: string }':
     case '{ [key: string]: Array<string> }':
-      return factory.createObjectLiteralExpression()
+      return ts.factory.createObjectLiteralExpression()
+    case 'number':
+      return ts.factory.createNumericLiteral(0)
+    case 'boolean':
+      return ts.factory.createArrayLiteralExpression([ts.factory.createTrue(), ts.factory.createFalse()])
     default:
       throw new Error(`Unsupported type: ${type}`)
   }
@@ -249,7 +247,6 @@ function _genBaseFieldElements(identifier, typeText, comment) {
   //   field: '',
   //   label: '',
   //   value: '',
-  //   items: [],
   //   helperText: '',
   // }
   return [
@@ -259,14 +256,6 @@ function _genBaseFieldElements(identifier, typeText, comment) {
     ),
     factory.createPropertyAssignment(factory.createIdentifier('label'), factory.createStringLiteral(identifier)),
     factory.createPropertyAssignment(factory.createIdentifier('value'), typeTextToInitialValue(typeText)),
-    ...(typeText === 'boolean'
-      ? [
-          factory.createPropertyAssignment(
-            factory.createIdentifier('items'),
-            factory.createArrayLiteralExpression([factory.createTrue(), factory.createFalse()])
-          ),
-        ]
-      : []),
     factory.createPropertyAssignment(
       factory.createIdentifier('helperText'),
       factory.createStringLiteral(cleanMarkers(comment))

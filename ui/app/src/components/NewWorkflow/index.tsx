@@ -14,7 +14,12 @@
  * limitations under the License.
  *
  */
-
+import Add from './Add'
+import loadable from '@loadable/component'
+import CheckIcon from '@mui/icons-material/Check'
+import PublishIcon from '@mui/icons-material/Publish'
+import RemoveIcon from '@mui/icons-material/Remove'
+import UndoIcon from '@mui/icons-material/Undo'
 import {
   Box,
   Button,
@@ -28,33 +33,26 @@ import {
   Stepper,
   Typography,
 } from '@mui/material'
-import { Form, Formik } from 'formik'
-import { SelectField, TextField } from 'components/FormField'
-import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-import { validateDeadline, validateName } from 'lib/formikhelpers'
-
-import { Ace } from 'ace-builds'
-import Add from './Add'
-import CheckIcon from '@mui/icons-material/Check'
+import { makeStyles } from '@mui/styles'
 import Menu from '@ui/mui-extends/esm/Menu'
 import Paper from '@ui/mui-extends/esm/Paper'
-import PublishIcon from '@mui/icons-material/Publish'
-import RemoveIcon from '@mui/icons-material/Remove'
 import Space from '@ui/mui-extends/esm/Space'
-import UndoIcon from '@mui/icons-material/Undo'
-import _ from 'lodash'
+import { Ace } from 'ace-builds'
 import api from 'api'
-import { constructWorkflow } from 'lib/formikhelpers'
+import { SelectField, TextField } from 'components/FormField'
 import i18n from 'components/T'
-import loadable from '@loadable/component'
-import { makeStyles } from '@mui/styles'
-import { resetNewExperiment } from 'slices/experiments'
+import { Form, Formik } from 'formik'
+import yaml from 'js-yaml'
+import { validateDeadline, validateName } from 'lib/formikhelpers'
+import { constructWorkflow } from 'lib/formikhelpers'
+import _isEmpty from 'lodash.isempty'
+import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-import yaml from 'js-yaml'
+import { resetNewExperiment } from 'slices/experiments'
+import { setAlert, setConfirm } from 'slices/globalStatus'
+import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -114,7 +112,7 @@ const NewWorkflow = () => {
   }, [dispatch])
 
   useEffect(() => {
-    setSteps(_.isEmpty(templates) ? [] : templates)
+    setSteps(_isEmpty(templates) ? [] : templates)
   }, [templates])
 
   const resetRestore = () => {
@@ -290,7 +288,7 @@ const NewWorkflow = () => {
                   color="primary"
                   startIcon={<PublishIcon />}
                   fullWidth
-                  disabled={_.isEmpty(templates)}
+                  disabled={_isEmpty(templates)}
                 >
                   {i18n('newW.submit')}
                 </Button>

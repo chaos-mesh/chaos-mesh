@@ -14,45 +14,32 @@
  * limitations under the License.
  *
  */
-
-import Checkbox, { CheckboxProps as MuiCheckboxProps } from '@mui/material/Checkbox'
-
-import FormControl from '../FormControl'
-import { FormControlLabel } from '@mui/material'
+import { FormControl, FormControlLabel, FormHelperText, FormLabel } from '@mui/material'
+import { default as MuiCheckbox, CheckboxProps as MuiCheckboxProps } from '@mui/material/Checkbox'
 
 export type CheckboxProps = MuiCheckboxProps & {
   /**
    * The label of the checkbox, would be shown on the right of the checkbox.
    */
-  label: string | React.ReactElement
-
+  label: string
   /**
    * The helper text or error message of the checkbox, would be shown on the bottom of the checkbox in the same line.
    *
    * When field error is true, it should be the error message, otherwise it should be the helper text.
    */
-  helperText?: React.ReactNode
+  helperText?: string
 
   /**
    * Presents there are validation errors for this components.
    */
-  error?: boolean
+  error: boolean
 }
 
 export default ({ label, helperText, error, ...rest }: CheckboxProps) => {
   return (
-    <FormControl error={error} helperText={helperText} sx={{ '.MuiFormHelperText-root': { m: 0 } }}>
-      <FormControlLabel
-        control={<Checkbox {...rest} size="small" />}
-        label={label}
-        sx={{
-          ml: '-9px',
-          '.MuiFormControlLabel-label': {
-            pt: 0.5,
-            fontSize: 'body2.fontSize',
-          },
-        }}
-      />
+    <FormControl error={error} required={true}>
+      <FormControlLabel control={<MuiCheckbox {...rest}></MuiCheckbox>} label={label}></FormControlLabel>
+      <FormHelperText>{helperText}</FormHelperText>
     </FormControl>
   )
 }

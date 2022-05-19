@@ -14,7 +14,18 @@
  * limitations under the License.
  *
  */
-import _ from 'lodash'
+
+export function toTitleCase(s: string) {
+  return s.charAt(0).toUpperCase() + s.substr(1)
+}
+
+export function truncate(s: string) {
+  if (s.length > 25) {
+    return s.substring(0, 25) + '...'
+  }
+
+  return s
+}
 
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
   return Object.entries(obj)
@@ -26,7 +37,7 @@ export function objToArrBySep(obj: Record<string, string | string[]>, separator:
     )
 }
 
-export function arrToObjBySep(arr: string[], sep: string): Record<string, string> {
+export function arrToObjBySep(arr: string[], sep: string) {
   const result: any = {}
 
   arr.forEach((d) => {
@@ -39,38 +50,27 @@ export function arrToObjBySep(arr: string[], sep: string): Record<string, string
 }
 
 /**
- * Recursively check if a value is empty.
- *
- * @export
- * @param {*} value
- * @return {boolean}
- */
-export function isDeepEmpty(value: any): boolean {
-  if (!value) {
-    return true
-  }
-
-  if (_.isArray(value) && _.isEmpty(value)) {
-    return true
-  }
-
-  if (_.isObject(value)) {
-    return _.every(value, isDeepEmpty)
-  }
-
-  return false
-}
-
-/**
  * Remove empty values from nested object.
  *
  * @export
  * @param {*} obj
  */
 export function sanitize(obj: any) {
-  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isDeepEmpty(value) ? undefined : value)) ?? '{}')
-}
+  function isEmpty(value: any): boolean {
+    if (!value) {
+      return true
+    }
 
-export function concatKindAction(kind: string, action?: string) {
-  return `${kind}${action ? ` / ${action}` : ''}`
+    if (Array.isArray(value) && value.length === 0) {
+      return true
+    }
+
+    if (value instanceof Object) {
+      return Object.values(value).every(isEmpty)
+    }
+
+    return false
+  }
+
+  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)) ?? '{}')
 }

@@ -14,37 +14,30 @@
  * limitations under the License.
  *
  */
-
-import { Box, Divider, Typography } from '@mui/material'
-
-import type { BoxProps } from '@mui/material'
-import Space from '../Space'
+import { Box, BoxProps, Divider, Typography } from '@mui/material'
 
 interface PaperTopProps {
-  title: React.ReactNode
-  subtitle?: React.ReactNode
-  h1?: boolean
+  title: string | JSX.Element
+  subtitle?: string | JSX.Element
   divider?: boolean
   boxProps?: BoxProps
 }
 
-const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, h1, divider, boxProps, children }) => (
-  <Space width="100%">
-    <Box {...boxProps} display="flex" justifyContent="space-between" alignItems="center">
-      <Box flex={1}>
-        <Typography variant={h1 ? 'h5' : 'h6'} component={h1 ? 'h1' : 'div'} fontWeight="bold">
-          {title}
+const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, divider, boxProps, children }) => (
+  <Box {...boxProps} display="flex" justifyContent="space-between" width="100%">
+    <Box flex={1}>
+      <Typography variant="h3" gutterBottom={subtitle || divider ? true : false}>
+        {title}
+      </Typography>
+      {subtitle && (
+        <Typography variant="body2" color="textSecondary">
+          {subtitle}
         </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="textSecondary">
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-      {children}
+      )}
+      {divider && <Divider />}
     </Box>
-    {divider && <Divider />}
-  </Space>
+    {children}
+  </Box>
 )
 
 export default PaperTop

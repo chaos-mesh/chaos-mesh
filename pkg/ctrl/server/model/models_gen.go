@@ -32,18 +32,6 @@ type Fd struct {
 	Target string `json:"target"`
 }
 
-type KillProcessResult struct {
-	Pid     string `json:"pid"`
-	Command string `json:"command"`
-}
-
-type MutablePod struct {
-	Pod           *v1.Pod              `json:"pod"`
-	KillProcesses []*KillProcessResult `json:"killProcesses"`
-	CleanTcs      []string             `json:"cleanTcs"`
-	CleanIptables []string             `json:"cleanIptables"`
-}
-
 type Namespace struct {
 	Ns              string                      `json:"ns"`
 	Component       []*v1.Pod                   `json:"component"`

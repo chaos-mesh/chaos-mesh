@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import {
   Button,
   Dialog,
@@ -24,12 +23,13 @@ import {
   DialogProps,
   DialogTitle,
 } from '@mui/material'
+import React from 'react'
 
 interface ConfirmDialogProps {
   open: boolean
   close?: () => void
-  title: React.ReactNode
-  description?: React.ReactNode
+  title: string | JSX.Element
+  description?: string
   cancelText?: string
   confirmText?: string
   onConfirm?: () => void
@@ -53,20 +53,18 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   }
 
   return (
-    <Dialog open={open} onClose={close} {...dialogProps}>
-      <DialogTitle sx={{ p: 4 }}>{title}</DialogTitle>
-      {(children || description) && (
-        <DialogContent sx={{ p: 4 }}>
-          {description ? <DialogContentText>{description}</DialogContentText> : children}
-        </DialogContent>
-      )}
+    <Dialog open={open} onClose={close} PaperProps={{ sx: { minWidth: 300 } }} {...dialogProps}>
+      <DialogTitle sx={{ p: 4.5 }}>{title}</DialogTitle>
+      <DialogContent sx={{ p: 4.5 }}>
+        {children ? children : description ? <DialogContentText>{description}</DialogContentText> : null}
+      </DialogContent>
 
       {onConfirm && (
         <DialogActions>
-          <Button color="secondary" onClick={close}>
+          <Button size="small" onClick={close}>
             {cancelText}
           </Button>
-          <Button autoFocus onClick={handleConfirm}>
+          <Button variant="contained" color="primary" size="small" autoFocus disableFocusRipple onClick={handleConfirm}>
             {confirmText}
           </Button>
         </DialogActions>

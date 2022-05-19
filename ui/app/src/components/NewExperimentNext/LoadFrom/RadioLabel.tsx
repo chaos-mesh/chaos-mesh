@@ -14,10 +14,8 @@
  * limitations under the License.
  *
  */
-
 import { Box, Typography } from '@mui/material'
-
-import _ from 'lodash'
+import { truncate } from 'lib/utils'
 
 const RadioLabel = (label: string, uuid?: string) => (
   <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -25,7 +23,7 @@ const RadioLabel = (label: string, uuid?: string) => (
     {uuid && (
       <Box ml={3}>
         <Typography variant="body2" color="textSecondary" title={uuid}>
-          {_.truncate(uuid)}
+          {truncate(uuid)}
         </Typography>
       </Box>
     )}

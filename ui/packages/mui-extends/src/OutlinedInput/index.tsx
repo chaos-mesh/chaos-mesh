@@ -14,9 +14,7 @@
  * limitations under the License.
  *
  */
-
 import { OutlinedInput as MuiOutlinedInput, OutlinedInputProps } from '@mui/material'
-
 import { forwardRef } from 'react'
 
 const OutlinedInput = forwardRef(({ sx, ...rest }: OutlinedInputProps, ref) => (
@@ -24,6 +22,7 @@ const OutlinedInput = forwardRef(({ sx, ...rest }: OutlinedInputProps, ref) => (
     size="small"
     sx={{
       px: rest.startAdornment || rest.endAdornment ? 2 : 0,
+      py: 0.5,
       borderColor: 'divider',
       typography: 'body2',
       '&:hover': {

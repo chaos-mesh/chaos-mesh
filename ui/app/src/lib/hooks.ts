@@ -14,9 +14,7 @@
  * limitations under the License.
  *
  */
-
 import { useEffect, useRef } from 'react'
-
 import { useLocation } from 'react-router-dom'
 
 export function usePrevious<T>(value: T) {
@@ -34,23 +32,14 @@ export function useQuery() {
 }
 
 export function useIntervalFetch(fetch: (intervalID: number) => void, timeout: number = 6000) {
+  const id = useRef(0)
+
   useEffect(() => {
-    let id = 0
-    let max = 0
+    id.current = window.setInterval(() => fetch(id.current), timeout)
 
-    id = window.setInterval(() => {
-      // Exit when the maximum number of times limit is reached.
-      if (max === 20) {
-        clearInterval(id)
-      }
+    fetch(id.current)
 
-      fetch(id)
-      max++
-    }, timeout)
-
-    fetch(id)
-
-    return () => clearInterval(id)
+    return () => clearInterval(id.current)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }

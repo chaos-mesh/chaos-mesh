@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
-
-import LS from 'lib/localStorage'
 import { createSlice } from '@reduxjs/toolkit'
+import LS from 'lib/localStorage'
 
 export type Theme = 'light' | 'dark'
 
@@ -25,7 +24,6 @@ const initialState = {
   lang: LS.get('lang') || 'en',
   debugMode: LS.get('debug-mode') === 'true',
   enableKubeSystemNS: LS.get('enable-kube-system-ns') === 'true',
-  useNextWorkflowInterface: LS.get('use-next-workflow-interface') === 'true',
 }
 
 const settingsSlice = createSlice({
@@ -52,15 +50,9 @@ const settingsSlice = createSlice({
 
       LS.set('enable-kube-system-ns', action.payload)
     },
-    setUseNextWorkflowInterface(state, action) {
-      state.useNextWorkflowInterface = action.payload
-
-      LS.set('use-next-workflow-interface', action.payload)
-    },
   },
 })
 
-export const { setTheme, setLang, setDebugMode, setEnableKubeSystemNS, setUseNextWorkflowInterface } =
-  settingsSlice.actions
+export const { setTheme, setLang, setDebugMode, setEnableKubeSystemNS } = settingsSlice.actions
 
 export default settingsSlice.reducer

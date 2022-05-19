@@ -14,11 +14,9 @@
  * limitations under the License.
  *
  */
-
 import { isHTTTPChaosPatchHeadersOrQueries, typeTextToFieldType, typeTextToInitialValue } from './factory.js'
-
-import ts from 'typescript'
 import { visitFilter } from './utils.js'
+import ts from 'typescript'
 
 describe('openapi => factory', () => {
   test('typeTextToFieldType', () => {
@@ -38,7 +36,7 @@ describe('openapi => factory', () => {
     expect(typeTextToInitialValue('Array<number>').elements).toBeInstanceOf(Array)
     expect(typeTextToInitialValue('{ [key: string]: string }').properties.length).toBe(0)
     expect(typeTextToInitialValue('number').text).toBe('0')
-    expect(typeTextToInitialValue('boolean').kind).toBe(ts.SyntaxKind.FalseKeyword)
+    expect(typeTextToInitialValue('boolean').elements).toBeInstanceOf(Array)
     expect(() => typeTextToInitialValue('other')).toThrowError()
   })
 

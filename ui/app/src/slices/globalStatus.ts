@@ -14,22 +14,19 @@
  * limitations under the License.
  *
  */
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-
 import { Config } from 'api/common.type'
-import LS from 'lib/localStorage'
-import React from 'react'
 import { TokenFormValues } from 'components/Token'
+import LS from 'lib/localStorage'
 
 export interface Alert {
   type: 'success' | 'warning' | 'error'
-  message: React.ReactNode
+  message: string
 }
 
 export interface Confirm {
   title: string
-  description?: React.ReactNode
+  description?: string
   handle?: () => void
   [key: string]: any
 }

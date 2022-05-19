@@ -148,7 +148,7 @@
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
+      "deadlineHelper": "The task will end within the deadline. the supported formats of the deadline are: ms / s / m / h.",
       "deadlineValidation": "The task deadline is required",
       "container": {
         "title": "Container",
@@ -199,12 +199,15 @@
     "titleStep2": "Fill the schedule info",
     "basic": {
       "nameHelper": "The schedule name",
-      "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define it.",
-      "historyLimitHelper": "Maximum number of experiment records.",
-      "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time.",
+      "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define the schedule",
+      "historyLimit": "History Limit",
+      "historyLimitHelper": "Maximum number of experiment records",
+      "concurrencyPolicy": "Concurrency Policy",
+      "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time",
       "forbid": "Forbid",
       "allow": "Allow",
-      "startingDeadlineSecondsHelper": "Counts how many missed jobs occurred from the value of startingDeadlineSeconds until now."
+      "startingDeadlineSeconds": "Experiment expiration time",
+      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time"
     }
   },
   "schedules": {
@@ -217,7 +220,7 @@
   "workflows": {
     "title": "Workflows",
     "notFound": "No workflows found",
-    "deleteDesc": "You can still find this workflow in the archives."
+    "deleteDesc": "You can still find this workflow in the archives"
   },
   "workflow": {
     "entry": "Entry",
@@ -254,25 +257,21 @@
     "title": "Settings",
     "debugMode": {
       "title": "Debug mode",
-      "choose": "Creating an experiment doesn't send a real HTTP request, but prints the relevant information in the console."
+      "choose": "Creating an experiment will not send the real HTTP request, but will print relevant information in the console"
     },
     "enableKubeSystemNS": {
-      "title": "Allow kube-system namespace",
-      "choose": "The kube-system namespace is allowed to be selected in the scope when creating an experiment."
-    },
-    "useNextWorkflowInterface": {
-      "title": "Use the next generation of workflow interface",
-      "choose": "Over the past period of time, we have refactored the interface related to workflows. Now you can create workflows more easily in the form of the flowchart. (Note: This improvement is still under active development and the interface is still subject to change until it is stable.)"
+      "title": "Kube System namespace",
+      "choose": "Allow to select the kube-system namespace in the scope when creating the experiment"
     },
     "theme": {
       "title": "Theme",
-      "choose": "Choose a theme.",
+      "choose": "Choose theme",
       "light": "Light",
       "dark": "Dark"
     },
     "lang": {
       "title": "Language",
-      "choose": "Choose the interface language.",
+      "choose": "Choose interface language",
       "en": "English",
       "zh": "Chinese"
     },
@@ -327,12 +326,12 @@
     "copy": "Copy",
     "definition": "Definition",
     "delete": "Delete",
-    "deleteDesc": "This operation is irreversible.",
+    "deleteDesc": "The operation is irreversible",
     "detail": "Detail",
     "doc": "Documentation",
     "download": "Download",
     "duration": "Duration",
-    "durationHelper": "Supported formats of the duration are: ms / s / m / h.",
+    "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
     "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
@@ -343,6 +342,7 @@
     "noOptions": "No options",
     "operation": "Operation",
     "options": "Options",
+    "other": "Other",
     "pause": "Pause",
     "preview": "Preview",
     "process": "Process",
@@ -366,7 +366,7 @@
   "status": {
     "injecting": "Injecting",
     "running": "Running",
-    "finished": "Completed",
+    "finished": "Finished",
     "paused": "Paused",
     "failed": "Failed",
     "deleting": "Deleting",

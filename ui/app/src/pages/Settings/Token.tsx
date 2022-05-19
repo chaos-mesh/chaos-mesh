@@ -14,19 +14,17 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button } from '@mui/material'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import Cookies from 'js-cookie'
 import GoogleIcon from '@mui/icons-material/Google'
-import LS from 'lib/localStorage'
+import { Box, Button } from '@mui/material'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import _ from 'lodash'
 import i18n from 'components/T'
-import { setConfirm } from 'slices/globalStatus'
+import Cookies from 'js-cookie'
+import LS from 'lib/localStorage'
+import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+import { setConfirm } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 const Token = () => {
   const navigate = useNavigate()
@@ -40,7 +38,7 @@ const Token = () => {
         <GoogleIcon sx={{ ml: 1 }} />
       </Box>
     ) : (
-      tokenName + ': ' + _.truncate(tokens[0].token)
+      tokenName + ': ' + truncate(tokens[0].token)
     )
   const dispatch = useStoreDispatch()
 

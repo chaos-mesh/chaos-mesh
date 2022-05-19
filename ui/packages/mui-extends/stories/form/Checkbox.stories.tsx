@@ -1,6 +1,7 @@
 import Checkbox from '../../esm/Checkbox'
 import type { CheckboxProps } from '../../esm/Checkbox'
-import React from 'react'
+import { ComponentMeta, ComponentStory } from '@storybook/react'
+import React, { useState } from 'react'
 
 export default {
   title: 'Form/Checkbox',
@@ -10,38 +11,47 @@ export default {
       action: 'onChange',
     },
   },
-}
+} as ComponentMeta<typeof Checkbox>
 
-const Template = (props: CheckboxProps) => <Checkbox {...props} />
-
-const fieldInfo = {
-  name: 'spec.abort',
-  label: 'Abort HTTP Request',
-  helperText: 'Abort is a rule to abort a http session.',
+const Template: ComponentStory<typeof Checkbox> = ({ ...props }: CheckboxProps) => {
+  return <Checkbox {...props} />
 }
 
 export const Default = Template.bind({})
 Default.args = {
-  ...fieldInfo,
+  name: 'spec.abort',
+  label: 'Abort HTTP Request',
+  helperText: 'Abort is a rule to abort a http session.',
+  checked: false,
+  disabled: false,
+  error: false,
 }
 
 export const Disabled = Template.bind({})
 Disabled.args = {
-  ...fieldInfo,
+  name: 'spec.abort',
+  label: 'Abort HTTP Request',
+  helperText: 'Abort is a rule to abort a http session.',
+  checked: false,
   disabled: true,
+  error: false,
 }
 
 export const WithValidationError = Template.bind({})
 WithValidationError.args = {
-  ...fieldInfo,
+  name: 'spec.abort',
+  label: 'Abort HTTP Request',
   helperText: 'Abort could not be used with action: delay',
   checked: true,
+  disabled: false,
   error: true,
 }
 
 export const WithoutHelperText = Template.bind({})
 WithoutHelperText.args = {
-  ...fieldInfo,
-  helperText: undefined,
+  name: 'spec.abort',
+  label: 'Abort HTTP Request',
   checked: true,
+  disabled: false,
+  error: true,
 }

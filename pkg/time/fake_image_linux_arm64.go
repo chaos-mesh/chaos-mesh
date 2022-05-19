@@ -17,8 +17,8 @@ package time
 
 import (
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/cerr"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 )
 
@@ -45,14 +45,10 @@ type FakeImage struct {
 	logger logr.Logger
 }
 
-func NewFakeImage(symbolName string, content []byte, offset map[string]int, logger logr.Logger) *FakeImage {
-	return &FakeImage{symbolName: symbolName, content: content, offset: offset, logger: logger}
-}
-
 func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err error) {
-	return errors.New("not implement fake image arm64")
+	return cerr.NotImplemented("fake image arm64")
 }
 
 func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
-	return errors.New("not implement fake image arm64")
+	return cerr.NotImplemented("fake image arm64")
 }

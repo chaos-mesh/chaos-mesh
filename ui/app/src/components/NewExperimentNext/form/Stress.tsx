@@ -14,14 +14,13 @@
  * limitations under the License.
  *
  */
-import { Form, Formik, getIn } from 'formik'
-import { LabelField, Submit, TextField } from 'components/FormField'
-import { useEffect, useState } from 'react'
-
-import MoreOptions from 'components/MoreOptions'
-import Space from '@ui/mui-extends/esm/Space'
-import { Typography } from '@mui/material'
 import typesData from '../data/types'
+import { Typography } from '@mui/material'
+import Space from '@ui/mui-extends/esm/Space'
+import { LabelField, Submit, TextField } from 'components/FormField'
+import MoreOptions from 'components/MoreOptions'
+import { Form, Formik, getIn } from 'formik'
+import { useEffect, useState } from 'react'
 import { useStoreSelector } from 'store'
 
 const validate = (values: any) => {
@@ -104,7 +103,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="stressors.memory.options"
               label="Options of Memory stressors"
-              helperText="Type string and end with a space to generate the memStress options"
+              helperText="Type string and end with a space to generate the stress-ng options"
             />
           </Space>
 

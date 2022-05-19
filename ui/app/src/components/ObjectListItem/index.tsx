@@ -14,21 +14,20 @@
  * limitations under the License.
  *
  */
-import { Box, IconButton, Typography } from '@mui/material'
-import DateTime, { format } from 'lib/luxon'
-
-import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import { Experiment } from 'api/experiments.type'
-import Paper from '@ui/mui-extends/esm/Paper'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import { Schedule } from 'api/schedules.type'
+import { Box, IconButton, Typography } from '@mui/material'
+import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
+import { Archive } from 'api/archives.type'
+import { Experiment } from 'api/experiments.type'
+import { Schedule } from 'api/schedules.type'
 import StatusLabel from 'components/StatusLabel'
-import _ from 'lodash'
 import i18n from 'components/T'
+import DateTime, { format } from 'lib/luxon'
+import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import { useStoreSelector } from 'store'
@@ -108,18 +107,18 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
 
   const Actions = () => (
     <Space direction="row" justifyContent="end" alignItems="center">
-      <Typography variant="body2" title={format(data.created_at!)}>
+      <Typography variant="body2" title={format(data.created_at)}>
         {i18n('table.created')}{' '}
-        {DateTime.fromISO(data.created_at!, {
+        {DateTime.fromISO(data.created_at, {
           locale: lang,
         }).toRelative()}
       </Typography>
       {(type === 'schedule' || type === 'experiment') &&
-        ((data as any).status === 'paused' ? (
+        ((data as Experiment).status === 'paused' ? (
           <IconButton color="primary" title={i18n('common.start', intl)} size="small" onClick={handleAction('start')}>
             <PlayCircleOutlineIcon />
           </IconButton>
-        ) : (data as any).status !== 'finished' ? (
+        ) : (data as Experiment).status !== 'finished' ? (
           <IconButton color="primary" title={i18n('common.pause', intl)} size="small" onClick={handleAction('pause')}>
             <PauseCircleOutlineIcon />
           </IconButton>
@@ -157,10 +156,10 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         <Space direction="row" alignItems="center">
           {type !== 'archive' && <StatusLabel status={(data as Experiment).status} />}
           <Typography component="div" title={data.name}>
-            {_.truncate(data.name!)}
+            {truncate(data.name)}
           </Typography>
           <Typography component="div" variant="body2" color="textSecondary" title={data.uid}>
-            {_.truncate(data.uid!)}
+            {truncate(data.uid)}
           </Typography>
         </Space>
 
