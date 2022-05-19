@@ -267,7 +267,7 @@ EOF
 e2e::image_build
 
 kubetest2_args=(
-    $PROVIDER
+    "$PROVIDER"
 )
 
 if [ -n "$RUNNER_SUITE_NAME" ]; then
@@ -308,7 +308,7 @@ if [ "$PROVIDER" == "kind" ]; then
         echo "error: no image for $KUBE_VERSION, exit"
         exit 1
     fi
-    kubetest2_args+=(--image-name $image)
+    kubetest2_args+=(--image-name "$image")
     kubetest2_args+=(
         # add some retires because kind may fail to start the cluster when the
         # load is high
