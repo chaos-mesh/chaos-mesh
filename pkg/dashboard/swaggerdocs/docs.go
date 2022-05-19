@@ -3678,7 +3678,7 @@ var doc = `{
                     "type": "string"
                 },
                 "mysqlConnectorVersion": {
-                    "description": "the version of mysql-connector-java, only support 5.X.X(set to 5) and 8.X.X(set to 8) now",
+                    "description": "the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now",
                     "type": "string"
                 },
                 "name": {
