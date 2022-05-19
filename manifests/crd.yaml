@@ -1979,7 +1979,7 @@ spec:
                 type: string
               mysqlConnectorVersion:
                 description: the version of mysql-connector-java, only support 5.X.X(set
-                  to 5) and 8.X.X(set to 8) now
+                  to "5") and 8.X.X(set to "8") now
                 type: string
               name:
                 description: byteman rule name, should be unique, and will generate
@@ -5761,7 +5761,7 @@ spec:
                     type: string
                   mysqlConnectorVersion:
                     description: the version of mysql-connector-java, only support
-                      5.X.X(set to 5) and 8.X.X(set to 8) now
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
                     type: string
                   name:
                     description: byteman rule name, should be unique, and will generate
@@ -8588,7 +8588,7 @@ spec:
                               type: string
                             mysqlConnectorVersion:
                               description: the version of mysql-connector-java, only
-                                support 5.X.X(set to 5) and 8.X.X(set to 8) now
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
                               type: string
                             name:
                               description: byteman rule name, should be unique, and
@@ -11168,8 +11168,8 @@ spec:
                                   type: string
                                 mysqlConnectorVersion:
                                   description: the version of mysql-connector-java,
-                                    only support 5.X.X(set to 5) and 8.X.X(set to
-                                    8) now
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
@@ -18606,7 +18606,7 @@ spec:
                     type: string
                   mysqlConnectorVersion:
                     description: the version of mysql-connector-java, only support
-                      5.X.X(set to 5) and 8.X.X(set to 8) now
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
                     type: string
                   name:
                     description: byteman rule name, should be unique, and will generate
@@ -21015,7 +21015,7 @@ spec:
                         type: string
                       mysqlConnectorVersion:
                         description: the version of mysql-connector-java, only support
-                          5.X.X(set to 5) and 8.X.X(set to 8) now
+                          5.X.X(set to "5") and 8.X.X(set to "8") now
                         type: string
                       name:
                         description: byteman rule name, should be unique, and will
@@ -23900,8 +23900,8 @@ spec:
                                   type: string
                                 mysqlConnectorVersion:
                                   description: the version of mysql-connector-java,
-                                    only support 5.X.X(set to 5) and 8.X.X(set to
-                                    8) now
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
@@ -26567,8 +26567,8 @@ spec:
                                       type: string
                                     mysqlConnectorVersion:
                                       description: the version of mysql-connector-java,
-                                        only support 5.X.X(set to 5) and 8.X.X(set
-                                        to 8) now
+                                        only support 5.X.X(set to "5") and 8.X.X(set
+                                        to "8") now
                                       type: string
                                     name:
                                       description: byteman rule name, should be unique,
@@ -36741,7 +36741,7 @@ spec:
                           type: string
                         mysqlConnectorVersion:
                           description: the version of mysql-connector-java, only support
-                            5.X.X(set to 5) and 8.X.X(set to 8) now
+                            5.X.X(set to "5") and 8.X.X(set to "8") now
                           type: string
                         name:
                           description: byteman rule name, should be unique, and will
@@ -39248,7 +39248,7 @@ spec:
                               type: string
                             mysqlConnectorVersion:
                               description: the version of mysql-connector-java, only
-                                support 5.X.X(set to 5) and 8.X.X(set to 8) now
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
                               type: string
                             name:
                               description: byteman rule name, should be unique, and

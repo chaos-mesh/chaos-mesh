@@ -135,7 +135,7 @@ type JVMStressCfgSpec struct {
 //   SQL is "select * from test.t1",
 //   only when ((Database == "test" || Database == "") && (Table == "t1" || Table == "") && (SQLType == "select" || SQLType == "")) is true, JVMChaos will inject fault
 type JVMMySQLSpec struct {
-	// the version of mysql-connector-java, only support 5.X.X(set to 5) and 8.X.X(set to 8) now
+	// the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now
 	MySQLConnectorVersion string `json:"mysqlConnectorVersion,omitempty"`
 
 	// the match database
