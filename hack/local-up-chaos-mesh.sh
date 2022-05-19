@@ -114,9 +114,9 @@ fi
 
 echo "info: loading images into cluster"
 images=(
-    $IMAGE_REGISTRY_PREFIX/chaos-mesh/chaos-mesh:${IMAGE_TAG}
-    $IMAGE_REGISTRY_PREFIX/chaos-mesh/chaos-dashboard:${IMAGE_TAG}
-    $IMAGE_REGISTRY_PREFIX/chaos-mesh/chaos-daemon:${IMAGE_TAG}
+    "$IMAGE_REGISTRY_PREFIX"/chaos-mesh/chaos-mesh:"${IMAGE_TAG}"
+    "$IMAGE_REGISTRY_PREFIX"/chaos-mesh/chaos-dashboard:"${IMAGE_TAG}"
+    "$IMAGE_REGISTRY_PREFIX"/chaos-mesh/chaos-daemon:"${IMAGE_TAG}"
 )
 for n in ${images[@]}; do
     echo "info: loading image $n"
