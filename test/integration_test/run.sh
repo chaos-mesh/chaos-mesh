@@ -52,7 +52,7 @@ if [ "$test_case" == "*" ]; then
 else
     for name in $test_case; do
         script="$test_dir/$name/run.sh"
-	    echo "run $script"
+        echo "run $script"
         run $script
     done
 fi
