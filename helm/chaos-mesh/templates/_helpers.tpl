@@ -171,10 +171,3 @@ Return the appropriate apiVersion for ingress
 {{- print "extensions/v1beta1" -}}
 {{- end -}}
 {{- end -}}
-
-{{/*
-Return the target Kubernetes version
-*/}}
-{{- define "chaos-mesh.kubeVersion" -}}
-  {{- default .Capabilities.KubeVersion.Version .Values.kubeVersionOverride }}
-{{- end -}}

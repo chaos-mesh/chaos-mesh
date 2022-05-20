@@ -18,7 +18,6 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `nameOverride` |  | `` |
 | `fullnameOverride` |  | `` |
-| `kubeVersionOverride` | Override the Kubernetes version, which is used to evaluate certain manifests | `` |
 | `customLabels` | Customized labels that will be tagged on all the resources of Chaos Mesh | `{}` |
 | `clusterScoped` | Whether chaos-mesh should manage kubernetes cluster wide chaos.Also see rbac.create and controllerManager.serviceAccount | `true` |
 | `rbac.create` | Creating rbac API Objects. Also see clusterScoped and controllerManager.serviceAccount | `true`                                                |
