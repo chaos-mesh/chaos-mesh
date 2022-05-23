@@ -26,7 +26,7 @@ export function objToArrBySep(obj: Record<string, string | string[]>, separator:
     )
 }
 
-export function arrToObjBySep(arr: string[], sep: string) {
+export function arrToObjBySep(arr: string[], sep: string): Record<string, string> {
   const result: any = {}
 
   arr.forEach((d) => {
