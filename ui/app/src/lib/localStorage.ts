@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 const PREFIX = 'chaos-mesh-'
 
 export default class LocalStorage {
@@ -23,8 +24,16 @@ export default class LocalStorage {
     return LocalStorage.ls.getItem(PREFIX + key)
   }
 
+  static getObj(key: string) {
+    return JSON.parse(LocalStorage.get(key) ?? '{}')
+  }
+
   static set(key: string, val: string) {
     return LocalStorage.ls.setItem(PREFIX + key, val)
+  }
+
+  static setObj(key: string, obj: any) {
+    return LocalStorage.set(key, JSON.stringify(obj))
   }
 
   static remove(key: string) {

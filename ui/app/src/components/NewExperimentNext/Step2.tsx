@@ -14,29 +14,32 @@
  * limitations under the License.
  *
  */
-
+import CheckIcon from '@mui/icons-material/Check'
+import PublishIcon from '@mui/icons-material/Publish'
+import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
-import { Fields as ScheduleSpecificFields, data as scheduleSpecificData } from 'components/Schedule/types'
-import basicData, { schema as basicSchema } from './data/basic'
-import { setBasic, setStep2 } from 'slices/experiments'
+import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
 
-import CheckIcon from '@mui/icons-material/Check'
-import Mode from './form/Mode'
-import Nodes from './form/Nodes'
-import OtherOptions from 'components/OtherOptions'
 import Paper from '@ui/mui-extends/esm/Paper'
-import PublishIcon from '@mui/icons-material/Publish'
-import Scheduler from './form/Scheduler'
-import Scope from './form/Scope'
 import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
 import Space from '@ui/mui-extends/esm/Space'
-import UndoIcon from '@mui/icons-material/Undo'
-import _isEmpty from 'lodash.isempty'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setBasic, setStep2 } from 'slices/experiments'
+
+import { LabelField, SelectField, TextField } from 'components/FormField'
+import MoreOptions from 'components/MoreOptions'
+import { Fields as ScheduleSpecificFields, data as scheduleSpecificData } from 'components/Schedule/types'
+import Scope from 'components/Scope'
+import Mode from 'components/Scope/Mode'
 import i18n from 'components/T'
+
+import basicData, { schema as basicSchema } from './data/basic'
+import Nodes from './form/Nodes'
+import Scheduler from './form/Scheduler'
 
 interface Step2Props {
   inWorkflow?: boolean
@@ -65,7 +68,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const [init, setInit] = useState(originalInit)
 
   useEffect(() => {
-    if (!_isEmpty(basic)) {
+    if (!_.isEmpty(basic)) {
       setInit({
         metadata: {
           ...originalInit.metadata,
@@ -128,7 +131,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     </Typography>
                     {env === 'k8s' ? (
                       namespaces.length ? (
-                        <Scope namespaces={namespaces} />
+                        <Scope kind={kind} namespaces={namespaces} scope="spec.selector" modeScope="spec" />
                       ) : (
                         <SkeletonN n={6} />
                       )
@@ -170,7 +173,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                       />
                     )}
                     {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
-                    <OtherOptions>
+                    <MoreOptions>
                       {namespaces.length && (
                         <SelectField
                           name="metadata.namespace"
@@ -184,9 +187,9 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                           ))}
                         </SelectField>
                       )}
-                      <LabelField name="metadata.labels" label={i18n('k8s.labels')} isKV />
-                      <LabelField name="metadata.annotations" label={i18n('k8s.annotations')} isKV />
-                    </OtherOptions>
+                      <LabelField name="metadata.labels" label={i18n('k8s.labels')} />
+                      <LabelField name="metadata.annotations" label={i18n('k8s.annotations')} />
+                    </MoreOptions>
                     {!inWorkflow && (
                       <>
                         <Divider />

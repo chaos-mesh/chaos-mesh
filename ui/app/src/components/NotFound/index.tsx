@@ -15,10 +15,11 @@
  *
  */
 
-import { Box, BoxProps, useTheme } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 
-import EmptyStreet from 'images/assets/undraw_empty_street.svg'
+import type { BoxProps } from '@mui/material'
 import EmptyStreetDark from 'images/assets/undraw_empty_street-dark.svg'
+import undrawNotFound from 'images/assets/undraw_not_found.svg'
 
 interface NotFoundProps extends BoxProps {
   illustrated?: boolean
@@ -28,20 +29,12 @@ const NotFound: React.FC<NotFoundProps> = ({ illustrated = false, children, ...r
   const theme = useTheme()
 
   return (
-    <Box
-      sx={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate3d(-50%, -50%, 0)',
-        ...rest,
-      }}
-    >
+    <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%" {...rest}>
       {illustrated && (
-        <Box mb={6}>
+        <Box mb={3}>
           <img
-            style={{ width: '50%' }}
-            src={theme.palette.mode === 'light' ? EmptyStreet : EmptyStreetDark}
+            style={{ width: 450 }}
+            src={theme.palette.mode === 'light' ? undrawNotFound : EmptyStreetDark}
             alt="Not found"
           />
         </Box>

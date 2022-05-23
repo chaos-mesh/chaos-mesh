@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Autocomplete, TextField } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
@@ -25,7 +26,7 @@ import i18n from 'components/T'
 import { setNameSpace } from 'slices/globalStatus'
 import { useEffect } from 'react'
 
-const ControlBar = () => {
+const Namespace = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
@@ -61,4 +62,4 @@ const ControlBar = () => {
   )
 }
 
-export default ControlBar
+export default Namespace

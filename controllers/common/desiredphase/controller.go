@@ -56,16 +56,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	reconcilerCtx := &reconcileContext{
+	reconcileInfo := &reconcileInfo{
 		obj:          obj,
 		Reconciler:   r,
 		shouldUpdate: false,
 	}
-	return reconcilerCtx.Reconcile(req)
+	return reconcileInfo.Reconcile(req)
 }
 
-// TODO: refactor: rename this struct, ambiguous with context.Context
-type reconcileContext struct {
+type reconcileInfo struct {
 	obj v1alpha1.InnerObject
 
 	*Reconciler
@@ -73,22 +72,22 @@ type reconcileContext struct {
 	requeueAfter time.Duration
 }
 
-func (ctx *reconcileContext) GetCreationTimestamp() metav1.Time {
-	return ctx.obj.GetCreationTimestamp()
+func (info *reconcileInfo) GetCreationTimestamp() metav1.Time {
+	return info.obj.GetCreationTimestamp()
 }
 
-func (ctx *reconcileContext) CalcDesiredPhase() (v1alpha1.DesiredPhase, []recorder.ChaosEvent) {
+func (info *reconcileInfo) CalcDesiredPhase() (v1alpha1.DesiredPhase, []recorder.ChaosEvent) {
 	events := []recorder.ChaosEvent{}
 
 	// Consider the finalizers
-	if ctx.obj.IsDeleted() {
-		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
+	if info.obj.IsDeleted() {
+		if info.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
 			events = append(events, recorder.Deleted{})
 		}
 		return v1alpha1.StoppedPhase, events
 	}
 
-	if ctx.obj.IsOneShot() {
+	if info.obj.IsOneShot() {
 		// An oneshot chaos should always be in running phase, so that it cannot
 		// be applied multiple times or cause other bugs :(
 		return v1alpha1.RunningPhase, events
@@ -97,70 +96,70 @@ func (ctx *reconcileContext) CalcDesiredPhase() (v1alpha1.DesiredPhase, []record
 	// Consider the duration
 	now := time.Now()
 
-	durationExceeded, untilStop, err := ctx.obj.DurationExceeded(now)
+	durationExceeded, untilStop, err := info.obj.DurationExceeded(now)
 	if err != nil {
-		ctx.Log.Error(err, "failed to parse duration")
+		info.Log.Error(err, "failed to parse duration")
 	}
 	if durationExceeded {
-		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
+		if info.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
 			events = append(events, recorder.TimeUp{})
 		}
 		return v1alpha1.StoppedPhase, events
 	}
 
-	ctx.requeueAfter = untilStop
+	info.requeueAfter = untilStop
 
 	// Then decide the pause logic
-	if ctx.obj.IsPaused() {
-		if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
+	if info.obj.IsPaused() {
+		if info.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.StoppedPhase {
 			events = append(events, recorder.Paused{})
 		}
 		return v1alpha1.StoppedPhase, events
 	}
 
-	if ctx.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.RunningPhase {
+	if info.obj.GetStatus().Experiment.DesiredPhase != v1alpha1.RunningPhase {
 		events = append(events, recorder.Started{})
 	}
 	return v1alpha1.RunningPhase, events
 }
 
-func (ctx *reconcileContext) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	desiredPhase, events := ctx.CalcDesiredPhase()
+func (info *reconcileInfo) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	desiredPhase, events := info.CalcDesiredPhase()
 
-	ctx.Log.Info("modify desiredPhase", "desiredPhase", desiredPhase)
-	if ctx.obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
+	info.Log.Info("modify desiredPhase", "desiredPhase", desiredPhase)
+	if info.obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
 		for _, ev := range events {
-			ctx.Recorder.Event(ctx.obj, ev)
+			info.Recorder.Event(info.obj, ev)
 		}
 
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-			obj := ctx.Object.DeepCopyObject().(v1alpha1.InnerObject)
+			obj := info.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
-			if err := ctx.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
-				ctx.Log.Error(err, "unable to get chaos")
+			if err := info.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				info.Log.Error(err, "unable to get chaos")
 				return err
 			}
 
 			if obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
 				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
-				ctx.Log.Info("update object", "namespace", obj.GetNamespace(), "name", obj.GetName())
-				return ctx.Client.Update(context.TODO(), obj)
+				info.Log.Info("update object", "namespace", obj.GetNamespace(), "name", obj.GetName())
+				return info.Client.Update(context.TODO(), obj)
 			}
 
 			return nil
 		})
 		if updateError != nil {
-			ctx.Log.Error(updateError, "fail to update")
-			ctx.Recorder.Event(ctx.obj, recorder.Failed{
+			info.Log.Error(updateError, "fail to update")
+			info.Recorder.Event(info.obj, recorder.Failed{
 				Activity: "update desiredphase",
 				Err:      updateError.Error(),
 			})
 			return ctrl.Result{}, nil
 		}
 
-		ctx.Recorder.Event(ctx.obj, recorder.Updated{
+		info.Recorder.Event(info.obj, recorder.Updated{
 			Field: "desiredPhase",
 		})
 	}
-	return ctrl.Result{RequeueAfter: ctx.requeueAfter}, nil
+	return ctrl.Result{RequeueAfter: info.requeueAfter}, nil
 }

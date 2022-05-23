@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  *
  */
+import Helmet from 'react-helmet'
+import type { HelmetProps } from 'react-helmet'
 
-import { Theme } from '@mui/material/styles'
-
-declare module '@mui/styles' {
-  interface DefaultTheme extends Theme {}
+export default function CustomHelmet(props: HelmetProps) {
+  return <Helmet {...props} titleTemplate="%s | Chaos Mesh" />
 }

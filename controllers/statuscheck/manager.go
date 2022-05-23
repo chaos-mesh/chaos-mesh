@@ -124,14 +124,6 @@ func (c *workerCache) delete(key types.NamespacedName) {
 	worker.stop()
 }
 
-func (c *workerCache) get(key types.NamespacedName) (*worker, bool) {
-	obj, ok := c.workers.Load(key)
-	if !ok {
-		return nil, ok
-	}
-	return obj.(*worker), ok
-}
-
 // resultCache provides cached status check results.
 type resultCache struct {
 	// Map of NamespacedName of StatusCheck -> *result

@@ -28,8 +28,8 @@ Please follow the Title Formats below when you open a new PR:
 - [ ] Need to update `chaos-mesh/website`
 - [ ] Need to update `Dashboard UI`
 - Need to **cheery-pick to release branches**
+  - [ ] release-2.2
   - [ ] release-2.1
-  - [ ] release-2.0
 
 ### Checklist
 

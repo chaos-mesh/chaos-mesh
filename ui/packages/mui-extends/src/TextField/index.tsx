@@ -15,7 +15,22 @@
  *
  */
 
-import { TextFieldProps as MuiTextFieldProps, TextField } from '@mui/material'
+import type { TextFieldProps as MuiTextFieldProps, OutlinedInputProps } from '@mui/material'
 
-export type TextFieldProps = MuiTextFieldProps
-export default (props: TextFieldProps) => <TextField size="small" fullWidth {...props} />
+import FormControl from '../FormControl'
+import OutlinedInput from '../OutlinedInput'
+
+export type TextFieldProps = OutlinedInputProps & {
+  label?: MuiTextFieldProps['label']
+  helperText?: MuiTextFieldProps['helperText']
+}
+
+export default function ({ label, helperText, ...rest }: TextFieldProps) {
+  const { disabled, error, fullWidth } = rest
+
+  return (
+    <FormControl disabled={disabled} error={error} label={label} helperText={helperText} fullWidth={fullWidth}>
+      <OutlinedInput {...rest} />
+    </FormControl>
+  )
+}

@@ -14,22 +14,14 @@
  * limitations under the License.
  *
  */
-
-import { RenderOptions, render } from '@testing-library/react'
+// Ref: https://testing-library.com/docs/react-testing-library/setup
+import { render } from '@testing-library/react'
+import type { RenderOptions } from '@testing-library/react'
+import type { FC, ReactElement } from 'react'
 
 import App from './App'
-import { IntlProvider } from 'react-intl'
-import type { ReactElement } from 'react'
-import flat from 'flat'
-import messages from 'i18n/messages'
 
-const AllTheProviders: React.FC = ({ children }) => (
-  <App>
-    <IntlProvider messages={flat(messages['en'])} locale="en" defaultLocale="en">
-      {children}
-    </IntlProvider>
-  </App>
-)
+const AllTheProviders: FC = ({ children }) => <App forTesting>{children}</App>
 
 const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
   render(ui, { wrapper: AllTheProviders, ...options })

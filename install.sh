@@ -288,7 +288,7 @@ prepare_env() {
 
 check_kubernetes() {
     need_cmd "kubectl"
-    kubectl_err_msg=$(kubectl version 2>&1 1>/dev/null)
+    kubectl_err_msg=$(kubectl version --output=yaml 2>&1 1>/dev/null)
     if [ "$kubectl_err_msg" != "" ]; then
         printf "check Kubernetes failed, error: %s\n" "${kubectl_err_msg}"
         exit 1
@@ -298,7 +298,7 @@ check_kubernetes() {
 }
 
 check_kubernetes_version() {
-    version_info=$(kubectl version | sed 's/.*GitVersion:\"v\([0-9.]*\).*/\1/g')
+    version_info=$(kubectl version --output=yaml | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
 
     for v in $version_info
     do
@@ -633,7 +633,7 @@ vercomp () {
         return 0
     fi
     local IFS=.
-    local i ver1=($1) ver2=($2)
+    local i ver1=("$1") ver2=("$2")
     # fill empty fields in ver1 with zeros
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
     do
@@ -1639,6 +1639,22 @@ spec:
           secret:
             secretName: chaos-mesh-webhook-certs
 ---
+# Source: chaos-mesh/templates/cert-manager-certs.yaml
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
 # Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
 # Copyright 2021 Chaos Mesh Authors.
 #
@@ -1815,7 +1831,21 @@ spec:
 # limitations under the License.
 #
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/mutating-admission-webhooks.yaml
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
@@ -1845,7 +1875,7 @@ webhooks:
     namespaceSelector:
       matchLabels:
         admission-webhook: enabled
-    failurePolicy: Ignore
+    failurePolicy: Fail
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -2225,7 +2255,21 @@ webhooks:
         resources:
           - statuschecks
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/validating-admission-webhooks.yaml
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -2616,11 +2660,11 @@ webhooks:
         resources:
           - statuschecks
 ---
-# Source: chaos-mesh/templates/secrets-configuration.yaml
+# Source: chaos-mesh/templates/validating-admission-webhooks.yaml
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: validate-auth
+  name: chaos-mesh-validation-auth
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
