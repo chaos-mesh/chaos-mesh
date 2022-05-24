@@ -19,6 +19,8 @@
 # it will use kind or minikube to install the kubernetes cluster according to the configuration.
 # Finally, when all dependencies are installed, chaos-mesh will be installed.
 
+VERSION=${VERSION:-latest}
+
 usage() {
     cat << EOF
 This script is used to install chaos-mesh.
@@ -42,7 +44,7 @@ FLAGS:
         --microk8s           Install chaos-mesh in microk8s environment
         --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
-    -v, --version            Version of chaos-mesh, default value: latest
+    -v, --version            Version of chaos-mesh, default value: ${VERSION}
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
@@ -60,7 +62,7 @@ EOF
 
 main() {
     local local_kube=""
-    local cm_version="latest"
+    local cm_version="${VERSION}"
     local kind_name="kind"
     local kind_version="v0.11.1"
     local node_num=3
