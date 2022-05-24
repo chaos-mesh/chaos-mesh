@@ -19,11 +19,25 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/genericwebhook"
 )
+
+type Delay string
+
+func (in *Delay) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in != nil {
+		_, err := time.ParseDuration(string(*in))
+		if err != nil {
+			allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("invalid duration %s", *in)))
+		}
+	}
+	return allErrs
+}
 
 type Port int32
 
