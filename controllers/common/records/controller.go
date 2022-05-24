@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -154,15 +155,22 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to apply chaos")
+				applyFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Apply, err.Error())
+				records[index].Events = append(records[index].Events, *applyFailedEvent)
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "apply chaos",
 					Err:      err.Error(),
 				})
 				needRetry = true
+				// if the impl.Apply() failed, we need to update the status to update the records[index].Events
+				shouldUpdate = true
 				continue
 			}
 
 			if record.Phase == v1alpha1.Injected {
+				records[index].InjectedCount++
+				applySucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Apply, "")
+				records[index].Events = append(records[index].Events, *applySucceedEvent)
 				r.Recorder.Event(obj, recorder.Applied{
 					Id: records[index].Id,
 				})
@@ -177,15 +185,22 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to recover chaos")
+				recoverFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Recover, err.Error())
+				records[index].Events = append(records[index].Events, *recoverFailedEvent)
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "recover chaos",
 					Err:      err.Error(),
 				})
 				needRetry = true
+				// if the impl.Recover() failed, we need to update the status to update the records[index].Events
+				shouldUpdate = true
 				continue
 			}
 
 			if record.Phase == v1alpha1.NotInjected {
+				records[index].RecoveredCount++
+				recoverSucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Recover, "")
+				records[index].Events = append(records[index].Events, *recoverSucceedEvent)
 				r.Recorder.Event(obj, recorder.Recovered{
 					Id: records[index].Id,
 				})
@@ -230,4 +245,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		})
 	}
 	return ctrl.Result{Requeue: needRetry}, nil
+}
+
+func newRecordEvent(eventType v1alpha1.RecordEventType, eventStage v1alpha1.RecordEventOperation, msg string) *v1alpha1.RecordEvent {
+	return v1alpha1.NewRecordEvent(eventType, eventStage, msg, metav1.Now())
 }
