@@ -331,7 +331,7 @@ if [ -n "${ARTIFACTS}" ]; then
     export REPORT_DIR=${ARTIFACTS}
 fi
 
-if [ -n "${ARTIFACTS}" -a -z "$SKIP_DUMP" ]; then
+if [ -n "${ARTIFACTS}" ] && [ -z "$SKIP_DUMP" ]; then
     kubetest2_args+=(--dump)
 fi
 
