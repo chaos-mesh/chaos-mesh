@@ -162,11 +162,11 @@ docker_args=(
     --net=host
     --privileged
     -v /:/rootfs
-    -v $ROOT:$ROOT
-    -w $ROOT
-    -v $KUBECONFIG:/etc/kubernetes/admin.conf:ro
+    -v "$ROOT":"$ROOT"
+    -w "$ROOT"
+    -v "$KUBECONFIG":/etc/kubernetes/admin.conf:ro
     --env KUBECONFIG=/etc/kubernetes/admin.conf
-    --env KUBECONTEXT=$KUBECONTEXT
+    --env KUBECONTEXT="$KUBECONTEXT"
 )
 
 if [ -n "$REPORT_DIR" ]; then
@@ -175,7 +175,7 @@ if [ -n "$REPORT_DIR" ]; then
         --report-prefix="${REPORT_PREFIX}"
     )
     docker_args+=(
-        -v $REPORT_DIR:$REPORT_DIR
+        -v "$REPORT_DIR":"$REPORT_DIR"
     )
 fi
 
