@@ -23,7 +23,7 @@ set -o nounset
 set -o pipefail
 
 ROOT=$(unset CDPATH && cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-cd $ROOT
+cd "$ROOT"
 
 source "${ROOT}/hack/lib.sh"
 
@@ -160,7 +160,7 @@ function e2e::image_build() {
 
 function e2e::create_kindconfig() {
     local tmpfile=${1}
-    cat <<EOF > $tmpfile
+    cat <<EOF > "$tmpfile"
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 kubeadmConfigPatches:
@@ -200,31 +200,31 @@ kubeadmConfigPatches:
     v: "4"
 EOF
     if [ -n "$DOCKER_IO_MIRROR" -o -n "$GCR_IO_MIRROR" -o -n "$QUAY_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
 containerdConfigPatches:
 - |-
 EOF
         if [ -n "$DOCKER_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
     endpoint = ["$DOCKER_IO_MIRROR"]
 EOF
         fi
         if [ -n "$GCR_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
     endpoint = ["$GCR_IO_MIRROR"]
 EOF
         fi
         if [ -n "$QUAY_IO_MIRROR" ]; then
-cat <<EOF >> $tmpfile
+cat <<EOF >> "$tmpfile"
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
     endpoint = ["$QUAY_IO_MIRROR"]
 EOF
         fi
     fi
     # control-plane
-    cat <<EOF >> $tmpfile
+    cat <<EOF >> "$tmpfile"
 nodes:
 - role: control-plane
 EOF
@@ -234,8 +234,8 @@ EOF
             exit 1
         fi
         local hostWorkerPath="${KIND_DATA_HOSTPATH}/control-plane"
-        test -d $hostWorkerPath || mkdir $hostWorkerPath
-        cat <<EOF >> $tmpfile
+        test -d "$hostWorkerPath" || mkdir "$hostWorkerPath"
+        cat <<EOF >> "$tmpfile"
   extraMounts:
   - containerPath: /mnt/disks/
     hostPath: "$hostWorkerPath"
@@ -243,8 +243,8 @@ EOF
 EOF
     fi
     # workers
-    for ((i = 1; i <= $KUBE_WORKERS; i++)) {
-        cat <<EOF >> $tmpfile
+    for ((i = 1; i <= "$KUBE_WORKERS"; i++)) {
+        cat <<EOF >> "$tmpfile"
 - role: worker
 EOF
         if [[ "$KIND_DATA_HOSTPATH" != "none" ]]; then
@@ -254,7 +254,7 @@ EOF
             fi
             local hostWorkerPath="${KIND_DATA_HOSTPATH}/worker${i}"
             test -d $hostWorkerPath || mkdir $hostWorkerPath
-            cat <<EOF >> $tmpfile
+            cat <<EOF >> "$tmpfile"
   extraMounts:
   - containerPath: /mnt/disks/
     hostPath: "$hostWorkerPath"
@@ -267,7 +267,7 @@ EOF
 e2e::image_build
 
 kubetest2_args=(
-    $PROVIDER
+    "$PROVIDER"
 )
 
 if [ -n "$RUNNER_SUITE_NAME" ]; then
@@ -291,9 +291,9 @@ fi
 if [ "$PROVIDER" == "kind" ]; then
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" EXIT
-    e2e::create_kindconfig $tmpfile
+    e2e::create_kindconfig "$tmpfile"
     echo "info: print the contents of kindconfig"
-    cat $tmpfile
+    cat "$tmpfile"
     image=""
     for v in ${!kind_node_images[*]}; do
         if [[ "$KUBE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ && "$KUBE_VERSION" == "$v" ]]; then
@@ -308,7 +308,7 @@ if [ "$PROVIDER" == "kind" ]; then
         echo "error: no image for $KUBE_VERSION, exit"
         exit 1
     fi
-    kubetest2_args+=(--image-name $image)
+    kubetest2_args+=(--image-name "$image")
     kubetest2_args+=(
         # add some retires because kind may fail to start the cluster when the
         # load is high
@@ -331,9 +331,9 @@ if [ -n "${ARTIFACTS}" ]; then
     export REPORT_DIR=${ARTIFACTS}
 fi
 
-if [ -n "${ARTIFACTS}" -a -z "$SKIP_DUMP" ]; then
+if [ -n "${ARTIFACTS}" ] && [ -z "$SKIP_DUMP" ]; then
     kubetest2_args+=(--dump)
 fi
 
-echo "info: run 'kubetest2 ${kubetest2_args[@]} -- hack/run-e2e.sh $@'"
+echo "info: run kubetest2" "${kubetest2_args[@]}" " -- hack/run-e2e.sh $*"
 $KUBETSTS2_BIN ${kubetest2_args[@]} -- hack/run-e2e.sh "$@"
