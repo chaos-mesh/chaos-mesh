@@ -21,6 +21,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
+	"golang.org/x/sys/unix"
 )
 
 var endian = binary.LittleEndian
