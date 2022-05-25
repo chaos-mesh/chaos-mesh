@@ -20,13 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ env.NOT_TARGET_LABELED == false }}
     steps:
-      - name: "Skip if labeled not target label"
-        id: "skip-if-not-target"
-        run: |
-          if [ "${NOT_TARGET_LABELED}" = "true" ]; then
-            echo "the label name is not 'rebuild-build-env-image' or 'rebuild-dev-env-image', skip"
-            exit 0
-          fi
       - name: checkout codes
         uses: actions/checkout@v2
       - name: Build Chaos Mesh Build Env
