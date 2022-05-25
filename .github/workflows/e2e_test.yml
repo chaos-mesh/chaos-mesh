@@ -3,13 +3,28 @@ name: E2E Test
 on:
   workflow_dispatch: {}
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
     branches:
       - master
       - release-*
 jobs:
   build-image:
     runs-on: ubuntu-latest
+    env: 
+      NOT_TARGET_LABELED: ${{ github.event.action == 'labeled' && github.event.label.name != 'rebuild-build-env-image' && github.event.label.name != 'rebuild-dev-env-image' }}
     steps:
+      - name: "Skip if labeled not target label"
+        id: "skip-if-not-target"
+        run: |
+          if [ "${NOT_TARGET_LABELED}" = "true" ]; then
+            echo "the label name is not 'rebuild-build-env-image' or 'rebuild-dev-env-image', skip"
+            exit 0
+          fi
       - name: checkout codes
         uses: actions/checkout@v2
       - name: Build Chaos Mesh Build Env
