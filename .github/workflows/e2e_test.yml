@@ -12,13 +12,10 @@ on:
     branches:
       - master
       - release-*
-env: 
-  NOT_TARGET_LABELED: ${{ github.event.action == 'labeled' && github.event.label.name != 'rebuild-build-env-image' && github.event.label.name != 'rebuild-dev-env-image' }}
-
 jobs:
   build-image:
     runs-on: ubuntu-latest
-    if: ${{ env.NOT_TARGET_LABELED == 'false' }}
+    if: ${{ github.event.action != 'labeled'|| github.event.label.name == 'rebuild-build-env-image' || github.event.label.name == 'rebuild-dev-env-image' }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -83,7 +80,7 @@ jobs:
 
   build-e2e-binary:
     runs-on: ubuntu-latest
-    if: ${{ env.NOT_TARGET_LABELED == 'false' }}
+    if: ${{ github.event.action != 'labeled'|| github.event.label.name == 'rebuild-build-env-image' || github.event.label.name == 'rebuild-dev-env-image' }}
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -112,7 +109,7 @@ jobs:
       - build-image
       - build-e2e-binary
     runs-on: ubuntu-latest
-    if: ${{ env.NOT_TARGET_LABELED == 'false' }}
+    if: ${{ github.event.action != 'labeled'|| github.event.label.name == 'rebuild-build-env-image' || github.event.label.name == 'rebuild-dev-env-image' }}
     strategy:
       fail-fast: false
       matrix:
@@ -215,7 +212,7 @@ jobs:
   pass:
     name: E2E Test Passed
     runs-on: ubuntu-latest
-    if: ${{ env.NOT_TARGET_LABELED == 'false' }}
+    if: ${{ github.event.action != 'labeled'|| github.event.label.name == 'rebuild-build-env-image' || github.event.label.name == 'rebuild-dev-env-image' }}
     steps:
       - run: exit 0
     needs:
