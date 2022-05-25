@@ -118,7 +118,7 @@ install: manifests
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
-SKYWALKING_EYES_HEADER = /bin/license-eye header -c ./.github/.licenserc.yaml
+SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
 boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
 boilerplate: images/dev-env/.dockerbuilt
 	$(SKYWALKING_EYES_HEADER) check

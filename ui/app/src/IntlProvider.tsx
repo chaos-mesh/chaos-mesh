@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  *
  */
-import { ThemeProvider as MuiThemeProvider, StyledEngineProvider } from '@mui/material/styles'
+import flat from 'flat'
+import messages from 'i18n/messages'
 import { useMemo } from 'react'
-import theme, { darkTheme } from 'theme'
+import { IntlProvider as ReactIntlProvider } from 'react-intl'
 
 import { useStoreSelector } from 'store'
 
-const ThemeProvider: React.FC = ({ children }) => {
-  const { theme: t } = useStoreSelector((state) => state.settings)
-  const globalTheme = useMemo(() => (t === 'light' ? theme : darkTheme), [t])
+const IntlProvider: React.FC = ({ children }) => {
+  const { lang } = useStoreSelector((state) => state.settings)
+  const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
 
   return (
-    <MuiThemeProvider theme={globalTheme}>
-      <StyledEngineProvider injectFirst>{children}</StyledEngineProvider>
-    </MuiThemeProvider>
+    <ReactIntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+      {children}
+    </ReactIntlProvider>
   )
 }
 
-export default ThemeProvider
+export default IntlProvider

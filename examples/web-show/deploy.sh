@@ -66,12 +66,6 @@ fi
 
 TARGET_IP=$(kubectl get pod -n kube-system -o wide| grep kube-controller | head -n 1 | awk '{print $6}')
 
-if [ ${DOCKER_MIRROR} == "true" ]; then
-    docker pull dockerhub.azk8s.cn/pingcap/web-show || true
-    docker tag dockerhub.azk8s.cn/pingcap/web-show pingcap/web-show  || true
-    kind load docker-image pingcap/web-show > /dev/null 2>&1 || true
-fi
-
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Service
@@ -107,7 +101,7 @@ spec:
     spec:
       containers:
         - name: web-show
-          image: pingcap/web-show
+          image: ghcr.io/chaos-mesh/web-show
           imagePullPolicy: Always
           command:
             - /usr/local/bin/web-show

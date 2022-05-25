@@ -10,12 +10,17 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Add more status for record [#3170](https://github.com/chaos-mesh/chaos-mesh/pull/3170)
 - Add `chaosDaemon.updateStrategy` to Helm chart to allow configuring `DaemonSetUpdateStrategy` for chaos-daemon [#3108](https://github.com/chaos-mesh/chaos-mesh/pull/3108)
 - Add AArch64 support for TimeChaos [#3088](https://github.com/chaos-mesh/chaos-mesh/pull/3088)
+- Add integration test and link test on arm [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
+- Bump chaos-tproxy to v0.4.6
 
 ### Changed
 
 - Helm charts: update validate-auth to chaos-mesh-validation-auth [#3193](https://github.com/chaos-mesh/chaos-mesh/pull/3193)
+- Update shell script to support shellchecks [#3230](https://github.com/chaos-mesh/chaos-mesh/pull/3230)
+- CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
 
 ### Deprecated
 
@@ -23,16 +28,21 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+
+- Removed extra import of common pkg in chaosctl/cmd/logs.go
+- Removed unused local function from statuscheck/manager.go [#3228](https://github.com/chaos-mesh/chaos-mesh/pull/3228)
 
 ### Fixed
 
 - Update description of memory stressors [#3225](https://github.com/chaos-mesh/chaos-mesh/pull/3225)
+- Isolate `target` field and `Scope` when creating `NetworkChaos` in UI [#3223](https://github.com/chaos-mesh/chaos-mesh/issues/3221)
+- Adapt install.sh for kubectl/kubernetes cluster greater than 1.24 [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
+- SC2166: Use || or && rather than -o or -a [#3235](https://github.com/chaos-mesh/chaos-mesh/pull/3235)
+- SC2206: Use quote to prevent word splitting/globbing [#3234](https://github.com/chaos-mesh/chaos-mesh/pull/3234)
 
 ### Security
 
 - Nothing
-
 
 ## [2.2.0] - 2022-04-29
 
@@ -93,6 +103,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Helm charts: apply webhook.FailurePolicy to all the webhooks with default value `Fail` [#3184](https://github.com/chaos-mesh/chaos-mesh/pull/3184)
 - Bump memStress from v0.2.1 to v0.3 [#3186](https://github.com/chaos-mesh/chaos-mesh/pull/3186)
 - Helm charts: configure ca bundle for webhook explicitly [#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)
+- Refine logging in pkg/selector/generic/namespace [#3214](https://github.com/chaos-mesh/chaos-mesh/pull/3214)
 
 ### Deprecated
 
