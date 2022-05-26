@@ -18,10 +18,10 @@ package namespace
 import (
 	"context"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -29,8 +29,6 @@ import (
 )
 
 const Name = "namespace"
-
-var log = ctrl.Log.WithName("namespace-selector")
 
 type namespaceSelector struct {
 	generic.Option
@@ -84,15 +82,15 @@ func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Sele
 	}, nil
 }
 
-func CheckNamespace(ctx context.Context, c client.Client, namespace string) bool {
+func CheckNamespace(ctx context.Context, c client.Client, namespace string, logger logr.Logger) bool {
 	ok, err := IsAllowedNamespaces(ctx, c, namespace)
 	if err != nil {
-		log.Error(err, "fail to check whether this namespace is allowed", "namespace", namespace)
+		logger.Error(err, "fail to check whether this namespace is allowed", "namespace", namespace)
 		return false
 	}
 
 	if !ok {
-		log.Info("namespace is not enabled for chaos-mesh", "namespace", namespace)
+		logger.Info("namespace is not enabled for chaos-mesh", "namespace", namespace)
 	}
 	return ok
 }

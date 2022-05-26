@@ -19,11 +19,25 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
+
+type Delay string
+
+func (in *Delay) Validate(root interface{}, path *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in != nil {
+		_, err := time.ParseDuration(string(*in))
+		if err != nil {
+			allErrs = append(allErrs, field.Invalid(path, in, fmt.Sprintf("invalid duration %s", *in)))
+		}
+	}
+	return allErrs
+}
 
 type Port int32
 
@@ -70,6 +84,7 @@ func (in *PodHttpChaosTarget) Validate(root interface{}, path *field.Path) field
 }
 
 func init() {
+	genericwebhook.Register("Delay", reflect.PtrTo(reflect.TypeOf(Delay(""))))
 	genericwebhook.Register("Port", reflect.PtrTo(reflect.TypeOf(Port(0))))
 	genericwebhook.Register("HTTPMethod", reflect.PtrTo(reflect.TypeOf(HTTPMethod(""))))
 	genericwebhook.Register("PodHttpChaosTarget", reflect.PtrTo(reflect.TypeOf(PodHttpChaosTarget(""))))

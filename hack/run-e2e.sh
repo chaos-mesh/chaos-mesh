@@ -73,7 +73,7 @@ function e2e::image_load() {
     if [ "$PROVIDER" == "kind" ]; then
         local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
         echo $nodes
-        echo "info: load images ${images[@]}"
+        echo "info: load images" "${images[@]}"
         for image in ${images[@]}; do
             $KIND_BIN load docker-image --name $CLUSTER ${IMAGE_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
         done
@@ -162,11 +162,11 @@ docker_args=(
     --net=host
     --privileged
     -v /:/rootfs
-    -v $ROOT:$ROOT
-    -w $ROOT
-    -v $KUBECONFIG:/etc/kubernetes/admin.conf:ro
+    -v "$ROOT":"$ROOT"
+    -w "$ROOT"
+    -v "$KUBECONFIG":/etc/kubernetes/admin.conf:ro
     --env KUBECONFIG=/etc/kubernetes/admin.conf
-    --env KUBECONTEXT=$KUBECONTEXT
+    --env KUBECONTEXT="$KUBECONTEXT"
 )
 
 if [ -n "$REPORT_DIR" ]; then
@@ -175,9 +175,9 @@ if [ -n "$REPORT_DIR" ]; then
         --report-prefix="${REPORT_PREFIX}"
     )
     docker_args+=(
-        -v $REPORT_DIR:$REPORT_DIR
+        -v "$REPORT_DIR":"$REPORT_DIR"
     )
 fi
 
-echo "info: docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}"
+echo "info: docker" "${docker_args[@]}" $E2E_IMAGE "${e2e_args[@]}"
 docker ${docker_args[@]} $E2E_IMAGE ${e2e_args[@]}
