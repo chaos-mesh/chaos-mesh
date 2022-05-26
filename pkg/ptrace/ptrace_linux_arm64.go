@@ -79,7 +79,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 
 	ip := make([]byte, syscallInstrSize)
 
-	// most aarch64 devices are big endian
+	// most aarch64 devices are little endian
 	// 0xd4000001 is `svc #0` to call the system call
 	endian.PutUint32(ip, 0xd4000001)
 	_, err = syscall.PtracePokeData(p.pid, getIp(p.backupRegs), ip)
