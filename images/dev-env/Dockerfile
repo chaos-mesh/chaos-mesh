@@ -22,6 +22,7 @@ RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
+RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
 FROM debian:buster-slim
 
@@ -58,7 +59,6 @@ RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
 
-COPY --from=apache/skywalking-eyes:0.2.0 /bin/license-eye /bin/license-eye
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 

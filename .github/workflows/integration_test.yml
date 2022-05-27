@@ -7,7 +7,11 @@ on:
 jobs:
   run:
     name: Integration Test
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@master
         with:
@@ -15,8 +19,28 @@ jobs:
           fetch-depth: 2
 
       - name: Create kind cluster
-        uses: helm/kind-action@v1.2.0
+        # released version of kind-action doesn't support arm64
+        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
+        with:
+          kubectl_version: v1.23.1
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v2.1
+
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v2.0
+
+      - name: Magic Kind DNS Fix
+        if: ${{ matrix.arch == 'arm64' }}
+        run: |
+          docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/nameserver \(.*\)/nameserver 8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
+          docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
+
+          kubectl rollout restart deployment -n kube-system coredns
+
       - uses: actions/setup-python@v2
+        if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
+
       - uses: actions/setup-go@v2
         with:
           go-version: '1.18'
@@ -62,7 +86,14 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
+          kubectl wait --timeout=60s --for=condition=ready --all pod
 
       - name: Run integration test
         run: |
           bash test/integration_test/run.sh
+
+      - name: post run - print k8s info
+        if: always()
+        run: |
+          kubectl describe pods
+          kubectl describe pods -n chaos-testing
