@@ -37,5 +37,5 @@ func AssetLD(rela elf.Rela64, imageOffset map[string]int, imageContent *[]byte, 
 	byteorder.PutUint32((*imageContent)[rela.Off:rela.Off+4], targetOffset)
 
 	// TODO: support other length besides uint64 (which is 8 bytes)
-	*imageContent = append(*imageContent, make([]byte, 8)...)
+	*imageContent = append(*imageContent, make([]byte, varLength)...)
 }

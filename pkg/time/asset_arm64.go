@@ -51,9 +51,16 @@ func AssetLD(rela elf.Rela64, imageOffset map[string]int, imageContent *[]byte, 
 
 	targetOffset >>= 2
 	instr := byteorder.Uint32((*imageContent)[rela.Off : rela.Off+4])
+
+	// See the document of instruction
+	// [ldr](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/LDR--literal---Load-Register--literal--?lang=en)
+	// the offset is saved in `imm19`, and the max length is 19 (bit)
+	//
+	// The `((targetOffset & (1<<19 - 1)) << 5)` cuts the little 19 bit of targetOffset, and
+	// shift to left 5 bit. And then, cut the rest part of the `instr` and `AND` them together.
 	instr = uint32(int(instr) & ^((1<<19-1)<<5)) | ((targetOffset & (1<<19 - 1)) << 5)
 	byteorder.PutUint32((*imageContent)[rela.Off:rela.Off+4], instr)
 
 	// TODO: support other length besides uint64 (which is 8 bytes)
-	*imageContent = append(*imageContent, make([]byte, 16)...)
+	*imageContent = append(*imageContent, make([]byte, varLength)...)
 }
