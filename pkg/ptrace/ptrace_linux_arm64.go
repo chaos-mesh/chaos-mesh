@@ -39,11 +39,19 @@ func getIp(regs *syscall.PtraceRegs) uintptr {
 }
 
 func getRegs(pid int, regsout *syscall.PtraceRegs) error {
-	return unix.PtraceGetRegSetArm64(pid, nrPRStatus, (*unix.PtraceRegsArm64)(regsout))
+	err := unix.PtraceGetRegSetArm64(pid, nrPRStatus, (*unix.PtraceRegsArm64)(regsout))
+	if err != nil {
+		return errors.Wrapf(err, "get registers of process %d", pid)
+	}
+	return nil
 }
 
 func setRegs(pid int, regs *syscall.PtraceRegs) error {
-	return unix.PtraceSetRegSetArm64(pid, nrPRStatus, (*unix.PtraceRegsArm64)(regs))
+	err := unix.PtraceSetRegSetArm64(pid, nrPRStatus, (*unix.PtraceRegsArm64)(regs))
+	if err != nil {
+		return errors.Wrapf(err, "set registers of process %d", pid)
+	}
+	return nil
 }
 
 // Syscall runs a syscall at main thread of process
