@@ -29,11 +29,9 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import api from 'api'
-import flat from 'flat'
-import messages from 'i18n/messages'
 import Cookies from 'js-cookie'
-import { useEffect, useMemo, useState } from 'react'
-import { IntlProvider } from 'react-intl'
+import { useEffect, useState } from 'react'
+import { BrowserRouter as Router } from 'react-router-dom'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import routes from 'routes'
 
@@ -75,11 +73,7 @@ const Root = styled(Box, {
 const TopContainer = () => {
   const theme = useTheme()
 
-  const { settings, globalStatus } = useStoreSelector((state) => state)
-  const { lang } = settings
-  const { alert, alertOpen, confirm, confirmOpen } = globalStatus
-
-  const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
+  const { alert, alertOpen, confirm, confirmOpen } = useStoreSelector((state) => state.globalStatus)
 
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
@@ -167,7 +161,7 @@ const TopContainer = () => {
   }, [isTabletScreen])
 
   return (
-    <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+    <Router>
       <CssBaseline />
       <Root open={openDrawer}>
         <Sidebar open={openDrawer} />
@@ -227,7 +221,7 @@ const TopContainer = () => {
           onConfirm={confirm.handle}
         />
       </Portal>
-    </IntlProvider>
+    </Router>
   )
 }
 
