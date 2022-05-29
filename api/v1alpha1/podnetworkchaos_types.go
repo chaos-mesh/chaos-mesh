@@ -123,6 +123,10 @@ type RawIptables struct {
 	// The block direction of this iptables rule
 	Direction ChainDirection `json:"direction"`
 
+	// SourcePorts represents the set of source ports of affected network package.
+	// +optional
+	SourcePorts string `json:"source_ports,omitempty"`
+
 	// Device represents the network device to be affected.
 	// +optional
 	Device string `json:"device,omitempty"`

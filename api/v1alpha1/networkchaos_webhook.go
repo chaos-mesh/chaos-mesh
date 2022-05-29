@@ -88,8 +88,18 @@ func ConvertUnitToBytes(nu string) (uint64, error) {
 func (in *NetworkChaosSpec) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
+	if (in.Direction == From || in.Direction == Both || in.Action != PartitionAction) && in.Ports != "" {
+		allErrs = append(allErrs,
+			field.Invalid(path.Child("direction"), in.Direction,
+				"Ports can only used in partition action and"+
+					" cannot be used with `from` and `both` direction yet"))
+	}
+
 	if in.Action == PartitionAction {
-		return nil
+		if len(allErrs) == 0 {
+			return nil
+		}
+		return allErrs
 	}
 
 	if (in.Direction == From || in.Direction == Both) &&

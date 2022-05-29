@@ -215,11 +215,12 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1
 			return err
 		}
 		chains = append(chains, &pb.Chain{
-			Name:      chain.Name,
-			Ipsets:    chain.IPSets,
-			Direction: direction,
-			Target:    "DROP",
-			Device:    chain.Device,
+			Name:        chain.Name,
+			Ipsets:      chain.IPSets,
+			Direction:   direction,
+			Target:      "DROP",
+			SourcePorts: chain.SourcePorts,
+			Device:      chain.Device,
 		})
 	}
 	return iptable.SetIptablesChains(ctx, chaosdaemonClient, pod, chains)

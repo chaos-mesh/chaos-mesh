@@ -326,7 +326,6 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 	if err != nil {
 		return err
 	}
-
 	pbChainDirection := pb.Chain_OUTPUT
 	if chainDirection == v1alpha1.Input {
 		pbChainDirection = pb.Chain_INPUT
@@ -376,7 +375,8 @@ func (impl *Impl) SetDrop(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		RawRuleSource: v1alpha1.RawRuleSource{
 			Source: m.Source,
 		},
-		Device: device,
+		SourcePorts: networkchaos.Spec.Ports,
+		Device:      device,
 	})
 
 	return nil

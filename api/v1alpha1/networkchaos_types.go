@@ -91,6 +91,13 @@ const (
 type NetworkChaosSpec struct {
 	PodSelector `json:",inline"`
 
+	// Ports represents the ports of network packets be affected.
+	// Up to 15 ports can be specified.
+	// This parameter only works with direction: to and action: partition.
+	// ports : port[,port]...
+	// +optional
+	Ports string `json:"ports"`
+
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
 	// Default action: delay
