@@ -15,7 +15,7 @@
  *
  */
 import { MenuItem } from '@mui/material'
-import type { FormikErrors, FormikTouched } from 'formik'
+import { useFormikContext } from 'formik'
 import { getIn } from 'formik'
 
 import { useStoreSelector } from 'store'
@@ -31,11 +31,11 @@ interface InfoProps {
   belong: Belong
   kind: string
   action?: string
-  errors: FormikErrors<Record<string, any>>
-  touched: FormikTouched<Record<string, any>>
 }
 
-export default function Info({ belong, kind, action, errors, touched }: InfoProps) {
+export default function Info({ belong, kind, action }: InfoProps) {
+  const { errors, touched } = useFormikContext()
+
   const { namespaces } = useStoreSelector((state) => state.experiments)
 
   return (

@@ -41,12 +41,18 @@ fi
 
 if [ "$test_case" == "*" ]; then
     for script in $test_dir/$test_case/run.sh; do
+        # jvmchaos and chaosd are not supported in aarch64
+        # TODO: support JVMChaos / chaosd in aarch64, and remove this check
+        if [[ ($script == *"jvm"* || $script == *"physical_machine"*) && "$(uname -m)" == "aarch64" ]]; then
+            continue
+        fi
+
         run $script
     done
 else
     for name in $test_case; do
         script="$test_dir/$name/run.sh"
-	echo "run $script"
+        echo "run $script"
         run $script
     done
 fi

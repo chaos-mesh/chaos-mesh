@@ -35,6 +35,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 			errorDuration := "400S"
 			errorMethod := "gET"
 			validMethod := http.MethodGet
+			errorDelay := "1"
+			valideDelay := "1s"
 
 			tcs := []TestCase{
 				{
@@ -324,6 +326,46 @@ var _ = Describe("HTTPChaos Webhook", func() {
 							Port:   80,
 							Target: PodHttpRequest,
 							Method: &errorMethod,
+						},
+					},
+					execute: func(chaos *HTTPChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "valid delay",
+					chaos: HTTPChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo19",
+						},
+						Spec: HTTPChaosSpec{
+							Port:   80,
+							Target: PodHttpRequest,
+							PodHttpChaosActions: PodHttpChaosActions{
+								Delay: &valideDelay,
+							},
+						},
+					},
+					execute: func(chaos *HTTPChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "ok",
+				},
+				{
+					name: "invalid delay",
+					chaos: HTTPChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo20",
+						},
+						Spec: HTTPChaosSpec{
+							Port:   80,
+							Target: PodHttpRequest,
+							PodHttpChaosActions: PodHttpChaosActions{
+								Delay: &errorDelay,
+							},
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {

@@ -220,6 +220,13 @@ chaosDaemon:
   # Map of chaos-controller-manager node/pod affinities
   affinity: {}
 
+  # Specify DaemonSetUpdateStrategy for chaos-daemon
+  updateStrategy: {}
+    # Example update strategy:
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxUnavailable: 33%
+
 dashboard:
   # Enable chaos-dashboard
   create: true
