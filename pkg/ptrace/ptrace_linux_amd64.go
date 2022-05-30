@@ -94,14 +94,15 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 		return 0, err
 	}
 
-	ip := make([]byte, syscallInstrSize)
+	instruction := make([]byte, syscallInstrSize)
+	ip := getIp(p.backupRegs)
 
 	// set the current instruction (the ip register points to) to the `syscall`
 	// instruction. In x86_64, the `syscall` instruction is 0x050f.
-	binary.LittleEndian.PutUint16(ip, 0x050f)
-	_, err = syscall.PtracePokeData(p.pid, getIp(p.backupRegs), ip)
+	binary.LittleEndian.PutUint16(instruction, 0x050f)
+	_, err = syscall.PtracePokeData(p.pid, ip, instruction)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrapf(err, "writing data %x to %x", instruction, ip)
 	}
 
 	// run one instruction, and stop

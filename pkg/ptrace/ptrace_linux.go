@@ -93,7 +93,6 @@ func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 	for {
 		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
-			logger.Error(err, "read failed", "pid", pid)
 			return nil, errors.WithStack(err)
 		}
 
@@ -129,7 +128,6 @@ func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 				}
 
 				if !strings.Contains(err.Error(), "no such process") {
-					logger.Error(err, "attach failed", "tid", tid)
 					return nil, errors.WithStack(err)
 				}
 				continue
@@ -194,7 +192,6 @@ func (p *TracedProgram) Detach() error {
 
 		if err != nil {
 			if !strings.Contains(err.Error(), "no such process") {
-				p.logger.Error(err, "detach failed", "tid", tid)
 				return errors.WithStack(err)
 			}
 		}
