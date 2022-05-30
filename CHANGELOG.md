@@ -20,6 +20,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Helm charts: update validate-auth to chaos-mesh-validation-auth [#3193](https://github.com/chaos-mesh/chaos-mesh/pull/3193)
 - Update shell script to support shellchecks [#3230](https://github.com/chaos-mesh/chaos-mesh/pull/3230)
 - CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
+- Obsolete the pid and startTime fields in iochaos, httpchaos and stresschaos [#3312](https://github.com/chaos-mesh/chaos-mesh/pull/3312)
 
 ### Deprecated
 
