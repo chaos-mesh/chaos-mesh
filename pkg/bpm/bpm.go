@@ -186,7 +186,7 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 	}
 
 	m.wg.Add(1)
-	log = log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+	log = log.WithValues("uid", process.Uid, "pid", process.Cmd.Process.Pid)
 
 	go func() {
 		err := cmd.Wait()
