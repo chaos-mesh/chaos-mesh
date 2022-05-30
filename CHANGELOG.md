@@ -21,7 +21,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update shell script to support shellchecks [#3230](https://github.com/chaos-mesh/chaos-mesh/pull/3230)
 - CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
 - CI: version unrelated manifests [#3293](https://github.com/chaos-mesh/chaos-mesh/pull/3293)
-- Helm charts: using 0.0.1 as version and appVersion [#3311](https://github.com/chaos-mesh/chaos-mesh/pull/3311)
+- Helm charts: using 0.0.0 as version and appVersion [#3311](https://github.com/chaos-mesh/chaos-mesh/pull/3311)
 
 ### Deprecated
 
