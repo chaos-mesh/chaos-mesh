@@ -90,10 +90,10 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 
 	// most aarch64 devices are little endian
 	// 0xd4000001 is `svc #0` to call the system call
-	endian.PutUint32(ip, 0xd4000001)
+	endian.PutUint32(instruction, 0xd4000001)
 	_, err = syscall.PtracePokeData(p.pid, ip, instruction)
 	if err != nil {
-		return 0, errors.Wrapf(err, "writing data %x to %x", instruction, ip)
+		return 0, errors.Wrapf(err, "writing data %v to %x", instruction, ip)
 	}
 
 	// run one instruction, and stop

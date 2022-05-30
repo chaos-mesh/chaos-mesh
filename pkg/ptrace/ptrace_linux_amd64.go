@@ -102,7 +102,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	binary.LittleEndian.PutUint16(instruction, 0x050f)
 	_, err = syscall.PtracePokeData(p.pid, ip, instruction)
 	if err != nil {
-		return 0, errors.Wrapf(err, "writing data %x to %x", instruction, ip)
+		return 0, errors.Wrapf(err, "writing data %v to %x", instruction, ip)
 	}
 
 	// run one instruction, and stop
