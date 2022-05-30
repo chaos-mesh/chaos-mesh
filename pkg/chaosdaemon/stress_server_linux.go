@@ -17,7 +17,6 @@ package chaosdaemon
 
 import (
 	"context"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -52,13 +51,9 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 
 	resp := new(pb.ExecStressResponse)
 	if cpuProc != nil {
-		resp.CpuInstance = strconv.Itoa(cpuProc.Pair.Pid)
-		resp.CpuStartTime = cpuProc.Pair.CreateTime
 		resp.CpuInstanceUid = cpuProc.Uid
 	}
 	if memoryProc != nil {
-		resp.MemoryInstance = strconv.Itoa(memoryProc.Pair.Pid)
-		resp.MemoryStartTime = memoryProc.Pair.CreateTime
 		resp.MemoryInstanceUid = memoryProc.Uid
 	}
 
@@ -68,39 +63,17 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
-	CpuPid, err := strconv.Atoi(req.CpuInstance)
-	if req.CpuInstance != "" && err != nil {
-		return nil, err
-	}
-
-	MemoryPid, err := strconv.Atoi(req.MemoryInstance)
-	if req.MemoryInstance != "" && err != nil {
-		return nil, err
-	}
-
-	if req.CpuInstanceUid == "" && CpuPid != 0 {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: CpuPid, CreateTime: req.CpuStartTime}); ok {
-			req.CpuInstanceUid = uid
-		}
-	}
-
-	if req.MemoryInstanceUid == "" && MemoryPid != 0 {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: MemoryPid, CreateTime: req.MemoryStartTime}); ok {
-			req.MemoryInstanceUid = uid
-		}
-	}
-
 	log.Info("Canceling stressors", "request", req)
 
 	if req.CpuInstanceUid != "" {
-		err = s.backgroundProcessManager.KillBackgroundProcess(ctx, req.CpuInstanceUid)
+		err := s.backgroundProcessManager.KillBackgroundProcess(ctx, req.CpuInstanceUid)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if req.MemoryInstanceUid != "" {
-		err = s.backgroundProcessManager.KillBackgroundProcess(ctx, req.MemoryInstanceUid)
+		err := s.backgroundProcessManager.KillBackgroundProcess(ctx, req.MemoryInstanceUid)
 		if err != nil {
 			return nil, err
 		}
@@ -169,9 +142,9 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Start stress-ng successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.Uid)
+	log.Info("Start stress-ng successfully", "command", cmd, "pid", proc.Cmd.Process.Pid, "uid", proc.Uid)
 
-	if err = AttachProcessToCGroup(proc.Pair.Pid, cgroupManager); err != nil {
+	if err = AttachProcessToCGroup(proc.Cmd.Process.Pid, cgroupManager); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill stress-ng failed", "request", req)
 		}
@@ -232,9 +205,9 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Start memStress successfully", "command", cmd, "pid", proc.Pair.Pid, "uid", proc.Uid)
+	log.Info("Start memStress successfully", "command", cmd, "pid", proc.Cmd.Process.Pid, "uid", proc.Uid)
 
-	if err = AttachProcessToCGroup(proc.Pair.Pid, cgroupManager); err != nil {
+	if err = AttachProcessToCGroup(proc.Cmd.Process.Pid, cgroupManager); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill memStress failed", "request", req)
 		}
@@ -249,7 +222,7 @@ func (s *DaemonServer) ExecMemoryStressors(ctx context.Context,
 
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
-		comm, err := util.ReadCommName(proc.Pair.Pid)
+		comm, err := util.ReadCommName(proc.Cmd.Process.Pid)
 
 		if err != nil {
 			return nil, err

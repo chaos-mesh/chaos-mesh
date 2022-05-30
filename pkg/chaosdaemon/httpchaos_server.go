@@ -74,12 +74,6 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	log := s.getLoggerFromContext(ctx)
 	log.Info("applying http chaos")
 
-	if in.InstanceUid == "" {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: int(in.Instance), CreateTime: in.StartTime}); ok {
-			in.InstanceUid = uid
-		}
-	}
-
 	if _, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid); !ok {
 		if in.InstanceUid != "" {
 			// chaos daemon may restart, create another tproxy instance
@@ -157,9 +151,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}
 
 	return &pb.ApplyHttpChaosResponse{
-		Instance:    int64(in.Instance),
 		InstanceUid: in.InstanceUid,
-		StartTime:   in.StartTime,
 		StatusCode:  int32(resp.StatusCode),
 		Error:       string(body),
 	}, nil
@@ -187,8 +179,6 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		return errors.Wrapf(err, "execute command(%s)", cmd)
 	}
 
-	in.Instance = int64(proc.Pair.Pid)
-	in.StartTime = proc.Pair.CreateTime
 	in.InstanceUid = proc.Uid
 	return nil
 }

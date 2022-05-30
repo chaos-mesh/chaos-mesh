@@ -39,12 +39,6 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	log := s.getLoggerFromContext(ctx)
 	log.Info("applying io chaos", "Request", in)
 
-	if in.InstanceUid == "" {
-		if uid, ok := s.backgroundProcessManager.GetUID(bpm.ProcessPair{Pid: int(in.Instance), CreateTime: in.StartTime}); ok {
-			in.InstanceUid = uid
-		}
-	}
-
 	if in.InstanceUid != "" {
 		err := s.killIOChaos(ctx, in.InstanceUid)
 		if err != nil {
@@ -114,8 +108,6 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	}
 
 	return &pb.ApplyIOChaosResponse{
-		Instance:    int64(proc.Pair.Pid),
-		StartTime:   proc.Pair.CreateTime,
 		InstanceUid: proc.Uid,
 	}, nil
 }
