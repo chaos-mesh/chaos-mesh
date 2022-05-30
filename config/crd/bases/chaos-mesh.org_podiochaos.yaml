@@ -201,6 +201,9 @@ spec:
                 description: StartTime represents the start time of a toda process
                 format: int64
                 type: integer
+              uid:
+                description: Uid represents a unique running toda process
+                type: string
             type: object
         type: object
     served: true

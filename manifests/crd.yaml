@@ -4230,6 +4230,9 @@ spec:
                 description: StartTime represents the start time of a tproxy process.
                 format: int64
                 type: integer
+              uid:
+                description: Uid represents a unique running chaos-proxy process
+                type: string
             type: object
         type: object
     served: true
@@ -4444,6 +4447,9 @@ spec:
                 description: StartTime represents the start time of a toda process
                 format: int64
                 type: integer
+              uid:
+                description: Uid represents a unique running toda process
+                type: string
             type: object
         type: object
     served: true
@@ -17175,6 +17181,9 @@ spec:
                 additionalProperties:
                   description: StressInstance is an instance generates stresses
                   properties:
+                    memUid:
+                      description: MemUid represents a unique running memStress process
+                      type: string
                     memoryStartTime:
                       description: MemoryStartTime specifies when the memStress starts
                       format: date-time
@@ -17185,6 +17194,10 @@ spec:
                     startTime:
                       description: StartTime specifies when the stress-ng starts
                       format: date-time
+                      type: string
+                    stressUid:
+                      description: StressUid represents a unique running stress-ng
+                        process
                       type: string
                     uid:
                       description: UID is the stress-ng identifier

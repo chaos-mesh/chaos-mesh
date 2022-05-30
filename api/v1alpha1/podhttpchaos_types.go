@@ -26,13 +26,19 @@ type PodHttpChaosSpec struct {
 
 // PodHttpChaosStatus defines the actual state of PodHttpChaos.
 type PodHttpChaosStatus struct {
+	//+kubebuilder:deprecatedversion:warning="Pid is deprecated, please use Uid instead"
 	// Pid represents a running tproxy process id.
 	// +optional
 	Pid int64 `json:"pid,omitempty"`
 
+	//+kubebuilder:deprecatedversion:warning="StartTime is deprecated"
 	// StartTime represents the start time of a tproxy process.
 	// +optional
 	StartTime int64 `json:"startTime,omitempty"`
+
+	// Uid represents a unique running chaos-proxy process
+	// +optional
+	Uid string `json:"uid,omitempty"`
 
 	// +optional
 	FailedMessage string `json:"failedMessage,omitempty"`
