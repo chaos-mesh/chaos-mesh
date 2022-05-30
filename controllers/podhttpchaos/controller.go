@@ -79,8 +79,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	observedGeneration := obj.ObjectMeta.Generation
-	pid := obj.Status.Pid
-	startTime := obj.Status.StartTime
+	uid := obj.Status.Uid
 
 	defer func() {
 		var failedMessage string
@@ -98,8 +97,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 			obj.Status.FailedMessage = failedMessage
 			obj.Status.ObservedGeneration = observedGeneration
-			obj.Status.Pid = pid
-			obj.Status.StartTime = startTime
+			obj.Status.Uid = uid
 
 			return r.Client.Status().Update(context.TODO(), obj)
 		})
@@ -157,9 +155,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		ProxyPorts:  proxyPorts,
 		ContainerId: containerID,
 
-		Instance:  obj.Status.Pid,
-		StartTime: obj.Status.StartTime,
-		EnterNS:   true,
+		InstanceUid: obj.Status.Uid,
+		EnterNS:     true,
 	})
 	if err != nil {
 		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
@@ -175,8 +172,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	pid = res.Instance
-	startTime = res.StartTime
+	uid = res.GetInstanceUid()
 
 	return ctrl.Result{}, nil
 }

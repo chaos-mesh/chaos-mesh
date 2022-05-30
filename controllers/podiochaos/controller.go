@@ -78,8 +78,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	failedMessage := ""
 	observedGeneration := obj.ObjectMeta.Generation
-	pid := obj.Status.Pid
-	startTime := obj.Status.StartTime
+	uid := obj.Status.Uid
 	defer func() {
 		if err != nil {
 			failedMessage = err.Error()
@@ -95,8 +94,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 			obj.Status.FailedMessage = failedMessage
 			obj.Status.ObservedGeneration = observedGeneration
-			obj.Status.Pid = pid
-			obj.Status.StartTime = startTime
+			obj.Status.Uid = uid
 
 			return r.Client.Status().Update(context.TODO(), obj)
 		})
@@ -153,9 +151,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		Volume:      obj.Spec.VolumeMountPath,
 		ContainerId: containerID,
 
-		Instance:  obj.Status.Pid,
-		StartTime: obj.Status.StartTime,
-		EnterNS:   true,
+		InstanceUid: obj.Status.Uid,
+		StartTime:   obj.Status.StartTime,
+		EnterNS:     true,
 	})
 	if err != nil {
 		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
@@ -163,8 +161,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	startTime = res.StartTime
-	pid = res.Instance
+	uid = res.GetInstanceUid()
 
 	return ctrl.Result{}, nil
 }

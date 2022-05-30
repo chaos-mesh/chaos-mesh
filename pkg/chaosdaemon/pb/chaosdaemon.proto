@@ -187,21 +187,13 @@ message ExecStressRequest {
 }
 
 message ExecStressResponse {
-  string cpuInstance = 1;
-  int64 cpuStartTime = 2;
-  string memoryInstance = 3;
-  int64 memoryStartTime = 4;
-  string cpuInstanceUid = 5;
-  string memoryInstanceUid = 6;
+  string stressUid = 1;
+  string memoryUid = 2;
 }
 
 message CancelStressRequest {
-  string cpuInstance = 1;
-  int64 cpuStartTime = 2;
-  string memoryInstance = 3;
-  int64 memoryStartTime = 4;
-  string cpuInstanceUid = 5;
-  string memoryInstanceUid = 6;
+  string stressUid = 1;
+  string memoryUid = 2;
 }
 
 message ApplyIOChaosRequest {

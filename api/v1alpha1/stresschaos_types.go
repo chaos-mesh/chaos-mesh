@@ -91,7 +91,7 @@ type StressInstance struct {
 	// +optional
 	UID string `json:"uid"`
 
-	//+kubebuilder:deprecatedversion:warning="MemoryUID is deprecated, please use MemoryUid instead"
+	//+kubebuilder:deprecatedversion:warning="MemoryUID is deprecated, please use MemUid instead"
 	// MemoryUID is the memStress identifier
 	// +optional
 	MemoryUID string `json:"memoryUid"`
