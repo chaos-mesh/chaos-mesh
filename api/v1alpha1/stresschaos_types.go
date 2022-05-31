@@ -99,12 +99,12 @@ type StressInstance struct {
 	//+kubebuilder:deprecatedversion:warning="StartTime is deprecated"
 	// StartTime specifies when the stress-ng starts
 	// +optional
-	StartTime *metav1.Time `json:"startTime"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 
 	//+kubebuilder:deprecatedversion:warning="MemoryStartTime is deprecated"
 	// MemoryStartTime specifies when the memStress starts
 	// +optional
-	MemoryStartTime *metav1.Time `json:"memoryStartTime"`
+	MemoryStartTime *metav1.Time `json:"memoryStartTime,omitempty"`
 }
 
 // Stressors defines plenty of stressors supported to stress system components out.
