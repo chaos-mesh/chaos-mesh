@@ -13,7 +13,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add more status for record [#3170](https://github.com/chaos-mesh/chaos-mesh/pull/3170)
 - Add `chaosDaemon.updateStrategy` to Helm chart to allow configuring `DaemonSetUpdateStrategy` for chaos-daemon [#3108](https://github.com/chaos-mesh/chaos-mesh/pull/3108)
 - Add integration test and link test on arm [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
-- Bump chaos-tproxy to v0.4.6
 
 ### Changed
 
@@ -22,6 +21,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
 - CI: version unrelated manifests [#3293](https://github.com/chaos-mesh/chaos-mesh/pull/3293)
 - Obsolete the pid and startTime fields in iochaos, httpchaos and stresschaos [#3312](https://github.com/chaos-mesh/chaos-mesh/pull/3312)
+- Bump chaos-tproxy to v0.4.6 [#3272](https://github.com/chaos-mesh/chaos-mesh/pull/3272)
 
 ### Deprecated
 
