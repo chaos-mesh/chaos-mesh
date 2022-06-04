@@ -12,7 +12,28 @@ jobs:
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
-
+      - name: Build Chaos Mesh Build Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
+          fi
+          make image-build-env
+      - name: Build Chaos Mesh Dev Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
+          fi
+          make image-dev-env
       # once the https://github.com/actions/cache/pull/498 gets merged,
       # we can switch to the official cache action
       - name: Restore build cache
@@ -30,7 +51,7 @@ jobs:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
           GO_BUILD_CACHE: ${{ github.workspace }}/cache
-          DOCKER_CLI_EXPERIMENTAL: enabled 
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker buildx create --use --name chaos-mesh-builder
           make -j4 image e2e-image
@@ -126,14 +147,17 @@ jobs:
           kubernetes version: ${{ matrix.kubernetes-version }}
           start args: --cni flannel
           github token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: load image into minikube
         run: |
           minikube image load ./output/saved-images/chaos-dashboard.tgz
           minikube image load ./output/saved-images/chaos-daemon.tgz
           minikube image load ./output/saved-images/chaos-mesh.tgz
           minikube image load ./output/saved-images/e2e-helper.tgz
-      - name: Setup Helm
-        uses: azure/setup-helm@v1
+
+      - name: Setup helm
+        uses: azure/setup-helm@v2.1
+
       - name: Install Chaos Mesh
         run: |
           # if kubernetes does not support apiextensions.k8s.io/v1, fallback to apiextensions.k8s.io/v1beta1
