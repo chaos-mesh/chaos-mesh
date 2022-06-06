@@ -104,7 +104,7 @@ type PodHttpChaosActions struct {
 	// such as "300ms", "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Delay *string `json:"delay,omitempty"`
+	Delay *string `json:"delay,omitempty" webhook:"Delay"`
 
 	// Replace is a rule to replace some contents in target.
 	// +optional
