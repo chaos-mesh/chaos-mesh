@@ -23,11 +23,19 @@ import (
 
 type Controller string
 
+// Object only used for registration webhook for various Kind of chaos custom resources.
+// Deprecated: use WebhookObject instead.
+// TODO: migrate it to WebhookObject
 type Object struct {
+	// Object should be the same as the kind of the chaos custom resource.
 	Object v1alpha1.InnerObject
-	Name   string
+	// Name indicates the name of the webhook. It would be used to dedicate enabling the webhook for this Kind of
+	// chaos custom resource or not.
+	Name string
 }
 
+// ChaosObjects is the list of all kind of chaos custom resource, following the registration pattern.
+// Deprecated: use WebhookObjects instead.
 var ChaosObjects = fx.Supply(
 	fx.Annotated{
 		Group: "objs",
@@ -142,11 +150,17 @@ var ChaosObjects = fx.Supply(
 	},
 )
 
+// WebhookObject only used for registration the
 type WebhookObject struct {
+	// Object should be the same as the kind of the chaos custom resource.
 	Object v1alpha1.WebhookObject
-	Name   string
+	// Name indicates the name of the webhook. It would be used to dedicate enabling the webhook for this Kind of
+	// chaos custom resource or not.
+	Name string
 }
 
+// WebhookObjects is the list of all kind of chaos custom resource, following the registration pattern.
+// When you add a new kind of chaos custom resource, please add it to the list.
 var WebhookObjects = fx.Supply(
 	fx.Annotated{
 		Group: "webhookObjs",

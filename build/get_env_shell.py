@@ -88,6 +88,9 @@ def main():
     if os.getenv("TARGET_PLATFORM") is not None and os.getenv(
             "TARGET_PLATFORM") != "":
         cmd += ["--platform", f"linux/{os.getenv('TARGET_PLATFORM')}"]
+    else:
+        cmd += ["--env", f"TARGET_PLATFORM={target_platform}"]
+
     if target_platform == "arm64":
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
 

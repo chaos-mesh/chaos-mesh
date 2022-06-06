@@ -31,23 +31,26 @@ jobs:
   go:
     needs: skip-changes
     if: ${{ needs.skip-changes.outputs.go != 'true' }}
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+        job:
+          - verify
+          - build
+          - test
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    steps:
+      - run: echo "Not required"
+  ui:
+    needs: skip-changes
+    if: ${{ needs.skip-changes.outputs.ui != 'true' }}
     strategy:
       matrix:
         job:
           - verify
           - build
           - test
-    steps:
-      - run: echo "Not required"
-  ui:
-    needs: skip-changes
-    if: ${{ needs.skip-changes.outputs.ui != 'true' }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        job:
-          - build
-          - test
+    runs-on: "ubuntu-latest"
     steps:
       - run: echo "Not required"

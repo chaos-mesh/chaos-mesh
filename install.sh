@@ -19,6 +19,8 @@
 # it will use kind or minikube to install the kubernetes cluster according to the configuration.
 # Finally, when all dependencies are installed, chaos-mesh will be installed.
 
+VERSION=${VERSION:-latest}
+
 usage() {
     cat << EOF
 This script is used to install chaos-mesh.
@@ -42,7 +44,7 @@ FLAGS:
         --microk8s           Install chaos-mesh in microk8s environment
         --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
-    -v, --version            Version of chaos-mesh, default value: latest
+    -v, --version            Version of chaos-mesh, default value: ${VERSION}
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
@@ -60,7 +62,7 @@ EOF
 
 main() {
     local local_kube=""
-    local cm_version="latest"
+    local cm_version="${VERSION}"
     local kind_name="kind"
     local kind_version="v0.11.1"
     local node_num=3
@@ -315,9 +317,9 @@ install_kubectl() {
 
     printf "Install kubectl client\n"
 
-    err_msg=$(kubectl version --client=true 2>&1 1>/dev/null)
+    err_msg=$(kubectl version --client=true --output=yaml 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
-        v=$(kubectl version --client=true | sed 's/.*GitVersion:\"v\([0-9.]*\).*/\1/g')
+        v=$(kubectl version --client=true --output=yaml | grep gitVersion | sed 's/.*gitVersion: v\([0-9.]*\).*/\1/g')
         target_version=$(echo "${kubectl_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesg requires kubectl version %s or later\n"  "${target_version}"
@@ -633,7 +635,7 @@ vercomp () {
         return 0
     fi
     local IFS=.
-    local i ver1=($1) ver2=($2)
+    local i ver1=("$1") ver2=("$2")
     # fill empty fields in ver1 with zeros
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
     do
