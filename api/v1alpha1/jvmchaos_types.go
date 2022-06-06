@@ -60,7 +60,7 @@ const (
 	// refer to https://downloads.jboss.org/byteman/4.0.14/byteman-programmers-guide.html#the-byteman-rule-language
 	JVMRuleDataAction JVMChaosAction = "ruleData"
 
-	// JVMMysqlAction represents the JVM chaos action of mysql java client fault injection
+	// JVMMySQLAction represents the JVM chaos action of mysql java client fault injection
 	JVMMySQLAction JVMChaosAction = "mysql"
 )
 
