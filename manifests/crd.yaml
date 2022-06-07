@@ -4223,11 +4223,13 @@ spec:
                 format: int64
                 type: integer
               pid:
-                description: Pid represents a running tproxy process id.
+                description: 'Pid represents a running tproxy process id. Deprecated:
+                  Pid is deprecated, please use Uid instead'
                 format: int64
                 type: integer
               startTime:
-                description: StartTime represents the start time of a tproxy process.
+                description: 'StartTime represents the start time of a tproxy process.
+                  Deprecated: StartTime is deprecated'
                 format: int64
                 type: integer
               uid:
@@ -4440,11 +4442,13 @@ spec:
                 format: int64
                 type: integer
               pid:
-                description: Pid represents a running toda process id
+                description: 'Pid represents a running toda process id Deprecated:
+                  Pid is deprecated, please use Uid instead'
                 format: int64
                 type: integer
               startTime:
-                description: StartTime represents the start time of a toda process
+                description: 'StartTime represents the start time of a toda process
+                  Deprecated: StartTime is deprecated'
                 format: int64
                 type: integer
               uid:
@@ -17185,14 +17189,17 @@ spec:
                       description: MemUid represents a unique running memStress process
                       type: string
                     memoryStartTime:
-                      description: MemoryStartTime specifies when the memStress starts
+                      description: 'MemoryStartTime specifies when the memStress starts
+                        Deprecated: MemoryStartTime is deprecated'
                       format: date-time
                       type: string
                     memoryUid:
-                      description: MemoryUID is the memStress identifier
+                      description: 'MemoryUID is the memStress identifier Deprecated:
+                        MemoryUID is deprecated, please use MemUid instead'
                       type: string
                     startTime:
-                      description: StartTime specifies when the stress-ng starts
+                      description: 'StartTime specifies when the stress-ng starts
+                        Deprecated: StartTime is deprecated'
                       format: date-time
                       type: string
                     stressUid:
@@ -17200,7 +17207,8 @@ spec:
                         process
                       type: string
                     uid:
-                      description: UID is the stress-ng identifier
+                      description: 'UID is the stress-ng identifier Deprecated: UID
+                        is deprecated, please use StressUid instead'
                       type: string
                   type: object
                 description: Instances always specifies stressing instances

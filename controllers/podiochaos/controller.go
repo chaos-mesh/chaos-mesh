@@ -152,7 +152,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		ContainerId: containerID,
 
 		InstanceUid: obj.Status.Uid,
-		StartTime:   obj.Status.StartTime,
 		EnterNS:     true,
 	})
 	if err != nil {

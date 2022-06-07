@@ -54,10 +54,7 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 
 	log.Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
-		return &pb.ApplyIOChaosResponse{
-			Instance:  0,
-			StartTime: 0,
-		}, nil
+		return &pb.ApplyIOChaosResponse{}, nil
 	}
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
