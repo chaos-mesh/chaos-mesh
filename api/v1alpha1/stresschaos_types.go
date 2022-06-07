@@ -88,21 +88,25 @@ type StressInstance struct {
 
 	//+kubebuilder:deprecatedversion:warning="UID is deprecated, please use StressUid instead"
 	// UID is the stress-ng identifier
+	// Deprecated: UID is deprecated, please use StressUid instead
 	// +optional
 	UID string `json:"uid"`
 
 	//+kubebuilder:deprecatedversion:warning="MemoryUID is deprecated, please use MemUid instead"
 	// MemoryUID is the memStress identifier
+	// Deprecated: MemoryUID is deprecated, please use MemUid instead
 	// +optional
 	MemoryUID string `json:"memoryUid"`
 
 	//+kubebuilder:deprecatedversion:warning="StartTime is deprecated"
 	// StartTime specifies when the stress-ng starts
+	// Deprecated: StartTime is deprecated
 	// +optional
 	StartTime *metav1.Time `json:"startTime,omitempty"`
 
 	//+kubebuilder:deprecatedversion:warning="MemoryStartTime is deprecated"
 	// MemoryStartTime specifies when the memStress starts
+	// Deprecated: MemoryStartTime is deprecated
 	// +optional
 	MemoryStartTime *metav1.Time `json:"memoryStartTime,omitempty"`
 }

@@ -229,11 +229,13 @@ type PodIOChaosStatus struct {
 
 	//+kubebuilder:deprecatedversion:warning="Pid is deprecated, please use Uid instead"
 	// Pid represents a running toda process id
+	// Deprecated: Pid is deprecated, please use Uid instead
 	// +optional
 	Pid int64 `json:"pid,omitempty"`
 
 	//+kubebuilder:deprecatedversion:warning="StartTime is deprecated"
 	// StartTime represents the start time of a toda process
+	// Deprecated: StartTime is deprecated
 	// +optional
 	StartTime int64 `json:"startTime,omitempty"`
 
