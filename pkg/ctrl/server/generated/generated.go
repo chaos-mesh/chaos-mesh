@@ -668,11 +668,12 @@ type ComplexityRoot struct {
 	}
 
 	RawIptables struct {
-		Device    func(childComplexity int) int
-		Direction func(childComplexity int) int
-		IPSets    func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Source    func(childComplexity int) int
+		Device      func(childComplexity int) int
+		Direction   func(childComplexity int) int
+		IPSets      func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Source      func(childComplexity int) int
+		SourcePorts func(childComplexity int) int
 	}
 
 	RawTrafficControl struct {
@@ -3895,6 +3896,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RawIptables.Source(childComplexity), true
 
+	case "RawIptables.source_ports":
+		if e.complexity.RawIptables.SourcePorts == nil {
+			break
+		}
+
+		return e.complexity.RawIptables.SourcePorts(childComplexity), true
+
 	case "RawTrafficControl.bandwidth":
 		if e.complexity.RawTrafficControl.Bandwidth == nil {
 			break
@@ -4457,7 +4465,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4675,7 +4683,7 @@ type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerState
 
     # Message regarding the last termination of the container
     message: String
-    
+
     #Time at which previous execution of the container started
     startedAt: Time
 
@@ -4703,7 +4711,7 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4779,7 +4787,7 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     rdev: Int64
 
     # MistakeSpec represents the mistake to inject
-    
+
     # filling determines what is filled in the miskate data.
     filling: String
 
@@ -4812,7 +4820,7 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4940,7 +4948,7 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5040,7 +5048,7 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5233,7 +5241,7 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5306,6 +5314,9 @@ type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
 
     # The block direction of this iptables rule
     direction: String!
+
+    # source_ports represents the set of source ports of affected network package.
+    source_ports: String
 
     # The name and namespace of the source network chaos
     source: String!
@@ -5408,7 +5419,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5512,7 +5523,7 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5556,7 +5567,8 @@ type CgroupsMemory {
 type ProcessStress {
     process: Process!
     cgroup: String!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -19292,6 +19304,38 @@ func (ec *executionContext) _RawIptables_direction(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RawIptables_source_ports(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIptables",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SourcePorts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RawIptables_source(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -28230,6 +28274,13 @@ func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionS
 				return innerFunc(ctx)
 
 			})
+		case "source_ports":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIptables_source_ports(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "source":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._RawIptables_source(ctx, field, obj)

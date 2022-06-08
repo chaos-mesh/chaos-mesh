@@ -1604,6 +1604,14 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      ports:
+        description: |-
+          Ports represents the ports of network packets be affected.
+          Up to 15 ports can be specified.
+          This parameter only works with direction: to and action: partition.
+          ports : port[,port]...
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos

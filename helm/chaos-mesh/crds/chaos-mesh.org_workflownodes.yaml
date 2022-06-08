@@ -1488,6 +1488,11 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  ports:
+                    description: 'Ports represents the ports of network packets be
+                      affected. Up to 15 ports can be specified. This parameter only
+                      works with direction: to and action: partition. ports : port[,port]...'
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -3889,6 +3894,12 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      ports:
+                        description: 'Ports represents the ports of network packets
+                          be affected. Up to 15 ports can be specified. This parameter
+                          only works with direction: to and action: partition. ports
+                          : port[,port]...'
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -6799,6 +6810,12 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                ports:
+                                  description: 'Ports represents the ports of network
+                                    packets be affected. Up to 15 ports can be specified.
+                                    This parameter only works with direction: to and
+                                    action: partition. ports : port[,port]...'
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -9460,6 +9477,13 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    ports:
+                                      description: 'Ports represents the ports of
+                                        network packets be affected. Up to 15 ports
+                                        can be specified. This parameter only works
+                                        with direction: to and action: partition.
+                                        ports : port[,port]...'
                                       type: string
                                     selector:
                                       description: Selector is used to select pods

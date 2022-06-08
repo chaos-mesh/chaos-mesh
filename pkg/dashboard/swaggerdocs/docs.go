@@ -4062,6 +4062,10 @@ var doc = `{
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
                     "type": "string"
                 },
+                "ports": {
+                    "description": "Ports represents the ports of network packets be affected.\nUp to 15 ports can be specified.\nThis parameter only works with direction: to and action: partition.\nports : port[,port]...\n+optional",
+                    "type": "string"
+                },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",

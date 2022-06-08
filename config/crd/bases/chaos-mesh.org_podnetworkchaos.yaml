@@ -107,6 +107,10 @@ spec:
                       type: string
                     source:
                       type: string
+                    source_ports:
+                      description: SourcePorts represents the set of source ports
+                        of affected network package.
+                      type: string
                   required:
                   - direction
                   - name
