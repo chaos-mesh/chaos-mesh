@@ -40,6 +40,8 @@ sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh:.*/\${IMAGE_REGISTRY_PREFIX}\/chao
 sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-daemon:.*/\${IMAGE_REGISTRY_PREFIX}\/chaos-mesh\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-dashboard:.*/\${IMAGE_REGISTRY_PREFIX}\/chaos-mesh\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/value: UTC/value: \$\{timezone\}/g' $tmp_file
+sed -i.bak 's/app.kubernetes.io\/version: 0.0.0/app.kubernetes.io\/version: $\{VERSION_TAG##v\}/g' $tmp_file
+
 mv $tmp_file $tmp_file.bak
 
 cat <<EOF > $tmp_file
