@@ -175,7 +175,6 @@ func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 		fx.Provide(
 			controllerManagerOption,
 			provider.NewClient,
-			provider.NewClientSet,
 			provider.NewManager,
 			provider.NewScheme,
 		),
