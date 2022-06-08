@@ -125,7 +125,7 @@ type RawIptables struct {
 
 	// SourcePorts represents the set of source ports of affected network package.
 	// +optional
-	SourcePorts string `json:"source_ports,omitempty"`
+	SourcePorts string `json:"sourcePorts,omitempty"`
 
 	// Device represents the network device to be affected.
 	// +optional

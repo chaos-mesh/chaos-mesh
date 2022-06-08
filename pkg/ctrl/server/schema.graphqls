@@ -993,8 +993,8 @@ type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     # The block direction of this iptables rule
     direction: String!
 
-    # source_ports represents the set of source ports of affected network package.
-    source_ports: String
+    # sourcePorts represents the set of source ports of affected network package.
+    sourcePorts: String
 
     # The name and namespace of the source network chaos
     source: String!

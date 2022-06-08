@@ -3896,7 +3896,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RawIptables.Source(childComplexity), true
 
-	case "RawIptables.source_ports":
+	case "RawIptables.sourcePorts":
 		if e.complexity.RawIptables.SourcePorts == nil {
 			break
 		}
@@ -5315,8 +5315,8 @@ type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     # The block direction of this iptables rule
     direction: String!
 
-    # source_ports represents the set of source ports of affected network package.
-    source_ports: String
+    # sourcePorts represents the set of source ports of affected network package.
+    sourcePorts: String
 
     # The name and namespace of the source network chaos
     source: String!
@@ -19304,7 +19304,7 @@ func (ec *executionContext) _RawIptables_direction(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RawIptables_source_ports(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
+func (ec *executionContext) _RawIptables_sourcePorts(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIptables) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -28274,9 +28274,9 @@ func (ec *executionContext) _RawIptables(ctx context.Context, sel ast.SelectionS
 				return innerFunc(ctx)
 
 			})
-		case "source_ports":
+		case "sourcePorts":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._RawIptables_source_ports(ctx, field, obj)
+				return ec._RawIptables_sourcePorts(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)

@@ -1354,7 +1354,7 @@ spec:
       containers:
         - name: chaos-daemon
           image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-daemon:${VERSION_TAG}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1558,7 +1558,7 @@ spec:
       containers:
       - name: chaos-mesh
         image: ${IMAGE_REGISTRY_PREFIX}/chaos-mesh/chaos-mesh:${VERSION_TAG}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         resources:
             limits: {}
             requests:
