@@ -13,10 +13,5 @@
 // limitations under the License.
 //
 
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("linux arm64 is not supported")
-}
+// Package provider provides several required components for bootstrapping chaos-controller-manager.
+package provider

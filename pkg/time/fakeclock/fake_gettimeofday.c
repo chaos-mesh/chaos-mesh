@@ -54,7 +54,7 @@ inline int real_gettimeofday(struct timeval *tv, struct timezone *tz)
 }
 #endif
 
-int gettimeofday(struct timeval *tv, struct timezone *tz)
+int fake_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
     int ret = real_gettimeofday(tv, tz);
 

@@ -4,6 +4,12 @@
 name: "Must Update CHANGELOG"
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
     branches:
       - master
       - release-*
@@ -16,7 +22,6 @@ jobs:
     steps:
       - name: "Skip if label exists"
         id: "skip-if-label-exists"
-
         run: |
           if [ "${LABEL_EXISTS}" = "true" ] ; then
             echo "no-need-update-changelog exists, skipping this check"

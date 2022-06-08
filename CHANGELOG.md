@@ -12,14 +12,18 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Add more status for record [#3170](https://github.com/chaos-mesh/chaos-mesh/pull/3170)
 - Add `chaosDaemon.updateStrategy` to Helm chart to allow configuring `DaemonSetUpdateStrategy` for chaos-daemon [#3108](https://github.com/chaos-mesh/chaos-mesh/pull/3108)
+- Add AArch64 support for TimeChaos [#3088](https://github.com/chaos-mesh/chaos-mesh/pull/3088)
 - Add integration test and link test on arm [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
-- Bump chaos-tproxy to v0.4.6
+- Add `spec.privateKey.rotationPolicy` to Certificates, to comply with requirements in cert-manager 1.8 [#3325](https://github.com/chaos-mesh/chaos-mesh/pull/3325)
 
 ### Changed
 
 - Helm charts: update validate-auth to chaos-mesh-validation-auth [#3193](https://github.com/chaos-mesh/chaos-mesh/pull/3193)
 - Update shell script to support shellchecks [#3230](https://github.com/chaos-mesh/chaos-mesh/pull/3230)
 - CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
+- CI: version unrelated manifests [#3293](https://github.com/chaos-mesh/chaos-mesh/pull/3293)
+- Bump chaos-tproxy to v0.4.6 [#3272](https://github.com/chaos-mesh/chaos-mesh/pull/3272)
+- Helm charts: using 0.0.0 as version and appVersion [#3311](https://github.com/chaos-mesh/chaos-mesh/pull/3311)
 
 ### Deprecated
 
@@ -27,14 +31,15 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-
 - Removed extra import of common pkg in chaosctl/cmd/logs.go
 - Removed unused local function from statuscheck/manager.go [#3228](https://github.com/chaos-mesh/chaos-mesh/pull/3228)
+- Removed ui build and test for arm64 [#3305](https://github.com/chaos-mesh/chaos-mesh/pull/3305)
 
 ### Fixed
 
 - Update description of memory stressors [#3225](https://github.com/chaos-mesh/chaos-mesh/pull/3225)
 - Isolate `target` field and `Scope` when creating `NetworkChaos` in UI [#3223](https://github.com/chaos-mesh/chaos-mesh/issues/3221)
+- Add arm64 architecture to ci_skip to pass required test [#3305](https://github.com/chaos-mesh/chaos-mesh/pull/3305)
 - Adapt install.sh for kubectl/kubernetes cluster greater than 1.24 [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
 - SC2166: Use || or && rather than -o or -a [#3235](https://github.com/chaos-mesh/chaos-mesh/pull/3235)
 - SC2206: Use quote to prevent word splitting/globbing [#3234](https://github.com/chaos-mesh/chaos-mesh/pull/3234)

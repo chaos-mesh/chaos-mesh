@@ -58,6 +58,8 @@ spec:
   isCA: true
   issuerRef:
     name: chaos-mesh-selfsigned
+  privateKey:
+    rotationPolicy: Never
 ---
 {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
 apiVersion: cert-manager.io/v1
@@ -105,6 +107,8 @@ spec:
   secretName: {{ template "chaos-mesh.webhook.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
+  privateKey:
+    rotationPolicy: Never
 ---
 {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
 apiVersion: cert-manager.io/v1
@@ -130,6 +134,8 @@ spec:
   secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
+  privateKey:
+    rotationPolicy: Never
 ---
 {{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
 apiVersion: cert-manager.io/v1
@@ -155,4 +161,6 @@ spec:
   secretName: {{ template "chaos-mesh.daemon.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
+  privateKey:
+    rotationPolicy: Never
 {{- end }}
