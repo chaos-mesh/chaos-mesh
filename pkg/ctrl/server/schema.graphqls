@@ -994,7 +994,7 @@ type RawIptables @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     direction: String!
 
     # SourcePorts represents the set of source ports of affected network package.
-    SourcePorts: String!
+    sourcePorts: String!
 
     # The name and namespace of the source network chaos
     source: String!
