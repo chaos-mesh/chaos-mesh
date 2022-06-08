@@ -16,6 +16,7 @@
 package remotecluster
 
 import (
+	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -24,7 +25,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
-	"github.com/go-logr/logr"
 )
 
 func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder, registry *clusterregistry.RemoteClusterRegistry) error {

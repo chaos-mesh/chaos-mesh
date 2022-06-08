@@ -20,10 +20,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotepodreconciler"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -32,6 +28,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
+
+	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotepodreconciler"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 type remoteCluster struct {
