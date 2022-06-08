@@ -174,7 +174,7 @@
         "imageHelper": "容器的镜像",
         "imageValidation": "镜像不能为空",
         "command": "命令",
-        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以空格结尾来创建单条命令。"
+        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以回车结束来创建单条命令。"
       },
       "conditionalBranches": {
         "title": "条件分支（可选）",
@@ -394,6 +394,6 @@
   },
   "physic": {
     "address": "地址",
-    "addressHelper": "键入并以空格结尾来添加一个或多个 chaosd 地址"
+    "addressHelper": "键入并以回车结束来添加一个或多个 chaosd 地址"
   }
 }
