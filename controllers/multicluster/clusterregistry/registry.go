@@ -120,7 +120,7 @@ func (r *RemoteClusterRegistry) WithClient(name string, f func(c client.Client) 
 
 	cluster, ok := r.clusters[name]
 	if !ok {
-		return errors.Wrapf(ErrNotExist, "lookup cluster: %s", cluster)
+		return errors.Wrapf(ErrNotExist, "lookup cluster: %s", name)
 	}
 
 	return f(cluster.Client)
@@ -133,7 +133,7 @@ func (r *RemoteClusterRegistry) Stop(ctx context.Context, name string) error {
 
 	cluster, ok := r.clusters[name]
 	if !ok {
-		return errors.Wrapf(ErrNotExist, "lookup cluster: %s", cluster)
+		return errors.Wrapf(ErrNotExist, "lookup cluster: %s", name)
 	}
 
 	err := cluster.app.Stop(ctx)
