@@ -87,6 +87,7 @@ func (s *DaemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 	err = s.timeChaosServer.SetTimeOffset(req.Uid, tasks.PodContainerName(req.PodContainerName),
 		time.NewConfig(req.Sec, req.Nsec, req.ClkIdsMask))
 	if err != nil {
+		logger.Error(err, "error while applying chaos")
 		return nil, err
 	}
 	return &empty.Empty{}, nil
@@ -112,6 +113,7 @@ func (s *DaemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 
 	err = s.timeChaosServer.manager.Recover(req.Uid, nameID)
 	if err != nil {
+		logger.Error(err, "error while recovering chaos")
 		return nil, err
 	}
 
