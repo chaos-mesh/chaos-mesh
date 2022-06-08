@@ -56,7 +56,7 @@ func NewScheme() *runtime.Scheme {
 }
 
 // NewOption returns the manager.Options for build the controller-runtime Manager
-func NewOption(logger logr.Logger) *ctrl.Options {
+func NewOption(logger logr.Logger, scheme *runtime.Scheme) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
 	leaderElectionNamespace := config.ControllerCfg.Namespace

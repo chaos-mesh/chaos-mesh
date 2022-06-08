@@ -4770,12 +4770,12 @@ spec:
                         type: string
                       name:
                         type: string
-                      namespacE:
+                      namespace:
                         type: string
                     required:
                     - key
                     - name
-                    - namespacE
+                    - namespace
                     type: object
                 required:
                 - secretRef
@@ -4783,7 +4783,6 @@ spec:
               namespace:
                 type: string
             required:
-            - configOverride
             - kubeConfig
             - namespace
             type: object

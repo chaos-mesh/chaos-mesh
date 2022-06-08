@@ -42,7 +42,8 @@ type RemoteClusterSpec struct {
 
 	KubeConfig RemoteClusterKubeConfig `json:"kubeConfig"`
 
-	ConfigOverride json.RawMessage `json:"configOverride"`
+	//+optional
+	ConfigOverride json.RawMessage `json:"configOverride,omitempty"`
 }
 
 // RemoteClusterKubeConfig refers to a secret by which we'll use to connect remote cluster
@@ -52,7 +53,7 @@ type RemoteClusterKubeConfig struct {
 
 // RemoteClusterSecretRef refers to a secret in any namespaces
 type RemoteClusterSecretRef struct {
-	Namespace string `json:"namespacE"`
+	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 
 	Key string `json:"key"`
