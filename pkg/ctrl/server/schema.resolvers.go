@@ -1157,14 +1157,7 @@ func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInpu
 }
 
 func (r *rawIPSetResolver) IPSetType(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error) {
-	if obj != nil {
-		IPSetJs, err := json.Marshal(obj)
-		if err != nil {
-			return "", fmt.Errorf("marshual error %v", *obj)
-		}
-		return string(IPSetJs), nil
-	}
-	return "", nil
+	return string(obj.IPSetType), nil
 }
 
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
