@@ -78,6 +78,7 @@ echo "Checking chaosctl debug networkchaos"
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
     code=1
+    cat $log_file
 fi
 file_must_contains $log_file "\[Chaos\]: web-show-network-delay" true
 file_must_contains $log_file "1. \[ipset list\]" true
