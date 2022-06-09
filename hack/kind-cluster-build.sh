@@ -197,7 +197,7 @@ echo "############# success create cluster:[${clusterName}] #############"
 echo "To start using your cluster, run:"
 echo "    export KUBECONFIG=${kubeconfigPath}"
 echo ""
-echo <<EOF
+cat << EOF
 NOTE: In kind, nodes run docker network and cannot access host network.
 If you configured local HTTP proxy in your docker, images may cannot be pulled
 because http proxy is inaccessible.

@@ -105,13 +105,10 @@ func (it *FakeImage) AttachToProcess(pid int, variables map[string]uint64) (err 
 	}
 
 	for k, v := range variables {
-		if offset, ok := it.offset[k]; ok {
-			err = program.WriteUint64ToAddr(fakeEntry.StartAddress+uint64(offset), v)
-			if err != nil {
-				return errors.Wrapf(err, "set %s for time skew, pid: %d", k, pid)
-			}
-		} else {
-			return errors.Errorf("no such extern variable in fake image: %s", k)
+		err = it.SetVarUint64(program, fakeEntry, k, v)
+
+		if err != nil {
+			return errors.Wrapf(err, "set %s for time skew, pid: %d", k, pid)
 		}
 	}
 
@@ -149,8 +146,8 @@ func (it *FakeImage) FindInjectedImage(program *ptrace.TracedProgram, varNum int
 		if varNum*8 > len(it.content) {
 			return nil, errors.New("variable num bigger than content num")
 		}
-		contentWithoutVariable := (*content)[:len(it.content)-varNum*8]
-		expectedContentWithoutVariable := it.content[:len(it.content)-varNum*8]
+		contentWithoutVariable := (*content)[:len(it.content)-varNum*varLength]
+		expectedContentWithoutVariable := it.content[:len(it.content)-varNum*varLength]
 		it.logger.Info("successfully read slice", "content", contentWithoutVariable, "expected content", expectedContentWithoutVariable)
 
 		if bytes.Equal(contentWithoutVariable, expectedContentWithoutVariable) {
@@ -215,7 +212,7 @@ func (it *FakeImage) Recover(pid int, vars map[string]uint64) error {
 	if it.OriginFuncCode == nil {
 		return nil
 	}
-	program, err := ptrace.Trace(pid, it.logger)
+	program, err := ptrace.Trace(pid, it.logger.WithName("ptrace").WithValues("pid", pid))
 	if err != nil {
 		return errors.Wrapf(err, "ptrace on target process, pid: %d", pid)
 	}
