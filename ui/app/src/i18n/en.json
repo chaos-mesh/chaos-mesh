@@ -158,7 +158,7 @@
         "imageHelper": "The image of container",
         "imageValidation": "The image is required",
         "command": "Command",
-        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends a space to create a single command."
+        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends Enter to create a single command."
       },
       "conditionalBranches": {
         "title": "Conditional branches (Optional)",
@@ -335,7 +335,7 @@
     "durationHelper": "Supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair",
     "logout": "Logout",
     "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
@@ -396,6 +396,6 @@
   },
   "physic": {
     "address": "Address",
-    "addressHelper": "Type and end with a space to add one or more chaosd addresses"
+    "addressHelper": "Type and end with Enter to add one or more chaosd addresses"
   }
 }
