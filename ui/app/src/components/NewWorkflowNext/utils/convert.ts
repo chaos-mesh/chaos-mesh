@@ -109,7 +109,7 @@ function findNextNodeArray(origin: string, result: uuid[], edgesMap: Map<uuid, E
   return result
 }
 
-function nodeExperimentToTemplate(node: NodeExperiment): Template {
+export function nodeExperimentToTemplate(node: NodeExperiment): Template {
   const { id, kind, name, templateType, deadline, scheduled, ...rest } = JSON.parse(JSON.stringify(node))
 
   if (scheduled) {
@@ -130,11 +130,13 @@ function nodeExperimentToTemplate(node: NodeExperiment): Template {
     }
   }
 
+  const fieldName = templateTypeToFieldName(templateType)
+
   return {
     name,
     templateType,
     deadline,
-    [templateTypeToFieldName(templateType)]: rest,
+    ...(fieldName && { [fieldName]: rest }),
   }
 }
 
