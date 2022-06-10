@@ -2512,7 +2512,9 @@ definitions:
         type: integer
       options:
         description: extend stress-ng options
-        type: string
+        items:
+          type: string
+        type: array
       workers:
         description: specifies N workers to apply the stressor.
         type: integer
@@ -2574,7 +2576,9 @@ definitions:
     properties:
       options:
         description: extend stress-ng options
-        type: string
+        items:
+          type: string
+        type: array
       size:
         description: |-
           specifies N bytes consumed per vm worker, default is the total available memory.
