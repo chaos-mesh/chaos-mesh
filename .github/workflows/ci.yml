@@ -104,14 +104,12 @@ jobs:
       run:
         working-directory: ./ui
     strategy:
-      fail-fast: false
       matrix:
-        arch: [amd64, arm64]
         job:
           - build
           - test
         # node-version: ["14"] # TODO: add nodejs-16?
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

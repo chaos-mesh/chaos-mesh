@@ -67,7 +67,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     kind,
     action,
     ...(kind === 'NetworkChaos' && { target: scopeInitialValues }),
-    ...(kind !== 'PhysicalMachineChaos' && scopeInitialValues),
+    ...(kind !== 'PhysicalMachineChaos' && kind !== 'Suspend' && scopeInitialValues),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
   const [form, setForm] = useState<AtomFormData[]>([])
@@ -89,6 +89,15 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     }
 
     async function loadData() {
+      if (kind === 'Suspend') {
+        setInitialValues((oldValues) => ({
+          ...oldValues,
+          ...formikProps.initialValues,
+        }))
+
+        return
+      }
+
       const { data }: { data: AtomFormData[] } = await import(`../../formik/${kind}.ts`)
       const form = action
         ? data.filter((d) => {
@@ -267,25 +276,29 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                 </Space>
               </>
             )}
-            <Divider />
-            <Typography variant="h6" fontWeight="bold">
-              <T id="newE.steps.scope" />
-            </Typography>
-            {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
-            <Divider />
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                Schedule
-              </Typography>
-              <Checkbox
-                label="Scheduled"
-                helperText="Check the box to convert the Experiment into a Schedule."
-                checked={scheduled}
-                onChange={switchToSchedule}
-              />
-            </Box>
-            {scheduled && <Schedule />}
-            <Divider />
+            {kind !== 'Suspend' && (
+              <>
+                <Divider />
+                <Typography variant="h6" fontWeight="bold">
+                  <T id="newE.steps.scope" />
+                </Typography>
+                {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
+                <Divider />
+                <Box>
+                  <Typography variant="h6" fontWeight="bold">
+                    Schedule
+                  </Typography>
+                  <Checkbox
+                    label="Scheduled"
+                    helperText="Check the box to convert the Experiment into a Schedule."
+                    checked={scheduled}
+                    onChange={switchToSchedule}
+                  />
+                </Box>
+                {scheduled && <Schedule />}
+                <Divider />
+              </>
+            )}
             <Typography variant="h6" fontWeight="bold">
               Info
             </Typography>

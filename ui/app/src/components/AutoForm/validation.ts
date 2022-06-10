@@ -37,11 +37,14 @@ const workflowNodeInfoSchema = (kind: string, action?: string) => ({
   ...(!isInstant(kind, action) && { deadline: string().trim().required() }),
 })
 
-const workflowSchema = (kind: string, action?: string) =>
-  object({
-    ...(kind !== 'PhysicalMachineChaos' && scopeInitialValuesSchema),
-    ...workflowNodeInfoSchema(kind, action),
-  })
+const workflowSchema = (kind: string, action?: string) => {
+  return kind !== 'Suspend'
+    ? object({
+        ...(kind !== 'PhysicalMachineChaos' && scopeInitialValuesSchema),
+        ...workflowNodeInfoSchema(kind, action),
+      })
+    : null
+}
 
 export function chooseSchemaByBelong(belong: Belong, kind: string, action?: string) {
   switch (belong) {
