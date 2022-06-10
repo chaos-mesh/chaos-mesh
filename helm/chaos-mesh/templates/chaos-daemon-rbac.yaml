@@ -88,7 +88,7 @@ spec:
     - IPC_LOCK
   {{- end }}
   allowedHostPaths:
-    - pathPrefix: {{ .Values.chaosDaemon.socketPath }}
+    - pathPrefix: {{ .Values.chaosDaemon.socketPath | dir }}
       readOnly: false
     - pathPrefix: /sys
       readOnly: false
