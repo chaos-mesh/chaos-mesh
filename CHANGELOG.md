@@ -25,6 +25,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - CI: version unrelated manifests [#3293](https://github.com/chaos-mesh/chaos-mesh/pull/3293)
 - Bump chaos-tproxy to v0.4.6 [#3272](https://github.com/chaos-mesh/chaos-mesh/pull/3272)
 - Helm charts: using 0.0.0 as version and appVersion [#3311](https://github.com/chaos-mesh/chaos-mesh/pull/3311)
+- Renamed namespace from chaos-testing to chaos-mesh
 
 ### Deprecated
 
