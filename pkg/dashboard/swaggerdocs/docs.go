@@ -4908,7 +4908,10 @@ var doc = `{
                 },
                 "options": {
                     "description": "extend stress-ng options",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "workers": {
                     "description": "specifies N workers to apply the stressor.",
@@ -4959,7 +4962,10 @@ var doc = `{
             "properties": {
                 "options": {
                     "description": "extend stress-ng options",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "size": {
                     "description": "specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..",

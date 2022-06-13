@@ -22,10 +22,10 @@ export IMAGE_DEV_ENV_BUILD ?= 0
 # Every branch should have its own image tag for build-env and dev-env
 # using := with ifeq instead of ?= for performance issue
 ifeq ($(IMAGE_BUILD_ENV_TAG),)
-IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
 endif
 ifeq ($(IMAGE_DEV_ENV_TAG),)
-IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
 endif
 
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
@@ -161,10 +161,12 @@ images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
 
 pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/build-env/.dockerbuilt
-	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
+	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
+	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o $$CFLAGS
 pkg/time/fakeclock/fake_gettimeofday.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c images/build-env/.dockerbuilt
-	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o
+	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
+	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))

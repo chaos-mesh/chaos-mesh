@@ -25,6 +25,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { LoadRecentlyUsedExperiments } from 'slices/workflows'
 
+import FunctionalNodesElements from './Elements/FunctionalNodes'
 import KubernetesElements from './Elements/Kubernetes'
 import PhysicalNodesElements from './Elements/PhysicalNodes'
 import SubmitWorkflow from './SubmitWorkflow'
@@ -92,6 +93,13 @@ export default function NewWorkflow() {
                 </Box>
               )}
               <Box>
+                <Typography fontWeight="medium">Functional Nodes</Typography>
+                <Typography variant="body2" color="secondary" fontSize={12}>
+                  Drag or click items below into the board to create a functional node.
+                </Typography>
+              </Box>
+              <FunctionalNodesElements onElementClick={handleClickElement} />
+              <Box>
                 <Typography fontWeight="medium">Kubernetes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>
                   Drag or click items below into the board to create a Chaos in Kubernetes.
@@ -104,7 +112,7 @@ export default function NewWorkflow() {
               <Box>
                 <Typography fontWeight="medium">Physical Nodes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>
-                  Drag or click items below into the board to create a PhysicalMachineChaos.
+                  Drag or click items below into the board to create a Chaos in Physical Nodes.
                 </Typography>
               </Box>
               <Box sx={{ height: 450, overflowY: 'auto' }}>

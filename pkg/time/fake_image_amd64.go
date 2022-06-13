@@ -13,10 +13,22 @@
 // limitations under the License.
 //
 
-package main
+package time
 
-import "fmt"
+import (
+	"github.com/pkg/errors"
 
-func main() {
-	fmt.Println("linux arm64 is not supported")
+	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
+)
+
+const varLength = 8
+
+func (it *FakeImage) SetVarUint64(program *ptrace.TracedProgram, entry *mapreader.Entry, symbol string, value uint64) error {
+	if offset, ok := it.offset[symbol]; ok {
+		err := program.WriteUint64ToAddr(entry.StartAddress+uint64(offset), value)
+		return err
+	}
+
+	return errors.New("symbol not found")
 }

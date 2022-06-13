@@ -14,30 +14,29 @@
  * limitations under the License.
  *
  */
+import TimelapseIcon from '@mui/icons-material/Timelapse'
+import { SvgIcon } from '@mui/material'
+
+import { ExperimentKind } from 'components/NewExperiment/types'
+import i18n from 'components/T'
 
 import { ReactComponent as AWSIcon } from 'images/chaos/aws.svg'
-import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
-import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
 import { ReactComponent as DiskIcon } from 'images/chaos/disk.svg'
-import { ExperimentKind } from 'components/NewExperiment/types'
-import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
+import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
 import { ReactComponent as GCPIcon } from 'images/chaos/gcp.svg'
 import { ReactComponent as HTTPIcon } from 'images/chaos/http.svg'
+import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
 import { ReactComponent as JavaIcon } from 'images/chaos/java.svg'
-import { ReactComponent as K8SIcon } from 'images/k8s.svg'
 import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
 import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
-import { ReactComponent as PhysicIcon } from 'images/physic.svg'
 import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
 import { ReactComponent as ProcessIcon } from 'images/chaos/process.svg'
 import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
-import { SvgIcon } from '@mui/material'
-import i18n from 'components/T'
+import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
+import { ReactComponent as K8SIcon } from 'images/k8s.svg'
+import { ReactComponent as PhysicIcon } from 'images/physic.svg'
 
-export function iconByKind(
-  kind: ExperimentKind | 'Schedule' | 'k8s' | 'physic' | 'DiskChaos' | 'ProcessChaos',
-  size: 'small' | 'medium' | 'large' = 'medium'
-) {
+export function iconByKind(kind: string, size: 'small' | 'medium' | 'large' = 'medium') {
   let icon
 
   switch (kind) {
@@ -91,6 +90,9 @@ export function iconByKind(
     case 'TimeChaos':
     case 'Schedule':
       icon = <ClockIcon />
+      break
+    case 'Suspend':
+      icon = <TimelapseIcon />
       break
   }
 
