@@ -82,15 +82,10 @@ const workflowSlice = createSlice({
     importNodes(state, action: PayloadAction<Record<uuid, NodeExperiment>>) {
       state.nodes = action.payload
     },
-    insertWorkflowNode(state, action: PayloadAction<WorkflowNode>) {
-      const { id, experiment } = action.payload
-
-      state.nodes[id] = experiment
-    },
     updateWorkflowNode(state, action) {
       const payload = action.payload
 
-      state.nodes[payload.id] = payload
+      state.nodes[payload.name] = payload
     },
     removeWorkflowNode(state, action: PayloadAction<uuid>) {
       delete state.nodes[action.payload]
@@ -132,7 +127,6 @@ const workflowSlice = createSlice({
 
 export const {
   importNodes,
-  insertWorkflowNode,
   updateWorkflowNode,
   removeWorkflowNode,
   loadRecentlyUsedExperiments,

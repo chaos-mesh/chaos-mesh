@@ -32,7 +32,7 @@ import Space from '@ui/mui-extends/esm/Space'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { setConfirm } from 'slices/globalStatus'
-import { importNodes, insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
+import { importNodes, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
 
 import AutoForm, { Belong } from 'components/AutoForm'
 import i18n, { T } from 'components/T'
@@ -122,15 +122,11 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   }
   const closeDrawer = () => {
     const id = identifier!.id!
-    const lastWorkflowNode = store.nodes[id]
+    const node = nodes.find((n) => n.id === id)!
 
     // Remove empty node.
-    if (!lastWorkflowNode) {
+    if (!node.data.finished) {
       setNodes(nodes.filter((node) => node.id !== id))
-
-      if (store.nodes[id]) {
-        dispatch(removeWorkflowNode(id))
-      }
     }
 
     cleanup()
@@ -152,7 +148,9 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     const node: Node = {
       id,
       position,
-      data: {},
+      data: {
+        finished: false,
+      },
       ...(parent && {
         parentNode: parent,
         extent: 'parent',
@@ -180,12 +178,11 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     }
 
     setNodes((oldNodes) => [...oldNodes, node])
-    dispatch(insertWorkflowNode({ id, experiment: null })) // Insert only id to distinguish from other nodes.
 
     return id
   }
 
-  const editNode = (e: React.MouseEvent, { id }: Node) => {
+  const editNode = (e: React.MouseEvent, { id, data }: Node) => {
     // Prevent editing nodes when resizing.
     //
     // See `GroupNode.tsx` for more details.
@@ -196,7 +193,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
       return
     }
 
-    const workflowNode = store.nodes[id]
+    const workflowNode = store.nodes[data.name]
 
     formInitialValues.current = workflowNode
 
@@ -209,13 +206,17 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   }
 
   const updateNode = (values: Record<string, any>) => {
+    const { id, ...rest } = values
+
     setNodes((oldNodes) =>
       oldNodes.map((node) => {
-        if (node.id === values.id) {
+        if (node.id === id) {
           return {
             ...node,
             data: {
               ...node.data,
+              finished: true,
+              name: values.name,
               ...(node.type === 'flowNode' && {
                 sx: {
                   alignItems: 'start',
@@ -249,10 +250,6 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
                 ),
                 children: values.name,
               }),
-              // Serial or Parallel.
-              ...(node.type === 'groupNode' && {
-                name: values.name,
-              }),
             },
           }
         }
@@ -260,14 +257,24 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         return node
       })
     )
-    dispatch(updateWorkflowNode(values))
+    dispatch(updateWorkflowNode(rest))
 
     cleanup()
   }
 
   const deleteNode = (id: uuid) => {
-    setNodes((oldNodes) => oldNodes.filter((node) => node.id !== id))
-    dispatch(removeWorkflowNode(id))
+    setNodes((oldNodes) => {
+      const node = oldNodes.find((n) => n.id === id)!
+      const templateName = node.data.name
+      const restNodes = oldNodes.filter((node) => node.id !== id)
+
+      // Remove the template if no other refs.
+      if (!restNodes.some((n) => n.data.name === templateName)) {
+        dispatch(removeWorkflowNode(templateName))
+      }
+
+      return restNodes
+    })
   }
 
   const onNodeDelete = (id: uuid) => (e: SyntheticEvent) => {
@@ -292,7 +299,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     const id = addNode(item, monitor, xyCoord, parent)
 
     // Start generating form.
-    setIdentifier({ ...item, id })
+    setIdentifier({ id, ...item })
 
     // Open form builder after adding new node.
     setOpenDrawer(true)
@@ -311,7 +318,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     const { store, nodes, edges } = workflowToFlow(workflow)
 
     dispatch(importNodes(store))
-    setNodes(nodes)
+    setNodes(nodes.map((node) => ({ ...node, data: { ...node.data, finished: true } })))
     setEdges(
       edges.map((edge) => ({
         ...edge,

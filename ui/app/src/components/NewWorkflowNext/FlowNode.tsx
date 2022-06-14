@@ -22,13 +22,15 @@ import BareNode from './BareNode'
 import type { BareNodeProps } from './BareNode'
 import StyledHandle from './StyleHandle'
 
-export type FlowNodeProps = NodeProps<BareNodeProps>
+export type FlowNodeProps = NodeProps<BareNodeProps & { finished: true; name: string }>
 
 function FlowNode({ data, isConnectable }: FlowNodeProps) {
+  const { name, finished, ...rest } = data
+
   return (
     <>
       {isConnectable && <StyledHandle type="target" position={Position.Left} />}
-      <BareNode {...data} />
+      <BareNode {...rest} />
       {isConnectable && <StyledHandle type="source" position={Position.Right} />}
     </>
   )

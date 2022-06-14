@@ -23,7 +23,7 @@ import type { NodeExperiment } from 'slices/workflows'
 
 import { Schedule, scheduleInitialValues } from 'components/AutoForm/data'
 
-import { arrToObjBySep, concatKindAction, isDeepEmpty, objToArrBySep } from 'lib/utils'
+import { arrToObjBySep, isDeepEmpty, objToArrBySep } from 'lib/utils'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
@@ -79,22 +79,6 @@ export interface Template {
   children?: string[]
 }
 
-/**
- * Convert edges to ES6 Map with source node UUID as key and the edge as value.
- *
- * @param {Edge[]} edges
- * @return {Map<uuid, Edge[]>}
- */
-function edgesToSourceMap(edges: Edge[]): Map<uuid, Edge> {
-  const map = new Map()
-
-  edges.forEach((edge) => {
-    map.set(edge.source, edge)
-  })
-
-  return map
-}
-
 export function nodeExperimentToTemplate(node: NodeExperiment): Template {
   const { id, kind, name, templateType, deadline, scheduled, ...rest } = JSON.parse(JSON.stringify(node))
 
@@ -126,38 +110,50 @@ export function nodeExperimentToTemplate(node: NodeExperiment): Template {
   }
 }
 
-export function flowToWorkflow(nodes: Node[], edges: Edge[], stateNodesMap: Record<uuid, NodeExperiment>) {
+export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Record<string, NodeExperiment>) {
   const origin = nodes
-    .map((n) => ({ id: n.id, parentNode: n.parentNode, incomers: getIncomers(n, nodes, edges) }))
-    .find((n) => n.incomers.length === 0 && !n.parentNode)!
-  const sourceMap = edgesToSourceMap(edges)
+    .filter((n) => !n.parentNode)
+    .map((n) => ({ ...n, incomers: getIncomers(n, nodes, edges) }))
+    .find((n) => n.incomers.length === 0)!
+  const nodeMap = _.keyBy(nodes, 'id')
+  const sourceMap = _.keyBy(edges, 'source')
 
-  function genTemplates(origin: { id: uuid }, level: number): Template[] {
-    const originalNode = stateNodesMap[origin.id]
-    let currentNode: Template
-    let restNodes: Template[] = []
+  function genTemplates(origin: Node, level: number): Template[] {
+    const originalTemplate = storeTemplates[origin.data.name]
+    let currentTemplate: Template
+    let restTemplates: Template[] = []
 
     if (
-      originalNode.templateType === SpecialTemplateType.Serial ||
-      originalNode.templateType === SpecialTemplateType.Parallel
+      originalTemplate.templateType === SpecialTemplateType.Serial ||
+      originalTemplate.templateType === SpecialTemplateType.Parallel
     ) {
-      const children = nodes.filter((n) => n.parentNode === originalNode.id).map((n) => stateNodesMap[n.id])
+      const children = nodes
+        .filter((n) => n.parentNode === origin.id)
+        .map((n) => ({ id: n.id, ...storeTemplates[n.data.name] }))
 
-      currentNode = {
+      currentTemplate = {
         level,
-        name: originalNode.name,
-        templateType: originalNode.templateType,
+        name: originalTemplate.name,
+        templateType: originalTemplate.templateType,
         children: children.map((n) => n.name),
       }
 
-      restNodes = restNodes.concat(children.flatMap((n) => genTemplates(n, level + 1)))
+      restTemplates = children.flatMap((n) => genTemplates(nodeMap[n.id], level + 1))
     } else {
-      currentNode = { level, ...nodeExperimentToTemplate(stateNodesMap[origin.id]) }
+      currentTemplate = { level, ...nodeExperimentToTemplate(originalTemplate) }
     }
 
-    const edge = sourceMap.get(origin.id)!
+    const edge = sourceMap[origin.id]
+    let nextNode
+    if (edge) {
+      nextNode = nodeMap[edge.target]
+    }
 
-    return [currentNode, ...restNodes, ...(edge ? genTemplates(stateNodesMap[edge.target], level) : [])]
+    return [
+      currentTemplate,
+      ...restTemplates,
+      ...(nextNode && !nextNode.parentNode ? genTemplates(nextNode, level) : []),
+    ]
   }
 
   let templates = genTemplates(origin, 0)
@@ -219,7 +215,6 @@ export function templateToNodeExperiment(t: Template, scheduled?: boolean): Node
     const chaos = rest[fieldName]
 
     result = {
-      id: t.name,
       kind: type,
       name: t.name,
       templateType: type,
@@ -237,15 +232,14 @@ export function templateToNodeExperiment(t: Template, scheduled?: boolean): Node
       ...chaos,
     }
   } else {
-    const fieldName = templateTypeToFieldName(t.templateType as ExperimentKind)!
+    const fieldName = templateTypeToFieldName(t.templateType as ExperimentKind)
 
     result = {
-      id: t.name,
       kind: t.templateType,
       name: t.name,
       templateType: t.templateType,
       deadline: t.deadline,
-      ...(t as any)[fieldName],
+      ...(fieldName && (t as any)[fieldName]),
     }
   }
 
@@ -298,23 +292,19 @@ enum View {
 export function workflowToFlow(workflow: string) {
   const { entry, templates }: { entry: string; templates: Template[] } = (yaml.load(workflow) as any).spec
   const templatesMap = _.keyBy(templates, 'name')
-  const store: Record<string, NodeExperiment> = {}
-  const nodes: Record<uuid, Node> = {}
-  const edges: Edge[] = []
-
-  // Insert all normal nodes.
+  // Convert templates to store.
   //
   // The `name` is used here as the unique id,
   // because the name of a template inside a Workflow is unique.
-  templates
-    .filter((t) => t.templateType !== SpecialTemplateType.Serial && t.templateType !== SpecialTemplateType.Parallel)
-    .forEach((t) => {
-      if (t.templateType === 'Schedule') {
-        store[t.name] = templateToNodeExperiment(t, true)
-      } else {
-        store[t.name] = templateToNodeExperiment(t)
-      }
-    })
+  const store = _.transform<Template, Record<string, NodeExperiment>>(templatesMap, (acc, t, k) => {
+    if (t.templateType === 'Schedule') {
+      acc[k] = templateToNodeExperiment(t, true)
+    } else {
+      acc[k] = templateToNodeExperiment(t)
+    }
+  })
+  const nodes: Record<uuid, Node> = {}
+  const edges: Edge[] = []
 
   function recurInsertNodesAndEdges(
     entry: Template,
@@ -339,13 +329,9 @@ export function workflowToFlow(workflow: string) {
               : View.PaddingY),
         },
         data: {
+          name: entry.name,
           kind: entry.templateType,
-          children: concatKindAction(
-            entry.templateType,
-            entry.templateType === SpecialTemplateType.Serial || entry.templateType === SpecialTemplateType.Parallel
-              ? entry.name
-              : store[entry.name].action
-          ),
+          children: entry.name,
         },
         ...(parentNode && {
           parentNode: parentNode.id,

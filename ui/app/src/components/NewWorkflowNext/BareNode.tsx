@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import { Button } from '@mui/material'
 import type { ButtonProps } from '@mui/material'
 import { forwardRef } from 'react'
@@ -22,7 +21,7 @@ import { forwardRef } from 'react'
 import { iconByKind } from 'lib/byKind'
 
 export type BareNodeProps = ButtonProps & {
-  kind?: string
+  kind: string
 }
 
 export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }, ref) => (
@@ -32,7 +31,7 @@ export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }
     variant="outlined"
     color="secondary"
     size="small"
-    startIcon={kind ? iconByKind(kind) : <CircleOutlinedIcon />}
+    startIcon={iconByKind(kind)}
     disableFocusRipple
     sx={{ justifyContent: 'flex-start', width: 200, ...sx }}
     {...rest}
