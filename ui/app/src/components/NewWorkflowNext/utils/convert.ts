@@ -16,7 +16,7 @@
  */
 import yaml from 'js-yaml'
 import _ from 'lodash'
-import type { Edge, Node, XYPosition } from 'react-flow-renderer'
+import { Edge, Node, XYPosition, getIncomers } from 'react-flow-renderer'
 import { v4 as uuidv4 } from 'uuid'
 
 import type { NodeExperiment } from 'slices/workflows'
@@ -80,33 +80,19 @@ export interface Template {
 }
 
 /**
- * Convert edges to ES6 Map with source node UUID as key and edges array as value.
+ * Convert edges to ES6 Map with source node UUID as key and the edge as value.
  *
  * @param {Edge[]} edges
  * @return {Map<uuid, Edge[]>}
  */
-function edgesToSourceMap(edges: Edge[]): Map<uuid, Edge[]> {
+function edgesToSourceMap(edges: Edge[]): Map<uuid, Edge> {
   const map = new Map()
 
   edges.forEach((edge) => {
-    if (map.has(edge.source)) {
-      map.set(edge.source, [...map.get(edge.source), edge])
-    } else {
-      map.set(edge.source, [edge])
-    }
+    map.set(edge.source, edge)
   })
 
   return map
-}
-
-function findNextNodeArray(origin: string, result: uuid[], edgesMap: Map<uuid, Edge[]>): uuid[] {
-  if (edgesMap.has(origin)) {
-    const target = edgesMap.get(origin)![0].target
-
-    return findNextNodeArray(target, [...result, target], edgesMap)
-  }
-
-  return result
 }
 
 export function nodeExperimentToTemplate(node: NodeExperiment): Template {
@@ -140,145 +126,41 @@ export function nodeExperimentToTemplate(node: NodeExperiment): Template {
   }
 }
 
-export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, NodeExperiment>, edges: Edge[]) {
+export function flowToWorkflow(nodes: Node[], edges: Edge[], stateNodesMap: Record<uuid, NodeExperiment>) {
+  const origin = nodes
+    .map((n) => ({ id: n.id, parentNode: n.parentNode, incomers: getIncomers(n, nodes, edges) }))
+    .find((n) => n.incomers.length === 0 && !n.parentNode)!
   const sourceMap = edgesToSourceMap(edges)
-  const scannedNodes: uuid[] = []
-  const realNexts: uuid[] = []
 
-  function genTemplates(origin: NodeExperiment, level: number): Template[] {
-    if (scannedNodes.includes(origin.id)) {
-      return []
-    }
+  function genTemplates(origin: { id: uuid }, level: number): Template[] {
+    const originalNode = stateNodesMap[origin.id]
+    let currentNode: Template
+    let restNodes: Template[] = []
 
-    scannedNodes.push(origin.id)
+    if (
+      originalNode.templateType === SpecialTemplateType.Serial ||
+      originalNode.templateType === SpecialTemplateType.Parallel
+    ) {
+      const children = nodes.filter((n) => n.parentNode === originalNode.id).map((n) => stateNodesMap[n.id])
 
-    const eds = sourceMap.get(origin.id)
-    let nextNodes: NodeExperiment[] = []
-    const extraNodes: Template[] = []
-
-    eds?.forEach((edge) => {
-      if (edge.target) {
-        nextNodes.push(nodesMap[edge.target])
-      }
-    })
-
-    // This indicates that the next node is parallel.
-    if (nextNodes.length > 1) {
-      extraNodes.push({
+      currentNode = {
         level,
-        name: SpecialTemplateType.Parallel + '-' + uuidv4(),
-        templateType: SpecialTemplateType.Parallel,
-        children: nextNodes.map((n) => n.name),
-      })
-
-      let realNext: uuid = ''
-      const uniqNexts = _.uniqWith(
-        nextNodes.map((n) => {
-          const nds = findNextNodeArray(n.id, [], sourceMap)
-
-          return { ...n, next: nds }
-        }),
-        (a, b) => {
-          const intersection = _.intersection<uuid>(a.next, b.next)
-
-          if (intersection.length > 0) {
-            realNext = intersection[0]
-          }
-
-          return a.next[0] === b.next[0]
-        }
-      )
-      // If all next nodes have the same next node, then jump to the next node.
-      const sameNext = uniqNexts.length === 1 && uniqNexts[0] && nodesMap[realNext]
-
-      if (sameNext) {
-        nextNodes.forEach((n) => {
-          extraNodes.push({ level: level + 1, ...nodeExperimentToTemplate(n) })
-        })
-
-        nextNodes = [sameNext]
+        name: originalNode.name,
+        templateType: originalNode.templateType,
+        children: children.map((n) => n.name),
       }
 
-      // This indicates that all next nodes have non-direct next node.
-      if (realNext && !sameNext) {
-        realNexts.push(realNext)
-      }
+      restNodes = restNodes.concat(children.flatMap((n) => genTemplates(n, level + 1)))
+    } else {
+      currentNode = { level, ...nodeExperimentToTemplate(stateNodesMap[origin.id]) }
     }
 
-    return [
-      { level, ...nodeExperimentToTemplate(origin) },
-      ...extraNodes,
-      ...nextNodes.flatMap((node) =>
-        genTemplates(
-          node,
-          nextNodes.length > 1
-            ? level + 1
-            : nextNodes.length === 1 && realNexts.includes(nextNodes[0].id)
-            ? level - 1
-            : level
-        )
-      ),
-    ]
+    const edge = sourceMap.get(origin.id)!
+
+    return [currentNode, ...restNodes, ...(edge ? genTemplates(stateNodesMap[edge.target], level) : [])]
   }
 
-  function findPotentialSerials(nodeName: string, siblings: string[], templates: Template[]) {
-    const node = templates.find((t) => t.name === nodeName)!
-    let matchedIndex = -1
-    const children = []
-
-    for (let i = 0; i < templates.length; i++) {
-      const name = templates[i].name
-
-      if (name === nodeName) {
-        matchedIndex = i
-      }
-
-      if (realNexts.includes(templates[i].id!) || siblings.includes(name) || i === templates.length - 1) {
-        return children.length > 1
-          ? {
-              level: node.level,
-              name: SpecialTemplateType.Serial + '-' + uuidv4(),
-              templateType: SpecialTemplateType.Serial,
-              children,
-            }
-          : null
-      }
-
-      if (matchedIndex > 0 && templates[i].level === node.level && !siblings.includes(name)) {
-        children.push(name)
-      }
-    }
-  }
-
-  function genPotentialSerials(templates: Template[]) {
-    return templates
-      .map((template) => {
-        const serials: Template[] = []
-
-        if (template.templateType === SpecialTemplateType.Parallel) {
-          template.children = template.children?.map((child, i) => {
-            const serial = findPotentialSerials(
-              child,
-              template.children!.slice(i).filter((name) => name !== child),
-              templates
-            )
-
-            if (serial) {
-              serials.push(serial)
-
-              return serial.name
-            }
-
-            return child
-          })
-        }
-
-        return [template, ...serials]
-      })
-      .flat()
-  }
-
-  let templates = genPotentialSerials(genTemplates(origin, 0))
+  let templates = genTemplates(origin, 0)
   templates = [
     {
       name: 'entry',

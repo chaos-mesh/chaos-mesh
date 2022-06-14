@@ -15,7 +15,7 @@
  *
  */
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
+import { Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
 import _ from 'lodash'
 import { SyntheticEvent, useCallback, useMemo, useRef, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
@@ -170,6 +170,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
           initNode,
         },
       }
+      node.zIndex = -1 // Make edges visible on the top of the group node.
     } else {
       node.type = 'flowNode'
       node.data = {
@@ -187,7 +188,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   const editNode = (e: React.MouseEvent, { id }: Node) => {
     // Prevent editing nodes when resizing.
     //
-    // See `GroupNode.tsx` for more detail.
+    // See `GroupNode.tsx` for more details.
     if (
       (e.target as HTMLDivElement).className === 're-resizable' ||
       (e.target as HTMLDivElement).className === ResizableHandleClassName
@@ -246,12 +247,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
                     </MenuItem> */}
                   </Menu>
                 ),
-                children: (
-                  <Box>
-                    <Box>{values.name}</Box>
-                    {values.deadline && <Box>deadline: {values.deadline}</Box>}
-                  </Box>
-                ),
+                children: values.name,
               }),
               // Serial or Parallel.
               ...(node.type === 'groupNode' && {
@@ -342,7 +338,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   const onNodeMouseMove = (e: React.MouseEvent, { id }: Node) => {
     // Resume dragging nodes after resizing.
     //
-    // See `GroupNode.tsx` for more detail.
+    // See `GroupNode.tsx` for more details.
     if ((e.target as HTMLDivElement).className === ResizableHandleClassName) {
       updateNodeDraggable(id, false)
     } else {

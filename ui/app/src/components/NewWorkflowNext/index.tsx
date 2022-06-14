@@ -58,10 +58,9 @@ export default function NewWorkflow() {
 
   const onFinishWorkflow = () => {
     const nds = flowRef.current?.getNodes()!
-    const origin = nds.find((n) => n.data.origin)!
     const eds = flowRef.current?.getEdges()!
 
-    const workflow = flowToWorkflow(nodes[origin.id], nodes, eds)
+    const workflow = flowToWorkflow(nds, eds, nodes)
 
     setWorkflow(workflow)
     setOpenSubmitDialog(true)
