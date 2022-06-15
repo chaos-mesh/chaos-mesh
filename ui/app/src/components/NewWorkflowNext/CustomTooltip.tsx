@@ -14,16 +14,19 @@
  * limitations under the License.
  *
  */
-import type { AutoFormProps } from 'components/AutoForm'
+import { Tooltip, styled, tooltipClasses } from '@mui/material'
+import type { TooltipProps } from '@mui/material'
 
-export enum ElementTypes {
-  Kubernetes = 'Kubernetes',
-  PhysicalNodes = 'PhysicalNodes',
-  Suspend = 'Suspend',
-}
+const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.arrow}`]: {
+    color: theme.palette.surfaceVariant.main,
+  },
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: theme.palette.surfaceVariant.main,
+    color: theme.palette.onSurfaceVariant.main,
+  },
+}))
 
-export type ElementDragData = Omit<AutoFormProps, 'formikProps'>
-
-export interface ElementsProps {
-  onElementClick: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
-}
+export default CustomTooltip

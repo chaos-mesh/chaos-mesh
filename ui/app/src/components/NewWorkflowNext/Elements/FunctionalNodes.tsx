@@ -14,16 +14,17 @@
  * limitations under the License.
  *
  */
-import type { AutoFormProps } from 'components/AutoForm'
+import Space from '@ui/mui-extends/esm/Space'
 
-export enum ElementTypes {
-  Kubernetes = 'Kubernetes',
-  PhysicalNodes = 'PhysicalNodes',
-  Suspend = 'Suspend',
-}
+import DraggableBareNode from './DraggableBareNode'
+import { ElementTypes, ElementsProps } from './types'
 
-export type ElementDragData = Omit<AutoFormProps, 'formikProps'>
-
-export interface ElementsProps {
-  onElementClick: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
+export default function FunctionalNodes({ onElementClick }: ElementsProps) {
+  return (
+    <Space>
+      <DraggableBareNode elementType={ElementTypes.Suspend} kind="Suspend" onNodeClick={onElementClick}>
+        Suspend
+      </DraggableBareNode>
+    </Space>
+  )
 }
