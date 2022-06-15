@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { Button } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import type { ButtonProps } from '@mui/material'
 import { forwardRef } from 'react'
 
@@ -24,7 +24,7 @@ export type BareNodeProps = ButtonProps & {
   kind: string
 }
 
-export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }, ref) => (
+export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, children, name, ...rest }, ref) => (
   <Button
     ref={ref}
     component="span"
@@ -33,7 +33,9 @@ export default forwardRef<HTMLSpanElement, BareNodeProps>(({ kind, sx, ...rest }
     size="small"
     startIcon={iconByKind(kind)}
     disableFocusRipple
-    sx={{ justifyContent: 'flex-start', width: 200, ...sx }}
+    sx={{ alignItems: 'center', width: 200, ...sx }}
+    children={<Box flex={1}>{children}</Box>}
+    title={name}
     {...rest}
   />
 ))

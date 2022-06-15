@@ -42,20 +42,21 @@ const Menu: React.FC<
   }
 
   const onClose = (e: React.SyntheticEvent) => {
-    e.stopPropagation()
+    e && e.stopPropagation() // Allow no event.
 
     setAnchorEl(null)
   }
 
   return (
-    <div>
+    <>
       <IconButton {...IconButtonProps} onClick={onClick}>
         <MoreVertIcon {...IconProps} />
       </IconButton>
       <StyledMenu {...rest} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
-        {children}
+        {/* If `children` is a function, the return type must be an array of React elements. */}
+        {typeof children === 'function' ? children({ onClose }) : children}
       </StyledMenu>
-    </div>
+    </>
   )
 }
 

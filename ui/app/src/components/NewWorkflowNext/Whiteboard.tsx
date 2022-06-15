@@ -14,10 +14,11 @@
  * limitations under the License.
  *
  */
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
 import _ from 'lodash'
-import { SyntheticEvent, useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
 import { useDrop } from 'react-dnd'
 import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
@@ -52,6 +53,68 @@ type Identifier = DropItem
 interface ControlProps {
   id: uuid
   onDelete: (id: uuid) => void
+}
+
+interface NodeControlProps extends ControlProps {
+  onCopy: (id: uuid) => void
+}
+
+const NodeControl = ({ id, onDelete, onCopy }: NodeControlProps) => {
+  const intl = useIntl()
+  const dispatch = useStoreDispatch()
+
+  const onNode = (type: 'delete' | 'copy', onClose: any) => (e: React.SyntheticEvent) => {
+    e.stopPropagation()
+
+    let action: typeof onDelete
+    switch (type) {
+      case 'delete':
+        action = onDelete
+        break
+      case 'copy':
+        action = onCopy
+        break
+      default:
+        break
+    }
+
+    dispatch(
+      setConfirm({
+        title: `${i18n(`common.${type}`, intl)} node ${id}`,
+        description: <T id="common.deleteDesc" />,
+        handle: () => {
+          action(id)
+
+          onClose()
+        },
+      })
+    )
+  }
+  return (
+    <Menu
+      IconButtonProps={{ size: 'small', sx: { position: 'absolute', top: 1, right: 4 } }}
+      IconProps={{ fontSize: 'inherit' }}
+    >
+      {({ onClose }: any) => [
+        <MenuItem key={'delete-' + id} onClick={onNode('delete', onClose)}>
+          <ListItemIcon sx={{ fontSize: 18 }}>
+            <DeleteIcon fontSize="inherit" />
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
+            <T id="common.delete" />
+          </ListItemText>
+        </MenuItem>,
+        <MenuItem key={'copy-' + id} onClick={onNode('copy', onClose)}>
+          <ListItemIcon sx={{ fontSize: 18 }}>
+            <ContentCopyIcon fontSize="inherit" />
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
+            <T id="common.copy" />
+          </ListItemText>
+        </MenuItem>,
+      ]}
+    </Menu>
+  )
 }
 
 const EdgeControl = ({ id, onDelete }: ControlProps) => {
@@ -218,36 +281,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
               finished: true,
               name: values.name,
               ...(node.type === 'flowNode' && {
-                sx: {
-                  alignItems: 'start',
-                  '& .MuiButton-startIcon': {
-                    mt: 0.5,
-                  },
-                },
-                endIcon: (
-                  <Menu
-                    IconButtonProps={{ size: 'small', sx: { position: 'absolute', right: 8, mt: -0.5 } }}
-                    IconProps={{ fontSize: 'inherit' }}
-                  >
-                    <MenuItem onClick={onNodeDelete(node.id)}>
-                      <ListItemIcon sx={{ fontSize: 18 }}>
-                        <DeleteIcon fontSize="inherit" />
-                      </ListItemIcon>
-                      <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
-                        <T id="common.delete" />
-                      </ListItemText>
-                    </MenuItem>
-                    {/* TODO: Copy single Node to reuse */}
-                    {/* <MenuItem>
-                      <ListItemIcon sx={{ fontSize: 18 }}>
-                        <ContentCopyIcon fontSize="inherit" />
-                      </ListItemIcon>
-                      <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
-                        Copy
-                      </ListItemText>
-                    </MenuItem> */}
-                  </Menu>
-                ),
+                endIcon: <NodeControl id={id} onDelete={deleteNode} onCopy={copyNode} />,
                 children: values.name,
               }),
             },
@@ -277,16 +311,25 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     })
   }
 
-  const onNodeDelete = (id: uuid) => (e: SyntheticEvent) => {
-    e.stopPropagation()
+  const copyNode = (id: uuid) => {
+    setNodes((oldNodes) => {
+      const node = oldNodes.find((n) => n.id === id)!
+      const newID = uuidv4()
+      const newNode: Node = {
+        ...node,
+        id: newID,
+        position: { x: node.position.x, y: node.position.y + node.height! + 100 },
+        selected: false, // Reset selection.
+        data: {
+          ...node.data,
+          ...(node.type === 'flowNode' && {
+            endIcon: <NodeControl id={newID} onDelete={deleteNode} onCopy={copyNode} />,
+          }),
+        },
+      }
 
-    dispatch(
-      setConfirm({
-        title: `Delete node ${id}`,
-        description: <T id="common.deleteDesc" />,
-        handle: () => deleteNode(id),
-      })
-    )
+      return [...oldNodes, newNode]
+    })
   }
 
   const initNode = (item: DropItem, monitor?: DropTargetMonitor, xyCoord?: XYCoord, parent?: uuid) => {
@@ -318,7 +361,18 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     const { store, nodes, edges } = workflowToFlow(workflow)
 
     dispatch(importNodes(store))
-    setNodes(nodes.map((node) => ({ ...node, data: { ...node.data, finished: true } })))
+    setNodes(
+      nodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          finished: true,
+          ...(node.type === 'flowNode' && {
+            endIcon: <NodeControl id={node.id} onDelete={deleteNode} onCopy={copyNode} />,
+          }),
+        },
+      }))
+    )
     setEdges(
       edges.map((edge) => ({
         ...edge,

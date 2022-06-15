@@ -25,7 +25,7 @@ import StyledHandle from './StyleHandle'
 export type FlowNodeProps = NodeProps<BareNodeProps & { finished: true; name: string }>
 
 function FlowNode({ data, isConnectable }: FlowNodeProps) {
-  const { name, finished, ...rest } = data
+  const { finished, ...rest } = data // Exclude `finished` from the data.
 
   return (
     <>

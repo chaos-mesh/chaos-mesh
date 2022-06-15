@@ -156,13 +156,22 @@ export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Rec
     ]
   }
 
-  let templates = genTemplates(origin, 0)
+  let templates = _.uniqBy(genTemplates(origin, 0), 'name')
+  const templatesWithLevel0 = templates.filter((t) => t.level === 0)
+  const hasEntry =
+    templatesWithLevel0.length === 1 &&
+    (templatesWithLevel0[0].templateType === SpecialTemplateType.Serial ||
+      templatesWithLevel0[0].templateType === SpecialTemplateType.Parallel)
   templates = [
-    {
-      name: 'entry',
-      templateType: SpecialTemplateType.Serial,
-      children: templates.filter((t) => t.level === 0).map((t) => t.name),
-    },
+    ...(!hasEntry
+      ? [
+          {
+            name: 'entry',
+            templateType: SpecialTemplateType.Serial,
+            children: templatesWithLevel0.map((t) => t.name),
+          },
+        ]
+      : []),
     ...templates.map((t) => _.omit(t, 'level')),
   ]
 
@@ -331,7 +340,7 @@ export function workflowToFlow(workflow: string) {
         data: {
           name: entry.name,
           kind: entry.templateType,
-          children: entry.name,
+          children: _.truncate(entry.name, { length: 20 }),
         },
         ...(parentNode && {
           parentNode: parentNode.id,
