@@ -15,7 +15,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add AArch64 support for TimeChaos [#3088](https://github.com/chaos-mesh/chaos-mesh/pull/3088)
 - Add integration test and link test on arm [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
 - Add `spec.privateKey.rotationPolicy` to Certificates, to comply with requirements in cert-manager 1.8 [#3325](https://github.com/chaos-mesh/chaos-mesh/pull/3325)
-- Support `Suspend` in next generation `New Workflow`'s UI [#3254](https://github.com/chaos-mesh/chaos-mesh/pull/3254)
+- Support `Suspend` in next generation `New Workflow` [#3254](https://github.com/chaos-mesh/chaos-mesh/pull/3254)
+- Allow importing external workflows and copying flow nodes in next generation `New Workflow` [#3368](https://github.com/chaos-mesh/chaos-mesh/pull/3368)
 
 ### Changed
 
