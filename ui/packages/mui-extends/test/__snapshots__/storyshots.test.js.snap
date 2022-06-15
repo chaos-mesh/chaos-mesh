@@ -94,7 +94,7 @@ exports[`Storyshots Example/Header Logged In 1`] = `
       <span
         className="welcome"
       >
-        Welcome,
+        Welcome, 
         <b>
           Jane Doe
         </b>
@@ -247,7 +247,7 @@ exports[`Storyshots Example/Page Logged In 1`] = `
     </h2>
     <p>
       We recommend building UIs with a
-
+       
       <a
         href="https://componentdriven.org"
         rel="noopener noreferrer"
@@ -257,7 +257,7 @@ exports[`Storyshots Example/Page Logged In 1`] = `
           component-driven
         </strong>
       </a>
-
+       
       process starting with atomic components and ending with pages.
     </p>
     <p>
@@ -273,7 +273,7 @@ exports[`Storyshots Example/Page Logged In 1`] = `
     </ul>
     <p>
       Get a guided tutorial on component-driven development at
-
+       
       <a
         href="https://storybook.js.org/tutorials/"
         rel="noopener noreferrer"
@@ -282,7 +282,7 @@ exports[`Storyshots Example/Page Logged In 1`] = `
         Storybook tutorials
       </a>
       . Read more in the
-
+       
       <a
         href="https://storybook.js.org/docs"
         rel="noopener noreferrer"
@@ -301,7 +301,7 @@ exports[`Storyshots Example/Page Logged In 1`] = `
         Tip
       </span>
        Adjust the width of the canvas with the
-
+       
       <svg
         height="10"
         viewBox="0 0 12 12"
@@ -394,7 +394,7 @@ exports[`Storyshots Example/Page Logged Out 1`] = `
     </h2>
     <p>
       We recommend building UIs with a
-
+       
       <a
         href="https://componentdriven.org"
         rel="noopener noreferrer"
@@ -404,7 +404,7 @@ exports[`Storyshots Example/Page Logged Out 1`] = `
           component-driven
         </strong>
       </a>
-
+       
       process starting with atomic components and ending with pages.
     </p>
     <p>
@@ -420,7 +420,7 @@ exports[`Storyshots Example/Page Logged Out 1`] = `
     </ul>
     <p>
       Get a guided tutorial on component-driven development at
-
+       
       <a
         href="https://storybook.js.org/tutorials/"
         rel="noopener noreferrer"
@@ -429,7 +429,7 @@ exports[`Storyshots Example/Page Logged Out 1`] = `
         Storybook tutorials
       </a>
       . Read more in the
-
+       
       <a
         href="https://storybook.js.org/docs"
         rel="noopener noreferrer"
@@ -448,7 +448,7 @@ exports[`Storyshots Example/Page Logged Out 1`] = `
         Tip
       </span>
        Adjust the width of the canvas with the
-
+       
       <svg
         height="10"
         viewBox="0 0 12 12"
