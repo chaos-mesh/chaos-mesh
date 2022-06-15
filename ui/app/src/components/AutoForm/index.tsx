@@ -101,7 +101,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
         kind === SpecialTemplateType.Serial ||
         kind === SpecialTemplateType.Parallel
       ) {
-        setInitialValues((oldValues) => _.merge(formikProps.initialValues, oldValues))
+        setInitialValues((oldValues) => _.merge({}, oldValues, formikProps.initialValues))
 
         return
       }
@@ -124,7 +124,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
           })
         : data
 
-      setInitialValues((oldValues) => _.merge(formikProps.initialValues || formToRecords(form), oldValues))
+      setInitialValues((oldValues) => _.merge({}, oldValues, formikProps.initialValues || formToRecords(form)))
       setForm(form)
     }
 
@@ -240,6 +240,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     }
   }
 
+  console.log(initialValues)
   return (
     <Formik
       enableReinitialize
