@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump chaos-tproxy to v0.4.6 [#3272](https://github.com/chaos-mesh/chaos-mesh/pull/3272)
 - Helm charts: using 0.0.0 as version and appVersion [#3311](https://github.com/chaos-mesh/chaos-mesh/pull/3311)
 - Helm charts: Relax allowedHostPaths in chaos-daemon PSP [#3350](https://github.com/chaos-mesh/chaos-mesh/pull/3350)
+- Add a comment to the flag size of memory stress in the dashboard [#3359](https://github.com/chaos-mesh/chaos-mesh/pull/3359)
 
 ### Deprecated
 
