@@ -97,6 +97,6 @@ The following table describes how the nomination is approved.
 
 | Nomination            | Description                                                                               | Approval      | Binding Roles  | Minimum Length (days) |
 | :----------------- | :---------------------------------------------------------------------------------------- | :------------ | :----------------- | :-------------------- |
-| New Member       | When a new member is proposed, should be only nominated by a committer.    | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 3                     |
+| New Member       | When a new member is proposed, should be only nominated by a committer.    | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active committers or maintainers | 3                     |
 | New Committer      | When a new committer is proposed, should be only nominated by a maintainer.  | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 7                     |
 | New Maintainer     | When a new maintainer is proposed, should be only nominated by a maintainer. | Supermajority (2/3) Approval | Active maintainers | 7                     |
