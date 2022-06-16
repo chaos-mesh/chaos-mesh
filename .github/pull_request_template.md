@@ -55,14 +55,6 @@ Side effects
 
 - [ ] Breaking backward compatibility
 
-### Release note <!-- bugfixes or new feature need a release note -->
-
-```text
-Please add a release note.
-
-You can safely ignore this section if you don't think this PR needs a release note.
-```
-
 ### DCO
 
 If you find the DCO check fails, please run commands like below (Depends on the actual situations. For example, if the failed commit isn't the most recent) to fix it:
