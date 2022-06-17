@@ -106,7 +106,7 @@ const Workflows = () => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({
