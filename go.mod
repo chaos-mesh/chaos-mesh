@@ -56,7 +56,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
-	github.com/swaggo/swag v1.6.7
+	github.com/swaggo/swag v1.8.3
 	github.com/vektah/gqlparser/v2 v2.4.1
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
 	go.uber.org/fx v1.12.0
@@ -66,7 +66,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
-	golang.org/x/tools v0.1.9
+	golang.org/x/tools v0.1.10
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	google.golang.org/api v0.46.0
 	google.golang.org/grpc v1.40.0
@@ -222,7 +222,7 @@ require (
 	go.uber.org/dig v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
+	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
@@ -245,7 +245,6 @@ require (
 
 replace (
 	github.com/chaos-mesh/chaos-mesh/api => ./api
-	github.com/swaggo/swag => github.com/pytimer/swag v1.7.9-0.20220125013646-8a5cb7b5fc19
 	k8s.io/api => k8s.io/api v0.23.1
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.23.1
 	k8s.io/apimachinery => k8s.io/apimachinery v0.23.1
