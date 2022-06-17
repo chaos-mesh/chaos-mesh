@@ -20,7 +20,7 @@ RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.0.0
 RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
-RUN go install github.com/pytimer/swag/cmd/swag@v1.7.9-0.20220125013646-8a5cb7b5fc19
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.3
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
 RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
