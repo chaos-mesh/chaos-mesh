@@ -55,10 +55,11 @@ Side effects
 
 - [ ] Breaking backward compatibility
 
-### Release note <!-- bugfixes or new feature need a release note -->
+### DCO
 
-```text
-Please add a release note.
+If you find the DCO check fails, please run commands like below (Depends on the actual situations. For example, if the failed commit isn't the most recent) to fix it:
 
-You can safely ignore this section if you don't think this PR needs a release note.
+```shell
+git commit --amend --signoff
+git push --force
 ```
