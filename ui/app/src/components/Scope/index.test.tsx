@@ -22,10 +22,12 @@ import { scopeInitialValues } from '../AutoForm/data'
 
 jest.mock('api', () => ({
   common: {
-    labels: jest.fn().mockImplementation((ns) => {
+    commonLabelsGet: jest.fn().mockImplementation(({ podNamespaceList: nsStr }) => {
+      const ns = nsStr.split(',')
+
       return Promise.resolve({ data: ns[0] === 'ns1' ? { app: 'ns1' } : { app: 'ns2' } })
     }),
-    pods: jest.fn().mockImplementation(({ namespaces: ns, labelSelectors }) => {
+    commonPodsPost: jest.fn().mockImplementation(({ request: { namespaces: ns, labelSelectors } }) => {
       const app1 = {
         ip: '172.17.0.10',
         name: 'app-1',

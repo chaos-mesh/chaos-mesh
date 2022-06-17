@@ -14,12 +14,10 @@
  * limitations under the License.
  *
  */
-
-import * as auth from './auth'
-
+import autoBind from 'auto-bind'
 import { ArchivesApi, CommonApi, EventsApi, ExperimentsApi, SchedulesApi, WorkflowsApi } from 'openapi'
 
-import autoBind from 'auto-bind'
+import * as auth from './auth'
 import http from './http'
 
 /**
