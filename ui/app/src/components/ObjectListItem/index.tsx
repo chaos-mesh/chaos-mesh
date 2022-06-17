@@ -14,27 +14,29 @@
  * limitations under the License.
  *
  */
-
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, IconButton, Typography } from '@mui/material'
-import DateTime, { format } from 'lib/luxon'
+import _ from 'lodash'
 import {
   PkgDashboardApiserverArchiveArchive,
   PkgDashboardApiserverExperimentExperiment,
   PkgDashboardApiserverScheduleSchedule,
 } from 'openapi'
-
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from 'components/StatusLabel'
-import i18n from 'components/T'
-import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreSelector } from 'store'
+
+import StatusLabel from 'components/StatusLabel'
+import i18n from 'components/T'
+
+import DateTime, { format } from 'lib/luxon'
 
 interface ObjectListItemProps {
   type?: 'schedule' | 'experiment' | 'archive'
@@ -114,18 +116,18 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
 
   const Actions = () => (
     <Space direction="row" justifyContent="end" alignItems="center">
-      <Typography variant="body2" title={format(data.created_at)}>
+      <Typography variant="body2" title={format(data.created_at!)}>
         {i18n('table.created')}{' '}
-        {DateTime.fromISO(data.created_at, {
+        {DateTime.fromISO(data.created_at!, {
           locale: lang,
         }).toRelative()}
       </Typography>
       {(type === 'schedule' || type === 'experiment') &&
-        ((data as Experiment).status === 'paused' ? (
+        ((data as any).status === 'paused' ? (
           <IconButton color="primary" title={i18n('common.start', intl)} size="small" onClick={handleAction('start')}>
             <PlayCircleOutlineIcon />
           </IconButton>
-        ) : (data as Experiment).status !== 'finished' ? (
+        ) : (data as any).status !== 'finished' ? (
           <IconButton color="primary" title={i18n('common.pause', intl)} size="small" onClick={handleAction('pause')}>
             <PauseCircleOutlineIcon />
           </IconButton>
@@ -163,10 +165,10 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
         <Space direction="row" alignItems="center">
           {type !== 'archive' && <StatusLabel status={(data as any).status} />}
           <Typography component="div" title={data.name}>
-            {truncate(data.name!)}
+            {_.truncate(data.name!)}
           </Typography>
           <Typography component="div" variant="body2" color="textSecondary" title={data.uid}>
-            {truncate(data.uid!)}
+            {_.truncate(data.uid!)}
           </Typography>
         </Space>
 

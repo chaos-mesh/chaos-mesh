@@ -29,11 +29,17 @@ scalar Int64
 
 schema {
     query: Query
+    mutation: Mutation
     subscription: Logger
 }
 
 type Query {
     namespace(ns: String): [Namespace!]
+    pods(selector: PodSelectorInput!): [Pod!]
+}
+
+type Mutation {
+    pod(ns: String! = "default", name: String!): MutablePod
 }
 
 type Logger {
@@ -77,9 +83,57 @@ type Process {
     fds: [Fd!]      @goField(forceResolver: true)
 }
 
+type KillProcessResult {
+    pid: String!
+    command: String!
+}
+
 type Fd {
     fd: String!
     target: String!
+}
+
+# PodSelectorInput defines the some selectors to select objects.
+# If the all selectors are empty, all objects will be used in chaos experiment.
+input PodSelectorInput {
+    # namespaces is a set of namespace to which objects belong.
+    namespaces: [String!]
+
+    # nodes is a set of node name and objects must belong to these nodes.
+    nodes: [String!]
+
+    # pods is a map of string keys and a set values that used to select pods.
+    # The key defines the namespace which pods belong,
+    # and the each values is a set of pod names.
+    pods: Map
+
+    # map of string keys and values that can be used to select nodes.
+    # Selector which must match a node's labels,
+    # and objects must belong to these selected nodes.
+    nodeSelectors: Map
+
+    # map of string keys and values that can be used to select objects.
+    # A selector based on fields.
+    fieldSelectors: Map
+
+    # map of string keys and values that can be used to select objects.
+    # A selector based on labels.
+    labelSelectors: Map
+
+    # map of string keys and values that can be used to select objects.
+    # A selector based on annotations.
+    annotationSelectors: Map
+
+    # podPhaseSelectors is a set of condition of a pod at the current time.
+    # supported value: Pending / Running / Succeeded / Failed / Unknown
+    podPhaseSelectors: [String!]
+}
+
+type MutablePod {
+    pod: Pod!
+    killProcesses(pids: [String!]): [KillProcessResult!]    @goField(forceResolver: true)
+    cleanTcs(devices: [String!]): [String!]                 @goField(forceResolver: true)
+    cleanIptables(chains: [String!]): [String!]             @goField(forceResolver: true)
 }
 
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
@@ -109,8 +163,8 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     processes: [Process!] 	@goField(forceResolver: true)
     mounts: [String!]      	@goField(forceResolver: true)
     ipset: String! 			@goField(forceResolver: true)
-    tcQdisc: String! 		@goField(forceResolver: true)
-    iptables: String!		@goField(forceResolver: true)
+    tcQdisc: [String!] 		@goField(forceResolver: true)
+    iptables: [String!]		@goField(forceResolver: true)
 }
 
 # PodStatus represents information about the status of a pod. Status may trail the actual
@@ -906,11 +960,26 @@ type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Raw
     # The name of ipset
     name: String!
 
+    ipSetType: String!
+
     # The contents of ipset
     cidrs: [String!]!
 
+	# The contents of ipset.
+	# Only available when IPSetType is NetPortIPSet.
+    cidrAndPorts: [CidrAndPort!]
+
+	# The contents of ipset.
+	# Only available when IPSetType is SetIPSet.
+    setNames: [String!]!
+
     # The name and namespace of the source network chaos
     source: String!
+}
+
+type CidrAndPort @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CidrAndPort") {
+    cidr: String!
+    port: Int!
 }
 
 # RawIptables represents the iptables rules on specific pod

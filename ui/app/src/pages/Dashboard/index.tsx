@@ -14,8 +14,15 @@
  * limitations under the License.
  *
  */
-
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
+import ScheduleIcon from '@mui/icons-material/Schedule'
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { TourProvider } from '@reactour/tour'
+import api from 'api'
 import {
   CoreEvent,
   CoreWorkflowMeta,
@@ -23,29 +30,20 @@ import {
   PkgDashboardApiserverScheduleSchedule,
 } from 'openapi'
 import { useEffect, useState } from 'react'
+import type { ReactChild } from 'react'
 
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
-import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
-import EventsChart from 'components/EventsChart'
-import EventsTimeline from 'components/EventsTimeline'
-import ExperimentIcon from '@ui/mui-extends/esm/Icons/Experiment'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Predefined from './Predefined'
-import ScheduleIcon from '@mui/icons-material/Schedule'
-import TotalStatus from './TotalStatus'
-import { TourProvider } from '@reactour/tour'
-import Welcome from './Welcome'
-import api from 'api'
-import i18n from 'components/T'
-import { useTheme } from '@mui/material/styles'
 
-const NumPanel: React.FC<{ title: JSX.Element; num: number; background: JSX.Element }> = ({
-  title,
-  num,
-  background,
-}) => (
+import EventsChart from 'components/EventsChart'
+import EventsTimeline from 'components/EventsTimeline'
+import i18n from 'components/T'
+
+import Predefined from './Predefined'
+import TotalStatus from './TotalStatus'
+import Welcome from './Welcome'
+
+const NumPanel: React.FC<{ title: ReactChild; num: number; background: ReactChild }> = ({ title, num, background }) => (
   <Paper sx={{ overflow: 'hidden' }}>
     <PaperTop title={title} />
     <Box mt={6}>
@@ -183,7 +181,7 @@ export default function Dashboard() {
               <NumPanel
                 title={i18n('experiments.title')}
                 num={data.experiments.length}
-                background={<ExperimentIcon color="primary" style={{ fontSize: '3em' }} />}
+                background={<ScienceOutlinedIcon color="primary" style={{ fontSize: '3em' }} />}
               />
             </Grid>
             <Grid item xs={4}>

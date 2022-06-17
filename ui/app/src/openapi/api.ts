@@ -1,5 +1,7 @@
 /* tslint:disable */
+
 /* eslint-disable */
+
 /**
  * Chaos Mesh Dashboard API
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
@@ -11,6 +13,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import globalAxios, { AxiosInstance, AxiosPromise, AxiosRequestConfig } from 'axios'
 
 // @ts-ignore
 import { BASE_PATH, BaseAPI, COLLECTION_FORMATS, RequestArgs, RequiredError } from './base'
@@ -28,8 +31,6 @@ import {
   setSearchParams,
   toPathString,
 } from './common'
-import globalAxios, { AxiosInstance, AxiosPromise, AxiosRequestConfig } from 'axios'
-
 import { Configuration } from './configuration'
 
 /**
@@ -4418,7 +4419,7 @@ export interface V1alpha1BlockDelaySpec {
  */
 export interface V1alpha1CPUStressor {
   /**
-   * Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading. +optional
+   * Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading. +kubebuilder:validation:Minimum=0 +kubebuilder:validation:Maximum=100 +optional
    * @type {number}
    * @memberof V1alpha1CPUStressor
    */
@@ -5125,7 +5126,7 @@ export interface V1alpha1IOChaosSpec {
  */
 export interface V1alpha1JVMChaosSpec {
   /**
-   * Action defines the specific jvm chaos action. Supported action: latency;return;exception;stress;gc;ruleData +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
+   * Action defines the specific jvm chaos action. Supported action: latency;return;exception;stress;gc;ruleData +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -5143,11 +5144,17 @@ export interface V1alpha1JVMChaosSpec {
    */
   containerNames?: Array<string>
   /**
-   * +optional the CPU core number need to use, only set it when action is stress
+   * +optional the CPU core number needs to use, only set it when action is stress
    * @type {number}
    * @memberof V1alpha1JVMChaosSpec
    */
   cpuCount?: number
+  /**
+   * the match database default value is \"\", means match all database
+   * @type {string}
+   * @memberof V1alpha1JVMChaosSpec
+   */
+  database?: string
   /**
    * Duration represents the duration of the chaos action +optional
    * @type {string}
@@ -5155,19 +5162,19 @@ export interface V1alpha1JVMChaosSpec {
    */
   duration?: string
   /**
-   * +optional the exception which needs to throw for action `exception`
+   * +optional the exception which needs to throw for action `exception` or the exception message needs to throw in action `mysql`
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
   exception?: string
   /**
-   * +optional the latency duration for action \'latency\', unit ms
+   * +optional the latency duration for action \'latency\', unit ms or the latency duration in action `mysql`
    * @type {number}
    * @memberof V1alpha1JVMChaosSpec
    */
   latency?: number
   /**
-   * +optional the memory type need to locate, only set it when action is stress, the value can be \'stack\' or \'heap\'
+   * +optional the memory type needs to locate, only set it when action is stress, the value can be \'stack\' or \'heap\'
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -5185,11 +5192,23 @@ export interface V1alpha1JVMChaosSpec {
    */
   mode?: string
   /**
-   * +optional byteman rule name, should be unique, and will use JVMChaos\' name if not set
+   * the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now
+   * @type {string}
+   * @memberof V1alpha1JVMChaosSpec
+   */
+  mysqlConnectorVersion?: string
+  /**
+   * +optional byteman rule name, should be unique, and will generate one if not set
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
   name?: string
+  /**
+   * the pid of Java process which needs to attach
+   * @type {number}
+   * @memberof V1alpha1JVMChaosSpec
+   */
+  pid?: number
   /**
    * +optional the port of agent server, default 9277
    * @type {number}
@@ -5197,7 +5216,7 @@ export interface V1alpha1JVMChaosSpec {
    */
   port?: number
   /**
-   * +optional
+   * +optional the byteman rule\'s data for action \'ruleData\'
    * @type {string}
    * @memberof V1alpha1JVMChaosSpec
    */
@@ -5208,6 +5227,18 @@ export interface V1alpha1JVMChaosSpec {
    * @memberof V1alpha1JVMChaosSpec
    */
   selector?: V1alpha1PodSelectorSpec
+  /**
+   * the match sql type default value is \"\", means match all SQL type. The value can be \'select\', \'insert\', \'update\', \'delete\', \'replace\'.
+   * @type {string}
+   * @memberof V1alpha1JVMChaosSpec
+   */
+  sqlType?: string
+  /**
+   * the match table default value is \"\", means match all table
+   * @type {string}
+   * @memberof V1alpha1JVMChaosSpec
+   */
+  table?: string
   /**
    * +optional the return value for action \'return\'
    * @type {string}
@@ -5222,7 +5253,7 @@ export interface V1alpha1JVMChaosSpec {
  */
 export interface V1alpha1JVMExceptionSpec {
   /**
-   * Java class
+   * +optional Java class
    * @type {string}
    * @memberof V1alpha1JVMExceptionSpec
    */
@@ -5234,19 +5265,19 @@ export interface V1alpha1JVMExceptionSpec {
    */
   exception?: string
   /**
-   * the method in Java class
+   * +optional the method in Java class
    * @type {string}
    * @memberof V1alpha1JVMExceptionSpec
    */
   method?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMExceptionSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMExceptionSpec
    */
@@ -5259,13 +5290,13 @@ export interface V1alpha1JVMExceptionSpec {
  */
 export interface V1alpha1JVMGCSpec {
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMGCSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMGCSpec
    */
@@ -5278,7 +5309,7 @@ export interface V1alpha1JVMGCSpec {
  */
 export interface V1alpha1JVMLatencySpec {
   /**
-   * Java class
+   * +optional Java class
    * @type {string}
    * @memberof V1alpha1JVMLatencySpec
    */
@@ -5290,19 +5321,19 @@ export interface V1alpha1JVMLatencySpec {
    */
   latency?: number
   /**
-   * the method in Java class
+   * +optional the method in Java class
    * @type {string}
    * @memberof V1alpha1JVMLatencySpec
    */
   method?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMLatencySpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMLatencySpec
    */
@@ -5315,25 +5346,25 @@ export interface V1alpha1JVMLatencySpec {
  */
 export interface V1alpha1JVMReturnSpec {
   /**
-   * Java class
+   * +optional Java class
    * @type {string}
    * @memberof V1alpha1JVMReturnSpec
    */
   class?: string
   /**
-   * the method in Java class
+   * +optional the method in Java class
    * @type {string}
    * @memberof V1alpha1JVMReturnSpec
    */
   method?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMReturnSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMReturnSpec
    */
@@ -5352,13 +5383,13 @@ export interface V1alpha1JVMReturnSpec {
  */
 export interface V1alpha1JVMRuleDataSpec {
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMRuleDataSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMRuleDataSpec
    */
@@ -5389,13 +5420,13 @@ export interface V1alpha1JVMStressSpec {
    */
   'mem-type'?: string
   /**
-   * the pid of Java process which need to attach
+   * the pid of Java process which needs to attach
    * @type {number}
    * @memberof V1alpha1JVMStressSpec
    */
   pid?: number
   /**
-   * the port of agent server
+   * +optional the port of agent server, default 9277
    * @type {number}
    * @memberof V1alpha1JVMStressSpec
    */
@@ -5464,6 +5495,12 @@ export interface V1alpha1LossSpec {
  */
 export interface V1alpha1MemoryStressor {
   /**
+   * OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more about this option. +kubebuilder:validation:Minimum=-1000 +kubebuilder:validation:Maximum=1000 +kubebuilder:default=0 +optional
+   * @type {number}
+   * @memberof V1alpha1MemoryStressor
+   */
+  oomScoreAdj?: number
+  /**
    * extend stress-ng options +optional
    * @type {Array<string>}
    * @memberof V1alpha1MemoryStressor
@@ -5489,7 +5526,7 @@ export interface V1alpha1MemoryStressor {
  */
 export interface V1alpha1MistakeSpec {
   /**
-   * Filling determines what is filled in the miskate data. +optional +kubebuilder:validation:Enum=zero;random
+   * Filling determines what is filled in the mistake data. +optional +kubebuilder:validation:Enum=zero;random
    * @type {string}
    * @memberof V1alpha1MistakeSpec
    */
@@ -5575,19 +5612,19 @@ export interface V1alpha1NetworkChaosSpec {
    */
   action?: string
   /**
-   *
+   * Bandwidth represents the detail about bandwidth control action +ui:form:when=action==\'bandwidth\' +optional
    * @type {V1alpha1BandwidthSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
   bandwidth?: V1alpha1BandwidthSpec
   /**
-   *
+   * Corrupt represents the detail about corrupt action +ui:form:when=action==\'corrupt\' +optional
    * @type {V1alpha1CorruptSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
   corrupt?: V1alpha1CorruptSpec
   /**
-   *
+   * Delay represents the detail about delay action +ui:form:when=action==\'delay\' +optional
    * @type {V1alpha1DelaySpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -5605,7 +5642,7 @@ export interface V1alpha1NetworkChaosSpec {
    */
   direction?: string
   /**
-   *
+   * DuplicateSpec represents the detail about loss action +ui:form:when=action==\'duplicate\' +optional
    * @type {V1alpha1DuplicateSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -5623,7 +5660,7 @@ export interface V1alpha1NetworkChaosSpec {
    */
   externalTargets?: Array<string>
   /**
-   *
+   * Loss represents the detail about loss action +ui:form:when=action==\'loss\' +optional
    * @type {V1alpha1LossSpec}
    * @memberof V1alpha1NetworkChaosSpec
    */
@@ -6382,6 +6419,12 @@ export interface V1alpha1ProcessSpec {
    */
   process?: string
   /**
+   * the command to be run when recovering experiment
+   * @type {string}
+   * @memberof V1alpha1ProcessSpec
+   */
+  recoverCmd?: string
+  /**
    * the signal number to send
    * @type {number}
    * @memberof V1alpha1ProcessSpec
@@ -6689,6 +6732,67 @@ export interface V1alpha1ScheduleStatus {
 /**
  *
  * @export
+ * @interface V1alpha1StatusCheckSpec
+ */
+export interface V1alpha1StatusCheckSpec {
+  /**
+   * Duration defines the duration of the whole status check if the number of failed execution does not exceed the failure threshold. Duration is available to both `Synchronous` and `Continuous` mode. A duration string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". +optional
+   * @type {string}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  duration?: string
+  /**
+   * FailureThreshold defines the minimum consecutive failure for the status check to be considered failed. +optional +kubebuilder:default=3 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  failureThreshold?: number
+  /**
+   *
+   * @type {V1alpha1HTTPStatusCheck}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  http?: V1alpha1HTTPStatusCheck
+  /**
+   * IntervalSeconds defines how often (in seconds) to perform an execution of status check. +optional +kubebuilder:default=10 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  intervalSeconds?: number
+  /**
+   * Mode defines the execution mode of the status check. Support type: Synchronous / Continuous +optional +kubebuilder:validation:Enum=Synchronous;Continuous
+   * @type {string}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  mode?: string
+  /**
+   * RecordsHistoryLimit defines the number of record to retain. +optional +kubebuilder:default=100 +kubebuilder:validation:Minimum=1 +kubebuilder:validation:Maximum=1000
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  recordsHistoryLimit?: number
+  /**
+   * SuccessThreshold defines the minimum consecutive successes for the status check to be considered successful. SuccessThreshold only works for `Synchronous` mode. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  successThreshold?: number
+  /**
+   * TimeoutSeconds defines the number of seconds after which an execution of status check times out. +optional +kubebuilder:default=1 +kubebuilder:validation:Minimum=1
+   * @type {number}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  timeoutSeconds?: number
+  /**
+   * Type defines the specific status check type. Support type: HTTP +kubebuilder:default=HTTP +kubebuilder:validation:Enum=HTTP
+   * @type {string}
+   * @memberof V1alpha1StatusCheckSpec
+   */
+  type?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1StatusCheckTemplate
  */
 export interface V1alpha1StatusCheckTemplate {
@@ -6761,10 +6865,10 @@ export interface V1alpha1StressCPUSpec {
   load?: number
   /**
    * extend stress-ng options
-   * @type {string}
+   * @type {Array<string>}
    * @memberof V1alpha1StressCPUSpec
    */
-  options?: string
+  options?: Array<string>
   /**
    * specifies N workers to apply the stressor.
    * @type {number}
@@ -6829,10 +6933,10 @@ export interface V1alpha1StressChaosSpec {
 export interface V1alpha1StressMemorySpec {
   /**
    * extend stress-ng options
-   * @type {string}
+   * @type {Array<string>}
    * @memberof V1alpha1StressMemorySpec
    */
-  options?: string
+  options?: Array<string>
   /**
    * specifies N bytes consumed per vm worker, default is the total available memory. One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..
    * @type {string}
@@ -6884,6 +6988,12 @@ export interface V1alpha1Task {
  * @interface V1alpha1Template
  */
 export interface V1alpha1Template {
+  /**
+   * AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded. Only used when Type is TypeStatusCheck. +optional
+   * @type {boolean}
+   * @memberof V1alpha1Template
+   */
+  abortWithStatusCheck?: boolean
   /**
    *
    * @type {V1alpha1AWSChaosSpec}
@@ -6986,6 +7096,12 @@ export interface V1alpha1Template {
    * @memberof V1alpha1Template
    */
   schedule?: V1alpha1ChaosOnlyScheduleSpec
+  /**
+   *
+   * @type {V1alpha1StatusCheckSpec}
+   * @memberof V1alpha1Template
+   */
+  statusCheck?: V1alpha1StatusCheckSpec
   /**
    *
    * @type {V1alpha1StressChaosSpec}
@@ -9005,7 +9121,10 @@ export const CommonApiFp = function (configuration?: Configuration) {
       request: V1alpha1PhysicalMachineSelectorSpec,
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverCommonPhysicalMachine>>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPhysicalMachine>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.commonPhysicalmachinesPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -9020,7 +9139,12 @@ export const CommonApiFp = function (configuration?: Configuration) {
     async commonPodsPost(
       request: V1alpha1PodSelectorSpec,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverCommonPod>>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPod>>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.commonPodsPost(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -9147,7 +9271,7 @@ export const CommonApiFactory = function (configuration?: Configuration, basePat
     commonPhysicalmachinesPost(
       request: V1alpha1PhysicalMachineSelectorSpec,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverCommonPhysicalMachine>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPhysicalMachine>> {
       return localVarFp.commonPhysicalmachinesPost(request, options).then((request) => request(axios, basePath))
     },
     /**
@@ -9160,7 +9284,7 @@ export const CommonApiFactory = function (configuration?: Configuration, basePat
     commonPodsPost(
       request: V1alpha1PodSelectorSpec,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverCommonPod>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverCommonPod>> {
       return localVarFp.commonPodsPost(request, options).then((request) => request(axios, basePath))
     },
     /**
@@ -10299,7 +10423,10 @@ export const ExperimentsApiFp = function (configuration?: Configuration) {
       status?: 'Injecting' | 'Running' | 'Finished' | 'Paused',
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverExperimentExperiment>>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentExperiment>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.experimentsGet(namespace, name, kind, status, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -10386,7 +10513,12 @@ export const ExperimentsApiFp = function (configuration?: Configuration) {
     async experimentsUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverExperimentDetail>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentDetail>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.experimentsUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -10442,7 +10574,7 @@ export const ExperimentsApiFactory = function (
         | 'HTTPChaos',
       status?: 'Injecting' | 'Running' | 'Finished' | 'Paused',
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverExperimentExperiment>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentExperiment>> {
       return localVarFp
         .experimentsGet(namespace, name, kind, status, options)
         .then((request) => request(axios, basePath))
@@ -10505,7 +10637,10 @@ export const ExperimentsApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    experimentsUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverExperimentDetail> {
+    experimentsUidGet(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverExperimentDetail> {
       return localVarFp.experimentsUidGet(uid, options).then((request) => request(axios, basePath))
     },
   }
@@ -11081,7 +11216,10 @@ export const SchedulesApiFp = function (configuration?: Configuration) {
       name?: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<PkgDashboardApiserverScheduleSchedule>>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedule>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesGet(namespace, name, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -11152,7 +11290,12 @@ export const SchedulesApiFp = function (configuration?: Configuration) {
     async schedulesUidGet(
       uid: string,
       options?: AxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverScheduleDetail>> {
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleDetail>
+    > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.schedulesUidGet(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
     },
@@ -11188,7 +11331,7 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
       namespace?: string,
       name?: string,
       options?: any
-    ): AxiosPromise<Array<PkgDashboardApiserverScheduleSchedule>> {
+    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleSchedule>> {
       return localVarFp.schedulesGet(namespace, name, options).then((request) => request(axios, basePath))
     },
     /**
@@ -11238,7 +11381,10 @@ export const SchedulesApiFactory = function (configuration?: Configuration, base
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    schedulesUidGet(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverScheduleDetail> {
+    schedulesUidGet(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverScheduleDetail> {
       return localVarFp.schedulesUidGet(uid, options).then((request) => request(axios, basePath))
     },
   }
@@ -11535,7 +11681,7 @@ export const TemplateApiFp = function (configuration?: Configuration) {
       (
         axios?: AxiosInstance,
         basePath?: string
-      ) => AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase>>
+      ) => AxiosPromise<Array<PkgDashboardApiserverTemplateStatusCheckTemplateBase>>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksGet(namespace, name, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -11562,7 +11708,7 @@ export const TemplateApiFactory = function (configuration?: Configuration, baseP
       namespace?: string,
       name?: string,
       options?: any
-    ): AxiosPromise<Array<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateBase>> {
+    ): AxiosPromise<Array<PkgDashboardApiserverTemplateStatusCheckTemplateBase>> {
       return localVarFp.templatesStatuschecksGet(namespace, name, options).then((request) => request(axios, basePath))
     },
   }
@@ -11623,12 +11769,12 @@ export const TemplatesApiAxiosParamCreator = function (configuration?: Configura
     /**
      * Pass a JSON object to create a new status check template.
      * @summary Create a new status check template.
-     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {PkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     templatesStatuschecksPost: async (
-      statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      statuscheck: PkgDashboardApiserverTemplateStatusCheckTemplate,
       options: AxiosRequestConfig = {}
     ): Promise<RequestArgs> => {
       // verify required parameter 'statuscheck' is not null or undefined
@@ -11752,12 +11898,12 @@ export const TemplatesApiAxiosParamCreator = function (configuration?: Configura
     /**
      * Update a status check template by namespaced name.
      * @summary Update a status check template.
-     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
+     * @param {PkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     templatesStatuschecksStatuscheckPut: async (
-      request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      request: PkgDashboardApiserverTemplateStatusCheckTemplate,
       options: AxiosRequestConfig = {}
     ): Promise<RequestArgs> => {
       // verify required parameter 'request' is not null or undefined
@@ -11799,18 +11945,15 @@ export const TemplatesApiFp = function (configuration?: Configuration) {
     /**
      * Pass a JSON object to create a new status check template.
      * @summary Create a new status check template.
-     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {PkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async templatesStatuschecksPost(
-      statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      statuscheck: PkgDashboardApiserverTemplateStatusCheckTemplate,
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverTemplateStatusCheckTemplate>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksPost(statuscheck, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -11848,10 +11991,7 @@ export const TemplatesApiFp = function (configuration?: Configuration) {
       name: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverTemplateStatusCheckTemplateDetail>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckGet(
         namespace,
@@ -11863,18 +12003,15 @@ export const TemplatesApiFp = function (configuration?: Configuration) {
     /**
      * Update a status check template by namespaced name.
      * @summary Update a status check template.
-     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
+     * @param {PkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async templatesStatuschecksStatuscheckPut(
-      request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      request: PkgDashboardApiserverTemplateStatusCheckTemplate,
       options?: AxiosRequestConfig
     ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate>
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverTemplateStatusCheckTemplate>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.templatesStatuschecksStatuscheckPut(request, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -11892,14 +12029,14 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
     /**
      * Pass a JSON object to create a new status check template.
      * @summary Create a new status check template.
-     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
+     * @param {PkgDashboardApiserverTemplateStatusCheckTemplate} statuscheck the status check definition
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     templatesStatuschecksPost(
-      statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      statuscheck: PkgDashboardApiserverTemplateStatusCheckTemplate,
       options?: any
-    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate> {
+    ): AxiosPromise<PkgDashboardApiserverTemplateStatusCheckTemplate> {
       return localVarFp.templatesStatuschecksPost(statuscheck, options).then((request) => request(axios, basePath))
     },
     /**
@@ -11931,7 +12068,7 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
       namespace: string,
       name: string,
       options?: any
-    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplateDetail> {
+    ): AxiosPromise<PkgDashboardApiserverTemplateStatusCheckTemplateDetail> {
       return localVarFp
         .templatesStatuschecksStatuscheckGet(namespace, name, options)
         .then((request) => request(axios, basePath))
@@ -11939,14 +12076,14 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
     /**
      * Update a status check template by namespaced name.
      * @summary Update a status check template.
-     * @param {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
+     * @param {PkgDashboardApiserverTemplateStatusCheckTemplate} request Request body
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     templatesStatuschecksStatuscheckPut(
-      request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate,
+      request: PkgDashboardApiserverTemplateStatusCheckTemplate,
       options?: any
-    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate> {
+    ): AxiosPromise<PkgDashboardApiserverTemplateStatusCheckTemplate> {
       return localVarFp
         .templatesStatuschecksStatuscheckPut(request, options)
         .then((request) => request(axios, basePath))
@@ -11962,10 +12099,10 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
 export interface TemplatesApiTemplatesStatuschecksPostRequest {
   /**
    * the status check definition
-   * @type {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate}
+   * @type {PkgDashboardApiserverTemplateStatusCheckTemplate}
    * @memberof TemplatesApiTemplatesStatuschecksPost
    */
-  readonly statuscheck: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+  readonly statuscheck: PkgDashboardApiserverTemplateStatusCheckTemplate
 }
 
 /**
@@ -12018,10 +12155,10 @@ export interface TemplatesApiTemplatesStatuschecksStatuscheckGetRequest {
 export interface TemplatesApiTemplatesStatuschecksStatuscheckPutRequest {
   /**
    * Request body
-   * @type {GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate}
+   * @type {PkgDashboardApiserverTemplateStatusCheckTemplate}
    * @memberof TemplatesApiTemplatesStatuschecksStatuscheckPut
    */
-  readonly request: GithubComChaosMeshChaosMeshPkgDashboardApiserverTemplateStatusCheckTemplate
+  readonly request: PkgDashboardApiserverTemplateStatusCheckTemplate
 }
 
 /**
@@ -12475,7 +12612,10 @@ export const WorkflowsApiFp = function (configuration?: Configuration) {
       uid: string,
       options?: AxiosRequestConfig
     ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<PkgDashboardApiserverWorkflowStatusResponse>
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse>
     > {
       const localVarAxiosArgs = await localVarAxiosParamCreator.workflowsUidDelete(uid, options)
       return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)
@@ -12586,7 +12726,10 @@ export const WorkflowsApiFactory = function (configuration?: Configuration, base
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    workflowsUidDelete(uid: string, options?: any): AxiosPromise<PkgDashboardApiserverWorkflowStatusResponse> {
+    workflowsUidDelete(
+      uid: string,
+      options?: any
+    ): AxiosPromise<GithubComChaosMeshChaosMeshPkgDashboardApiserverWorkflowStatusResponse> {
       return localVarFp.workflowsUidDelete(uid, options).then((request) => request(axios, basePath))
     },
     /**

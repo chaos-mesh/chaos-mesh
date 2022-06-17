@@ -153,6 +153,11 @@ chaosDaemon:
   env: {}
   # running chaosDaemon on host network
   hostNetwork: false
+  # configurations about mtls.
+  # currently we do not support use specified ca and cert for mtls, it would generate the ca and certs when chaos mesh deploy by helm.
+  mtls:
+    # enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon
+    enabled: true
 
   # Run chaos-daemon container in privileged mode. Processes in privileged containers
   # are essentially equivalent to root on the host.
@@ -193,6 +198,9 @@ chaosDaemon:
   # runtime: crio
   # socketPath: /var/run/crio/crio.sock
 
+  # You can customize socket dir via socketDir
+  # If you set socketPath and socketDir at the same time, only socketPath will work.
+
   # CPU/Memory resource requests/limits for chaosDaemon container
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -212,6 +220,13 @@ chaosDaemon:
   # Map of chaos-controller-manager node/pod affinities
   affinity: {}
 
+  # Specify DaemonSetUpdateStrategy for chaos-daemon
+  updateStrategy: {}
+    # Example update strategy:
+    # type: RollingUpdate
+    # rollingUpdate:
+    #   maxUnavailable: 33%
+
 dashboard:
   # Enable chaos-dashboard
   create: true
@@ -224,7 +239,7 @@ dashboard:
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # The serviceAccount for chaos-dashboard
-  serviceAccount: chaos-controller-manager
+  serviceAccount: chaos-dashboard
   image:
     # override global registry, empty value means using the global images.registry
     registry: ""
@@ -234,9 +249,7 @@ dashboard:
     tag: ""
   # Image pull policy
   imagePullPolicy: IfNotPresent
-  # securityMode would enable both of:
-  # - rbac authentication on Chaos Dashboard
-  # - chaos-daemon mtls
+  # securityMode requires user to provide credentials on Chaos Dashboard, instead of using chaos-dashboard service account
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
   gcpSecurityMode: false
@@ -448,6 +461,8 @@ webhook:
     # Setup the webhook using cert-manager
     enabled: false
   # if empty and disable certManager, Helm will auto-generate these fields
+  caBundlePEM: |
+
   crtPEM: |
 
   keyPEM: |
@@ -458,7 +473,7 @@ webhook:
   timeoutSeconds: 5
   # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
-  FailurePolicy: Ignore
+  FailurePolicy: Fail
 
   CRDS:
     - podchaos

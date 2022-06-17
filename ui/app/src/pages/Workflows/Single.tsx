@@ -14,29 +14,33 @@
  * limitations under the License.
  *
  */
-
+import loadable from '@loadable/component'
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+import { makeStyles } from '@mui/styles'
+import api from 'api'
+import { EventHandler } from 'cytoscape'
+import yaml from 'js-yaml'
 import { CoreEvent, CoreWorkflowDetail } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { EventHandler } from 'cytoscape'
-import EventsTimeline from 'components/EventsTimeline'
-import NodeConfiguration from 'components/ObjectConfiguration/Node'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
-import { constructWorkflowTopology } from 'lib/cytoscape'
-import i18n from 'components/T'
-import loadable from '@loadable/component'
-import { makeStyles } from '@mui/styles'
-import { useIntervalFetch } from 'lib/hooks'
-import { useIntl } from 'react-intl'
+
 import { useStoreDispatch } from 'store'
-import yaml from 'js-yaml'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import NodeConfiguration from 'components/ObjectConfiguration/Node'
+import i18n from 'components/T'
+
+import { constructWorkflowTopology } from 'lib/cytoscape'
+import { useIntervalFetch } from 'lib/hooks'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -179,7 +183,8 @@ const Single = () => {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <div>
+        <div style={{ height: '100%' }}>
+          {single && <Helmet title={`Workflow ${single.name}`} />}
           <Space spacing={6} className={classes.root}>
             <Space direction="row">
               <Button
@@ -196,13 +201,7 @@ const Single = () => {
               </Button>
             </Space>
             <Paper sx={{ display: 'flex', flexDirection: 'column', height: 450 }}>
-              <PaperTop
-                title={
-                  <Space spacing={1.5} alignItems="center">
-                    <Box>{i18n('workflow.topology')}</Box>
-                  </Space>
-                }
-              ></PaperTop>
+              <PaperTop title={i18n('workflow.topology')} />
               <div ref={topologyRef} style={{ flex: 1 }} />
             </Paper>
 

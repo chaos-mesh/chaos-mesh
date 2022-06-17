@@ -157,19 +157,21 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-gc:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-latency:
@@ -184,10 +186,11 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               jvm-return:
@@ -199,10 +202,11 @@ spec:
                     description: the method in Java class
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                   value:
                     description: the return value for action 'return'
@@ -211,10 +215,11 @@ spec:
               jvm-rule-data:
                 properties:
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                   rule-data:
                     description: RuleData used to save the rule file's data, will
@@ -232,10 +237,11 @@ spec:
                       action is stress, the value can be 'stack' or 'heap'
                     type: string
                   pid:
-                    description: the pid of Java process which need to attach
+                    description: the pid of Java process which needs to attach
                     type: integer
                   port:
-                    description: the port of agent server
+                    description: the port of agent server, default 9277
+                    format: int32
                     type: integer
                 type: object
               mode:
@@ -548,7 +554,9 @@ spec:
                     type: integer
                   options:
                     description: extend stress-ng options
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   workers:
                     description: specifies N workers to apply the stressor.
                     type: integer
@@ -557,7 +565,9 @@ spec:
                 properties:
                   options:
                     description: extend stress-ng options
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   size:
                     description: specifies N bytes consumed per vm worker, default
                       is the total available memory. One can specify the size as %
@@ -607,15 +617,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array

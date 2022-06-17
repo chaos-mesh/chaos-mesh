@@ -42,6 +42,11 @@ spec:
               templates:
                 items:
                   properties:
+                    abortWithStatusCheck:
+                      description: AbortWithStatusCheck describe whether to abort
+                        the workflow when the failure threshold of StatusCheck is
+                        exceeded. Only used when Type is TypeStatusCheck.
+                      type: boolean
                     awsChaos:
                       description: AWSChaosSpec is the content of the specification
                         for an AWSChaos
@@ -803,7 +808,7 @@ spec:
                               format: int64
                               type: integer
                             kind:
-                              description: FileType represents type of a file
+                              description: FileType represents type of file
                               type: string
                             mtime:
                               description: Timespec represents a time
@@ -872,7 +877,7 @@ spec:
                           properties:
                             filling:
                               description: Filling determines what is filled in the
-                                miskate data.
+                                mistake data.
                               enum:
                               - zero
                               - random
@@ -1034,6 +1039,7 @@ spec:
                           - stress
                           - gc
                           - ruleData
+                          - mysql
                           type: string
                         class:
                           description: Java class
@@ -1046,23 +1052,28 @@ spec:
                             type: string
                           type: array
                         cpuCount:
-                          description: the CPU core number need to use, only set it
-                            when action is stress
+                          description: the CPU core number needs to use, only set
+                            it when action is stress
                           type: integer
+                        database:
+                          description: the match database default value is "", means
+                            match all database
+                          type: string
                         duration:
                           description: Duration represents the duration of the chaos
                             action
                           type: string
                         exception:
                           description: the exception which needs to throw for action
-                            `exception`
+                            `exception` or the exception message needs to throw in
+                            action `mysql`
                           type: string
                         latency:
                           description: the latency duration for action 'latency',
-                            unit ms
+                            unit ms or the latency duration in action `mysql`
                           type: integer
                         memType:
-                          description: the memory type need to locate, only set it
+                          description: the memory type needs to locate, only set it
                             when action is stress, the value can be 'stack' or 'heap'
                           type: string
                         method:
@@ -1078,15 +1089,23 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        mysqlConnectorVersion:
+                          description: the version of mysql-connector-java, only support
+                            5.X.X(set to "5") and 8.X.X(set to "8") now
+                          type: string
                         name:
                           description: byteman rule name, should be unique, and will
-                            use JVMChaos' name if not set
+                            generate one if not set
                           type: string
+                        pid:
+                          description: the pid of Java process which needs to attach
+                          type: integer
                         port:
                           description: the port of agent server, default 9277
                           format: int32
                           type: integer
                         ruleData:
+                          description: the byteman rule's data for action 'ruleData'
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -1181,6 +1200,15 @@ spec:
                                 a set of pod names.
                               type: object
                           type: object
+                        sqlType:
+                          description: the match sql type default value is "", means
+                            match all SQL type. The value can be 'select', 'insert',
+                            'update', 'delete', 'replace'.
+                          type: string
+                        table:
+                          description: the match table default value is "", means
+                            match all table
+                          type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
                             / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -1903,19 +1931,23 @@ spec:
                               description: the method in Java class
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-gc:
                           properties:
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-latency:
@@ -1931,10 +1963,12 @@ spec:
                               description: the method in Java class
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         jvm-return:
@@ -1946,10 +1980,12 @@ spec:
                               description: the method in Java class
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                             value:
                               description: the return value for action 'return'
@@ -1958,10 +1994,12 @@ spec:
                         jvm-rule-data:
                           properties:
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                             rule-data:
                               description: RuleData used to save the rule file's data,
@@ -1980,10 +2018,12 @@ spec:
                                 or 'heap'
                               type: string
                             pid:
-                              description: the pid of Java process which need to attach
+                              description: the pid of Java process which needs to
+                                attach
                               type: integer
                             port:
-                              description: the port of agent server
+                              description: the port of agent server, default 9277
+                              format: int32
                               type: integer
                           type: object
                         mode:
@@ -2308,7 +2348,9 @@ spec:
                               type: integer
                             options:
                               description: extend stress-ng options
-                              type: string
+                              items:
+                                type: string
+                              type: array
                             workers:
                               description: specifies N workers to apply the stressor.
                               type: integer
@@ -2317,7 +2359,9 @@ spec:
                           properties:
                             options:
                               description: extend stress-ng options
-                              type: string
+                              items:
+                                type: string
+                              type: array
                             size:
                               description: specifies N bytes consumed per vm worker,
                                 default is the total available memory. One can specify
@@ -3266,7 +3310,7 @@ spec:
                                   format: int64
                                   type: integer
                                 kind:
-                                  description: FileType represents type of a file
+                                  description: FileType represents type of file
                                   type: string
                                 mtime:
                                   description: Timespec represents a time
@@ -3336,7 +3380,7 @@ spec:
                               properties:
                                 filling:
                                   description: Filling determines what is filled in
-                                    the miskate data.
+                                    the mistake data.
                                   enum:
                                   - zero
                                   - random
@@ -3504,6 +3548,7 @@ spec:
                               - stress
                               - gc
                               - ruleData
+                              - mysql
                               type: string
                             class:
                               description: Java class
@@ -3516,23 +3561,28 @@ spec:
                                 type: string
                               type: array
                             cpuCount:
-                              description: the CPU core number need to use, only set
-                                it when action is stress
+                              description: the CPU core number needs to use, only
+                                set it when action is stress
                               type: integer
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
                             exception:
                               description: the exception which needs to throw for
-                                action `exception`
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
                               type: string
                             latency:
                               description: the latency duration for action 'latency',
-                                unit ms
+                                unit ms or the latency duration in action `mysql`
                               type: integer
                             memType:
-                              description: the memory type need to locate, only set
+                              description: the memory type needs to locate, only set
                                 it when action is stress, the value can be 'stack'
                                 or 'heap'
                               type: string
@@ -3550,15 +3600,24 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
+                              type: string
                             name:
                               description: byteman rule name, should be unique, and
-                                will use JVMChaos' name if not set
+                                will generate one if not set
                               type: string
+                            pid:
+                              description: the pid of Java process which needs to
+                                attach
+                              type: integer
                             port:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
                             ruleData:
+                              description: the byteman rule's data for action 'ruleData'
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -3656,6 +3715,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -4403,21 +4471,23 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-gc:
                               properties:
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-latency:
@@ -4433,11 +4503,12 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             jvm-return:
@@ -4449,11 +4520,12 @@ spec:
                                   description: the method in Java class
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 value:
                                   description: the return value for action 'return'
@@ -4462,11 +4534,12 @@ spec:
                             jvm-rule-data:
                               properties:
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                                 rule-data:
                                   description: RuleData used to save the rule file's
@@ -4485,11 +4558,12 @@ spec:
                                     'stack' or 'heap'
                                   type: string
                                 pid:
-                                  description: the pid of Java process which need
+                                  description: the pid of Java process which needs
                                     to attach
                                   type: integer
                                 port:
-                                  description: the port of agent server
+                                  description: the port of agent server, default 9277
+                                  format: int32
                                   type: integer
                               type: object
                             mode:
@@ -4826,7 +4900,9 @@ spec:
                                   type: integer
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
@@ -4835,7 +4911,9 @@ spec:
                               properties:
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can
@@ -5173,6 +5251,8 @@ spec:
                                       description: Load specifies P percent loading
                                         per CPU worker. 0 is effectively a sleep (no
                                         load) and 100 is full loading.
+                                      maximum: 100
+                                      minimum: 0
                                       type: integer
                                     options:
                                       description: extend stress-ng options
@@ -5197,6 +5277,7 @@ spec:
                                       description: OOMScoreAdj sets the oom_score_adj
                                         of the stress process. See `man 5 proc` to
                                         know more about this option.
+                                      maximum: 1000
                                       minimum: -1000
                                       type: integer
                                     options:
@@ -5395,6 +5476,108 @@ spec:
                       - schedule
                       - type
                       type: object
+                    statusCheck:
+                      description: StatusCheck describe the behavior of StatusCheck.
+                        Only used when Type is TypeStatusCheck.
+                      properties:
+                        duration:
+                          description: Duration defines the duration of the whole
+                            status check if the number of failed execution does not
+                            exceed the failure threshold. Duration is available to
+                            both `Synchronous` and `Continuous` mode. A duration string
+                            is a possibly signed sequence of decimal numbers, each
+                            with optional fraction and a unit suffix, such as "300ms",
+                            "-1.5h" or "2h45m". Valid time units are "ns", "us" (or
+                            "µs"), "ms", "s", "m", "h".
+                          type: string
+                        failureThreshold:
+                          default: 3
+                          description: FailureThreshold defines the minimum consecutive
+                            failure for the status check to be considered failed.
+                          minimum: 1
+                          type: integer
+                        http:
+                          properties:
+                            body:
+                              type: string
+                            criteria:
+                              description: Criteria defines how to determine the result
+                                of the status check.
+                              properties:
+                                statusCode:
+                                  description: StatusCode defines the expected http
+                                    status code for the request. A statusCode string
+                                    could be a single code (e.g. 200), or an inclusive
+                                    range (e.g. 200-400, both `200` and `400` are
+                                    included).
+                                  type: string
+                              required:
+                              - statusCode
+                              type: object
+                            headers:
+                              additionalProperties:
+                                items:
+                                  type: string
+                                type: array
+                              description: "A Header represents the key-value pairs
+                                in an HTTP header. \n The keys should be in canonical
+                                form, as returned by CanonicalHeaderKey."
+                              type: object
+                            method:
+                              default: GET
+                              enum:
+                              - GET
+                              - POST
+                              type: string
+                            url:
+                              type: string
+                          required:
+                          - criteria
+                          - url
+                          type: object
+                        intervalSeconds:
+                          default: 10
+                          description: IntervalSeconds defines how often (in seconds)
+                            to perform an execution of status check.
+                          minimum: 1
+                          type: integer
+                        mode:
+                          description: 'Mode defines the execution mode of the status
+                            check. Support type: Synchronous / Continuous'
+                          enum:
+                          - Synchronous
+                          - Continuous
+                          type: string
+                        recordsHistoryLimit:
+                          default: 100
+                          description: RecordsHistoryLimit defines the number of record
+                            to retain.
+                          maximum: 1000
+                          minimum: 1
+                          type: integer
+                        successThreshold:
+                          default: 1
+                          description: SuccessThreshold defines the minimum consecutive
+                            successes for the status check to be considered successful.
+                            SuccessThreshold only works for `Synchronous` mode.
+                          minimum: 1
+                          type: integer
+                        timeoutSeconds:
+                          default: 1
+                          description: TimeoutSeconds defines the number of seconds
+                            after which an execution of status check times out.
+                          minimum: 1
+                          type: integer
+                        type:
+                          default: HTTP
+                          description: 'Type defines the specific status check type.
+                            Support type: HTTP'
+                          enum:
+                          - HTTP
+                          type: string
+                      required:
+                      - type
+                      type: object
                     stressChaos:
                       description: StressChaosSpec defines the desired state of StressChaos
                       properties:
@@ -5537,6 +5720,8 @@ spec:
                                   description: Load specifies P percent loading per
                                     CPU worker. 0 is effectively a sleep (no load)
                                     and 100 is full loading.
+                                  maximum: 100
+                                  minimum: 0
                                   type: integer
                                 options:
                                   description: extend stress-ng options
@@ -5561,6 +5746,7 @@ spec:
                                   description: OOMScoreAdj sets the oom_score_adj
                                     of the stress process. See `man 5 proc` to know
                                     more about this option.
+                                  maximum: 1000
                                   minimum: -1000
                                   type: integer
                                 options:

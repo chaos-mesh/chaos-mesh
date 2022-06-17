@@ -14,17 +14,20 @@
  * limitations under the License.
  *
  */
+import AddCircleIcon from '@mui/icons-material/AddCircle'
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { Box, IconButton, InputAdornment, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
-import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { useEffect, useState } from 'react'
 
-import AddCircleIcon from '@mui/icons-material/AddCircle'
 import Paper from '@ui/mui-extends/esm/Paper'
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import Space from '@ui/mui-extends/esm/Space'
-import typesData from '../data/types'
+
 import { useStoreSelector } from 'store'
+
+import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
+
+import typesData from '../data/types'
 
 interface KernelProps {
   onSubmit: (values: Record<string, any>) => void
@@ -119,9 +122,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                 type="number"
                 name="failKernRequest.probability"
                 helperText="The fails with probability"
-                InputProps={{
-                  endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                }}
+                endAdornment={<InputAdornment position="end">%</InputAdornment>}
               />
               <TextField type="number" name="failKernRequest.times" helperText="The max times of failures" />
             </Space>

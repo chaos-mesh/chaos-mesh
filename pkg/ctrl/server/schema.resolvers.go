@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
+	podSelector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
 
 func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
@@ -123,6 +125,10 @@ func (r *chaosConditionResolver) Type(ctx context.Context, obj *v1alpha1.ChaosCo
 
 func (r *chaosConditionResolver) Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error) {
 	return string(obj.Status), nil
+}
+
+func (r *cidrAndPortResolver) Port(ctx context.Context, obj *v1alpha1.CidrAndPort) (int, error) {
+	return int(obj.Port), nil
 }
 
 func (r *containerStateRunningResolver) StartedAt(ctx context.Context, obj *v1.ContainerStateRunning) (*time.Time, error) {
@@ -458,6 +464,27 @@ func (r *mistakeSpecResolver) Filling(ctx context.Context, obj *v1alpha1.Mistake
 	return &filling, nil
 }
 
+func (r *mutablePodResolver) KillProcesses(ctx context.Context, obj *model.MutablePod, pids []string) ([]*model.KillProcessResult, error) {
+	return r.Resolver.killProcess(ctx, obj.Pod, pids)
+}
+
+func (r *mutablePodResolver) CleanTcs(ctx context.Context, obj *model.MutablePod, devices []string) ([]string, error) {
+	return r.Resolver.cleanTcs(ctx, obj.Pod, devices)
+}
+
+func (r *mutablePodResolver) CleanIptables(ctx context.Context, obj *model.MutablePod, chains []string) ([]string, error) {
+	return r.Resolver.cleanIptables(ctx, obj.Pod, chains)
+}
+
+func (r *mutationResolver) Pod(ctx context.Context, ns string, name string) (*model.MutablePod, error) {
+	key := types.NamespacedName{Namespace: ns, Name: name}
+	pod := new(v1.Pod)
+	if err := r.Client.Get(ctx, key, pod); err != nil {
+		return nil, err
+	}
+	return &model.MutablePod{Pod: pod}, nil
+}
+
 func (r *namespaceResolver) Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error) {
 	var list v1.PodList
 	var pods []*v1.Pod
@@ -746,7 +773,7 @@ func (r *podResolver) Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error) 
 		return nil, err
 	}
 
-	daemon, exist := daemons[obj.Name]
+	daemon, exist := daemons[obj.Spec.NodeName]
 	if !exist {
 		return nil, fmt.Errorf("daemon of pod(%s/%s) not found", obj.Namespace, obj.Name)
 	}
@@ -765,11 +792,11 @@ func (r *podResolver) Ipset(ctx context.Context, obj *v1.Pod) (string, error) {
 	return r.GetIpset(ctx, obj)
 }
 
-func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *podResolver) TcQdisc(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	return r.GetTcQdisc(ctx, obj)
 }
 
-func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) (string, error) {
+func (r *podResolver) Iptables(ctx context.Context, obj *v1.Pod) ([]string, error) {
 	return r.GetIptables(ctx, obj)
 }
 
@@ -1062,6 +1089,77 @@ func (r *queryResolver) Namespace(ctx context.Context, ns *string) ([]*model.Nam
 	return []*model.Namespace{{Ns: *ns}}, nil
 }
 
+func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error) {
+	spec := v1alpha1.PodSelectorSpec{
+		Pods:              map[string][]string{},
+		NodeSelectors:     map[string]string{},
+		Nodes:             selector.Nodes,
+		PodPhaseSelectors: selector.PodPhaseSelectors,
+		GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+			Namespaces:          selector.Namespaces,
+			FieldSelectors:      map[string]string{},
+			LabelSelectors:      map[string]string{},
+			AnnotationSelectors: map[string]string{},
+		},
+	}
+
+	for ns, p := range selector.Pods {
+		if pod, ok := p.(string); ok {
+			spec.Pods[ns] = []string{pod}
+		}
+
+		if pods, ok := p.([]string); ok {
+			spec.Pods[ns] = pods
+		}
+	}
+
+	for k, s := range selector.NodeSelectors {
+		if selector, ok := s.(string); ok {
+			spec.NodeSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.FieldSelectors {
+		if selector, ok := s.(string); ok {
+			spec.FieldSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.LabelSelectors {
+		if selector, ok := s.(string); ok {
+			spec.LabelSelectors[k] = selector
+		}
+	}
+
+	for k, s := range selector.AnnotationSelectors {
+		if selector, ok := s.(string); ok {
+			spec.AnnotationSelectors[k] = selector
+		}
+	}
+
+	selectImpl := podSelector.New(podSelector.Params{
+		Client: r.Client,
+		Reader: r.Client,
+	})
+	pods, err := selectImpl.Select(ctx, &v1alpha1.PodSelector{Selector: spec, Mode: v1alpha1.AllMode})
+	if err != nil {
+		if errors.Is(err, podSelector.ErrNoPodSelected) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var list []*v1.Pod
+	for _, pod := range pods {
+		p := pod
+		list = append(list, &p.Pod)
+	}
+	return list, nil
+}
+
+func (r *rawIPSetResolver) IPSetType(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
 	return string(obj.Direction), nil
 }
@@ -1140,6 +1238,9 @@ func (r *Resolver) ChaosCondition() generated.ChaosConditionResolver {
 	return &chaosConditionResolver{r}
 }
 
+// CidrAndPort returns generated.CidrAndPortResolver implementation.
+func (r *Resolver) CidrAndPort() generated.CidrAndPortResolver { return &cidrAndPortResolver{r} }
+
 // ContainerStateRunning returns generated.ContainerStateRunningResolver implementation.
 func (r *Resolver) ContainerStateRunning() generated.ContainerStateRunningResolver {
 	return &containerStateRunningResolver{r}
@@ -1186,6 +1287,12 @@ func (r *Resolver) Logger() generated.LoggerResolver { return &loggerResolver{r}
 
 // MistakeSpec returns generated.MistakeSpecResolver implementation.
 func (r *Resolver) MistakeSpec() generated.MistakeSpecResolver { return &mistakeSpecResolver{r} }
+
+// MutablePod returns generated.MutablePodResolver implementation.
+func (r *Resolver) MutablePod() generated.MutablePodResolver { return &mutablePodResolver{r} }
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Namespace returns generated.NamespaceResolver implementation.
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
@@ -1249,6 +1356,9 @@ func (r *Resolver) Process() generated.ProcessResolver { return &processResolver
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// RawIPSet returns generated.RawIPSetResolver implementation.
+func (r *Resolver) RawIPSet() generated.RawIPSetResolver { return &rawIPSetResolver{r} }
+
 // RawIptables returns generated.RawIptablesResolver implementation.
 func (r *Resolver) RawIptables() generated.RawIptablesResolver { return &rawIptablesResolver{r} }
 
@@ -1276,6 +1386,7 @@ func (r *Resolver) StressChaosStatus() generated.StressChaosStatusResolver {
 type attrOverrideSpecResolver struct{ *Resolver }
 type bandwidthSpecResolver struct{ *Resolver }
 type chaosConditionResolver struct{ *Resolver }
+type cidrAndPortResolver struct{ *Resolver }
 type containerStateRunningResolver struct{ *Resolver }
 type containerStateTerminatedResolver struct{ *Resolver }
 type experimentStatusResolver struct{ *Resolver }
@@ -1289,6 +1400,8 @@ type iOChaosStatusResolver struct{ *Resolver }
 type ioFaultResolver struct{ *Resolver }
 type loggerResolver struct{ *Resolver }
 type mistakeSpecResolver struct{ *Resolver }
+type mutablePodResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
 type networkChaosResolver struct{ *Resolver }
 type ownerReferenceResolver struct{ *Resolver }
@@ -1305,6 +1418,7 @@ type podStatusResolver struct{ *Resolver }
 type podStressChaosResolver struct{ *Resolver }
 type processResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type rawIPSetResolver struct{ *Resolver }
 type rawIptablesResolver struct{ *Resolver }
 type rawTrafficControlResolver struct{ *Resolver }
 type recordResolver struct{ *Resolver }

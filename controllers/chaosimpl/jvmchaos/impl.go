@@ -24,7 +24,9 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pingcap/errors"
+	"github.com/pingcap/log"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -39,7 +41,9 @@ var (
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
 
-const CommonRuleTemplate = `
+const (
+	// byteman rule template
+	SimpleRuleTemplate = `
 RULE {{.Name}}
 CLASS {{.Class}}
 METHOD {{.Method}}
@@ -50,18 +54,52 @@ DO
 ENDRULE
 `
 
-const StressRuleTemplate = `
+	CompleteRuleTemplate = `
 RULE {{.Name}}
-STRESS {{.StressType}}
-{{.StressValueName}} {{.StressValue}}
+CLASS {{.Class}}
+METHOD {{.Method}}
+HELPER {{.Helper}}
+AT ENTRY
+BIND {{.Bind}};
+IF {{.Condition}}
+DO
+	{{.Do}};
 ENDRULE
 `
 
-const GcRuleTemplate = `
-RULE {{.Name}}
-GC
-ENDRULE
-`
+	// for action 'mysql', 'gc' and 'stress'
+	SQLHelper    = "org.chaos_mesh.byteman.helper.SQLHelper"
+	GCHelper     = "org.chaos_mesh.byteman.helper.GCHelper"
+	StressHelper = "org.chaos_mesh.byteman.helper.StressHelper"
+
+	// the trigger point for 'gc' and 'stress'
+	TriggerClass  = "org.chaos_mesh.chaos_agent.TriggerThread"
+	TriggerMethod = "triggerFunc"
+
+	MySQL5InjectClass  = "com.mysql.jdbc.MysqlIO"
+	MySQL5InjectMethod = "sqlQueryDirect"
+	MySQL5Exception    = "java.sql.SQLException(\"%s\")"
+
+	MySQL8InjectClass  = "com.mysql.cj.NativeSession"
+	MySQL8InjectMethod = "execSQL"
+	MySQL8Exception    = "com.mysql.cj.exceptions.CJException(\"%s\")"
+)
+
+// BytemanTemplateSpec is the template spec for byteman rule
+type BytemanTemplateSpec struct {
+	Name      string
+	Class     string
+	Method    string
+	Helper    string
+	Bind      string
+	Condition string
+	Do        string
+
+	// below is only used for stress template
+	StressType      string
+	StressValueName string
+	StressValue     string
+}
 
 type Impl struct {
 	client.Client
@@ -172,46 +210,83 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 		return nil
 	}
 
-	ruleParameter := &JVMRuleParameter{
-		JVMParameter: spec.JVMParameter,
+	bytemanTemplateSpec := BytemanTemplateSpec{
+		Name:   spec.Name,
+		Class:  spec.Class,
+		Method: spec.Method,
 	}
 
 	switch spec.Action {
 	case v1alpha1.JVMLatencyAction:
-		ruleParameter.Do = fmt.Sprintf("Thread.sleep(%d)", ruleParameter.LatencyDuration)
+		bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", spec.LatencyDuration)
 	case v1alpha1.JVMExceptionAction:
-		ruleParameter.Do = fmt.Sprintf("throw new %s", ruleParameter.ThrowException)
+		bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", spec.ThrowException)
 	case v1alpha1.JVMReturnAction:
-		ruleParameter.Do = fmt.Sprintf("return %s", ruleParameter.ReturnValue)
+		bytemanTemplateSpec.Do = fmt.Sprintf("return %s", spec.ReturnValue)
 	case v1alpha1.JVMStressAction:
-		if ruleParameter.CPUCount > 0 {
-			ruleParameter.StressType = "CPU"
-			ruleParameter.StressValueName = "CPUCOUNT"
-			ruleParameter.StressValue = fmt.Sprintf("%d", ruleParameter.CPUCount)
+		bytemanTemplateSpec.Helper = StressHelper
+		bytemanTemplateSpec.Class = TriggerClass
+		bytemanTemplateSpec.Method = TriggerMethod
+		// the bind and condition is useless, only used for fill the template
+		bytemanTemplateSpec.Bind = "flag:boolean=true"
+		bytemanTemplateSpec.Condition = "true"
+		if spec.CPUCount > 0 {
+			bytemanTemplateSpec.Do = fmt.Sprintf("injectCPUStress(\"%s\", %d)", spec.Name, spec.CPUCount)
 		} else {
-			ruleParameter.StressType = "MEMORY"
-			ruleParameter.StressValueName = "MEMORYTYPE"
-			ruleParameter.StressValue = ruleParameter.MemoryType
+			bytemanTemplateSpec.Do = fmt.Sprintf("injectMemStress(\"%s\", \"%s\")", spec.Name, spec.MemoryType)
+		}
+	case v1alpha1.JVMGCAction:
+		bytemanTemplateSpec.Helper = GCHelper
+		bytemanTemplateSpec.Class = TriggerClass
+		bytemanTemplateSpec.Method = TriggerMethod
+		// the bind and condition is useless, only used for fill the template
+		bytemanTemplateSpec.Bind = "flag:boolean=true"
+		bytemanTemplateSpec.Condition = "true"
+		bytemanTemplateSpec.Do = "gc()"
+	case v1alpha1.JVMMySQLAction:
+		var mysqlException string
+		bytemanTemplateSpec.Helper = SQLHelper
+		// the first parameter of matchDBTable is the database which the SQL execute in, because the SQL may not contain database, for example: select * from t1;
+		// can't get the database information now, so use a "" instead
+		// TODO: get the database information and fill it in matchDBTable function
+		bytemanTemplateSpec.Bind = fmt.Sprintf("flag:boolean=matchDBTable(\"\", $2, \"%s\", \"%s\", \"%s\")", spec.Database, spec.Table, spec.SQLType)
+		bytemanTemplateSpec.Condition = "flag"
+		if spec.MySQLConnectorVersion == "5" {
+			bytemanTemplateSpec.Class = MySQL5InjectClass
+			bytemanTemplateSpec.Method = MySQL5InjectMethod
+			mysqlException = MySQL5Exception
+		} else if spec.MySQLConnectorVersion == "8" {
+			bytemanTemplateSpec.Class = MySQL8InjectClass
+			bytemanTemplateSpec.Method = MySQL8InjectMethod
+			mysqlException = MySQL8Exception
+		} else {
+			return errors.Errorf("mysql connector version %s is not supported", spec.MySQLConnectorVersion)
+		}
+
+		if len(spec.ThrowException) > 0 {
+			exception := fmt.Sprintf(mysqlException, spec.ThrowException)
+			bytemanTemplateSpec.Do = fmt.Sprintf("throw new %s", exception)
+		} else if spec.LatencyDuration > 0 {
+			bytemanTemplateSpec.Do = fmt.Sprintf("Thread.sleep(%d)", spec.LatencyDuration)
 		}
 	}
 
 	buf := new(bytes.Buffer)
 	var t *template.Template
 	switch spec.Action {
-	case v1alpha1.JVMStressAction:
-		t = template.Must(template.New("byteman rule").Parse(StressRuleTemplate))
+	case v1alpha1.JVMStressAction, v1alpha1.JVMGCAction, v1alpha1.JVMMySQLAction:
+		t = template.Must(template.New("byteman rule").Parse(CompleteRuleTemplate))
 	case v1alpha1.JVMExceptionAction, v1alpha1.JVMLatencyAction, v1alpha1.JVMReturnAction:
-		t = template.Must(template.New("byteman rule").Parse(CommonRuleTemplate))
-	case v1alpha1.JVMGCAction:
-		t = template.Must(template.New("byteman rule").Parse(GcRuleTemplate))
+		t = template.Must(template.New("byteman rule").Parse(SimpleRuleTemplate))
 	default:
 		return errors.Errorf("jvm action %s not supported", spec.Action)
 	}
 	if t == nil {
-		return errors.New("parse byeman rule template failed")
+		return errors.Errorf("parse byeman rule template failed")
 	}
-	err := t.Execute(buf, ruleParameter)
+	err := t.Execute(buf, bytemanTemplateSpec)
 	if err != nil {
+		log.Error("executing template", zap.Error(err))
 		return err
 	}
 

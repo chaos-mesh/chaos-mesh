@@ -39,7 +39,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
@@ -50,11 +50,11 @@ import (
 
 // Config contains the basic chaos daemon configuration.
 type Config struct {
-	HTTPPort  int
-	GRPCPort  int
-	Host      string
-	Runtime   string
-	Profiling bool
+	HTTPPort       int
+	GRPCPort       int
+	Host           string
+	CrClientConfig *crclients.CrClientConfig
+	Profiling      bool
 
 	tlsConfig
 }
@@ -85,16 +85,16 @@ type DaemonServer struct {
 	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
 	tproxyLocker *sync.Map
 
-	IPSetLocker      *locker.Locker
-	TimeChaosManager tasks.TaskManager
+	IPSetLocker     *locker.Locker
+	timeChaosServer TimeChaosServer
 }
 
 func (s *DaemonServer) getLoggerFromContext(ctx context.Context) logr.Logger {
 	return log.EnrichLoggerWithContext(ctx, s.rootLogger)
 }
 
-func newDaemonServer(containerRuntime string, reg prometheus.Registerer, log logr.Logger) (*DaemonServer, error) {
-	crClient, err := crclients.CreateContainerRuntimeInfoClient(containerRuntime)
+func newDaemonServer(clientConfig *crclients.CrClientConfig, reg prometheus.Registerer, log logr.Logger) (*DaemonServer, error) {
+	crClient, err := crclients.CreateContainerRuntimeInfoClient(clientConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +109,13 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.StartBackgroundProcessManager(reg, log),
 		tproxyLocker:             new(sync.Map),
-		TimeChaosManager:         tasks.NewTaskManager(log),
 		rootLogger:               log,
+		timeChaosServer: TimeChaosServer{
+			podContainerNameProcessMap: tasks.NewPodProcessMap(),
+			manager:                    tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
+			nameLocker:                 tasks.NewLockMap[tasks.PodContainerName](),
+			logger:                     logr.New(log.GetSink()).WithName("TimeChaos"),
+		},
 	}
 }
 
@@ -203,7 +208,7 @@ type Server struct {
 func BuildServer(conf *Config, reg RegisterGatherer, log logr.Logger) (*Server, error) {
 	server := &Server{conf: conf, logger: log}
 	var err error
-	server.daemonServer, err = newDaemonServer(conf.Runtime, reg, log)
+	server.daemonServer, err = newDaemonServer(conf.CrClientConfig, reg, log)
 	if err != nil {
 		return nil, errors.Wrap(err, "create daemon server")
 	}
@@ -236,7 +241,7 @@ func (s *Server) Start() error {
 	})
 
 	eg.Go(func() error {
-		s.logger.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", s.conf.Runtime)
+		s.logger.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", s.conf.CrClientConfig.Runtime)
 		if err := s.grpcServer.Serve(grpcListener); err != nil {
 			return errors.Wrap(err, "start grpc endpoint")
 		}

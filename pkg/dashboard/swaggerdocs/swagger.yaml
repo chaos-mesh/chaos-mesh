@@ -3440,6 +3440,8 @@ definitions:
         description: |-
           Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
           is full loading.
+          +kubebuilder:validation:Minimum=0
+          +kubebuilder:validation:Maximum=100
           +optional
         type: integer
       options:
@@ -3996,7 +3998,7 @@ definitions:
         description: |-
           Action defines the specific jvm chaos action.
           Supported action: latency;return;exception;stress;gc;ruleData
-          +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
+          +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql
         type: string
       class:
         description: |-
@@ -4014,8 +4016,13 @@ definitions:
       cpuCount:
         description: |-
           +optional
-          the CPU core number need to use, only set it when action is stress
+          the CPU core number needs to use, only set it when action is stress
         type: integer
+      database:
+        description: |-
+          the match database
+          default value is "", means match all database
+        type: string
       duration:
         description: |-
           Duration represents the duration of the chaos action
@@ -4025,16 +4032,18 @@ definitions:
         description: |-
           +optional
           the exception which needs to throw for action `exception`
+          or the exception message needs to throw in action `mysql`
         type: string
       latency:
         description: |-
           +optional
           the latency duration for action 'latency', unit ms
+          or the latency duration in action `mysql`
         type: integer
       memType:
         description: |-
           +optional
-          the memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+          the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
         type: string
       method:
         description: |-
@@ -4047,23 +4056,43 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      mysqlConnectorVersion:
+        description: the version of mysql-connector-java, only support 5.X.X(set to
+          "5") and 8.X.X(set to "8") now
+        type: string
       name:
         description: |-
           +optional
-          byteman rule name, should be unique, and will use JVMChaos' name if not set
+          byteman rule name, should be unique, and will generate one if not set
         type: string
+      pid:
+        description: the pid of Java process which needs to attach
+        type: integer
       port:
         description: |-
           +optional
           the port of agent server, default 9277
         type: integer
       ruleData:
-        description: +optional
+        description: |-
+          +optional
+          the byteman rule's data for action 'ruleData'
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
           action.
+      sqlType:
+        description: |-
+          the match sql type
+          default value is "", means match all SQL type.
+          The value can be 'select', 'insert', 'update', 'delete', 'replace'.
+        type: string
+      table:
+        description: |-
+          the match table
+          default value is "", means match all table
+        type: string
       value:
         description: |-
           +optional
@@ -4073,61 +4102,81 @@ definitions:
   v1alpha1.JVMExceptionSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       exception:
         description: the exception which needs to throw for action `exception`
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMGCSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMLatencySpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       latency:
         description: the latency duration for action 'latency', unit ms
         type: integer
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.JVMReturnSpec:
     properties:
       class:
-        description: Java class
+        description: |-
+          +optional
+          Java class
         type: string
       method:
-        description: the method in Java class
+        description: |-
+          +optional
+          the method in Java class
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       value:
         description: the return value for action 'return'
@@ -4136,10 +4185,12 @@ definitions:
   v1alpha1.JVMRuleDataSpec:
     properties:
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
       rule-data:
         description: RuleData used to save the rule file's data, will use it when
@@ -4156,10 +4207,12 @@ definitions:
           the value can be 'stack' or 'heap'
         type: string
       pid:
-        description: the pid of Java process which need to attach
+        description: the pid of Java process which needs to attach
         type: integer
       port:
-        description: the port of agent server
+        description: |-
+          +optional
+          the port of agent server, default 9277
         type: integer
     type: object
   v1alpha1.KernelChaosSpec:
@@ -4205,7 +4258,7 @@ definitions:
           OOMScoreAdj sets the oom_score_adj of the stress process. See `man 5 proc` to know more
           about this option.
           +kubebuilder:validation:Minimum=-1000
-          +kubebuilder:validation:Maximm=1000
+          +kubebuilder:validation:Maximum=1000
           +kubebuilder:default=0
           +optional
         type: integer
@@ -4234,7 +4287,7 @@ definitions:
     properties:
       filling:
         description: |-
-          Filling determines what is filled in the miskate data.
+          Filling determines what is filled in the mistake data.
           +optional
           +kubebuilder:validation:Enum=zero;random
         type: string
@@ -4285,16 +4338,19 @@ definitions:
         $ref: '#/definitions/v1alpha1.BandwidthSpec'
         description: |-
           Bandwidth represents the detail about bandwidth control action
+          +ui:form:when=action=='bandwidth'
           +optional
       corrupt:
         $ref: '#/definitions/v1alpha1.CorruptSpec'
         description: |-
           Corrupt represents the detail about corrupt action
+          +ui:form:when=action=='corrupt'
           +optional
       delay:
         $ref: '#/definitions/v1alpha1.DelaySpec'
         description: |-
           Delay represents the detail about delay action
+          +ui:form:when=action=='delay'
           +optional
       device:
         description: |-
@@ -4312,6 +4368,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.DuplicateSpec'
         description: |-
           DuplicateSpec represents the detail about loss action
+          +ui:form:when=action=='duplicate'
           +optional
       duration:
         description: Duration represents the duration of the chaos action
@@ -4327,6 +4384,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.LossSpec'
         description: |-
           Loss represents the detail about loss action
+          +ui:form:when=action=='loss'
           +optional
       mode:
         description: |-
@@ -5262,6 +5320,78 @@ definitions:
           +nullable
         type: string
     type: object
+  v1alpha1.StatusCheckSpec:
+    properties:
+      duration:
+        description: |-
+          Duration defines the duration of the whole status check if the
+          number of failed execution does not exceed the failure threshold.
+          Duration is available to both `Synchronous` and `Continuous` mode.
+          A duration string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "-1.5h" or "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      failureThreshold:
+        description: |-
+          FailureThreshold defines the minimum consecutive failure
+          for the status check to be considered failed.
+          +optional
+          +kubebuilder:default=3
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      http:
+        $ref: '#/definitions/v1alpha1.HTTPStatusCheck'
+        description: +optional
+      intervalSeconds:
+        description: |-
+          IntervalSeconds defines how often (in seconds) to perform
+          an execution of status check.
+          +optional
+          +kubebuilder:default=10
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      mode:
+        description: |-
+          Mode defines the execution mode of the status check.
+          Support type: Synchronous / Continuous
+          +optional
+          +kubebuilder:validation:Enum=Synchronous;Continuous
+        type: string
+      recordsHistoryLimit:
+        description: |-
+          RecordsHistoryLimit defines the number of record to retain.
+          +optional
+          +kubebuilder:default=100
+          +kubebuilder:validation:Minimum=1
+          +kubebuilder:validation:Maximum=1000
+        type: integer
+      successThreshold:
+        description: |-
+          SuccessThreshold defines the minimum consecutive successes
+          for the status check to be considered successful.
+          SuccessThreshold only works for `Synchronous` mode.
+          +optional
+          +kubebuilder:default=1
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      timeoutSeconds:
+        description: |-
+          TimeoutSeconds defines the number of seconds after which
+          an execution of status check times out.
+          +optional
+          +kubebuilder:default=1
+          +kubebuilder:validation:Minimum=1
+        type: integer
+      type:
+        description: |-
+          Type defines the specific status check type.
+          Support type: HTTP
+          +kubebuilder:default=HTTP
+          +kubebuilder:validation:Enum=HTTP
+        type: string
+    type: object
   v1alpha1.StatusCheckTemplate:
     properties:
       duration:
@@ -5342,7 +5472,9 @@ definitions:
         type: integer
       options:
         description: extend stress-ng options
-        type: string
+        items:
+          type: string
+        type: array
       workers:
         description: specifies N workers to apply the stressor.
         type: integer
@@ -5402,7 +5534,9 @@ definitions:
     properties:
       options:
         description: extend stress-ng options
-        type: string
+        items:
+          type: string
+        type: array
       size:
         description: |-
           specifies N bytes consumed per vm worker, default is the total available memory.
@@ -5438,6 +5572,12 @@ definitions:
     type: object
   v1alpha1.Template:
     properties:
+      abortWithStatusCheck:
+        description: |-
+          AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+          Only used when Type is TypeStatusCheck.
+          +optional
+        type: boolean
       awsChaos:
         $ref: '#/definitions/v1alpha1.AWSChaosSpec'
         description: +optional
@@ -5497,6 +5637,11 @@ definitions:
         $ref: '#/definitions/v1alpha1.ChaosOnlyScheduleSpec'
         description: |-
           Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.
+          +optional
+      statusCheck:
+        $ref: '#/definitions/v1alpha1.StatusCheckSpec'
+        description: |-
+          StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.
           +optional
       stressChaos:
         $ref: '#/definitions/v1alpha1.StressChaosSpec'
@@ -5897,7 +6042,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/pkg_dashboard_apiserver_archive.Archive'
+              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive'
             type: array
         "500":
           description: Internal Server Error
@@ -5943,7 +6088,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_archive.Detail'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail'
         "404":
           description: Not Found
           schema:
@@ -5996,7 +6141,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/pkg_dashboard_apiserver_archive.Archive'
+              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive'
             type: array
         "500":
           description: Internal Server Error
@@ -6042,7 +6187,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_archive.Detail'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail'
         "500":
           description: Internal Server Error
           schema:
@@ -6091,7 +6236,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/pkg_dashboard_apiserver_archive.Archive'
+              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive'
             type: array
         "500":
           description: Internal Server Error
@@ -6137,7 +6282,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_archive.Detail'
+            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail'
         "500":
           description: Internal Server Error
           schema:

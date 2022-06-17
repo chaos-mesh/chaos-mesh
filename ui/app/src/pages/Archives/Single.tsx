@@ -14,23 +14,25 @@
  * limitations under the License.
  *
  */
-
+import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
+import api from 'api'
+import yaml from 'js-yaml'
 import { CoreEvent, PkgDashboardApiserverArchiveDetail } from 'openapi'
 import { useCallback, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
-import EventsTimeline from 'components/EventsTimeline'
 import Loading from '@ui/mui-extends/esm/Loading'
-import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import ObjectConfiguration from 'components/ObjectConfiguration'
 import i18n from 'components/T'
-import loadable from '@loadable/component'
-import { useParams } from 'react-router-dom'
+
 import { useQuery } from 'lib/hooks'
-import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -120,6 +122,7 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
+          {single.data && <Helmet title={`Archive ${single.data.name}`} />}
           {kind !== 'workflow' ? (
             <Space spacing={6}>
               {single.kind === kind && single.data && (

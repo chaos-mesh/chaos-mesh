@@ -1,5 +1,7 @@
 /* tslint:disable */
+
 /* eslint-disable */
+
 /**
  * Chaos Mesh Dashboard API
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
@@ -11,10 +13,9 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-
 import { AxiosInstance, AxiosResponse } from 'axios'
-import { RequestArgs, RequiredError } from './base'
 
+import { RequestArgs, RequiredError } from './base'
 import { Configuration } from './configuration'
 
 /**

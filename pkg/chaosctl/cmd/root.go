@@ -22,6 +22,7 @@ import (
 
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
 )
 
 var managerNamespace, managerSvc string
@@ -37,7 +38,10 @@ Interacting with chaos mesh
   chaosctl debug networkchaos
 
   # show logs of all chaos-mesh components
-  chaosctl logs`,
+  chaosctl logs
+
+  # forcedly recover chaos from pods
+  chaosctl recover networkchaos pod1 -n test`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -96,6 +100,18 @@ func Execute() {
 		os.Exit(1)
 	}
 
+	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecovererBuilder{
+		httpChaos:    recover.HTTPRecoverer,
+		ioChaos:      recover.IORecoverer,
+		stressChaos:  recover.StressRecoverer,
+		networkChaos: recover.NetworkRecoverer,
+	})
+	if err != nil {
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("recover command: "+err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
 	physicalMachineCommand, err := NewPhysicalMachineCommand()
 	if err != nil {
 		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
@@ -104,6 +120,7 @@ func Execute() {
 	}
 
 	rootCmd.AddCommand(debugCommand)
+	rootCmd.AddCommand(recoverCommand)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(physicalMachineCommand)

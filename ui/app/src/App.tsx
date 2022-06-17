@@ -14,19 +14,35 @@
  * limitations under the License.
  *
  */
+import type { FC } from 'react'
+import { DndProvider } from 'react-dnd'
+import { HTML5Backend } from 'react-dnd-html5-backend'
+import { Provider as StoreProvider } from 'react-redux'
 
-import { Provider } from 'react-redux'
-import { BrowserRouter as Router } from 'react-router-dom'
-import ThemeProvider from './ThemeProvider'
-import TopContainer from 'components/TopContainer'
 import store from './store'
 
-const App: React.FC = ({ children }) => (
-  <Provider store={store}>
-    <Router>
-      <ThemeProvider>{children || <TopContainer />}</ThemeProvider>
-    </Router>
-  </Provider>
-)
+import TopContainer from 'components/TopContainer'
+
+import IntlProvider from './IntlProvider'
+import ThemeProvider from './ThemeProvider'
+
+interface AppProps {
+  forTesting?: boolean
+}
+
+const App: FC<AppProps> = ({ forTesting, children }) => {
+  const rendered = children || <TopContainer />
+  const RealWorldOnlyProviders: FC = ({ children }) => <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+
+  return (
+    <StoreProvider store={store}>
+      <ThemeProvider>
+        <IntlProvider>
+          {!forTesting ? <RealWorldOnlyProviders>{rendered}</RealWorldOnlyProviders> : rendered}
+        </IntlProvider>
+      </ThemeProvider>
+    </StoreProvider>
+  )
+}
 
 export default App

@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -90,6 +91,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				return ctrl.Result{}, nil
 			}
 
+			if len(targets) == 0 {
+				r.Log.Info("no target has been selected")
+				r.Recorder.Event(obj, recorder.Failed{
+					Activity: "select targets",
+					Err:      "no target has been selected",
+				})
+				return ctrl.Result{}, nil
+			}
+
 			for _, target := range targets {
 				records = append(records, &v1alpha1.Record{
 					Id:          target.Id(),
@@ -102,15 +112,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		// TODO: dynamic upgrade the records when some of these pods/containers stopped
 	}
 
-	if len(records) == 0 {
-		r.Log.Info("no record has been selected")
-		r.Recorder.Event(obj, recorder.Failed{
-			Activity: "select targets",
-			Err:      "no record has been selected",
-		})
-		return ctrl.Result{}, nil
-	}
-
 	needRetry := false
 	for index, record := range records {
 		var err error
@@ -118,13 +119,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		// The whole running logic is a cycle:
 		// Not Injected -> Not Injected/* -> Injected -> Injected/* -> Not Injected
-		// Every steps should follow the cycle. For example, if it's in "Not Injected/*" status, and it wants to recover
+		// Every step should follow the cycle. For example, if it's in "Not Injected/*" status, and it wants to recover
 		// then it has to apply and then recover, but not recover directly.
 
 		originalPhase := record.Phase
 		operation := Nothing
 		if desiredPhase == v1alpha1.RunningPhase && originalPhase != v1alpha1.Injected {
-			// The originalPhase has three possible situations: Not Injected, Not Injedcted/* or Injected/*
+			// The originalPhase has three possible situations: Not Injected, Not Injected/* or Injected/*
 			// In the first two situations, it should apply, in the last situation, it should recover
 
 			if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
@@ -134,8 +135,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 		if desiredPhase == v1alpha1.StoppedPhase && originalPhase != v1alpha1.NotInjected {
-			// The originalPhase has three possible situations: Not Injedcted/*, Injected, or Injected/*
-			// In the first one situations, it should apply, in the last two situations, it should recover
+			// The originalPhase has three possible situations: Not Injected/*, Injected, or Injected/*
+			// In the first one situation, it should apply, in the last two situations, it should recover
 
 			if strings.HasPrefix(string(originalPhase), string(v1alpha1.NotInjected)) {
 				operation = Apply
@@ -154,15 +155,22 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to apply chaos")
+				applyFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Apply, err.Error())
+				records[index].Events = append(records[index].Events, *applyFailedEvent)
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "apply chaos",
 					Err:      err.Error(),
 				})
 				needRetry = true
+				// if the impl.Apply() failed, we need to update the status to update the records[index].Events
+				shouldUpdate = true
 				continue
 			}
 
 			if record.Phase == v1alpha1.Injected {
+				records[index].InjectedCount++
+				applySucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Apply, "")
+				records[index].Events = append(records[index].Events, *applySucceedEvent)
 				r.Recorder.Event(obj, recorder.Applied{
 					Id: records[index].Id,
 				})
@@ -177,15 +185,22 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// TODO: add backoff and retry mechanism
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to recover chaos")
+				recoverFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Recover, err.Error())
+				records[index].Events = append(records[index].Events, *recoverFailedEvent)
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "recover chaos",
 					Err:      err.Error(),
 				})
 				needRetry = true
+				// if the impl.Recover() failed, we need to update the status to update the records[index].Events
+				shouldUpdate = true
 				continue
 			}
 
 			if record.Phase == v1alpha1.NotInjected {
+				records[index].RecoveredCount++
+				recoverSucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Recover, "")
+				records[index].Events = append(records[index].Events, *recoverSucceedEvent)
 				r.Recorder.Event(obj, recorder.Recovered{
 					Id: records[index].Id,
 				})
@@ -230,4 +245,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		})
 	}
 	return ctrl.Result{Requeue: needRetry}, nil
+}
+
+func newRecordEvent(eventType v1alpha1.RecordEventType, eventStage v1alpha1.RecordEventOperation, msg string) *v1alpha1.RecordEvent {
+	return v1alpha1.NewRecordEvent(eventType, eventStage, msg, metav1.Now())
 }

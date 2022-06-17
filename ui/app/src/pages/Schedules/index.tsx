@@ -14,29 +14,33 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Checkbox, styled } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
-
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
-import { PkgDashboardApiserverScheduleSchedule } from 'openapi'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import Space from '@ui/mui-extends/esm/Space'
+import { Box, Button, Checkbox, styled } from '@mui/material'
 import { Typography } from '@mui/material'
-import _groupBy from 'lodash.groupby'
 import api from 'api'
-import i18n from 'components/T'
-import { transByKind } from 'lib/byKind'
+import _ from 'lodash'
+import { PkgDashboardApiserverScheduleSchedule } from 'openapi'
+import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch } from 'store'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import NotFound from 'components/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
+import i18n from 'components/T'
+
+import { transByKind } from 'lib/byKind'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -194,7 +198,7 @@ const Schedules = () => {
       </Space>
 
       {schedules.length > 0 &&
-        Object.entries(_groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
+        Object.entries(_.groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
           <Box key={type} mb={6}>
             <Typography variant="overline">{transByKind(type as any)}</Typography>
             <RWList

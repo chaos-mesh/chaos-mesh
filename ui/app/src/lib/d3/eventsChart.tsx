@@ -14,17 +14,16 @@
  * limitations under the License.
  *
  */
-
-import * as d3 from 'd3'
-
 import { Box, Typography } from '@mui/material'
+import * as d3 from 'd3'
+import _ from 'lodash'
+import { CoreEvent as Event } from 'openapi'
+import { renderToString } from 'react-dom/server'
+
+import { Theme } from 'slices/settings'
+
 import DateTime, { format, now } from 'lib/luxon'
 
-import { CoreEvent as Event } from 'openapi'
-import { Theme } from 'slices/settings'
-import _debounce from 'lodash.debounce'
-import { renderToString } from 'react-dom/server'
-import { truncate } from '../utils'
 import wrapText from './wrapText'
 
 /**
@@ -211,7 +210,7 @@ export default function gen({
       .insert('div')
       .attr('class', 'experiment')
       .attr('title', (d) => d.name)
-      .text((d) => truncate(d.name))
+      .text((d) => _.truncate(d.name))
   }
 
   const tooltip = d3
@@ -310,7 +309,7 @@ export default function gen({
       circles.attr('cx', (d) => x(DateTime.fromISO(d.created_at!)))
     }
 
-    d3.select(window).on('resize', _debounce(reGen, 250))
+    d3.select(window).on('resize', _.debounce(reGen, 250))
   }
   update(events)
 

@@ -14,30 +14,33 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-
 import AddIcon from '@mui/icons-material/Add'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import CloseIcon from '@mui/icons-material/Close'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
-import { PkgDashboardApiserverExperimentExperiment } from 'openapi'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import Space from '@ui/mui-extends/esm/Space'
-import _groupBy from 'lodash.groupby'
+import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
 import api from 'api'
-import i18n from 'components/T'
-import { transByKind } from 'lib/byKind'
-import { useIntervalFetch } from 'lib/hooks'
+import _ from 'lodash'
+import { PkgDashboardApiserverExperimentExperiment } from 'openapi'
+import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch } from 'store'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import NotFound from 'components/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
+import i18n from 'components/T'
+
+import { transByKind } from 'lib/byKind'
+import { useIntervalFetch } from 'lib/hooks'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -206,7 +209,7 @@ export default function Experiments() {
       </Space>
 
       {experiments.length > 0 &&
-        Object.entries(_groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
+        Object.entries(_.groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
           <Box key={kind} mb={6}>
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
             <RWList

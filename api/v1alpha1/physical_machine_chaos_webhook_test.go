@@ -979,6 +979,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							JVMCommonSpec: JVMCommonSpec{
 								Pid: 10,
 							},
+
 							CPUCount:   0,
 							MemoryType: "",
 						},

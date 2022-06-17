@@ -22,6 +22,10 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
     {{- include "chaos-mesh.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.chaosDaemon.updateStrategy }}
+  updateStrategy:
+{{ toYaml .Values.chaosDaemon.updateStrategy | indent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "chaos-mesh.selectors" . | nindent 6 }}
@@ -32,7 +36,8 @@ spec:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
-        {{- if .Values.dashboard.securityMode }}
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
+        {{- if .Values.chaosDaemon.mtls.enabled }}
         rollme: {{ randAlphaNum 5 | quote }}
         {{- end }}
     {{- with .Values.chaosDaemon.podAnnotations }}
@@ -71,7 +76,7 @@ spec:
           {{- if .Values.enableProfiling }}
             - --pprof
           {{- end }}
-          {{- if .Values.dashboard.securityMode }}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
             - --ca
             - /etc/chaos-daemon/cert/ca.crt
             - --cert
@@ -79,6 +84,18 @@ spec:
             - --key
             - /etc/chaos-daemon/cert/tls.key
           {{- end }}
+            - --runtime-socket-path
+        {{- if .Values.chaosDaemon.socketPath }}
+            - /host-run/{{ .Values.chaosDaemon.socketPath | base }}
+        {{- else }}
+          {{- if eq .Values.chaosDaemon.runtime "docker" }}
+            - /host-run/docker.sock
+          {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
+            - /host-run/containerd.sock
+          {{- else if eq .Values.chaosDaemon.runtime "crio" }}
+            - /host-run/crio.sock
+          {{- end }}
+        {{- end }}
           env:
             {{- if .Values.chaosDaemon.env }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.chaosDaemon | trim | nindent 12 }}
@@ -107,18 +124,12 @@ spec:
             {{- end }}
           volumeMounts:
             - name: socket-path
-              {{- if eq .Values.chaosDaemon.runtime "docker" }}
-              mountPath: /var/run/docker.sock
-              {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
-              mountPath: /run/containerd/containerd.sock
-              {{- else if eq .Values.chaosDaemon.runtime "crio" }}
-              mountPath: /var/run/crio/crio.sock
-              {{- end }}
+              mountPath: /host-run
             - name: sys-path
               mountPath: /host-sys
             - name: lib-modules
               mountPath: /lib/modules
-            {{- if .Values.dashboard.securityMode}}
+            {{- if .Values.chaosDaemon.mtls.enabled}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
               readOnly: true
@@ -126,7 +137,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
-              hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
 {{- if .Values.bpfki.create }}
@@ -156,7 +166,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.bpfki.grpcPort }}
-              hostPort: {{ .Values.bpfki.grpcPort }}
 {{- end }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
@@ -176,14 +185,26 @@ spec:
       volumes:
         - name: socket-path
           hostPath:
-            path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
+          {{- if .Values.chaosDaemon.socketPath }}
+            path: {{ .Values.chaosDaemon.socketPath | dir }}
+          {{- else if .Values.chaosDaemon.socketDir }}
+            path: {{ .Values.chaosDaemon.socketDir }}
+          {{- else }}
+            {{- if eq .Values.chaosDaemon.runtime "docker" }}
+            path: /var/run
+            {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
+            path: /run/containerd
+            {{- else if eq .Values.chaosDaemon.runtime "crio" }}
+            path: /var/run/crio
+            {{- end }}
+          {{- end }}
         - name: sys-path
           hostPath:
             path: /sys
         - name: lib-modules
           hostPath:
             path: /lib/modules
-        {{- if .Values.dashboard.securityMode}}
+        {{- if .Values.chaosDaemon.mtls.enabled}}
         - name: chaos-daemon-cert
           secret:
             secretName:  {{ template "chaos-mesh.daemon.certs" . }}

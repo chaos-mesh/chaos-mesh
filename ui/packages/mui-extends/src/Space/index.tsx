@@ -16,12 +16,8 @@
  */
 import { Stack, StackProps } from '@mui/material'
 
-function Space({ children, ...rest }: StackProps) {
-  return (
-    <Stack spacing={3} {...rest}>
-      {children}
-    </Stack>
-  )
+function Space(props: StackProps) {
+  return <Stack spacing={3} {...props} />
 }
 
 export default Space

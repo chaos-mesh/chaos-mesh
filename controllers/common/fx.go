@@ -24,7 +24,9 @@ import (
 	k8sTypes "k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
@@ -74,6 +76,10 @@ func Bootstrap(params Params) error {
 			For(pair.Object).
 			Named(pair.Name + "-pipeline")
 
+		// for common CRDs, since we don't want to reconcile the object,
+		// when we only change the object.status.experiment.records[].events
+		predicaters := []predicate.Predicate{StatusRecordEventsChangePredicate{}}
+
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
 			pair := pair
@@ -119,6 +125,7 @@ func Bootstrap(params Params) error {
 					}),
 				)
 			}
+			predicaters = append(predicaters, PickChildCRDPredicate{})
 		}
 
 		pipe := pipeline.NewPipeline(&pipeline.PipelineContext{
@@ -136,6 +143,7 @@ func Bootstrap(params Params) error {
 		})
 
 		pipe.AddSteps(params.Steps...)
+		builder = builder.WithEventFilter(predicate.Or(predicaters...))
 		err := builder.Complete(pipe)
 		if err != nil {
 			return err
@@ -144,4 +152,56 @@ func Bootstrap(params Params) error {
 	}
 
 	return nil
+}
+
+// PickChildCRDPredicate allows events to trigger the Reconcile of Chaos CRD,
+// for example:
+// Reconcile of IOChaos could be triggered by changes on PodIOChaos.
+// For now, we have PodHttpChaos/PodIOChaos/PodNetworkChaos which require to follow this pattern.
+type PickChildCRDPredicate struct {
+	predicate.Funcs
+}
+
+// Update implements UpdateEvent filter for child CRD.
+func (PickChildCRDPredicate) Update(e event.UpdateEvent) bool {
+	switch e.ObjectNew.(type) {
+	case *v1alpha1.PodHttpChaos, *v1alpha1.PodIOChaos, *v1alpha1.PodNetworkChaos:
+		return true
+	}
+	return false
+}
+
+// StatusRecordEventsChangePredicate skip the update event,
+// when we Only update object.status.experiment.records[].events
+type StatusRecordEventsChangePredicate struct {
+	predicate.Funcs
+}
+
+// Update implements UpdateEvent filter for update to filter the events
+// which we Only update object.status.experiment.records[].events
+func (StatusRecordEventsChangePredicate) Update(e event.UpdateEvent) bool {
+	objNew, ok := e.ObjectNew.DeepCopyObject().(v1alpha1.StatefulObject)
+	if !ok {
+		return false
+	}
+	objOld, ok := e.ObjectOld.DeepCopyObject().(v1alpha1.StatefulObject)
+	if !ok {
+		return false
+	}
+	statusNew := objNew.GetStatus()
+	statusOld := objOld.GetStatus()
+	if statusNew == nil || statusOld == nil {
+		return true
+	}
+	objNew.SetGeneration(0)
+	objOld.SetGeneration(0)
+	objNew.SetResourceVersion("")
+	objOld.SetResourceVersion("")
+	for i := range statusNew.Experiment.Records {
+		statusNew.Experiment.Records[i].Events = nil
+	}
+	for i := range statusOld.Experiment.Records {
+		statusOld.Experiment.Records[i].Events = nil
+	}
+	return !reflect.DeepEqual(objNew, objOld)
 }

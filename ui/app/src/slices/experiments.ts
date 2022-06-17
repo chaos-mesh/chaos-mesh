@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
-
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import api from 'api'
+import { V1alpha1PodSelectorSpec } from 'openapi'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
-import { V1alpha1PodSelectorSpec } from 'openapi'
-import api from 'api'
 
 export const getNamespaces = createAsyncThunk(
   'common/chaos-available-namespaces',
@@ -43,7 +42,7 @@ export const getAnnotations = createAsyncThunk(
       })
     ).data
 )
-export const getCommonPodsByNamespaces = createAsyncThunk(
+export const getCommonPods = createAsyncThunk(
   'common/pods',
   async (data: V1alpha1PodSelectorSpec) =>
     (
@@ -52,7 +51,7 @@ export const getCommonPodsByNamespaces = createAsyncThunk(
       })
     ).data
 )
-export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
+export const getNetworkTargetPods = createAsyncThunk(
   'network/target/pods',
   async (data: V1alpha1PodSelectorSpec) =>
     (
@@ -97,6 +96,10 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
+    clearPods(state) {
+      state.pods = []
+      state.networkTargetPods = []
+    },
     clearNetworkTargetPods(state) {
       state.networkTargetPods = []
     },
@@ -148,16 +151,17 @@ const experimentsSlice = createSlice({
     builder.addCase(getAnnotations.fulfilled, (state, action) => {
       state.annotations = action.payload
     })
-    builder.addCase(getCommonPodsByNamespaces.fulfilled, (state, action) => {
-      state.pods = action.payload as any[]
+    builder.addCase(getCommonPods.fulfilled, (state, action) => {
+      state.pods = action.payload
     })
-    builder.addCase(getNetworkTargetPodsByNamespaces.fulfilled, (state, action) => {
-      state.networkTargetPods = action.payload as any[]
+    builder.addCase(getNetworkTargetPods.fulfilled, (state, action) => {
+      state.networkTargetPods = action.payload
     })
   },
 })
 
 export const {
+  clearPods,
   clearNetworkTargetPods,
   setStep1,
   setStep2,
