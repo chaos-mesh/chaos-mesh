@@ -357,7 +357,7 @@ install.sh: images/dev-env/.dockerbuilt
 
 swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config \
