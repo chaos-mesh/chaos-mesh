@@ -16,7 +16,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: Workflow
 metadata:
-  namespace: chaos-testing
+  namespace: chaos-mesh
   name: workflow-jvm
 spec:
   entry: entry

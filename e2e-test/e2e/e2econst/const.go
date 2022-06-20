@@ -17,6 +17,6 @@ package e2econst
 
 const (
 	PauseImage             = "gcr.io/google-containers/pause:latest"
-	ChaosMeshNamespace     = "chaos-testing"
+	ChaosMeshNamespace     = "chaos-mesh"
 	ChaosControllerManager = "chaos-controller-manager"
 )
