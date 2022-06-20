@@ -980,6 +980,15 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
+                  sqlType:
+                    description: the match sql type default value is "", means match
+                      all SQL type. The value can be 'select', 'insert', 'update',
+                      'delete', 'replace'.
+                    type: string
+                  table:
+                    description: the match table default value is "", means match
+                      all table
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -1170,15 +1179,6 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
-                  sqlType:
-                    description: the match sql type default value is "", means match
-                      all SQL type. The value can be 'select', 'insert', 'update',
-                      'delete', 'replace'.
-                    type: string
-                  table:
-                    description: the match table default value is "", means match
-                      all table
-                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -3656,6 +3656,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -3863,15 +3872,6 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
-                            sqlType:
-                              description: the match sql type default value is "",
-                                means match all SQL type. The value can be 'select',
-                                'insert', 'update', 'delete', 'replace'.
-                              type: string
-                            table:
-                              description: the match table default value is "", means
-                                match all table
-                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -6080,6 +6080,15 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -6295,15 +6304,6 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
-                                sqlType:
-                                  description: the match sql type default value is
-                                    "", means match all SQL type. The value can be
-                                    'select', 'insert', 'update', 'delete', 'replace'.
-                                  type: string
-                                table:
-                                  description: the match table default value is "",
-                                    means match all table
-                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
