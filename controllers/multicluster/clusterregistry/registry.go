@@ -51,7 +51,7 @@ type RemoteClusterRegistry struct {
 	logger   logr.Logger
 	client   client.Client
 
-	*sync.Mutex
+	lock *sync.Mutex
 }
 
 func New(logger logr.Logger, client client.Client) *RemoteClusterRegistry {
@@ -60,7 +60,7 @@ func New(logger logr.Logger, client client.Client) *RemoteClusterRegistry {
 		logger:   logger.WithName("clusterregistry"),
 		client:   client,
 
-		Mutex: &sync.Mutex{},
+		lock: &sync.Mutex{},
 	}
 }
 
@@ -116,8 +116,8 @@ func controllerManagerOption(scheme *runtime.Scheme) *ctrl.Options {
 // TODO: add more kinds of client, like `no-cache` into this registry, if they
 // are needed
 func (r *RemoteClusterRegistry) WithClient(name string, f func(c client.Client) error) error {
-	r.Lock()
-	defer r.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	cluster, ok := r.clusters[name]
 	if !ok {
@@ -129,8 +129,8 @@ func (r *RemoteClusterRegistry) WithClient(name string, f func(c client.Client) 
 
 // Stop stops the running controller-manager which watches the remote cluster.
 func (r *RemoteClusterRegistry) Stop(ctx context.Context, name string) error {
-	r.Lock()
-	defer r.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	cluster, ok := r.clusters[name]
 	if !ok {
@@ -150,8 +150,8 @@ func (r *RemoteClusterRegistry) Stop(ctx context.Context, name string) error {
 
 // Spawn starts the controller-manager and watches the remote cluster
 func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
-	r.Lock()
-	defer r.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	if _, ok := r.clusters[name]; ok {
 		return errors.Wrapf(ErrAlreadyExist, "spawn cluster: %s", name)
@@ -160,7 +160,7 @@ func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 	localClient := r.client
 	var remoteClient client.Client
 	app := fx.New(
-		fx.Logger(log.NewLogrPrinter(r.logger.WithName("fx-"+name))),
+		fx.Logger(log.NewLogrPrinter(r.logger.WithName("remotecluster-fx-"+name))),
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(r.logger.WithName("remotecluster-"+name)),
 		fx.Supply(config),

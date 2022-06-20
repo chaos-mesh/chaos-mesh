@@ -14,7 +14,7 @@ spec:
     listKind: RemoteClusterList
     plural: remoteclusters
     singular: remotecluster
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1alpha1
     schema:

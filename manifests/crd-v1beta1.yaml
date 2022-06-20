@@ -4711,7 +4711,7 @@ spec:
     plural: remoteclusters
     singular: remotecluster
   preserveUnknownFields: false
-  scope: Namespaced
+  scope: Cluster
   subresources:
     status: {}
   validation:

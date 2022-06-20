@@ -4,7 +4,7 @@ This documents not only describe the behavior of `clusterregistry`, it
 also describes the technical framework which can help the chaos mesh developers
 to develop the multicluster application.
 
-A `clusterregistry` will manage all controllers running on a remote cluster. The
+A `clusterregistry` will manage all controllers watching a remote cluster. The
 construction of these controllers (managers) will be managed by `fx`. The main
 process of constructing a controller manage is nearly the same with the main
 one. The only difference is that we'll need to provide a new `RestConfig`, and
