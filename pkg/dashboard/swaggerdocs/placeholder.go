@@ -13,5 +13,9 @@
 // limitations under the License.
 //
 
-// This file ensures the `swaggerdocs` package exists even if swagger is not enabled. This is also required for `go mod tidy`.
+/*
+Package swaggerdocs places swagger docs.
+
+This file ensures that the `swaggerdocs` package still exists when `swagger` is not enabled.
+*/
 package swaggerdocs
