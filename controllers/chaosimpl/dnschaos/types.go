@@ -57,15 +57,24 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	service, err := impl.getService(ctx, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
-		impl.Log.Error(err, "fail to get service")
+		impl.Log.Error(err, "fail to get dns service")
+		return v1alpha1.NotInjected, err
+	}
+
+	dnsPods, err := impl.getPodsFromSelector(ctx, config.ControllerCfg.Namespace, service.Spec.Selector)
+	if err != nil {
+		impl.Log.Error(err, "fail to get pods from selector")
 		return v1alpha1.NotInjected, err
 	}
 
 	dnschaos := obj.(*v1alpha1.DNSChaos)
-	err = impl.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
-	if err != nil {
-		impl.Log.Error(err, "fail to set DNS server rules")
-		return v1alpha1.NotInjected, err
+	for _, pod := range dnsPods {
+		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
+		if err != nil {
+			impl.Log.Error(err, "fail to set DNS server rules")
+			return v1alpha1.NotInjected, err
+		}
+		impl.Log.Info("Apply DNS chaos to DNS pod", "ip", service.Spec.ClusterIP)
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
