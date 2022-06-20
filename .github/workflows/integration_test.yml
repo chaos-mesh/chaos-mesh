@@ -74,10 +74,10 @@ jobs:
         run: |
           export CLUSTER="chart-testing"
           hack/local-up-chaos-mesh.sh
-          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-testing
-          kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-testing
+          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
+          kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-mesh
           sleep 5
-          kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
+          kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
       - name: Make chaosctl
         run: |
           make chaosctl
@@ -96,4 +96,4 @@ jobs:
         if: always()
         run: |
           kubectl describe pods
-          kubectl describe pods -n chaos-testing
+          kubectl describe pods -n chaos-mesh

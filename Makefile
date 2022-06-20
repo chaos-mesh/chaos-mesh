@@ -110,7 +110,7 @@ schedule-migration.tar.gz: schedule-migration
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
 
-NAMESPACE ?= chaos-testing
+NAMESPACE ?= chaos-mesh
 # Install CRDs into a cluster
 install: manifests
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;

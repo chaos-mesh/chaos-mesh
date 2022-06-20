@@ -43,8 +43,8 @@ kubectl apply -f ./cluster-viewer.yaml
 kubectl apply -f ./busybox-manager.yaml
 kubectl apply -f ./busybox-viewer.yaml
 
-CLUSTER_MANAGER_TOKEN=`kubectl -n chaos-testing describe secret $(kubectl -n chaos-testing get secret | grep account-cluster-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-testing describe secret $(kubectl -n chaos-testing get secret | grep account-cluster-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
+CLUSTER_MANAGER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
+CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 BUSYBOX_MANAGER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 BUSYBOX_VIEWER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 
@@ -241,15 +241,15 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/${EXP_UID}?nam
 
 echo "***** test webhook authority ******"
 
-EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing"]}, "mode": "one"}, "action": "delay", "delay": {"latency": "1ms"}, "mode": "one"}}'
-UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-testing", "default" ]}, "mode": "one"}, "action": "delay", "delay": {"latency": "2ms"}, "mode": "one"}}'
+EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-mesh"]}, "mode": "one"}, "action": "delay", "delay": {"latency": "1ms"}, "mode": "one"}}'
+UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test2", "namespace": "busybox"}, "spec": {"direction": "both", "target": {"selector": {"namespaces": ["chaos-mesh", "default" ]}, "mode": "one"}, "action": "delay", "delay": {"latency": "2ms"}, "mode": "one"}}'
 
-# create experiment require the privileges of namespace busybox and chaos-testing, so only cluster manager can create exp success
+# create experiment require the privileges of namespace busybox and chaos-mesh, so only cluster manager can create exp success
 REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" 'is forbidden'
 
 REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments" "create_exp.out" '"name":"ci-test2"'
 
-# update the experiment require the privileges of namespace busybox, chaos-testing and default, so only cluster manager can update exp success
+# update the experiment require the privileges of namespace busybox, chaos-mesh and default, so only cluster manager can update exp success
 
 # As we are discussing whether we should provide the ability to modify a chaos while running, these tests are removed now
 # REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" "is forbidden"

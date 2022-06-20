@@ -8,8 +8,8 @@ You can install Chaos Mesh by commands:
 
 ```bash
 hack/local-up-chaos-mesh.sh
-kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-testing
-kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
+kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
+kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 ```
 
 2. Install localstack && aws client(optional)
