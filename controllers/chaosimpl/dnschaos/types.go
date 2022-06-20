@@ -27,6 +27,7 @@ import (
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -198,6 +199,22 @@ func (impl *Impl) getService(ctx context.Context, namespace string, serviceName 
 	}
 
 	return service, nil
+}
+
+// getPodsFromSelector returns the pods assiocated to a given service
+func (impl *Impl) getPodsFromSelector(ctx context.Context, namespace string, labelSelector map[string]string) ([]v1.Pod, error) {
+	lSelector := labels.SelectorFromSet(labelSelector)
+	listOptions := &client.ListOptions{
+		Namespace:     namespace,
+		LabelSelector: lSelector,
+	}
+	podsList := &v1.PodList{}
+	err := impl.Client.List(ctx, podsList, listOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return podsList.Items, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {
