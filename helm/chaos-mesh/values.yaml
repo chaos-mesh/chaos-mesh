@@ -397,6 +397,8 @@ dnsServer:
   name: chaos-mesh-dns-server
   # grpc port for chaos-dns-server
   grpcPort: 9288
+  # Number of replicas
+  replicas: 1
   # CPU/Memory resource requests/limits for chaos-dns-server pod
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
