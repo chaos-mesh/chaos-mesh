@@ -146,15 +146,23 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	// get dns server's ip used for chaos
 	service, err := impl.getService(ctx, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
-		impl.Log.Error(err, "fail to get service")
+		impl.Log.Error(err, "fail to get dns service")
 		return v1alpha1.Injected, err
 	}
-	impl.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	err = impl.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+	dnsPods, err := impl.getPodsFromSelector(ctx, config.ControllerCfg.Namespace, service.Spec.Selector)
 	if err != nil {
-		impl.Log.Error(err, "fail to cancelDNSServerRules")
-		return v1alpha1.Injected, err
+		impl.Log.Error(err, "fail to get pods from selector")
+		return v1alpha1.NotInjected, err
+	}
+
+	for _, pod := range dnsPods {
+		err = impl.cancelDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+		if err != nil {
+			impl.Log.Error(err, "fail to cancelDNSServerRules")
+			return v1alpha1.Injected, err
+		}
+		impl.Log.Info("Cancel DNS chaos to DNS pod", "ip", service.Spec.ClusterIP)
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
