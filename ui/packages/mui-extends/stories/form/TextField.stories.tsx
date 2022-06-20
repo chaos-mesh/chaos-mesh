@@ -46,7 +46,7 @@ HasInputAdornment.args = {
 export const Group = () => (
   <Space>
     <Template label="Name" placeholder="experiment-1" helperText="This field is required" />
-    <Template label="Namespace" placeholder="chaos-testing" helperText="This field is optional" />
+    <Template label="Namespace" placeholder="chaos-mesh" helperText="This field is optional" />
   </Space>
 )
 
