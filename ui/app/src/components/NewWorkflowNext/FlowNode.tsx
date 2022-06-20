@@ -14,14 +14,14 @@
  * limitations under the License.
  *
  */
-
+import { styled } from '@mui/material'
+import type { TooltipProps } from '@mui/material'
 import { Handle, Position } from 'react-flow-renderer'
-import { Tooltip, styled, tooltipClasses } from '@mui/material'
+import type { Node } from 'react-flow-renderer'
 
 import BareNode from './BareNode'
 import type { BareNodeProps } from './BareNode'
-import type { Node } from 'react-flow-renderer'
-import type { TooltipProps } from '@mui/material'
+import CustomTooltip from './CustomTooltip'
 
 const StyledHandle = styled(Handle)(({ theme }) => ({
   width: '8px !important',
@@ -29,18 +29,6 @@ const StyledHandle = styled(Handle)(({ theme }) => ({
   background: `${theme.palette.background.default} !important`,
   borderColor: `${theme.palette.outline.main} !important`,
   zIndex: 1,
-}))
-
-const NodeTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.surfaceVariant.main,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.surfaceVariant.main,
-    color: theme.palette.onSurfaceVariant.main,
-  },
 }))
 
 export type FlowNodeProps = Node<BareNodeProps & { origin?: boolean; tooltipProps: TooltipProps }>
@@ -51,9 +39,9 @@ export default function FlowNode({ data }: FlowNodeProps) {
   return (
     <>
       {!origin && <StyledHandle type="target" position={Position.Left} />}
-      <NodeTooltip arrow placement="top" {...tooltipProps}>
+      <CustomTooltip arrow placement="top" {...tooltipProps}>
         <BareNode {...rest} />
-      </NodeTooltip>
+      </CustomTooltip>
       <StyledHandle type="source" position={Position.Right} />
     </>
   )

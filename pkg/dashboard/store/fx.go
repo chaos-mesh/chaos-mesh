@@ -13,10 +13,16 @@
 // limitations under the License.
 //
 
-package e2econst
+package store
 
-const (
-	PauseImage             = "gcr.io/google-containers/pause:latest"
-	ChaosMeshNamespace     = "chaos-mesh"
-	ChaosControllerManager = "chaos-controller-manager"
+import (
+	"github.com/go-logr/logr"
+	"github.com/jinzhu/gorm"
+	"go.uber.org/fx"
+
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 )
+
+func Bootstrap(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {
+	return NewDBStore(lc, conf, logger.WithName("dashboard-store"))
+}

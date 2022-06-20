@@ -1488,7 +1488,7 @@ exports[`Storyshots Form/TextField Group 1`] = `
         onBlur={[Function]}
         onChange={[Function]}
         onFocus={[Function]}
-        placeholder="chaos-testing"
+        placeholder="chaos-mesh"
         required={false}
         type="text"
       />

@@ -3700,7 +3700,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData",
+                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql",
                     "type": "string"
                 },
                 "class": {
@@ -3718,16 +3718,20 @@ var doc = `{
                     "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
                     "type": "integer"
                 },
+                "database": {
+                    "description": "the match database\ndefault value is \"\", means match all database",
+                    "type": "string"
+                },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
                 "exception": {
-                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `",
+                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `",
                     "type": "string"
                 },
                 "latency": {
-                    "description": "+optional\nthe latency duration for action 'latency', unit ms",
+                    "description": "+optional\nthe latency duration for action 'latency', unit ms\nor the latency duration in action ` + "`" + `mysql` + "`" + `",
                     "type": "integer"
                 },
                 "memType": {
@@ -3740,6 +3744,10 @@ var doc = `{
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "mysqlConnectorVersion": {
+                    "description": "the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now",
                     "type": "string"
                 },
                 "name": {
@@ -3762,6 +3770,14 @@ var doc = `{
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "sqlType": {
+                    "description": "the match sql type\ndefault value is \"\", means match all SQL type.\nThe value can be 'select', 'insert', 'update', 'delete', 'replace'.",
+                    "type": "string"
+                },
+                "table": {
+                    "description": "the match table\ndefault value is \"\", means match all table",
+                    "type": "string"
                 },
                 "value": {
                     "description": "+optional\nthe return value for action 'return'",
@@ -4908,7 +4924,10 @@ var doc = `{
                 },
                 "options": {
                     "description": "extend stress-ng options",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "workers": {
                     "description": "specifies N workers to apply the stressor.",
@@ -4959,7 +4978,10 @@ var doc = `{
             "properties": {
                 "options": {
                     "description": "extend stress-ng options",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "size": {
                     "description": "specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..",

@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+set -eu
+
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
@@ -25,7 +27,6 @@ echo "deploy a helloword pod which is implement with java"
 # 1. Hello World
 # ...
 
-kubectl create namespace helloworld
 kubectl apply -f ./helloworld_pod.yaml
 
 echo "wait helloworld pod status to running"
@@ -51,8 +52,8 @@ function check_log() {
 
     success=false
     for ((k=0; k<10; k++)); do
-        kubectl logs --tail=1 helloworld -n helloworld | grep $match "$message"
-        if [ "$?" = "0" ]; then
+        line=`kubectl logs --tail=1 helloworld -n helloworld | grep $match "$message" | wc -l`
+        if [ "$line" = "1" ]; then
             success=true
             break
         fi
@@ -80,6 +81,52 @@ check_log "Got an exception!java.io.IOException: BOOM" true
 echo "delete jvm chaos, and will not print 'Got an exception!java.io.IOException: BOOM'"
 kubectl delete -f ./exception.yaml
 check_log "Got an exception!java.io.IOException: BOOM" false
+
+echo "deploy TiDB service and mysql query Java application which used to query TiDB/MySQL"
+kubectl apply -f tidb.yaml
+
+nodeIP=`kubectl get nodes -o wide | grep -Eo '([0-9]*\.){3}[0-9]*'`
+
+cat <<EOF > tidb-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tidb-config
+  namespace: mysql
+data:
+  DSN: "jdbc:mysql://${nodeIP}:30400/mysql"
+  USER: "root"
+  PASSWORD: ""
+EOF
+
+kubectl apply -f tidb-configmap.yaml
+kubectl apply -f mysql_query.yaml
+
+echo "wait tidb and mysql-query pod status to running"
+for ((k=0; k<30; k++)); do
+    kubectl get pods --namespace mysql > pods.status
+    cat pods.status
+
+    run_num=`grep Running pods.status | wc -l`
+    pod_num=$((`cat pods.status | wc -l` - 1))
+    if [ $run_num == $pod_num ]; then
+        break
+    fi
+
+    sleep 1
+done
+
+kubectl get events -n mysql
+kubectl get nodes -o wide
+
+curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+check_contains "root" user_info.log
+
+kubectl apply -f mysql_query_exception.yaml
+
+sleep 5
+curl -X GET "http://${nodeIP}:30001/query?sql=SELECT%20*%20FROM%20mysql.user" > user_info.log
+check_contains "BOOM" user_info.log
 
 # TODO: more test
 

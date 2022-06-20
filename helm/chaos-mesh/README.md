@@ -168,9 +168,9 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 
 ```console
 # helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh --set dashboard.create=true
 # helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dashboard.create=true
 ```
 
 The above command enable the Chaos Dashboard.
@@ -179,9 +179,9 @@ Alternatively, a YAML file that specifies the values for the parameters can be p
 
 ```console
 # helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing -f values.yaml
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh -f values.yaml
 # helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing -f values.yaml
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh -f values.yaml
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)

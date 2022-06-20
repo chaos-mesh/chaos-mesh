@@ -28,7 +28,6 @@ import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	"golang.org/x/time/rate"
-	"k8s.io/client-go/kubernetes"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/util/workqueue"
@@ -105,9 +104,6 @@ type RunParams struct {
 	fx.In
 	// Mgr is the controller-runtime Manager to register controllers and webhooks to.
 	Mgr ctrl.Manager
-	// Clientset is the typed kubernetes clientset.
-	// TODO: Not used anymore, remove it in the future.
-	Clientset *kubernetes.Clientset
 	// Logger is the root logger used in the application.
 	Logger logr.Logger
 	// AuthCli is the typed kubernetes authorization client. Required for the authentication webhooks.

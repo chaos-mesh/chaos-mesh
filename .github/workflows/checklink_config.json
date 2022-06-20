@@ -11,6 +11,9 @@
     },
     {
       "pattern": "^#"
+    },
+    {
+      "pattern": "^https://www.microsoft.com"
     }
   ],
   "aliveStatusCodes": [200, 403, 500, 502, 503]
