@@ -16,7 +16,7 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: PhysicalMachine
 metadata:
   name: physicalmachine1
-  namespace: chaos-testing
+  namespace: chaos-mesh
   labels:
     arch: amd64
 spec:

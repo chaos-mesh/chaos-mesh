@@ -28,7 +28,6 @@ import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	"golang.org/x/time/rate"
-	"k8s.io/client-go/kubernetes"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/util/workqueue"
@@ -98,21 +97,31 @@ func main() {
 	app.Run()
 }
 
+// RunParams contains all the parameters needed to run the chaos-controller-manager
 type RunParams struct {
 	fx.In
-
-	Mgr                 ctrl.Manager
-	Clientset           *kubernetes.Clientset
-	Logger              logr.Logger
-	AuthCli             *authorizationv1.AuthorizationV1Client
+	// Mgr is the controller-runtime Manager to register controllers and webhooks to.
+	Mgr ctrl.Manager
+	// Logger is the root logger used in the application.
+	Logger logr.Logger
+	// AuthCli is the typed kubernetes authorization client. Required for the authentication webhooks.
+	AuthCli *authorizationv1.AuthorizationV1Client
+	// DaemonClientBuilder is the builder/factory for creating chaos daemon clients.
 	DaemonClientBuilder *chaosdaemon.ChaosDaemonClientBuilder
-	MetricsCollector    *metrics.ChaosControllerManagerMetricsCollector
-	CtrlServer          *handler.Server
+	// MetricsCollector collects metrics for observability.
+	MetricsCollector *metrics.ChaosControllerManagerMetricsCollector
+	// CtrlServer is the graphql server for chaosctl.
+	CtrlServer *handler.Server
 
-	Objs        []types.Object        `group:"objs"`
+	// Objs collects all the kinds of chaos custom resource objects that would be handled by the controller/reconciler.
+	Objs []types.Object `group:"objs"`
+	// WebhookObjs collects all the kinds of chaos custom resource objects that would be handled by the validation and mutation webhooks.
 	WebhookObjs []types.WebhookObject `group:"webhookObjs"`
 }
 
+// Run is the one of the entrypoints for fx application of chaos-controller-manager. It would bootstrap the
+// controller-runtime manager and register all the controllers and webhooks.
+// Please notice that Run is NOT the only one entrypoint, every other functions called by fx.Invoke are also entrypoint.
 func Run(params RunParams) error {
 	mgr := params.Mgr
 	authCli := params.AuthCli

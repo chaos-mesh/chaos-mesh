@@ -18,7 +18,7 @@ tmp_file="chaos-mesh.yaml"
 tmp_install_script="install.sh.bak"
 install_script="install.sh"
 
-helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
+helm template chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
       --set controllerManager.hostNetwork=true \
       --set controllerManager.chaosdSecurityMode=false \
       --set chaosDaemon.hostNetwork=true \
@@ -40,6 +40,8 @@ sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-mesh:.*/\${IMAGE_REGISTRY_PREFIX}\/chao
 sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-daemon:.*/\${IMAGE_REGISTRY_PREFIX}\/chaos-mesh\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/ghcr.io\/chaos-mesh\/chaos-dashboard:.*/\${IMAGE_REGISTRY_PREFIX}\/chaos-mesh\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/value: UTC/value: \$\{timezone\}/g' $tmp_file
+sed -i.bak 's/app.kubernetes.io\/version: 0.0.0/app.kubernetes.io\/version: $\{VERSION_TAG##v\}/g' $tmp_file
+
 mv $tmp_file $tmp_file.bak
 
 cat <<EOF > $tmp_file
@@ -47,7 +49,7 @@ cat <<EOF > $tmp_file
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: chaos-testing
+  name: chaos-mesh
 EOF
 
 cat $tmp_file.bak >> $tmp_file

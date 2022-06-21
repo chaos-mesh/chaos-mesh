@@ -15,12 +15,13 @@
  *
  */
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Drawer } from '@mui/material'
+import { Box, Drawer, IconButton } from '@mui/material'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
 import { useDrop } from 'react-dnd'
 import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
 import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
+import { useIntl } from 'react-intl'
 import { v4 as uuidv4 } from 'uuid'
 
 import Paper from '@ui/mui-extends/esm/Paper'
@@ -32,28 +33,30 @@ import { setConfirm } from 'slices/globalStatus'
 import { insertWorkflowNode, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
 
 import AutoForm, { Belong } from 'components/AutoForm'
-import { T } from 'components/T'
+import i18n, { T } from 'components/T'
 
 import { concatKindAction } from 'lib/utils'
 
+import AdjustableEdge from './AdjustableEdge'
 import { ElementDragData, ElementTypes } from './Elements/types'
 import FlowNode from './FlowNode'
 
 type DropItem = ElementDragData
 type Identifier = DropItem
 
-interface NodeControlProps {
+interface ControlProps {
   id: uuid
   onDelete: (id: uuid) => void
 }
 
-const NodeControl = ({ id, onDelete }: NodeControlProps) => {
+const NodeControl = ({ id, onDelete }: ControlProps) => {
+  const intl = useIntl()
   const dispatch = useStoreDispatch()
 
-  const onClick = () => {
+  const onNodeDelete = () => {
     dispatch(
       setConfirm({
-        title: `Delete Node ${id}`,
+        title: `Delete node ${id}`,
         description: <T id="common.deleteDesc" />,
         handle: () => onDelete(id),
       })
@@ -61,10 +64,38 @@ const NodeControl = ({ id, onDelete }: NodeControlProps) => {
   }
 
   return (
-    <Space direction="row" lineHeight={1}>
-      <Box className="nodrag" title="Delete" onClick={onClick} sx={{ cursor: 'pointer' }}>
-        <DeleteIcon fontSize="small" />
-      </Box>
+    <Space className="nodrag" direction="row" lineHeight={1}>
+      {/* TODO: Copy single Node to reuse */}
+      {/* <IconButton size="small" >
+        <FileCopyIcon fontSize="inherit" />
+      </IconButton>
+      <Divider orientation="vertical" variant="middle" flexItem /> */}
+      <IconButton size="small" onClick={onNodeDelete} title={i18n('common.delete', intl)} aria-label="delete">
+        <DeleteIcon fontSize="inherit" />
+      </IconButton>
+    </Space>
+  )
+}
+
+const EdgeControl = ({ id, onDelete }: ControlProps) => {
+  const intl = useIntl()
+  const dispatch = useStoreDispatch()
+
+  const onEdgeDelete = () => {
+    dispatch(
+      setConfirm({
+        title: `Delete edge ${id}`,
+        description: <T id="common.deleteDesc" />,
+        handle: () => onDelete(id),
+      })
+    )
+  }
+
+  return (
+    <Space className="nodrag" direction="row" lineHeight={1}>
+      <IconButton size="small" onClick={onEdgeDelete} title={i18n('common.delete', intl)} aria-label="delete">
+        <DeleteIcon fontSize="inherit" />
+      </IconButton>
     </Space>
   )
 }
@@ -94,11 +125,27 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         //   return eds
         // }
 
-        return addEdge({ ...connection, type: 'smoothstep' }, eds)
+        const id = uuidv4()
+
+        return addEdge(
+          {
+            ...connection,
+            type: 'adjustableEdge',
+            data: {
+              id,
+              tooltipProps: {
+                title: <EdgeControl id={id} onDelete={deleteEdge} />,
+              },
+            },
+          },
+          eds
+        )
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setEdges]
   )
   const nodeTypes = useMemo(() => ({ flowNode: FlowNode }), [])
+  const edgeTypes = useMemo(() => ({ adjustableEdge: AdjustableEdge }), [])
 
   const store = useStoreSelector((state) => state.workflows)
   const dispatch = useStoreDispatch()
@@ -159,24 +206,6 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     return id
   }
 
-  const updateNode = (values: Record<string, any>) => {
-    setNodes((oldNodes) =>
-      oldNodes.map((node) => {
-        if (node.id === values.id) {
-          return {
-            ...node,
-            data: { ...node.data, children: `${values.name} (${concatKindAction(values.kind, values.action)})` },
-          }
-        }
-
-        return node
-      })
-    )
-    dispatch(updateWorkflowNode(values))
-
-    cleanup()
-  }
-
   const editNode = (_: any, { id }: Node) => {
     const workflowNode = store.nodes[id]
 
@@ -188,6 +217,41 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
       act: workflowNode.action,
     })
     setOpenDrawer(true)
+  }
+
+  const updateNode = (values: Record<string, any>) => {
+    setNodes((oldNodes) =>
+      oldNodes.map((node) => {
+        if (node.id === values.id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              disableRipple: true,
+              sx: {
+                alignItems: 'start',
+                '& .MuiButton-startIcon': {
+                  mt: 0.5,
+                },
+              },
+              children: (
+                <Box>
+                  <Box>
+                    {values.name} ({concatKindAction(values.kind, values.action)})
+                  </Box>
+                  <Box>deadline: {values.deadline}</Box>
+                </Box>
+              ),
+            },
+          }
+        }
+
+        return node
+      })
+    )
+    dispatch(updateWorkflowNode(values))
+
+    cleanup()
   }
 
   const deleteNode = (id: uuid) => {
@@ -206,9 +270,13 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   }
 
   const [, drop] = useDrop(() => ({
-    accept: [ElementTypes.Kubernetes, ElementTypes.PhysicalNodes],
+    accept: [ElementTypes.Kubernetes, ElementTypes.PhysicalNodes, ElementTypes.Suspend],
     drop: initNode,
   }))
+
+  const deleteEdge = (id: uuid) => {
+    setEdges((oldEdges) => oldEdges.filter((edge) => edge.data.id !== id))
+  }
 
   return (
     <>
@@ -225,11 +293,11 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         nodes={nodes}
         onNodesChange={onNodesChange}
         onNodeClick={editNode}
-        onNodeMouseEnter={() => {}}
         edges={edges}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
       >
         <Background />
         <Controls />

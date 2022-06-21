@@ -19,6 +19,7 @@ import type { AutoFormProps } from 'components/AutoForm'
 export enum ElementTypes {
   Kubernetes = 'Kubernetes',
   PhysicalNodes = 'PhysicalNodes',
+  Suspend = 'Suspend',
 }
 
 export type ElementDragData = Omit<AutoFormProps, 'formikProps'>

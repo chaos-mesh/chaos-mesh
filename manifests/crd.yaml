@@ -1930,6 +1930,7 @@ spec:
                 - stress
                 - gc
                 - ruleData
+                - mysql
                 type: string
               class:
                 description: Java class
@@ -1944,14 +1945,20 @@ spec:
                 description: the CPU core number needs to use, only set it when action
                   is stress
                 type: integer
+              database:
+                description: the match database default value is "", means match all
+                  database
+                type: string
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
               exception:
                 description: the exception which needs to throw for action `exception`
+                  or the exception message needs to throw in action `mysql`
                 type: string
               latency:
-                description: the latency duration for action 'latency', unit ms
+                description: the latency duration for action 'latency', unit ms or
+                  the latency duration in action `mysql`
                 type: integer
               memType:
                 description: the memory type needs to locate, only set it when action
@@ -1969,6 +1976,10 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              mysqlConnectorVersion:
+                description: the version of mysql-connector-java, only support 5.X.X(set
+                  to "5") and 8.X.X(set to "8") now
                 type: string
               name:
                 description: byteman rule name, should be unique, and will generate
@@ -2074,6 +2085,15 @@ spec:
                       belong, and the each values is a set of pod names.
                     type: object
                 type: object
+              sqlType:
+                description: the match sql type default value is "", means match all
+                  SQL type. The value can be 'select', 'insert', 'update', 'delete',
+                  'replace'.
+                type: string
+              table:
+                description: the match table default value is "", means match all
+                  table
+                type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
                   / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
@@ -3568,7 +3588,9 @@ spec:
                     type: integer
                   options:
                     description: extend stress-ng options
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   workers:
                     description: specifies N workers to apply the stressor.
                     type: integer
@@ -3577,7 +3599,9 @@ spec:
                 properties:
                   options:
                     description: extend stress-ng options
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   size:
                     description: specifies N bytes consumed per vm worker, default
                       is the total available memory. One can specify the size as %
@@ -5837,6 +5861,7 @@ spec:
                     - stress
                     - gc
                     - ruleData
+                    - mysql
                     type: string
                   class:
                     description: Java class
@@ -5851,14 +5876,20 @@ spec:
                     description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
+                  database:
+                    description: the match database default value is "", means match
+                      all database
+                    type: string
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
                   exception:
                     description: the exception which needs to throw for action `exception`
+                      or the exception message needs to throw in action `mysql`
                     type: string
                   latency:
                     description: the latency duration for action 'latency', unit ms
+                      or the latency duration in action `mysql`
                     type: integer
                   memType:
                     description: the memory type needs to locate, only set it when
@@ -5876,6 +5907,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  mysqlConnectorVersion:
+                    description: the version of mysql-connector-java, only support
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
                     type: string
                   name:
                     description: byteman rule name, should be unique, and will generate
@@ -5981,6 +6016,15 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
+                  sqlType:
+                    description: the match sql type default value is "", means match
+                      all SQL type. The value can be 'select', 'insert', 'update',
+                      'delete', 'replace'.
+                    type: string
+                  table:
+                    description: the match table default value is "", means match
+                      all table
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -7072,7 +7116,9 @@ spec:
                         type: integer
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
@@ -7081,7 +7127,9 @@ spec:
                     properties:
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -8794,6 +8842,7 @@ spec:
                               - stress
                               - gc
                               - ruleData
+                              - mysql
                               type: string
                             class:
                               description: Java class
@@ -8809,17 +8858,22 @@ spec:
                               description: the CPU core number needs to use, only
                                 set it when action is stress
                               type: integer
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
                             exception:
                               description: the exception which needs to throw for
-                                action `exception`
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
                               type: string
                             latency:
                               description: the latency duration for action 'latency',
-                                unit ms
+                                unit ms or the latency duration in action `mysql`
                               type: integer
                             memType:
                               description: the memory type needs to locate, only set
@@ -8839,6 +8893,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
                               type: string
                             name:
                               description: byteman rule name, should be unique, and
@@ -8951,6 +9009,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -10129,7 +10196,9 @@ spec:
                                   type: integer
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
@@ -10138,7 +10207,9 @@ spec:
                               properties:
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can
@@ -11514,6 +11585,7 @@ spec:
                                   - stress
                                   - gc
                                   - ruleData
+                                  - mysql
                                   type: string
                                 class:
                                   description: Java class
@@ -11529,17 +11601,22 @@ spec:
                                   description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
+                                database:
+                                  description: the match database default value is
+                                    "", means match all database
+                                  type: string
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    for action `exception`
+                                    for action `exception` or the exception message
+                                    needs to throw in action `mysql`
                                   type: string
                                 latency:
                                   description: the latency duration for action 'latency',
-                                    unit ms
+                                    unit ms or the latency duration in action `mysql`
                                   type: integer
                                 memType:
                                   description: the memory type needs to locate, only
@@ -11559,6 +11636,11 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                mysqlConnectorVersion:
+                                  description: the version of mysql-connector-java,
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
@@ -11676,6 +11758,15 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -12892,7 +12983,9 @@ spec:
                                       type: integer
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -12902,7 +12995,9 @@ spec:
                                   properties:
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available
@@ -19082,6 +19177,7 @@ spec:
                     - stress
                     - gc
                     - ruleData
+                    - mysql
                     type: string
                   class:
                     description: Java class
@@ -19096,14 +19192,20 @@ spec:
                     description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
+                  database:
+                    description: the match database default value is "", means match
+                      all database
+                    type: string
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
                   exception:
                     description: the exception which needs to throw for action `exception`
+                      or the exception message needs to throw in action `mysql`
                     type: string
                   latency:
                     description: the latency duration for action 'latency', unit ms
+                      or the latency duration in action `mysql`
                     type: integer
                   memType:
                     description: the memory type needs to locate, only set it when
@@ -19121,6 +19223,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  mysqlConnectorVersion:
+                    description: the version of mysql-connector-java, only support
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
                     type: string
                   name:
                     description: byteman rule name, should be unique, and will generate
@@ -19226,6 +19332,15 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
+                  sqlType:
+                    description: the match sql type default value is "", means match
+                      all SQL type. The value can be 'select', 'insert', 'update',
+                      'delete', 'replace'.
+                    type: string
+                  table:
+                    description: the match table default value is "", means match
+                      all table
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -20317,7 +20432,9 @@ spec:
                         type: integer
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
@@ -20326,7 +20443,9 @@ spec:
                     properties:
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -21617,6 +21736,7 @@ spec:
                         - stress
                         - gc
                         - ruleData
+                        - mysql
                         type: string
                       class:
                         description: Java class
@@ -21632,17 +21752,22 @@ spec:
                         description: the CPU core number needs to use, only set it
                           when action is stress
                         type: integer
+                      database:
+                        description: the match database default value is "", means
+                          match all database
+                        type: string
                       duration:
                         description: Duration represents the duration of the chaos
                           action
                         type: string
                       exception:
                         description: the exception which needs to throw for action
-                          `exception`
+                          `exception` or the exception message needs to throw in action
+                          `mysql`
                         type: string
                       latency:
                         description: the latency duration for action 'latency', unit
-                          ms
+                          ms or the latency duration in action `mysql`
                         type: integer
                       memType:
                         description: the memory type needs to locate, only set it
@@ -21660,6 +21785,10 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      mysqlConnectorVersion:
+                        description: the version of mysql-connector-java, only support
+                          5.X.X(set to "5") and 8.X.X(set to "8") now
                         type: string
                       name:
                         description: byteman rule name, should be unique, and will
@@ -21767,6 +21896,15 @@ spec:
                               names.
                             type: object
                         type: object
+                      sqlType:
+                        description: the match sql type default value is "", means
+                          match all SQL type. The value can be 'select', 'insert',
+                          'update', 'delete', 'replace'.
+                        type: string
+                      table:
+                        description: the match table default value is "", means match
+                          all table
+                        type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
                           / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -22878,7 +23016,9 @@ spec:
                             type: integer
                           options:
                             description: extend stress-ng options
-                            type: string
+                            items:
+                              type: string
+                            type: array
                           workers:
                             description: specifies N workers to apply the stressor.
                             type: integer
@@ -22887,7 +23027,9 @@ spec:
                         properties:
                           options:
                             description: extend stress-ng options
-                            type: string
+                            items:
+                              type: string
+                            type: array
                           size:
                             description: specifies N bytes consumed per vm worker,
                               default is the total available memory. One can specify
@@ -24640,6 +24782,7 @@ spec:
                                   - stress
                                   - gc
                                   - ruleData
+                                  - mysql
                                   type: string
                                 class:
                                   description: Java class
@@ -24655,17 +24798,22 @@ spec:
                                   description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
+                                database:
+                                  description: the match database default value is
+                                    "", means match all database
+                                  type: string
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    for action `exception`
+                                    for action `exception` or the exception message
+                                    needs to throw in action `mysql`
                                   type: string
                                 latency:
                                   description: the latency duration for action 'latency',
-                                    unit ms
+                                    unit ms or the latency duration in action `mysql`
                                   type: integer
                                 memType:
                                   description: the memory type needs to locate, only
@@ -24685,6 +24833,11 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                mysqlConnectorVersion:
+                                  description: the version of mysql-connector-java,
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
@@ -24802,6 +24955,15 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -26020,7 +26182,9 @@ spec:
                                       type: integer
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -26030,7 +26194,9 @@ spec:
                                   properties:
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available
@@ -27450,6 +27616,7 @@ spec:
                                       - stress
                                       - gc
                                       - ruleData
+                                      - mysql
                                       type: string
                                     class:
                                       description: Java class
@@ -27465,17 +27632,23 @@ spec:
                                       description: the CPU core number needs to use,
                                         only set it when action is stress
                                       type: integer
+                                    database:
+                                      description: the match database default value
+                                        is "", means match all database
+                                      type: string
                                     duration:
                                       description: Duration represents the duration
                                         of the chaos action
                                       type: string
                                     exception:
                                       description: the exception which needs to throw
-                                        for action `exception`
+                                        for action `exception` or the exception message
+                                        needs to throw in action `mysql`
                                       type: string
                                     latency:
                                       description: the latency duration for action
-                                        'latency', unit ms
+                                        'latency', unit ms or the latency duration
+                                        in action `mysql`
                                       type: integer
                                     memType:
                                       description: the memory type needs to locate,
@@ -27495,6 +27668,11 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    mysqlConnectorVersion:
+                                      description: the version of mysql-connector-java,
+                                        only support 5.X.X(set to "5") and 8.X.X(set
+                                        to "8") now
                                       type: string
                                     name:
                                       description: byteman rule name, should be unique,
@@ -27617,6 +27795,16 @@ spec:
                                             pod names.
                                           type: object
                                       type: object
+                                    sqlType:
+                                      description: the match sql type default value
+                                        is "", means match all SQL type. The value
+                                        can be 'select', 'insert', 'update', 'delete',
+                                        'replace'.
+                                      type: string
+                                    table:
+                                      description: the match table default value is
+                                        "", means match all table
+                                      type: string
                                     value:
                                       description: Value is required when the mode
                                         is set to `FixedMode` / `FixedPercentMode`
@@ -28879,7 +29067,9 @@ spec:
                                           type: integer
                                         options:
                                           description: extend stress-ng options
-                                          type: string
+                                          items:
+                                            type: string
+                                          type: array
                                         workers:
                                           description: specifies N workers to apply
                                             the stressor.
@@ -28889,7 +29079,9 @@ spec:
                                       properties:
                                         options:
                                           description: extend stress-ng options
-                                          type: string
+                                          items:
+                                            type: string
+                                          type: array
                                         size:
                                           description: specifies N bytes consumed
                                             per vm worker, default is the total available
@@ -37755,6 +37947,7 @@ spec:
                           - stress
                           - gc
                           - ruleData
+                          - mysql
                           type: string
                         class:
                           description: Java class
@@ -37770,17 +37963,22 @@ spec:
                           description: the CPU core number needs to use, only set
                             it when action is stress
                           type: integer
+                        database:
+                          description: the match database default value is "", means
+                            match all database
+                          type: string
                         duration:
                           description: Duration represents the duration of the chaos
                             action
                           type: string
                         exception:
                           description: the exception which needs to throw for action
-                            `exception`
+                            `exception` or the exception message needs to throw in
+                            action `mysql`
                           type: string
                         latency:
                           description: the latency duration for action 'latency',
-                            unit ms
+                            unit ms or the latency duration in action `mysql`
                           type: integer
                         memType:
                           description: the memory type needs to locate, only set it
@@ -37798,6 +37996,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        mysqlConnectorVersion:
+                          description: the version of mysql-connector-java, only support
+                            5.X.X(set to "5") and 8.X.X(set to "8") now
                           type: string
                         name:
                           description: byteman rule name, should be unique, and will
@@ -37906,6 +38108,15 @@ spec:
                                 a set of pod names.
                               type: object
                           type: object
+                        sqlType:
+                          description: the match sql type default value is "", means
+                            match all SQL type. The value can be 'select', 'insert',
+                            'update', 'delete', 'replace'.
+                          type: string
+                        table:
+                          description: the match table default value is "", means
+                            match all table
+                          type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
                             / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -39045,7 +39256,9 @@ spec:
                               type: integer
                             options:
                               description: extend stress-ng options
-                              type: string
+                              items:
+                                type: string
+                              type: array
                             workers:
                               description: specifies N workers to apply the stressor.
                               type: integer
@@ -39054,7 +39267,9 @@ spec:
                           properties:
                             options:
                               description: extend stress-ng options
-                              type: string
+                              items:
+                                type: string
+                              type: array
                             size:
                               description: specifies N bytes consumed per vm worker,
                                 default is the total available memory. One can specify
@@ -40396,6 +40611,7 @@ spec:
                               - stress
                               - gc
                               - ruleData
+                              - mysql
                               type: string
                             class:
                               description: Java class
@@ -40411,17 +40627,22 @@ spec:
                               description: the CPU core number needs to use, only
                                 set it when action is stress
                               type: integer
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
                             exception:
                               description: the exception which needs to throw for
-                                action `exception`
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
                               type: string
                             latency:
                               description: the latency duration for action 'latency',
-                                unit ms
+                                unit ms or the latency duration in action `mysql`
                               type: integer
                             memType:
                               description: the memory type needs to locate, only set
@@ -40441,6 +40662,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
                               type: string
                             name:
                               description: byteman rule name, should be unique, and
@@ -40553,6 +40778,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -41729,7 +41963,9 @@ spec:
                                   type: integer
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
@@ -41738,7 +41974,9 @@ spec:
                               properties:
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can

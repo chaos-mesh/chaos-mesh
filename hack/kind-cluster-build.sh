@@ -152,14 +152,14 @@ nodes:
 - role: control-plane
 EOF
 
-for ((i=0;i<${nodeNum};i++))
+for ((i=0;i<nodeNum;i++))
 do
     mkdir -p ${data_dir}/worker${i}
     cat <<EOF >>  ${configFile}
 - role: worker
   extraMounts:
 EOF
-    for ((k=1;k<=${volumeNum};k++))
+    for ((k=1;k<=volumeNum;k++))
     do
         mkdir -p ${data_dir}/worker${i}/vol${k}
         cat <<EOF >> ${configFile}
@@ -190,7 +190,7 @@ set -e
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 
-$KUBECTL_BIN create ns chaos-testing
+$KUBECTL_BIN create ns chaos-mesh
 
 echo "############# success create cluster:[${clusterName}] #############"
 

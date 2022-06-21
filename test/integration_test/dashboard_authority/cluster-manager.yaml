@@ -38,7 +38,7 @@ kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: account-cluster-manager
-  namespace: chaos-testing
+  namespace: chaos-mesh
 
 ---
 
@@ -49,7 +49,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: account-cluster-manager
-  namespace: chaos-testing
+  namespace: chaos-mesh
 roleRef:
   kind: ClusterRole
   name: cluster-role-test-manager
