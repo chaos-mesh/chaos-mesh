@@ -52,7 +52,6 @@ require (
 	github.com/retailnext/iptables_exporter v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/romana/ipset v1.0.0
-	github.com/samber/lo v1.11.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.2.1
@@ -223,7 +222,6 @@ require (
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/dig v1.9.0 // indirect
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect

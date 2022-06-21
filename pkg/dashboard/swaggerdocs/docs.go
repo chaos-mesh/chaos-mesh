@@ -3209,6 +3209,11 @@ var doc = `{
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
                 },
+                "diskChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DiskChaosSpec"
+                },
                 "dnsChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -3384,6 +3389,60 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ReorderSpec"
+                }
+            }
+        },
+        "v1alpha1.DiskChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "+kubebuilder:validation:Enum=fill;write;read",
+                    "type": "string"
+                },
+                "containerNames": {
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action",
+                    "type": "string"
+                },
+                "fill_by_fallocate": {
+                    "type": "boolean"
+                },
+                "loop_execution": {
+                    "type": "boolean"
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "string"
+                },
+                "process_num": {
+                    "type": "integer"
+                },
+                "selector": {
+                    "description": "Selector is used to select pods that are used to inject chaos action.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "size": {
+                    "type": "string"
+                },
+                "space_lock_size": {
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
                 }
             }
         },
@@ -4725,6 +4784,11 @@ var doc = `{
                     "description": "+optional\n+kubebuilder:default=Forbid\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
                 },
+                "diskChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DiskChaosSpec"
+                },
                 "dnsChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -5034,6 +5098,11 @@ var doc = `{
                 "deadline": {
                     "description": "+optional",
                     "type": "string"
+                },
+                "diskChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.DiskChaosSpec"
                 },
                 "dnsChaos": {
                     "description": "+optional",

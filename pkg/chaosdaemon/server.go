@@ -21,7 +21,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/pkg/disk"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
