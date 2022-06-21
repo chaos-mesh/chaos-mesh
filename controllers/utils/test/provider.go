@@ -30,7 +30,6 @@ var Module = fx.Provide(
 	provider.NewAuthCli,
 	provider.NewScheme,
 	provider.NewNoCacheReader,
-	provider.NewGlobalCacheReader,
 	provider.NewControlPlaneCacheReader,
 	manager.NewTestManager,
 	recorder.NewRecorderBuilder,
