@@ -111,7 +111,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	default:
 		return v1alpha1.NotInjected, errors.New("unexpected disk chaos action")
 	}
-	return v1alpha1.Injected, nil
+	return v1alpha1.NotInjected, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {

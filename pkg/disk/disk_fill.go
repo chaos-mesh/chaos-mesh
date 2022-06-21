@@ -48,6 +48,9 @@ func InitFill(c FillConfig, logger logr.Logger) (*Fill, error) {
 	}
 	c.Path = path
 	byteSize, err := Count(c.Size, c.Percent, c.Path)
+	if err != nil {
+		return nil, err
+	}
 	if c.FillByFAllocate {
 		fallocateCmd := FAllocate{
 			Exec:     command.NewExec(),

@@ -41,6 +41,8 @@ func (m *SyncMap[T]) Write(key string, value T) {
 
 func (s *DaemonServer) DiskFill(ctx context.Context, req *pb.DiskFillRequest) (*empty.Empty, error) {
 	logger := s.rootLogger.WithName("Disk Fill")
+	logger.Info("conifg", "request", req)
+
 	f, err := disk.InitFill(
 		disk.NewFillConfig(req.FillByFallocate, disk.CommonConfig{
 			Path:    req.Path,
