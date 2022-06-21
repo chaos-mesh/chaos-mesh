@@ -32,11 +32,11 @@ import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
 import { ReactComponent as ProcessIcon } from 'images/chaos/process.svg'
 import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
 import { SvgIcon } from '@mui/material'
-import T from 'components/T'
+import i18n from 'components/T'
 
 export function iconByKind(
   kind: ExperimentKind | 'Schedule' | 'k8s' | 'physic' | 'DiskChaos' | 'ProcessChaos',
-  size: 'small' | 'large' = 'large'
+  size: 'small' | 'medium' | 'large' = 'medium'
 ) {
   let icon
 
@@ -108,5 +108,5 @@ export function transByKind(kind: ExperimentKind | 'Workflow' | 'Schedule') {
     id = `newE.target.${kind.replace('Chaos', '').toLowerCase()}.title`
   }
 
-  return T(id)
+  return i18n(id)
 }

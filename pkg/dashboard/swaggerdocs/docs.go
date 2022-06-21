@@ -3171,7 +3171,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "load": {
-                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+optional",
+                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -3715,7 +3715,7 @@ var doc = `{
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
                     "type": "integer"
                 },
                 "duration": {
@@ -3731,7 +3731,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "string"
                 },
                 "method": {
@@ -3743,15 +3743,19 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
+                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
                     "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which needs to attach",
+                    "type": "integer"
                 },
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "ruleData": {
-                    "description": "+optional",
+                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
                     "type": "string"
                 },
                 "selector": {
@@ -3769,7 +3773,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "exception": {
@@ -3777,15 +3781,15 @@ var doc = `{
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3794,11 +3798,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3807,7 +3811,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "latency": {
@@ -3815,15 +3819,15 @@ var doc = `{
                     "type": "integer"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3832,19 +3836,19 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "value": {
@@ -3857,11 +3861,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -3882,11 +3886,11 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3934,6 +3938,10 @@ var doc = `{
         "v1alpha1.MemoryStressor": {
             "type": "object",
             "properties": {
+                "oomScoreAdj": {
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
+                    "type": "integer"
+                },
                 "options": {
                     "description": "extend stress-ng options\n+optional",
                     "type": "array",
@@ -3955,7 +3963,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "filling": {
-                    "description": "Filling determines what is filled in the miskate data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
+                    "description": "Filling determines what is filled in the mistake data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
                     "type": "string"
                 },
                 "maxLength": {
@@ -4007,17 +4015,17 @@ var doc = `{
                     "type": "string"
                 },
                 "bandwidth": {
-                    "description": "Bandwidth represents the detail about bandwidth control action\n+optional",
+                    "description": "Bandwidth represents the detail about bandwidth control action\n+ui:form:when=action=='bandwidth'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BandwidthSpec"
                 },
                 "corrupt": {
-                    "description": "Corrupt represents the detail about corrupt action\n+optional",
+                    "description": "Corrupt represents the detail about corrupt action\n+ui:form:when=action=='corrupt'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.CorruptSpec"
                 },
                 "delay": {
-                    "description": "Delay represents the detail about delay action\n+optional",
+                    "description": "Delay represents the detail about delay action\n+ui:form:when=action=='delay'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
@@ -4030,7 +4038,7 @@ var doc = `{
                     "type": "string"
                 },
                 "duplicate": {
-                    "description": "DuplicateSpec represents the detail about loss action\n+optional",
+                    "description": "DuplicateSpec represents the detail about loss action\n+ui:form:when=action=='duplicate'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DuplicateSpec"
                 },
@@ -4046,7 +4054,7 @@ var doc = `{
                     }
                 },
                 "loss": {
-                    "description": "Loss represents the detail about loss action\n+optional",
+                    "description": "Loss represents the detail about loss action\n+ui:form:when=action=='loss'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.LossSpec"
                 },
@@ -4655,6 +4663,10 @@ var doc = `{
                     "description": "the process name or the process ID",
                     "type": "string"
                 },
+                "recoverCmd": {
+                    "description": "the command to be run when recovering experiment",
+                    "type": "string"
+                },
                 "signal": {
                     "description": "the signal number to send",
                     "type": "integer"
@@ -4803,6 +4815,48 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.StatusCheckSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration defines the duration of the whole status check if the\nnumber of failed execution does not exceed the failure threshold.\nDuration is available to both ` + "`" + `Synchronous` + "`" + ` and ` + "`" + `Continuous` + "`" + ` mode.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "failureThreshold": {
+                    "description": "FailureThreshold defines the minimum consecutive failure\nfor the status check to be considered failed.\n+optional\n+kubebuilder:default=3\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "http": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
+                },
+                "intervalSeconds": {
+                    "description": "IntervalSeconds defines how often (in seconds) to perform\nan execution of status check.\n+optional\n+kubebuilder:default=10\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the execution mode of the status check.\nSupport type: Synchronous / Continuous\n+optional\n+kubebuilder:validation:Enum=Synchronous;Continuous",
+                    "type": "string"
+                },
+                "recordsHistoryLimit": {
+                    "description": "RecordsHistoryLimit defines the number of record to retain.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:Minimum=1\n+kubebuilder:validation:Maximum=1000",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "SuccessThreshold defines the minimum consecutive successes\nfor the status check to be considered successful.\nSuccessThreshold only works for ` + "`" + `Synchronous` + "`" + ` mode.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "description": "TimeoutSeconds defines the number of seconds after which\nan execution of status check times out.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type defines the specific status check type.\nSupport type: HTTP\n+kubebuilder:default=HTTP\n+kubebuilder:validation:Enum=HTTP",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.StatusCheckTemplate": {
             "type": "object",
             "properties": {
@@ -4944,6 +4998,10 @@ var doc = `{
         "v1alpha1.Template": {
             "type": "object",
             "properties": {
+                "abortWithStatusCheck": {
+                    "description": "AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.\nOnly used when Type is TypeStatusCheck.\n+optional",
+                    "type": "boolean"
+                },
                 "awsChaos": {
                     "description": "+optional",
                     "type": "object",
@@ -5029,6 +5087,11 @@ var doc = `{
                     "description": "Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ChaosOnlyScheduleSpec"
+                },
+                "statusCheck": {
+                    "description": "StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckSpec"
                 },
                 "stressChaos": {
                     "description": "+optional",

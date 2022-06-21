@@ -14,23 +14,26 @@
  * limitations under the License.
  *
  */
+import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
-
+import api from 'api'
 import { ArchiveSingle } from 'api/archives.type'
 import { Event } from 'api/events.type'
-import EventsTimeline from 'components/EventsTimeline'
+import yaml from 'js-yaml'
+import { useCallback, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+
 import Loading from '@ui/mui-extends/esm/Loading'
-import ObjectConfiguration from 'components/ObjectConfiguration'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
-import api from 'api'
-import loadable from '@loadable/component'
-import { useParams } from 'react-router-dom'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import ObjectConfiguration from 'components/ObjectConfiguration'
+import i18n from 'components/T'
+
 import { useQuery } from 'lib/hooks'
-import yaml from 'js-yaml'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -94,7 +97,7 @@ const Single = () => {
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
       {single.data && (
         <Space display="flex" flexDirection="column" height="100%">
-          <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
+          <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
           <Box flex={1}>
             <YAMLEditor
               name={single.data.name}
@@ -112,6 +115,7 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
+          {single.data && <Helmet title={`Archive ${single.data.name}`} />}
           {kind !== 'workflow' ? (
             <Space spacing={6}>
               {single.kind === kind && single.data && (
@@ -123,7 +127,7 @@ const Single = () => {
               <Grid container>
                 <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                   <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                    <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                    <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                     <Box flex={1} overflow="scroll">
                       <EventsTimeline events={events} />
                     </Box>

@@ -145,6 +145,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	err = r.SetIPSets(ctx, pod, obj, pbClient)
 	if err != nil {
+		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Log.Error(err, "fail to set ipsets")
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set ipsets",
@@ -155,6 +156,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	err = r.SetIptables(ctx, pod, obj, pbClient)
 	if err != nil {
+		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Log.Error(err, "fail to set iptables")
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set iptables",
@@ -165,6 +167,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	err = r.SetTcs(ctx, pod, obj, pbClient)
 	if err != nil {
+		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set tc",
 			Err:      err.Error(),
@@ -179,9 +182,19 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 func (r *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos, chaosdaemonClient chaosdaemonclient.ChaosDaemonClientInterface) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
+		cidrAndPorts := []*pb.CidrAndPort{}
+		for _, cidrAndPort := range ipset.CidrAndPorts {
+			cidrAndPorts = append(cidrAndPorts, &pb.CidrAndPort{
+				Cidr: cidrAndPort.Cidr,
+				Port: uint32(cidrAndPort.Port),
+			})
+		}
 		ipsets = append(ipsets, &pb.IPSet{
-			Name:  ipset.Name,
-			Cidrs: ipset.Cidrs,
+			Name:         ipset.Name,
+			Type:         string(ipset.IPSetType),
+			Cidrs:        ipset.Cidrs,
+			CidrAndPorts: cidrAndPorts,
+			SetNames:     ipset.SetNames,
 		})
 	}
 	return ipset.FlushIPSets(ctx, chaosdaemonClient, pod, ipsets)

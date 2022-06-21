@@ -22,7 +22,7 @@ import { validateDeadline, validateName } from 'lib/formikhelpers'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import i18n from 'components/T'
 import { schemaBasic } from './types'
 import { useIntl } from 'react-intl'
 
@@ -51,7 +51,7 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
   return (
     <Paper>
       <Space>
-        <PaperTop title={T('newW.suspendTitle')} />
+        <PaperTop title={i18n('newW.suspendTitle')} />
         <Formik initialValues={initialValues || { name: '', deadline: '' }} onSubmit={onSubmit}>
           {({ errors, touched }) => (
             <Form>
@@ -59,17 +59,17 @@ const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
                 <TextField
                   fast
                   name="name"
-                  label={T('common.name')}
-                  validate={validateName(T('newW.node.nameValidation', intl))}
-                  helperText={errors.name && touched.name ? errors.name : T('newW.node.nameHelper')}
+                  label={i18n('common.name')}
+                  validate={validateName(i18n('newW.node.nameValidation', intl))}
+                  helperText={errors.name && touched.name ? errors.name : i18n('newW.node.nameHelper')}
                   error={errors.name && touched.name ? true : false}
                 />
                 <TextField
                   fast
                   name="deadline"
-                  label={T('newW.node.deadline')}
-                  validate={validateDeadline(T('newW.node.deadlineValidation', intl))}
-                  helperText={errors.deadline && touched.deadline ? errors.deadline : T('newW.node.deadlineHelper')}
+                  label={i18n('newW.node.deadline')}
+                  validate={validateDeadline(i18n('newW.node.deadlineValidation', intl))}
+                  helperText={errors.deadline && touched.deadline ? errors.deadline : i18n('newW.node.deadlineHelper')}
                   error={errors.deadline && touched.deadline ? true : false}
                 />
               </Space>

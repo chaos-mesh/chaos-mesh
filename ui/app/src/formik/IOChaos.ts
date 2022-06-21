@@ -132,7 +132,7 @@ export const actions = ['latency', 'fault', 'attrOverride', 'mistake'],
       label: 'delay',
       value: '',
       helperText:
-        'Optional. Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as \\"300ms\\". Valid time units are \\"ns\\", \\"us\\" (or \\"\u00B5s\\"), \\"ms\\", \\"s\\", \\"m\\", \\"h\\".',
+        'Optional. Delay defines the value of I/O chaos action delay. A delay string is a possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms". Valid time units are "ns", "us" (or "\u00B5s"), "ms", "s", "m", "h".',
       when: "action=='latency'",
     },
     {
@@ -157,7 +157,7 @@ export const actions = ['latency', 'fault', 'attrOverride', 'mistake'],
           field: 'text',
           label: 'filling',
           value: '',
-          helperText: 'Optional. Filling determines what is filled in the miskate data.',
+          helperText: 'Optional. Filling determines what is filled in the mistake data.',
         },
         {
           field: 'number',

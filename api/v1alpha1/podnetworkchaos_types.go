@@ -55,16 +55,48 @@ type PodNetworkChaosSpec struct {
 	TrafficControls []RawTrafficControl `json:"tcs,omitempty"`
 }
 
+// IPSetType represents the type of IP set
+type IPSetType string
+
+const (
+	SetIPSet     IPSetType = "list:set"
+	NetPortIPSet IPSetType = "hash:net,port"
+	NetIPSet     IPSetType = "hash:net"
+)
+
 // RawIPSet represents an ipset on specific pod
 type RawIPSet struct {
 	// The name of ipset
 	Name string `json:"name"`
 
-	// The contents of ipset
-	Cidrs []string `json:"cidrs"`
+	IPSetType IPSetType `json:"ipsetType"`
+
+	// The contents of ipset.
+	// Only available when IPSetType is NetIPSet.
+	// +optional
+	Cidrs []string `json:"cidrs,omitempty"`
+
+	// The contents of ipset.
+	// Only available when IPSetType is NetPortIPSet.
+	// +optional
+	CidrAndPorts []CidrAndPort `json:"cidrAndPorts,omitempty"`
+
+	// The contents of ipset.
+	// Only available when IPSetType is SetIPSet.
+	// +optional
+	SetNames []string `json:"setNames,omitempty"`
 
 	// The name and namespace of the source network chaos
 	RawRuleSource `json:",inline"`
+}
+
+// CidrAndPort represents CIDR and port pair
+type CidrAndPort struct {
+	Cidr string `json:"cidr"`
+
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	Port uint16 `json:"port"`
 }
 
 // ChainDirection represents the direction of chain
@@ -131,22 +163,27 @@ type RawTrafficControl struct {
 // TcParameter represents the parameters for a traffic control chaos
 type TcParameter struct {
 	// Delay represents the detail about delay action
+	// +ui:form:when=action=='delay'
 	// +optional
 	Delay *DelaySpec `json:"delay,omitempty"`
 
 	// Loss represents the detail about loss action
+	// +ui:form:when=action=='loss'
 	// +optional
 	Loss *LossSpec `json:"loss,omitempty"`
 
 	// DuplicateSpec represents the detail about loss action
+	// +ui:form:when=action=='duplicate'
 	// +optional
 	Duplicate *DuplicateSpec `json:"duplicate,omitempty"`
 
 	// Corrupt represents the detail about corrupt action
+	// +ui:form:when=action=='corrupt'
 	// +optional
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
 	// Bandwidth represents the detail about bandwidth control action
+	// +ui:form:when=action=='bandwidth'
 	// +optional
 	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 }

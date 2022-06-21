@@ -21,8 +21,8 @@ import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import Loading from '@ui/mui-extends/esm/Loading'
 import NotFound from 'components/NotFound'
-import T from 'components/T'
 import api from 'api'
+import i18n from 'components/T'
 
 export default function Events() {
   const [loading, setLoading] = useState(true)
@@ -52,7 +52,7 @@ export default function Events() {
 
       {!loading && events.length === 0 && (
         <NotFound illustrated textAlign="center">
-          <Typography>{T('events.notFound')}</Typography>
+          <Typography>{i18n('events.notFound')}</Typography>
         </NotFound>
       )}
 

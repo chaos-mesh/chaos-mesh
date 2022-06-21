@@ -64,7 +64,7 @@ spec:
                   type: string
                 type: array
               cpuCount:
-                description: the CPU core number need to use, only set it when action
+                description: the CPU core number needs to use, only set it when action
                   is stress
                 type: integer
               duration:
@@ -77,7 +77,7 @@ spec:
                 description: the latency duration for action 'latency', unit ms
                 type: integer
               memType:
-                description: the memory type need to locate, only set it when action
+                description: the memory type needs to locate, only set it when action
                   is stress, the value can be 'stack' or 'heap'
                 type: string
               method:
@@ -94,14 +94,18 @@ spec:
                 - random-max-percent
                 type: string
               name:
-                description: byteman rule name, should be unique, and will use JVMChaos'
-                  name if not set
+                description: byteman rule name, should be unique, and will generate
+                  one if not set
                 type: string
+              pid:
+                description: the pid of Java process which needs to attach
+                type: integer
               port:
                 description: the port of agent server, default 9277
                 format: int32
                 type: integer
               ruleData:
+                description: the byteman rule's data for action 'ruleData'
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -232,15 +236,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array

@@ -32,6 +32,18 @@ type Fd struct {
 	Target string `json:"target"`
 }
 
+type KillProcessResult struct {
+	Pid     string `json:"pid"`
+	Command string `json:"command"`
+}
+
+type MutablePod struct {
+	Pod           *v1.Pod              `json:"pod"`
+	KillProcesses []*KillProcessResult `json:"killProcesses"`
+	CleanTcs      []string             `json:"cleanTcs"`
+	CleanIptables []string             `json:"cleanIptables"`
+}
+
 type Namespace struct {
 	Ns              string                      `json:"ns"`
 	Component       []*v1.Pod                   `json:"component"`
@@ -43,6 +55,17 @@ type Namespace struct {
 	Podhttpchaos    []*v1alpha1.PodHttpChaos    `json:"podhttpchaos"`
 	Networkchaos    []*v1alpha1.NetworkChaos    `json:"networkchaos"`
 	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos"`
+}
+
+type PodSelectorInput struct {
+	Namespaces          []string               `json:"namespaces"`
+	Nodes               []string               `json:"nodes"`
+	Pods                map[string]interface{} `json:"pods"`
+	NodeSelectors       map[string]interface{} `json:"nodeSelectors"`
+	FieldSelectors      map[string]interface{} `json:"fieldSelectors"`
+	LabelSelectors      map[string]interface{} `json:"labelSelectors"`
+	AnnotationSelectors map[string]interface{} `json:"annotationSelectors"`
+	PodPhaseSelectors   []string               `json:"podPhaseSelectors"`
 }
 
 type PodStressChaos struct {

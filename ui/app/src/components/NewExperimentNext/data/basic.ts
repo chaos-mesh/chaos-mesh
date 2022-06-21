@@ -32,7 +32,7 @@ const data = {
       namespaces: [],
       labelSelectors: [],
       annotationSelectors: [],
-      podPhaseSelectors: ['all'],
+      podPhaseSelectors: [],
       pods: [],
     },
     mode: 'all',

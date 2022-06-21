@@ -1,0 +1,107 @@
+# Copyright 2022 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{{- $webhookApiVersion := include "webhook.apiVersion" . -}}
+{{- $caCert := include "webhook.caBundleCertPEM" . -}}
+{{- $crtPEM := include "webhook.certPEM" . -}}
+{{- $keyPEM := include "webhook.keyPEM" . -}}
+
+{{- $timeoutSeconds := .Values.webhook.timeoutSeconds }}
+{{- $supportTimeoutSeconds := false }}
+{{- if ge .Capabilities.KubeVersion.Minor "14" }}
+{{- $supportTimeoutSeconds = true }}
+{{- end }}
+{{- $certManagerEnabled := .Values.webhook.certManager.enabled }}
+
+apiVersion: {{ $webhookApiVersion }}
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ template "chaos-mesh.mutation" . }}
+  labels:
+    {{- include "chaos-mesh.labels" . | nindent 4 }}
+    app.kubernetes.io/component: admission-webhook
+  {{- if $certManagerEnabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
+  {{- end }}
+webhooks:
+  - name: {{ template "chaos-mesh.webhook" . }}
+    {{- if $supportTimeoutSeconds }}
+    timeoutSeconds: {{ $timeoutSeconds }}
+    {{- if eq $webhookApiVersion "admissionregistration.k8s.io/v1" }}
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    {{- end }}
+    {{- end }}
+    clientConfig:
+      {{- if $certManagerEnabled }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
+      {{- end }}
+      service:
+        name: {{ template "chaos-mesh.svc" . }}
+        namespace: {{ .Release.Namespace | quote }}
+        path: "/inject-v1-pod"
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        admission-webhook: enabled
+    failurePolicy: {{ .Values.webhook.FailurePolicy }}
+  {{- range $crd := .Values.webhook.CRDS }}
+  - clientConfig:
+      {{- if $certManagerEnabled }}
+      caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
+      {{- end }}
+      service:
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace | quote }}
+        path: /mutate-chaos-mesh-org-v1alpha1-{{ $crd }}
+    failurePolicy: {{ $.Values.webhook.FailurePolicy }}
+    name: m{{ $crd }}.kb.io
+    {{- if $supportTimeoutSeconds }}
+    timeoutSeconds: {{ $timeoutSeconds }}
+    {{- if eq $webhookApiVersion "admissionregistration.k8s.io/v1" }}
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    {{- end }}
+    {{- end }}
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          {{- if eq $crd "schedule" }}
+          - schedules
+          {{- else if eq $crd "workflow" }}
+          - workflows
+          {{- else if eq $crd "physicalmachine" }}
+          - physicalmachines
+          {{- else if eq $crd "statuscheck" }}
+          - statuschecks
+          {{- else }}
+          - {{ $crd }}
+          {{- end }}
+  {{- end }}
+---
