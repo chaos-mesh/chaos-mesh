@@ -27,3 +27,25 @@ keywords:
   - fault-injection
   - kubernetes
   - testing
+maintainers:
+  - name: cwen0
+    email: cwen@pingcap.com
+  - name: YangKeao
+    email: yangkeao@chunibyo.icu
+  - name: dcalvin
+    email: wenghao@pingcap.com
+  - name: yeya24
+    email: yb532204897@gmail.com
+  - name: Gallardot
+    email: tttick@gmail.com
+annotations:
+  # Use this annotation to indicate that this chart version contains security updates, boolean string.
+  artifacthub.io/containsSecurityUpdates: "false"
+  # Use this annotation to indicate that your chart represents an operator, boolean string.
+  artifacthub.io/operator: "true"
+  # Use this annotation to indicate the capabilities of the operator your chart provides. It must be one of the following options: basic install, seamless upgrades, full lifecycle, deep insights or auto pilot.
+  artifacthub.io/operatorCapabilities: "Seamless Upgrades"
+  # Use this annotation to indicate that this chart version is a pre-release.
+  artifacthub.io/prerelease: "true"
+  # Use this annotation to indicate the chart’s license, string.
+  artifacthub.io/license: "Apache-2.0"

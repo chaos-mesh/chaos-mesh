@@ -67,7 +67,7 @@ KUBECONTEXT=${KUBECONTEXT:-}
 IMAGE_REGISTRY_PREFIX=${IMAGE_REGISTRY_PREFIX:-ghcr.io}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 SKIP_IMAGE_BUILD=${SKIP_IMAGE_BUILD:-}
-NAMESPACE=${NAMESPACE:-chaos-testing}
+NAMESPACE=${NAMESPACE:-chaos-mesh}
 
 hack::ensure_kubectl
 hack::ensure_kind

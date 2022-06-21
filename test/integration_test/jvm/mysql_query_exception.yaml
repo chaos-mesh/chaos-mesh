@@ -1,4 +1,4 @@
-# Copyright 2021 Chaos Mesh Authors.
+# Copyright 2022 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: chaos-mesh.org/v1alpha1
-kind: AWSChaos
+kind: JVMChaos
 metadata:
-  name: aws-ec2-stop
-  namespace: chaos-mesh
+  name: exception
+  namespace: mysql
 spec:
-  action: ec2-stop
-  secretName: "cloud-key-secret"
-  awsRegion: "us-east-1"
-  ec2Instance: "i-c849713a387c4feb7"
-  endpoint: "http://192.168.39.13:31566"
-  duration: "5s"
+  action: mysql
+  mysqlConnectorVersion: '8'
+  database: mysql
+  table: user
+  exception: BOOM
+  mode: all
+  selector:
+    labelSelectors:
+      'app': 'mysql-query'

@@ -89,7 +89,7 @@ func main() {
 			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLConfig) {
 				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
-			store.NewDBStore,
+			store.Bootstrap,
 			collector.Bootstrap,
 			ttlcontroller.Bootstrap,
 		),

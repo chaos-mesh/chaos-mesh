@@ -14,16 +14,14 @@
  * limitations under the License.
  *
  */
-import type { AutoFormProps } from 'components/AutoForm'
+import { render } from 'test-utils'
 
-export enum ElementTypes {
-  Kubernetes = 'Kubernetes',
-  PhysicalNodes = 'PhysicalNodes',
-  Suspend = 'Suspend',
-}
+import BareNode from './BareNode'
 
-export type ElementDragData = Omit<AutoFormProps, 'formikProps'>
+describe('<BareNode />', () => {
+  it('renders correctly', () => {
+    const { container } = render(<BareNode kind="PodChaos" />)
 
-export interface ElementsProps {
-  onElementClick: (kind: ElementDragData['kind'], act: ElementDragData['act']) => void
-}
+    expect(container).toMatchSnapshot()
+  })
+})

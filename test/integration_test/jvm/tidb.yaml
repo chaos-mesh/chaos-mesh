@@ -1,4 +1,4 @@
-# Copyright 2021 Chaos Mesh Authors.
+# Copyright 2022 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +16,38 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: helloworld
+  name: mysql
 ---
 apiVersion: v1
-kind: Pod
+kind: Service
 metadata:
-  name: helloworld
-  namespace: helloworld
+  name: tidb
+  namespace: mysql
 spec:
-  containers:
-    - name: helloworld
-      image: xiang13225080/helloworld:v1.0
-      imagePullPolicy: IfNotPresent
+  type: NodePort
+  ports:
+  - port: 4000
+    targetPort: 4000
+    nodePort: 30400
+  selector:
+    app: tidb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tidb
+  namespace: mysql
+spec:
+  selector:
+    matchLabels:
+      app: tidb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tidb
+    spec:
+      containers:
+      - image: pingcap/tidb:v6.0.0
+        name: tidb
