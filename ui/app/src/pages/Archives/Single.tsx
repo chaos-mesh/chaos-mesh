@@ -18,7 +18,7 @@ import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import api from 'api'
 import yaml from 'js-yaml'
-import { CoreEvent, PkgDashboardApiserverArchiveDetail } from 'openapi'
+import { CoreEvent, TypesArchiveDetail } from 'openapi'
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -42,7 +42,7 @@ const Single = () => {
   let kind = query.get('kind') || 'experiment'
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<{ kind: string; data: PkgDashboardApiserverArchiveDetail | null }>({
+  const [single, setSingle] = useState<{ kind: string; data: TypesArchiveDetail | null }>({
     kind,
     data: null,
   })

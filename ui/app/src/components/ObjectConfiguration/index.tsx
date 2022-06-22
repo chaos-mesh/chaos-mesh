@@ -14,19 +14,22 @@
  * limitations under the License.
  *
  */
-
-import { Experiment, Selector, TableCell } from './common'
 import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'
-import { PkgDashboardApiserverArchiveDetail, PkgDashboardApiserverExperimentDetail } from 'openapi'
+import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+import { TypesArchiveDetail, TypesExperimentDetail } from 'openapi'
 
 import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from 'components/StatusLabel'
-import { format } from 'lib/luxon'
-import i18n from 'components/T'
-import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+
 import { useStoreSelector } from 'store'
 
-type Config = PkgDashboardApiserverExperimentDetail | PkgDashboardApiserverArchiveDetail
+import StatusLabel from 'components/StatusLabel'
+import i18n from 'components/T'
+
+import { format } from 'lib/luxon'
+
+import { Experiment, Selector, TableCell } from './common'
+
+type Config = TypesExperimentDetail | TypesArchiveDetail
 
 interface ObjectConfigurationProps {
   config: Config

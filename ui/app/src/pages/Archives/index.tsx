@@ -24,7 +24,7 @@ import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
 import Tab from '@mui/material/Tab'
 import api from 'api'
 import _ from 'lodash'
-import { PkgDashboardApiserverArchiveArchive } from 'openapi'
+import { TypesArchive } from 'openapi'
 import { useCallback, useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -65,7 +65,7 @@ export default function Archives() {
 
   const [panel, setPanel] = useState<PanelType>(kind as PanelType)
   const [loading, setLoading] = useState(true)
-  const [archives, setArchives] = useState<PkgDashboardApiserverArchiveArchive[]>([])
+  const [archives, setArchives] = useState<TypesArchive[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0

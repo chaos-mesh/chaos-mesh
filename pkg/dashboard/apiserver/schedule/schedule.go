@@ -35,6 +35,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
@@ -78,26 +79,13 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.PUT("/start/:uid", s.startSchedule)
 }
 
-// Schedule defines the information of a schedule.
-type Schedule struct {
-	core.ObjectBase
-	Status status.ScheduleStatus `json:"status"`
-}
-
-// Detail adds KubeObjectDesc on Schedule.
-type Detail struct {
-	Schedule
-	ExperimentUIDs []string            `json:"experiment_uids"`
-	KubeObject     core.KubeObjectDesc `json:"kube_object"`
-}
-
 // @Summary List chaos schedules.
 // @Description Get chaos schedules from k8s cluster in real time.
 // @Tags schedules
 // @Produce json
 // @Param namespace query string false "filter schedules by namespace"
 // @Param name query string false "filter schedules by name"
-// @Success 200 {array} Schedule
+// @Success 200 {array} apiservertypes.Schedule
 // @Failure 400 {object} u.APIError
 // @Failure 500 {object} u.APIError
 // @Router /schedules [get]
@@ -124,13 +112,13 @@ func (s *Service) list(c *gin.Context) {
 		return
 	}
 
-	sches := make([]*Schedule, 0)
+	sches := make([]*apiservertypes.Schedule, 0)
 	for _, schedule := range ScheduleList.Items {
 		if name != "" && schedule.Name != name {
 			continue
 		}
 
-		sches = append(sches, &Schedule{
+		sches = append(sches, &apiservertypes.Schedule{
 			ObjectBase: core.ObjectBase{
 				Namespace: schedule.Namespace,
 				Name:      schedule.Name,
@@ -186,7 +174,7 @@ func (s *Service) create(c *gin.Context) {
 // @Tags schedules
 // @Produce json
 // @Param uid path string true "the schedule uid"
-// @Success 200 {object} Detail
+// @Success 200 {object} apiservertypes.ScheduleDetail
 // @Failure 400 {object} u.APIError
 // @Failure 404 {object} u.APIError
 // @Failure 500 {object} u.APIError
@@ -194,7 +182,7 @@ func (s *Service) create(c *gin.Context) {
 func (s *Service) get(c *gin.Context) {
 	var (
 		sch       *core.Schedule
-		schDetail *Detail
+		schDetail *apiservertypes.ScheduleDetail
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -224,7 +212,7 @@ func (s *Service) get(c *gin.Context) {
 	c.JSON(http.StatusOK, schDetail)
 }
 
-func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) *Detail {
+func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName) *apiservertypes.ScheduleDetail {
 	var sch v1alpha1.Schedule
 
 	if err := kubeCli.Get(context.Background(), namespacedName, &sch); err != nil {
@@ -274,8 +262,8 @@ func (s *Service) findScheduleInCluster(c *gin.Context, kubeCli client.Client, n
 		UIDList = append(UIDList, string(item.GetUID()))
 	}
 
-	return &Detail{
-		Schedule: Schedule{
+	return &apiservertypes.ScheduleDetail{
+		Schedule: apiservertypes.Schedule{
 			ObjectBase: core.ObjectBase{
 				Namespace: sch.Namespace,
 				Name:      sch.Name,

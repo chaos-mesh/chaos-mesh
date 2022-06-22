@@ -23,12 +23,7 @@ import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { TourProvider } from '@reactour/tour'
 import api from 'api'
-import {
-  CoreEvent,
-  CoreWorkflowMeta,
-  PkgDashboardApiserverExperimentExperiment,
-  PkgDashboardApiserverScheduleSchedule,
-} from 'openapi'
+import { CoreEvent, CoreWorkflowMeta, TypesExperiment, TypesSchedule } from 'openapi'
 import { useEffect, useState } from 'react'
 import type { ReactChild } from 'react'
 
@@ -60,8 +55,8 @@ const NumPanel: React.FC<{ title: ReactChild; num: number; background: ReactChil
 export default function Dashboard() {
   const [data, setData] = useState<{
     workflows: CoreWorkflowMeta[]
-    schedules: PkgDashboardApiserverScheduleSchedule[]
-    experiments: PkgDashboardApiserverExperimentExperiment[]
+    schedules: TypesSchedule[]
+    experiments: TypesExperiment[]
     events: CoreEvent[]
   }>({
     workflows: [],

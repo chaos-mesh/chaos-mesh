@@ -67,7 +67,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive"
+                                "$ref": "#/definitions/types.Archive"
                             }
                         }
                     },
@@ -143,7 +143,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive"
+                                "$ref": "#/definitions/types.Archive"
                             }
                         }
                     },
@@ -212,7 +212,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail"
+                            "$ref": "#/definitions/types.ArchiveDetail"
                         }
                     },
                     "500": {
@@ -287,7 +287,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive"
+                                "$ref": "#/definitions/types.Archive"
                             }
                         }
                     },
@@ -356,7 +356,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail"
+                            "$ref": "#/definitions/types.ArchiveDetail"
                         }
                     },
                     "500": {
@@ -424,7 +424,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail"
+                            "$ref": "#/definitions/types.ArchiveDetail"
                         }
                     },
                     "404": {
@@ -498,7 +498,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/utils.MapStringSliceResponse"
                         }
                     },
                     "500": {
@@ -617,7 +617,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/utils.MapStringSliceResponse"
                         }
                     },
                     "500": {
@@ -682,7 +682,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/utils.MapStringSliceResponse"
                         }
                     },
                     "500": {
@@ -717,7 +717,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice"
+                            "$ref": "#/definitions/utils.MapStringSliceResponse"
                         }
                     },
                     "500": {
@@ -756,7 +756,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine"
+                                "$ref": "#/definitions/types.PhysicalMachine"
                             }
                         }
                     },
@@ -796,7 +796,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod"
+                                "$ref": "#/definitions/types.Pod"
                             }
                         }
                     },
@@ -1088,7 +1088,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Experiment"
+                                "$ref": "#/definitions/types.Experiment"
                             }
                         }
                     },
@@ -1365,7 +1365,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Detail"
+                            "$ref": "#/definitions/types.ExperimentDetail"
                         }
                     },
                     "400": {
@@ -1474,7 +1474,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Schedule"
+                                "$ref": "#/definitions/types.Schedule"
                             }
                         }
                     },
@@ -1699,7 +1699,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Detail"
+                            "$ref": "#/definitions/types.ScheduleDetail"
                         }
                     },
                     "400": {
@@ -1798,7 +1798,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateBase"
+                                "$ref": "#/definitions/types.StatusCheckTemplateBase"
                             }
                         }
                     },
@@ -1835,7 +1835,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
+                            "$ref": "#/definitions/types.StatusCheckTemplate"
                         }
                     }
                 ],
@@ -1843,7 +1843,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
+                            "$ref": "#/definitions/types.StatusCheckTemplate"
                         }
                     },
                     "400": {
@@ -1891,7 +1891,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateDetail"
+                            "$ref": "#/definitions/types.StatusCheckTemplateDetail"
                         }
                     },
                     "400": {
@@ -1930,7 +1930,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
+                            "$ref": "#/definitions/types.StatusCheckTemplate"
                         }
                     }
                 ],
@@ -1938,7 +1938,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate"
+                            "$ref": "#/definitions/types.StatusCheckTemplate"
                         }
                     },
                     "400": {
@@ -2337,7 +2337,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse"
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "400": {
@@ -2668,267 +2668,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "kube_object": {
-                    "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod": {
-            "type": "object",
-            "properties": {
-                "ip": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Detail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "failed_message": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "kube_object": {
-                    "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Experiment": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "failed_message": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Detail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "experiment_uids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "kube_object": {
-                    "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Schedule": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplate": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "spec": {
-                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateBase": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateDetail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "spec": {
-                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
         "http.Header": {
             "type": "object",
             "additionalProperties": {
@@ -2949,267 +2688,6 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "integer"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_archive.Archive": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_archive.Detail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "kube_object": {
-                    "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_common.MapSlice": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_common.PhysicalMachine": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_common.Pod": {
-            "type": "object",
-            "properties": {
-                "ip": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_experiment.Detail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "failed_message": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "kube_object": {
-                    "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_experiment.Experiment": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "failed_message": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_schedule.Detail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "experiment_uids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "kube_object": {
-                    "$ref": "#/definitions/core.KubeObjectDesc"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_schedule.Schedule": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "kind": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_template.StatusCheckTemplate": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "spec": {
-                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_template.StatusCheckTemplateBase": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_template.StatusCheckTemplateDetail": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "namespace": {
-                    "type": "string"
-                },
-                "spec": {
-                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
-                },
-                "uid": {
-                    "type": "string"
-                }
-            }
-        },
-        "pkg_dashboard_apiserver_workflow.StatusResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "string"
                 }
             }
         },
@@ -3241,6 +2719,250 @@ const docTemplate = `{
                 }
             }
         },
+        "types.Archive": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ArchiveDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "kube_object": {
+                    "$ref": "#/definitions/core.KubeObjectDesc"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Experiment": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "failed_message": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ExperimentDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "failed_message": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "kube_object": {
+                    "$ref": "#/definitions/core.KubeObjectDesc"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.PhysicalMachine": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Pod": {
+            "type": "object",
+            "properties": {
+                "ip": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.Schedule": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ScheduleDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "experiment_uids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "kube_object": {
+                    "$ref": "#/definitions/core.KubeObjectDesc"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                }
+            }
+        },
+        "types.StatusCheckTemplateBase": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.StatusCheckTemplateDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
         "utils.APIError": {
             "type": "object",
             "properties": {
@@ -3254,6 +2976,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "utils.MapStringSliceResponse": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
                     "type": "string"
                 }
             }
@@ -7482,7 +7213,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "2.0",
+	Version:          "2.2",
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},

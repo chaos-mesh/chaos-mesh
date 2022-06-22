@@ -22,7 +22,7 @@ import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
 import api from 'api'
 import _ from 'lodash'
-import { PkgDashboardApiserverExperimentExperiment } from 'openapi'
+import { TypesExperiment } from 'openapi'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -58,7 +58,7 @@ export default function Experiments() {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [experiments, setExperiments] = useState<PkgDashboardApiserverExperimentExperiment[]>([])
+  const [experiments, setExperiments] = useState<TypesExperiment[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0

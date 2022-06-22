@@ -20,11 +20,7 @@ import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, IconButton, Typography } from '@mui/material'
 import _ from 'lodash'
-import {
-  PkgDashboardApiserverArchiveArchive,
-  PkgDashboardApiserverExperimentExperiment,
-  PkgDashboardApiserverScheduleSchedule,
-} from 'openapi'
+import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
@@ -41,10 +37,7 @@ import DateTime, { format } from 'lib/luxon'
 interface ObjectListItemProps {
   type?: 'schedule' | 'experiment' | 'archive'
   archive?: 'workflow' | 'schedule' | 'experiment'
-  data:
-    | PkgDashboardApiserverScheduleSchedule
-    | PkgDashboardApiserverExperimentExperiment
-    | PkgDashboardApiserverArchiveArchive
+  data: TypesSchedule | TypesExperiment | TypesArchive
   onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
 }
 

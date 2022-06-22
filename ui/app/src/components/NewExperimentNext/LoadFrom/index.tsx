@@ -14,25 +14,25 @@
  * limitations under the License.
  *
  */
-
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
-import {
-  PkgDashboardApiserverArchiveArchive,
-  PkgDashboardApiserverExperimentExperiment,
-  PkgDashboardApiserverScheduleSchedule,
-} from 'openapi'
-import { PreDefinedValue, getDB } from 'lib/idb'
+import api from 'api'
+import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
 
 import Paper from '@ui/mui-extends/esm/Paper'
-import RadioLabel from './RadioLabel'
 import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
 import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
-import i18n from 'components/T'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
+
 import { useStoreDispatch } from 'store'
+
+import { setAlert } from 'slices/globalStatus'
+
+import i18n from 'components/T'
+
+import { PreDefinedValue, getDB } from 'lib/idb'
+
+import RadioLabel from './RadioLabel'
 
 interface LoadFromProps {
   callback?: (data: any) => void
@@ -47,9 +47,9 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<{
-    experiments: PkgDashboardApiserverExperimentExperiment[]
-    archives: PkgDashboardApiserverArchiveArchive[]
-    schedules: PkgDashboardApiserverScheduleSchedule[]
+    experiments: TypesExperiment[]
+    archives: TypesArchive[]
+    schedules: TypesSchedule[]
   }>({
     experiments: [],
     archives: [],

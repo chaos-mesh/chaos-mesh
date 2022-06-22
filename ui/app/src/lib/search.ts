@@ -14,21 +14,15 @@
  * limitations under the License.
  *
  */
-
-import {
-  CoreWorkflowMeta,
-  PkgDashboardApiserverArchiveArchive,
-  PkgDashboardApiserverExperimentExperiment,
-  PkgDashboardApiserverScheduleSchedule,
-} from 'openapi'
+import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 
 type Keyword = 'namespace' | 'ns' | 'kind'
 
 interface SearchData {
   workflows: CoreWorkflowMeta[]
-  schedules: PkgDashboardApiserverScheduleSchedule[]
-  experiments: PkgDashboardApiserverExperimentExperiment[]
-  archives: PkgDashboardApiserverArchiveArchive[]
+  schedules: TypesSchedule[]
+  experiments: TypesExperiment[]
+  archives: TypesArchive[]
 }
 
 interface KeywordToken {

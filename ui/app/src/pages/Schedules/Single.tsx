@@ -21,7 +21,7 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, Button, Grid, Grow } from '@mui/material'
 import api from 'api'
 import yaml from 'js-yaml'
-import { CoreEvent, PkgDashboardApiserverScheduleDetail } from 'openapi'
+import { CoreEvent, TypesScheduleDetail } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -51,7 +51,7 @@ const Single = () => {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<PkgDashboardApiserverScheduleDetail>()
+  const [single, setSingle] = useState<TypesScheduleDetail>()
   const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchSchedule = () => {

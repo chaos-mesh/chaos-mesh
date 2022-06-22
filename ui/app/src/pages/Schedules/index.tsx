@@ -23,7 +23,7 @@ import { Box, Button, Checkbox, styled } from '@mui/material'
 import { Typography } from '@mui/material'
 import api from 'api'
 import _ from 'lodash'
-import { PkgDashboardApiserverScheduleSchedule } from 'openapi'
+import { TypesSchedule } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -58,7 +58,7 @@ const Schedules = () => {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [schedules, setSchedules] = useState<PkgDashboardApiserverScheduleSchedule[]>([])
+  const [schedules, setSchedules] = useState<TypesSchedule[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0

@@ -226,176 +226,6 @@ definitions:
       url:
         type: string
     type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      kube_object:
-        $ref: '#/definitions/core.KubeObjectDesc'
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine:
-    properties:
-      address:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod:
-    properties:
-      ip:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      state:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Detail:
-    properties:
-      created_at:
-        type: string
-      failed_message:
-        type: string
-      kind:
-        type: string
-      kube_object:
-        $ref: '#/definitions/core.KubeObjectDesc'
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Experiment:
-    properties:
-      created_at:
-        type: string
-      failed_message:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Detail:
-    properties:
-      created_at:
-        type: string
-      experiment_uids:
-        items:
-          type: string
-        type: array
-      kind:
-        type: string
-      kube_object:
-        $ref: '#/definitions/core.KubeObjectDesc'
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Schedule:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplate:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      spec:
-        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateBase:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_template.StatusCheckTemplateDetail:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      spec:
-        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
-      uid:
-        type: string
-    type: object
-  github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse:
-    properties:
-      status:
-        type: string
-    type: object
   http.Header:
     additionalProperties:
       items:
@@ -410,176 +240,6 @@ definitions:
         type: string
       type:
         type: integer
-    type: object
-  pkg_dashboard_apiserver_archive.Archive:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_archive.Detail:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      kube_object:
-        $ref: '#/definitions/core.KubeObjectDesc'
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_common.MapSlice:
-    additionalProperties:
-      items:
-        type: string
-      type: array
-    type: object
-  pkg_dashboard_apiserver_common.PhysicalMachine:
-    properties:
-      address:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_common.Pod:
-    properties:
-      ip:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      state:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_experiment.Detail:
-    properties:
-      created_at:
-        type: string
-      failed_message:
-        type: string
-      kind:
-        type: string
-      kube_object:
-        $ref: '#/definitions/core.KubeObjectDesc'
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_experiment.Experiment:
-    properties:
-      created_at:
-        type: string
-      failed_message:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_schedule.Detail:
-    properties:
-      created_at:
-        type: string
-      experiment_uids:
-        items:
-          type: string
-        type: array
-      kind:
-        type: string
-      kube_object:
-        $ref: '#/definitions/core.KubeObjectDesc'
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_schedule.Schedule:
-    properties:
-      created_at:
-        type: string
-      kind:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      status:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_template.StatusCheckTemplate:
-    properties:
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      spec:
-        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
-    type: object
-  pkg_dashboard_apiserver_template.StatusCheckTemplateBase:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_template.StatusCheckTemplateDetail:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      name:
-        type: string
-      namespace:
-        type: string
-      spec:
-        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
-      uid:
-        type: string
-    type: object
-  pkg_dashboard_apiserver_workflow.StatusResponse:
-    properties:
-      status:
-        type: string
     type: object
   resource.Quantity:
     properties:
@@ -599,6 +259,165 @@ definitions:
       running:
         type: integer
     type: object
+  types.Archive:
+    properties:
+      created_at:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.ArchiveDetail:
+    properties:
+      created_at:
+        type: string
+      kind:
+        type: string
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.Experiment:
+    properties:
+      created_at:
+        type: string
+      failed_message:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.ExperimentDetail:
+    properties:
+      created_at:
+        type: string
+      failed_message:
+        type: string
+      kind:
+        type: string
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.PhysicalMachine:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+    type: object
+  types.Pod:
+    properties:
+      ip:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      state:
+        type: string
+    type: object
+  types.Schedule:
+    properties:
+      created_at:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.ScheduleDetail:
+    properties:
+      created_at:
+        type: string
+      experiment_uids:
+        items:
+          type: string
+        type: array
+      kind:
+        type: string
+      kube_object:
+        $ref: '#/definitions/core.KubeObjectDesc'
+      name:
+        type: string
+      namespace:
+        type: string
+      status:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.StatusCheckTemplate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+    type: object
+  types.StatusCheckTemplateBase:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      uid:
+        type: string
+    type: object
+  types.StatusCheckTemplateDetail:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      spec:
+        $ref: '#/definitions/v1alpha1.StatusCheckTemplate'
+      uid:
+        type: string
+    type: object
   utils.APIError:
     properties:
       code:
@@ -609,6 +428,12 @@ definitions:
         type: string
       type:
         type: string
+    type: object
+  utils.MapStringSliceResponse:
+    additionalProperties:
+      items:
+        type: string
+      type: array
     type: object
   utils.Response:
     properties:
@@ -5988,7 +5813,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Chaos Mesh Dashboard API
-  version: "2.0"
+  version: "2.2"
 paths:
   /archives:
     delete:
@@ -6042,7 +5867,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive'
+              $ref: '#/definitions/types.Archive'
             type: array
         "500":
           description: Internal Server Error
@@ -6088,7 +5913,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail'
+            $ref: '#/definitions/types.ArchiveDetail'
         "404":
           description: Not Found
           schema:
@@ -6141,7 +5966,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive'
+              $ref: '#/definitions/types.Archive'
             type: array
         "500":
           description: Internal Server Error
@@ -6187,7 +6012,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail'
+            $ref: '#/definitions/types.ArchiveDetail'
         "500":
           description: Internal Server Error
           schema:
@@ -6236,7 +6061,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Archive'
+              $ref: '#/definitions/types.Archive'
             type: array
         "500":
           description: Internal Server Error
@@ -6282,7 +6107,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_archive.Detail'
+            $ref: '#/definitions/types.ArchiveDetail'
         "500":
           description: Internal Server Error
           schema:
@@ -6306,7 +6131,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/utils.MapStringSliceResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -6388,7 +6213,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/utils.MapStringSliceResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -6433,7 +6258,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/utils.MapStringSliceResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -6458,7 +6283,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.MapSlice'
+            $ref: '#/definitions/utils.MapStringSliceResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -6484,7 +6309,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.PhysicalMachine'
+              $ref: '#/definitions/types.PhysicalMachine'
             type: array
         "500":
           description: Internal Server Error
@@ -6510,7 +6335,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_common.Pod'
+              $ref: '#/definitions/types.Pod'
             type: array
         "500":
           description: Internal Server Error
@@ -6747,7 +6572,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Experiment'
+              $ref: '#/definitions/types.Experiment'
             type: array
         "400":
           description: Bad Request
@@ -6844,7 +6669,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_experiment.Detail'
+            $ref: '#/definitions/types.ExperimentDetail'
         "400":
           description: Bad Request
           schema:
@@ -6997,7 +6822,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Schedule'
+              $ref: '#/definitions/types.Schedule'
             type: array
         "400":
           description: Bad Request
@@ -7085,7 +6910,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_schedule.Detail'
+            $ref: '#/definitions/types.ScheduleDetail'
         "400":
           description: Bad Request
           schema:
@@ -7182,7 +7007,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateBase'
+              $ref: '#/definitions/types.StatusCheckTemplateBase'
             type: array
         "400":
           description: Bad Request
@@ -7205,14 +7030,14 @@ paths:
         name: statuscheck
         required: true
         schema:
-          $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
+          $ref: '#/definitions/types.StatusCheckTemplate'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
+            $ref: '#/definitions/types.StatusCheckTemplate'
         "400":
           description: Bad Request
           schema:
@@ -7279,7 +7104,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplateDetail'
+            $ref: '#/definitions/types.StatusCheckTemplateDetail'
         "400":
           description: Bad Request
           schema:
@@ -7303,14 +7128,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
+          $ref: '#/definitions/types.StatusCheckTemplate'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pkg_dashboard_apiserver_template.StatusCheckTemplate'
+            $ref: '#/definitions/types.StatusCheckTemplate'
         "400":
           description: Bad Request
           schema:
@@ -7397,7 +7222,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github.com_chaos-mesh_chaos-mesh_pkg_dashboard_apiserver_workflow.StatusResponse'
+            $ref: '#/definitions/utils.Response'
         "400":
           description: Bad Request
           schema:

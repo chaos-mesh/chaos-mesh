@@ -22,7 +22,7 @@ import Alert from '@mui/lab/Alert'
 import { Box, Button, Grid, Grow } from '@mui/material'
 import api from 'api'
 import yaml from 'js-yaml'
-import { CoreEvent, PkgDashboardApiserverExperimentDetail } from 'openapi'
+import { CoreEvent, TypesExperimentDetail } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -52,7 +52,7 @@ export default function Single() {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<PkgDashboardApiserverExperimentDetail>()
+  const [single, setSingle] = useState<TypesExperimentDetail>()
   const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchExperiment = () => {

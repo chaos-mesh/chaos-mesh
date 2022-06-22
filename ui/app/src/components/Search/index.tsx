@@ -31,12 +31,7 @@ import {
 import { makeStyles } from '@mui/styles'
 import api from 'api'
 import _ from 'lodash'
-import {
-  CoreWorkflowMeta,
-  PkgDashboardApiserverArchiveArchive,
-  PkgDashboardApiserverExperimentExperiment,
-  PkgDashboardApiserverScheduleSchedule,
-} from 'openapi'
+import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -69,11 +64,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-type OptionCategory =
-  | CoreWorkflowMeta
-  | PkgDashboardApiserverScheduleSchedule
-  | PkgDashboardApiserverExperimentExperiment
-  | PkgDashboardApiserverArchiveArchive
+type OptionCategory = CoreWorkflowMeta | TypesSchedule | TypesExperiment | TypesArchive
 type Option = OptionCategory & { is?: string }
 
 const Search: React.FC = () => {
