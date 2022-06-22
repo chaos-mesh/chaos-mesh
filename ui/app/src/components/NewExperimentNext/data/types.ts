@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
@@ -916,6 +915,7 @@ const data: Record<Kind, Definition> = {
       },
     ],
   },
+  DiskChaos: {},
 }
 
 const networkPhysicCommon: Spec = {

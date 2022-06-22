@@ -17,27 +17,30 @@
 
 package v1alpha1
 
+
 import (
 	"github.com/pkg/errors"
 )
 
+
 const (
-	ScheduleTypeAWSChaos             ScheduleTemplateType = "AWSChaos"
-	ScheduleTypeAzureChaos           ScheduleTemplateType = "AzureChaos"
-	ScheduleTypeBlockChaos           ScheduleTemplateType = "BlockChaos"
-	ScheduleTypeDiskChaos            ScheduleTemplateType = "DiskChaos"
-	ScheduleTypeDNSChaos             ScheduleTemplateType = "DNSChaos"
-	ScheduleTypeGCPChaos             ScheduleTemplateType = "GCPChaos"
-	ScheduleTypeHTTPChaos            ScheduleTemplateType = "HTTPChaos"
-	ScheduleTypeIOChaos              ScheduleTemplateType = "IOChaos"
-	ScheduleTypeJVMChaos             ScheduleTemplateType = "JVMChaos"
-	ScheduleTypeKernelChaos          ScheduleTemplateType = "KernelChaos"
-	ScheduleTypeNetworkChaos         ScheduleTemplateType = "NetworkChaos"
+	ScheduleTypeAWSChaos ScheduleTemplateType = "AWSChaos"
+	ScheduleTypeAzureChaos ScheduleTemplateType = "AzureChaos"
+	ScheduleTypeBlockChaos ScheduleTemplateType = "BlockChaos"
+	ScheduleTypeDiskChaos ScheduleTemplateType = "DiskChaos"
+	ScheduleTypeDNSChaos ScheduleTemplateType = "DNSChaos"
+	ScheduleTypeGCPChaos ScheduleTemplateType = "GCPChaos"
+	ScheduleTypeHTTPChaos ScheduleTemplateType = "HTTPChaos"
+	ScheduleTypeIOChaos ScheduleTemplateType = "IOChaos"
+	ScheduleTypeJVMChaos ScheduleTemplateType = "JVMChaos"
+	ScheduleTypeKernelChaos ScheduleTemplateType = "KernelChaos"
+	ScheduleTypeNetworkChaos ScheduleTemplateType = "NetworkChaos"
 	ScheduleTypePhysicalMachineChaos ScheduleTemplateType = "PhysicalMachineChaos"
-	ScheduleTypePodChaos             ScheduleTemplateType = "PodChaos"
-	ScheduleTypeStressChaos          ScheduleTemplateType = "StressChaos"
-	ScheduleTypeTimeChaos            ScheduleTemplateType = "TimeChaos"
-	ScheduleTypeWorkflow             ScheduleTemplateType = "Workflow"
+	ScheduleTypePodChaos ScheduleTemplateType = "PodChaos"
+	ScheduleTypeStressChaos ScheduleTemplateType = "StressChaos"
+	ScheduleTypeTimeChaos ScheduleTemplateType = "TimeChaos"
+	ScheduleTypeWorkflow ScheduleTemplateType = "Workflow"
+
 )
 
 var allScheduleTemplateType = []ScheduleTemplateType{
@@ -57,6 +60,7 @@ var allScheduleTemplateType = []ScheduleTemplateType{
 	ScheduleTypeStressChaos,
 	ScheduleTypeTimeChaos,
 	ScheduleTypeWorkflow,
+
 }
 
 func (it *ScheduleItem) SpawnNewObject(templateType ScheduleTemplateType) (GenericChaos, error) {
