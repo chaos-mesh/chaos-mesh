@@ -51,11 +51,11 @@ func main() {
 			newSource: `package test
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha2"
+	chaosmeshapiv1alpha2 "github.com/chaos-mesh/chaos-mesh/api/v1alpha2"
 )
 
 func main() {
-	v1alpha2.CallTestFunc("test")
+	chaosmeshapiv1alpha2.CallTestFunc("test")
 }
 `,
 			from: "v1alpha1",
@@ -101,18 +101,18 @@ func main() {
 			newSource: `package test
 
 import (
-	v1alpha2 "github.com/chaos-mesh/chaos-mesh/api/v1alpha2"
+	chaosmeshapiv1alpha2 "github.com/chaos-mesh/chaos-mesh/api/v1alpha2"
 )
 
 func main() {
-	v1alpha2.CallTestFunc("test")
+	chaosmeshapiv1alpha2.CallTestFunc("test")
 }
 `,
 			from: "v1alpha1",
 			to:   "v1alpha2",
 		},
 		{
-			name: "should-not-migrate-with-unknown-alias",
+			name: "should-migrate-with-unknown-alias",
 			originalSource: `package test
 
 import (
@@ -126,11 +126,11 @@ func main() {
 			newSource: `package test
 
 import (
-	test "github.com/chaos-mesh/chaos-mesh/api/v1alpha2"
+	chaosmeshapiv1alpha2 "github.com/chaos-mesh/chaos-mesh/api/v1alpha2"
 )
 
 func main() {
-	test.CallTestFunc("test")
+	chaosmeshapiv1alpha2.CallTestFunc("test")
 }
 `,
 			from: "v1alpha1",
