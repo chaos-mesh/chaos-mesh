@@ -87,6 +87,7 @@ func (in *AWSChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // AWSChaosList contains a list of AWSChaos
 type AWSChaosList struct {
@@ -224,6 +225,7 @@ func (in *AzureChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // AzureChaosList contains a list of AzureChaos
 type AzureChaosList struct {
@@ -361,6 +363,7 @@ func (in *BlockChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // BlockChaosList contains a list of BlockChaos
 type BlockChaosList struct {
@@ -494,6 +497,7 @@ func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // DNSChaosList contains a list of DNSChaos
 type DNSChaosList struct {
@@ -627,6 +631,7 @@ func (in *GCPChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // GCPChaosList contains a list of GCPChaos
 type GCPChaosList struct {
@@ -764,6 +769,7 @@ func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // HTTPChaosList contains a list of HTTPChaos
 type HTTPChaosList struct {
@@ -897,6 +903,7 @@ func (in *IOChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // IOChaosList contains a list of IOChaos
 type IOChaosList struct {
@@ -1030,6 +1037,7 @@ func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // JVMChaosList contains a list of JVMChaos
 type JVMChaosList struct {
@@ -1163,6 +1171,7 @@ func (in *KernelChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // KernelChaosList contains a list of KernelChaos
 type KernelChaosList struct {
@@ -1296,6 +1305,7 @@ func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // NetworkChaosList contains a list of NetworkChaos
 type NetworkChaosList struct {
@@ -1429,6 +1439,7 @@ func (in *PhysicalMachineChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // PhysicalMachineChaosList contains a list of PhysicalMachineChaos
 type PhysicalMachineChaosList struct {
@@ -1601,6 +1612,7 @@ func (in *PodChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // PodChaosList contains a list of PodChaos
 type PodChaosList struct {
@@ -1885,6 +1897,7 @@ func (in *StressChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // StressChaosList contains a list of StressChaos
 type StressChaosList struct {
@@ -2018,6 +2031,7 @@ func (in *TimeChaos) GetSpecAndMetaString() (string, error) {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 // TimeChaosList contains a list of TimeChaos
 type TimeChaosList struct {
