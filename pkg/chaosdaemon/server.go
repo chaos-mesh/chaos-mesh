@@ -20,7 +20,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/disk"
 	"net"
 	"net/http"
 	"os"
@@ -40,7 +39,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
@@ -86,8 +85,6 @@ type DaemonServer struct {
 	// tproxyLocker is a set of tproxy processes to lock stdin/stdout/stderr
 	tproxyLocker *sync.Map
 
-	DiskChaosManager DiskChaosManager
-
 	IPSetLocker     *locker.Locker
 	timeChaosServer TimeChaosServer
 }
@@ -118,11 +115,6 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient, 
 			manager:                    tasks.NewTaskManager(logr.New(log.GetSink()).WithName("TimeChaos")),
 			nameLocker:                 tasks.NewLockMap[tasks.PodContainerName](),
 			logger:                     logr.New(log.GetSink()).WithName("TimeChaos"),
-		},
-		DiskChaosManager: DiskChaosManager{
-			FillMap:    NewSyncMap(make(map[string]*disk.Fill)),
-			PayloadMap: NewSyncMap(make(map[string]*disk.Payload)),
-			locker:     sync.RWMutex{},
 		},
 	}
 }

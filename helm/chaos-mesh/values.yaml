@@ -75,7 +75,7 @@ controllerManager:
     # override global tag, empty value means using the global images.tag
     tag: ""
   # Image pull policy
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
 
   # The keys within the "env" map are mounted as environment variables on the pod.
   env:
@@ -144,7 +144,7 @@ chaosDaemon:
     # empty tag means using the global images.tag
     tag: ""
   # Image pull policy
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   # The port which grpc server listens on.
   grpcPort: 31767
   # The port which http server listens on.
