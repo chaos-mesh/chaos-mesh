@@ -17,6 +17,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `spec.privateKey.rotationPolicy` to Certificates, to comply with requirements in cert-manager 1.8 [#3325](https://github.com/chaos-mesh/chaos-mesh/pull/3325)
 - Support `Suspend` in next generation `New Workflow`'s UI [#3254](https://github.com/chaos-mesh/chaos-mesh/pull/3254)
 - Add helm annotations for Artifact Hub [#3355](https://github.com/chaos-mesh/chaos-mesh/pull/3355)
+- Add Disk Chaos API [#3387](https://github.com/chaos-mesh/chaos-mesh/pull/3387)
 
 ### Changed
 
