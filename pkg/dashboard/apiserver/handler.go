@@ -32,7 +32,7 @@ var handlerModule = fx.Options(
 	fx.Provide(
 		common.NewService,
 		experiment.NewService,
-		schedule.NewService,
+		schedule.Bootstrap,
 		workflow.Bootstrap,
 		event.NewService,
 		archive.NewService,

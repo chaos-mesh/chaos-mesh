@@ -31,7 +31,7 @@ import Space from '@ui/mui-extends/esm/Space'
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
-import _groupBy from 'lodash.groupby'
+import _ from 'lodash'
 import api from 'api'
 import i18n from 'components/T'
 import { transByKind } from 'lib/byKind'
@@ -238,7 +238,7 @@ export default function Archives() {
       </Space>
 
       {archives.length > 0 &&
-        Object.entries(_groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
+        Object.entries(_.groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
           <Box key={kind} mb={6}>
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
             <RWList

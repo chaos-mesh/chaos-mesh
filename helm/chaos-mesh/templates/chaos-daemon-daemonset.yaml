@@ -22,6 +22,10 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
     {{- include "chaos-mesh.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.chaosDaemon.updateStrategy }}
+  updateStrategy:
+{{ toYaml .Values.chaosDaemon.updateStrategy | indent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "chaos-mesh.selectors" . | nindent 6 }}
@@ -32,7 +36,8 @@ spec:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
-        {{- if .Values.dashboard.securityMode }}
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
+        {{- if .Values.chaosDaemon.mtls.enabled }}
         rollme: {{ randAlphaNum 5 | quote }}
         {{- end }}
     {{- with .Values.chaosDaemon.podAnnotations }}
@@ -71,7 +76,7 @@ spec:
           {{- if .Values.enableProfiling }}
             - --pprof
           {{- end }}
-          {{- if .Values.dashboard.securityMode }}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
             - --ca
             - /etc/chaos-daemon/cert/ca.crt
             - --cert
@@ -124,7 +129,7 @@ spec:
               mountPath: /host-sys
             - name: lib-modules
               mountPath: /lib/modules
-            {{- if .Values.dashboard.securityMode}}
+            {{- if .Values.chaosDaemon.mtls.enabled}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
               readOnly: true
@@ -199,7 +204,7 @@ spec:
         - name: lib-modules
           hostPath:
             path: /lib/modules
-        {{- if .Values.dashboard.securityMode}}
+        {{- if .Values.chaosDaemon.mtls.enabled}}
         - name: chaos-daemon-cert
           secret:
             secretName:  {{ template "chaos-mesh.daemon.certs" . }}

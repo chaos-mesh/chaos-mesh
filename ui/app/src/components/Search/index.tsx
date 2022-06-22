@@ -36,13 +36,12 @@ import ScheduleIcon from '@mui/icons-material/Schedule'
 import SearchIcon from '@mui/icons-material/Search'
 import Tooltip from '@ui/mui-extends/esm/Tooltip'
 import { Workflow } from 'api/workflows.type'
-import _debounce from 'lodash.debounce'
+import _ from 'lodash'
 import api from 'api'
 import { format } from 'lib/luxon'
 import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 import search from 'lib/search'
-import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
@@ -80,7 +79,7 @@ const Search: React.FC = () => {
 
   const debounceExecSearch = useMemo(
     () =>
-      _debounce(async (s: string) => {
+      _.debounce(async (s: string) => {
         setNoResult(false)
         setOpen(true)
 
@@ -112,7 +111,7 @@ const Search: React.FC = () => {
   )
 
   const groupBy = (option: Option) => i18n(`${option.is}s.title`, intl)
-  const getOptionLabel = (option: Option) => option.name
+  const getOptionLabel = (option: Option) => option.name!
   const isOptionEqualToValue = (option: Option, value: Option) => option.uid === value.uid
   const filterOptions = (options: Option[]) => options
 
@@ -157,7 +156,7 @@ const Search: React.FC = () => {
             {name}
           </Typography>
           <div className={classes.chipContainer}>
-            <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uuid)} title={uuid} />
+            <Chip color="primary" icon={<FingerprintIcon />} label={_.truncate(uuid)} title={uuid} />
             <Chip label={kind} />
             <Chip icon={<ScheduleIcon />} label={format(time)} />
           </div>
@@ -221,7 +220,7 @@ const Search: React.FC = () => {
                       </Typography>
                     }
                   >
-                    <HelpOutlineIcon fontSize="small" />
+                    <HelpOutlineIcon />
                   </Tooltip>
                 </InputAdornment>
               </>

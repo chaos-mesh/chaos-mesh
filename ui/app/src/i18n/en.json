@@ -50,13 +50,17 @@
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
+      "namespaceSelectorsHelper": "Specifies the namespaces to which target Pods belong.",
+      "labelSelectorsHelper": "Specifies the labels that target Pods come with.",
+      "annotationSelectorsHelper": "Specifies the annotations that target Pods come with.",
+      "phaseSelectorsHelper": "Specifies the phases of target Pods.",
       "mode": "Mode",
-      "modeHelper": "Select the experiment mode",
+      "modeHelper": "Specifies the mode of the experiment.",
       "modeValue": "Mode Value",
       "modeValueHelper": "Please fill the mode value",
       "targetPods": "Target Pods",
-      "targetPodsPreview": "Target Pods Preview",
-      "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope",
+      "targetPodsPreview": "Preview of Pods to be injected",
+      "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope.",
       "noPodsFound": "No pods found"
     },
     "target": {
@@ -144,7 +148,7 @@
       "nameHelper": "The task name",
       "nameValidation": "The task name is required",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline. the supported formats of the deadline are: ms / s / m / h.",
+      "deadlineHelper": "The task will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
       "deadlineValidation": "The task deadline is required",
       "container": {
         "title": "Container",
@@ -154,7 +158,7 @@
         "imageHelper": "The image of container",
         "imageValidation": "The image is required",
         "command": "Command",
-        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends a space to create a single command."
+        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends Enter to create a single command."
       },
       "conditionalBranches": {
         "title": "Conditional branches (Optional)",
@@ -195,15 +199,12 @@
     "titleStep2": "Fill the schedule info",
     "basic": {
       "nameHelper": "The schedule name",
-      "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define the schedule",
-      "historyLimit": "History Limit",
-      "historyLimitHelper": "Maximum number of experiment records",
-      "concurrencyPolicy": "Concurrency Policy",
-      "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time",
+      "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define it.",
+      "historyLimitHelper": "Maximum number of experiment records.",
+      "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time.",
       "forbid": "Forbid",
       "allow": "Allow",
-      "startingDeadlineSeconds": "Experiment expiration time",
-      "startingDeadlineSecondsHelper": "Set to ignore experiments that haven’t been running for a long time"
+      "startingDeadlineSecondsHelper": "Counts how many missed jobs occurred from the value of startingDeadlineSeconds until now."
     }
   },
   "schedules": {
@@ -216,7 +217,7 @@
   "workflows": {
     "title": "Workflows",
     "notFound": "No workflows found",
-    "deleteDesc": "You can still find this workflow in the archives"
+    "deleteDesc": "You can still find this workflow in the archives."
   },
   "workflow": {
     "entry": "Entry",
@@ -253,21 +254,25 @@
     "title": "Settings",
     "debugMode": {
       "title": "Debug mode",
-      "choose": "Creating an experiment will not send the real HTTP request, but will print relevant information in the console"
+      "choose": "Creating an experiment doesn't send a real HTTP request, but prints the relevant information in the console."
     },
     "enableKubeSystemNS": {
-      "title": "Kube System namespace",
-      "choose": "Allow to select the kube-system namespace in the scope when creating the experiment"
+      "title": "Allow kube-system namespace",
+      "choose": "The kube-system namespace is allowed to be selected in the scope when creating an experiment."
+    },
+    "useNextWorkflowInterface": {
+      "title": "Use the next generation of workflow interface",
+      "choose": "Over the past period of time, we have refactored the interface related to workflows. Now you can create workflows more easily in the form of the flowchart. (Note: This improvement is still under active development and the interface is still subject to change until it is stable.)"
     },
     "theme": {
       "title": "Theme",
-      "choose": "Choose theme",
+      "choose": "Choose a theme.",
       "light": "Light",
       "dark": "Dark"
     },
     "lang": {
       "title": "Language",
-      "choose": "Choose interface language",
+      "choose": "Choose the interface language.",
       "en": "English",
       "zh": "Chinese"
     },
@@ -310,7 +315,7 @@
   },
   "common": {
     "add": "Add",
-    "otherOptions": "Other Options",
+    "moreOptions": "More Options",
     "batchOperation": "Batch operation",
     "cancel": "Cancel",
     "cancelEdit": "Cancel edit",
@@ -322,15 +327,15 @@
     "copy": "Copy",
     "definition": "Definition",
     "delete": "Delete",
-    "deleteDesc": "The operation is irreversible",
+    "deleteDesc": "This operation is irreversible.",
     "detail": "Detail",
     "doc": "Documentation",
     "download": "Download",
     "duration": "Duration",
-    "durationHelper": "The supported formats of the duration are: ms / s / m / h.",
+    "durationHelper": "Supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair",
     "logout": "Logout",
     "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
@@ -338,7 +343,6 @@
     "noOptions": "No options",
     "operation": "Operation",
     "options": "Options",
-    "other": "Other",
     "pause": "Pause",
     "preview": "Preview",
     "process": "Process",
@@ -362,7 +366,7 @@
   "status": {
     "injecting": "Injecting",
     "running": "Running",
-    "finished": "Finished",
+    "finished": "Completed",
     "paused": "Paused",
     "failed": "Failed",
     "deleting": "Deleting",
@@ -387,11 +391,11 @@
     "annotations": "Annotations",
     "namespaceSelectors": "Namespace Selectors",
     "labelSelectors": "Label Selectors",
-    "annotationsSelectors": "Annotation Selectors",
+    "annotationSelectors": "Annotation Selectors",
     "podPhaseSelectors": "Phase Selectors"
   },
   "physic": {
     "address": "Address",
-    "addressHelper": "Type and end with a space to add one or more chaosd addresses"
+    "addressHelper": "Type and end with Enter to add one or more chaosd addresses"
   }
 }

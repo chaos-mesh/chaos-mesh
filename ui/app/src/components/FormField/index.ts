@@ -14,8 +14,10 @@
  * limitations under the License.
  *
  */
+
 export { default as TextField } from './TextField'
 export { default as SelectField } from './SelectField'
+export { default as AutocompleteField } from './AutocompleteField'
 export { default as LabelField } from './LabelField'
-export { default as AutocompleteMultipleField } from './AutocompleteMultipleField'
+export { default as TextTextField } from './TextTextField'
 export { default as Submit } from './Submit'

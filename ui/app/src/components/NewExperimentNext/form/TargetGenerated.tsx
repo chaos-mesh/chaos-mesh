@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { AutocompleteMultipleField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
+import { AutocompleteField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import { Env, clearNetworkTargetPods } from 'slices/experiments'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
 import { Kind, Spec } from '../data/types'
@@ -22,9 +22,9 @@ import { useEffect, useState } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { MenuItem } from '@mui/material'
+import MoreOptions from 'components/MoreOptions'
 import { ObjectSchema } from 'yup'
-import OtherOptions from 'components/OtherOptions'
-import Scope from './Scope'
+import Scope from 'components/Scope'
 import Space from '@ui/mui-extends/esm/Space'
 import basicData from '../data/basic'
 import i18n from 'components/T'
@@ -100,7 +100,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                error={getIn(touched, k) && getIn(errors, k)}
                 {...v.inputProps}
               />
             )
@@ -111,7 +111,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(touched, k) && getIn(errors, k) ? true : false}
+                error={getIn(touched, k) && getIn(errors, k)}
                 multiline
                 rows={6}
                 {...v.inputProps}
@@ -125,7 +125,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(errors, k) && getIn(touched, k) ? true : false}
+                error={getIn(errors, k) && getIn(touched, k)}
                 {...v.inputProps}
               />
             )
@@ -136,7 +136,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 name={k}
                 label={v.label}
                 helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
-                error={getIn(errors, k) && getIn(touched, k) ? true : false}
+                error={getIn(errors, k) && getIn(touched, k)}
               >
                 {v.items?.map((option: string | { label: string; value: any }) =>
                   option instanceof Object ? (
@@ -157,14 +157,14 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                 key={k}
                 name={k}
                 label={v.label}
-                helperText={v.helperText}
-                isKV={v.isKV}
-                errorText={getIn(errors, k) && getIn(touched, k) ? getIn(errors, k) : ''}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(errors, k) && getIn(touched, k)}
               />
             )
           case 'autocomplete':
             return (
-              <AutocompleteMultipleField
+              <AutocompleteField
+                multiple
                 key={k}
                 name={k}
                 label={v.label}
@@ -205,7 +205,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
           <Form>
             <Space>{parseDataToFormFields(errors, touched)}</Space>
             {env === 'k8s' && kind === 'NetworkChaos' && (
-              <OtherOptions
+              <MoreOptions
                 title={i18n('newE.target.network.target.title')}
                 beforeOpen={beforeTargetOpen}
                 afterClose={afterTargetClose}
@@ -219,7 +219,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                     podsPreviewDesc={i18n('newE.target.network.target.podsPreviewHelper')}
                   />
                 )}
-              </OtherOptions>
+              </MoreOptions>
             )}
             <Submit />
           </Form>

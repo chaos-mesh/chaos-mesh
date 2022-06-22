@@ -45,7 +45,7 @@ import PublishIcon from '@mui/icons-material/Publish'
 import RemoveIcon from '@mui/icons-material/Remove'
 import Space from '@ui/mui-extends/esm/Space'
 import UndoIcon from '@mui/icons-material/Undo'
-import _isEmpty from 'lodash.isempty'
+import _ from 'lodash'
 import api from 'api'
 import { constructWorkflow } from 'lib/formikhelpers'
 import i18n from 'components/T'
@@ -114,7 +114,7 @@ const NewWorkflow = () => {
   }, [dispatch])
 
   useEffect(() => {
-    setSteps(_isEmpty(templates) ? [] : templates)
+    setSteps(_.isEmpty(templates) ? [] : templates)
   }, [templates])
 
   const resetRestore = () => {
@@ -290,7 +290,7 @@ const NewWorkflow = () => {
                   color="primary"
                   startIcon={<PublishIcon />}
                   fullWidth
-                  disabled={_isEmpty(templates)}
+                  disabled={_.isEmpty(templates)}
                 >
                   {i18n('newW.submit')}
                 </Button>
