@@ -129,21 +129,20 @@ func migrateFile(log logr.Logger, path string, from string, to string) error {
 // migrateAst migrates the ast, and returns whether this ast has been modified
 func migrateAst(log logr.Logger, fileAst *ast.File, from string, to string) bool {
 	needMigrate := false
+	fromName := ""
 	for _, imp := range fileAst.Imports {
 		if imp.Path.Value == common.Quote(common.ChaosMeshAPIPrefix+from) {
 			if imp.Name == nil {
-				imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
-
-				needMigrate = true
-			} else if imp.Name.Name == from {
-				imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
-				imp.Name.Name = to
-
-				needMigrate = true
+				fromName = from
 			} else {
-				imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
-				// don't need to migrate, because this package is called by alias
+				fromName = imp.Name.Name
 			}
+
+			imp.Path.Value = common.Quote(common.ChaosMeshAPIPrefix + to)
+			imp.Name = &ast.Ident{
+				Name: formatChaosMeshAPI(to),
+			}
+			needMigrate = true
 		}
 	}
 	if needMigrate {
@@ -157,8 +156,8 @@ func migrateAst(log logr.Logger, fileAst *ast.File, from string, to string) bool
 					break
 				}
 
-				if ident.Name == from {
-					ident.Name = to
+				if ident.Name == fromName {
+					ident.Name = formatChaosMeshAPI(to)
 				}
 			}
 
@@ -169,4 +168,8 @@ func migrateAst(log logr.Logger, fileAst *ast.File, from string, to string) bool
 	}
 
 	return false
+}
+
+func formatChaosMeshAPI(to string) string {
+	return "chaosmeshapi" + to
 }
