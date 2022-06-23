@@ -184,20 +184,8 @@ spec:
         {{- end }}
       volumes:
         - name: socket-path
-          hostPath:
-          {{- if .Values.chaosDaemon.socketPath }}
-            path: {{ .Values.chaosDaemon.socketPath | dir }}
-          {{- else if .Values.chaosDaemon.socketDir }}
-            path: {{ .Values.chaosDaemon.socketDir }}
-          {{- else }}
-            {{- if eq .Values.chaosDaemon.runtime "docker" }}
-            path: /var/run
-            {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
-            path: /run/containerd
-            {{- else if eq .Values.chaosDaemon.runtime "crio" }}
-            path: /var/run/crio
-            {{- end }}
-          {{- end }}
+          hostPath: 
+            path: {{template "chaos-daemon.socket-path" . }}
         - name: sys-path
           hostPath:
             path: /sys
