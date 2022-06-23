@@ -42,7 +42,7 @@ var _ InnerObject = (*DiskChaos)(nil)
 type DiskChaosAction string
 
 const (
-	Fill   DiskChaosAction = "fill"
+	DFill  DiskChaosAction = "fill"
 	DWrite DiskChaosAction = "write"
 	DRead  DiskChaosAction = "read"
 )
@@ -57,12 +57,15 @@ type DiskChaosSpec struct {
 	Size    string `json:"size,omitempty"`
 	Percent string `json:"percent,omitempty"`
 
+	// SpaceLockSize keeps a part of disk space before disk chaos execute and
+	// delete at first when we recover the disk chaos.
 	SpaceLockSize string `json:"space_lock_size,omitempty"`
 
 	FillByFAllocate bool `json:"fill_by_fallocate,omitempty"`
 
-	ProcessNum    uint8 `json:"process_num,omitempty" webhook:"ProcessNum"`
-	LoopExecution bool  `json:"loop_execution,omitempty"`
+	ProcessNum uint8 `json:"process_num,omitempty" webhook:"ProcessNum"`
+	// Not implement.
+	LoopExecution bool `json:"loop_execution,omitempty"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`

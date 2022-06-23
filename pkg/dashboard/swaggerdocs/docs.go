@@ -3414,6 +3414,7 @@ var doc = `{
                     "type": "boolean"
                 },
                 "loop_execution": {
+                    "description": "Not implement.",
                     "type": "boolean"
                 },
                 "mode": {
@@ -3438,6 +3439,7 @@ var doc = `{
                     "type": "string"
                 },
                 "space_lock_size": {
+                    "description": "SpaceLockSize keeps a part of disk space before disk chaos execute and\ndelete at first when we recover the disk chaos.",
                     "type": "string"
                 },
                 "value": {
