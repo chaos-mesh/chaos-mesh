@@ -21,6 +21,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -35,7 +36,6 @@ import (
 
 var (
 	scheme = runtime.NewScheme()
-	log    = ctrl.Log.WithName("collector")
 )
 
 func init() {
@@ -47,6 +47,7 @@ func init() {
 // Server defines a server to manage collectors.
 type Server struct {
 	Manager ctrl.Manager
+	logger  logr.Logger
 }
 
 // NewServer returns a CollectorServer and Client.
@@ -56,8 +57,9 @@ func NewServer(
 	scheduleArchive core.ScheduleStore,
 	event core.EventStore,
 	workflowStore core.WorkflowStore,
+	logger logr.Logger,
 ) (*Server, client.Client, client.Reader, *runtime.Scheme) {
-	s := &Server{}
+	s := &Server{logger: logger}
 
 	// namespace scoped
 	options := ctrl.Options{
@@ -67,9 +69,9 @@ func NewServer(
 		Port:               9443,
 	}
 	if conf.ClusterScoped {
-		log.Info("Chaos controller manager is running in cluster scoped mode.")
+		logger.Info("Chaos controller manager is running in cluster scoped mode.")
 	} else {
-		log.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", conf.TargetNamespace)
+		logger.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", conf.TargetNamespace)
 		options.Namespace = conf.TargetNamespace
 	}
 
@@ -78,7 +80,7 @@ func NewServer(
 	cfg := ctrl.GetConfigOrDie()
 	s.Manager, err = ctrl.NewManager(cfg, options)
 	if err != nil {
-		log.Error(err, "unable to start collector")
+		logger.Error(err, "unable to start collector")
 		os.Exit(1)
 	}
 
@@ -86,13 +88,13 @@ func NewServer(
 		clientpool.K8sClients, err = clientpool.NewClientPool(cfg, scheme, 100)
 		if err != nil {
 			// this should never happen
-			log.Error(err, "fail to create client pool")
+			logger.Error(err, "fail to create client pool")
 			os.Exit(1)
 		}
 	} else {
 		clientpool.K8sClients, err = clientpool.NewLocalClient(cfg, scheme)
 		if err != nil {
-			log.Error(err, "fail to create client pool")
+			logger.Error(err, "fail to create client pool")
 			os.Exit(1)
 		}
 	}
@@ -100,39 +102,39 @@ func NewServer(
 	for kind, chaosKind := range v1alpha1.AllKinds() {
 		if err = (&ChaosCollector{
 			Client:  s.Manager.GetClient(),
-			Log:     ctrl.Log.WithName("collector").WithName(kind),
+			Log:     logger.WithName(kind),
 			archive: experimentArchive,
 			event:   event,
 		}).Setup(s.Manager, chaosKind.SpawnObject()); err != nil {
-			log.Error(err, "unable to create collector", "collector", kind)
+			logger.Error(err, "unable to create collector", "collector", kind)
 			os.Exit(1)
 		}
 	}
 
 	if err = (&ScheduleCollector{
 		Client:  s.Manager.GetClient(),
-		Log:     ctrl.Log.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
+		Log:     logger.WithName("schedule-collector").WithName(v1alpha1.KindSchedule),
 		archive: scheduleArchive,
 	}).Setup(s.Manager, &v1alpha1.Schedule{}); err != nil {
-		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
 		os.Exit(1)
 	}
 
 	if err = (&EventCollector{
 		Client: s.Manager.GetClient(),
-		Log:    ctrl.Log.WithName("event-collector").WithName("Event"),
+		Log:    logger.WithName("event-collector").WithName("Event"),
 		event:  event,
 	}).Setup(s.Manager, &v1.Event{}); err != nil {
-		log.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
+		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindSchedule)
 		os.Exit(1)
 	}
 
 	if err = (&WorkflowCollector{
 		kubeClient: s.Manager.GetClient(),
-		Log:        ctrl.Log.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
+		Log:        logger.WithName("workflow-collector").WithName(v1alpha1.KindWorkflow),
 		store:      workflowStore,
 	}).Setup(s.Manager, &v1alpha1.Workflow{}); err != nil {
-		log.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
+		logger.Error(err, "unable to create collector", "collector", v1alpha1.KindWorkflow)
 		os.Exit(1)
 	}
 
@@ -142,9 +144,9 @@ func NewServer(
 // Register starts collectors manager.
 func Register(ctx context.Context, s *Server) {
 	go func() {
-		log.Info("Starting collector")
+		s.logger.Info("Starting collector")
 		if err := s.Manager.Start(ctx); err != nil {
-			log.Error(err, "could not start collector")
+			s.logger.Error(err, "could not start collector")
 			os.Exit(1)
 		}
 	}()

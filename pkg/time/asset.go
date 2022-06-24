@@ -21,6 +21,7 @@ import (
 	"embed"
 	"encoding/binary"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
 
@@ -31,7 +32,7 @@ const textSection = ".text"
 const relocationSection = ".rela.text"
 
 // LoadFakeImageFromEmbedFs builds FakeImage from the embed filesystem. It parses the ELF file and extract the variables from the relocation section, reserves the space for them at the end of content, then calculates and saves offsets as "manually relocation"
-func LoadFakeImageFromEmbedFs(filename string, symbolName string) (*FakeImage, error) {
+func LoadFakeImageFromEmbedFs(filename string, symbolName string, logger logr.Logger) (*FakeImage, error) {
 	path := "fakeclock/" + filename
 	object, err := fakeclock.ReadFile(path)
 	if err != nil {
@@ -48,14 +49,13 @@ func LoadFakeImageFromEmbedFs(filename string, symbolName string) (*FakeImage, e
 		return nil, errors.Wrapf(err, "get symbols %s", path)
 	}
 
-	fakeImage := FakeImage{
-		symbolName: symbolName,
-		offset:     make(map[string]int),
-	}
+	var imageContent []byte
+	imageOffset := make(map[string]int)
+
 	for _, r := range elfFile.Sections {
 
 		if r.Type == elf.SHT_PROGBITS && r.Name == textSection {
-			fakeImage.content, err = r.Data()
+			imageContent, err = r.Data()
 			if err != nil {
 				return nil, errors.Wrapf(err, "read text section data %s", path)
 			}
@@ -83,28 +83,22 @@ func LoadFakeImageFromEmbedFs(filename string, symbolName string) (*FakeImage, e
 					continue
 				}
 
-				// The relocation of a X86 image is like:
-				// Relocation section '.rela.text' at offset 0x288 contains 3 entries:
-				// Offset          Info           Type           Sym. Value    Sym. Name + Addend
-				// 000000000016  000900000002 R_X86_64_PC32     0000000000000000 CLOCK_IDS_MASK - 4
-				// 00000000001f  000a00000002 R_X86_64_PC32     0000000000000008 TV_NSEC_DELTA - 4
-				// 00000000002a  000b00000002 R_X86_64_PC32     0000000000000010 TV_SEC_DELTA - 4
-				//
-				// For example, we need to write the offset of `CLOCK_IDS_MASK` - 4 in 0x16 of the section
-				// If we want to put the `CLOCK_IDS_MASK` at the end of the section, it will be
-				// len(fakeImage.content) - 4 - 0x16
-
-				sym := &syms[symNo-1]
-				fakeImage.offset[sym.Name] = len(fakeImage.content)
-				targetOffset := uint32(len(fakeImage.content)) - uint32(rela.Off) + uint32(rela.Addend)
-				elfFile.ByteOrder.PutUint32(fakeImage.content[rela.Off:rela.Off+4], targetOffset)
-
-				// TODO: support other length besides uint64 (which is 8 bytes)
-				fakeImage.content = append(fakeImage.content, make([]byte, 8)...)
+				sym := syms[symNo-1]
+				byteorder := elfFile.ByteOrder
+				if elfFile.Machine == elf.EM_X86_64 || elfFile.Machine == elf.EM_AARCH64 {
+					AssetLD(rela, imageOffset, &imageContent, sym, byteorder)
+				} else {
+					return nil, errors.Errorf("unsupported architecture")
+				}
 			}
 
 			break
 		}
 	}
-	return &fakeImage, nil
+	return NewFakeImage(
+		symbolName,
+		imageContent,
+		imageOffset,
+		logger,
+	), nil
 }

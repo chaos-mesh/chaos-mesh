@@ -14,7 +14,10 @@
  * limitations under the License.
  *
  */
+
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+
+import LS from 'lib/localStorage'
 
 export type TemplateExperiment = any
 
@@ -50,16 +53,62 @@ export interface Template {
   custom?: TemplateCustom
 }
 
+// TODO: remove above code
+export type NodeExperiment = any
+
+export interface WorkflowNode {
+  id: uuid
+  experiment?: NodeExperiment
+}
+
+export interface RecentUse {
+  kind: string
+  act?: string
+}
+
 const initialState: {
+  nodes: Record<uuid, NodeExperiment>
+  recentUse: RecentUse[]
   templates: Template[]
 } = {
+  nodes: {},
+  recentUse: [],
   templates: [],
 }
 
-const workflowsSlice = createSlice({
+const workflowSlice = createSlice({
   name: 'workflows',
   initialState,
   reducers: {
+    insertWorkflowNode(state, action: PayloadAction<WorkflowNode>) {
+      const { id, experiment } = action.payload
+
+      state.nodes[id] = experiment
+    },
+    updateWorkflowNode(state, action) {
+      const payload = action.payload
+
+      state.nodes[payload.id] = payload
+    },
+    removeWorkflowNode(state, action: PayloadAction<uuid>) {
+      delete state.nodes[action.payload]
+    },
+    LoadRecentlyUsedExperiments(state) {
+      state.recentUse = LS.getObj('new-workflow-recently-used-experiments')
+    },
+    SetRecentlyUsedExperiments(state, action: PayloadAction<RecentUse>) {
+      const exp = action.payload
+
+      state.recentUse = [...state.recentUse, exp]
+
+      LS.setObj('new-workflow-recently-used-experiments', state.recentUse)
+    },
+    resetWorkflow(state) {
+      state.nodes = {}
+      // TODO: remove below code
+      state.templates = []
+    },
+    // TODO: remove below code
     setTemplate(state, action: PayloadAction<Template>) {
       const tpl = action.payload
 
@@ -76,12 +125,19 @@ const workflowsSlice = createSlice({
 
       state.templates = templates.filter((_, i) => i !== index)
     },
-    resetWorkflow(state) {
-      state.templates = []
-    },
   },
 })
 
-export const { setTemplate, updateTemplate, deleteTemplate, resetWorkflow } = workflowsSlice.actions
+export const {
+  insertWorkflowNode,
+  updateWorkflowNode,
+  removeWorkflowNode,
+  LoadRecentlyUsedExperiments,
+  SetRecentlyUsedExperiments,
+  setTemplate,
+  updateTemplate,
+  deleteTemplate,
+  resetWorkflow,
+} = workflowSlice.actions
 
-export default workflowsSlice.reducer
+export default workflowSlice.reducer

@@ -1759,6 +1759,246 @@ var doc = `{
                 }
             }
         },
+        "/templates/statuschecks": {
+            "get": {
+                "description": "Get status check templates from k8s cluster in real time.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "template"
+                ],
+                "summary": "List status check templates.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "filter status check templates by namespace",
+                        "name": "namespace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter status check templates by name",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/template.StatusCheckTemplateBase"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Pass a JSON object to create a new status check template.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Create a new status check template.",
+                "parameters": [
+                    {
+                        "description": "the status check definition",
+                        "name": "statuscheck",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/templates/statuschecks/statuscheck": {
+            "get": {
+                "description": "Get the status check template's detail by namespaced name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Get a status check template.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the namespace of status check templates",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of status check templates",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplateDetail"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a status check template by namespaced name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Update a status check template.",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/template.StatusCheckTemplate"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete the status check template by namespaced name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Delete a status check template.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the namespace of status check templates",
+                        "name": "namespace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of status check templates",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.APIError"
+                        }
+                    }
+                }
+            }
+        },
         "/workflows": {
             "get": {
                 "description": "List workflows from Kubernetes cluster.",
@@ -2382,10 +2622,15 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2420,10 +2665,15 @@ var doc = `{
                     "type": "string"
                 },
                 "end_time": {
+                    "description": "EndTime represents the time when the workflow completed all steps.",
                     "type": "string"
                 },
                 "entry": {
                     "description": "the entry node name",
+                    "type": "string"
+                },
+                "finish_time": {
+                    "description": "FinishTime represents the time when the workflow was deleted from Kubernetes.",
                     "type": "string"
                 },
                 "id": {
@@ -2611,6 +2861,68 @@ var doc = `{
                 }
             }
         },
+        "template.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                }
+            }
+        },
+        "template.StatusCheckTemplateBase": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "template.StatusCheckTemplateDetail": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckTemplate"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
         "utils.APIError": {
             "type": "object",
             "properties": {
@@ -2729,6 +3041,43 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.AzureChaosSpec": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "Action defines the specific azure chaos action.\nSupported action: vm-stop / vm-restart / disk-detach\nDefault action: vm-stop\n+kubebuilder:validation:Enum=vm-stop;vm-restart;disk-detach",
+                    "type": "string"
+                },
+                "diskName": {
+                    "description": "DiskName indicates the name of the disk.\nNeeded in disk-detach.\n+optional",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
+                    "type": "string"
+                },
+                "lun": {
+                    "description": "LUN indicates the Logical Unit Number of the data disk.\nNeeded in disk-detach.\n+optional",
+                    "type": "integer"
+                },
+                "resourceGroupName": {
+                    "description": "ResourceGroupName defines the name of ResourceGroup",
+                    "type": "string"
+                },
+                "secretName": {
+                    "description": "SecretName defines the name of kubernetes secret. It is used for Azure credentials.\n+optional",
+                    "type": "string"
+                },
+                "subscriptionID": {
+                    "description": "SubscriptionID defines the id of Azure subscription.",
+                    "type": "string"
+                },
+                "vmName": {
+                    "description": "VMName defines the name of Virtual Machine",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.BandwidthSpec": {
             "type": "object",
             "properties": {
@@ -2835,7 +3184,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "load": {
-                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+optional",
+                    "description": "Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100\nis full loading.\n+kubebuilder:validation:Minimum=0\n+kubebuilder:validation:Maximum=100\n+optional",
                     "type": "integer"
                 },
                 "options": {
@@ -2858,6 +3207,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
                     "description": "+optional",
@@ -3251,6 +3605,40 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.HTTPCriteria": {
+            "type": "object",
+            "properties": {
+                "statusCode": {
+                    "description": "StatusCode defines the expected http status code for the request.\nA statusCode string could be a single code (e.g. 200), or\nan inclusive range (e.g. 200-400, both ` + "`" + `200` + "`" + ` and ` + "`" + `400` + "`" + ` are included).",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPStatusCheck": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "criteria": {
+                    "description": "Criteria defines how to determine the result of the status check.",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPCriteria"
+                },
+                "headers": {
+                    "description": "+optional",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "+optional\n+kubebuilder:validation:Enum=GET;POST\n+kubebuilder:default=GET",
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.IOChaosSpec": {
             "type": "object",
             "properties": {
@@ -3303,7 +3691,7 @@ var doc = `{
                     "type": "string"
                 },
                 "percent": {
-                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional",
+                    "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional\n+kubebuilder:default=100",
                     "type": "integer"
                 },
                 "selector": {
@@ -3325,7 +3713,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData",
+                    "description": "Action defines the specific jvm chaos action.\nSupported action: latency;return;exception;stress;gc;ruleData\n+kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql",
                     "type": "string"
                 },
                 "class": {
@@ -3340,23 +3728,27 @@ var doc = `{
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number need to use, only set it when action is stress",
+                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
                     "type": "integer"
+                },
+                "database": {
+                    "description": "the match database\ndefault value is \"\", means match all database",
+                    "type": "string"
                 },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
                 "exception": {
-                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `",
+                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `",
                     "type": "string"
                 },
                 "latency": {
-                    "description": "+optional\nthe latency duration for action 'latency', unit ms",
+                    "description": "+optional\nthe latency duration for action 'latency', unit ms\nor the latency duration in action ` + "`" + `mysql` + "`" + `",
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type need to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
                     "type": "string"
                 },
                 "method": {
@@ -3367,22 +3759,38 @@ var doc = `{
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
                     "type": "string"
                 },
-                "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will use JVMChaos' name if not set",
+                "mysqlConnectorVersion": {
+                    "description": "the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now",
                     "type": "string"
+                },
+                "name": {
+                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which needs to attach",
+                    "type": "integer"
                 },
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "ruleData": {
-                    "description": "+optional",
+                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
                     "type": "string"
                 },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "sqlType": {
+                    "description": "the match sql type\ndefault value is \"\", means match all SQL type.\nThe value can be 'select', 'insert', 'update', 'delete', 'replace'.",
+                    "type": "string"
+                },
+                "table": {
+                    "description": "the match table\ndefault value is \"\", means match all table",
+                    "type": "string"
                 },
                 "value": {
                     "description": "+optional\nthe return value for action 'return'",
@@ -3394,7 +3802,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "exception": {
@@ -3402,15 +3810,15 @@ var doc = `{
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3419,11 +3827,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3432,7 +3840,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "latency": {
@@ -3440,15 +3848,15 @@ var doc = `{
                     "type": "integer"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3457,19 +3865,19 @@ var doc = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "Java class",
+                    "description": "+optional\nJava class",
                     "type": "string"
                 },
                 "method": {
-                    "description": "the method in Java class",
+                    "description": "+optional\nthe method in Java class",
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "value": {
@@ -3482,11 +3890,11 @@ var doc = `{
             "type": "object",
             "properties": {
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -3507,11 +3915,11 @@ var doc = `{
                     "type": "string"
                 },
                 "pid": {
-                    "description": "the pid of Java process which need to attach",
+                    "description": "the pid of Java process which needs to attach",
                     "type": "integer"
                 },
                 "port": {
-                    "description": "the port of agent server",
+                    "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
                 }
             }
@@ -3559,6 +3967,10 @@ var doc = `{
         "v1alpha1.MemoryStressor": {
             "type": "object",
             "properties": {
+                "oomScoreAdj": {
+                    "description": "OOMScoreAdj sets the oom_score_adj of the stress process. See ` + "`" + `man 5 proc` + "`" + ` to know more\nabout this option.\n+kubebuilder:validation:Minimum=-1000\n+kubebuilder:validation:Maximum=1000\n+kubebuilder:default=0\n+optional",
+                    "type": "integer"
+                },
                 "options": {
                     "description": "extend stress-ng options\n+optional",
                     "type": "array",
@@ -3580,7 +3992,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "filling": {
-                    "description": "Filling determines what is filled in the miskate data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
+                    "description": "Filling determines what is filled in the mistake data.\n+optional\n+kubebuilder:validation:Enum=zero;random",
                     "type": "string"
                 },
                 "maxLength": {
@@ -3632,17 +4044,17 @@ var doc = `{
                     "type": "string"
                 },
                 "bandwidth": {
-                    "description": "Bandwidth represents the detail about bandwidth control action\n+optional",
+                    "description": "Bandwidth represents the detail about bandwidth control action\n+ui:form:when=action=='bandwidth'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.BandwidthSpec"
                 },
                 "corrupt": {
-                    "description": "Corrupt represents the detail about corrupt action\n+optional",
+                    "description": "Corrupt represents the detail about corrupt action\n+ui:form:when=action=='corrupt'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.CorruptSpec"
                 },
                 "delay": {
-                    "description": "Delay represents the detail about delay action\n+optional",
+                    "description": "Delay represents the detail about delay action\n+ui:form:when=action=='delay'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DelaySpec"
                 },
@@ -3655,7 +4067,7 @@ var doc = `{
                     "type": "string"
                 },
                 "duplicate": {
-                    "description": "DuplicateSpec represents the detail about loss action\n+optional",
+                    "description": "DuplicateSpec represents the detail about loss action\n+ui:form:when=action=='duplicate'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.DuplicateSpec"
                 },
@@ -3671,7 +4083,7 @@ var doc = `{
                     }
                 },
                 "loss": {
-                    "description": "Loss represents the detail about loss action\n+optional",
+                    "description": "Loss represents the detail about loss action\n+ui:form:when=action=='loss'\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.LossSpec"
                 },
@@ -4280,6 +4692,10 @@ var doc = `{
                     "description": "the process name or the process ID",
                     "type": "string"
                 },
+                "recoverCmd": {
+                    "description": "the command to be run when recovering experiment",
+                    "type": "string"
+                },
                 "signal": {
                     "description": "the signal number to send",
                     "type": "integer"
@@ -4323,6 +4739,11 @@ var doc = `{
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
                     "description": "+optional",
@@ -4423,6 +4844,90 @@ var doc = `{
                 }
             }
         },
+        "v1alpha1.StatusCheckSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration defines the duration of the whole status check if the\nnumber of failed execution does not exceed the failure threshold.\nDuration is available to both ` + "`" + `Synchronous` + "`" + ` and ` + "`" + `Continuous` + "`" + ` mode.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "failureThreshold": {
+                    "description": "FailureThreshold defines the minimum consecutive failure\nfor the status check to be considered failed.\n+optional\n+kubebuilder:default=3\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "http": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
+                },
+                "intervalSeconds": {
+                    "description": "IntervalSeconds defines how often (in seconds) to perform\nan execution of status check.\n+optional\n+kubebuilder:default=10\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the execution mode of the status check.\nSupport type: Synchronous / Continuous\n+optional\n+kubebuilder:validation:Enum=Synchronous;Continuous",
+                    "type": "string"
+                },
+                "recordsHistoryLimit": {
+                    "description": "RecordsHistoryLimit defines the number of record to retain.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:Minimum=1\n+kubebuilder:validation:Maximum=1000",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "SuccessThreshold defines the minimum consecutive successes\nfor the status check to be considered successful.\nSuccessThreshold only works for ` + "`" + `Synchronous` + "`" + ` mode.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "description": "TimeoutSeconds defines the number of seconds after which\nan execution of status check times out.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type defines the specific status check type.\nSupport type: HTTP\n+kubebuilder:default=HTTP\n+kubebuilder:validation:Enum=HTTP",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.StatusCheckTemplate": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration defines the duration of the whole status check if the\nnumber of failed execution does not exceed the failure threshold.\nDuration is available to both ` + "`" + `Synchronous` + "`" + ` and ` + "`" + `Continuous` + "`" + ` mode.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "failureThreshold": {
+                    "description": "FailureThreshold defines the minimum consecutive failure\nfor the status check to be considered failed.\n+optional\n+kubebuilder:default=3\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "http": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.HTTPStatusCheck"
+                },
+                "intervalSeconds": {
+                    "description": "IntervalSeconds defines how often (in seconds) to perform\nan execution of status check.\n+optional\n+kubebuilder:default=10\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the execution mode of the status check.\nSupport type: Synchronous / Continuous\n+optional\n+kubebuilder:validation:Enum=Synchronous;Continuous",
+                    "type": "string"
+                },
+                "recordsHistoryLimit": {
+                    "description": "RecordsHistoryLimit defines the number of record to retain.\n+optional\n+kubebuilder:default=100\n+kubebuilder:validation:Minimum=1\n+kubebuilder:validation:Maximum=1000",
+                    "type": "integer"
+                },
+                "successThreshold": {
+                    "description": "SuccessThreshold defines the minimum consecutive successes\nfor the status check to be considered successful.\nSuccessThreshold only works for ` + "`" + `Synchronous` + "`" + ` mode.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "timeoutSeconds": {
+                    "description": "TimeoutSeconds defines the number of seconds after which\nan execution of status check times out.\n+optional\n+kubebuilder:default=1\n+kubebuilder:validation:Minimum=1",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type defines the specific status check type.\nSupport type: HTTP\n+kubebuilder:default=HTTP\n+kubebuilder:validation:Enum=HTTP",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.StressCPUSpec": {
             "type": "object",
             "properties": {
@@ -4432,7 +4937,10 @@ var doc = `{
                 },
                 "options": {
                     "description": "extend stress-ng options",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "workers": {
                     "description": "specifies N workers to apply the stressor.",
@@ -4483,7 +4991,10 @@ var doc = `{
             "properties": {
                 "options": {
                     "description": "extend stress-ng options",
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "size": {
                     "description": "specifies N bytes consumed per vm worker, default is the total available memory.\nOne can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..",
@@ -4522,10 +5033,19 @@ var doc = `{
         "v1alpha1.Template": {
             "type": "object",
             "properties": {
+                "abortWithStatusCheck": {
+                    "description": "AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.\nOnly used when Type is TypeStatusCheck.\n+optional",
+                    "type": "boolean"
+                },
                 "awsChaos": {
                     "description": "+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.AWSChaosSpec"
+                },
+                "azureChaos": {
+                    "description": "+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.AzureChaosSpec"
                 },
                 "blockChaos": {
                     "description": "+optional",
@@ -4602,6 +5122,11 @@ var doc = `{
                     "description": "Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.\n+optional",
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ChaosOnlyScheduleSpec"
+                },
+                "statusCheck": {
+                    "description": "StatusCheck describe the behavior of StatusCheck. Only used when Type is TypeStatusCheck.\n+optional",
+                    "type": "object",
+                    "$ref": "#/definitions/v1alpha1.StatusCheckSpec"
                 },
                 "stressChaos": {
                     "description": "+optional",

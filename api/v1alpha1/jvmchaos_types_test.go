@@ -56,8 +56,10 @@ var _ = Describe("JVMChaos", func() {
 				Spec: JVMChaosSpec{
 					Action: JVMLatencyAction,
 					JVMParameter: JVMParameter{
-						Class:           "Main",
-						Method:          "print",
+						JVMClassMethodSpec: JVMClassMethodSpec{
+							Class:  "Main",
+							Method: "print",
+						},
 						LatencyDuration: 1000,
 					},
 					ContainerSelector: ContainerSelector{

@@ -19,8 +19,8 @@ import { useEffect, useRef } from 'react'
 
 import { Event } from 'api/events.type'
 import NotFound from 'components/NotFound'
-import T from 'components/T'
 import genEventsChart from 'lib/d3/eventsChart'
+import i18n from 'components/T'
 import { useStoreSelector } from 'store'
 
 interface EventsChartProps extends BoxProps {
@@ -52,7 +52,7 @@ const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
 
   return (
     <Box {...rest} ref={chartRef}>
-      {events?.length === 0 && <NotFound>{T('events.notFound')}</NotFound>}
+      {events?.length === 0 && <NotFound>{i18n('events.notFound')}</NotFound>}
     </Box>
   )
 }

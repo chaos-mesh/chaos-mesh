@@ -18,16 +18,18 @@ package metrics
 import (
 	"context"
 
+	"github.com/go-logr/logr"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics/utils"
 )
 
 var (
 	// DefaultChaosDaemonMetricsCollector is the default metrics collector for chaos daemon
-	DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector()
+	DefaultChaosDaemonMetricsCollector = NewChaosDaemonMetricsCollector(log.L().WithName("chaos-daemon").WithName("metrics"))
 
 	// ChaosDaemonGrpcServerBuckets is the buckets for gRPC server handling histogram metrics
 	ChaosDaemonGrpcServerBuckets = []float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}
@@ -49,8 +51,8 @@ func WithHistogramName(name string) grpcprometheus.HistogramOption {
 }
 
 type ChaosDaemonMetricsCollector struct {
-	crClient crclients.ContainerRuntimeInfoClient
-
+	crClient            crclients.ContainerRuntimeInfoClient
+	logger              logr.Logger
 	iptablesPackets     *prometheus.GaugeVec
 	iptablesPacketBytes *prometheus.GaugeVec
 	ipsetMembers        *prometheus.GaugeVec
@@ -58,8 +60,9 @@ type ChaosDaemonMetricsCollector struct {
 }
 
 // NewChaosDaemonMetricsCollector initializes metrics for each chaos daemon
-func NewChaosDaemonMetricsCollector() *ChaosDaemonMetricsCollector {
+func NewChaosDaemonMetricsCollector(logger logr.Logger) *ChaosDaemonMetricsCollector {
 	return &ChaosDaemonMetricsCollector{
+		logger: logger,
 		iptablesPackets: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_daemon_iptables_packets",
 			Help: "Total number of iptables packets",
@@ -107,20 +110,20 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 
 	containerIDs, err := collector.crClient.ListContainerIDs(context.Background())
 	if err != nil {
-		log.Error(err, "fail to list all container process IDs")
+		collector.logger.Error(err, "fail to list all container process IDs")
 		return
 	}
 
 	for _, containerID := range containerIDs {
 		pid, err := collector.crClient.GetPidFromContainerID(context.Background(), containerID)
 		if err != nil {
-			log.Error(err, "fail to get pid from container ID")
+			collector.logger.Error(err, "fail to get pid from container ID")
 			continue
 		}
 
 		labels, err := collector.crClient.GetLabelsFromContainerID(context.Background(), containerID)
 		if err != nil {
-			log.Error(err, "fail to get container labels", "containerID", containerID)
+			collector.logger.Error(err, "fail to get container labels", "containerID", containerID)
 			continue
 		}
 
@@ -128,7 +131,7 @@ func (collector *ChaosDaemonMetricsCollector) collectNetworkMetrics() {
 			labels[kubernetesPodNameLabel], labels[kubernetesContainerNameLabel]
 
 		labelValues := []string{namespace, podName, containerName}
-		log := log.WithValues(
+		log := collector.logger.WithValues(
 			"namespace", namespace,
 			"podName", podName,
 			"containerName", containerName,

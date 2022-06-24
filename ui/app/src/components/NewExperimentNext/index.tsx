@@ -25,11 +25,11 @@ import Space from '@ui/mui-extends/esm/Space'
 import Step1 from './Step1'
 import Step2 from './Step2'
 import Step3 from './Step3'
-import T from 'components/T'
 import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
+import i18n from 'components/T'
 import { parseYAML } from 'lib/formikhelpers'
 import { useStoreDispatch } from 'store'
 
@@ -84,9 +84,9 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
       {loadFrom && (
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={onChange}>
-            <Tab label={T(`${inSchedule ? 'newS' : 'newE'}.title`)} value="initial" />
-            <Tab label={T('newE.loadFrom')} value="existing" />
-            <Tab label={T('newE.byYAML')} value="yaml" />
+            <Tab label={i18n(`${inSchedule ? 'newS' : 'newE'}.title`)} value="initial" />
+            <Tab label={i18n('newE.loadFrom')} value="existing" />
+            <Tab label={i18n('newE.byYAML')} value="yaml" />
           </TabList>
         </Box>
       )}

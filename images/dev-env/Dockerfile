@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.17 AS go_install
+FROM golang:1.18 AS go_install
 
 ENV GO111MODULE=on
 ENV GOPATH /go
@@ -15,13 +15,14 @@ RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 RUN go install github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
-RUN go install github.com/99designs/gqlgen@v0.13.0
+RUN go install github.com/99designs/gqlgen@v0.17.2
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.0.0
 RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
+RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
 FROM debian:buster-slim
 
@@ -58,12 +59,11 @@ RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
 
-COPY --from=apache/skywalking-eyes:0.2.0 /bin/license-eye /bin/license-eye
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
 # The `gqlgen` depends on the plugin in it
-COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0 /go/pkg/mod/github.com/99designs/gqlgen@v0.13.0
+COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.2 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.2
 
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 

@@ -16,14 +16,16 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
 )
+
+var managerNamespace, managerSvc string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -36,61 +38,97 @@ Interacting with chaos mesh
   chaosctl debug networkchaos
 
   # show logs of all chaos-mesh components
-  chaosctl logs`,
+  chaosctl logs
+
+  # forcedly recover chaos from pods
+  chaosctl recover networkchaos pod1 -n test`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := cm.SetupKlog()
-	if err != nil {
-		log.Fatal("failed to setup klog", err)
-	}
 	rootLogger, flushFunc, err := cm.NewStderrLogger()
 	if err != nil {
-		log.Fatal("failed to initialize logger", err)
+		cm.PrettyPrint("failed to initialize logger: ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
 	}
 	if flushFunc != nil {
 		defer flushFunc()
 	}
 	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
 
-	logsCmd, err := NewLogsCmd(rootLogger.WithName("cmd-logs"))
+	rootCmd.PersistentFlags().StringVarP(&managerNamespace, "manager-namespace", "N", "chaos-mesh", "the namespace chaos-controller-manager in")
+	rootCmd.PersistentFlags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")
+	err = rootCmd.RegisterFlagCompletionFunc("manager-namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		// TODO: list namespaces without ctrlserver
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd",
-			"cmd", "logs",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to register completion function for flag 'manager-namespace': ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
+	err = rootCmd.RegisterFlagCompletionFunc("manager-svc", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		// TODO: list svc without ctrlserver
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
+	if err != nil {
+		cm.PrettyPrint("failed to register completion function for flag 'manager-svc': ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
+	logsCmd, err := NewLogsCmd()
+	if err != nil {
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("log command: "+err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
 	rootCmd.AddCommand(logsCmd)
 
-	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"))
+	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"), map[string]debug.Debug{
+		networkChaos: debug.NetworkDebug,
+		ioChaos:      debug.IODebug,
+		stressChaos:  debug.StressDebug,
+		httpChaos:    debug.HTTPDebug,
+	})
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd",
-			"cmd", "debug",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("debug command: "+err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
 
-	physicalMachineCommand, err := NewPhysicalMachineCommand(rootLogger.WithName("cmd-physical-machine"))
+	recoverCommand, err := NewRecoverCommand(rootLogger.WithName("cmd-recover"), map[string]recover.RecovererBuilder{
+		httpChaos:    recover.HTTPRecoverer,
+		ioChaos:      recover.IORecoverer,
+		stressChaos:  recover.StressRecoverer,
+		networkChaos: recover.NetworkRecoverer,
+	})
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd",
-			"cmd", "physicalmachine",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("recover command: "+err.Error(), 1, cm.Red)
+		os.Exit(1)
+	}
+
+	physicalMachineCommand, err := NewPhysicalMachineCommand()
+	if err != nil {
+		cm.PrettyPrint("failed to initialize cmd: ", 0, cm.Red)
+		cm.PrettyPrint("physicalmachine command: "+err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
 
 	rootCmd.AddCommand(debugCommand)
+	rootCmd.AddCommand(recoverCommand)
 	rootCmd.AddCommand(completionCmd)
 	rootCmd.AddCommand(forwardCmd)
 	rootCmd.AddCommand(physicalMachineCommand)
+
 	if err := rootCmd.Execute(); err != nil {
-		rootLogger.Error(err, "failed to execute cmd",
-			"errorVerbose", fmt.Sprintf("%+v", err),
-		)
+		cm.PrettyPrint("failed to execute cmd: ", 0, cm.Red)
+		cm.PrettyPrint(err.Error(), 1, cm.Red)
+		os.Exit(1)
 	}
 }
 

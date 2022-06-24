@@ -15,20 +15,23 @@
  *
  */
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import api from 'api'
+import { RBACConfigParams } from 'api/common.type'
+import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
+import _ from 'lodash'
 import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
+
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { RBACConfigParams } from 'api/common.type'
-import { SelectField } from 'components/FormField'
-import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
-import api from 'api'
-import copy from 'copy-text-to-clipboard'
-import { makeStyles } from '@mui/styles'
 import { setAlert } from 'slices/globalStatus'
-import { toTitleCase } from 'lib/utils'
-import { useIntl } from 'react-intl'
+
+import { SelectField } from 'components/FormField'
+import i18n from 'components/T'
 
 const useStyles = makeStyles((theme) => ({
   pre: {
@@ -85,7 +88,7 @@ const RBACGenerator = () => {
     dispatch(
       setAlert({
         type: 'success',
-        message: T('common.copied', intl),
+        message: i18n('common.copied', intl),
       })
     )
   }
@@ -94,7 +97,7 @@ const RBACGenerator = () => {
     <div ref={containerRef}>
       <Space>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.generatorHelper')}
+          {i18n('settings.addToken.generatorHelper')}
         </Typography>
         <Formik
           initialValues={{ namespace: 'default', role: 'viewer', clustered: false }}
@@ -107,13 +110,13 @@ const RBACGenerator = () => {
               <FormControl>
                 <FormControlLabel
                   control={<Field as={Checkbox} name="clustered" color="primary" />}
-                  label={<Typography variant="body2">{T('settings.addToken.clustered')}</Typography>}
+                  label={<Typography variant="body2">{i18n('settings.addToken.clustered')}</Typography>}
                 />
               </FormControl>
               <SelectField
                 name="namespace"
-                label={T('k8s.namespace')}
-                helperText={T('common.chooseNamespace')}
+                label={i18n('k8s.namespace')}
+                helperText={i18n('common.chooseNamespace')}
                 disabled={clustered}
               >
                 {namespaces.map((n) => (
@@ -124,12 +127,12 @@ const RBACGenerator = () => {
               </SelectField>
               <SelectField
                 name="role"
-                label={T('settings.addToken.role')}
-                helperText={T('settings.addToken.roleHelper')}
+                label={i18n('settings.addToken.role')}
+                helperText={i18n('settings.addToken.roleHelper')}
               >
                 {['manager', 'viewer'].map((role) => (
                   <MenuItem key={role} value={role}>
-                    {toTitleCase(role)}
+                    {_.upperFirst(role)}
                   </MenuItem>
                 ))}
               </SelectField>
@@ -137,22 +140,22 @@ const RBACGenerator = () => {
           </Form>
         </Formik>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.generatorHelper2')}
+          {i18n('settings.addToken.generatorHelper2')}
         </Typography>
         <Box position="relative">
           <pre className={classes.pre} style={{ height: 300, overflow: 'auto' }}>
             {rbac}
           </pre>
           <Box className={classes.copy}>
-            <Button onClick={copyRBAC}>{T('common.copy')}</Button>
+            <Button onClick={copyRBAC}>{i18n('common.copy')}</Button>
           </Box>
         </Box>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.generatorHelper3')}
+          {i18n('settings.addToken.generatorHelper3')}
         </Typography>
         <pre className={classes.pre}>kubectl apply -f rbac.yaml</pre>
         <Typography variant="body2" color="textSecondary">
-          {T('settings.addToken.generatorHelper4')}
+          {i18n('settings.addToken.generatorHelper4')}
         </Typography>
         <pre className={classes.pre}>{getSecret}</pre>
       </Space>

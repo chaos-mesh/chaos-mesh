@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 )
@@ -56,15 +57,16 @@ type ChaosDashboardConfig struct {
 // PersistTTLConfig defines the configuration of ttl
 type PersistTTLConfig struct {
 	SyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
-	Event      string `envconfig:"TTL_EVENT"       default:"168h"` // one week
-	Experiment string `envconfig:"TTL_EXPERIMENT"  default:"336h"` // two weeks
+	Event      string `envconfig:"TTL_EVENT"         default:"168h"` // one week
+	Experiment string `envconfig:"TTL_EXPERIMENT"    default:"336h"` // two weeks
+	Schedule   string `envconfig:"TTL_SCHEDULE"      default:"336h"` // two weeks
+	Workflow   string `envconfig:"TTL_WORKFLOW"      default:"336h"` // two weeks
 }
 
 // DatabaseConfig defines the configuration for databases
 type DatabaseConfig struct {
 	Driver     string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
 	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"core.sqlite"`
-	Secret     string `envconfig:"DATABASE_SECRET"`
 }
 
 // GetChaosDashboardEnv gets all env variables related to dashboard.
@@ -75,25 +77,37 @@ func GetChaosDashboardEnv() (*ChaosDashboardConfig, error) {
 }
 
 // ParsePersistTTLConfig parse PersistTTLConfig to persistTTLConfigParsed.
-func ParsePersistTTLConfig(config *PersistTTLConfig) (*ttlcontroller.TTLconfig, error) {
-	SyncPeriod, err := time.ParseDuration(config.SyncPeriod)
+func ParsePersistTTLConfig(config *PersistTTLConfig) (*ttlcontroller.TTLConfig, error) {
+	syncPeriod, err := time.ParseDuration(config.SyncPeriod)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
-	Event, err := time.ParseDuration(config.Event)
+	event, err := time.ParseDuration(config.Event)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "parse configuration TTL for event")
 	}
 
-	Experiment, err := time.ParseDuration(config.Experiment)
+	experiment, err := time.ParseDuration(config.Experiment)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
 	}
 
-	return &ttlcontroller.TTLconfig{
-		DatabaseTTLResyncPeriod: SyncPeriod,
-		EventTTL:                Event,
-		ArchiveTTL:              Experiment,
+	schedule, err := time.ParseDuration(config.Schedule)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
+	}
+
+	workflow, err := time.ParseDuration(config.Workflow)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
+	}
+
+	return &ttlcontroller.TTLConfig{
+		DatabaseTTLResyncPeriod: syncPeriod,
+		EventTTL:                event,
+		ArchiveTTL:              experiment,
+		ScheduleTTL:             schedule,
+		WorkflowTTL:             workflow,
 	}, nil
 }

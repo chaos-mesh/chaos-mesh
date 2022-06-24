@@ -50,10 +50,12 @@ func init() {
 	// +kubebuilder:scaffold:scheme
 }
 
+// NewScheme returns the runtime.Scheme used by controller-runtime
 func NewScheme() *runtime.Scheme {
 	return scheme
 }
 
+// NewOption returns the manager.Options for build the controller-runtime Manager
 func NewOption(logger logr.Logger) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
@@ -62,6 +64,7 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		leaderElectionNamespace = "default"
 	}
 	options := ctrl.Options{
+		// TODO: accept the schema from parameter instead of using scheme directly
 		Scheme:                     scheme,
 		MetricsBindAddress:         net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
@@ -91,10 +94,12 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 	return &options
 }
 
+// NewConfig would fetch the rest.Config from environment. When it failed to fetch config, it would exit the whole application.
 func NewConfig() *rest.Config {
 	return ctrl.GetConfigOrDie()
 }
 
+// NewManager would build the controller-runtime manager with the given parameters.
 func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
 	if config.ControllerCfg.QPS > 0 {
 		cfg.QPS = config.ControllerCfg.QPS
@@ -106,6 +111,7 @@ func NewManager(options *ctrl.Options, cfg *rest.Config) (ctrl.Manager, error) {
 	return ctrl.NewManager(cfg, *options)
 }
 
+// NewAuthCli would build the authorizationv1.AuthorizationV1Client with given parameters.
 func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error) {
 
 	if config.ControllerCfg.QPS > 0 {
@@ -118,6 +124,7 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 	return authorizationv1.NewForConfig(cfg)
 }
 
+// NewClient would build the controller-runtime client.Client with given parameters.
 func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
 	// TODO: make this size configurable
 	cache, err := lru.New(100)
@@ -137,21 +144,11 @@ type noCacheReader struct {
 	client.Reader `name:"no-cache"`
 }
 
+// NewNoCacheReader builds a client.Reader with no cache.
+// TODO: we could return with fx.Annotate instead of struct noCacheReader and magic name "no-cache"
 func NewNoCacheReader(mgr ctrl.Manager) noCacheReader {
 	return noCacheReader{
 		Reader: mgr.GetAPIReader(),
-	}
-}
-
-type globalCacheReader struct {
-	fx.Out
-
-	client.Reader `name:"global-cache"`
-}
-
-func NewGlobalCacheReader(mgr ctrl.Manager) globalCacheReader {
-	return globalCacheReader{
-		Reader: mgr.GetClient(),
 	}
 }
 
@@ -161,6 +158,7 @@ type controlPlaneCacheReader struct {
 	client.Reader `name:"control-plane-cache"`
 }
 
+// NewControlPlaneCacheReader builds a client.Reader with cache for certain usage for control plane
 func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPlaneCacheReader, error) {
 	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
 	if err != nil {
@@ -176,6 +174,7 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 		return controlPlaneCacheReader{}, err
 	}
 	// TODO: store the channel and use it to stop
+	// FIXME: goroutine leaks
 	go func() {
 		// FIXME: get context from parameter
 		err := cacheReader.Start(context.TODO())
@@ -218,6 +217,5 @@ var Module = fx.Provide(
 	NewScheme,
 	NewConfig,
 	NewNoCacheReader,
-	NewGlobalCacheReader,
 	NewControlPlaneCacheReader,
 )

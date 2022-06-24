@@ -101,12 +101,12 @@ func NewOperatorAction(
 }
 
 func (oa *operatorAction) DeployOperator(info *OperatorConfig) error {
-	klog.Infof("create namespace chaos-testing")
+	klog.Infof("create namespace chaos-mesh")
 	cmd := fmt.Sprintf(`kubectl create ns %s`, e2econst.ChaosMeshNamespace)
 	klog.Infof(cmd)
 	output, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 	if err != nil {
-		return errors.Errorf("failed to create namespace chaos-testing: %v %s", err, string(output))
+		return errors.Errorf("failed to create namespace chaos-mesh: %v %s", err, string(output))
 	}
 	return oa.UpgradeOperator(info)
 }

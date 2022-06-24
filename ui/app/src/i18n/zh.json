@@ -50,6 +50,10 @@
       "namespaceHelper": "选择命名空间"
     },
     "scope": {
+      "namespaceSelectorsHelper": "指定目标 Pod 所属的命名空间（namespace）。",
+      "labelSelectorsHelper": "指定目标 Pod 带有的标签（label）。",
+      "annotationSelectorsHelper": "指定目标 Pod 带有的注解（annotation）。",
+      "phaseSelectorsHelper": "指定目标 Pod 所处的阶段（phase）。",
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
@@ -129,15 +133,12 @@
     "titleStep2": "填写计划信息",
     "basic": {
       "nameHelper": "计划的名称",
-      "scheduleHelper": "计划以 CronJob 的形式表示。如果你还不熟悉它，可以借助 {crontabguru} 来帮助定义计划",
-      "historyLimit": "历史限制",
-      "historyLimitHelper": "最大实验记录数",
-      "concurrencyPolicy": "并发策略",
-      "concurrencyPolicyHelper": "是否允许实验同时运行",
+      "scheduleHelper": "计划以 CronJob 的形式表示。如果你还不熟悉它，可以借助 {crontabguru} 来辅助制定计划。",
+      "historyLimitHelper": "最大实验记录数。",
+      "concurrencyPolicyHelper": "是否允许实验同时运行。",
       "forbid": "禁止",
       "allow": "允许",
-      "startingDeadlineSeconds": "实验过期时间",
-      "startingDeadlineSecondsHelper": "设置以忽略长时间未运行的实验"
+      "startingDeadlineSecondsHelper": "统计从 startingDeadlineSeconds 设置的值到现在错过了多少次 job。"
     }
   },
   "schedules": {
@@ -173,7 +174,7 @@
         "imageHelper": "容器的镜像",
         "imageValidation": "镜像不能为空",
         "command": "命令",
-        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以空格结尾来创建单条命令。"
+        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以回车结束来创建单条命令。"
       },
       "conditionalBranches": {
         "title": "条件分支（可选）",
@@ -251,21 +252,25 @@
     "title": "设置",
     "debugMode": {
       "title": "调试模式",
-      "choose": "创建实验不会发送真实的 HTTP 请求，而是将相关信息打印在控制台中"
+      "choose": "创建实验不会发送真正的 HTTP 请求，而是将相关信息打印在控制台中。"
     },
     "enableKubeSystemNS": {
-      "title": "Kube System 命名空间",
-      "choose": "创建实验时允许在范围中选择 kube-system 命名空间"
+      "title": "允许 kube-system 命名空间",
+      "choose": "在创建实验时允许在范围内选择 kube-system 命名空间。"
+    },
+    "useNextWorkflowInterface": {
+      "title": "使用全新的工作流界面",
+      "choose": "在过去的一段时间里，我们将工作流的相关界面进行了重构。现在你可以通过流程图的形式来更加方便地创建工作流。（注意：这项改进仍处于活跃地开发状态中，在它稳定前界面仍有可能会发生变动。）"
     },
     "theme": {
       "title": "主题",
-      "choose": "选择主题",
+      "choose": "选择主题。",
       "light": "浅色",
       "dark": "暗色"
     },
     "lang": {
       "title": "语言",
-      "choose": "选择界面语言",
+      "choose": "选择界面语言。",
       "en": "英语",
       "zh": "简体中文"
     },
@@ -308,7 +313,7 @@
   },
   "common": {
     "add": "添加",
-    "otherOptions": "其他选项",
+    "moreOptions": "更多选项",
     "batchOperation": "批量操作",
     "cancel": "取消",
     "cancelEdit": "取消修改",
@@ -336,7 +341,6 @@
     "noOptions": "无选项",
     "operation": "操作",
     "options": "选项",
-    "other": "其他",
     "pause": "暂停",
     "preview": "预览",
     "process": "流程",
@@ -385,11 +389,11 @@
     "annotations": "注解",
     "namespaceSelectors": "命名空间选择器",
     "labelSelectors": "标签选择器",
-    "annotationsSelectors": "注解选择器",
+    "annotationSelectors": "注解选择器",
     "podPhaseSelectors": "阶段选择器"
   },
   "physic": {
     "address": "地址",
-    "addressHelper": "键入并以空格结尾来添加一个或多个 chaosd 地址"
+    "addressHelper": "键入并以回车结束来添加一个或多个 chaosd 地址"
   }
 }

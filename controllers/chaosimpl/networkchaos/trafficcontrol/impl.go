@@ -63,9 +63,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)
 	}
-	if networkchaos.Status.Instances == nil {
-		networkchaos.Status.Instances = make(map[string]int64)
-	}
 
 	record := records[index]
 	phase := record.Phase
@@ -179,9 +176,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	// The only possible phase to get in here is "Injected" or "Injected/Wait"
 
 	networkchaos := obj.(*v1alpha1.NetworkChaos)
-	if networkchaos.Status.Instances == nil {
-		networkchaos.Status.Instances = make(map[string]int64)
-	}
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)
 	}
@@ -299,15 +293,22 @@ func (impl *Impl) ApplyTc(ctx context.Context, m *podnetworkchaosmanager.PodNetw
 		}
 		targetPods = append(targetPods, pod)
 	}
-	dstIpset := ipset.BuildIPSet(targetPods, externalCidrs, networkchaos, string(tcType[0:2])+ipSetPostFix, m.Source)
-	impl.Log.Info("apply traffic control with filter", "sources", m.Source, "ipset", dstIpset)
+	ipSetWithTcPostFix := string(tcType[0:2]) + ipSetPostFix
+	dstIPSets := ipset.BuildIPSets(targetPods, externalCidrs, networkchaos, ipSetWithTcPostFix, m.Source)
+	dstSetIPSet := ipset.BuildSetIPSet(dstIPSets, networkchaos, ipSetWithTcPostFix, m.Source)
+	impl.Log.Info("apply traffic control with filter", "sources", m.Source, "setIpset", dstSetIPSet, "ipSets", dstIPSets)
 
-	m.T.Append(dstIpset)
+	for _, ipSet := range dstIPSets {
+		m.T.Append(ipSet)
+	}
+
+	m.T.Append(dstSetIPSet)
+
 	m.T.Append(v1alpha1.RawTrafficControl{
 		Type:        tcType,
 		TcParameter: spec.TcParameter,
 		Source:      m.Source,
-		IPSet:       dstIpset.Name,
+		IPSet:       dstSetIPSet.Name,
 		Device:      device,
 	})
 

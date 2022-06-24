@@ -21,6 +21,8 @@ If you are an adopter and are willing to share your Chaos Mesh story, feel free 
 | [RabbitMQ](https://www.rabbitmq.com/)                  |RabbitMQ applies NetworkChaos to learn how RabbitMQ handles network latency.            |[Testing RabbitMQ Resiliency with Chaos Mesh](https://github.com/rabbitmq/tgir/tree/S01E09/s01/e09)       |
 | [Tencent](https://www.tencent.com/en-us)                  |After Tencent Interactive Entertainment migrated their online operations to the Tencent Cloud Kubernetes engine, they wished to provide users with a more stable and reliable experience, which is why they introduced Chaos Mesh. Tencent mainly use Chaos Mesh to simulate the following types of failures: fault isolation, service degradation, verification of services.            |[Securing Online Gaming: Combine Chaos Engineering with DevOps Practices](https://chaos-mesh.org/blog/Securing-Online-Gaming-Combine-Chaos-Engineering-with-DevOps-Practices/)       |
 | [Xpeng](https://en.xiaopeng.com/)                  |Xpeng Motors use Chaos Mesh in the following scenarios: rolling updates of microservices and lossless verification of traffic; microservices, multi-registries, multi-party synchronization, and traffic lossless verification; MQTT cluster two-way subscription verification; exactly-once consumer business verification for message queues;simulation of weak 4G network for in-vehicle systems, saving drive test costs; AIOPS anomaly detection dataset generation.            |To be added.       |
+| [Maycur](https://www.maycur.com/)                  |Maycur built Chaos Mesh on K8S for JVM fault drill, mainly for JVM delay, method exception, method return value modification, and other scenarios.             |To be added.       |
+
 
 ## Vendors
 

@@ -34,15 +34,14 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import SearchIcon from '@mui/icons-material/Search'
-import T from 'components/T'
 import Tooltip from '@ui/mui-extends/esm/Tooltip'
 import { Workflow } from 'api/workflows.type'
-import _debounce from 'lodash.debounce'
+import _ from 'lodash'
 import api from 'api'
 import { format } from 'lib/luxon'
+import i18n from 'components/T'
 import { makeStyles } from '@mui/styles'
 import search from 'lib/search'
-import { truncate } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
@@ -80,7 +79,7 @@ const Search: React.FC = () => {
 
   const debounceExecSearch = useMemo(
     () =>
-      _debounce(async (s: string) => {
+      _.debounce(async (s: string) => {
         setNoResult(false)
         setOpen(true)
 
@@ -111,8 +110,8 @@ const Search: React.FC = () => {
     []
   )
 
-  const groupBy = (option: Option) => T(`${option.is}s.title`, intl)
-  const getOptionLabel = (option: Option) => option.name
+  const groupBy = (option: Option) => i18n(`${option.is}s.title`, intl)
+  const getOptionLabel = (option: Option) => option.name!
   const isOptionEqualToValue = (option: Option, value: Option) => option.uid === value.uid
   const filterOptions = (options: Option[]) => options
 
@@ -157,7 +156,7 @@ const Search: React.FC = () => {
             {name}
           </Typography>
           <div className={classes.chipContainer}>
-            <Chip color="primary" icon={<FingerprintIcon />} label={truncate(uuid)} title={uuid} />
+            <Chip color="primary" icon={<FingerprintIcon />} label={_.truncate(uuid)} title={uuid} />
             <Chip label={kind} />
             <Chip icon={<ScheduleIcon />} label={format(time)} />
           </div>
@@ -186,7 +185,7 @@ const Search: React.FC = () => {
       open={open}
       onClose={() => setOpen(false)}
       loading={loading}
-      loadingText={noResult ? T('search.result.noResult') : T('search.result.acquiring')}
+      loadingText={noResult ? i18n('search.result.noResult') : i18n('search.result.acquiring')}
       options={options}
       groupBy={groupBy}
       getOptionLabel={getOptionLabel}
@@ -198,7 +197,7 @@ const Search: React.FC = () => {
       renderInput={(params) => (
         <TextField
           {...params}
-          label={T('search.placeholder')}
+          label={i18n('search.placeholder')}
           InputProps={{
             ...params.InputProps,
             startAdornment: (
@@ -213,15 +212,15 @@ const Search: React.FC = () => {
                   <Tooltip
                     title={
                       <Typography variant="body2" component="div">
-                        {T('search.tip.title')}
+                        {i18n('search.tip.title')}
                         <ul className={classes.tooltip}>
-                          <li>{T('search.tip.namespace')}</li>
-                          <li>{T('search.tip.kind')}</li>
+                          <li>{i18n('search.tip.namespace')}</li>
+                          <li>{i18n('search.tip.kind')}</li>
                         </ul>
                       </Typography>
                     }
                   >
-                    <HelpOutlineIcon fontSize="small" />
+                    <HelpOutlineIcon />
                   </Tooltip>
                 </InputAdornment>
               </>

@@ -14,29 +14,32 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button, Grid, Grow } from '@mui/material'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-
+import loadable from '@loadable/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { Event } from 'api/events.type'
-import EventsTimeline from 'components/EventsTimeline'
-import Loading from '@ui/mui-extends/esm/Loading'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import { ScheduleSingle } from 'api/schedules.type'
-import Space from '@ui/mui-extends/esm/Space'
-import T from 'components/T'
+import { Box, Button, Grid, Grow } from '@mui/material'
 import api from 'api'
-import loadable from '@loadable/component'
-import { useIntl } from 'react-intl'
-import { useStoreDispatch } from 'store'
+import { Event } from 'api/events.type'
+import { ScheduleSingle } from 'api/schedules.type'
 import yaml from 'js-yaml'
+import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
+import { useNavigate, useParams } from 'react-router-dom'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch } from 'store'
+
+import { setAlert, setConfirm } from 'slices/globalStatus'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import ObjectConfiguration from 'components/ObjectConfiguration'
+import i18n from 'components/T'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -85,8 +88,8 @@ const Single = () => {
       case 'archive':
         dispatch(
           setConfirm({
-            title: `${T('archives.single', intl)} ${single!.name}`,
-            description: T('experiments.deleteDesc', intl),
+            title: `${i18n('archives.single', intl)} ${single!.name}`,
+            description: i18n('experiments.deleteDesc', intl),
             handle: handleAction('archive'),
           })
         )
@@ -95,8 +98,8 @@ const Single = () => {
       case 'pause':
         dispatch(
           setConfirm({
-            title: `${T('common.pause', intl)} ${single!.name}`,
-            description: T('experiments.pauseDesc', intl),
+            title: `${i18n('common.pause', intl)} ${single!.name}`,
+            description: i18n('experiments.pauseDesc', intl),
             handle: handleAction('pause'),
           })
         )
@@ -105,8 +108,8 @@ const Single = () => {
       case 'start':
         dispatch(
           setConfirm({
-            title: `${T('common.start', intl)} ${single!.name}`,
-            description: T('experiments.startDesc', intl),
+            title: `${i18n('common.start', intl)} ${single!.name}`,
+            description: i18n('experiments.startDesc', intl),
             handle: handleAction('start'),
           })
         )
@@ -141,7 +144,7 @@ const Single = () => {
           dispatch(
             setAlert({
               type: 'success',
-              message: T(`confirm.success.${action}`, intl),
+              message: i18n(`confirm.success.${action}`, intl),
             })
           )
 
@@ -161,6 +164,7 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
+          {single && <Helmet title={`Schedule ${single.name}`} />}
           <Space spacing={6}>
             <Space direction="row">
               <Button
@@ -169,7 +173,7 @@ const Single = () => {
                 startIcon={<ArchiveOutlinedIcon />}
                 onClick={handleSelect('archive')}
               >
-                {T('archives.single')}
+                {i18n('archives.single')}
               </Button>
               {single?.status === 'paused' ? (
                 <Button
@@ -178,7 +182,7 @@ const Single = () => {
                   startIcon={<PlayCircleOutlineIcon />}
                   onClick={handleSelect('start')}
                 >
-                  {T('common.start')}
+                  {i18n('common.start')}
                 </Button>
               ) : single?.status !== 'finished' ? (
                 <Button
@@ -187,7 +191,7 @@ const Single = () => {
                   startIcon={<PauseCircleOutlineIcon />}
                   onClick={handleSelect('pause')}
                 >
-                  {T('common.pause')}
+                  {i18n('common.pause')}
                 </Button>
               ) : null}
             </Space>
@@ -197,7 +201,7 @@ const Single = () => {
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
-                  <PaperTop title={T('events.title')} boxProps={{ mb: 3 }} />
+                  <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                   <Box flex={1} overflow="scroll">
                     <EventsTimeline events={events} />
                   </Box>
@@ -207,7 +211,7 @@ const Single = () => {
                 <Paper sx={{ height: 600, p: 0 }}>
                   {single && (
                     <Space display="flex" flexDirection="column" height="100%">
-                      <PaperTop title={T('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
+                      <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
                         <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
                       </Box>

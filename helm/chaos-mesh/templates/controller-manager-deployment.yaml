@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +33,7 @@ spec:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: controller-manager
       annotations:
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
         rollme: {{ randAlphaNum 5 | quote }}
     {{- with .Values.controllerManager.podAnnotations }}
 {{ toYaml . | indent 8 }}
@@ -61,9 +63,8 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
-          {{- range $envKey, $envVal := .Values.controllerManager.env }}
-          - name: {{ $envKey | upper }}
-            value: {{ $envVal | quote }}
+          {{- if .Values.controllerManager.env }}
+          {{- include "chaos-mesh.helpers.listEnvVars" .Values.controllerManager | trim | nindent 10 }}
           {{- end }}
           - name: NAMESPACE
             valueFrom:
@@ -111,7 +112,7 @@ spec:
             value: {{ .Values.dashboard.securityMode | quote }}
           - name: CHAOSD_SECURITY_MODE
             value: {{ .Values.controllerManager.chaosdSecurityMode | quote }}
-          {{- if .Values.dashboard.securityMode}}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
           - name: CHAOS_DAEMON_CLIENT_CERT
             value: /etc/chaos-daemon/cert/tls.crt
           - name: CHAOS_DAEMON_CLIENT_KEY
@@ -147,7 +148,7 @@ spec:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
-          {{- if .Values.dashboard.securityMode }}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
           - name: chaos-daemon-client-cert
             mountPath: /etc/chaos-daemon/cert
             readOnly: true
@@ -189,7 +190,7 @@ spec:
         - name: webhook-certs
           secret:
             secretName: {{ template "chaos-mesh.webhook.certs" . }}
-        {{- if .Values.dashboard.securityMode }}
+        {{- if .Values.chaosDaemon.mtls.enabled }}
         - name: chaos-daemon-client-cert
           secret:
             secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
