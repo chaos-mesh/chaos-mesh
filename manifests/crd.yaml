@@ -209,17 +209,6 @@ spec:
               duration:
                 description: Duration represents the duration of the chaos action.
                 type: string
-              limit:
-                description: Limit defines the limit of IO frequency.
-                properties:
-                  period:
-                    type: string
-                  quota:
-                    description: Quota defines how many operations are permitted in
-                      a period
-                    format: int64
-                    type: integer
-                type: object
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -4207,17 +4196,6 @@ spec:
                   duration:
                     description: Duration represents the duration of the chaos action.
                     type: string
-                  limit:
-                    description: Limit defines the limit of IO frequency.
-                    properties:
-                      period:
-                        type: string
-                      quota:
-                        description: Quota defines how many operations are permitted
-                          in a period
-                        format: int64
-                        type: integer
-                    type: object
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -6866,17 +6844,6 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action.
                               type: string
-                            limit:
-                              description: Limit defines the limit of IO frequency.
-                              properties:
-                                period:
-                                  type: string
-                                quota:
-                                  description: Quota defines how many operations are
-                                    permitted in a period
-                                  format: int64
-                                  type: integer
-                              type: object
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -9371,17 +9338,6 @@ spec:
                                   description: Duration represents the duration of
                                     the chaos action.
                                   type: string
-                                limit:
-                                  description: Limit defines the limit of IO frequency.
-                                  properties:
-                                    period:
-                                      type: string
-                                    quota:
-                                      description: Quota defines how many operations
-                                        are permitted in a period
-                                      format: int64
-                                      type: integer
-                                  type: object
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -16387,17 +16343,6 @@ spec:
                   duration:
                     description: Duration represents the duration of the chaos action.
                     type: string
-                  limit:
-                    description: Limit defines the limit of IO frequency.
-                    properties:
-                      period:
-                        type: string
-                      quota:
-                        description: Quota defines how many operations are permitted
-                          in a period
-                        format: int64
-                        type: integer
-                    type: object
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -18716,17 +18661,6 @@ spec:
                         description: Duration represents the duration of the chaos
                           action.
                         type: string
-                      limit:
-                        description: Limit defines the limit of IO frequency.
-                        properties:
-                          period:
-                            type: string
-                          quota:
-                            description: Quota defines how many operations are permitted
-                              in a period
-                            format: int64
-                            type: integer
-                        type: object
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -21434,17 +21368,6 @@ spec:
                                   description: Duration represents the duration of
                                     the chaos action.
                                   type: string
-                                limit:
-                                  description: Limit defines the limit of IO frequency.
-                                  properties:
-                                    period:
-                                      type: string
-                                    quota:
-                                      description: Quota defines how many operations
-                                        are permitted in a period
-                                      format: int64
-                                      type: integer
-                                  type: object
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -24010,17 +23933,6 @@ spec:
                                       description: Duration represents the duration
                                         of the chaos action.
                                       type: string
-                                    limit:
-                                      description: Limit defines the limit of IO frequency.
-                                      properties:
-                                        period:
-                                          type: string
-                                        quota:
-                                          description: Quota defines how many operations
-                                            are permitted in a period
-                                          format: int64
-                                          type: integer
-                                      type: object
                                     mode:
                                       description: 'Mode defines the mode to run chaos
                                         action. Supported mode: one / all / fixed
@@ -33925,17 +33837,6 @@ spec:
                           description: Duration represents the duration of the chaos
                             action.
                           type: string
-                        limit:
-                          description: Limit defines the limit of IO frequency.
-                          properties:
-                            period:
-                              type: string
-                            quota:
-                              description: Quota defines how many operations are permitted
-                                in a period
-                              format: int64
-                              type: integer
-                          type: object
                         mode:
                           description: 'Mode defines the mode to run chaos action.
                             Supported mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -36345,17 +36246,6 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action.
                               type: string
-                            limit:
-                              description: Limit defines the limit of IO frequency.
-                              properties:
-                                period:
-                                  type: string
-                                quota:
-                                  description: Quota defines how many operations are
-                                    permitted in a period
-                                  format: int64
-                                  type: integer
-                              type: object
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent

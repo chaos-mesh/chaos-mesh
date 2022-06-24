@@ -63,17 +63,7 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 		return nil, err
 	}
 
-	if req.Action == pb.ApplyBlockChaosRequest_Limit {
-		log.Info("Injecting IOEM Limit", "quota", req.Limit.Quota, "period_us", req.Limit.PeriodUs, "volumePath", volumePath)
-		id, err := c.InjectIOEMLimit(volumePath, 0, uint(pid), req.Limit.PeriodUs, req.Limit.Quota)
-		if err != nil {
-			log.Error(err, "inject ioem limit")
-			return nil, err
-		}
-		return &pb.ApplyBlockChaosResponse{
-			InjectionId: int32(id),
-		}, nil
-	} else if req.Action == pb.ApplyBlockChaosRequest_Delay {
+	if req.Action == pb.ApplyBlockChaosRequest_Delay {
 		log.Info("Injecting IOEM Delay", "delay", req.Delay.Delay, "jitter", req.Delay.Jitter, "corr", req.Delay.Correlation)
 
 		id, err := c.InjectIOEMDelay(volumePath, 0, uint(pid), int64(req.Delay.Delay), int64(req.Delay.Jitter), uint32(req.Delay.Correlation))

@@ -279,11 +279,9 @@ message ApplyBlockChaosRequest {
   string container_id = 1;
   string volume_path = 2;
   enum Action {
-    Limit = 0;
     Delay = 1;
   }
   Action action = 3;
-  BlockLimitSpec limit = 4;
   BlockDelaySpec delay = 5;
   bool enterNS = 6;
 }

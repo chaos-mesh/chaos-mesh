@@ -101,26 +101,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		if err != nil {
 			return v1alpha1.NotInjected, err
 		}
-	} else if blockchaos.Spec.Action == v1alpha1.BlockLimit {
-		duration, err := time.ParseDuration(blockchaos.Spec.Limit.Period)
-		if err != nil {
-			return v1alpha1.NotInjected, errors.Wrapf(err, "parse period: %s", blockchaos.Spec.Limit.Period)
-		}
-
-		res, err = pbClient.ApplyBlockChaos(ctx, &pb.ApplyBlockChaosRequest{
-			ContainerId: containerId,
-			VolumePath:  volumePath,
-			Action:      pb.ApplyBlockChaosRequest_Limit,
-			Limit: &pb.BlockLimitSpec{
-				Quota:    blockchaos.Spec.Limit.Quota,
-				PeriodUs: uint64(duration.Microseconds()),
-			},
-			EnterNS: true,
-		})
-
-		if err != nil {
-			return v1alpha1.NotInjected, err
-		}
 	} else {
 		return v1alpha1.NotInjected, utils.ErrUnknownAction
 	}
