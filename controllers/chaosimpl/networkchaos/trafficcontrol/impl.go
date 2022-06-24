@@ -63,9 +63,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)
 	}
-	if networkchaos.Status.Instances == nil {
-		networkchaos.Status.Instances = make(map[string]int64)
-	}
 
 	record := records[index]
 	phase := record.Phase
@@ -179,9 +176,6 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	// The only possible phase to get in here is "Injected" or "Injected/Wait"
 
 	networkchaos := obj.(*v1alpha1.NetworkChaos)
-	if networkchaos.Status.Instances == nil {
-		networkchaos.Status.Instances = make(map[string]int64)
-	}
 	if networkchaos.Status.Instances == nil {
 		networkchaos.Status.Instances = make(map[string]int64)
 	}

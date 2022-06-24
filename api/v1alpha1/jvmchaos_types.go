@@ -29,7 +29,7 @@ type JVMChaosSpec struct {
 
 	// Action defines the specific jvm chaos action.
 	// Supported action: latency;return;exception;stress;gc;ruleData
-	// +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData
+	// +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql
 	Action JVMChaosAction `json:"action"`
 
 	// JVMParameter represents the detail about jvm chaos action definition
@@ -59,6 +59,9 @@ const (
 	// JVMRuleDataAction represents inject fault with byteman's rule
 	// refer to https://downloads.jboss.org/byteman/4.0.14/byteman-programmers-guide.html#the-byteman-rule-language
 	JVMRuleDataAction JVMChaosAction = "ruleData"
+
+	// JVMMySQLAction represents the JVM chaos action of mysql java client fault injection
+	JVMMySQLAction JVMChaosAction = "mysql"
 )
 
 // JVMParameter represents the detail about jvm chaos action definition
@@ -68,6 +71,8 @@ type JVMParameter struct {
 	JVMClassMethodSpec `json:",inline"`
 
 	JVMStressCfgSpec `json:",inline"`
+
+	JVMMySQLSpec `json:",inline"`
 
 	// +optional
 	// byteman rule name, should be unique, and will generate one if not set
@@ -79,10 +84,12 @@ type JVMParameter struct {
 
 	// +optional
 	// the exception which needs to throw for action `exception`
+	// or the exception message needs to throw in action `mysql`
 	ThrowException string `json:"exception"`
 
 	// +optional
 	// the latency duration for action 'latency', unit ms
+	// or the latency duration in action `mysql`
 	LatencyDuration int `json:"latency"`
 
 	// +optional
@@ -120,6 +127,29 @@ type JVMStressCfgSpec struct {
 	// +optional
 	// the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
 	MemoryType string `json:"memType,omitempty"`
+}
+
+// JVMMySQLSpec is the specification of MySQL fault injection in JVM
+// only when SQL match the Database, Table and SQLType, JVMChaos mesh will inject fault
+// for examle:
+//   SQL is "select * from test.t1",
+//   only when ((Database == "test" || Database == "") && (Table == "t1" || Table == "") && (SQLType == "select" || SQLType == "")) is true, JVMChaos will inject fault
+type JVMMySQLSpec struct {
+	// the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now
+	MySQLConnectorVersion string `json:"mysqlConnectorVersion,omitempty"`
+
+	// the match database
+	// default value is "", means match all database
+	Database string `json:"database,omitempty"`
+
+	// the match table
+	// default value is "", means match all table
+	Table string `json:"table,omitempty"`
+
+	// the match sql type
+	// default value is "", means match all SQL type.
+	// The value can be 'select', 'insert', 'update', 'delete', 'replace'.
+	SQLType string `json:"sqlType,omitempty"`
 }
 
 // JVMChaosStatus defines the observed state of JVMChaos

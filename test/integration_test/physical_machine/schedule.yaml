@@ -16,7 +16,7 @@ kind: Schedule
 apiVersion: chaos-mesh.org/v1alpha1
 metadata:
   name: test
-  namespace: chaos-testing
+  namespace: chaos-mesh
 spec:
   schedule: '@every 5s'
   startingDeadlineSeconds: null

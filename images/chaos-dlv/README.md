@@ -13,14 +13,14 @@ Then you need to install with the corresponding helm configuration to integrate
 this container with the chaos mesh:
 
 ```bash
-helm install chaos-mesh ./helm/chaos-mesh -n chaos-testing --set chaosDlv.enable=true
+helm install chaos-mesh ./helm/chaos-mesh -n chaos-mesh --set chaosDlv.enable=true
 ```
 
 After deploying the image, you can find the `chaos-mesh-dlv` container under
 every pods of chaos mesh. The command:
 
 ```bash
-kubectl get pods -n chaos-testing -o jsonpath="{.items[*].spec.containers[*].name}"
+kubectl get pods -n chaos-mesh -o jsonpath="{.items[*].spec.containers[*].name}"
 ```
 
 Will print:
@@ -38,7 +38,7 @@ command to forward the remote port, and use a `dlv` command to connect to it.
 For example:
 
 ```bash
-kubectl port-forward -n chaos-testing svc/chaos-mesh-controller-manager 2345:8000
+kubectl port-forward -n chaos-mesh svc/chaos-mesh-controller-manager 2345:8000
 dlv connect localhost:2345
 ```
 
@@ -52,7 +52,7 @@ to specific pod automatically.
 Firstly, use `kubectl port-forward` to export the port on local machine:
 
 ```bash
-kubectl port-forward -n chaos-testing svc/chaos-mesh-controller-manager 2345:8000
+kubectl port-forward -n chaos-mesh svc/chaos-mesh-controller-manager 2345:8000
 ```
 
 Then add a vscode attach configuration and save it in `.vscode/launch.json`:
