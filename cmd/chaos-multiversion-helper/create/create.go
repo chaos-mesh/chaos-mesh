@@ -156,9 +156,9 @@ func createFile(ctx createFileContext, file fs.FileInfo) error {
 		// `ast` package is not suitable for removing a comment, so the
 		// traditional string processing tool is preferred :)
 		sedProcess := exec.Command("sed", "-i", "/+kubebuilder:storageversion/d", oldFilePath)
-		err = sedProcess.Run()
+		sedOutput, err := sedProcess.CombinedOutput()
 		if err != nil {
-			return errors.Wrapf(err, "remove storage version for %s", oldFilePath)
+			return errors.Wrapf(err, "remove storage version for %s: %s", oldFilePath, string(sedOutput))
 		}
 	}
 
