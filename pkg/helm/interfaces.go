@@ -24,15 +24,16 @@ import (
 type ReleaseService interface {
 	/*GetRelease would fetch the installed release.
 	 */
-	GetRelease(namespace string, releaseName string) (release.Release, error)
+	GetRelease(namespace string, releaseName string) (*release.Release, error)
 
 	/*UpgradeOrInstall would upgrade the existed release or install a new one.
 	namespace is the namespace of the release, it should be an existed namespace.
 	releaseName introduces the name of the release.
 	chart is the chart with certain version to be installed.
 	values is the values to be used in the chart, it is also so-called Config in helm's codes.
+	It will return the installed/upgraded release and error if any.
 	*/
-	UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) error
+	UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error)
 
-	UninstallRelease(namespace string, releaseName string) error
+	UninstallRelease(namespace string, releaseName string) (*release.UninstallReleaseResponse, error)
 }
