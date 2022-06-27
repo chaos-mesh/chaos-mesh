@@ -74,9 +74,9 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 		return &pb.ApplyBlockChaosResponse{
 			InjectionId: int32(id),
 		}, nil
-	} else {
-		return nil, errors.New("unknown action")
 	}
+
+	return nil, errors.New("unknown action")
 }
 
 func normalizeVolumeName(ctx context.Context, volumePath string) (string, error) {
