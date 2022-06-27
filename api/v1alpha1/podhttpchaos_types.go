@@ -22,6 +22,10 @@ type PodHttpChaosSpec struct {
 	// Rules are a list of injection rule for http request.
 	// +optional
 	Rules []PodHttpChaosRule `json:"rules,omitempty"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster RemoteCluster `json:"remoteCluster,omitempty"`
 }
 
 // PodHttpChaosStatus defines the actual state of PodHttpChaos.

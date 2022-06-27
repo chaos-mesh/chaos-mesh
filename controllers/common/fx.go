@@ -80,6 +80,9 @@ func Bootstrap(params Params) error {
 		// when we only change the object.status.experiment.records[].events
 		predicaters := []predicate.Predicate{StatusRecordEventsChangePredicate{}}
 
+		// Filtering of chaos that will be deployed on remote clusters
+		predicaters = append(predicaters, RemoteChaosPredicate{})
+
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
 			pair := pair
@@ -204,4 +207,21 @@ func (StatusRecordEventsChangePredicate) Update(e event.UpdateEvent) bool {
 		statusOld.Experiment.Records[i].Events = nil
 	}
 	return !reflect.DeepEqual(objNew, objOld)
+}
+
+type RemoteChaosPredicate struct {
+	predicate.Funcs
+}
+
+func (RemoteChaosPredicate) Create(e event.CreateEvent) bool {
+	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return false
+	}
+
+	if obj.GetRemoteCluster().ClusterName == "" {
+		return true
+	}
+
+	return false
 }

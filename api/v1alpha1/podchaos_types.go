@@ -76,6 +76,10 @@ type PodChaosSpec struct {
 	// +optional
 	// +kubebuilder:validation:Minimum=0
 	GracePeriod int64 `json:"gracePeriod"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster RemoteCluster `json:"remoteCluster,omitempty"`
 }
 
 // PodChaosStatus represents the current status of the chaos experiment about pods.
