@@ -1444,6 +1444,14 @@ definitions:
     type: object
   v1alpha1.KernelChaosSpec:
     properties:
+      containerNames:
+        description: |-
+          ContainerNames indicates list of the name of affected container.
+          If not set, the first container will be injected
+          +optional
+        items:
+          type: string
+        type: array
       duration:
         description: Duration represents the duration of the chaos action
         type: string
