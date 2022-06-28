@@ -31,7 +31,7 @@ To become a Chaos Mesh member, you are expected to:
     - Join community discussions (e.g. community meetings, Slack).
 - Sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
 
-Contributors that meet the above requirements will then be nominated by their sponsor at the next available [community meeting](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit) to become a member. The maintainers will confer and decide whether to grant membership or not. Chaos Mesh members will be invited into the Chaos Mesh organization, which is recognized by the Chaos Mesh badge under the profile.
+Contributors that meet the above requirements will then be nominated by their sponsor through a PR. It is recommended to describe the reasons for the nomination and the contribution of the nominee in the PR. To get the PR merged, at least two approvals are required from committers or maintainers. Chaos Mesh members will be invited into the Chaos Mesh organization, which is recognized by the Chaos Mesh badge under the profile.
 
 Members are expected to respond to issues and PRs assigned to them, and be the owners of the code or docs they have contributed. Members that have not contributed to the project or community in any way in over 6 months will lose their membership.
 
@@ -48,7 +48,7 @@ Typically, a potential committer needs to show that they have a sufficient under
 - Have contributed 6 or more substantial PRs.
 - Have an above-average understanding of the project codebase, its goals, and directions.
 
-Members that meet the above requirements will be nominated by an existing maintainer to become a committer. The existing maintainers will confer and decide whether to grant committer status or not. 
+Members that meet the above requirements will be nominated by an existing maintainer to become a committer. It is recommended to describe the reasons for the nomination and the contribution of the nominee in the PR. The existing maintainers will confer and decide whether to grant committer status or not. 
 
 Committers are expected to review issues and PRs. Their LGTM counts towards the required LGTM count to merge a PR. While committership indicates a valued member of the community who has demonstrated a healthy respect for the project’s aims and objectives, their work continues to be reviewed by the community before acceptance in an official release.
 
@@ -65,7 +65,7 @@ Committers wanting to become maintainers are expected to:
 - Demonstrate a deep and comprehensive understanding of Chaos Mesh's architecture, technical goals, and directions.
 - Actively engage with major Chaos Mesh feature proposals and implementations.
 
-A new maintainer must be nominated by an existing maintainer. The nominating maintainer will create a PR to update the [Maintainers List](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md). Upon consensus of incumbent maintainers, the PR will be approved and the new maintainer becomes active.
+A new maintainer must be nominated by an existing maintainer. The nominating maintainer will create a PR to update the [Maintainers List](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md). It is recommended to describe the reasons for the nomination and the contribution of the nominee in the PR. Upon consensus of incumbent maintainers, the PR will be approved and the new maintainer becomes active.
 
 If a maintainer is no longer interested or cannot perform the maintainer duties listed above, they should volunteer to be moved to [emeritus status](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md#emeritus-maintainers). In extreme cases this can also occur by a vote of the maintainers per the voting process, as mentioned below.
 
@@ -90,3 +90,13 @@ Decision making must comply with the [CNCF Code of Conduct](https://github.com/c
 ### Proposal process
 
 We use a Request for Comments (RFC) process for any substantial changes to Chaos Mesh. This process involves an upfront design that will provide increased visibility to the community. If you're considering a PR that will bring in a new feature that may affect how Chaos Mesh is implemented, or may be a breaking change, then you should start with a RFC. The process is documented in the [RFC repository](https://github.com/chaos-mesh/rfcs) and has [a template](https://github.com/chaos-mesh/rfcs/blob/main/template.md) for you to get started.
+
+### Nomination process
+
+The following table describes how the nomination is approved.
+
+| Nomination            | Description                                                                               | Approval      | Binding Roles  | Minimum Length (days) |
+| :----------------- | :---------------------------------------------------------------------------------------- | :------------ | :----------------- | :-------------------- |
+| New Member       | When a new member is proposed, should be only nominated by a committer.    | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active committers or maintainers | 3                     |
+| New Committer      | When a new committer is proposed, should be only nominated by a maintainer.  | [Lazy Consensus](https://communitymgt.fandom.com/wiki/Lazy_consensus) | Active maintainers | 7                     |
+| New Maintainer     | When a new maintainer is proposed, should be only nominated by a maintainer. | Supermajority (2/3) Approval | Active maintainers | 7                     |
