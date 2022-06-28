@@ -2260,7 +2260,7 @@ webhooks:
       caBundle: "${CA_BUNDLE}"
       service:
         name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
+        namespace: "chaos-mesh"
         path: /mutate-chaos-mesh-org-v1alpha1-remotecluster
     failurePolicy: Fail
     name: mremotecluster.kb.io
@@ -2686,7 +2686,7 @@ webhooks:
       caBundle: "${CA_BUNDLE}"
       service:
         name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
+        namespace: "chaos-mesh"
         path: /validate-chaos-mesh-org-v1alpha1-remotecluster
     failurePolicy: Fail
     name: vremotecluster.kb.io
