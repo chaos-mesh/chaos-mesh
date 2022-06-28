@@ -93,7 +93,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 
 ### Community blogs
 
-- Grant Tarrant-Fisher: [Integrate your Reliability Toolkit with Your World, Part 2](https://medium.com/chaosiq/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
+- Grant Tarrant-Fisher: [Integrate your Reliability Toolkit with Your World, Part 2](https://web.archive.org/web/20220223141503/https://blog.reliably.com/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
 - Yoshinori Teraoka: [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
 - Sébastien Prud'homme: [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
 - Craig Morten
