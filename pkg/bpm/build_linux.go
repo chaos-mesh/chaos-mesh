@@ -45,14 +45,19 @@ func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 		cmd = nsexecPath
 	}
 
-	if b.pause {
-		args = append([]string{cmd}, args...)
-		cmd = pausePath
-	}
-
 	if b.oomScoreAdj != 0 {
 		args = append([]string{"-n", strconv.Itoa(b.oomScoreAdj), "--", cmd}, args...)
 		cmd = "choom"
+	}
+
+	// pause should always be the first command to execute because the
+	// `stress_server` will check whether the /proc/PID/comm is `pause` to
+	// determine whether it should continue to send `SIGCONT`. If the first
+	// command is not `pause`, the real `pause` program may not receive the
+	// command successfully.
+	if b.pause {
+		args = append([]string{cmd}, args...)
+		cmd = pausePath
 	}
 
 	if c := mock.On("MockProcessBuild"); c != nil {
