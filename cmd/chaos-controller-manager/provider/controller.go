@@ -152,21 +152,6 @@ func NewNoCacheReader(mgr ctrl.Manager) noCacheReader {
 	}
 }
 
-type globalCacheReader struct {
-	fx.Out
-
-	client.Reader `name:"global-cache"`
-}
-
-// NewGlobalCacheReader builds a client.Reader with cache for global usage
-// TODO: we could return with fx.Annotate instead of struct globalCacheReader and magic name "global-cache"
-// TODO: it seems this component is not used anymore, maybe we could remote it.
-func NewGlobalCacheReader(mgr ctrl.Manager) globalCacheReader {
-	return globalCacheReader{
-		Reader: mgr.GetClient(),
-	}
-}
-
 type controlPlaneCacheReader struct {
 	fx.Out
 
@@ -232,6 +217,5 @@ var Module = fx.Provide(
 	NewScheme,
 	NewConfig,
 	NewNoCacheReader,
-	NewGlobalCacheReader,
 	NewControlPlaneCacheReader,
 )
