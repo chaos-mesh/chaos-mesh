@@ -8,6 +8,26 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.2.1] - 2022-06-29
+
 ### Added
 
 - JVMChaos: support inject fault into MySQL client [#3189](https://github.com/chaos-mesh/chaos-mesh/pull/3189)
