@@ -1178,6 +1178,12 @@ spec:
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
                 properties:
+                  containerNames:
+                    description: ContainerNames indicates list of the name of affected
+                      container. If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
@@ -3593,6 +3599,13 @@ spec:
                   kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
                     properties:
+                      containerNames:
+                        description: ContainerNames indicates list of the name of
+                          affected container. If not set, the first container will
+                          be injected
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action
@@ -6495,6 +6508,13 @@ spec:
                               description: KernelChaosSpec defines the desired state
                                 of KernelChaos
                               properties:
+                                containerNames:
+                                  description: ContainerNames indicates list of the
+                                    name of affected container. If not set, the first
+                                    container will be injected
+                                  items:
+                                    type: string
+                                  type: array
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
@@ -9173,6 +9193,13 @@ spec:
                                   description: KernelChaosSpec defines the desired
                                     state of KernelChaos
                                   properties:
+                                    containerNames:
+                                      description: ContainerNames indicates list of
+                                        the name of affected container. If not set,
+                                        the first container will be injected
+                                      items:
+                                        type: string
+                                      type: array
                                     duration:
                                       description: Duration represents the duration
                                         of the chaos action
