@@ -187,6 +187,7 @@ func (s *DaemonServer) ExecCPUStressors(ctx context.Context,
 		log.Info("send signal to resume process")
 		time.Sleep(time.Millisecond)
 
+		// TODO: integrate the resume process into the bpm
 		comm, err := util.ReadCommName(cmd.Process.Pid)
 		if err != nil {
 			return nil, err
