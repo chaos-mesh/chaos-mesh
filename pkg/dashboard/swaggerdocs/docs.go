@@ -3914,6 +3914,13 @@ var doc = `{
         "v1alpha1.KernelChaosSpec": {
             "type": "object",
             "properties": {
+                "containerNames": {
+                    "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "duration": {
                     "description": "Duration represents the duration of the chaos action",
                     "type": "string"
