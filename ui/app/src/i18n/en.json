@@ -94,8 +94,7 @@
         "title": "Network Attack",
         "target": {
           "title": "Target",
-          "podsPreview": "Target Pods Preview",
-          "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
+          "podsPreview": "Target Pods Preview"
         }
       },
       "http": {

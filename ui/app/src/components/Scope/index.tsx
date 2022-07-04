@@ -40,17 +40,9 @@ interface ScopeProps {
   scope?: string
   modeScope?: string
   podsPreviewTitle?: string | JSX.Element
-  podsPreviewDesc?: string | JSX.Element
 }
 
-const Scope: React.FC<ScopeProps> = ({
-  kind,
-  namespaces,
-  scope = 'selector',
-  modeScope = '',
-  podsPreviewTitle,
-  podsPreviewDesc,
-}) => {
+const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', modeScope = '', podsPreviewTitle }) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
@@ -170,7 +162,7 @@ const Scope: React.FC<ScopeProps> = ({
           {podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}
         </Typography>
         <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>
-          {podsPreviewDesc || <T id="newE.scope.targetPodsPreviewHelper" />}
+          <T id="newE.scope.targetPodsPreviewHelper" />
         </Typography>
       </div>
       {pods.length > 0 ? (
