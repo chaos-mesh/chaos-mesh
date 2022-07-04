@@ -62,6 +62,7 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 		log.Error(err, "create chaos-driver client")
 		return nil, err
 	}
+	defer c.Close()
 
 	if req.Action == pb.ApplyBlockChaosRequest_Delay {
 		log.Info("Injecting IOEM Delay", "delay", req.Delay.Delay, "jitter", req.Delay.Jitter, "corr", req.Delay.Correlation)
@@ -143,6 +144,7 @@ func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlo
 		log.Error(err, "create chaos-driver client")
 		return nil, err
 	}
+	defer c.Close()
 
 	log.Info("Recovering IOEM", "injectionId", req.InjectionId)
 	err = c.Recover(int(req.InjectionId))
