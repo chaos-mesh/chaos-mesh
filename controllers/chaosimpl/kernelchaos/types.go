@@ -54,7 +54,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, err := controller.ParseNamespacedName(record.Id)
+	podId, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -71,7 +71,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	log = log.WithValues("pod", pod)
 
-	if err = impl.applyPod(ctx, &pod, kernelChaos); err != nil {
+	if err = impl.applyPod(ctx, &pod, kernelChaos, containerID); err != nil {
 		log.Error(err, "failed to apply chaos on pod")
 		return v1alpha1.NotInjected, err
 	}
@@ -85,7 +85,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	record := records[index]
 
 	log := impl.Log.WithValues("chaos", kernelChaos, "record", record)
-	podId, err := controller.ParseNamespacedName(record.Id)
+	podId, containerID, err := controller.ParseNamespacedNameContainer(record.Id)
 	if err != nil {
 		errorInfo := fmt.Sprintf("kernelChaos recover error, record ID is %s", record.Id)
 		log.Error(err, errorInfo)
@@ -105,7 +105,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	log = log.WithValues("pod", pod)
 
-	if err = impl.recoverPod(ctx, &pod, kernelChaos); err != nil {
+	if err = impl.recoverPod(ctx, &pod, kernelChaos, containerID); err != nil {
 		log.Error(err, "failed to recover chaos on pod")
 		return v1alpha1.Injected, err
 	}
@@ -113,9 +113,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {
-	// judged type in `Recover` already so no need to judge again
-	chaos, _ := somechaos.(*v1alpha1.KernelChaos)
+func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
 	impl.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
@@ -136,7 +134,7 @@ func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_GETPID,
 		},
-		ContainerId: pod.Status.ContainerStatuses[0].ContainerID,
+		ContainerId: containerID,
 	})
 
 	if err != nil {
@@ -169,7 +167,7 @@ func (impl *Impl) recoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha
 	return err
 }
 
-func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
+func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos, containerID string) error {
 	impl.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := impl.chaosDaemonClientBuilder.Build(ctx, pod, &types.NamespacedName{
@@ -190,7 +188,7 @@ func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ker
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_GETPID,
 		},
-		ContainerId: pod.Status.ContainerStatuses[0].ContainerID,
+		ContainerId: containerID,
 	})
 	if err != nil {
 		impl.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
