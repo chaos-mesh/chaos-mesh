@@ -171,20 +171,4 @@ var _ = Describe("background process manager", func() {
 			WaitProcess(m, p, time.Second*5)
 		})
 	})
-
-	Context("get uid", func() {
-		It("kill process", func() {
-			cmd := DefaultProcessBuilder("sleep", "2").Build(context.Background())
-			p, err := m.StartProcess(context.Background(), cmd)
-			Expect(err).To(BeNil())
-
-			uid, loaded := m.GetUID(p.Pair)
-			Expect(loaded).To(BeTrue())
-
-			err = m.KillBackgroundProcess(context.Background(), uid)
-			Expect(err).To(BeNil())
-
-			WaitProcess(m, p, time.Second*0)
-		})
-	})
 })

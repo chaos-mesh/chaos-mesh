@@ -194,13 +194,18 @@ spec:
                 format: int64
                 type: integer
               pid:
-                description: Pid represents a running tproxy process id.
+                description: 'Pid represents a running tproxy process id. Deprecated:
+                  Pid is deprecated, please use Uid instead'
                 format: int64
                 type: integer
               startTime:
-                description: StartTime represents the start time of a tproxy process.
+                description: 'StartTime represents the start time of a tproxy process.
+                  Deprecated: StartTime is deprecated'
                 format: int64
                 type: integer
+              uid:
+                description: Uid represents a unique running chaos-proxy process
+                type: string
             type: object
         type: object
     served: true

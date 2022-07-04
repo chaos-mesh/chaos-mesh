@@ -27,7 +27,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/shirou/gopsutil/process"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
@@ -63,25 +62,8 @@ const (
 	DefaultProcPrefix = "/proc"
 )
 
-// ProcessPair is an identifier for process
-// Keep compatible with v2.x
-// TODO: remove in v3.x
-//
-// Currently, the bpm locate managed processes by both PID and create time, because the OS may reuse PID, we must check the create time to avoid locating the wrong process.
-//
-// However, the two-step locating is messy and the create time may be imprecise (we have fixed a [relevant bug](https://github.com/shirou/gopsutil/pull/1204)).
-// In future version, we should completely remove the two-step locating and identify managed processes by UID only.
-type ProcessPair struct {
-	Pid        int
-	CreateTime int64
-}
-
 type Process struct {
 	Uid string
-
-	// TODO: remove in v3.x
-	// store create time, to keep compatible with v2.x
-	Pair ProcessPair
 
 	Cmd   *ManagedCommand
 	Pipes Pipes
@@ -109,10 +91,6 @@ type BackgroundProcessManager struct {
 
 	// Uid -> Process
 	processes *sync.Map
-
-	// TODO: remove in v3.x
-	// PidPair -> Uid, to keep compatible with v2.x
-	pidPairToUid *sync.Map
 
 	rootLogger logr.Logger
 
@@ -142,24 +120,6 @@ func startProcess(cmd *ManagedCommand) (*Process, error) {
 	}
 
 	newProcess.ctx, newProcess.stopped = context.WithCancel(context.Background())
-
-	// keep compatible with v2.x
-	// TODO: remove in v3.x
-	pid := cmd.Process.Pid
-	proc, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		return nil, errors.Wrapf(err, "get process state for pid %d", pid)
-	}
-
-	ct, err := proc.CreateTime()
-	if err != nil {
-		return nil, errors.Wrapf(err, "get process create time for pid %d", pid)
-	}
-
-	newProcess.Pair = ProcessPair{
-		Pid:        int(proc.Pid),
-		CreateTime: ct,
-	}
 	return newProcess, nil
 }
 
@@ -174,7 +134,6 @@ func StartBackgroundProcessManager(registry prometheus.Registerer, rootLogger lo
 		wg:               &sync.WaitGroup{},
 		identifiers:      &sync.Map{},
 		processes:        &sync.Map{},
-		pidPairToUid:     &sync.Map{},
 		rootLogger:       rootLogger.WithName("background-process-manager"),
 		metricsCollector: nil,
 	}
@@ -185,7 +144,6 @@ func StartBackgroundProcessManager(registry prometheus.Registerer, rootLogger lo
 			process, loaded := backgroundProcessManager.processes.LoadAndDelete(uid)
 			if loaded {
 				proc := process.(*Process)
-				backgroundProcessManager.pidPairToUid.Delete(proc.Pair)
 				if proc.Cmd.Identifier != nil {
 					backgroundProcessManager.identifiers.Delete(*proc.Cmd.Identifier)
 				}
@@ -222,15 +180,14 @@ func (m *BackgroundProcessManager) StartProcess(ctx context.Context, cmd *Manage
 	}
 
 	m.processes.Store(process.Uid, process)
-	m.pidPairToUid.Store(process.Pair, process.Uid)
-	// end
 
 	if m.metricsCollector != nil {
 		m.metricsCollector.bpmControlledProcessTotal.Inc()
 	}
 
 	m.wg.Add(1)
-	log = log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+	log = log.WithValues("uid", process.Uid, "pid", process.Cmd.Process.Pid)
+	log.Info("process started")
 
 	go func() {
 		err := cmd.Wait()
@@ -256,7 +213,7 @@ func (m *BackgroundProcessManager) Shutdown(ctx context.Context) {
 
 	m.processes.Range(func(_, value interface{}) bool {
 		process := value.(*Process)
-		log := log.WithValues("uid", process.Uid, "pid", process.Pair.Pid)
+		log := log.WithValues("uid", process.Uid, "pid", process.Cmd.Process.Pid)
 		if err := process.Cmd.Process.Signal(syscall.SIGTERM); err != nil {
 			log.Error(err, "send SIGTERM to process")
 			return true
@@ -265,13 +222,6 @@ func (m *BackgroundProcessManager) Shutdown(ctx context.Context) {
 	})
 	m.wg.Wait()
 	close(m.deathChannel)
-}
-
-func (m *BackgroundProcessManager) GetUID(pair ProcessPair) (string, bool) {
-	if uid, loaded := m.pidPairToUid.Load(pair); loaded {
-		return uid.(string), true
-	}
-	return "", false
 }
 
 func (m *BackgroundProcessManager) getProc(uid string) (*Process, bool) {

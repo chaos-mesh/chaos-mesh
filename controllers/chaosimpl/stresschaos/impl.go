@@ -17,12 +17,10 @@ package stresschaos
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -91,14 +89,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 	// TODO: support custom status
 	stresschaos.Status.Instances[records[index].Id] = v1alpha1.StressInstance{
-		UID: res.CpuInstance,
-		StartTime: &metav1.Time{
-			Time: time.Unix(res.CpuStartTime/1000, (res.CpuStartTime%1000)*int64(time.Millisecond)),
-		},
-		MemoryUID: res.MemoryInstance,
-		MemoryStartTime: &metav1.Time{
-			Time: time.Unix(res.MemoryStartTime/1000, (res.MemoryStartTime%1000)*int64(time.Millisecond)),
-		},
+		StressUid: res.CpuInstanceUid,
+		MemUid:    res.MemoryInstanceUid,
 	}
 
 	return v1alpha1.Injected, nil
@@ -128,14 +120,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.NotInjected, nil
 	}
 	req := &pb.CancelStressRequest{
-		CpuInstance:    instance.UID,
-		MemoryInstance: instance.MemoryUID,
-	}
-	if instance.StartTime != nil {
-		req.CpuStartTime = instance.StartTime.UnixNano() / int64(time.Millisecond)
-	}
-	if instance.MemoryStartTime != nil {
-		req.MemoryStartTime = instance.MemoryStartTime.UnixNano() / int64(time.Millisecond)
+		CpuInstanceUid:    instance.StressUid,
+		MemoryInstanceUid: instance.MemUid,
 	}
 	if _, err = pbClient.CancelStressors(ctx, req); err != nil {
 		impl.Log.Error(err, "cancel stressors")

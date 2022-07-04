@@ -312,7 +312,7 @@ generate-deepcopy: images/dev-env/.dockerbuilt chaos-build
 	cd ./api ;\
 		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 
-generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
+generate: proto generate-ctrl swagger_spec generate-deepcopy chaos-build
 
 check: generate yaml vet boilerplate lint tidy install.sh fmt
 
