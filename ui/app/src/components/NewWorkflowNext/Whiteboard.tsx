@@ -21,7 +21,7 @@ import _ from 'lodash'
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
 import { useDrop } from 'react-dnd'
-import type { Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
+import { MarkerType, Node, ReactFlowInstance, XYPosition } from 'react-flow-renderer'
 import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
 import { useIntl } from 'react-intl'
 import { v4 as uuidv4 } from 'uuid'
@@ -46,6 +46,12 @@ import FlowNode from './FlowNode'
 import GroupNode, { ResizableHandleClassName } from './GroupNode'
 import { dndAccept } from './data'
 import { SpecialTemplateType, workflowToFlow } from './utils/convert'
+
+const commonMarkerEnd = {
+  type: MarkerType.ArrowClosed,
+  width: 18,
+  height: 18,
+}
 
 export type DropItem = ElementDragData
 type Identifier = DropItem
@@ -162,6 +168,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
                 title: <EdgeControl id={id} onDelete={deleteEdge} />,
               },
             },
+            markerEnd: commonMarkerEnd,
           },
           eds
         )
@@ -377,6 +384,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
       edges.map((edge) => ({
         ...edge,
         data: { ...edge.data, tooltipProps: { title: <EdgeControl id={edge.data.id} onDelete={deleteEdge} /> } },
+        markerEnd: commonMarkerEnd,
       }))
     )
   }

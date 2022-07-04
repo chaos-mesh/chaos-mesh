@@ -240,7 +240,6 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     }
   }
 
-  console.log(initialValues)
   return (
     <Formik
       enableReinitialize
