@@ -234,6 +234,8 @@ github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5 h1:7aWHqerlJ41y6FOsEUvknqgXnGmJyJSbjhAWq5pO4F8=
 github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5/go.mod h1:/iP1qXHoty45bqomnu2LM+VVyAEdWN+vtSHGlQgyxbw=
+github.com/chaos-mesh/chaos-driver v0.2.1 h1:F/ahUg2Lih6ITOWpwHlo57peLMqPMTFD/WVSzr0cagw=
+github.com/chaos-mesh/chaos-driver v0.2.1/go.mod h1:yrsVhX9sXaMDQQ/qBRdcNXlR4Spkcw1Z/vyXMbIuUyE=
 github.com/chaos-mesh/k8s_dns_chaos v0.2.0 h1:6GeoVQkuUBI4U8TdlH4R8Jgocq1Y9C4hQUQK2h6Lgl0=
 github.com/chaos-mesh/k8s_dns_chaos v0.2.0/go.mod h1:CB8grXv5pqxLgiI0HSZxyyykmDRekpd5M7fz+NlOdMs=
 github.com/checkpoint-restore/go-criu/v4 v4.1.0/go.mod h1:xUQBLp4RLc5zJtWY++yjOoMoB5lihDt7fai+75m+rGw=
