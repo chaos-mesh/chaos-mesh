@@ -424,9 +424,6 @@ spec:
             duration:
               description: Duration represents the duration of the chaos action.
               type: string
-            iops:
-              description: IOPS defines the limit of IO frequency.
-              type: integer
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -4875,9 +4872,6 @@ spec:
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
-                iops:
-                  description: IOPS defines the limit of IO frequency.
-                  type: integer
                 mode:
                   description: 'Mode defines the mode to run chaos action. Supported
                     mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -7616,9 +7610,6 @@ spec:
                             description: Duration represents the duration of the chaos
                               action.
                             type: string
-                          iops:
-                            description: IOPS defines the limit of IO frequency.
-                            type: integer
                           mode:
                             description: 'Mode defines the mode to run chaos action.
                               Supported mode: one / all / fixed / fixed-percent /
@@ -10150,9 +10141,6 @@ spec:
                                 description: Duration represents the duration of the
                                   chaos action.
                                 type: string
-                              iops:
-                                description: IOPS defines the limit of IO frequency.
-                                type: integer
                               mode:
                                 description: 'Mode defines the mode to run chaos action.
                                   Supported mode: one / all / fixed / fixed-percent
@@ -17518,9 +17506,6 @@ spec:
                 duration:
                   description: Duration represents the duration of the chaos action.
                   type: string
-                iops:
-                  description: IOPS defines the limit of IO frequency.
-                  type: integer
                 mode:
                   description: 'Mode defines the mode to run chaos action. Supported
                     mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -19915,9 +19900,6 @@ spec:
                     duration:
                       description: Duration represents the duration of the chaos action.
                       type: string
-                    iops:
-                      description: IOPS defines the limit of IO frequency.
-                      type: integer
                     mode:
                       description: 'Mode defines the mode to run chaos action. Supported
                         mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -22688,9 +22670,6 @@ spec:
                                 description: Duration represents the duration of the
                                   chaos action.
                                 type: string
-                              iops:
-                                description: IOPS defines the limit of IO frequency.
-                                type: integer
                               mode:
                                 description: 'Mode defines the mode to run chaos action.
                                   Supported mode: one / all / fixed / fixed-percent
@@ -25298,9 +25277,6 @@ spec:
                                     description: Duration represents the duration
                                       of the chaos action.
                                     type: string
-                                  iops:
-                                    description: IOPS defines the limit of IO frequency.
-                                    type: integer
                                   mode:
                                     description: 'Mode defines the mode to run chaos
                                       action. Supported mode: one / all / fixed /
@@ -35306,9 +35282,6 @@ spec:
                         description: Duration represents the duration of the chaos
                           action.
                         type: string
-                      iops:
-                        description: IOPS defines the limit of IO frequency.
-                        type: integer
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -37773,9 +37746,6 @@ spec:
                             description: Duration represents the duration of the chaos
                               action.
                             type: string
-                          iops:
-                            description: IOPS defines the limit of IO frequency.
-                            type: integer
                           mode:
                             description: 'Mode defines the mode to run chaos action.
                               Supported mode: one / all / fixed / fixed-percent /

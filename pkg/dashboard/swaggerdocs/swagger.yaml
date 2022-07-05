@@ -596,11 +596,6 @@ definitions:
           Duration represents the duration of the chaos action.
           +optional
         type: string
-      iops:
-        description: |-
-          IOPS defines the limit of IO frequency.
-          +optional
-        type: integer
       mode:
         description: |-
           Mode defines the mode to run chaos action.

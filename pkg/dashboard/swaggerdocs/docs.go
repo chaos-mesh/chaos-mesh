@@ -3126,10 +3126,6 @@ var doc = `{
                     "description": "Duration represents the duration of the chaos action.\n+optional",
                     "type": "string"
                 },
-                "iops": {
-                    "description": "IOPS defines the limit of IO frequency.\n+optional",
-                    "type": "integer"
-                },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
                     "type": "string"
