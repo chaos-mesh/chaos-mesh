@@ -139,8 +139,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	if _, err = pbClient.RecoverBlockChaos(ctx, &pb.RecoverBlockChaosRequest{
 		InjectionId: int32(injection_id),
 	}); err != nil {
-		// TODO: check whether the erorr still exists
-		return v1alpha1.Injected, nil
+		// TODO: check whether the error still exists
+		return v1alpha1.Injected, err
 	}
 	delete(blockchaos.Status.InjectionIds, records[index].Id)
 	return v1alpha1.NotInjected, nil
