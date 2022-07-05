@@ -22,10 +22,7 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dns-server
 spec:
-  # replicas: not specified here:
-  # 1. In order to make Addon Manager do not reconcile this replicas parameter.
-  # 2. Default is 1.
-  # 3. Will be tuned in real time if DNS horizontal auto-scaling is turned on.
+  replicas: {{ .Values.dnsServer.replicas | default 1 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
