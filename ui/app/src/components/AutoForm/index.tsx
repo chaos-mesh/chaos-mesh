@@ -276,7 +276,6 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                     scope="target.selector"
                     modeScope="target"
                     podsPreviewTitle={<T id="newE.target.network.target.podsPreview" />}
-                    podsPreviewDesc={<T id="newE.target.network.target.podsPreviewHelper" />}
                   />
                 </Space>
               </>
