@@ -80,9 +80,6 @@ func Bootstrap(params Params) error {
 		// when we only change the object.status.experiment.records[].events
 		predicaters := []predicate.Predicate{StatusRecordEventsChangePredicate{}}
 
-		// Filtering of chaos that will be deployed on remote clusters
-		predicaters = append(predicaters, RemoteChaosPredicate{})
-
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
 			pair := pair
@@ -146,7 +143,7 @@ func Bootstrap(params Params) error {
 		})
 
 		pipe.AddSteps(params.Steps...)
-		builder = builder.WithEventFilter(predicate.Or(predicaters...))
+		builder = builder.WithEventFilter(predicate.And(predicate.Or(predicaters...), RemoteChaosPredicate{}))
 		err := builder.Complete(pipe)
 		if err != nil {
 			return err
@@ -219,7 +216,46 @@ func (RemoteChaosPredicate) Create(e event.CreateEvent) bool {
 		return false
 	}
 
-	if obj.GetRemoteCluster().ClusterName == "" {
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
+}
+
+func (RemoteChaosPredicate) Update(e event.UpdateEvent) bool {
+	obj, ok := e.ObjectNew.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return false
+	}
+
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
+}
+
+func (RemoteChaosPredicate) Delete(e event.DeleteEvent) bool {
+	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return false
+	}
+
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
+}
+
+func (RemoteChaosPredicate) Generic(e event.GenericEvent) bool {
+	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return false
+	}
+
+	if obj.GetRemoteCluster() == "" {
 		return true
 	}
 

@@ -2975,6 +2975,10 @@ var doc = `{
                     "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\n+ui:form:ignore\n+optional",
                     "type": "string"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "secretName": {
                     "description": "SecretName defines the name of kubernetes secret.\n+optional",
                     "type": "string"
@@ -3060,6 +3064,10 @@ var doc = `{
                     "description": "LUN indicates the Logical Unit Number of the data disk.\nNeeded in disk-detach.\n+optional",
                     "type": "integer"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "resourceGroupName": {
                     "description": "ResourceGroupName defines the name of ResourceGroup",
                     "type": "string"
@@ -3128,6 +3136,10 @@ var doc = `{
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -3349,6 +3361,10 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",
@@ -3504,6 +3520,10 @@ var doc = `{
                     "description": "Project defines the ID of gcp project.",
                     "type": "string"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "secretName": {
                     "description": "SecretName defines the name of kubernetes secret. It is used for GCP credentials.\n+optional",
                     "type": "string"
@@ -3553,6 +3573,10 @@ var doc = `{
                 "port": {
                     "description": "Port represents the target port to be proxy of.",
                     "type": "integer"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
                 },
                 "replace": {
                     "description": "Replace is a rule to replace some contents in target.\n+optional",
@@ -3677,6 +3701,10 @@ var doc = `{
                     "description": "Percent defines the percentage of injection errors and provides a number from 0-100.\ndefault: 100.\n+optional\n+kubebuilder:default=100",
                     "type": "integer"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",
@@ -3757,6 +3785,10 @@ var doc = `{
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
                 },
                 "ruleData": {
                     "description": "+optional\nthe byteman rule's data for action 'ruleData'",
@@ -3930,6 +3962,10 @@ var doc = `{
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
                     "type": "string"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",
@@ -4079,6 +4115,10 @@ var doc = `{
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -4411,6 +4451,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "selector": {
                     "description": "Selector is used to select physical machines that are used to inject chaos action.\n+optional",
                     "type": "object",
@@ -4499,6 +4543,10 @@ var doc = `{
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -4956,6 +5004,10 @@ var doc = `{
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
                     "type": "string"
                 },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
                     "type": "object",
@@ -5161,6 +5213,10 @@ var doc = `{
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
                 },
                 "selector": {

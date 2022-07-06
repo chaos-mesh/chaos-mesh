@@ -79,8 +79,8 @@ func (in *{{.Type}}) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *{{.Type}}Spec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *{{.Type}}) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.

@@ -32,10 +32,6 @@ type PodIOChaosSpec struct {
 	// Actions are a list of IOChaos actions
 	// +optional
 	Actions []IOChaosAction `json:"actions,omitempty"`
-
-	// RemoteCluster represents the remote cluster where the chaos will be deployed
-	// +optional
-	RemoteCluster RemoteCluster `json:"remoteCluster,omitempty"`
 }
 
 // IOChaosAction defines a possible action of IOChaos

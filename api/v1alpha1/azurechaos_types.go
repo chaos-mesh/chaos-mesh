@@ -97,7 +97,7 @@ type AzureSelector struct {
 
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
-	RemoteCluster RemoteCluster `json:"remoteCluster,omitempty"`
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {

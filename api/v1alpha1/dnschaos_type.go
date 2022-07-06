@@ -82,7 +82,7 @@ type DNSChaosSpec struct {
 
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
-	RemoteCluster RemoteCluster `json:"remoteCluster,omitempty"`
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // DNSChaosStatus defines the observed state of DNSChaos

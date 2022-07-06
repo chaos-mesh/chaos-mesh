@@ -16,6 +16,8 @@
 package remotechaos
 
 import (
+	"fmt"
+
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -50,7 +52,7 @@ func Bootstrap(params Params) error {
 	setupLog := logger.WithName("setup-remotechaos")
 
 	for _, obj := range objs {
-		name := obj.Name + "-records"
+		name := obj.Name + "-remote-apply"
 		if !config.ShouldSpawnController(name) {
 			return nil
 		}
@@ -60,23 +62,12 @@ func Bootstrap(params Params) error {
 		builder := builder.Default(mgr).
 			For(obj.Object).
 			Named(obj.Name + "-remotechaos").
-			WithEventFilter(predicate.Funcs{
-				CreateFunc: func(e event.CreateEvent) bool {
-					obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
-					if !ok {
-						return false
-					}
-
-					if obj.GetRemoteCluster().ClusterName == "" {
-						return false
-					}
-
-					return true
-				},
-			})
+			WithEventFilter(remotePredicates)
 		err := builder.Complete(&Reconciler{
 			Client: client,
 			Log:    logger.WithName("remotechaos"),
+
+			Object: obj.Object,
 
 			registry: registry,
 		})
@@ -88,4 +79,43 @@ func Bootstrap(params Params) error {
 	}
 
 	return nil
+}
+
+// this controller will only create or delete the remote chaos
+var remotePredicates = predicate.Funcs{
+	CreateFunc: func(e event.CreateEvent) bool {
+		obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+		if !ok {
+			fmt.Println("not a remote object")
+			return false
+		}
+
+		if obj.GetRemoteCluster() == "" {
+			return false
+		}
+
+		return true
+	},
+	UpdateFunc: func(e event.UpdateEvent) bool {
+		return false
+	},
+	DeleteFunc: func(e event.DeleteEvent) bool {
+		// TODO: consider carefully whether we'll need to handle
+		// delete event
+		obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+		if !ok {
+			fmt.Println("not a remote object")
+			return false
+		}
+
+		if obj.GetRemoteCluster() == "" {
+			fmt.Println("remote cluster is empty")
+			return false
+		}
+
+		return true
+	},
+	GenericFunc: func(e event.GenericEvent) bool {
+		return false
+	},
 }

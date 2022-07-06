@@ -180,6 +180,6 @@ type WebhookObject interface {
 
 // +kubebuilder:object:generate=false
 type RemoteObject interface {
-	GenericChaos
-	GetRemoteCluster() *RemoteCluster
+	StatefulObject
+	GetRemoteCluster() string
 }

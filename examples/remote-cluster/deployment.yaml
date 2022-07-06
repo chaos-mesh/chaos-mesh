@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-show
+  labels:
+    app: web-show
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-show
+  template:
+    metadata:
+      labels:
+        app: web-show
+    spec:
+      containers:
+        - name: web-show
+          image: ghcr.io/chaos-mesh/web-show
+          imagePullPolicy: Always
+          command:
+            - /usr/local/bin/web-show
+            - --target-ip=127.0.0.1

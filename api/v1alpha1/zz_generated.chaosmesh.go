@@ -73,8 +73,8 @@ func (in *AWSChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *AWSChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *AWSChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -215,8 +215,8 @@ func (in *AzureChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *AzureChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *AzureChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -357,8 +357,8 @@ func (in *BlockChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *BlockChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *BlockChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -495,8 +495,8 @@ func (in *DNSChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *DNSChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *DNSChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -633,8 +633,8 @@ func (in *GCPChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *GCPChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *GCPChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -775,8 +775,8 @@ func (in *HTTPChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *HTTPChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *HTTPChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -913,8 +913,8 @@ func (in *IOChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *IOChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *IOChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1051,8 +1051,8 @@ func (in *JVMChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *JVMChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *JVMChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1189,8 +1189,8 @@ func (in *KernelChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *KernelChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *KernelChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1327,8 +1327,8 @@ func (in *NetworkChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *NetworkChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *NetworkChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1465,8 +1465,8 @@ func (in *PhysicalMachineChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *PhysicalMachineChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *PhysicalMachineChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1642,8 +1642,8 @@ func (in *PodChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *PodChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *PodChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1970,8 +1970,8 @@ func (in *StressChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *StressChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *StressChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -2108,8 +2108,8 @@ func (in *TimeChaos) GetStatus() *ChaosStatus {
 }
 
 // GetRemoteCluster returns the remoteCluster
-func (in *TimeChaosSpec) GetRemoteCluster() *RemoteCluster {
-	return &in.RemoteCluster
+func (in *TimeChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.

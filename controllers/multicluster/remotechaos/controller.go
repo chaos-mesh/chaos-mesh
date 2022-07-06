@@ -16,9 +16,9 @@ package remotechaos
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -27,13 +27,12 @@ import (
 )
 
 type Reconciler struct {
-	Log    logr.Logger
-	Object v1alpha1.RemoteObject
-
-	registry    *clusterregistry.RemoteClusterRegistry
-	clusterName string
 	client.Client
-	Impl types.ChaosImpl
+	Log logr.Logger
+
+	Object v1alpha1.InnerObject
+
+	registry *clusterregistry.RemoteClusterRegistry
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -49,8 +48,46 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	r.registry.WithClient(obj.GetClusterName(), func(c client.Client) error {
-		return c.Create(ctx, obj)
+	err := r.registry.WithClient(obj.GetRemoteCluster(), func(c client.Client) error {
+		localObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
+
+		remoteObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
+		err := c.Get(context.TODO(), req.NamespacedName, remoteObj)
+		if err != nil {
+			if apierrors.IsNotFound(err) {
+				// omit the remoteCluster
+				localSpecValue := reflect.Indirect(reflect.ValueOf(localObj)).FieldByName("Spec")
+				localSpecValue.FieldByName("RemoteCluster").Set(reflect.ValueOf(""))
+
+				// only Spec, Name, Namespace and a label will be initialized
+				newObj := r.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+				reflect.Indirect(reflect.ValueOf(newObj)).FieldByName("Spec").Set(localSpecValue)
+
+				newObj.SetLabels(map[string]string{
+					"chaos-mesh.org/controlled-by": "remote-chaos",
+				})
+				newObj.SetName(obj.GetName())
+				newObj.SetNamespace(obj.GetNamespace())
+
+				return c.Create(ctx, newObj)
+			}
+
+			// TODO: handle this error
+			r.Log.Error(err, "unable to get chaos")
+			return nil
+		}
+
+		// remote chaos exists
+		if localObj.GetDeletionTimestamp() != nil {
+			return c.Delete(ctx, localObj)
+		}
+
+		return nil
 	})
+	if err != nil {
+		r.Log.Error(err, "unable to create chaos")
+		// TODO: handle the error
+		// TODO: retry
+	}
 	return ctrl.Result{}, nil
 }

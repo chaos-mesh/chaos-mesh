@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package remotepodreconciler
+package remotechaosmonitor
 
 import (
 	"context"
@@ -34,13 +34,13 @@ type Reconciler struct {
 func New(manageClient client.Client, clusterName string, localClient client.Client, logger logr.Logger) *Reconciler {
 	return &Reconciler{
 		clusterName:  clusterName,
-		logger:       logger.WithName("example-pod"),
+		logger:       logger.WithName("remotechaos-monitor"),
 		manageClient: manageClient,
 		localClient:  localClient,
 	}
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.logger.Info("reconcile pod", "clusterName", r.clusterName, "namespace", req.Namespace, "name", req.Name)
+	r.logger.Info("reconcile chaos", "clusterName", r.clusterName, "namespace", req.Namespace, "name", req.Name)
 	return ctrl.Result{}, nil
 }
