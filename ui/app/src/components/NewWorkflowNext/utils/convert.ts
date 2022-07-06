@@ -290,12 +290,12 @@ type ParentNode = {
   id: uuid
   type: SpecialTemplateType.Serial | SpecialTemplateType.Parallel
 }
-enum View {
+export enum View {
   NodeWidth = 200,
   NodeHeight = 30,
   PaddingX = 30,
   PaddingY = 15,
-  GroupNodeTypographyHeight = 24,
+  GroupNodeTypographyHeight = 32,
 }
 
 export function workflowToFlow(workflow: string) {

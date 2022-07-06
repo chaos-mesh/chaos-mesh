@@ -28,7 +28,7 @@ import { iconByKind } from 'lib/byKind'
 import StyledHandle from './StyleHandle'
 import { DropItem } from './Whiteboard'
 import { dndAccept } from './data'
-import { SpecialTemplateType } from './utils/convert'
+import { SpecialTemplateType, View } from './utils/convert'
 
 export const ResizableHandleClassName = 're-resizable-handle'
 const handleClasses = {
@@ -46,12 +46,13 @@ interface GroupNodeProps {
   id: uuid
   name: React.ReactNode
   type: SpecialTemplateType.Serial | SpecialTemplateType.Parallel
-  childrenNum: number
-  width: number
-  height: number
+  childrenNum?: number
+  width?: number
+  height?: number
   actions: {
     initNode: (item: DropItem, monitor?: DropTargetMonitor, xyCoord?: XYCoord, parent?: uuid) => void
   }
+  nodeControl?: React.ReactNode
 }
 
 export default function GroupNode({ data, isConnectable }: NodeProps<GroupNodeProps>) {
@@ -59,10 +60,15 @@ export default function GroupNode({ data, isConnectable }: NodeProps<GroupNodePr
     id,
     name,
     type,
-    childrenNum,
-    width = type === SpecialTemplateType.Serial ? 200 * childrenNum + 30 * (childrenNum + 1) : 200 + 30 * childrenNum,
-    height = type === SpecialTemplateType.Parallel ? 30 * childrenNum + 15 * (childrenNum + 1) : 30 + 15 * childrenNum,
+    childrenNum = 2,
+    width = type === SpecialTemplateType.Serial
+      ? View.NodeWidth * childrenNum + View.PaddingX * (childrenNum + 1)
+      : View.NodeWidth + View.PaddingX * childrenNum,
+    height = type === SpecialTemplateType.Parallel
+      ? View.NodeHeight * childrenNum + View.PaddingY * (childrenNum + 1)
+      : View.NodeHeight + View.PaddingY * childrenNum,
     actions,
+    nodeControl,
   } = data
   const groupNodeID = `group-node-${id}`
 
@@ -82,18 +88,16 @@ export default function GroupNode({ data, isConnectable }: NodeProps<GroupNodePr
 
   return (
     <Box id={groupNodeID} ref={drop}>
-      <Space direction="row" spacing={1} alignItems="center" sx={{ color: 'secondary.main', fontSize: 18 }}>
-        {iconByKind(type, 'inherit')}
-        <Typography component="div" fontWeight="medium">
-          {name}
-        </Typography>
-      </Space>
-      <Resizable
-        className="re-resizable"
-        handleClasses={handleClasses}
-        defaultSize={{ width, height }}
-        onResize={(e) => e.stopImmediatePropagation()}
-      >
+      <Box display="flex" justifyContent="space-between" sx={{ mb: 1, color: 'secondary.main', fontSize: 18 }}>
+        <Space direction="row" spacing={1} alignItems="center">
+          {iconByKind(type, 'inherit')}
+          <Typography component="div" fontWeight="medium">
+            {name}
+          </Typography>
+        </Space>
+        {nodeControl}
+      </Box>
+      <Resizable className="re-resizable" handleClasses={handleClasses} defaultSize={{ width, height }}>
         <StyledHandle type="target" position={Position.Left} isConnectable={isConnectable} />
         <Paper
           sx={{

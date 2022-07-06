@@ -28,7 +28,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import Menu from '@ui/mui-extends/esm/Menu'
 import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
@@ -62,23 +61,24 @@ interface ControlProps {
 }
 
 interface NodeControlProps extends ControlProps {
+  type: 'flowNode' | 'groupNode'
   onCopy: (id: uuid) => void
 }
 
-const NodeControl = ({ id, onDelete, onCopy }: NodeControlProps) => {
+const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
   const intl = useIntl()
   const dispatch = useStoreDispatch()
 
-  const onNode = (type: 'delete' | 'copy', onClose: any) => (e: React.SyntheticEvent) => {
+  const onNode = (type: 'copy' | 'delete', onClose: any) => (e: React.SyntheticEvent) => {
     e.stopPropagation()
 
     let action: typeof onDelete
     switch (type) {
-      case 'delete':
-        action = onDelete
-        break
       case 'copy':
         action = onCopy
+        break
+      case 'delete':
+        action = onDelete
         break
       default:
         break
@@ -98,24 +98,27 @@ const NodeControl = ({ id, onDelete, onCopy }: NodeControlProps) => {
   }
   return (
     <Menu
-      IconButtonProps={{ size: 'small', sx: { position: 'absolute', top: 1, right: 4 } }}
+      IconButtonProps={{
+        size: 'small',
+        sx: type === 'flowNode' ? { position: 'absolute', top: 1, right: 4 } : undefined,
+      }}
       IconProps={{ fontSize: 'inherit' }}
     >
       {({ onClose }: any) => [
-        <MenuItem key={'delete-' + id} onClick={onNode('delete', onClose)}>
-          <ListItemIcon sx={{ fontSize: 18 }}>
-            <DeleteIcon fontSize="inherit" />
-          </ListItemIcon>
-          <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
-            <T id="common.delete" />
-          </ListItemText>
-        </MenuItem>,
         <MenuItem key={'copy-' + id} onClick={onNode('copy', onClose)}>
           <ListItemIcon sx={{ fontSize: 18 }}>
             <ContentCopyIcon fontSize="inherit" />
           </ListItemIcon>
           <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
             <T id="common.copy" />
+          </ListItemText>
+        </MenuItem>,
+        <MenuItem key={'delete-' + id} onClick={onNode('delete', onClose)}>
+          <ListItemIcon sx={{ fontSize: 18 }}>
+            <DeleteIcon fontSize="inherit" />
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ variant: 'button', color: 'secondary' }}>
+            <T id="common.delete" />
           </ListItemText>
         </MenuItem>,
       ]}
@@ -138,11 +141,9 @@ const EdgeControl = ({ id, onDelete }: ControlProps) => {
   }
 
   return (
-    <Space direction="row" lineHeight={1}>
-      <IconButton size="small" onClick={onEdgeDelete} title={i18n('common.delete', intl)} aria-label="delete">
-        <DeleteIcon fontSize="inherit" />
-      </IconButton>
-    </Space>
+    <IconButton size="small" onClick={onEdgeDelete} title={i18n('common.delete', intl)} aria-label="delete">
+      <DeleteIcon fontSize="inherit" />
+    </IconButton>
   )
 }
 
@@ -233,7 +234,6 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         id,
         name: _.truncate(`${item.kind}-${id}`),
         type: item.kind,
-        childrenNum: 1,
         actions: {
           initNode,
         },
@@ -275,6 +275,16 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     setOpenDrawer(true)
   }
 
+  const addNodeControl = (id: uuid, type: NodeControlProps['type']) => {
+    switch (type) {
+      case 'groupNode':
+        return { nodeControl: <NodeControl id={id} type={type} onDelete={deleteNode} onCopy={copyNode} /> }
+      case 'flowNode':
+      default:
+        return { endIcon: <NodeControl id={id} type={type} onDelete={deleteNode} onCopy={copyNode} /> }
+    }
+  }
+
   const updateNode = (values: Record<string, any>) => {
     const { id, ...rest } = values
 
@@ -288,9 +298,9 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
               finished: true,
               name: values.name,
               ...(node.type === 'flowNode' && {
-                endIcon: <NodeControl id={id} onDelete={deleteNode} onCopy={copyNode} />,
                 children: values.name,
               }),
+              ...addNodeControl(id, node.type as NodeControlProps['type']),
             },
           }
         }
@@ -303,39 +313,67 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
     cleanup()
   }
 
-  const deleteNode = (id: uuid) => {
+  const copyNode = (id: uuid) => {
     setNodes((oldNodes) => {
-      const node = oldNodes.find((n) => n.id === id)!
-      const templateName = node.data.name
-      const restNodes = oldNodes.filter((node) => node.id !== id)
+      function genNewChildrenNodes(id: uuid, results: Node[], parent?: uuid) {
+        const node = oldNodes.find((n) => n.id === id)!
+        const newID = uuidv4()
 
-      // Remove the template if no other refs.
-      if (!restNodes.some((n) => n.data.name === templateName)) {
-        dispatch(removeWorkflowNode(templateName))
+        results.push({
+          ...node,
+          id: newID,
+          ...(!parent && { position: { x: node.position.x, y: node.position.y + node.height! + 100 } }),
+          selected: false, // Reset selection.
+          data: {
+            ...node.data,
+            ...addNodeControl(newID, node.type as NodeControlProps['type']),
+          },
+          ...(parent && {
+            parentNode: parent,
+            extent: 'parent',
+          }),
+        })
+
+        // Copy all children nodes.
+        if (node.type === 'groupNode') {
+          oldNodes
+            .filter((node) => node.parentNode === id)
+            .forEach((node) => genNewChildrenNodes(node.id, results, newID))
+        }
       }
 
-      return restNodes
+      const newNodes: Node[] = []
+      genNewChildrenNodes(id, newNodes)
+
+      return [...oldNodes, ...newNodes]
     })
   }
 
-  const copyNode = (id: uuid) => {
+  const deleteNode = (id: uuid) => {
     setNodes((oldNodes) => {
-      const node = oldNodes.find((n) => n.id === id)!
-      const newID = uuidv4()
-      const newNode: Node = {
-        ...node,
-        id: newID,
-        position: { x: node.position.x, y: node.position.y + node.height! + 100 },
-        selected: false, // Reset selection.
-        data: {
-          ...node.data,
-          ...(node.type === 'flowNode' && {
-            endIcon: <NodeControl id={newID} onDelete={deleteNode} onCopy={copyNode} />,
-          }),
-        },
+      function findDeletedNodes(id: uuid, results: Node[]) {
+        const node = oldNodes.find((n) => n.id === id)!
+
+        results.push(node)
+
+        if (node.type === 'groupNode') {
+          oldNodes.filter((n) => n.parentNode === id).forEach((n) => findDeletedNodes(n.id, results))
+        }
       }
 
-      return [...oldNodes, newNode]
+      const deletedNodes: Node[] = []
+      findDeletedNodes(id, deletedNodes)
+      const restNodes = _.differenceBy(oldNodes, deletedNodes, 'id')
+      const templates = deletedNodes.map((n) => n.data.name)
+
+      // Remove templates if they are not used by other nodes.
+      templates.forEach((template) => {
+        if (!restNodes.some((n) => n.data.name === template)) {
+          dispatch(removeWorkflowNode(template))
+        }
+      })
+
+      return restNodes
     })
   }
 
@@ -374,9 +412,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         data: {
           ...node.data,
           finished: true,
-          ...(node.type === 'flowNode' && {
-            endIcon: <NodeControl id={node.id} onDelete={deleteNode} onCopy={copyNode} />,
-          }),
+          ...addNodeControl(node.id, node.type as NodeControlProps['type']),
         },
       }))
     )
