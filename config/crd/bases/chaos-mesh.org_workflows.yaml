@@ -78,6 +78,88 @@ spec:
                           description: Endpoint indicates the endpoint of the aws
                             server. Just used it in test now.
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
                           type: string
@@ -115,6 +197,88 @@ spec:
                           description: LUN indicates the Logical Unit Number of the
                             data disk. Needed in disk-detach.
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         resourceGroupName:
                           description: ResourceGroupName defines the name of ResourceGroup
                           type: string
@@ -178,6 +342,88 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -359,6 +605,88 @@ spec:
                           items:
                             type: string
                           type: array
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -495,6 +823,88 @@ spec:
                         project:
                           description: Project defines the ID of gcp project.
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
                             It is used for GCP credentials.
@@ -590,6 +1000,88 @@ spec:
                             of.
                           format: int32
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         replace:
                           description: Replace is a rule to replace some contents
                             in target.
@@ -911,6 +1403,88 @@ spec:
                           description: 'Percent defines the percentage of injection
                             errors and provides a number from 0-100. default: 100.'
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -1101,6 +1675,88 @@ spec:
                           description: the port of agent server, default 9277
                           format: int32
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         ruleData:
                           description: the byteman rule's data for action 'ruleData'
                           type: string
@@ -1318,6 +1974,88 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -1576,6 +2314,88 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -2270,6 +3090,88 @@ spec:
                               description: the signal number to send
                               type: integer
                           type: object
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select physical machines
                             that are used to inject chaos action.
@@ -2436,6 +3338,88 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -2580,6 +3564,90 @@ spec:
                               description: Endpoint indicates the endpoint of the
                                 aws server. Just used it in test now.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret.
@@ -2618,6 +3686,90 @@ spec:
                               description: LUN indicates the Logical Unit Number of
                                 the data disk. Needed in disk-detach.
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             resourceGroupName:
                               description: ResourceGroupName defines the name of ResourceGroup
                               type: string
@@ -2683,6 +3835,90 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -2848,6 +4084,90 @@ spec:
                               items:
                                 type: string
                               type: array
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -2988,6 +4308,90 @@ spec:
                             project:
                               description: Project defines the ID of gcp project.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret. It is used for GCP credentials.
@@ -3089,6 +4493,90 @@ spec:
                                 of.
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             replace:
                               description: Replace is a rule to replace some contents
                                 in target.
@@ -3420,6 +4908,90 @@ spec:
                                 errors and provides a number from 0-100. default:
                                 100.'
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -3617,6 +5189,90 @@ spec:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             ruleData:
                               description: the byteman rule's data for action 'ruleData'
                               type: string
@@ -3843,6 +5499,90 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -4109,6 +5849,90 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -4823,6 +6647,90 @@ spec:
                                   description: the signal number to send
                                   type: integer
                               type: object
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select physical machines
                                 that are used to inject chaos action.
@@ -4994,6 +6902,90 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -5138,6 +7130,90 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -5358,6 +7434,90 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              properties:
+                                apiVersion:
+                                  description: 'APIVersion defines the versioned schema
+                                    of this representation of an object. Servers should
+                                    convert recognized schemas to the latest internal
+                                    value, and may reject unrecognized values. More
+                                    info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                                  type: string
+                                kind:
+                                  description: 'Kind is a string value representing
+                                    the REST resource this object represents. Servers
+                                    may infer this from the endpoint the client submits
+                                    requests to. Cannot be updated. In CamelCase.
+                                    More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                                  type: string
+                                metadata:
+                                  type: object
+                                spec:
+                                  description: RemoteClusterSpec defines the specification
+                                    of a remote cluster
+                                  properties:
+                                    configOverride:
+                                      description: RawMessage is a raw encoded JSON
+                                        value. It implements Marshaler and Unmarshaler
+                                        and can be used to delay JSON decoding or
+                                        precompute a JSON encoding.
+                                      format: byte
+                                      type: string
+                                    kubeConfig:
+                                      description: RemoteClusterKubeConfig refers
+                                        to a secret by which we'll use to connect
+                                        remote cluster
+                                      properties:
+                                        secretRef:
+                                          description: RemoteClusterSecretRef refers
+                                            to a secret in any namespaces
+                                          properties:
+                                            key:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                          required:
+                                          - key
+                                          - name
+                                          - namespace
+                                          type: object
+                                      required:
+                                      - secretRef
+                                      type: object
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kubeConfig
+                                  - namespace
+                                  type: object
+                                status:
+                                  properties:
+                                    conditions:
+                                      description: Conditions represents the current
+                                        condition of the remote cluster
+                                      items:
+                                        properties:
+                                          reason:
+                                            type: string
+                                          status:
+                                            type: string
+                                          type:
+                                            type: string
+                                        required:
+                                        - status
+                                        - type
+                                        type: object
+                                      type: array
+                                    currentVersion:
+                                      type: string
+                                  required:
+                                  - currentVersion
+                                  type: object
+                              type: object
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -5610,6 +7770,88 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -8758,6 +11000,88 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          properties:
+                            apiVersion:
+                              description: 'APIVersion defines the versioned schema
+                                of this representation of an object. Servers should
+                                convert recognized schemas to the latest internal
+                                value, and may reject unrecognized values. More info:
+                                https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+                              type: string
+                            kind:
+                              description: 'Kind is a string value representing the
+                                REST resource this object represents. Servers may
+                                infer this from the endpoint the client submits requests
+                                to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+                              type: string
+                            metadata:
+                              type: object
+                            spec:
+                              description: RemoteClusterSpec defines the specification
+                                of a remote cluster
+                              properties:
+                                configOverride:
+                                  description: RawMessage is a raw encoded JSON value.
+                                    It implements Marshaler and Unmarshaler and can
+                                    be used to delay JSON decoding or precompute a
+                                    JSON encoding.
+                                  format: byte
+                                  type: string
+                                kubeConfig:
+                                  description: RemoteClusterKubeConfig refers to a
+                                    secret by which we'll use to connect remote cluster
+                                  properties:
+                                    secretRef:
+                                      description: RemoteClusterSecretRef refers to
+                                        a secret in any namespaces
+                                      properties:
+                                        key:
+                                          type: string
+                                        name:
+                                          type: string
+                                        namespace:
+                                          type: string
+                                      required:
+                                      - key
+                                      - name
+                                      - namespace
+                                      type: object
+                                  required:
+                                  - secretRef
+                                  type: object
+                                namespace:
+                                  type: string
+                              required:
+                              - kubeConfig
+                              - namespace
+                              type: object
+                            status:
+                              properties:
+                                conditions:
+                                  description: Conditions represents the current condition
+                                    of the remote cluster
+                                  items:
+                                    properties:
+                                      reason:
+                                        type: string
+                                      status:
+                                        type: string
+                                      type:
+                                        type: string
+                                    required:
+                                    - status
+                                    - type
+                                    type: object
+                                  type: array
+                                currentVersion:
+                                  type: string
+                              required:
+                              - currentVersion
+                              type: object
+                          type: object
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
