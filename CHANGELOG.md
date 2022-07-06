@@ -113,7 +113,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Helm charts: apply webhook.FailurePolicy to all the webhooks with default value `Fail` [#3184](https://github.com/chaos-mesh/chaos-mesh/pull/3184)
 - Bump memStress from v0.2.1 to v0.3 [#3186](https://github.com/chaos-mesh/chaos-mesh/pull/3186)
 - Helm charts: configure ca bundle for webhook explicitly [#3190](https://github.com/chaos-mesh/chaos-mesh/pull/3190)
-- Refine logging in pkg/selector/generic/namespace [#3214](https://github.com/chaos-mesh/chaos-mesh/pull/3214)
+- Bump chaos-tproxy to v0.4.6 [#3272](https://github.com/chaos-mesh/chaos-mesh/pull/3272)
 
 ### Deprecated
 
