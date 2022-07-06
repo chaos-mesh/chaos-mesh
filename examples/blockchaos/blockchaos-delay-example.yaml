@@ -15,7 +15,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: BlockChaos
 metadata:
-  name: hostpath-example
+  name: hostpath-example-delay
 spec:
   selector:
     labelSelectors:
