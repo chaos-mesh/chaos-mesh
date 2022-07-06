@@ -34,7 +34,6 @@ type BlockChaos struct {
 type BlockChaosAction string
 
 const (
-	BlockLimit BlockChaosAction = "limit"
 	BlockDelay BlockChaosAction = "delay"
 )
 
@@ -44,10 +43,6 @@ type BlockChaosSpec struct {
 	// Supported action: limit / delay
 	// +kubebuilder:validation:Enum=limit;delay
 	Action BlockChaosAction `json:"action"`
-
-	// IOPS defines the limit of IO frequency.
-	// +optional
-	IOPS int `json:"iops,omitempty"`
 
 	// Delay defines the delay distribution.
 	// +optional

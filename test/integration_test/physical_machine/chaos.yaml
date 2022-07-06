@@ -16,10 +16,10 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: PhysicalMachineChaos
 metadata:
   name: physical-stress-mem
-  namespace: chaos-testing
+  namespace: chaos-mesh
 spec:
   action: stress-mem
-  address: 
+  address:
   - CHAOSD_ADDRESS
   mode: one
   stress-mem:

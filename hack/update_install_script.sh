@@ -18,7 +18,7 @@ tmp_file="chaos-mesh.yaml"
 tmp_install_script="install.sh.bak"
 install_script="install.sh"
 
-helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
+helm template chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
       --set controllerManager.hostNetwork=true \
       --set controllerManager.chaosdSecurityMode=false \
       --set chaosDaemon.hostNetwork=true \
@@ -49,7 +49,7 @@ cat <<EOF > $tmp_file
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: chaos-testing
+  name: chaos-mesh
 EOF
 
 cat $tmp_file.bak >> $tmp_file

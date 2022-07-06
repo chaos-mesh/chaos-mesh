@@ -30,6 +30,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/chaos-mesh/chaos-mesh/pkg/sysfs"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 )
 
@@ -80,6 +81,12 @@ func main() {
 	err = fusedev.GrantAccess()
 	if err != nil {
 		rootLogger.Error(err, "grant access to /dev/fuse")
+	}
+
+	rootLogger.Info("remount /sys with read-write permission")
+	err = sysfs.RemountWithOption()
+	if err != nil {
+		rootLogger.Error(err, "remount /sys with read-write permission")
 	}
 
 	server, err := chaosdaemon.BuildServer(conf, reg, rootLogger)

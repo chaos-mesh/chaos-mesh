@@ -70,7 +70,7 @@ function judge_stress() {
 
     if [ "$success" = false ]; then
         echo "[debug] chaos-controller-manager log:"
-        kubectl logs -n chaos-testing -l app.kubernetes.io/component=controller-manager --tail=20
+        kubectl logs -n chaos-mesh -l app.kubernetes.io/component=controller-manager --tail=20
 
         echo ""
         echo "[debug]chaosd log:"
