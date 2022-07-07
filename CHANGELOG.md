@@ -8,6 +8,12 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
+### Added
+
+- Nothing
+
+### Changed
+
 - Nothing
 
 ### Deprecated
@@ -16,7 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Run build image ci on self-hosted machine [#3429](https://github.com/chaos-mesh/chaos-mesh/pull/3429)
+- Nothing
 
 ### Removed
 
@@ -28,14 +34,19 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+## [2.2.2] - 2022-07-07
+
+### Changed
+
+- Bump chaos-tproxy to v0.5.1 [#3426](https://github.com/chaos-mesh/chaos-mesh/pull/3426)
+- Run build image ci on self-hosted machine [#3429](https://github.com/chaos-mesh/chaos-mesh/pull/3429)
 
 ## [2.2.1] - 2022-06-29
 
 ### Added
 
 - JVMChaos: support inject fault into MySQL client [#3189](https://github.com/chaos-mesh/chaos-mesh/pull/3189)
-- Bump chaos-tproxy to v0.5.1
+
 ### Changed
 
 - Nothing
