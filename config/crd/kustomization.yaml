@@ -25,6 +25,7 @@ resources:
 - bases/chaos-mesh.org_physicalmachines.yaml
 - bases/chaos-mesh.org_blockchaos.yaml
 - bases/chaos-mesh.org_statuschecks.yaml
+- bases/chaos-mesh.org_remoteclusters.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

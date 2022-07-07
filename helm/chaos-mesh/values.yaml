@@ -496,6 +496,7 @@ webhook:
     - physicalmachinechaos
     - physicalmachine
     - statuscheck
+    - remotecluster
 
 bpfki:
   # Enable chaos-kernel
