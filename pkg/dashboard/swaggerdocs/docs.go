@@ -3107,7 +3107,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific block chaos action.\nSupported action: limit / delay\n+kubebuilder:validation:Enum=limit;delay",
+                    "description": "Action defines the specific block chaos action.\nSupported action: delay\n+kubebuilder:validation:Enum=delay",
                     "type": "string"
                 },
                 "containerNames": {
