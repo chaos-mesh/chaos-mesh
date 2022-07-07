@@ -426,6 +426,20 @@ func Test_shouldNotSetupDurationInTheChaos(t *testing.T) {
 		want field.ErrorList
 	}{
 		{
+			name: "should return error when embed chaos is not set",
+			args: args{
+				path: templatesPath,
+				template: Template{
+					Name:       "invalid-pod-chaos",
+					Type:       TypePodChaos,
+					EmbedChaos: nil,
+				},
+			},
+			want: field.ErrorList{
+				field.Invalid(templatesPath.Child(string(TypePodChaos)), nil, fmt.Sprintf("the value of chaos %s is required", string(TypePodChaos))),
+			},
+		},
+		{
 			name: "should not set duration in the chaos",
 			args: args{
 				path: templatesPath,

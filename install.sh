@@ -583,7 +583,7 @@ install_kind() {
     err_msg=$(kind version 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(kind version | awk '{print $2}' | sed s/v//g)
-        target_version=$(echo "${kind_version}" | sed s/v//g)
+        target_version=${kind_version//v}
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
         else
