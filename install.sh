@@ -1388,7 +1388,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath:
+          hostPath: 
             path: ${socketDir}
         - name: sys-path
           hostPath:
