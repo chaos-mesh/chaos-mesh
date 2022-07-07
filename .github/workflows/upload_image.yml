@@ -53,6 +53,7 @@ jobs:
           fi
           # ${VAR,,} convert VAR to lower case
           make -B \
+            TARGET_PLATFORM=$ARCH \
             IMAGE_TAG=$IMAGE_TAG-$ARCH \
             IMAGE_DEV_ENV_BUILD=1 \
             IMAGE_BUILD_ENV_BUILD=1 \
