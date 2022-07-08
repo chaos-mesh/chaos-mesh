@@ -1,4 +1,4 @@
-# Copyright 2021 Chaos Mesh Authors.
+# Copyright 2022 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: v1
-kind: PersistentVolume
+apiVersion: chaos-mesh.org/v1alpha1
+kind: RemoteCluster
 metadata:
-  name: hostpath-example
+ name: cluster-xxxxxxx
 spec:
-  storageClassName: manual
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt"
+ namespace: "chaos-mesh"
+ kubeConfig:
+   secretRef:
+      name: chaos-mesh-02.kubeconfig
+      namespace: default
+      key: kubeconfig

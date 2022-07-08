@@ -13,25 +13,14 @@
 // limitations under the License.
 //
 
-package finalizer
+package sysfs
 
-func RemoveFromFinalizer(finalizers []string, key string) []string {
-	slice := make([]string, 0, len(finalizers))
-	for _, f := range finalizers {
-		if f != key {
-			slice = append(slice, f)
-		}
+import "syscall"
+
+func RemountWithOption(options ...func(uintptr) uintptr) error {
+	flag := uintptr(syscall.MS_REMOUNT)
+	for _, opt := range options {
+		flag = opt(flag)
 	}
-
-	return slice
-}
-
-func InsertFinalizer(finalizers []string, finalizer string) []string {
-	for _, f := range finalizers {
-		if f == finalizer {
-			return finalizers
-		}
-	}
-
-	return append(finalizers, finalizer)
+	return syscall.Mount("sysfs", "/sys", "sysfs", flag, "")
 }

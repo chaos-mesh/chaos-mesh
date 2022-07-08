@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,25 +13,11 @@
 // limitations under the License.
 //
 
-package finalizer
+package clusterregistry
 
-func RemoveFromFinalizer(finalizers []string, key string) []string {
-	slice := make([]string, 0, len(finalizers))
-	for _, f := range finalizers {
-		if f != key {
-			slice = append(slice, f)
-		}
-	}
+import "github.com/pkg/errors"
 
-	return slice
-}
-
-func InsertFinalizer(finalizers []string, finalizer string) []string {
-	for _, f := range finalizers {
-		if f == finalizer {
-			return finalizers
-		}
-	}
-
-	return append(finalizers, finalizer)
-}
+var (
+	ErrAlreadyExist = errors.New("controllers of cluster has already been started")
+	ErrNotExist     = errors.New("controllers of cluster doesn't exist")
+)
