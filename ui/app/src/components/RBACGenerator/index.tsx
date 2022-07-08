@@ -17,10 +17,10 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import api from 'api'
-import { RBACConfigParams } from 'api/common.type'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
+import { CommonApiCommonRbacConfigGetRequest } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -61,9 +61,9 @@ const RBACGenerator = () => {
 
   const containerRef = useRef(null)
 
-  const fetchRBACConfig = (values: RBACConfigParams) =>
-    api.common.rbacConfig(values).then(({ data }) => {
-      const entries = Object.entries<string>(data)
+  const fetchRBACConfig = (values: CommonApiCommonRbacConfigGetRequest) =>
+    api.common.commonRbacConfigGet(values).then(({ data }) => {
+      const entries = Object.entries(data)
       const [name, yaml] = entries[0]
 
       setRBAC(yaml)
@@ -74,7 +74,7 @@ const RBACGenerator = () => {
     fetchRBACConfig({ namespace: 'default', role: 'viewer' })
   }, [])
 
-  const onValidate = ({ namespace, role, clustered }: RBACConfigParams & { clustered: boolean }) => {
+  const onValidate = ({ namespace, role, clustered }: CommonApiCommonRbacConfigGetRequest & { clustered: boolean }) => {
     fetchRBACConfig({
       namespace: clustered ? '' : namespace,
       role,

@@ -25,7 +25,6 @@
  * 3. `T` is an alias of `FormattedMessage`. Mostly you will often use `T` instead of `i18n`.
  *
  */
-
 import { FormattedMessage } from 'react-intl'
 import type { IntlShape } from 'react-intl'
 

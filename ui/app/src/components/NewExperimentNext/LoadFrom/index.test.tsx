@@ -64,15 +64,15 @@ const scheduleArchives = [
 jest.mock('api', () => {
   return {
     experiments: {
-      experiments: jest.fn().mockResolvedValue({ data: experiments }),
-      single: jest.fn().mockResolvedValue({ data: { kube_object: { spec: {} } } }),
+      experimentsGet: jest.fn().mockResolvedValue({ data: experiments }),
+      experimentsUidGet: jest.fn().mockResolvedValue({ data: { kube_object: { spec: {} } } }),
     },
     schedules: {
-      schedules: jest.fn().mockResolvedValue({ data: schedules }),
-      archives: jest.fn().mockResolvedValue({ data: scheduleArchives }),
+      schedulesGet: jest.fn().mockResolvedValue({ data: schedules }),
     },
     archives: {
-      archives: jest.fn().mockResolvedValue({ data: archives }),
+      archivesGet: jest.fn().mockResolvedValue({ data: archives }),
+      archivesSchedulesGet: jest.fn().mockResolvedValue({ data: scheduleArchives }),
     },
   }
 })

@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { DateTime } from 'luxon'
 
 export function comparator(a: string, b: string) {

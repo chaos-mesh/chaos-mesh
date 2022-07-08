@@ -14,9 +14,7 @@
  * limitations under the License.
  *
  */
-
 // All options are based on https://www.figma.com/file/2J6PVAaitQPQFHBtF5LbII/UI-Interface.
-
 import { ThemeOptions, createTheme, responsiveFontSizes } from '@mui/material/styles'
 
 const common: ThemeOptions = {

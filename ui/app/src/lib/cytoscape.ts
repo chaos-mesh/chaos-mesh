@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
+import { Theme } from '@mui/material'
 import { Node, WorkflowSingle } from 'api/workflows.type'
 import cytoscape, { EdgeDefinition, EventHandler, NodeDefinition, Stylesheet } from 'cytoscape'
-
-import { Theme } from '@mui/material'
-import _ from 'lodash'
 import dagre from 'cytoscape-dagre'
+import _ from 'lodash'
 
 cytoscape.use(dagre)
 

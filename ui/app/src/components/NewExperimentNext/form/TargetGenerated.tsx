@@ -14,20 +14,24 @@
  * limitations under the License.
  *
  */
-import { AutocompleteField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
-import { Env, clearNetworkTargetPods } from 'slices/experiments'
+import { MenuItem } from '@mui/material'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
-import { Kind, Spec } from '../data/types'
 import { useEffect, useState } from 'react'
+import { ObjectSchema } from 'yup'
+
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { MenuItem } from '@mui/material'
+import { Env, clearNetworkTargetPods } from 'slices/experiments'
+
+import { AutocompleteField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import MoreOptions from 'components/MoreOptions'
-import { ObjectSchema } from 'yup'
 import Scope from 'components/Scope'
-import Space from '@ui/mui-extends/esm/Space'
-import basicData from '../data/basic'
 import i18n from 'components/T'
+
+import basicData from '../data/basic'
+import { Kind, Spec } from '../data/types'
 
 interface TargetGeneratedProps {
   env: Env
