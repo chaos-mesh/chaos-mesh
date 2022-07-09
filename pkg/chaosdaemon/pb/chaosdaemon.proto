@@ -213,6 +213,7 @@ message ApplyIOChaosRequest {
   int64 startTime = 5;
   bool enterNS = 6;
   string instance_uid = 7;
+  bool unixSocket = 8;
 }
 
 message ApplyIOChaosResponse {
@@ -230,6 +231,7 @@ message ApplyHttpChaosRequest {
   int64 startTime = 5;
   bool enterNS = 6;
   string instance_uid = 7;
+  bool unixSocket = 8;
 }
 
 message ApplyHttpChaosResponse {

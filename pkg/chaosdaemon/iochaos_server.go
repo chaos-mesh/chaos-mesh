@@ -16,23 +16,25 @@
 package chaosdaemon
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
+	"io"
+	"net"
+	"net/http"
 	"os"
 	"strings"
-	"time"
-
-	jrpc "github.com/ethereum/go-ethereum/rpc"
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 const (
-	todaBin = "/usr/local/bin/toda"
+	todaBin            = "/usr/local/bin/toda"
+	todaUnixSocketAddr = "@toda-%s.sock"
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
@@ -46,29 +48,91 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	}
 
 	if in.InstanceUid != "" {
-		err := s.killIOChaos(ctx, in.InstanceUid)
-		if err != nil {
-			return nil, err
+		if err := s.killIOChaos(ctx, in.InstanceUid); err != nil {
+			// ignore this error
+			log.Error(err, "kill background process", "uid", in.InstanceUid)
 		}
 	}
 
-	actions := []v1alpha1.IOChaosAction{}
+	if err := s.createIOChaos(ctx, in); err != nil {
+		return nil, errors.Wrap(err, "create IO chaos")
+	}
+
+	log.Info("Waiting for toda to start")
+	resp, err := s.applyIOChaos(ctx, in)
+	if err != nil {
+		if kerr := s.killIOChaos(ctx, in.InstanceUid); kerr != nil {
+			log.Error(kerr, "kill toda", "request", in)
+		}
+		return nil, errors.Wrap(err, "apply config")
+	}
+	return resp, err
+}
+
+func (s *DaemonServer) killIOChaos(ctx context.Context, uid string) error {
+	log := s.getLoggerFromContext(ctx)
+
+	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, uid)
+	if err != nil {
+		return errors.Wrapf(err, "kill toda %s", uid)
+	}
+	log.Info("kill toda successfully", "uid", uid)
+	return nil
+}
+
+func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
+
+	log := s.getLoggerFromContext(ctx)
+	transport := &unixSocketTransport{
+		addr: fmt.Sprintf(todaUnixSocketAddr, in.ContainerId),
+	}
+
+	req, err := http.NewRequest(http.MethodPut, "http://psedo-host/update", bytes.NewReader([]byte(in.Actions)))
+	if err != nil {
+		return nil, errors.Wrap(err, "create http://psedo-host/update request")
+	}
+
+	_, _ = transport.RoundTrip(req)
+
+	req, err = http.NewRequest(http.MethodPut, "http://psedo-host/get_status", bytes.NewReader([]byte("ping")))
+	if err != nil {
+		return nil, errors.Wrap(err, "create http://psedo-host/get_status request")
+	}
+	resp, err := transport.RoundTrip(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "send http request")
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil || string(body) != "ok" {
+		return nil, errors.Wrap(err, "toda startup takes too long or an error occurs")
+	}
+
+	log.Info("http chaos applied")
+
+	return &pb.ApplyIOChaosResponse{
+		Instance:    in.Instance,
+		StartTime:   in.StartTime,
+		InstanceUid: in.InstanceUid,
+	}, nil
+}
+
+func (s *DaemonServer) createIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) error {
+	log := s.getLoggerFromContext(ctx)
+
+	var actions []v1alpha1.IOChaosAction
 	err := json.Unmarshal([]byte(in.Actions), &actions)
 	if err != nil {
-		return nil, errors.Wrap(err, "unmarshal json bytes")
+		return errors.Wrap(err, "unmarshal json bytes")
 	}
 
 	log.Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
-		return &pb.ApplyIOChaosResponse{
-			Instance:  0,
-			StartTime: 0,
-		}, nil
+		return nil
 	}
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
-		return nil, errors.Wrap(err, "getting PID")
+		return errors.Wrap(err, "getting PID")
 	}
 
 	// TODO: make this log level configurable
@@ -83,50 +147,32 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	}
 
+	if in.UnixSocket {
+		unixListener, err1 := net.Listen("unix", fmt.Sprintf(todaUnixSocketAddr, in.ContainerId))
+		if err1 != nil {
+			return errors.Wrap(err, "create toda unixListener")
+		}
+		listener := unixListener.(*net.UnixListener)
+		listenSocket, err1 := listener.File()
+		if err1 != nil {
+			return errors.Wrap(err, "create toda listenSocket")
+		}
+		processBuilder.SetExtraFiles([]*os.File{listenSocket})
+		processBuilder = processBuilder.SetNoPathNS("3", bpm.KeepFdNS)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	cmd := processBuilder.Build(ctx)
 	cmd.Stderr = os.Stderr
 	proc, err := s.backgroundProcessManager.StartProcess(ctx, cmd)
 	if err != nil {
-		return nil, errors.Wrapf(err, "start process `%s`", cmd)
+		return errors.Wrapf(err, "start process `%s`", cmd)
 	}
 
-	client, err := jrpc.DialIO(ctx, proc.Pipes.Stdout, proc.Pipes.Stdin)
-	if err != nil {
-		return nil, errors.Wrapf(err, "dialing rpc client")
-	}
-
-	var ret string
-	log.Info("Waiting for toda to start")
-	var rpcError error
-	maxWaitTime := time.Millisecond * 2000
-	timeOut, cancel := context.WithTimeout(ctx, maxWaitTime)
-	defer cancel()
-	_ = client.CallContext(timeOut, &ret, "update", actions)
-	rpcError = client.CallContext(timeOut, &ret, "get_status", "ping")
-	if rpcError != nil || ret != "ok" {
-		log.Info("Starting toda takes too long or encounter an error")
-		if kerr := s.killIOChaos(ctx, proc.Uid); kerr != nil {
-			log.Error(kerr, "kill toda", "request", in)
-		}
-		return nil, errors.Errorf("toda startup takes too long or an error occurs: %s", ret)
-	}
-
-	return &pb.ApplyIOChaosResponse{
-		Instance:    int64(proc.Pair.Pid),
-		StartTime:   proc.Pair.CreateTime,
-		InstanceUid: proc.Uid,
-	}, nil
-}
-
-func (s *DaemonServer) killIOChaos(ctx context.Context, uid string) error {
-	log := s.getLoggerFromContext(ctx)
-
-	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, uid)
-	if err != nil {
-		return errors.Wrapf(err, "kill toda %s", uid)
-	}
-	log.Info("kill toda successfully", "uid", uid)
+	in.Instance = int64(proc.Pair.Pid)
+	in.StartTime = proc.Pair.CreateTime
+	in.InstanceUid = proc.Uid
 	return nil
+
 }

@@ -153,9 +153,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		Volume:      obj.Spec.VolumeMountPath,
 		ContainerId: containerID,
 
-		Instance:  obj.Status.Pid,
-		StartTime: obj.Status.StartTime,
-		EnterNS:   true,
+		Instance:   obj.Status.Pid,
+		StartTime:  obj.Status.StartTime,
+		EnterNS:    true,
+		UnixSocket: true,
 	})
 	if err != nil {
 		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)

@@ -30,7 +30,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH $PATH:/usr/local/bin
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.3/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
+# RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.3/toda-linux-amd64.tar.gz | tar xz -C /usr/local/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
@@ -40,10 +40,13 @@ RUN case "$TARGET_PLATFORM" in \
     ;; \
     *) echo >&2 "error: unsupported architecture '$TARGET_PLATFORM'"; exit 1 ;; \
     esac; \
-    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
+    curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.7/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
     mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so; \
-    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.4.6/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /usr/local/bin; \
+#    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.4.6/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /usr/local/bin; \
     curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3/memStress_v0.3-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause
+
+COPY bin/toda /usr/local/bin/toda
+COPY bin/tproxy /usr/local/bin/tproxy

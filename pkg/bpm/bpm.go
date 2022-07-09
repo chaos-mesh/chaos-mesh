@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"sync"
 	"syscall"
@@ -33,6 +34,7 @@ import (
 )
 
 type NsType string
+type NoPathNsType string
 
 const (
 	MountNS NsType = "mnt"
@@ -43,6 +45,11 @@ const (
 	PidNS NsType = "pid"
 	// user namespace is not supported yet
 	// UserNS  NsType = "user"
+	CgroupNS NsType = "cgroup"
+)
+
+const (
+	KeepFdNS NoPathNsType = "keepFd"
 )
 
 var nsArgMap = map[NsType]string{
@@ -54,6 +61,11 @@ var nsArgMap = map[NsType]string{
 	PidNS: "p",
 	// user namespace is not supported by nsexec yet
 	// UserNS:  "U",
+	CgroupNS: "c",
+}
+
+var noPathNsArgMap = map[NoPathNsType]string{
+	KeepFdNS: "k",
 }
 
 const (
@@ -333,12 +345,13 @@ func (m *BackgroundProcessManager) getLoggerFromContext(ctx context.Context) log
 // DefaultProcessBuilder returns the default process builder
 func DefaultProcessBuilder(cmd string, args ...string) *CommandBuilder {
 	return &CommandBuilder{
-		cmd:        cmd,
-		args:       args,
-		nsOptions:  []nsOption{},
-		pause:      false,
-		identifier: nil,
-		ctx:        context.Background(),
+		cmd:             cmd,
+		args:            args,
+		nsOptions:       []nsOption{},
+		noPathNsOptions: []noPathNsOption{},
+		pause:           false,
+		identifier:      nil,
+		ctx:             context.Background(),
 	}
 }
 
@@ -348,16 +361,17 @@ type CommandBuilder struct {
 	args []string
 	env  []string
 
-	nsOptions []nsOption
+	nsOptions       []nsOption
+	noPathNsOptions []noPathNsOption
 
 	pause    bool
 	localMnt bool
 
-	identifier *string
-	stdin      io.ReadWriteCloser
-	stdout     io.ReadWriteCloser
-	stderr     io.ReadWriteCloser
-
+	identifier  *string
+	stdin       io.ReadWriteCloser
+	stdout      io.ReadWriteCloser
+	stderr      io.ReadWriteCloser
+	extraFiles  []*os.File
 	oomScoreAdj int
 
 	// the context is used to kill the process and will be passed into
@@ -387,6 +401,21 @@ func (b *CommandBuilder) SetNS(pid uint32, typ NsType) *CommandBuilder {
 // SetNSOpt sets the namespace of the process
 func (b *CommandBuilder) SetNSOpt(options []nsOption) *CommandBuilder {
 	b.nsOptions = append(b.nsOptions, options...)
+
+	return b
+}
+
+// SetNoPathNS sets the Common option of the process
+func (b *CommandBuilder) SetNoPathNS(value string, typ NoPathNsType) *CommandBuilder {
+	return b.SetNoPathNSOpt([]noPathNsOption{{
+		Typ:   typ,
+		Value: value,
+	}})
+}
+
+// SetNoPathNSOpt sets the Common option of the process
+func (b *CommandBuilder) SetNoPathNSOpt(options []noPathNsOption) *CommandBuilder {
+	b.noPathNsOptions = append(b.noPathNsOptions, options...)
 
 	return b
 }
@@ -442,6 +471,13 @@ func (b *CommandBuilder) SetStderr(stderr io.ReadWriteCloser) *CommandBuilder {
 	return b
 }
 
+// SetExtraFiles sets extraFiles for process
+func (b *CommandBuilder) SetExtraFiles(extraFiles []*os.File) *CommandBuilder {
+	b.extraFiles = extraFiles
+
+	return b
+}
+
 // SetOOMScoreAdj sets the oom_score_adj for a process
 // oom_score_adj ranges from -1000 to 1000
 func (b *CommandBuilder) SetOOMScoreAdj(scoreAdj int) *CommandBuilder {
@@ -459,6 +495,11 @@ func (b *CommandBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
 type nsOption struct {
 	Typ  NsType
 	Path string
+}
+
+type noPathNsOption struct {
+	Typ   NoPathNsType
+	Value string
 }
 
 // ManagedCommand is a process which can be managed by backgroundProcessManager

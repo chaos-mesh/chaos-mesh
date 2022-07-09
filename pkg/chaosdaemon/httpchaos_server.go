@@ -16,59 +16,26 @@
 package chaosdaemon
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
+	"net"
 	"net/http"
 	"os"
-	"sync"
-
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
 )
 
 const (
-	tproxyBin = "/usr/local/bin/tproxy"
-	pathEnv   = "PATH"
+	tproxyBin            = "/usr/local/bin/tproxy"
+	pathEnv              = "PATH"
+	tproxyUnixSocketAddr = "@tproxy-%s.sock"
 )
-
-type stdioTransport struct {
-	uid    string
-	locker *sync.Map
-	pipes  bpm.Pipes
-}
-
-func (t *stdioTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	if _, loaded := t.locker.LoadOrStore(t.uid, true); loaded {
-		return &http.Response{
-			StatusCode: http.StatusLocked,
-			Status:     http.StatusText(http.StatusLocked),
-			Body:       io.NopCloser(bytes.NewBufferString("")),
-			Request:    req,
-		}, nil
-	}
-	defer t.locker.Delete(t.uid)
-	if t.pipes.Stdin == nil {
-		return nil, errors.New("fail to get stdin of process")
-	}
-	if t.pipes.Stdout == nil {
-		return nil, errors.New("fail to get stdout of process")
-	}
-
-	err = req.Write(t.pipes.Stdin)
-	if err != nil {
-		return
-	}
-
-	resp, err = http.ReadResponse(bufio.NewReader(t.pipes.Stdout), req)
-	return
-}
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
@@ -80,19 +47,17 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 	}
 
-	if _, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid); !ok {
-		if in.InstanceUid != "" {
-			// chaos daemon may restart, create another tproxy instance
-			if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); err != nil {
-				// ignore this error
-				log.Error(err, "kill background process", "uid", in.InstanceUid)
-			}
+	if in.InstanceUid != "" {
+		// chaos daemon may restart, create another tproxy instance
+		if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); err != nil {
+			// ignore this error
+			log.Error(err, "kill background process", "uid", in.InstanceUid)
 		}
+	}
 
-		// set uid internally
-		if err := s.createHttpChaos(ctx, in); err != nil {
-			return nil, errors.Wrap(err, "create http chaos")
-		}
+	// set uid internally
+	if err := s.createHttpChaos(ctx, in); err != nil {
+		return nil, errors.Wrap(err, "create http chaos")
 	}
 
 	resp, err := s.applyHttpChaos(ctx, in)
@@ -108,15 +73,8 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 
-	pipes, ok := s.backgroundProcessManager.GetPipes(in.InstanceUid)
-	if !ok {
-		return nil, errors.Errorf("fail to get process(%s)", in.InstanceUid)
-	}
-
-	transport := &stdioTransport{
-		uid:    in.InstanceUid,
-		locker: s.tproxyLocker,
-		pipes:  pipes,
+	transport := &unixSocketTransport{
+		addr: fmt.Sprintf(tproxyUnixSocketAddr, in.ContainerId),
 	}
 
 	var rules []tproxyconfig.PodHttpChaosBaseRule
@@ -139,7 +97,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 
 	log.Info("ready to apply", "config", string(config))
 
-	req, err := http.NewRequest(http.MethodPut, "/", bytes.NewReader(config))
+	req, err := http.NewRequest(http.MethodPut, "http://psedo-host/", bytes.NewReader(config))
 	if err != nil {
 		return nil, errors.Wrap(err, "create http request")
 	}
@@ -157,7 +115,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}
 
 	return &pb.ApplyHttpChaosResponse{
-		Instance:    int64(in.Instance),
+		Instance:    in.Instance,
 		InstanceUid: in.InstanceUid,
 		StartTime:   in.StartTime,
 		StatusCode:  int32(resp.StatusCode),
@@ -177,6 +135,20 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
+	}
+
+	if in.UnixSocket {
+		unixListener, err1 := net.Listen("unix", fmt.Sprintf(tproxyUnixSocketAddr, in.ContainerId))
+		if err1 != nil {
+			return errors.Wrap(err, "create tproxy unixListener")
+		}
+		listener := unixListener.(*net.UnixListener)
+		listenSocket, err1 := listener.File()
+		if err1 != nil {
+			return errors.Wrap(err, "create tproxy listenSocket")
+		}
+		processBuilder.SetExtraFiles([]*os.File{listenSocket})
+		processBuilder = processBuilder.SetNoPathNS("3", bpm.KeepFdNS)
 	}
 
 	cmd := processBuilder.Build(ctx)

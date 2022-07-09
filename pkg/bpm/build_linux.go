@@ -38,11 +38,17 @@ func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 		for _, option := range b.nsOptions {
 			args = append([]string{"-" + nsArgMap[option.Typ], option.Path}, args...)
 		}
-
-		if b.localMnt {
-			args = append([]string{"-l"}, args...)
-		}
 		cmd = nsexecPath
+	}
+
+	if len(b.noPathNsOptions) > 0 {
+		for _, option := range b.noPathNsOptions {
+			args = append([]string{"-" + noPathNsArgMap[option.Typ], option.Value}, args...)
+		}
+	}
+
+	if b.localMnt {
+		args = append([]string{"-l"}, args...)
 	}
 
 	if b.pause {
@@ -80,6 +86,10 @@ func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 
 	if b.stderr != nil {
 		command.Stderr = b.stderr
+	}
+
+	if b.extraFiles != nil {
+		command.ExtraFiles = b.extraFiles
 	}
 
 	return &ManagedCommand{
