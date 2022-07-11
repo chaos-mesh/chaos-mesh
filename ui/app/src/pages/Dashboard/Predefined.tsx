@@ -14,26 +14,30 @@
  * limitations under the License.
  *
  */
+import loadable from '@loadable/component'
 
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
-import { PreDefinedValue, getDB } from 'lib/idb'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useRef, useState } from 'react'
-
+import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
+import api from 'api'
+import clsx from 'clsx'
+import yaml from 'js-yaml'
+import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
+
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import YAML from 'components/YAML'
-import api from 'api'
-import clsx from 'clsx'
-import i18n from 'components/T'
-import { iconByKind } from 'lib/byKind'
-import loadable from '@loadable/component'
-import { makeStyles } from '@mui/styles'
-import { useIntl } from 'react-intl'
+
 import { useStoreDispatch } from 'store'
-import yaml from 'js-yaml'
+
+import { setAlert, setConfirm } from 'slices/globalStatus'
+
+import i18n from 'components/T'
+import YAML from 'components/YAML'
+
+import { iconByKind } from 'lib/byKind'
+import { PreDefinedValue, getDB } from 'lib/idb'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -155,7 +159,7 @@ const Predefined = () => {
       <Space direction="row" sx={{ height: 88, overflowX: 'scroll' }}>
         <YAML
           callback={saveExperiment}
-          buttonProps={{ className: clsx(classes.card, classes.addCard, 'tutorial-predefined') }}
+          ButtonProps={{ className: clsx(classes.card, classes.addCard, 'tutorial-predefined') }}
         />
         {experiments.map((d) => (
           <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>
