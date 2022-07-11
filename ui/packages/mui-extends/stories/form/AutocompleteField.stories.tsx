@@ -1,6 +1,7 @@
+import React from 'react'
+
 import AutocompleteField from '../../esm/AutocompleteField'
 import type { AutocompleteFieldProps } from '../../esm/AutocompleteField'
-import React from 'react'
 
 export default {
   title: 'Form/AutoCompleteField',

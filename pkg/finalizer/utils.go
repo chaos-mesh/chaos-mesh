@@ -27,16 +27,11 @@ func RemoveFromFinalizer(finalizers []string, key string) []string {
 }
 
 func InsertFinalizer(finalizers []string, finalizer string) []string {
-	exist := false
-
 	for _, f := range finalizers {
 		if f == finalizer {
-			exist = true
+			return finalizers
 		}
 	}
 
-	if exist {
-		return finalizers
-	}
 	return append(finalizers, finalizer)
 }

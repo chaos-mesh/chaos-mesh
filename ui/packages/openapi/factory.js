@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import ts from 'typescript'
 
 import { cleanMarkers, getUIFormWhen, isUIFormIgnore } from './utils.js'
-
-import ts from 'typescript'
 
 const { factory } = ts
 

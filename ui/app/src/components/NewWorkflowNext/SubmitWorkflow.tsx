@@ -99,7 +99,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     }
 
     api.workflows
-      .newWorkflow(payload)
+      .workflowsPost({ request: payload })
       .then(() => {
         dispatch(resetWorkflow())
 

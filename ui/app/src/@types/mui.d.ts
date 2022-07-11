@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { Theme } from '@mui/material/styles'
 
 // TODO: remove this declaration when @mui/styles isn't used anymore. See: https://mui.com/guides/migration-v4/.

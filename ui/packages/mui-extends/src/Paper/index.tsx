@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { Paper as MUIPaper, PaperProps } from '@mui/material'
 
 const Paper: React.FC<PaperProps> = ({ children, sx, ...rest }) => (
