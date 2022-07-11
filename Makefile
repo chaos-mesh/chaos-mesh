@@ -19,15 +19,6 @@ HELM_BIN=$(ROOT)/output/bin/helm
 export IMAGE_BUILD_ENV_BUILD ?= 0
 export IMAGE_DEV_ENV_BUILD ?= 0
 
-# Every branch should have its own image tag for build-env and dev-env
-# using := with ifeq instead of ?= for performance issue
-ifeq ($(IMAGE_BUILD_ENV_TAG),)
-export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
-endif
-ifeq ($(IMAGE_DEV_ENV_TAG),)
-export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
-endif
-
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
 GOENV  	:= CGO_ENABLED=0
 CGOENV 	:= CGO_ENABLED=1
