@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import LS from 'lib/localStorage'

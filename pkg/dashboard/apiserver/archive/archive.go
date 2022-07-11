@@ -30,6 +30,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
@@ -82,15 +83,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.DELETE("/workflows", s.batchDeleteWorkflow)
 }
 
-// Archive defines the basic information of an archive.
-type Archive = core.ObjectBase
-
-// Detail represents an archive instance.
-type Detail struct {
-	Archive
-	KubeObject core.KubeObjectDesc `json:"kube_object"`
-}
-
 // @Summary Get archived chaos experiments.
 // @Description Get archived chaos experiments.
 // @Tags archives
@@ -98,9 +90,9 @@ type Detail struct {
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
 // @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Success 200 {array} Archive
+// @Success 200 {array} types.Archive
 // @Router /archives [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
@@ -117,10 +109,10 @@ func (s *Service) list(c *gin.Context) {
 		return
 	}
 
-	archives := make([]Archive, 0)
+	archives := make([]types.Archive, 0)
 
 	for _, meta := range metas {
-		archives = append(archives, Archive{
+		archives = append(archives, types.Archive{
 			UID:       meta.UID,
 			Kind:      meta.Kind,
 			Namespace: meta.Namespace,
@@ -137,9 +129,9 @@ func (s *Service) list(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "the archive uid"
-// @Success 200 {object} Detail
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} types.ArchiveDetail
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /archives/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
@@ -157,8 +149,8 @@ func (s *Service) get(c *gin.Context) {
 	chaos := v1alpha1.AllKinds()[exp.Kind].SpawnObject()
 	_ = json.Unmarshal([]byte(exp.Experiment), chaos)
 
-	c.JSON(http.StatusOK, &Detail{
-		Archive: Archive{
+	c.JSON(http.StatusOK, &types.ArchiveDetail{
+		Archive: types.Archive{
 			UID:       exp.UID,
 			Kind:      exp.Kind,
 			Name:      exp.Name,
@@ -186,8 +178,8 @@ func (s *Service) get(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
@@ -226,8 +218,8 @@ func (s *Service) delete(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
@@ -263,9 +255,9 @@ func (s *Service) batchDelete(c *gin.Context) {
 // @Produce json
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
-// @Success 200 {array} Archive
+// @Success 200 {array} types.Archive
 // @Router /archives/schedules [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) listSchedule(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
@@ -277,10 +269,10 @@ func (s *Service) listSchedule(c *gin.Context) {
 		return
 	}
 
-	archives := make([]Archive, 0)
+	archives := make([]types.Archive, 0)
 
 	for _, meta := range metas {
-		archives = append(archives, Archive{
+		archives = append(archives, types.Archive{
 			UID:       meta.UID,
 			Kind:      meta.Kind,
 			Namespace: meta.Namespace,
@@ -297,13 +289,13 @@ func (s *Service) listSchedule(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} Detail
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} types.ArchiveDetail
+// @Failure 500 {object} u.APIError
 // @Router /archives/schedules/{uid} [get]
 func (s *Service) detailSchedule(c *gin.Context) {
 	var (
 		err    error
-		detail Detail
+		detail types.ArchiveDetail
 	)
 	uid := c.Param("uid")
 
@@ -332,8 +324,8 @@ func (s *Service) detailSchedule(c *gin.Context) {
 		return
 	}
 
-	detail = Detail{
-		Archive: Archive{
+	detail = types.ArchiveDetail{
+		Archive: types.Archive{
 			UID:       exp.UID,
 			Kind:      exp.Kind,
 			Name:      exp.Name,
@@ -363,8 +355,8 @@ func (s *Service) detailSchedule(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/schedules/{uid} [delete]
 func (s *Service) deleteSchedule(c *gin.Context) {
 	var (
@@ -403,8 +395,8 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/schedules [delete]
 func (s *Service) batchDeleteSchedule(c *gin.Context) {
 	var (
@@ -440,9 +432,9 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 // @Produce json
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
-// @Success 200 {array} Archive
+// @Success 200 {array} types.Archive
 // @Router /archives/workflows [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) listWorkflow(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
@@ -454,10 +446,10 @@ func (s *Service) listWorkflow(c *gin.Context) {
 		return
 	}
 
-	archives := make([]Archive, 0)
+	archives := make([]types.Archive, 0)
 
 	for _, meta := range metas {
-		archives = append(archives, Archive{
+		archives = append(archives, types.Archive{
 			UID:       meta.UID,
 			Kind:      v1alpha1.KindWorkflow,
 			Namespace: meta.Namespace,
@@ -474,13 +466,13 @@ func (s *Service) listWorkflow(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} Detail
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} types.ArchiveDetail
+// @Failure 500 {object} u.APIError
 // @Router /archives/workflows/{uid} [get]
 func (s *Service) detailWorkflow(c *gin.Context) {
 	var (
 		err    error
-		detail Detail
+		detail types.ArchiveDetail
 	)
 	uid := c.Param("uid")
 
@@ -509,8 +501,8 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 		return
 	}
 
-	detail = Detail{
-		Archive: Archive{
+	detail = types.ArchiveDetail{
+		Archive: types.Archive{
 			UID:       meta.UID,
 			Kind:      v1alpha1.KindWorkflow,
 			Name:      meta.Name,
@@ -540,8 +532,8 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/workflows/{uid} [delete]
 func (s *Service) deleteWorkflow(c *gin.Context) {
 	var (
@@ -568,8 +560,8 @@ func (s *Service) deleteWorkflow(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uids query string true "uids"
-// @Success 200 {object} utils.Response
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 500 {object} u.APIError
 // @Router /archives/workflows [delete]
 func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 	var (

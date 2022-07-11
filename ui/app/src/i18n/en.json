@@ -34,7 +34,7 @@
   },
   "newE": {
     "title": "New experiment",
-    "titleStep1": "Experiment Type",
+    "titleStep1": "Inject into",
     "titleStep2": "Experiment Info",
     "steps": {
       "basic": "Metadata",

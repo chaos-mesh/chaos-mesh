@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import AutocompleteField, { AutocompleteFieldProps } from './AutocompleteField'
 
 const LabelField: React.FC<Omit<AutocompleteFieldProps, 'freeSolo' | 'multiple' | 'options'>> = (props) => {

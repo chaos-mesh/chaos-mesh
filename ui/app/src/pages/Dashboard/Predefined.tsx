@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
 import { PreDefinedValue, getDB } from 'lib/idb'
 import { setAlert, setConfirm } from 'slices/globalStatus'
@@ -107,7 +108,9 @@ const Predefined = () => {
     const exp: any = yaml.load(yamlEditor!.getValue())
 
     const isSchedule = exp['kind'] === 'Schedule'
-    const action = isSchedule ? api.schedules.newSchedule : api.experiments.newExperiment
+    const action = isSchedule
+      ? (schedule: any) => api.schedules.schedulesPost({ schedule })
+      : (chaos: any) => api.experiments.experimentsPost({ chaos })
 
     action(exp)
       .then(() => {

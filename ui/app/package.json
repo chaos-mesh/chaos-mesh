@@ -16,6 +16,7 @@
     "@reactour/tour": "^2.3.0",
     "@reduxjs/toolkit": "^1.7.1",
     "ace-builds": "^1.4.12",
+    "auto-bind": "^5.0.1",
     "axios": "^0.24.0",
     "clsx": "^1.1.1",
     "copy-text-to-clipboard": "^3.0.1",
@@ -99,6 +100,9 @@
     "source-map-explorer": "^2.5.2"
   },
   "jest": {
-    "resetMocks": false
+    "resetMocks": false,
+    "transformIgnorePatterns": [
+      "node_modules/(?!auto-bind)"
+    ]
   }
 }

@@ -39,6 +39,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
@@ -82,19 +83,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/state", s.state)
 }
 
-// Experiment defines the information of an experiment.
-type Experiment struct {
-	core.ObjectBase
-	Status        status.ChaosStatus `json:"status"`
-	FailedMessage string             `json:"failed_message,omitempty"`
-}
-
-// Detail adds KubeObjectDesc on Experiment.
-type Detail struct {
-	Experiment
-	KubeObject core.KubeObjectDesc `json:"kube_object"`
-}
-
 // @Summary List chaos experiments.
 // @Description Get chaos experiments from k8s clusters in real time.
 // @Tags experiments
@@ -103,9 +91,9 @@ type Detail struct {
 // @Param name query string false "filter exps by name"
 // @Param kind query string false "filter exps by kind" Enums(PodChaos, NetworkChaos, IOChaos, StressChaos, KernelChaos, TimeChaos, DNSChaos, AWSChaos, GCPChaos, JVMChaos, HTTPChaos)
 // @Param status query string false "filter exps by status" Enums(Injecting, Running, Finished, Paused)
-// @Success 200 {array} Experiment
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {array} apiservertypes.Experiment
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments [get]
 func (s *Service) list(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -123,7 +111,7 @@ func (s *Service) list(c *gin.Context) {
 		log.V(1).Info("Replace query namespace with", ns)
 	}
 
-	exps := make([]*Experiment, 0)
+	exps := make([]*apiservertypes.Experiment, 0)
 	for k, chaosKind := range v1alpha1.AllKinds() {
 		if kind != "" && k != kind {
 			continue
@@ -143,7 +131,7 @@ func (s *Service) list(c *gin.Context) {
 				continue
 			}
 
-			exps = append(exps, &Experiment{
+			exps = append(exps, &apiservertypes.Experiment{
 				ObjectBase: core.ObjectBase{
 					Namespace: item.GetNamespace(),
 					Name:      chaosName,
@@ -170,8 +158,8 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param chaos body map[string]interface{} true "the chaos definition"
 // @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments [post]
 func (s *Service) create(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -214,15 +202,15 @@ func (s *Service) create(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} Detail
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} apiservertypes.ExperimentDetail
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/{uid} [get]
 func (s *Service) get(c *gin.Context) {
 	var (
 		exp       *core.Experiment
-		expDetail *Detail
+		expDetail *apiservertypes.ExperimentDetail
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -260,7 +248,7 @@ func (s *Service) get(c *gin.Context) {
 	c.JSON(http.StatusOK, expDetail)
 }
 
-func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, chaos client.Object) *Detail {
+func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, namespacedName types.NamespacedName, chaos client.Object) *apiservertypes.ExperimentDetail {
 	if err := kubeCli.Get(context.Background(), namespacedName, chaos); err != nil {
 		u.SetAPImachineryError(c, err)
 
@@ -276,8 +264,8 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 
 	kind := gvk.Kind
 
-	return &Detail{
-		Experiment: Experiment{
+	return &apiservertypes.ExperimentDetail{
+		Experiment: apiservertypes.Experiment{
 			ObjectBase: core.ObjectBase{
 				Namespace: reflect.ValueOf(chaos).MethodByName("GetNamespace").Call(nil)[0].String(),
 				Name:      reflect.ValueOf(chaos).MethodByName("GetName").Call(nil)[0].String(),
@@ -309,10 +297,10 @@ func (s *Service) findChaosInCluster(c *gin.Context, kubeCli client.Client, name
 // @Produce json
 // @Param uid path string true "the experiment uid"
 // @Param force query string false "force" Enums(true, false)
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
@@ -351,10 +339,10 @@ func (s *Service) delete(c *gin.Context) {
 // @Produce json
 // @Param uids query string true "the experiment uids, split with comma. Example: ?uids=uid1,uid2"
 // @Param force query string false "force" Enums(true, false)
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments [delete]
 func (s *Service) batchDelete(c *gin.Context) {
 	var (
@@ -461,10 +449,10 @@ func forceClean(kubeCli client.Client, chaos client.Object) error {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/pause/{uid} [put]
 func (s *Service) pause(c *gin.Context) {
 	var exp *core.Experiment
@@ -504,10 +492,10 @@ func (s *Service) pause(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "the experiment uid"
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/start/{uid} [put]
 func (s *Service) start(c *gin.Context) {
 	var exp *core.Experiment
@@ -565,8 +553,8 @@ func patchExperiment(kubeCli client.Client, exp *core.Experiment, annotations ma
 // @Produce json
 // @Param namespace query string false "namespace"
 // @Success 200 {object} status.AllChaosStatus
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /experiments/state [get]
 func (s *Service) state(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)

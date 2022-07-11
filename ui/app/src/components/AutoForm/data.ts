@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import _ from 'lodash'
 
 export const podPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']

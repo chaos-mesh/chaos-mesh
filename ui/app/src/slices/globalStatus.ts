@@ -14,13 +14,13 @@
  * limitations under the License.
  *
  */
-
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-
-import { Config } from 'api/common.type'
-import LS from 'lib/localStorage'
+import { ConfigChaosDashboardConfig } from 'openapi'
 import React from 'react'
+
 import { TokenFormValues } from 'components/Token'
+
+import LS from 'lib/localStorage'
 
 export interface Alert {
   type: 'success' | 'warning' | 'error'
@@ -84,11 +84,11 @@ const globalStatusSlice = createSlice({
     setConfirmOpen(state, action: PayloadAction<boolean>) {
       state.confirmOpen = action.payload
     },
-    setConfig(state, action: PayloadAction<Config>) {
-      state.securityMode = action.payload.security_mode
-      state.dnsServerCreate = action.payload.dns_server_create
-      state.gcpSecurityMode = action.payload.gcp_security_mode
-      state.version = action.payload.version
+    setConfig(state, action: PayloadAction<ConfigChaosDashboardConfig>) {
+      state.securityMode = action.payload.security_mode!
+      state.dnsServerCreate = action.payload.dns_server_create!
+      state.gcpSecurityMode = action.payload.gcp_security_mode!
+      state.version = action.payload.version!
     },
     setNameSpace(state, action: PayloadAction<string>) {
       const ns = action.payload

@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
-
 import { Box, Divider, Typography } from '@mui/material'
-
 import type { BoxProps } from '@mui/material'
+
 import Space from '../Space'
 
 interface PaperTopProps {
