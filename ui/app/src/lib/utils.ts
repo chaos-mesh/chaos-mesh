@@ -19,23 +19,20 @@ import _ from 'lodash'
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
   return Object.entries(obj)
     .filter((d) => !filters?.includes(d[0]))
-    .reduce(
-      (acc: string[], [key, val]) =>
-        acc.concat(Array.isArray(val) ? val.map((d) => `${key}${separator}${d}`) : `${key}${separator}${val}`),
+    .reduce<string[]>(
+      (acc, [k, v]) => acc.concat(Array.isArray(v) ? v.map((d) => `${k}${separator}${d}`) : `${k}${separator}${v}`),
       []
     )
 }
 
 export function arrToObjBySep(arr: string[], sep: string): Record<string, string> {
-  const result: any = {}
+  return arr.reduce<Record<string, string>>((acc, d) => {
+    const [k, v] = d.split(sep)
 
-  arr.forEach((d) => {
-    const split = d.split(sep)
+    acc[k] = v
 
-    result[split[0]] = split[1]
-  })
-
-  return result
+    return acc
+  }, {})
 }
 
 /**

@@ -14,35 +14,26 @@
  * limitations under the License.
  *
  */
-import { styled } from '@mui/material'
-import type { TooltipProps } from '@mui/material'
-import { Handle, Position } from 'react-flow-renderer'
-import type { Node } from 'react-flow-renderer'
+import { memo } from 'react'
+import { Position } from 'react-flow-renderer'
+import type { NodeProps } from 'react-flow-renderer'
 
 import BareNode from './BareNode'
 import type { BareNodeProps } from './BareNode'
-import CustomTooltip from './CustomTooltip'
+import StyledHandle from './StyleHandle'
 
-const StyledHandle = styled(Handle)(({ theme }) => ({
-  width: '8px !important',
-  height: '8px !important',
-  background: `${theme.palette.background.default} !important`,
-  borderColor: `${theme.palette.outline.main} !important`,
-  zIndex: 1,
-}))
+export type FlowNodeProps = NodeProps<BareNodeProps & { finished: true; name: string }>
 
-export type FlowNodeProps = Node<BareNodeProps & { origin?: boolean; tooltipProps: TooltipProps }>
-
-export default function FlowNode({ data }: FlowNodeProps) {
-  const { origin, tooltipProps, ...rest } = data
+function FlowNode({ data, isConnectable }: FlowNodeProps) {
+  const { finished, ...rest } = data // Exclude `finished` from the data.
 
   return (
     <>
-      {!origin && <StyledHandle type="target" position={Position.Left} />}
-      <CustomTooltip arrow placement="top" {...tooltipProps}>
-        <BareNode {...rest} />
-      </CustomTooltip>
-      <StyledHandle type="source" position={Position.Right} />
+      {isConnectable && <StyledHandle type="target" position={Position.Left} />}
+      <BareNode {...rest} />
+      {isConnectable && <StyledHandle type="source" position={Position.Right} />}
     </>
   )
 }
+
+export default memo(FlowNode)

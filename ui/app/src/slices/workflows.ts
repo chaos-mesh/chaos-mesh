@@ -79,23 +79,21 @@ const workflowSlice = createSlice({
   name: 'workflows',
   initialState,
   reducers: {
-    insertWorkflowNode(state, action: PayloadAction<WorkflowNode>) {
-      const { id, experiment } = action.payload
-
-      state.nodes[id] = experiment
+    importNodes(state, action: PayloadAction<Record<uuid, NodeExperiment>>) {
+      state.nodes = action.payload
     },
     updateWorkflowNode(state, action) {
       const payload = action.payload
 
-      state.nodes[payload.id] = payload
+      state.nodes[payload.name] = payload
     },
     removeWorkflowNode(state, action: PayloadAction<uuid>) {
       delete state.nodes[action.payload]
     },
-    LoadRecentlyUsedExperiments(state) {
+    loadRecentlyUsedExperiments(state) {
       state.recentUse = LS.getObj('new-workflow-recently-used-experiments')
     },
-    SetRecentlyUsedExperiments(state, action: PayloadAction<RecentUse>) {
+    setRecentlyUsedExperiments(state, action: PayloadAction<RecentUse>) {
       const exp = action.payload
 
       state.recentUse = [...state.recentUse, exp]
@@ -128,15 +126,15 @@ const workflowSlice = createSlice({
 })
 
 export const {
-  insertWorkflowNode,
+  importNodes,
   updateWorkflowNode,
   removeWorkflowNode,
-  LoadRecentlyUsedExperiments,
-  SetRecentlyUsedExperiments,
+  loadRecentlyUsedExperiments,
+  setRecentlyUsedExperiments,
+  resetWorkflow,
   setTemplate,
   updateTemplate,
   deleteTemplate,
-  resetWorkflow,
 } = workflowSlice.actions
 
 export default workflowSlice.reducer

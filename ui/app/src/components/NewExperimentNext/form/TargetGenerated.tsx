@@ -220,7 +220,6 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                     scope="target.selector"
                     modeScope="target"
                     podsPreviewTitle={i18n('newE.target.network.target.podsPreview')}
-                    podsPreviewDesc={i18n('newE.target.network.target.podsPreviewHelper')}
                   />
                 )}
               </MoreOptions>
