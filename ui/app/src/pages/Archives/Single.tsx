@@ -17,9 +17,8 @@
 import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import api from 'api'
-import { ArchiveSingle } from 'api/archives.type'
-import { Event } from 'api/events.type'
 import yaml from 'js-yaml'
+import { CoreEvent, TypesArchiveDetail } from 'openapi'
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -43,25 +42,30 @@ const Single = () => {
   let kind = query.get('kind') || 'experiment'
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<{ kind: string; data: ArchiveSingle | null }>({ kind, data: null })
-  const [events, setEvents] = useState<Event[]>([])
+  const [single, setSingle] = useState<{ kind: string; data: TypesArchiveDetail | null }>({
+    kind,
+    data: null,
+  })
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchSingle = useCallback(() => {
     let request
     switch (kind) {
       case 'workflow':
-        request = api.workflows.singleArchive
+        request = api.archives.archivesWorkflowsUidGet
         break
       case 'schedule':
-        request = api.schedules.singleArchive
+        request = api.archives.archivesSchedulesUidGet
         break
       case 'experiment':
       default:
-        request = api.archives.single
+        request = api.archives.archivesUidGet
         break
     }
 
-    request(uuid!)
+    request({
+      uid: uuid!,
+    })
       .then(({ data }) => {
         setSingle({ kind, data })
       })
@@ -80,7 +84,10 @@ const Single = () => {
 
     const fetchEvents = () => {
       api.events
-        .events({ object_id: uuid, limit: 999 })
+        .eventsGet({
+          objectId: uuid,
+          limit: 999,
+        })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {

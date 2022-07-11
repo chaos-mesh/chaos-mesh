@@ -1,6 +1,7 @@
+import React from 'react'
+
 import Checkbox from '../../esm/Checkbox'
 import type { CheckboxProps } from '../../esm/Checkbox'
-import React from 'react'
 
 export default {
   title: 'Form/Checkbox',

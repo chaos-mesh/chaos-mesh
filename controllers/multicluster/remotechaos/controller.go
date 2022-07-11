@@ -22,6 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -55,6 +56,28 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		err := c.Get(context.TODO(), req.NamespacedName, remoteObj)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
+				// remote chaos doesn't exist, while the local one is being deleted
+				if localObj.GetDeletionTimestamp() != nil {
+					retry.RetryOnConflict(retry.DefaultRetry, func() error {
+						var obj v1alpha1.RemoteObject
+						r.Client.Get(context.TODO(), req.NamespacedName, obj)
+						if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+							if apierrors.IsNotFound(err) {
+								r.Log.Info("chaos has been removed")
+								return nil
+							}
+							// TODO: handle this error
+							r.Log.Error(err, "unable to get chaos")
+
+							return err
+						}
+
+						obj.SetFinalizers([]string{})
+						return r.Client.Update(ctx, obj)
+					})
+					return c.Delete(ctx, localObj)
+				}
+
 				// omit the remoteCluster
 				localSpecValue := reflect.Indirect(reflect.ValueOf(localObj)).FieldByName("Spec")
 				localSpecValue.FieldByName("RemoteCluster").Set(reflect.ValueOf(""))
@@ -79,7 +102,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		// remote chaos exists
 		if localObj.GetDeletionTimestamp() != nil {
-			return c.Delete(ctx, localObj)
+			return c.Delete(ctx, remoteObj)
 		}
 
 		return nil

@@ -22,7 +22,6 @@ import type { ButtonProps } from '@mui/material'
 import type { GridColumns, GridRowParams } from '@mui/x-data-grid'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import api from 'api'
-import { Workflow } from 'api/workflows.type'
 import _ from 'lodash'
 import { CoreWorkflowMeta } from 'openapi'
 import React, { useState } from 'react'
@@ -51,14 +50,14 @@ const Workflows = () => {
   const intl = useIntl()
 
   const [loading, setLoading] = useState(true)
-  const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const [workflows, setWorkflows] = useState<CoreWorkflowMeta[]>([])
 
   const { useNextWorkflowInterface } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const fetchWorkflows = (intervalID?: number) => {
     api.workflows
-      .workflows()
+      .workflowsGet()
       .then(({ data }) => {
         setWorkflows(
           data
@@ -99,7 +98,7 @@ const Workflows = () => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.workflows.del
+        actionFunc = api.workflows.workflowsUidDelete
 
         break
       default:
@@ -107,7 +106,7 @@ const Workflows = () => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({
@@ -141,7 +140,7 @@ const Workflows = () => {
 
     const {
       data: { name, kube_object },
-    } = await api.workflows.single(uid)
+    } = await api.workflows.workflowsUidGet({ uid })
 
     dispatch(
       setConfirm({
@@ -149,14 +148,16 @@ const Workflows = () => {
         description: 'This will re-create a new workflow with the same configuration.',
         handle: () => {
           api.workflows
-            .newWorkflow({
-              apiVersion: 'chaos-mesh.org/v1alpha1',
-              kind: 'Workflow',
-              metadata: {
-                ...kube_object!.metadata,
-                name: `${name}-${uuidv4()}`,
-              },
-              spec: kube_object!.spec,
+            .workflowsPost({
+              request: {
+                apiVersion: 'chaos-mesh.org/v1alpha1',
+                kind: 'Workflow',
+                metadata: {
+                  ...kube_object!.metadata,
+                  name: `${name}-${uuidv4()}`,
+                },
+                spec: kube_object!.spec,
+              } as any,
             })
             .then(() => {
               dispatch(

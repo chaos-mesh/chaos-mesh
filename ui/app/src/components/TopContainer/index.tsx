@@ -138,7 +138,7 @@ const TopContainer = () => {
      */
     function fetchServerConfig() {
       api.common
-        .config()
+        .commonConfigGet()
         .then(({ data }) => {
           if (data.security_mode) {
             setAuth()

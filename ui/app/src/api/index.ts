@@ -14,13 +14,68 @@
  * limitations under the License.
  *
  */
-import * as archives from './archives'
+import autoBind from 'auto-bind'
+import { ArchivesApi, CommonApi, EventsApi, ExperimentsApi, SchedulesApi, WorkflowsApi } from 'openapi'
+
 import * as auth from './auth'
-import * as common from './common'
-import * as events from './events'
-import * as experiments from './experiments'
-import * as schedules from './schedules'
-import * as workflows from './workflows'
+import http from './http'
+
+/**
+ * Due to we use OpenAPI generated as our API, it is important to make sure that `this` always points to
+ * the original instance object during the API call.
+ *
+ * So we use `autoBind` to help us finish the job automatically. Please read the following code for more details.
+ *
+ */
+
+class CommonApiBind extends CommonApi {
+  constructor(...args: any) {
+    super(...args)
+    autoBind(this)
+  }
+}
+
+class ArchivesApiBind extends ArchivesApi {
+  constructor(...args: any) {
+    super(...args)
+    autoBind(this)
+  }
+}
+
+class ExperimentsApiBind extends ExperimentsApi {
+  constructor(...args: any) {
+    super(...args)
+    autoBind(this)
+  }
+}
+
+class SchedulesApiBind extends SchedulesApi {
+  constructor(...args: any) {
+    super(...args)
+    autoBind(this)
+  }
+}
+
+class WorkflowsApiBind extends WorkflowsApi {
+  constructor(...args: any) {
+    super(...args)
+    autoBind(this)
+  }
+}
+
+class EventsApiBind extends EventsApi {
+  constructor(...args: any) {
+    super(...args)
+    autoBind(this)
+  }
+}
+
+const common = new CommonApiBind(undefined, undefined, http)
+const archives = new ArchivesApiBind(undefined, undefined, http)
+const experiments = new ExperimentsApiBind(undefined, undefined, http)
+const schedules = new SchedulesApiBind(undefined, undefined, http)
+const workflows = new WorkflowsApiBind(undefined, undefined, http)
+const events = new EventsApiBind(undefined, undefined, http)
 
 const api = {
   auth,
