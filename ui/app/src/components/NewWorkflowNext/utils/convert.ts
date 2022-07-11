@@ -181,7 +181,7 @@ export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Rec
       kind: 'Workflow',
       metadata: {},
       spec: {
-        entry: 'entry',
+        entry: hasEntry ? templatesWithLevel0[0].name : 'entry',
         templates,
       },
     },
