@@ -39,7 +39,7 @@ import (
 )
 
 // @title Chaos Mesh Dashboard API
-// @version 2.0
+// @version 2.2
 // @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
 // @contact.name GitHub Issues

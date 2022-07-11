@@ -14,11 +14,9 @@
  * limitations under the License.
  *
  */
-
-import type { DataGridProps, GridRenderCellParams } from '@mui/x-data-grid'
-
-import { DataGrid } from '@mui/x-data-grid'
 import { Typography } from '@mui/material'
+import type { DataGridProps, GridRenderCellParams } from '@mui/x-data-grid'
+import { DataGrid } from '@mui/x-data-grid'
 
 export default function DataTable({ columns, sx, ...rest }: DataGridProps) {
   return (

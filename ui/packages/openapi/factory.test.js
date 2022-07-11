@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import ts from 'typescript'
 
 import { isHTTTPChaosPatchHeadersOrQueries, typeTextToFieldType, typeTextToInitialValue } from './factory.js'
-
-import ts from 'typescript'
 import { visitFilter } from './utils.js'
 
 describe('openapi => factory', () => {

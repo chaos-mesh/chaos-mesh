@@ -168,9 +168,6 @@ spec:
                           description: Duration represents the duration of the chaos
                             action.
                           type: string
-                        iops:
-                          description: IOPS defines the limit of IO frequency.
-                          type: integer
                         mode:
                           description: 'Mode defines the mode to run chaos action.
                             Supported mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -1226,6 +1223,13 @@ spec:
                     kernelChaos:
                       description: KernelChaosSpec defines the desired state of KernelChaos
                       properties:
+                        containerNames:
+                          description: ContainerNames indicates list of the name of
+                            affected container. If not set, the first container will
+                            be injected
+                          items:
+                            type: string
+                          type: array
                         duration:
                           description: Duration represents the duration of the chaos
                             action
@@ -2668,9 +2672,6 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action.
                               type: string
-                            iops:
-                              description: IOPS defines the limit of IO frequency.
-                              type: integer
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -3743,6 +3744,13 @@ spec:
                           description: KernelChaosSpec defines the desired state of
                             KernelChaos
                           properties:
+                            containerNames:
+                              description: ContainerNames indicates list of the name
+                                of affected container. If not set, the first container
+                                will be injected
+                              items:
+                                type: string
+                              type: array
                             duration:
                               description: Duration represents the duration of the
                                 chaos action

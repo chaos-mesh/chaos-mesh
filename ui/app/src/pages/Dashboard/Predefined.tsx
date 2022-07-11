@@ -15,6 +15,7 @@
  *
  */
 import loadable from '@loadable/component'
+
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
@@ -111,7 +112,9 @@ const Predefined = () => {
     const exp: any = yaml.load(yamlEditor!.getValue())
 
     const isSchedule = exp['kind'] === 'Schedule'
-    const action = isSchedule ? api.schedules.newSchedule : api.experiments.newExperiment
+    const action = isSchedule
+      ? (schedule: any) => api.schedules.schedulesPost({ schedule })
+      : (chaos: any) => api.experiments.experimentsPost({ chaos })
 
     action(exp)
       .then(() => {

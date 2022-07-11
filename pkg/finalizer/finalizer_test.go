@@ -40,7 +40,12 @@ func TestInsertFinalizer(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	finalizers := []string{"1"}
-	InsertFinalizer(finalizers, "1")
+	finalizers = InsertFinalizer(finalizers, "1")
 
 	g.Expect(finalizers).Should(Equal([]string{"1"}))
+
+	finalizers = []string{"1", "2"}
+	finalizers = InsertFinalizer(finalizers, "3")
+
+	g.Expect(finalizers).Should(Equal([]string{"1", "2", "3"}))
 }

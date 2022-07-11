@@ -14,20 +14,22 @@
  * limitations under the License.
  *
  */
-
-import { Experiment, Selector, TableCell } from './common'
 import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'
-
-import { ArchiveSingle } from 'api/archives.type'
-import { ExperimentSingle } from 'api/experiments.type'
-import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from 'components/StatusLabel'
-import { format } from 'lib/luxon'
-import i18n from 'components/T'
 import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+import { TypesArchiveDetail, TypesExperimentDetail } from 'openapi'
+
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreSelector } from 'store'
 
-type Config = ExperimentSingle | ArchiveSingle
+import StatusLabel from 'components/StatusLabel'
+import i18n from 'components/T'
+
+import { format } from 'lib/luxon'
+
+import { Experiment, Selector, TableCell } from './common'
+
+type Config = TypesExperimentDetail | TypesArchiveDetail
 
 interface ObjectConfigurationProps {
   config: Config
@@ -46,7 +48,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
 }) => {
   const { lang } = useStoreSelector((state) => state.settings)
 
-  const spec = inNode ? config : config.kube_object.spec
+  const spec: any = inNode ? config : config!.kube_object!.spec
   const experiment =
     inSchedule || inNode ? spec[templateTypeToFieldName(inSchedule ? spec.type : (config as any).templateType)] : spec
 
@@ -91,7 +93,7 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
                   <TableCell>{i18n('table.created')}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      {format(config.created_at, lang)}
+                      {format(config.created_at!, lang)}
                     </Typography>
                   </TableCell>
                 </TableRow>

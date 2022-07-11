@@ -14,10 +14,11 @@
  * limitations under the License.
  *
  */
+
 import { Box, Typography } from '@mui/material'
 import DateTime, { format } from 'lib/luxon'
 
-import { Event } from 'api/events.type'
+import { CoreEvent } from 'openapi'
 import NotFound from 'components/NotFound'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
@@ -31,7 +32,7 @@ import { iconByKind } from 'lib/byKind'
 import { useStoreSelector } from 'store'
 
 interface EventsTimelineProps {
-  events: Event[]
+  events: CoreEvent[]
 }
 
 const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
@@ -44,7 +45,7 @@ const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
           <TimelineOppositeContent style={{ flex: 0.001, padding: 0 }} />
           <TimelineSeparator>
             <TimelineConnector sx={{ py: 3 }} />
-            <TimelineDot color="primary">{iconByKind(e.kind, 'small')}</TimelineDot>
+            <TimelineDot color="primary">{iconByKind(e.kind as any, 'small')}</TimelineDot>
           </TimelineSeparator>
           <TimelineContent>
             <Box display="flex" justifyContent="space-between" mt={6}>
@@ -54,8 +55,8 @@ const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
                   {e.message}
                 </Typography>
               </Box>
-              <Typography variant="overline" title={format(e.created_at)}>
-                {DateTime.fromISO(e.created_at, {
+              <Typography variant="overline" title={format(e.created_at!)}>
+                {DateTime.fromISO(e.created_at!, {
                   locale: lang,
                 }).toRelative()}
               </Typography>

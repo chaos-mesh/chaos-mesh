@@ -1,9 +1,6 @@
 // This file is synchronized from '@ui/app/src/theme.ts'.
-
 // All options are based on https://www.figma.com/file/2J6PVAaitQPQFHBtF5LbII/UI-Interface.
-
 import { ThemeProvider, createTheme, responsiveFontSizes } from '@mui/material/styles'
-
 import React from 'react'
 
 const common = {
