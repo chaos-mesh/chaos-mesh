@@ -51,7 +51,7 @@ inline int real_clock_gettime(clockid_t clk_id, struct timespec *tp) {
 }
 #endif
 
-int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+int fake_clock_gettime(clockid_t clk_id, struct timespec *tp) {
     int ret = real_clock_gettime(clk_id, tp);
 
     int64_t sec_delta = TV_SEC_DELTA;

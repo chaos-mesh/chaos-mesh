@@ -22,6 +22,10 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
     {{- include "chaos-mesh.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.chaosDaemon.updateStrategy }}
+  updateStrategy:
+{{ toYaml .Values.chaosDaemon.updateStrategy | indent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "chaos-mesh.selectors" . | nindent 6 }}
@@ -32,7 +36,8 @@ spec:
         {{- include "chaos-mesh.labels" . | nindent 8 }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
-        {{- if .Values.dashboard.securityMode }}
+        {{- /* it requires to reload the latest re-generated certs for mtls after helm upgrade*/}}
+        {{- if .Values.chaosDaemon.mtls.enabled }}
         rollme: {{ randAlphaNum 5 | quote }}
         {{- end }}
     {{- with .Values.chaosDaemon.podAnnotations }}
@@ -71,7 +76,7 @@ spec:
           {{- if .Values.enableProfiling }}
             - --pprof
           {{- end }}
-          {{- if .Values.dashboard.securityMode }}
+          {{- if .Values.chaosDaemon.mtls.enabled }}
             - --ca
             - /etc/chaos-daemon/cert/ca.crt
             - --cert
@@ -124,7 +129,7 @@ spec:
               mountPath: /host-sys
             - name: lib-modules
               mountPath: /lib/modules
-            {{- if .Values.dashboard.securityMode}}
+            {{- if .Values.chaosDaemon.mtls.enabled}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
               readOnly: true
@@ -132,7 +137,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
-              hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
 {{- if .Values.bpfki.create }}
@@ -162,7 +166,6 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.bpfki.grpcPort }}
-              hostPort: {{ .Values.bpfki.grpcPort }}
 {{- end }}
         {{- if .Values.chaosDlv.enable }}
         - name: chaos-mesh-dlv
@@ -181,27 +184,15 @@ spec:
         {{- end }}
       volumes:
         - name: socket-path
-          hostPath:
-          {{- if .Values.chaosDaemon.socketPath }}
-            path: {{ .Values.chaosDaemon.socketPath | dir }}
-          {{- else if .Values.chaosDaemon.socketDir }}
-            path: {{ .Values.chaosDaemon.socketDir }}
-          {{- else }}
-            {{- if eq .Values.chaosDaemon.runtime "docker" }}
-            path: /var/run
-            {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
-            path: /run/containerd
-            {{- else if eq .Values.chaosDaemon.runtime "crio" }}
-            path: /var/run/crio
-            {{- end }}
-          {{- end }}
+          hostPath: 
+            path: {{template "chaos-daemon.socket-path" . }}
         - name: sys-path
           hostPath:
             path: /sys
         - name: lib-modules
           hostPath:
             path: /lib/modules
-        {{- if .Values.dashboard.securityMode}}
+        {{- if .Values.chaosDaemon.mtls.enabled}}
         - name: chaos-daemon-cert
           secret:
             secretName:  {{ template "chaos-mesh.daemon.certs" . }}

@@ -80,7 +80,7 @@ var _ = Describe("Event", func() {
 			ID:        1,
 			ObjectID:  "UID1",
 			CreatedAt: now.Add(time.Hour * 24),
-			Namespace: "chaos-testing",
+			Namespace: "chaos-mesh",
 			Name:      "event1",
 			Kind:      "NetworkChaos",
 			Type:      "type",
@@ -151,7 +151,7 @@ var _ = Describe("Event", func() {
 
 			mock.ExpectQuery(sql).WithArgs(event1.Namespace, event1.Name, event1.Kind).WillReturnRows(rows)
 
-			events, err := es.ListByExperiment(context.TODO(), "chaos-testing", "event1", "NetworkChaos")
+			events, err := es.ListByExperiment(context.TODO(), "chaos-mesh", "event1", "NetworkChaos")
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(events[0]).Should(Equal(event1))
 		})

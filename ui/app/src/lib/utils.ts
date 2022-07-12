@@ -14,39 +14,48 @@
  * limitations under the License.
  *
  */
-
-export function toTitleCase(s: string) {
-  return s.charAt(0).toUpperCase() + s.substr(1)
-}
-
-export function truncate(s: string) {
-  if (s.length > 25) {
-    return s.substring(0, 25) + '...'
-  }
-
-  return s
-}
+import _ from 'lodash'
 
 export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
   return Object.entries(obj)
     .filter((d) => !filters?.includes(d[0]))
-    .reduce(
-      (acc: string[], [key, val]) =>
-        acc.concat(Array.isArray(val) ? val.map((d) => `${key}${separator}${d}`) : `${key}${separator}${val}`),
+    .reduce<string[]>(
+      (acc, [k, v]) => acc.concat(Array.isArray(v) ? v.map((d) => `${k}${separator}${d}`) : `${k}${separator}${v}`),
       []
     )
 }
 
-export function arrToObjBySep(arr: string[], sep: string) {
-  const result: any = {}
+export function arrToObjBySep(arr: string[], sep: string): Record<string, string> {
+  return arr.reduce<Record<string, string>>((acc, d) => {
+    const [k, v] = d.split(sep)
 
-  arr.forEach((d) => {
-    const split = d.split(sep)
+    acc[k] = v
 
-    result[split[0]] = split[1]
-  })
+    return acc
+  }, {})
+}
 
-  return result
+/**
+ * Recursively check if a value is empty.
+ *
+ * @export
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isDeepEmpty(value: any): boolean {
+  if (!value) {
+    return true
+  }
+
+  if (_.isArray(value) && _.isEmpty(value)) {
+    return true
+  }
+
+  if (_.isObject(value)) {
+    return _.every(value, isDeepEmpty)
+  }
+
+  return false
 }
 
 /**
@@ -56,21 +65,9 @@ export function arrToObjBySep(arr: string[], sep: string) {
  * @param {*} obj
  */
 export function sanitize(obj: any) {
-  function isEmpty(value: any): boolean {
-    if (!value) {
-      return true
-    }
+  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isDeepEmpty(value) ? undefined : value)) ?? '{}')
+}
 
-    if (Array.isArray(value) && value.length === 0) {
-      return true
-    }
-
-    if (value instanceof Object) {
-      return Object.values(value).every(isEmpty)
-    }
-
-    return false
-  }
-
-  return JSON.parse(JSON.stringify(obj, (_, value: any) => (isEmpty(value) ? undefined : value)) ?? '{}')
+export function concatKindAction(kind: string, action?: string) {
+  return `${kind}${action ? ` / ${action}` : ''}`
 }

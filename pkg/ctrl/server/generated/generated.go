@@ -44,6 +44,7 @@ type ResolverRoot interface {
 	AttrOverrideSpec() AttrOverrideSpecResolver
 	BandwidthSpec() BandwidthSpecResolver
 	ChaosCondition() ChaosConditionResolver
+	CidrAndPort() CidrAndPortResolver
 	ContainerStateRunning() ContainerStateRunningResolver
 	ContainerStateTerminated() ContainerStateTerminatedResolver
 	ExperimentStatus() ExperimentStatusResolver
@@ -57,6 +58,8 @@ type ResolverRoot interface {
 	IoFault() IoFaultResolver
 	Logger() LoggerResolver
 	MistakeSpec() MistakeSpecResolver
+	MutablePod() MutablePodResolver
+	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	NetworkChaos() NetworkChaosResolver
 	OwnerReference() OwnerReferenceResolver
@@ -73,6 +76,7 @@ type ResolverRoot interface {
 	PodStressChaos() PodStressChaosResolver
 	Process() ProcessResolver
 	Query() QueryResolver
+	RawIPSet() RawIPSetResolver
 	RawIptables() RawIptablesResolver
 	RawTrafficControl() RawTrafficControlResolver
 	Record() RecordResolver
@@ -133,6 +137,11 @@ type ComplexityRoot struct {
 		Reason func(childComplexity int) int
 		Status func(childComplexity int) int
 		Type   func(childComplexity int) int
+	}
+
+	CidrAndPort struct {
+		Cidr func(childComplexity int) int
+		Port func(childComplexity int) int
 	}
 
 	ContainerState struct {
@@ -322,6 +331,11 @@ type ComplexityRoot struct {
 		Weight func(childComplexity int) int
 	}
 
+	KillProcessResult struct {
+		Command func(childComplexity int) int
+		Pid     func(childComplexity int) int
+	}
+
 	Logger struct {
 		Component func(childComplexity int, ns string, component model.Component) int
 		Pod       func(childComplexity int, ns string, name string) int
@@ -342,6 +356,17 @@ type ComplexityRoot struct {
 		Filling        func(childComplexity int) int
 		MaxLength      func(childComplexity int) int
 		MaxOccurrences func(childComplexity int) int
+	}
+
+	MutablePod struct {
+		CleanIptables func(childComplexity int, chains []string) int
+		CleanTcs      func(childComplexity int, devices []string) int
+		KillProcesses func(childComplexity int, pids []string) int
+		Pod           func(childComplexity int) int
+	}
+
+	Mutation struct {
+		Pod func(childComplexity int, ns string, name string) int
 	}
 
 	Namespace struct {
@@ -634,9 +659,12 @@ type ComplexityRoot struct {
 	}
 
 	RawIPSet struct {
-		Cidrs  func(childComplexity int) int
-		Name   func(childComplexity int) int
-		Source func(childComplexity int) int
+		CidrAndPorts func(childComplexity int) int
+		Cidrs        func(childComplexity int) int
+		IPSetType    func(childComplexity int) int
+		Name         func(childComplexity int) int
+		SetNames     func(childComplexity int) int
+		Source       func(childComplexity int) int
 	}
 
 	RawIptables struct {
@@ -742,6 +770,9 @@ type ChaosConditionResolver interface {
 	Type(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
 	Status(ctx context.Context, obj *v1alpha1.ChaosCondition) (string, error)
 }
+type CidrAndPortResolver interface {
+	Port(ctx context.Context, obj *v1alpha1.CidrAndPort) (int, error)
+}
 type ContainerStateRunningResolver interface {
 	StartedAt(ctx context.Context, obj *v1.ContainerStateRunning) (*time.Time, error)
 }
@@ -827,6 +858,14 @@ type LoggerResolver interface {
 }
 type MistakeSpecResolver interface {
 	Filling(ctx context.Context, obj *v1alpha1.MistakeSpec) (*string, error)
+}
+type MutablePodResolver interface {
+	KillProcesses(ctx context.Context, obj *model.MutablePod, pids []string) ([]*model.KillProcessResult, error)
+	CleanTcs(ctx context.Context, obj *model.MutablePod, devices []string) ([]string, error)
+	CleanIptables(ctx context.Context, obj *model.MutablePod, chains []string) ([]string, error)
+}
+type MutationResolver interface {
+	Pod(ctx context.Context, ns string, name string) (*model.MutablePod, error)
 }
 type NamespaceResolver interface {
 	Component(ctx context.Context, obj *model.Namespace, component model.Component) ([]*v1.Pod, error)
@@ -946,6 +985,9 @@ type ProcessResolver interface {
 type QueryResolver interface {
 	Namespace(ctx context.Context, ns *string) ([]*model.Namespace, error)
 	Pods(ctx context.Context, selector model.PodSelectorInput) ([]*v1.Pod, error)
+}
+type RawIPSetResolver interface {
+	IPSetType(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error)
 }
 type RawIptablesResolver interface {
 	Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error)
@@ -1191,6 +1233,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ChaosCondition.Type(childComplexity), true
+
+	case "CidrAndPort.cidr":
+		if e.complexity.CidrAndPort.Cidr == nil {
+			break
+		}
+
+		return e.complexity.CidrAndPort.Cidr(childComplexity), true
+
+	case "CidrAndPort.port":
+		if e.complexity.CidrAndPort.Port == nil {
+			break
+		}
+
+		return e.complexity.CidrAndPort.Port(childComplexity), true
 
 	case "ContainerState.running":
 		if e.complexity.ContainerState.Running == nil {
@@ -2123,6 +2179,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.IoFault.Weight(childComplexity), true
 
+	case "KillProcessResult.command":
+		if e.complexity.KillProcessResult.Command == nil {
+			break
+		}
+
+		return e.complexity.KillProcessResult.Command(childComplexity), true
+
+	case "KillProcessResult.pid":
+		if e.complexity.KillProcessResult.Pid == nil {
+			break
+		}
+
+		return e.complexity.KillProcessResult.Pid(childComplexity), true
+
 	case "Logger.component":
 		if e.complexity.Logger.Component == nil {
 			break
@@ -2202,6 +2272,61 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MistakeSpec.MaxOccurrences(childComplexity), true
+
+	case "MutablePod.cleanIptables":
+		if e.complexity.MutablePod.CleanIptables == nil {
+			break
+		}
+
+		args, err := ec.field_MutablePod_cleanIptables_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MutablePod.CleanIptables(childComplexity, args["chains"].([]string)), true
+
+	case "MutablePod.cleanTcs":
+		if e.complexity.MutablePod.CleanTcs == nil {
+			break
+		}
+
+		args, err := ec.field_MutablePod_cleanTcs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MutablePod.CleanTcs(childComplexity, args["devices"].([]string)), true
+
+	case "MutablePod.killProcesses":
+		if e.complexity.MutablePod.KillProcesses == nil {
+			break
+		}
+
+		args, err := ec.field_MutablePod_killProcesses_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.MutablePod.KillProcesses(childComplexity, args["pids"].([]string)), true
+
+	case "MutablePod.pod":
+		if e.complexity.MutablePod.Pod == nil {
+			break
+		}
+
+		return e.complexity.MutablePod.Pod(childComplexity), true
+
+	case "Mutation.pod":
+		if e.complexity.Mutation.Pod == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_pod_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Pod(childComplexity, args["ns"].(string), args["name"].(string)), true
 
 	case "Namespace.component":
 		if e.complexity.Namespace.Component == nil {
@@ -3693,6 +3818,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["selector"].(model.PodSelectorInput)), true
 
+	case "RawIPSet.cidrAndPorts":
+		if e.complexity.RawIPSet.CidrAndPorts == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.CidrAndPorts(childComplexity), true
+
 	case "RawIPSet.cidrs":
 		if e.complexity.RawIPSet.Cidrs == nil {
 			break
@@ -3700,12 +3832,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RawIPSet.Cidrs(childComplexity), true
 
+	case "RawIPSet.ipSetType":
+		if e.complexity.RawIPSet.IPSetType == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.IPSetType(childComplexity), true
+
 	case "RawIPSet.name":
 		if e.complexity.RawIPSet.Name == nil {
 			break
 		}
 
 		return e.complexity.RawIPSet.Name(childComplexity), true
+
+	case "RawIPSet.setNames":
+		if e.complexity.RawIPSet.SetNames == nil {
+			break
+		}
+
+		return e.complexity.RawIPSet.SetNames(childComplexity), true
 
 	case "RawIPSet.source":
 		if e.complexity.RawIPSet.Source == nil {
@@ -4109,6 +4255,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 	case ast.Subscription:
 		next := ec._Logger(ctx, rc.Operation.SelectionSet)
 
@@ -4183,6 +4343,7 @@ scalar Int64
 
 schema {
     query: Query
+    mutation: Mutation
     subscription: Logger
 }
 
@@ -4191,8 +4352,12 @@ type Query {
     pods(selector: PodSelectorInput!): [Pod!]
 }
 
+type Mutation {
+    pod(ns: String! = "default", name: String!): MutablePod
+}
+
 type Logger {
-    component(ns: String! = "chaos-testing", component: Component!): String!  	@goField(forceResolver: true)
+    component(ns: String! = "chaos-mesh", component: Component!): String!  	@goField(forceResolver: true)
     pod(ns: String! = "default", name: String!): String!                		@goField(forceResolver: true)
 }
 
@@ -4230,6 +4395,11 @@ type Process {
     pid: String!
     command: String!
     fds: [Fd!]      @goField(forceResolver: true)
+}
+
+type KillProcessResult {
+    pid: String!
+    command: String!
 }
 
 type Fd {
@@ -4273,6 +4443,13 @@ input PodSelectorInput {
     podPhaseSelectors: [String!]
 }
 
+type MutablePod {
+    pod: Pod!
+    killProcesses(pids: [String!]): [KillProcessResult!]    @goField(forceResolver: true)
+    cleanTcs(devices: [String!]): [String!]                 @goField(forceResolver: true)
+    cleanIptables(chains: [String!]): [String!]             @goField(forceResolver: true)
+}
+
 type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     kind: String!
     apiVersion: String!
@@ -4280,7 +4457,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4498,7 +4675,7 @@ type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerState
 
     # Message regarding the last termination of the container
     message: String
-    
+
     #Time at which previous execution of the container started
     startedAt: Time
 
@@ -4526,7 +4703,7 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4602,7 +4779,7 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     rdev: Int64
 
     # MistakeSpec represents the mistake to inject
-    
+
     # filling determines what is filled in the miskate data.
     filling: String
 
@@ -4635,7 +4812,7 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4763,7 +4940,7 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4863,7 +5040,7 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5056,7 +5233,7 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5097,11 +5274,26 @@ type RawIPSet @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.Raw
     # The name of ipset
     name: String!
 
+    ipSetType: String!
+
     # The contents of ipset
     cidrs: [String!]!
 
+	# The contents of ipset.
+	# Only available when IPSetType is NetPortIPSet.
+    cidrAndPorts: [CidrAndPort!]
+
+	# The contents of ipset.
+	# Only available when IPSetType is SetIPSet.
+    setNames: [String!]!
+
     # The name and namespace of the source network chaos
     source: String!
+}
+
+type CidrAndPort @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.CidrAndPort") {
+    cidr: String!
+    port: Int!
 }
 
 # RawIptables represents the iptables rules on specific pod
@@ -5216,7 +5408,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5320,7 +5512,7 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5364,7 +5556,8 @@ type CgroupsMemory {
 type ProcessStress {
     process: Process!
     cgroup: String!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -5397,6 +5590,75 @@ func (ec *executionContext) field_Logger_component_args(ctx context.Context, raw
 }
 
 func (ec *executionContext) field_Logger_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ns"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ns"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ns"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_MutablePod_cleanIptables_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["chains"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chains"))
+		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["chains"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutablePod_cleanTcs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["devices"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("devices"))
+		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["devices"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_MutablePod_killProcesses_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []string
+	if tmp, ok := rawArgs["pids"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pids"))
+		arg0, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pids"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_pod_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -6594,6 +6856,76 @@ func (ec *executionContext) _ChaosCondition_reason(ctx context.Context, field gr
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CidrAndPort_cidr(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CidrAndPort) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CidrAndPort",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cidr, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CidrAndPort_port(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.CidrAndPort) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CidrAndPort",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.CidrAndPort().Port(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ContainerState_waiting(ctx context.Context, field graphql.CollectedField, obj *v1.ContainerState) (ret graphql.Marshaler) {
@@ -11005,6 +11337,76 @@ func (ec *executionContext) _IoFault_weight(ctx context.Context, field graphql.C
 	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _KillProcessResult_pid(ctx context.Context, field graphql.CollectedField, obj *model.KillProcessResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "KillProcessResult",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KillProcessResult_command(ctx context.Context, field graphql.CollectedField, obj *model.KillProcessResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "KillProcessResult",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Command, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Logger_component(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -11369,6 +11771,197 @@ func (ec *executionContext) _MistakeSpec_maxLength(ctx context.Context, field gr
 	res := resTmp.(int64)
 	fc.Result = res
 	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutablePod_pod(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MutablePod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pod, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.Pod)
+	fc.Result = res
+	return ec.marshalNPod2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐPod(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutablePod_killProcesses(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MutablePod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_MutablePod_killProcesses_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.MutablePod().KillProcesses(rctx, obj, args["pids"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.KillProcessResult)
+	fc.Result = res
+	return ec.marshalOKillProcessResult2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResultᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutablePod_cleanTcs(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MutablePod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_MutablePod_cleanTcs_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.MutablePod().CleanTcs(rctx, obj, args["devices"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutablePod_cleanIptables(ctx context.Context, field graphql.CollectedField, obj *model.MutablePod) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "MutablePod",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_MutablePod_cleanIptables_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.MutablePod().CleanIptables(rctx, obj, args["chains"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_pod(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_pod_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Pod(rctx, args["ns"].(string), args["name"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.MutablePod)
+	fc.Result = res
+	return ec.marshalOMutablePod2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐMutablePod(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Namespace_ns(ctx context.Context, field graphql.CollectedField, obj *model.Namespace) (ret graphql.Marshaler) {
@@ -18423,6 +19016,41 @@ func (ec *executionContext) _RawIPSet_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RawIPSet_ipSetType(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.RawIPSet().IPSetType(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RawIPSet_cidrs(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -18442,6 +19070,73 @@ func (ec *executionContext) _RawIPSet_cidrs(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Cidrs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIPSet_cidrAndPorts(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CidrAndPorts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]v1alpha1.CidrAndPort)
+	fc.Result = res
+	return ec.marshalOCidrAndPort2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPortᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawIPSet_setNames(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawIPSet",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SetNames, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -22067,6 +22762,57 @@ func (ec *executionContext) _ChaosCondition(ctx context.Context, sel ast.Selecti
 	return out
 }
 
+var cidrAndPortImplementors = []string{"CidrAndPort"}
+
+func (ec *executionContext) _CidrAndPort(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.CidrAndPort) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cidrAndPortImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CidrAndPort")
+		case "cidr":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._CidrAndPort_cidr(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "port":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._CidrAndPort_port(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var containerStateImplementors = []string{"ContainerState"}
 
 func (ec *executionContext) _ContainerState(ctx context.Context, sel ast.SelectionSet, obj *v1.ContainerState) graphql.Marshaler {
@@ -23969,6 +24715,47 @@ func (ec *executionContext) _IoFault(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var killProcessResultImplementors = []string{"KillProcessResult"}
+
+func (ec *executionContext) _KillProcessResult(ctx context.Context, sel ast.SelectionSet, obj *model.KillProcessResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, killProcessResultImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("KillProcessResult")
+		case "pid":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._KillProcessResult_pid(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "command":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._KillProcessResult_command(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var loggerImplementors = []string{"Logger"}
 
 func (ec *executionContext) _Logger(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
@@ -24114,6 +24901,125 @@ func (ec *executionContext) _MistakeSpec(ctx context.Context, sel ast.SelectionS
 			}
 
 			out.Values[i] = innerFunc(ctx)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutablePodImplementors = []string{"MutablePod"}
+
+func (ec *executionContext) _MutablePod(ctx context.Context, sel ast.SelectionSet, obj *model.MutablePod) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutablePodImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MutablePod")
+		case "pod":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._MutablePod_pod(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "killProcesses":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._MutablePod_killProcesses(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "cleanTcs":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._MutablePod_cleanTcs(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "cleanIptables":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._MutablePod_cleanIptables(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "pod":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_pod(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
 
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -27205,8 +28111,28 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "ipSetType":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RawIPSet_ipSetType(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "cidrs":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._RawIPSet_cidrs(ctx, field, obj)
@@ -27215,7 +28141,24 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "cidrAndPorts":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_cidrAndPorts(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "setNames":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawIPSet_setNames(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "source":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -27225,7 +28168,7 @@ func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = innerFunc(ctx)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -28439,6 +29382,10 @@ func (ec *executionContext) marshalNChaosCondition2githubᚗcomᚋchaosᚑmesh�
 	return ec._ChaosCondition(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNCidrAndPort2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPort(ctx context.Context, sel ast.SelectionSet, v v1alpha1.CidrAndPort) graphql.Marshaler {
+	return ec._CidrAndPort(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNComponent2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐComponent(ctx context.Context, v interface{}) (model.Component, error) {
 	var res model.Component
 	err := res.UnmarshalGQL(v)
@@ -28565,6 +29512,16 @@ func (ec *executionContext) marshalNInt642int64(ctx context.Context, sel ast.Sel
 
 func (ec *executionContext) marshalNIoFault2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐIoFault(ctx context.Context, sel ast.SelectionSet, v v1alpha1.IoFault) graphql.Marshaler {
 	return ec._IoFault(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNKillProcessResult2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResult(ctx context.Context, sel ast.SelectionSet, v *model.KillProcessResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._KillProcessResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNNamespace2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *model.Namespace) graphql.Marshaler {
@@ -29250,6 +30207,53 @@ func (ec *executionContext) marshalOChaosCondition2ᚕgithubᚗcomᚋchaosᚑmes
 	return ret
 }
 
+func (ec *executionContext) marshalOCidrAndPort2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPortᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.CidrAndPort) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCidrAndPort2githubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐCidrAndPort(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalOContainerState2k8sᚗioᚋapiᚋcoreᚋv1ᚐContainerState(ctx context.Context, sel ast.SelectionSet, v v1.ContainerState) graphql.Marshaler {
 	return ec._ContainerState(ctx, sel, &v)
 }
@@ -29676,6 +30680,53 @@ func (ec *executionContext) marshalOIoFault2ᚕgithubᚗcomᚋchaosᚑmeshᚋcha
 	return ret
 }
 
+func (ec *executionContext) marshalOKillProcessResult2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResultᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.KillProcessResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNKillProcessResult2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐKillProcessResult(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalOLossSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐLossSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.LossSpec) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -29711,6 +30762,13 @@ func (ec *executionContext) marshalOMistakeSpec2ᚖgithubᚗcomᚋchaosᚑmesh�
 		return graphql.Null
 	}
 	return ec._MistakeSpec(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMutablePod2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐMutablePod(ctx context.Context, sel ast.SelectionSet, v *model.MutablePod) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MutablePod(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalONamespace2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋpkgᚋctrlᚋserverᚋmodelᚐNamespaceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Namespace) graphql.Marshaler {

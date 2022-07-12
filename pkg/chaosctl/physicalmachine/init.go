@@ -57,7 +57,7 @@ func NewPhysicalMachineInitCmd() (*cobra.Command, error) {
 Examples:
   # Generate TLS certs for remote physical machine, and create PhysicalMachine CustomResource in certain namespace
   chaosctl pm init PHYSICALMACHINE_NAME -n NAMESPACE --ip REMOTEIP
-  
+
   # Generate TLS certs for remote physical machine, and create PhysicalMachine CustomResource in certain namespace with specified labels
   chaosctl pm init PHYSICALMACHINE_NAME -n NAMESPACE --ip REMOTEIP -l key1=value1,key2=value2
   `,
@@ -70,7 +70,7 @@ Examples:
 			return initOption.Run(args)
 		},
 	}
-	initCmd.PersistentFlags().StringVar(&initOption.chaosMeshNamespace, "chaos-mesh-namespace", "chaos-testing", "namespace where chaos mesh installed")
+	initCmd.PersistentFlags().StringVar(&initOption.chaosMeshNamespace, "chaos-mesh-namespace", "chaos-mesh", "namespace where chaos mesh installed")
 	initCmd.PersistentFlags().StringVar(&initOption.remoteIP, "ip", "", "ip of the remote physical machine")
 	initCmd.PersistentFlags().StringVar(&initOption.sshUser, "ssh-user", "root", "username for ssh connection")
 	initCmd.PersistentFlags().StringVar(&initOption.sshPrivateKeyFile, "ssh-key", filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa"), "private key filepath for ssh connection")

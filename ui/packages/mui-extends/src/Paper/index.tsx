@@ -16,8 +16,8 @@
  */
 import { Paper as MUIPaper, PaperProps } from '@mui/material'
 
-const Paper: React.FC<PaperProps> = ({ sx, children, ...rest }) => (
-  <MUIPaper {...rest} variant="outlined" sx={{ position: 'relative', height: '100%', p: 4.5, ...sx }}>
+const Paper: React.FC<PaperProps> = ({ children, sx, ...rest }) => (
+  <MUIPaper {...rest} variant="outlined" sx={{ position: 'relative', height: '100%', p: 4, ...sx }}>
     {children}
   </MUIPaper>
 )

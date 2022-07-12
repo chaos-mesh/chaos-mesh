@@ -1,0 +1,47 @@
+name: E2E Test Upload Cache
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - master
+      - release-*
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout codes
+        uses: actions/checkout@v2
+      - name: build e2e images
+        env:
+          DOCKER_CACHE: 1
+          DOCKER_CACHE_DIR: ${{github.workspace}}/cache
+          GO_BUILD_CACHE: ${{github.workspace}}/cache
+          DOCKER_CLI_EXPERIMENTAL: enabled 
+        run: |
+          docker buildx create --use --name chaos-mesh-builder
+          make -j4 image e2e-image
+      - name: upload build cache
+        uses: martijnhols/actions-cache/save@main
+        with:
+          path: cache
+          key: e2e-image-build-cache-${{ runner.os }}
+
+  build-e2e-binary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout codes
+        uses: actions/checkout@v2
+      - name: build e2e binary
+        env:
+          DOCKER_CACHE: 1
+          DOCKER_CACHE_DIR: ${{github.workspace}}/cache
+          GO_BUILD_CACHE: ${{github.workspace}}/cache
+        run: |
+          make e2e-build
+      - name: upload build cache
+        uses: martijnhols/actions-cache/save@main
+        with:
+          path: cache
+          key: e2e-binary-build-cache-${{ runner.os }}
+

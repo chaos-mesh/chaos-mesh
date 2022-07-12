@@ -15,20 +15,23 @@
  *
  */
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
-import { Field, Form, Formik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { RBACConfigParams } from 'api/common.type'
-import { SelectField } from 'components/FormField'
-import Space from '@ui/mui-extends/esm/Space'
+import { makeStyles } from '@mui/styles'
 import api from 'api'
 import copy from 'copy-text-to-clipboard'
-import i18n from 'components/T'
-import { makeStyles } from '@mui/styles'
-import { setAlert } from 'slices/globalStatus'
-import { toTitleCase } from 'lib/utils'
+import { Field, Form, Formik } from 'formik'
+import _ from 'lodash'
+import { CommonApiCommonRbacConfigGetRequest } from 'openapi'
+import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
+
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setAlert } from 'slices/globalStatus'
+
+import { SelectField } from 'components/FormField'
+import i18n from 'components/T'
 
 const useStyles = makeStyles((theme) => ({
   pre: {
@@ -58,9 +61,9 @@ const RBACGenerator = () => {
 
   const containerRef = useRef(null)
 
-  const fetchRBACConfig = (values: RBACConfigParams) =>
-    api.common.rbacConfig(values).then(({ data }) => {
-      const entries = Object.entries<string>(data)
+  const fetchRBACConfig = (values: CommonApiCommonRbacConfigGetRequest) =>
+    api.common.commonRbacConfigGet(values).then(({ data }) => {
+      const entries = Object.entries(data)
       const [name, yaml] = entries[0]
 
       setRBAC(yaml)
@@ -71,7 +74,7 @@ const RBACGenerator = () => {
     fetchRBACConfig({ namespace: 'default', role: 'viewer' })
   }, [])
 
-  const onValidate = ({ namespace, role, clustered }: RBACConfigParams & { clustered: boolean }) => {
+  const onValidate = ({ namespace, role, clustered }: CommonApiCommonRbacConfigGetRequest & { clustered: boolean }) => {
     fetchRBACConfig({
       namespace: clustered ? '' : namespace,
       role,
@@ -129,7 +132,7 @@ const RBACGenerator = () => {
               >
                 {['manager', 'viewer'].map((role) => (
                   <MenuItem key={role} value={role}>
-                    {toTitleCase(role)}
+                    {_.upperFirst(role)}
                   </MenuItem>
                 ))}
               </SelectField>

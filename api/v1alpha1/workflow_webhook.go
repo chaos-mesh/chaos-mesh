@@ -143,6 +143,12 @@ func validateTemplate(path *field.Path, template Template, allTemplates []Templa
 		result = append(result, shouldBeNoSchedule(path, template)...)
 
 		result = append(result, template.EmbedChaos.Validate(path, string(templateType))...)
+	case templateType == TypeStatusCheck:
+		result = append(result, shouldBeNoTask(path, template)...)
+		result = append(result, shouldBeNoChildren(path, template)...)
+		result = append(result, shouldBeNoConditionalBranches(path, template)...)
+		result = append(result, shouldBeNoEmbedChaos(path, template)...)
+		result = append(result, shouldBeNoSchedule(path, template)...)
 	default:
 		result = append(result, field.Invalid(path.Child("templateType"), template.Type, fmt.Sprintf("unrecognized template type: %s", template.Type)))
 	}
@@ -197,6 +203,7 @@ func shouldNotSetupDurationInTheChaos(path *field.Path, template Template) field
 
 	if template.EmbedChaos == nil {
 		result = append(result, field.Invalid(path.Child(string(template.Type)), nil, fmt.Sprintf("the value of chaos %s is required", template.Type)))
+		return result
 	}
 
 	spec := reflect.ValueOf(template.EmbedChaos).Elem().FieldByName(string(template.Type))

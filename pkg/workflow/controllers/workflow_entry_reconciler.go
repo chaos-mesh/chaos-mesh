@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -59,7 +60,7 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	entryNodes, err := it.fetchEntryNode(ctx, workflow)
+	entryNodes, err := fetchEntryNode(ctx, it.kubeClient, workflow)
 	if err != nil {
 		it.logger.Error(err, "failed to list entry nodes of workflow",
 			"workflow", request.NamespacedName)
@@ -124,7 +125,7 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 			return err
 		}
 
-		entryNodes, err := it.fetchEntryNode(ctx, workflowNeedUpdate)
+		entryNodes, err := fetchEntryNode(ctx, it.kubeClient, workflowNeedUpdate)
 		if err != nil {
 			it.logger.Error(err,
 				"failed to list entry nodes of workflow",
@@ -205,7 +206,7 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 //
 // The expected length of result is 1, but due to the reconcile and the inconsistent cache, there might be more than one
 // entry nodes created, if should be reported to the upper logic.
-func (it *WorkflowEntryReconciler) fetchEntryNode(ctx context.Context, workflow v1alpha1.Workflow) ([]v1alpha1.WorkflowNode, error) {
+func fetchEntryNode(ctx context.Context, kubeClient client.Client, workflow v1alpha1.Workflow) ([]v1alpha1.WorkflowNode, error) {
 	entryNodesList := v1alpha1.WorkflowNodeList{}
 	controlledByWorkflow, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{
@@ -213,19 +214,15 @@ func (it *WorkflowEntryReconciler) fetchEntryNode(ctx context.Context, workflow 
 		},
 	})
 	if err != nil {
-		it.logger.Error(err, "failed to build label selector with filtering entry workflow node controlled by current workflow",
-			"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name))
-		return nil, err
+		return nil, errors.Wrap(err, "build label selector")
 	}
 
-	err = it.kubeClient.List(ctx, &entryNodesList, &client.ListOptions{
+	err = kubeClient.List(ctx, &entryNodesList, &client.ListOptions{
 		Namespace:     workflow.Namespace,
 		LabelSelector: controlledByWorkflow,
 	})
 	if err != nil {
-		it.logger.Error(err, "failed to list entry workflow node controlled by workflow",
-			"workflow", fmt.Sprintf("%s/%s", workflow.Namespace, workflow.Name))
-		return nil, err
+		return nil, errors.Wrapf(err, "list entry workflow node")
 	}
 
 	sortedEntryNodes := SortByCreationTimestamp(entryNodesList.Items)

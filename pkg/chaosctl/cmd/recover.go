@@ -36,7 +36,7 @@ type RecoverOptions struct {
 	labels    *[]string
 }
 
-func NewRecoverCommand(logger logr.Logger, builders map[string]recover.RecoverBuilder) (*cobra.Command, error) {
+func NewRecoverCommand(logger logr.Logger, builders map[string]recover.RecovererBuilder) (*cobra.Command, error) {
 	o := &RecoverOptions{namespace: "default"}
 
 	recoverCmd := &cobra.Command{
@@ -91,7 +91,7 @@ Examples:
 	return recoverCmd, nil
 }
 
-func recoverResourceCommand(option *RecoverOptions, chaosType string, builder recover.RecoverBuilder) *cobra.Command {
+func recoverResourceCommand(option *RecoverOptions, chaosType string, builder recover.RecovererBuilder) *cobra.Command {
 	return &cobra.Command{
 		Use:   fmt.Sprintf(`%s POD[,POD[,POD...]] [-n NAMESPACE]`, chaosType),
 		Short: fmt.Sprintf(`Recover %s from certain pods`, chaosType),
@@ -122,7 +122,7 @@ func recoverResourceCommand(option *RecoverOptions, chaosType string, builder re
 }
 
 // Run recover
-func (o *RecoverOptions) Run(recover recover.Recover, client *ctrlclient.CtrlClient, args []string) error {
+func (o *RecoverOptions) Run(recover recover.Recoverer, client *ctrlclient.CtrlClient, args []string) error {
 	pods, err := o.selectPods(client, args)
 	if err != nil {
 		return err
