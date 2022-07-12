@@ -50,10 +50,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	err := r.registry.WithClient(obj.GetRemoteCluster(), func(c client.Client) error {
+		r.Log.Info("handling chaos with remote client", "cluster", obj.GetRemoteCluster())
+
 		localObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
 
 		remoteObj := obj.DeepCopyObject().(v1alpha1.RemoteObject)
-		err := c.Get(context.TODO(), req.NamespacedName, remoteObj)
+		err := c.Get(ctx, req.NamespacedName, remoteObj)
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				// remote chaos doesn't exist, while the local one is being deleted
@@ -102,15 +104,23 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		// remote chaos exists
 		if localObj.GetDeletionTimestamp() != nil {
-			return c.Delete(ctx, remoteObj)
+			r.Log.Info("deleting remote obj", "namespace", remoteObj.GetNamespace(), "name", remoteObj.GetName())
+			err := c.Delete(ctx, remoteObj)
+			if err != nil {
+				if apierrors.IsNotFound(err) {
+					return nil
+				} else {
+					return err
+				}
+			}
 		}
-
 		return nil
 	})
 	if err != nil {
-		r.Log.Error(err, "unable to create chaos")
+		r.Log.Error(err, "unable to handle chaos")
 		// TODO: handle the error
 		// TODO: retry
 	}
+
 	return ctrl.Result{}, nil
 }

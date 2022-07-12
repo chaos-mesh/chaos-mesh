@@ -56,7 +56,7 @@ func Bootstrap(params Params) error {
 			For(obj.Object).
 			Named(obj.Name + "-remotechaos-monitor")
 
-		err := builder.Complete(New(params.ManageClient, params.ClusterName, params.LocalClient, params.Logger))
+		err := builder.Complete(New(obj.Object, params.ManageClient, params.ClusterName, params.LocalClient, params.Logger))
 
 		if err != nil {
 			return err

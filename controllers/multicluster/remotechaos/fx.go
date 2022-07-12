@@ -97,7 +97,20 @@ var remotePredicates = predicate.Funcs{
 		return true
 	},
 	UpdateFunc: func(e event.UpdateEvent) bool {
-		return false
+		// TODO: consider carefully whether we'll need to handle
+		// delete event
+		obj, ok := e.ObjectNew.DeepCopyObject().(v1alpha1.RemoteObject)
+		if !ok {
+			fmt.Println("not a remote object")
+			return false
+		}
+
+		if obj.GetRemoteCluster() == "" {
+			fmt.Println("remote cluster is empty")
+			return false
+		}
+
+		return true
 	},
 	DeleteFunc: func(e event.DeleteEvent) bool {
 		// TODO: consider carefully whether we'll need to handle
