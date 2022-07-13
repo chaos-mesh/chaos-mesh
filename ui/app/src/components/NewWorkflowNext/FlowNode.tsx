@@ -14,47 +14,26 @@
  * limitations under the License.
  *
  */
-
-import { Handle, Position } from 'react-flow-renderer'
-import { Tooltip, styled, tooltipClasses } from '@mui/material'
+import { memo } from 'react'
+import { Position } from 'react-flow-renderer'
+import type { NodeProps } from 'react-flow-renderer'
 
 import BareNode from './BareNode'
 import type { BareNodeProps } from './BareNode'
-import type { Node } from 'react-flow-renderer'
-import type { TooltipProps } from '@mui/material'
+import StyledHandle from './StyleHandle'
 
-const StyledHandle = styled(Handle)(({ theme }) => ({
-  width: '8px !important',
-  height: '8px !important',
-  background: `${theme.palette.background.default} !important`,
-  borderColor: `${theme.palette.outline.main} !important`,
-  zIndex: 1,
-}))
+export type FlowNodeProps = NodeProps<BareNodeProps & { finished: true; name: string }>
 
-const NodeTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.surfaceVariant.main,
-  },
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.surfaceVariant.main,
-    color: theme.palette.onSurfaceVariant.main,
-  },
-}))
-
-export type FlowNodeProps = Node<BareNodeProps & { origin?: boolean; tooltipProps: TooltipProps }>
-
-export default function FlowNode({ data }: FlowNodeProps) {
-  const { origin, tooltipProps, ...rest } = data
+function FlowNode({ data, isConnectable }: FlowNodeProps) {
+  const { finished, ...rest } = data // Exclude `finished` from the data.
 
   return (
     <>
-      {!origin && <StyledHandle type="target" position={Position.Left} />}
-      <NodeTooltip arrow placement="top" {...tooltipProps}>
-        <BareNode {...rest} />
-      </NodeTooltip>
-      <StyledHandle type="source" position={Position.Right} />
+      {isConnectable && <StyledHandle type="target" position={Position.Left} />}
+      <BareNode {...rest} />
+      {isConnectable && <StyledHandle type="source" position={Position.Right} />}
     </>
   )
 }
+
+export default memo(FlowNode)

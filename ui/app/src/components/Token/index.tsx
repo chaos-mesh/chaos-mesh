@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Form, Formik, FormikHelpers } from 'formik'
 import { Submit, TextField } from 'components/FormField'
 import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
@@ -79,7 +80,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
 
     // Test the validity of the token in advance
     api.experiments
-      .state()
+      .experimentsStateGet()
       .then(restSteps)
       .catch((error) => {
         const data = error.response?.data

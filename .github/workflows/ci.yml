@@ -45,13 +45,15 @@ jobs:
   go:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
-    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
+        arch: [amd64, arm64]
         job:
           - verify
           - build
           - test
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v2
 
@@ -98,7 +100,6 @@ jobs:
   ui:
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
-    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./ui
@@ -108,6 +109,7 @@ jobs:
           - build
           - test
         # node-version: ["14"] # TODO: add nodejs-16?
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

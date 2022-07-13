@@ -34,7 +34,7 @@
   },
   "newE": {
     "title": "新的实验",
-    "titleStep1": "实验类型",
+    "titleStep1": "注入到",
     "titleStep2": "实验信息",
     "steps": {
       "basic": "元信息",
@@ -91,8 +91,7 @@
         "title": "网络攻击",
         "target": {
           "title": "目标",
-          "podsPreview": "预览目标 Pod",
-          "podsPreviewHelper": "通过勾选 Pod 来进一步限制目标的范围"
+          "podsPreview": "预览目标 Pod"
         }
       },
       "http": {
@@ -174,7 +173,7 @@
         "imageHelper": "容器的镜像",
         "imageValidation": "镜像不能为空",
         "command": "命令",
-        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以空格结尾来创建单条命令。"
+        "commandHelper": "可选项。指定在容器中运行的命令，输入字符串并以回车结束来创建单条命令。"
       },
       "conditionalBranches": {
         "title": "条件分支（可选）",
@@ -394,6 +393,6 @@
   },
   "physic": {
     "address": "地址",
-    "addressHelper": "键入并以空格结尾来添加一个或多个 chaosd 地址"
+    "addressHelper": "键入并以回车结束来添加一个或多个 chaosd 地址"
   }
 }

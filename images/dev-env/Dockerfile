@@ -20,8 +20,9 @@ RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.0.0
 RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
-RUN go install github.com/swaggo/swag/cmd/swag@v1.6.7
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.3
 RUN go install github.com/onsi/ginkgo/ginkgo@v1.16.4
+RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
 FROM debian:buster-slim
 
@@ -33,7 +34,7 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \ 
+RUN apt-get update && \
     apt-get install unzip git build-essential curl python musl musl-dev python3 -y && \
     rm -rf /var/lib/apt/lists/*
 
@@ -58,7 +59,6 @@ RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
 
-COPY --from=apache/skywalking-eyes:0.2.0 /bin/license-eye /bin/license-eye
 COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 

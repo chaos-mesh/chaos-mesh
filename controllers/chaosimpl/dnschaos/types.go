@@ -27,6 +27,7 @@ import (
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -56,15 +57,24 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	service, err := impl.getService(ctx, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
-		impl.Log.Error(err, "fail to get service")
+		impl.Log.Error(err, "fail to get dns service")
+		return v1alpha1.NotInjected, err
+	}
+
+	dnsPods, err := impl.getPodsFromSelector(ctx, config.ControllerCfg.Namespace, service.Spec.Selector)
+	if err != nil {
+		impl.Log.Error(err, "fail to get pods from selector")
 		return v1alpha1.NotInjected, err
 	}
 
 	dnschaos := obj.(*v1alpha1.DNSChaos)
-	err = impl.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
-	if err != nil {
-		impl.Log.Error(err, "fail to set DNS server rules")
-		return v1alpha1.NotInjected, err
+	for _, pod := range dnsPods {
+		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
+		if err != nil {
+			impl.Log.Error(err, "fail to set DNS server rules")
+			return v1alpha1.NotInjected, err
+		}
+		impl.Log.Info("Apply DNS chaos to DNS pod", "ip", service.Spec.ClusterIP)
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
@@ -136,15 +146,23 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	// get dns server's ip used for chaos
 	service, err := impl.getService(ctx, config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
-		impl.Log.Error(err, "fail to get service")
+		impl.Log.Error(err, "fail to get dns service")
 		return v1alpha1.Injected, err
 	}
-	impl.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	err = impl.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+	dnsPods, err := impl.getPodsFromSelector(ctx, config.ControllerCfg.Namespace, service.Spec.Selector)
 	if err != nil {
-		impl.Log.Error(err, "fail to cancelDNSServerRules")
-		return v1alpha1.Injected, err
+		impl.Log.Error(err, "fail to get pods from selector")
+		return v1alpha1.NotInjected, err
+	}
+
+	for _, pod := range dnsPods {
+		err = impl.cancelDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+		if err != nil {
+			impl.Log.Error(err, "fail to cancelDNSServerRules")
+			return v1alpha1.Injected, err
+		}
+		impl.Log.Info("Cancel DNS chaos to DNS pod", "ip", service.Spec.ClusterIP)
 	}
 
 	_, err = decodedContainer.PbClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
@@ -198,6 +216,22 @@ func (impl *Impl) getService(ctx context.Context, namespace string, serviceName 
 	}
 
 	return service, nil
+}
+
+// getPodsFromSelector returns the pods assiocated to a given service
+func (impl *Impl) getPodsFromSelector(ctx context.Context, namespace string, labelSelector map[string]string) ([]v1.Pod, error) {
+	lSelector := labels.SelectorFromSet(labelSelector)
+	listOptions := &client.ListOptions{
+		Namespace:     namespace,
+		LabelSelector: lSelector,
+	}
+	podsList := &v1.PodList{}
+	err := impl.Client.List(ctx, podsList, listOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return podsList.Items, nil
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {

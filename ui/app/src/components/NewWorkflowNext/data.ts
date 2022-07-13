@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,13 @@
  * limitations under the License.
  *
  */
-import { Archive } from './archives.type'
-import http from './http'
+import { ElementTypes } from './Elements/types'
+import { SpecialTemplateType } from './utils/convert'
 
-export const archives = (namespace = null, name = null, kind = null) =>
-  http.get<Archive[]>('/archives', {
-    params: {
-      namespace,
-      name,
-      kind,
-    },
-  })
-
-export const single = (uuid: uuid) => http.get(`/archives/${uuid}`)
-
-export const del = (uuid: uuid) => http.delete(`/archives/${uuid}`)
-export const delMulti = (uuids: uuid[]) => http.delete(`/archives?uids=${uuids.join(',')}`)
+export const dndAccept = [
+  ElementTypes.Kubernetes,
+  ElementTypes.PhysicalNodes,
+  ElementTypes.Suspend,
+  SpecialTemplateType.Serial,
+  SpecialTemplateType.Parallel,
+]

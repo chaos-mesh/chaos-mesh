@@ -127,9 +127,8 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific block chaos action.
-                      Supported action: limit / delay'
+                      Supported action: delay'
                     enum:
-                    - limit
                     - delay
                     type: string
                   containerNames:
@@ -152,9 +151,6 @@ spec:
                   duration:
                     description: Duration represents the duration of the chaos action.
                     type: string
-                  iops:
-                    description: IOPS defines the limit of IO frequency.
-                    type: integer
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -976,6 +972,7 @@ spec:
                     - stress
                     - gc
                     - ruleData
+                    - mysql
                     type: string
                   class:
                     description: Java class
@@ -990,14 +987,20 @@ spec:
                     description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
+                  database:
+                    description: the match database default value is "", means match
+                      all database
+                    type: string
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
                   exception:
                     description: the exception which needs to throw for action `exception`
+                      or the exception message needs to throw in action `mysql`
                     type: string
                   latency:
                     description: the latency duration for action 'latency', unit ms
+                      or the latency duration in action `mysql`
                     type: integer
                   memType:
                     description: the memory type needs to locate, only set it when
@@ -1015,6 +1018,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  mysqlConnectorVersion:
+                    description: the version of mysql-connector-java, only support
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
                     type: string
                   name:
                     description: byteman rule name, should be unique, and will generate
@@ -1120,6 +1127,15 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
+                  sqlType:
+                    description: the match sql type default value is "", means match
+                      all SQL type. The value can be 'select', 'insert', 'update',
+                      'delete', 'replace'.
+                    type: string
+                  table:
+                    description: the match table default value is "", means match
+                      all table
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -1137,6 +1153,12 @@ spec:
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
                 properties:
+                  containerNames:
+                    description: ContainerNames indicates list of the name of affected
+                      container. If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
@@ -2211,7 +2233,9 @@ spec:
                         type: integer
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
@@ -2220,7 +2244,9 @@ spec:
                     properties:
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -2849,9 +2875,8 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific block chaos
-                                action. Supported action: limit / delay'
+                                action. Supported action: delay'
                               enum:
-                              - limit
                               - delay
                               type: string
                             containerNames:
@@ -2877,9 +2902,6 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action.
                               type: string
-                            iops:
-                              description: IOPS defines the limit of IO frequency.
-                              type: integer
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -3778,6 +3800,7 @@ spec:
                               - stress
                               - gc
                               - ruleData
+                              - mysql
                               type: string
                             class:
                               description: Java class
@@ -3793,17 +3816,22 @@ spec:
                               description: the CPU core number needs to use, only
                                 set it when action is stress
                               type: integer
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
                             exception:
                               description: the exception which needs to throw for
-                                action `exception`
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
                               type: string
                             latency:
                               description: the latency duration for action 'latency',
-                                unit ms
+                                unit ms or the latency duration in action `mysql`
                               type: integer
                             memType:
                               description: the memory type needs to locate, only set
@@ -3823,6 +3851,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
                               type: string
                             name:
                               description: byteman rule name, should be unique, and
@@ -3935,6 +3967,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -3954,6 +3995,13 @@ spec:
                           description: KernelChaosSpec defines the desired state of
                             KernelChaos
                           properties:
+                            containerNames:
+                              description: ContainerNames indicates list of the name
+                                of affected container. If not set, the first container
+                                will be injected
+                              items:
+                                type: string
+                              type: array
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
@@ -5113,7 +5161,9 @@ spec:
                                   type: integer
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
@@ -5122,7 +5172,9 @@ spec:
                               properties:
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can
@@ -5409,9 +5461,8 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific block
-                                    chaos action. Supported action: limit / delay'
+                                    chaos action. Supported action: delay'
                                   enum:
-                                  - limit
                                   - delay
                                   type: string
                                 containerNames:
@@ -5437,9 +5488,6 @@ spec:
                                   description: Duration represents the duration of
                                     the chaos action.
                                   type: string
-                                iops:
-                                  description: IOPS defines the limit of IO frequency.
-                                  type: integer
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -6339,6 +6387,7 @@ spec:
                                   - stress
                                   - gc
                                   - ruleData
+                                  - mysql
                                   type: string
                                 class:
                                   description: Java class
@@ -6354,17 +6403,22 @@ spec:
                                   description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
+                                database:
+                                  description: the match database default value is
+                                    "", means match all database
+                                  type: string
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    for action `exception`
+                                    for action `exception` or the exception message
+                                    needs to throw in action `mysql`
                                   type: string
                                 latency:
                                   description: the latency duration for action 'latency',
-                                    unit ms
+                                    unit ms or the latency duration in action `mysql`
                                   type: integer
                                 memType:
                                   description: the memory type needs to locate, only
@@ -6384,6 +6438,11 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                mysqlConnectorVersion:
+                                  description: the version of mysql-connector-java,
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
                                   type: string
                                 name:
                                   description: byteman rule name, should be unique,
@@ -6501,6 +6560,15 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -6520,6 +6588,13 @@ spec:
                               description: KernelChaosSpec defines the desired state
                                 of KernelChaos
                               properties:
+                                containerNames:
+                                  description: ContainerNames indicates list of the
+                                    name of affected container. If not set, the first
+                                    container will be injected
+                                  items:
+                                    type: string
+                                  type: array
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
@@ -7717,7 +7792,9 @@ spec:
                                       type: integer
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -7727,7 +7804,9 @@ spec:
                                   properties:
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available

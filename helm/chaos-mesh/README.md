@@ -51,9 +51,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | `10s` |
 | `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | `2s` |
 | `controllerManager.chaosdSecurityMode` |  Enabled for mTLS connection between chaos-controller-manager and chaosd | `true` |
-| `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
-| `controllerManager.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
-| `controllerManager.image.tag` | Override global tag, empty value means using the global images.tag | `` |
+| `chaosDaemon.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `chaosDaemon.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
+| `chaosDaemon.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `chaosDaemon.imagePullPolicy` | Image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
@@ -170,9 +170,9 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 
 ```console
 # helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh --set dashboard.create=true
 # helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dashboard.create=true
 ```
 
 The above command enable the Chaos Dashboard.
@@ -181,9 +181,9 @@ Alternatively, a YAML file that specifies the values for the parameters can be p
 
 ```console
 # helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing -f values.yaml
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh -f values.yaml
 # helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing -f values.yaml
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh -f values.yaml
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)

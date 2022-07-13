@@ -4357,7 +4357,7 @@ type Mutation {
 }
 
 type Logger {
-    component(ns: String! = "chaos-testing", component: Component!): String!  	@goField(forceResolver: true)
+    component(ns: String! = "chaos-mesh", component: Component!): String!  	@goField(forceResolver: true)
     pod(ns: String! = "default", name: String!): String!                		@goField(forceResolver: true)
 }
 
@@ -4457,7 +4457,7 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4675,7 +4675,7 @@ type ContainerStateTerminated @goModel(model: "k8s.io/api/core/v1.ContainerState
 
     # Message regarding the last termination of the container
     message: String
-    
+
     #Time at which previous execution of the container started
     startedAt: Time
 
@@ -4703,7 +4703,7 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4779,7 +4779,7 @@ type IOChaosAction @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     rdev: Int64
 
     # MistakeSpec represents the mistake to inject
-    
+
     # filling determines what is filled in the miskate data.
     filling: String
 
@@ -4812,7 +4812,7 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -4940,7 +4940,7 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5040,7 +5040,7 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5233,7 +5233,7 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5408,7 +5408,7 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5512,7 +5512,7 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     generateName: String!
     namespace: String!
     selfLink: String!
-    uid: String! 
+    uid: String!
     resourceVersion: String!
     generation: Int!
     creationTimestamp: Time!
@@ -5556,7 +5556,8 @@ type CgroupsMemory {
 type ProcessStress {
     process: Process!
     cgroup: String!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

@@ -723,9 +723,9 @@ export const actions = [
             'specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading.',
         },
         {
-          field: 'text',
+          field: 'label',
           label: 'options',
-          value: '',
+          value: [],
           helperText: 'extend stress-ng options',
         },
         {
@@ -742,9 +742,9 @@ export const actions = [
       label: 'stress-mem',
       children: [
         {
-          field: 'text',
+          field: 'label',
           label: 'options',
-          value: '',
+          value: [],
           helperText: 'extend stress-ng options',
         },
         {

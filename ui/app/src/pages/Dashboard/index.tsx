@@ -14,31 +14,29 @@
  * limitations under the License.
  *
  */
-
-import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
-
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
-import { Event } from 'api/events.type'
-import EventsChart from 'components/EventsChart'
-import EventsTimeline from 'components/EventsTimeline'
-import { Experiment } from 'api/experiments.type'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Predefined from './Predefined'
-import type { ReactChild } from 'react'
-import { Schedule } from 'api/schedules.type'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
-import TotalStatus from './TotalStatus'
-import { TourProvider } from '@reactour/tour'
-import Welcome from './Welcome'
-import { Workflow } from 'api/workflows.type'
-import api from 'api'
-import i18n from 'components/T'
+import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { TourProvider } from '@reactour/tour'
+import api from 'api'
+import { CoreEvent, CoreWorkflowMeta, TypesExperiment, TypesSchedule } from 'openapi'
+import { useEffect, useState } from 'react'
+import type { ReactChild } from 'react'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+
+import EventsChart from 'components/EventsChart'
+import EventsTimeline from 'components/EventsTimeline'
+import i18n from 'components/T'
+
+import Predefined from './Predefined'
+import TotalStatus from './TotalStatus'
+import Welcome from './Welcome'
 
 const NumPanel: React.FC<{ title: ReactChild; num: number; background: ReactChild }> = ({ title, num, background }) => (
   <Paper sx={{ overflow: 'hidden' }}>
@@ -56,10 +54,10 @@ const NumPanel: React.FC<{ title: ReactChild; num: number; background: ReactChil
 
 export default function Dashboard() {
   const [data, setData] = useState<{
-    workflows: Workflow[]
-    schedules: Schedule[]
-    experiments: Experiment[]
-    events: Event[]
+    workflows: CoreWorkflowMeta[]
+    schedules: TypesSchedule[]
+    experiments: TypesExperiment[]
+    events: CoreEvent[]
   }>({
     workflows: [],
     schedules: [],
@@ -68,10 +66,10 @@ export default function Dashboard() {
   })
 
   useEffect(() => {
-    const fetchExperiments = api.experiments.experiments()
-    const fetchSchedules = api.schedules.schedules()
-    const fetchWorkflows = api.workflows.workflows()
-    const fetchEvents = api.events.events({ limit: 216 })
+    const fetchExperiments = api.experiments.experimentsGet()
+    const fetchSchedules = api.schedules.schedulesGet()
+    const fetchWorkflows = api.workflows.workflowsGet()
+    const fetchEvents = api.events.eventsGet({ limit: 216 })
     const fetchAll = () => {
       Promise.all([fetchSchedules, fetchWorkflows, fetchExperiments, fetchEvents])
         .then((data) =>

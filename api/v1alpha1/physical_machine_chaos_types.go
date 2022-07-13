@@ -231,7 +231,7 @@ type StressCPUSpec struct {
 	// specifies N workers to apply the stressor.
 	Workers int `json:"workers,omitempty"`
 	// extend stress-ng options
-	Options string `json:"options,omitempty"`
+	Options []string `json:"options,omitempty"`
 }
 
 type StressMemorySpec struct {
@@ -239,7 +239,7 @@ type StressMemorySpec struct {
 	// One can specify the size as % of total available memory or in units of B, KB/KiB, MB/MiB, GB/GiB, TB/TiB..
 	Size string `json:"size,omitempty"`
 	// extend stress-ng options
-	Options string `json:"options,omitempty"`
+	Options []string `json:"options,omitempty"`
 }
 
 type DiskFileSpec struct {

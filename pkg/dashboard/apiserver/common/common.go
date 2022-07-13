@@ -32,7 +32,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
+	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
@@ -103,21 +104,6 @@ roleRef:
 `
 )
 
-// Pod defines the basic information of a pod
-type Pod struct {
-	Name      string `json:"name"`
-	IP        string `json:"ip"`
-	Namespace string `json:"namespace"`
-	State     string `json:"state"`
-}
-
-// PhysicalMachine defines the basic information of a physicalMachine
-type PhysicalMachine struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Address   string `json:"address"`
-}
-
 // Service defines a handler service for cluster common objects.
 type Service struct {
 	// this kubeCli use the local token, used for list namespace of the K8s cluster
@@ -158,33 +144,33 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Tags common
 // @Produce json
 // @Param request body v1alpha1.PodSelectorSpec true "Request body"
-// @Success 200 {array} Pod
+// @Success 200 {array} apiservertypes.Pod
+// @Failure 500 {object} u.APIError
 // @Router /common/pods [post]
-// @Failure 500 {object} utils.APIError
 func (s *Service) listPods(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	selector := v1alpha1.PodSelectorSpec{}
 	if err := c.ShouldBindJSON(&selector); err != nil {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 	ctx := context.TODO()
 	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	pods := make([]Pod, 0, len(filteredPods))
+	pods := make([]apiservertypes.Pod, 0, len(filteredPods))
 	for _, pod := range filteredPods {
-		pods = append(pods, Pod{
+		pods = append(pods, apiservertypes.Pod{
 			Name:      pod.Name,
 			IP:        pod.Status.PodIP,
 			Namespace: pod.Namespace,
@@ -202,15 +188,14 @@ func (s *Service) listPods(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} string
 // @Router /common/namespaces [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) listNamespaces(c *gin.Context) {
-
 	var namespaces sort.StringSlice
 
 	var nsList v1.NamespaceList
 	if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 	namespaces = make(sort.StringSlice, 0, len(nsList.Items))
@@ -228,16 +213,15 @@ func (s *Service) listNamespaces(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} string
 // @Router /common/chaos-available-namespaces [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
-
 	var namespaces sort.StringSlice
 
 	if s.conf.ClusterScoped {
 		var nsList v1.NamespaceList
 		if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
 		namespaces = make(sort.StringSlice, 0, len(nsList.Items))
@@ -258,7 +242,7 @@ func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
 // @Produce json
 // @Success 200 {array} string
 // @Router /common/kinds [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getKinds(c *gin.Context) {
 	var kinds []string
 
@@ -271,22 +255,18 @@ func (s *Service) getKinds(c *gin.Context) {
 	c.JSON(http.StatusOK, kinds)
 }
 
-// MapSlice defines a common map
-type MapSlice map[string][]string
-
 // @Summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
 // @Param podNamespaceList query string true "The pod's namespace list, split by ,"
-// @Success 200 {object} MapSlice
+// @Success 200 {object} u.MapStringSliceResponse
 // @Router /common/labels [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getLabels(c *gin.Context) {
-
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -294,7 +274,7 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	if len(podNamespaceList) == 0 {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
 		return
 	}
 
@@ -306,11 +286,11 @@ func (s *Service) getLabels(c *gin.Context) {
 	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	labels := make(map[string][]string)
+	labels := make(u.MapStringSliceResponse)
 	for _, pod := range filteredPods {
 		for k, v := range pod.Labels {
 			if _, ok := labels[k]; ok {
@@ -331,14 +311,13 @@ func (s *Service) getLabels(c *gin.Context) {
 // @Tags common
 // @Produce json
 // @Param podNamespaceList query string true "The pod's namespace list, split by ,"
-// @Success 200 {object} MapSlice
+// @Success 200 {object} u.MapStringSliceResponse
 // @Router /common/annotations [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getAnnotations(c *gin.Context) {
-
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
@@ -346,7 +325,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 
 	if len(podNamespaceList) == 0 {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(errors.New("podNamespaceList is required")))
 		return
 	}
 
@@ -358,11 +337,11 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	annotations := make(map[string][]string)
+	annotations := make(u.MapStringSliceResponse)
 	for _, pod := range filteredPods {
 		for k, v := range pod.Annotations {
 			if _, ok := annotations[k]; ok {
@@ -384,7 +363,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} config.ChaosDashboardConfig
 // @Router /common/config [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, s.conf)
 }
@@ -393,9 +372,11 @@ func (s *Service) getConfig(c *gin.Context) {
 // @Description Get the rbac config according to the user's choice.
 // @Tags common
 // @Produce json
-// @Success 200 {object} MapSlice
+// @Param namespace query string false "The namespace of RBAC"
+// @Param role query string false "The role of RBAC"
+// @Success 200 {object} map[string]string
 // @Router /common/rbac-config [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getRbacConfig(c *gin.Context) {
 	namespace := c.Query("namespace")
 	roleType := c.Query("role")
@@ -414,7 +395,7 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 		verbs = `"get", "list", "watch"`
 	} else {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(errors.New("roleType is neither manager nor viewer")))
+		_ = c.Error(u.ErrBadRequest.WrapWithNoMessage(errors.New("roleType is neither manager nor viewer")))
 		return
 	}
 
@@ -442,31 +423,31 @@ func (s *Service) getRbacConfig(c *gin.Context) {
 // @Tags common
 // @Produce json
 // @Param request body v1alpha1.PhysicalMachineSelectorSpec true "Request body"
-// @Success 200 {array} PhysicalMachine
+// @Success 200 {array} apiservertypes.PhysicalMachine
+// @Failure 500 {object} u.APIError
 // @Router /common/physicalmachines [post]
-// @Failure 500 {object} utils.APIError
 func (s *Service) listPhysicalMachines(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	selector := v1alpha1.PhysicalMachineSelectorSpec{}
 	if err := c.ShouldBindJSON(&selector); err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 	ctx := context.TODO()
 	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	physicalMachines := make([]PhysicalMachine, 0, len(filtered))
+	physicalMachines := make([]apiservertypes.PhysicalMachine, 0, len(filtered))
 	for _, pm := range filtered {
-		physicalMachines = append(physicalMachines, PhysicalMachine{
+		physicalMachines = append(physicalMachines, apiservertypes.PhysicalMachine{
 			Name:      pm.Name,
 			Namespace: pm.Namespace,
 			Address:   pm.Spec.Address,
@@ -481,21 +462,21 @@ func (s *Service) listPhysicalMachines(c *gin.Context) {
 // @Tags common
 // @Produce json
 // @Param physicalMachineNamespaceList query string true "The physicalMachine's namespace list, split by ,"
-// @Success 200 {object} MapSlice
+// @Success 200 {object} u.MapStringSliceResponse
 // @Router /common/physicalmachine-labels [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("physicalMachineNamespaceList is required")))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(errors.New("physicalMachineNamespaceList is required")))
 		return
 	}
 
@@ -506,11 +487,11 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 	ctx := context.TODO()
 	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	labels := make(map[string][]string)
+	labels := make(u.MapStringSliceResponse)
 	for _, obj := range filtered {
 		for k, v := range obj.Labels {
 			if _, ok := labels[k]; ok {
@@ -531,21 +512,21 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 // @Tags common
 // @Produce json
 // @Param physicalMachineNamespaceList query string true "The physicalMachine's namespace list, split by ,"
-// @Success 200 {object} MapSlice
+// @Success 200 {object} u.MapStringSliceResponse
 // @Router /common/physicalmachine-annotations [get]
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrBadRequest.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrBadRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	physicalMachineNamespaceList := c.Query("physicalMachineNamespaceList")
 
 	if len(physicalMachineNamespaceList) == 0 {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(errors.New("physicalMachineNamespaceList is required")))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(errors.New("physicalMachineNamespaceList is required")))
 		return
 	}
 	selector := v1alpha1.PhysicalMachineSelectorSpec{}
@@ -555,11 +536,11 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 	ctx := context.TODO()
 	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
 	if err != nil {
-		utils.SetAPIError(c, utils.ErrInternalServer.WrapWithNoMessage(err))
+		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	annotations := make(map[string][]string)
+	annotations := make(u.MapStringSliceResponse)
 	for _, obj := range filtered {
 		for k, v := range obj.Annotations {
 			if _, ok := annotations[k]; ok {

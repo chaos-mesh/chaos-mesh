@@ -34,6 +34,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -50,7 +51,7 @@ type MockScheduleStore struct {
 
 func TestEvent(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Archive Suite")
+	RunSpecs(t, "types.Archive Suite")
 }
 
 func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
@@ -358,7 +359,7 @@ var _ = Describe("event", func() {
 
 	Context("List", func() {
 		It("success", func() {
-			response := []Archive{
+			response := []types.Archive{
 				{
 					UID:       "testUID",
 					Kind:      "testKind",
@@ -387,8 +388,8 @@ var _ = Describe("event", func() {
 	Context("Detail", func() {
 		It("testPodChaos", func() {
 			chaos := &v1alpha1.PodChaos{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testPodChaos",
 					Kind:      v1alpha1.KindPodChaos,
 					Namespace: "testNamespace",
@@ -420,8 +421,8 @@ var _ = Describe("event", func() {
 
 		It("testIOChaos", func() {
 			chaos := &v1alpha1.IOChaos{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testIOChaos",
 					Kind:      v1alpha1.KindIOChaos,
 					Namespace: "testNamespace",
@@ -453,8 +454,8 @@ var _ = Describe("event", func() {
 
 		It("testNetworkChaos", func() {
 			chaos := &v1alpha1.NetworkChaos{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testNetworkChaos",
 					Kind:      v1alpha1.KindNetworkChaos,
 					Namespace: "testNamespace",
@@ -486,8 +487,8 @@ var _ = Describe("event", func() {
 
 		It("testTimeChaos", func() {
 			chaos := &v1alpha1.TimeChaos{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testTimeChaos",
 					Kind:      v1alpha1.KindTimeChaos,
 					Namespace: "testNamespace",
@@ -519,8 +520,8 @@ var _ = Describe("event", func() {
 
 		It("testKernelChaos", func() {
 			chaos := &v1alpha1.KernelChaos{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testKernelChaos",
 					Kind:      v1alpha1.KindKernelChaos,
 					Namespace: "testNamespace",
@@ -552,8 +553,8 @@ var _ = Describe("event", func() {
 
 		It("testStressChaos", func() {
 			chaos := &v1alpha1.StressChaos{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testStressChaos",
 					Kind:      v1alpha1.KindStressChaos,
 					Namespace: "testNamespace",
@@ -608,7 +609,7 @@ var _ = Describe("event", func() {
 
 	Context("ListSchedule", func() {
 		It("success", func() {
-			response := []Archive{
+			response := []types.Archive{
 				{
 					UID:       "testUID",
 					Kind:      "testKind",
@@ -637,8 +638,8 @@ var _ = Describe("event", func() {
 	Context("DetailSchedule", func() {
 		It("testPodChaos", func() {
 			sch := &v1alpha1.Schedule{}
-			response := Detail{
-				Archive: Archive{
+			response := types.ArchiveDetail{
+				Archive: types.Archive{
 					UID:       "testPodChaos",
 					Kind:      v1alpha1.KindPodChaos,
 					Namespace: "testNamespace",

@@ -34,7 +34,7 @@
   },
   "newE": {
     "title": "New experiment",
-    "titleStep1": "Experiment Type",
+    "titleStep1": "Inject into",
     "titleStep2": "Experiment Info",
     "steps": {
       "basic": "Metadata",
@@ -46,7 +46,7 @@
     "byYAML": "By YAML",
     "byYAMLDesc": "Create an experiment or schedule by filling in or uploading YAML",
     "basic": {
-      "nameHelper": "The experiment name",
+      "nameHelper": "Fill the experiment name.",
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
@@ -94,8 +94,7 @@
         "title": "Network Attack",
         "target": {
           "title": "Target",
-          "podsPreview": "Target Pods Preview",
-          "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
+          "podsPreview": "Target Pods Preview"
         }
       },
       "http": {
@@ -145,11 +144,11 @@
       "http": "HTTP Request",
       "number": "Number",
       "child": "Child task",
-      "nameHelper": "The task name",
-      "nameValidation": "The task name is required",
+      "nameHelper": "Fill the node name.",
+      "nameValidation": "The node name is required.",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
-      "deadlineValidation": "The task deadline is required",
+      "deadlineHelper": "The node will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
+      "deadlineValidation": "The node deadline is required.",
       "container": {
         "title": "Container",
         "nameHelper": "The container name",
@@ -158,7 +157,7 @@
         "imageHelper": "The image of container",
         "imageValidation": "The image is required",
         "command": "Command",
-        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends a space to create a single command."
+        "commandHelper": "Optional. Specifies the command running in the container, enter the string and ends Enter to create a single command."
       },
       "conditionalBranches": {
         "title": "Conditional branches (Optional)",
@@ -335,7 +334,7 @@
     "durationHelper": "Supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with a TAB to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair",
     "logout": "Logout",
     "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
@@ -396,6 +395,6 @@
   },
   "physic": {
     "address": "Address",
-    "addressHelper": "Type and end with a space to add one or more chaosd addresses"
+    "addressHelper": "Type and end with Enter to add one or more chaosd addresses"
   }
 }

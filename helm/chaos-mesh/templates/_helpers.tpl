@@ -157,9 +157,7 @@ Define the webhook's name
 {{ .Values.chaosDlv.image.registry | default .Values.images.registry }}/{{ .Values.chaosDlv.image.repository }}:{{ .Values.chaosDlv.image.tag | default .Values.images.tag }}
 {{- end -}}
 
-{{/*
-Return the appropriate apiVersion for ingress
-*/}}
+{{/*Return the appropriate apiVersion for ingress*/}}
 {{- define "chaos-dashboard.ingress.apiVersion" -}}
 {{- if .Values.dashboard.ingress.apiVersionOverrides -}}
 {{- print .Values.dashboard.ingress.apiVersionOverrides -}}
@@ -169,5 +167,22 @@ Return the appropriate apiVersion for ingress
 {{- print "networking.k8s.io/v1beta1" -}}
 {{- else -}}
 {{- print "extensions/v1beta1" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*Define the socket path for chaos-daemon*/}}
+{{- define "chaos-daemon.socket-path" -}}
+{{- if .Values.chaosDaemon.socketPath -}}
+  {{- .Values.chaosDaemon.socketPath | dir -}}
+{{- else if .Values.chaosDaemon.socketDir -}}
+  {{- .Values.chaosDaemon.socketDir -}}
+{{- else -}}
+  {{- if eq .Values.chaosDaemon.runtime "docker" -}}
+  /var/run
+  {{- else if eq .Values.chaosDaemon.runtime "containerd" -}}
+  /run/containerd
+  {{- else if eq .Values.chaosDaemon.runtime "crio" -}}
+  /var/run/crio
+  {{- end -}}
 {{- end -}}
 {{- end -}}

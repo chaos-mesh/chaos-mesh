@@ -78,9 +78,9 @@ const layout = "2006-01-02 15:04:05"
 // @Param namespace query string false "The namespace of the object"
 // @Param object_id query string false "The UID of the object"
 // @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AWSChaos, GCPChaos, DNSChaos, Schedule)
-// @Param limit query string false "The max length of events list"
+// @Param limit query number false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 // @Router /events [get]
 func (s *Service) list(c *gin.Context) {
 	ns := c.Query("namespace")
@@ -120,9 +120,9 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param namespace query string false "The namespace of the object"
 // @Param uid path string false "The UID of the Workflow"
-// @Param limit query string false "The max length of events list"
+// @Param limit query number false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 // @Router /events/workflow/{uid} [get]
 func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -236,9 +236,9 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 // @Produce json
 // @Param id path uint true "The event ID"
 // @Success 200 {object} core.Event
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /events/{id} [get]
 func (s *Service) get(c *gin.Context) {
 	id, ns := c.Param("id"), c.Query("namespace")
