@@ -53,7 +53,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove sed need (SC2001) [#3248](https://github.com/chaos-mesh/chaos-mesh/pull/3248)
 - Removed not used clientset in cmd/chaos-controller-manager/main.go [#3334](https://github.com/chaos-mesh/chaos-mesh/pull/3334)
 - Removed not used globalCacheReader in cmd/chaos-controller-manager/provider/controller.go [#3343](https://github.com/chaos-mesh/chaos-mesh/pull/3343)
-- Makefile: remove IMAGE_BUILD_ENV_TAG and IMAGE_DEV_ENV_TAG [#3444](https://github.com/chaos-mesh/chaos-mesh/pull/3444)
+- Removed unsupported action comments of blockchaos [#3435](https://github.com/chaos-mesh/chaos-mesh/pull/3435)
 
 ### Fixed
 
@@ -69,6 +69,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - StressChaos: run `pause` before `choom` [#3405](https://github.com/chaos-mesh/chaos-mesh/pull/3405)
 - JVMChaos: update the error message that can be ignored [#3415](https://github.com/chaos-mesh/chaos-mesh/pull/3415)
 - Fix Workflow Validating Webhook Panic [#3413](https://github.com/chaos-mesh/chaos-mesh/pull/3413)
+- Overwrite $IMAGE_BUILD_ENV_TAG with $IMAGE_TAG-$ARCH in `upload_env_image.yml` github action [#3444](https://github.com/chaos-mesh/chaos-mesh/pull/3444)
 
 ### Security
 

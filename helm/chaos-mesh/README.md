@@ -51,9 +51,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | `10s` |
 | `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | `2s` |
 | `controllerManager.chaosdSecurityMode` |  Enabled for mTLS connection between chaos-controller-manager and chaosd | `true` |
-| `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
-| `controllerManager.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
-| `controllerManager.image.tag` | Override global tag, empty value means using the global images.tag | `` |
+| `chaosDaemon.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `chaosDaemon.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
+| `chaosDaemon.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `chaosDaemon.imagePullPolicy` | Image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
