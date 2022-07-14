@@ -31,7 +31,7 @@ The Committers of Chaos Mesh, along with their emails, are listed below:
 | Shivansh Saini ([shivanshs9](https://github.com/shivanshs9))     | [shivansh.saini.cse17@iitbhu.ac.in](mailto:shivansh.saini.cse17@iitbhu.ac.in) | [Headout](https://github.com/headout) |
 | Siyu Chen ([iguoyr](https://github.com/iguoyr))                  | [chensiyu@pingcap.com](mailto:chensiyu@pingcap.com)                           | [PingCAP](https://www.pingcap.com/)   |
 | Xianglin Gao ([xlgao-zju](https://github.com/xlgao-zju))         | [xlgao@zju.edu.cn](mailto:xlgao@zju.edu.cn)                                   | [Tencent](https://tencent.com/)       |
-| Chenxi Li ([Hexilee](https://github.com/Hexilee))                | [lichenxi@pingcap.com](mailto:lichengxi@pingcap.com)                          | [PingCAP](https://pingcap.com/)       |
+| Chenxi Li ([Hexilee](https://github.com/Hexilee))                | [lichenxi@pingcap.com](mailto:lichenxi@pingcap.com)                           | [PingCAP](https://pingcap.com/)       |
 
 ## Emeritus Maintainers
 
