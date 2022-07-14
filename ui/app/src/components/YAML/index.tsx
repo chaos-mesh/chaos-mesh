@@ -14,25 +14,29 @@
  * limitations under the License.
  *
  */
-import { Button, ButtonProps } from '@mui/material'
+import FileOpenIcon from '@mui/icons-material/FileOpen'
+import LoadingButton, { LoadingButtonProps } from '@mui/lab/LoadingButton'
+import { useState } from 'react'
 
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
-import i18n from 'components/T'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
+
+import { setAlert } from 'slices/globalStatus'
+
+import { T } from 'components/T'
 
 interface YAMLProps {
   callback: (y: any) => void
-  buttonProps?: ButtonProps<'label'>
+  ButtonProps?: LoadingButtonProps<'label'>
 }
 
-const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
-  const intl = useIntl()
+const YAML: React.FC<YAMLProps> = ({ children, callback, ButtonProps }) => {
+  const [loading, setLoading] = useState(false)
 
   const dispatch = useStoreDispatch()
 
   const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoading(true)
+
     const f = e.target.files![0]
 
     const reader = new FileReader()
@@ -44,18 +48,27 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
       dispatch(
         setAlert({
           type: 'success',
-          message: i18n('confirm.success.load', intl),
+          message: <T id="confirm.success.load" />,
         })
       )
+
+      setLoading(false)
     }
     reader.readAsText(f)
   }
 
   return (
-    <Button {...buttonProps} component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
-      {i18n('common.upload')}
+    <LoadingButton
+      {...ButtonProps}
+      component="label"
+      loading={loading}
+      variant="outlined"
+      size="small"
+      startIcon={<FileOpenIcon />}
+    >
+      {children || <T id="common.upload" />}
       <input type="file" hidden onChange={handleUploadYAML} />
-    </Button>
+    </LoadingButton>
   )
 }
 

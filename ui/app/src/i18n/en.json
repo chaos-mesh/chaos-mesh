@@ -34,7 +34,7 @@
   },
   "newE": {
     "title": "New experiment",
-    "titleStep1": "Experiment Type",
+    "titleStep1": "Inject into",
     "titleStep2": "Experiment Info",
     "steps": {
       "basic": "Metadata",
@@ -46,7 +46,7 @@
     "byYAML": "By YAML",
     "byYAMLDesc": "Create an experiment or schedule by filling in or uploading YAML",
     "basic": {
-      "nameHelper": "The experiment name",
+      "nameHelper": "Fill the experiment name.",
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
@@ -94,8 +94,7 @@
         "title": "Network Attack",
         "target": {
           "title": "Target",
-          "podsPreview": "Target Pods Preview",
-          "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
+          "podsPreview": "Target Pods Preview"
         }
       },
       "http": {
@@ -145,11 +144,11 @@
       "http": "HTTP Request",
       "number": "Number",
       "child": "Child task",
-      "nameHelper": "The task name",
-      "nameValidation": "The task name is required",
+      "nameHelper": "Fill the node name.",
+      "nameValidation": "The node name is required.",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
-      "deadlineValidation": "The task deadline is required",
+      "deadlineHelper": "The node will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
+      "deadlineValidation": "The node deadline is required.",
       "container": {
         "title": "Container",
         "nameHelper": "The container name",

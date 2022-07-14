@@ -30,7 +30,14 @@ export const scopeInitialValues = {
   value: undefined,
 }
 
-export const scheduleInitialValues = {
+export interface Schedule {
+  schedule: string
+  historyLimit?: number
+  concurrencyPolicy?: 'Forbid' | 'Allow'
+  startingDeadlineSeconds?: number
+}
+
+export const scheduleInitialValues: Schedule = {
   schedule: '',
   historyLimit: 1,
   concurrencyPolicy: 'Forbid',

@@ -34,7 +34,7 @@
   },
   "newE": {
     "title": "新的实验",
-    "titleStep1": "实验类型",
+    "titleStep1": "注入到",
     "titleStep2": "实验信息",
     "steps": {
       "basic": "元信息",
@@ -91,8 +91,7 @@
         "title": "网络攻击",
         "target": {
           "title": "目标",
-          "podsPreview": "预览目标 Pod",
-          "podsPreviewHelper": "通过勾选 Pod 来进一步限制目标的范围"
+          "podsPreview": "预览目标 Pod"
         }
       },
       "http": {

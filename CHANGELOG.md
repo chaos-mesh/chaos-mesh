@@ -21,10 +21,12 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add helm annotations for Artifact Hub [#3355](https://github.com/chaos-mesh/chaos-mesh/pull/3355)
 - Add implementation of blockchaos in chaos-daemon [#2907](https://github.com/chaos-mesh/chaos-mesh/pull/2907)
 - Bump chaos-tproxy to v0.5.1 [#3412](https://github.com/chaos-mesh/chaos-mesh/pull/3412)
+- Allow importing external workflows and copying flow nodes in next generation `New Workflow` [#3368](https://github.com/chaos-mesh/chaos-mesh/pull/3368)
 
 ### Changed
 
 - Helm charts: update validate-auth to chaos-mesh-validation-auth [#3193](https://github.com/chaos-mesh/chaos-mesh/pull/3193)
+- Helm charts: support latest api version of dashboard ingress [#3066](https://github.com/chaos-mesh/chaos-mesh/pull/3066)
 - Update shell script to support shellchecks [#3230](https://github.com/chaos-mesh/chaos-mesh/pull/3230)
 - CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
 - CI: version unrelated manifests [#3293](https://github.com/chaos-mesh/chaos-mesh/pull/3293)
@@ -52,6 +54,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove sed need (SC2001) [#3248](https://github.com/chaos-mesh/chaos-mesh/pull/3248)
 - Removed not used clientset in cmd/chaos-controller-manager/main.go [#3334](https://github.com/chaos-mesh/chaos-mesh/pull/3334)
 - Removed not used globalCacheReader in cmd/chaos-controller-manager/provider/controller.go [#3343](https://github.com/chaos-mesh/chaos-mesh/pull/3343)
+- Removed unsupported action comments of blockchaos [#3435](https://github.com/chaos-mesh/chaos-mesh/pull/3435)
 
 ### Fixed
 

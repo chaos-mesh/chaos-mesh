@@ -18,6 +18,7 @@ import { Box, Divider, FormHelperText, MenuItem, Typography } from '@mui/materia
 import { eval as expEval, parse } from 'expression-eval'
 import { Form, Formik, getIn } from 'formik'
 import type { FormikConfig, FormikErrors, FormikTouched, FormikValues } from 'formik'
+import _ from 'lodash'
 import { useEffect, useState } from 'react'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
@@ -26,6 +27,7 @@ import Space from '@ui/mui-extends/esm/Space'
 import { useStoreSelector } from 'store'
 
 import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
+import { SpecialTemplateType } from 'components/NewWorkflowNext/utils/convert'
 import Scope from 'components/Scope'
 import { T } from 'components/T'
 
@@ -62,12 +64,17 @@ export interface AtomFormData {
 }
 
 const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kind, act: action, formikProps }) => {
+  const kindAction = concatKindAction(kind, action)
   const [initialValues, setInitialValues] = useState<Record<string, any>>({
     id,
     kind,
     action,
     ...(kind === 'NetworkChaos' && { target: scopeInitialValues }),
-    ...(kind !== 'PhysicalMachineChaos' && kind !== 'Suspend' && scopeInitialValues),
+    ...(kind !== 'PhysicalMachineChaos' &&
+      kind !== SpecialTemplateType.Suspend &&
+      kind !== SpecialTemplateType.Serial &&
+      kind !== SpecialTemplateType.Parallel &&
+      scopeInitialValues),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
   const [form, setForm] = useState<AtomFormData[]>([])
@@ -89,11 +96,12 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     }
 
     async function loadData() {
-      if (kind === 'Suspend') {
-        setInitialValues((oldValues) => ({
-          ...oldValues,
-          ...formikProps.initialValues,
-        }))
+      if (
+        kind === SpecialTemplateType.Suspend ||
+        kind === SpecialTemplateType.Serial ||
+        kind === SpecialTemplateType.Parallel
+      ) {
+        setInitialValues((oldValues) => _.merge({}, oldValues, formikProps.initialValues))
 
         return
       }
@@ -116,10 +124,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
           })
         : data
 
-      setInitialValues((oldValues) => ({
-        ...oldValues,
-        ...(formikProps.initialValues || formToRecords(form)),
-      }))
+      setInitialValues((oldValues) => _.merge({}, oldValues, formikProps.initialValues || formToRecords(form)))
       setForm(form)
     }
 
@@ -246,7 +251,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
         <Form>
           <Space>
             <Typography variant="h6" fontWeight="bold">
-              {concatKindAction(kind, action)}
+              {kindAction}
             </Typography>
             {action && (
               <SelectField
@@ -271,34 +276,35 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                     scope="target.selector"
                     modeScope="target"
                     podsPreviewTitle={<T id="newE.target.network.target.podsPreview" />}
-                    podsPreviewDesc={<T id="newE.target.network.target.podsPreviewHelper" />}
                   />
                 </Space>
               </>
             )}
-            {kind !== 'Suspend' && (
-              <>
-                <Divider />
-                <Typography variant="h6" fontWeight="bold">
-                  <T id="newE.steps.scope" />
-                </Typography>
-                {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
-                <Divider />
-                <Box>
+            {kind !== SpecialTemplateType.Suspend &&
+              kind !== SpecialTemplateType.Serial &&
+              kind !== SpecialTemplateType.Parallel && (
+                <>
+                  <Divider />
                   <Typography variant="h6" fontWeight="bold">
-                    Schedule
+                    <T id="newE.steps.scope" />
                   </Typography>
-                  <Checkbox
-                    label="Scheduled"
-                    helperText="Check the box to convert the Experiment into a Schedule."
-                    checked={scheduled}
-                    onChange={switchToSchedule}
-                  />
-                </Box>
-                {scheduled && <Schedule />}
-                <Divider />
-              </>
-            )}
+                  {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
+                  <Divider />
+                  <Box>
+                    <Typography variant="h6" fontWeight="bold">
+                      Schedule
+                    </Typography>
+                    <Checkbox
+                      label="Scheduled"
+                      helperText={`Check the box to convert ${kindAction} into a Schedule.`}
+                      checked={scheduled}
+                      onChange={switchToSchedule}
+                    />
+                  </Box>
+                  {scheduled && <Schedule />}
+                  <Divider />
+                </>
+              )}
             <Typography variant="h6" fontWeight="bold">
               Info
             </Typography>

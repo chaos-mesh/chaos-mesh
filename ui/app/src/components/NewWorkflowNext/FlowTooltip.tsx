@@ -17,7 +17,7 @@
 import { Tooltip, styled, tooltipClasses } from '@mui/material'
 import type { TooltipProps } from '@mui/material'
 
-const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
+const FlowTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.arrow}`]: {
@@ -29,4 +29,4 @@ const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
   },
 }))
 
-export default CustomTooltip
+export default FlowTooltip

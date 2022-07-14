@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import LinearScaleIcon from '@mui/icons-material/LinearScale'
 import TimelapseIcon from '@mui/icons-material/Timelapse'
 import { SvgIcon } from '@mui/material'
 
@@ -36,7 +37,7 @@ import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
 import { ReactComponent as K8SIcon } from 'images/k8s.svg'
 import { ReactComponent as PhysicIcon } from 'images/physic.svg'
 
-export function iconByKind(kind: string, size: 'small' | 'medium' | 'large' = 'medium') {
+export function iconByKind(kind: string, size: 'small' | 'inherit' | 'medium' | 'large' = 'medium') {
   let icon
 
   switch (kind) {
@@ -91,9 +92,12 @@ export function iconByKind(kind: string, size: 'small' | 'medium' | 'large' = 'm
     case 'Schedule':
       icon = <ClockIcon />
       break
+    case 'Serial':
+      return <LinearScaleIcon fontSize={size} />
+    case 'Parallel':
+      return <LinearScaleIcon fontSize={size} sx={{ transform: 'rotate(90deg)', transformOrigin: 'center' }} />
     case 'Suspend':
-      icon = <TimelapseIcon />
-      break
+      return <TimelapseIcon fontSize={size} />
   }
 
   return <SvgIcon fontSize={size}>{icon}</SvgIcon>
