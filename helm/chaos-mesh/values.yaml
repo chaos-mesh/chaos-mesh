@@ -361,7 +361,6 @@ dashboard:
     ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
     hosts:
       - name: dashboard.local
-        paths: ["/"]
 
         ## Set this to true in order to enable TLS on the ingress record
         tls: false
@@ -375,6 +374,15 @@ dashboard:
 
         ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
         tlsSecret: dashboard.local-tls
+
+    # Paths that map requests to chaos dashboard
+    paths: ["/"]
+
+    # Override apiVersion of ingress rendered by this helm chart
+    apiVersionOverrides: ""
+
+    # Defines which ingress controller will implement the resource
+    ingressClassName: ""
 
 dnsServer:
   # Enable DNS Server which required by DNSChaos
