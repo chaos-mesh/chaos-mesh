@@ -60,9 +60,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if apierrors.IsNotFound(err) {
 				// remote chaos doesn't exist, while the local one is being deleted
 				if localObj.GetDeletionTimestamp() != nil {
-					retry.RetryOnConflict(retry.DefaultRetry, func() error {
+					return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 						var obj v1alpha1.RemoteObject
-						r.Client.Get(context.TODO(), req.NamespacedName, obj)
+						r.Log.Info("resetting finalizers of local objects")
 						if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
 							if apierrors.IsNotFound(err) {
 								r.Log.Info("chaos has been removed")
@@ -77,7 +77,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 						obj.SetFinalizers([]string{})
 						return r.Client.Update(ctx, obj)
 					})
-					return c.Delete(ctx, localObj)
 				}
 
 				// omit the remoteCluster

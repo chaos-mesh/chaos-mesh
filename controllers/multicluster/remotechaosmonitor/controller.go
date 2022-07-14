@@ -61,8 +61,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		} else {
 			// TODO: handle this error
 			r.logger.Error(err, "unable to get remote chaos")
+			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, nil
 	}
 
 	localObj := r.obj.DeepCopyObject().(v1alpha1.RemoteObject)
@@ -90,7 +90,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	if shouldDelete {
-		err := r.localClient.Delete(ctx, localObj)
+		r.logger.Info("deleting local obj", "namespace", localObj.GetNamespace(), "name", localObj.GetName())
+		localObj.SetFinalizers([]string{})
+		err := r.localClient.Update(ctx, localObj)
+		if err != nil {
+			// TODO: retry
+			r.logger.Error(err, "fail to update localObj")
+			// it's expected to not return, as we could still try
+			// to remove this object
+		}
+
+		err = r.localClient.Delete(ctx, localObj)
 		if err != nil {
 			// TODO: retry
 			r.logger.Error(err, "fail to delete local object")
