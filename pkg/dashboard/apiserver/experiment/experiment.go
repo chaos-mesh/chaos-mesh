@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,14 +46,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
-var log = u.Log.WithName("experiments")
-
 // Service defines a handler service for experiments.
 type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
 	config  *config.ChaosDashboardConfig
 	scheme  *runtime.Scheme
+	log     logr.Logger
 }
 
 func NewService(
@@ -60,12 +60,14 @@ func NewService(
 	event core.EventStore,
 	config *config.ChaosDashboardConfig,
 	scheme *runtime.Scheme,
+	log logr.Logger,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
 		config:  config,
 		scheme:  scheme,
+		log:     log,
 	}
 }
 
@@ -108,7 +110,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
 		ns = s.config.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	exps := make([]*apiservertypes.Experiment, 0)
@@ -568,7 +570,7 @@ func (s *Service) state(c *gin.Context) {
 	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
 		ns = s.config.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.log.V(1).Info("Replace query namespace with", ns)
 	}
 
 	allChaosStatus := status.AllChaosStatus{}
