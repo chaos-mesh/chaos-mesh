@@ -73,8 +73,13 @@ func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
 	return args, nil
 }
 
-func getAllInterfaces(ctx context.Context, log logr.Logger, pid uint32) ([]string, error) {
-	ipOutput, err := bpm.DefaultProcessBuilder("ip", "-j", "addr", "show").SetNS(pid, bpm.NetNS).SetContext(ctx).Build(ctx).CombinedOutput()
+func getAllInterfaces(ctx context.Context, log logr.Logger, pid uint32, enterNS bool) ([]string, error) {
+	processBuilder := bpm.DefaultProcessBuilder("ip", "-j", "addr", "show").SetContext(ctx)
+	if enterNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build(ctx)
+	ipOutput, err := cmd.CombinedOutput()
 	if err != nil {
 		return []string{}, err
 	}
@@ -110,7 +115,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	tcCli := buildTcClient(ctx, log, in.EnterNS, pid)
 
-	ifaces, err := getAllInterfaces(ctx, log, pid)
+	ifaces, err := getAllInterfaces(ctx, log, pid, in.EnterNS)
 	if err != nil {
 		log.Error(err, "error while getting interfaces")
 		return nil, err
