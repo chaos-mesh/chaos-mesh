@@ -399,9 +399,8 @@ spec:
           properties:
             action:
               description: 'Action defines the specific block chaos action. Supported
-                action: limit / delay'
+                action: delay'
               enum:
-              - limit
               - delay
               type: string
             containerNames:
@@ -4953,9 +4952,8 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific block chaos action. Supported
-                    action: limit / delay'
+                    action: delay'
                   enum:
-                  - limit
                   - delay
                   type: string
                 containerNames:
@@ -7688,9 +7686,8 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific block chaos
-                              action. Supported action: limit / delay'
+                              action. Supported action: delay'
                             enum:
-                            - limit
                             - delay
                             type: string
                           containerNames:
@@ -10219,9 +10216,8 @@ spec:
                             properties:
                               action:
                                 description: 'Action defines the specific block chaos
-                                  action. Supported action: limit / delay'
+                                  action. Supported action: delay'
                                 enum:
-                                - limit
                                 - delay
                                 type: string
                               containerNames:
@@ -17587,9 +17583,8 @@ spec:
               properties:
                 action:
                   description: 'Action defines the specific block chaos action. Supported
-                    action: limit / delay'
+                    action: delay'
                   enum:
-                  - limit
                   - delay
                   type: string
                 containerNames:
@@ -19981,9 +19976,8 @@ spec:
                   properties:
                     action:
                       description: 'Action defines the specific block chaos action.
-                        Supported action: limit / delay'
+                        Supported action: delay'
                       enum:
-                      - limit
                       - delay
                       type: string
                     containerNames:
@@ -22748,9 +22742,8 @@ spec:
                             properties:
                               action:
                                 description: 'Action defines the specific block chaos
-                                  action. Supported action: limit / delay'
+                                  action. Supported action: delay'
                                 enum:
-                                - limit
                                 - delay
                                 type: string
                               containerNames:
@@ -25355,9 +25348,8 @@ spec:
                                 properties:
                                   action:
                                     description: 'Action defines the specific block
-                                      chaos action. Supported action: limit / delay'
+                                      chaos action. Supported action: delay'
                                     enum:
-                                    - limit
                                     - delay
                                     type: string
                                   containerNames:
@@ -35361,9 +35353,8 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific block chaos action.
-                          Supported action: limit / delay'
+                          Supported action: delay'
                         enum:
-                        - limit
                         - delay
                         type: string
                       containerNames:
@@ -37824,9 +37815,8 @@ spec:
                         properties:
                           action:
                             description: 'Action defines the specific block chaos
-                              action. Supported action: limit / delay'
+                              action. Supported action: delay'
                             enum:
-                            - limit
                             - delay
                             type: string
                           containerNames:

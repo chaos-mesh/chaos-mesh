@@ -51,9 +51,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.leaderElection.renewDeadline` | The duration that the acting control-plane will retry refreshing leadership before giving up. | `10s` |
 | `controllerManager.leaderElection.retryPeriod` | The duration the LeaderElector clients should wait between tries of actions. | `2s` |
 | `controllerManager.chaosdSecurityMode` |  Enabled for mTLS connection between chaos-controller-manager and chaosd | `true` |
-| `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
-| `controllerManager.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
-| `controllerManager.image.tag` | Override global tag, empty value means using the global images.tag | `` |
+| `chaosDaemon.image.registry` | Override global registry, empty value means using the global images.registry | `` |
+| `chaosDaemon.image.repository` | Repository part for image of chaos-daemon | `chaos-mesh/chaos-daemon` |
+| `chaosDaemon.image.tag` | Override global tag, empty value means using the global images.tag | `` |
 | `chaosDaemon.imagePullPolicy` | Image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
@@ -95,7 +95,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.service.clusterIP`         | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil`           |
 | `dashboard.service.nodePort`          | Set the `nodePort` of the dashboard service if the type is `NodePort`  | `nil`           |
 | `dashboard.resources` | CPU/Memory resource requests/limits for chaos-dashboard pod  | `requests: { cpu: "25m", memory: "256Mi" }, limits:{}`  |
-| `dashboard.persistentVolume.enable` | Enable storage volume for chaos-dashboard. If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence| `false` |
+| `dashboard.persistentVolume.enabled` | Enable storage volume for chaos-dashboard. If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence| `false` |
 | `dashboard.persistentVolume.existingClaim` | Use the existing PVC for persisting chaos event| `` |
 | `dashboard.persistentVolume.size` | Chaos Dashboard data Persistent Volume size | `8Gi` |
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
@@ -117,10 +117,12 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.ingress.certManager`               | Enable Cert-Manager for ingress                                                      | `false`             |
 | `dashboard.ingress.annotations`               | Annotations for the dashboard Ingress                                                   | `{}`                |
 | `dashboard.ingress.hosts[0].name`             | Hostname to your dashboard installation                                                 | `dashboard.local`     |
-| `dashboard.ingress.hosts[0].paths`            | Path within the url structure                                                         | `["/"]`             |
 | `dashboard.ingress.hosts[0].tls`              | Utilize TLS backend in ingress                                                        | `false`             |
 | `dashboard.ingress.hosts[0].tlsHosts`         | Array of TLS hosts for ingress record (defaults to `ingress.hosts[0].name` if `nil`)  | `nil`               |
 | `dashboard.ingress.hosts[0].tlsSecret`        | TLS Secret (certificates)                                                             | `dashboard.local-tls` |
+| `dashboard.ingress.paths`                     | Paths that map requests to chaos dashboard                    | `["/"]` |
+| `dashboard.ingress.apiVersionOverrides`       | Override apiVersion of ingress rendered by this helm chart    | ``      |
+| `dashboard.ingress.ingressClassName`          | Defines which ingress controller will implement the resource  | ``      |
 | `dnsServer.create` | Enable DNS Server which required by DNSChaos | `false` |
 | `dnsServer.serviceAccount` | Name of serviceaccount for chaos-dns-server. | `chaos-dns-server` |
 | `dnsServer.image` | Image of DNS Server | `pingcap/coredns:v0.2.1` |
