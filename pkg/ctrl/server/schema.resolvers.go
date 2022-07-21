@@ -1157,7 +1157,7 @@ func (r *queryResolver) Pods(ctx context.Context, selector model.PodSelectorInpu
 }
 
 func (r *rawIPSetResolver) IPSetType(ctx context.Context, obj *v1alpha1.RawIPSet) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return string(obj.IPSetType), nil
 }
 
 func (r *rawIptablesResolver) Direction(ctx context.Context, obj *v1alpha1.RawIptables) (string, error) {
@@ -1222,7 +1222,11 @@ func (r *stressChaosSpecResolver) Mode(ctx context.Context, obj *v1alpha1.Stress
 }
 
 func (r *stressChaosStatusResolver) Instances(ctx context.Context, obj *v1alpha1.StressChaosStatus) (map[string]interface{}, error) {
-	panic(fmt.Errorf("not implemented"))
+	instances := make(map[string]interface{})
+	for k, v := range obj.Instances {
+		instances[k] = v
+	}
+	return instances, nil
 }
 
 // AttrOverrideSpec returns generated.AttrOverrideSpecResolver implementation.
