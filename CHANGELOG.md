@@ -11,6 +11,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Add e2e build image cache [#3097](https://github.com/chaos-mesh/chaos-mesh/pull/3151)
+- PhysicalMachineChaos: add recover command in process [#3468](https://github.com/chaos-mesh/chaos-mesh/pull/3468)
 
 ### Changed
 
