@@ -54,9 +54,7 @@ import (
 
 var (
 	printVersion bool
-
-	// TODO: create the logger through dependency injection
-	setupLog = ctrl.Log.WithName("setup")
+	setupLog     = ctrl.Log.WithName("setup")
 )
 
 func parseFlags() {
@@ -230,7 +228,6 @@ func Run(params RunParams) error {
 	setupLog.Info("Starting manager")
 	if err := mgr.Start(controllerRuntimeSignalHandler); err != nil {
 		setupLog.Error(err, "unable to start manager")
-		// TODO: return the error instead of exit
 		os.Exit(1)
 	}
 

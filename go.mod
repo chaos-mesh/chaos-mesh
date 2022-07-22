@@ -62,12 +62,12 @@ require (
 	github.com/swaggo/swag v1.8.3
 	github.com/vektah/gqlparser/v2 v2.4.1
 	github.com/vishvananda/netlink v1.1.1-0.20201029203352-d40f9887b852
-	go.uber.org/fx v1.17.1
-	go.uber.org/zap v1.21.0
+	go.uber.org/fx v1.12.0
+	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
+	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	golang.org/x/tools v0.1.11
