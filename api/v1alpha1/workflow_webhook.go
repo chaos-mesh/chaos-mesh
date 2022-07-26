@@ -203,6 +203,7 @@ func shouldNotSetupDurationInTheChaos(path *field.Path, template Template) field
 
 	if template.EmbedChaos == nil {
 		result = append(result, field.Invalid(path.Child(string(template.Type)), nil, fmt.Sprintf("the value of chaos %s is required", template.Type)))
+		return result
 	}
 
 	spec := reflect.ValueOf(template.EmbedChaos).Elem().FieldByName(string(template.Type))

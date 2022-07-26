@@ -14,30 +14,32 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button, Grid, Grow } from '@mui/material'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-
-import Alert from '@mui/lab/Alert'
+import loadable from '@loadable/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { Event } from 'api/events.type'
-import EventsTimeline from 'components/EventsTimeline'
-import { ExperimentSingle } from 'api/experiments.type'
-import Loading from '@ui/mui-extends/esm/Loading'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import Space from '@ui/mui-extends/esm/Space'
+import Alert from '@mui/lab/Alert'
+import { Box, Button, Grid, Grow } from '@mui/material'
 import api from 'api'
-import i18n from 'components/T'
-import loadable from '@loadable/component'
-import { useIntl } from 'react-intl'
-import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
+import { CoreEvent, TypesExperimentDetail } from 'openapi'
+import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
+import { useNavigate, useParams } from 'react-router-dom'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch } from 'store'
+
+import { setAlert, setConfirm } from 'slices/globalStatus'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import ObjectConfiguration from 'components/ObjectConfiguration'
+import i18n from 'components/T'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -50,12 +52,14 @@ export default function Single() {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<ExperimentSingle>()
-  const [events, setEvents] = useState<Event[]>([])
+  const [single, setSingle] = useState<TypesExperimentDetail>()
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchExperiment = () => {
     api.experiments
-      .single(uuid!)
+      .experimentsUidGet({
+        uid: uuid!,
+      })
       .then(({ data }) => setSingle(data))
       .catch(console.error)
   }
@@ -68,7 +72,7 @@ export default function Single() {
   useEffect(() => {
     const fetchEvents = () => {
       api.events
-        .events({ object_id: uuid, limit: 999 })
+        .eventsGet({ objectId: uuid, limit: 999 })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {
@@ -121,15 +125,15 @@ export default function Single() {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.experiments.del
+        actionFunc = api.experiments.experimentsUidDelete
 
         break
       case 'pause':
-        actionFunc = api.experiments.pause
+        actionFunc = api.experiments.experimentsPauseUidPut
 
         break
       case 'start':
-        actionFunc = api.experiments.start
+        actionFunc = api.experiments.experimentsStartUidPut
 
         break
       default:
@@ -137,7 +141,7 @@ export default function Single() {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({
@@ -162,6 +166,7 @@ export default function Single() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
+          {single && <Helmet title={`Experiment ${single.name}`} />}
           <Space spacing={6}>
             <Space direction="row">
               <Button

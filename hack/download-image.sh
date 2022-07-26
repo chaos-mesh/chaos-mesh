@@ -39,9 +39,9 @@ function download_image() {
 
     local ARTIFACT_URL=$(curl \
         -H "Accept: application/vnd.github.v3+json" \
-        https://api.github.com/repos/$github_repository/actions/runs/$github_run_id/artifacts 2>/dev/null |\
+        https://api.github.com/repos/"$github_repository"/actions/runs/"$github_run_id"/artifacts 2>/dev/null |\
         jq -r ".artifacts[0].archive_download_url")
-    local TOKEN=$(echo url=https://github.com/$github_repository|\
+    local TOKEN=$(echo url=https://github.com/"$github_repository"|\
         gh auth git-credential get|\
         grep password|\
         cut -b 10-)
@@ -49,7 +49,7 @@ function download_image() {
     curl -L \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: token $TOKEN" \
-        $ARTIFACT_URL > .cache/chaos-mesh-images.zip
+        "$ARTIFACT_URL" > .cache/chaos-mesh-images.zip
     unzip -o -d .cache/ .cache/chaos-mesh-images.zip
     
     for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
@@ -62,7 +62,7 @@ function download_image() {
 function check_executable_exists() {
     while [[ $# -gt 0 ]]; do
         local executable=$1
-        if ! command -v $executable >/dev/null 2>&1; then
+        if ! command -v "$executable" >/dev/null 2>&1; then
             echo "Error: $executable is not installed"
             exit 1
         fi
@@ -104,4 +104,4 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-download_image $GITHUB_REPOSITORY $GITHUB_ACTION_ID
+download_image "$GITHUB_REPOSITORY $GITHUB_ACTION_ID"

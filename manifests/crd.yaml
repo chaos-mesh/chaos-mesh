@@ -104,15 +104,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -245,15 +282,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -325,9 +399,8 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific block chaos action. Supported
-                  action: limit / delay'
+                  action: delay'
                 enum:
-                - limit
                 - delay
                 type: string
               containerNames:
@@ -350,9 +423,6 @@ spec:
               duration:
                 description: Duration represents the duration of the chaos action.
                 type: string
-              iops:
-                description: IOPS defines the limit of IO frequency.
-                type: integer
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -495,15 +565,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -745,15 +852,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -888,15 +1032,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -1214,15 +1395,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -1580,15 +1798,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -1671,6 +1926,7 @@ spec:
                 - stress
                 - gc
                 - ruleData
+                - mysql
                 type: string
               class:
                 description: Java class
@@ -1685,14 +1941,20 @@ spec:
                 description: the CPU core number needs to use, only set it when action
                   is stress
                 type: integer
+              database:
+                description: the match database default value is "", means match all
+                  database
+                type: string
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
               exception:
                 description: the exception which needs to throw for action `exception`
+                  or the exception message needs to throw in action `mysql`
                 type: string
               latency:
-                description: the latency duration for action 'latency', unit ms
+                description: the latency duration for action 'latency', unit ms or
+                  the latency duration in action `mysql`
                 type: integer
               memType:
                 description: the memory type needs to locate, only set it when action
@@ -1711,9 +1973,13 @@ spec:
                 - fixed-percent
                 - random-max-percent
                 type: string
+              mysqlConnectorVersion:
+                description: the version of mysql-connector-java, only support 5.X.X(set
+                  to "5") and 8.X.X(set to "8") now
+                type: string
               name:
-                description: byteman rule name, should be unique, and will use JVMChaos'
-                  name if not set
+                description: byteman rule name, should be unique, and will generate
+                  one if not set
                 type: string
               pid:
                 description: the pid of Java process which needs to attach
@@ -1815,6 +2081,15 @@ spec:
                       belong, and the each values is a set of pod names.
                     type: object
                 type: object
+              sqlType:
+                description: the match sql type default value is "", means match all
+                  SQL type. The value can be 'select', 'insert', 'update', 'delete',
+                  'replace'.
+                type: string
+              table:
+                description: the match table default value is "", means match all
+                  table
+                type: string
               value:
                 description: Value is required when the mode is set to `FixedMode`
                   / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
@@ -1854,15 +2129,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -1926,6 +2238,12 @@ spec:
           spec:
             description: Spec defines the behavior of a kernel chaos experiment
             properties:
+              containerNames:
+                description: ContainerNames indicates list of the name of affected
+                  container. If not set, the first container will be injected
+                items:
+                  type: string
+                type: array
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
@@ -2136,15 +2454,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -2603,15 +2958,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -3198,7 +3590,9 @@ spec:
                     type: integer
                   options:
                     description: extend stress-ng options
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   workers:
                     description: specifies N workers to apply the stressor.
                     type: integer
@@ -3207,7 +3601,9 @@ spec:
                 properties:
                   options:
                     description: extend stress-ng options
-                    type: string
+                    items:
+                      type: string
+                    type: array
                   size:
                     description: specifies N bytes consumed per vm worker, default
                       is the total available memory. One can specify the size as %
@@ -3257,15 +3653,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -3552,15 +3985,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -4278,6 +4748,111 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
+  name: remoteclusters.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: RemoteCluster
+    listKind: RemoteClusterList
+    plural: remoteclusters
+    singular: remotecluster
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: RemoteCluster defines a remote cluster
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RemoteClusterSpec defines the specification of a remote cluster
+            properties:
+              configOverride:
+                description: RawMessage is a raw encoded JSON value. It implements
+                  Marshaler and Unmarshaler and can be used to delay JSON decoding
+                  or precompute a JSON encoding.
+                format: byte
+                type: string
+              kubeConfig:
+                description: RemoteClusterKubeConfig refers to a secret by which we'll
+                  use to connect remote cluster
+                properties:
+                  secretRef:
+                    description: RemoteClusterSecretRef refers to a secret in any
+                      namespaces
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - key
+                    - name
+                    - namespace
+                    type: object
+                required:
+                - secretRef
+                type: object
+              namespace:
+                type: string
+            required:
+            - kubeConfig
+            - namespace
+            type: object
+          status:
+            properties:
+              conditions:
+                description: Conditions represents the current condition of the remote
+                  cluster
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              currentVersion:
+                type: string
+            required:
+            - currentVersion
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
   name: schedules.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -4399,9 +4974,8 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific block chaos action.
-                      Supported action: limit / delay'
+                      Supported action: delay'
                     enum:
-                    - limit
                     - delay
                     type: string
                   containerNames:
@@ -4424,9 +4998,6 @@ spec:
                   duration:
                     description: Duration represents the duration of the chaos action.
                     type: string
-                  iops:
-                    description: IOPS defines the limit of IO frequency.
-                    type: integer
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -5248,6 +5819,7 @@ spec:
                     - stress
                     - gc
                     - ruleData
+                    - mysql
                     type: string
                   class:
                     description: Java class
@@ -5262,14 +5834,20 @@ spec:
                     description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
+                  database:
+                    description: the match database default value is "", means match
+                      all database
+                    type: string
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
                   exception:
                     description: the exception which needs to throw for action `exception`
+                      or the exception message needs to throw in action `mysql`
                     type: string
                   latency:
                     description: the latency duration for action 'latency', unit ms
+                      or the latency duration in action `mysql`
                     type: integer
                   memType:
                     description: the memory type needs to locate, only set it when
@@ -5288,9 +5866,13 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  mysqlConnectorVersion:
+                    description: the version of mysql-connector-java, only support
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
+                    type: string
                   name:
-                    description: byteman rule name, should be unique, and will use
-                      JVMChaos' name if not set
+                    description: byteman rule name, should be unique, and will generate
+                      one if not set
                     type: string
                   pid:
                     description: the pid of Java process which needs to attach
@@ -5392,6 +5974,15 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
+                  sqlType:
+                    description: the match sql type default value is "", means match
+                      all SQL type. The value can be 'select', 'insert', 'update',
+                      'delete', 'replace'.
+                    type: string
+                  table:
+                    description: the match table default value is "", means match
+                      all table
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -5409,6 +6000,12 @@ spec:
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
                 properties:
+                  containerNames:
+                    description: ContainerNames indicates list of the name of affected
+                      container. If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
@@ -6483,7 +7080,9 @@ spec:
                         type: integer
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
@@ -6492,7 +7091,9 @@ spec:
                     properties:
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -7121,9 +7722,8 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific block chaos
-                                action. Supported action: limit / delay'
+                                action. Supported action: delay'
                               enum:
-                              - limit
                               - delay
                               type: string
                             containerNames:
@@ -7149,9 +7749,6 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action.
                               type: string
-                            iops:
-                              description: IOPS defines the limit of IO frequency.
-                              type: integer
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -8050,6 +8647,7 @@ spec:
                               - stress
                               - gc
                               - ruleData
+                              - mysql
                               type: string
                             class:
                               description: Java class
@@ -8065,17 +8663,22 @@ spec:
                               description: the CPU core number needs to use, only
                                 set it when action is stress
                               type: integer
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
                             exception:
                               description: the exception which needs to throw for
-                                action `exception`
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
                               type: string
                             latency:
                               description: the latency duration for action 'latency',
-                                unit ms
+                                unit ms or the latency duration in action `mysql`
                               type: integer
                             memType:
                               description: the memory type needs to locate, only set
@@ -8096,9 +8699,13 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
+                              type: string
                             name:
                               description: byteman rule name, should be unique, and
-                                will use JVMChaos' name if not set
+                                will generate one if not set
                               type: string
                             pid:
                               description: the pid of Java process which needs to
@@ -8207,6 +8814,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -8226,6 +8842,13 @@ spec:
                           description: KernelChaosSpec defines the desired state of
                             KernelChaos
                           properties:
+                            containerNames:
+                              description: ContainerNames indicates list of the name
+                                of affected container. If not set, the first container
+                                will be injected
+                              items:
+                                type: string
+                              type: array
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
@@ -9385,7 +10008,9 @@ spec:
                                   type: integer
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
@@ -9394,7 +10019,9 @@ spec:
                               properties:
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can
@@ -9681,9 +10308,8 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific block
-                                    chaos action. Supported action: limit / delay'
+                                    chaos action. Supported action: delay'
                                   enum:
-                                  - limit
                                   - delay
                                   type: string
                                 containerNames:
@@ -9709,9 +10335,6 @@ spec:
                                   description: Duration represents the duration of
                                     the chaos action.
                                   type: string
-                                iops:
-                                  description: IOPS defines the limit of IO frequency.
-                                  type: integer
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -10611,6 +11234,7 @@ spec:
                                   - stress
                                   - gc
                                   - ruleData
+                                  - mysql
                                   type: string
                                 class:
                                   description: Java class
@@ -10626,17 +11250,22 @@ spec:
                                   description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
+                                database:
+                                  description: the match database default value is
+                                    "", means match all database
+                                  type: string
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    for action `exception`
+                                    for action `exception` or the exception message
+                                    needs to throw in action `mysql`
                                   type: string
                                 latency:
                                   description: the latency duration for action 'latency',
-                                    unit ms
+                                    unit ms or the latency duration in action `mysql`
                                   type: integer
                                 memType:
                                   description: the memory type needs to locate, only
@@ -10657,9 +11286,14 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                mysqlConnectorVersion:
+                                  description: the version of mysql-connector-java,
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
+                                  type: string
                                 name:
                                   description: byteman rule name, should be unique,
-                                    and will use JVMChaos' name if not set
+                                    and will generate one if not set
                                   type: string
                                 pid:
                                   description: the pid of Java process which needs
@@ -10773,6 +11407,15 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -10792,6 +11435,13 @@ spec:
                               description: KernelChaosSpec defines the desired state
                                 of KernelChaos
                               properties:
+                                containerNames:
+                                  description: ContainerNames indicates list of the
+                                    name of affected container. If not set, the first
+                                    container will be injected
+                                  items:
+                                    type: string
+                                  type: array
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
@@ -11989,7 +12639,9 @@ spec:
                                       type: integer
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -11999,7 +12651,9 @@ spec:
                                   properties:
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available
@@ -16672,15 +17326,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -16929,15 +17620,52 @@ spec:
                     description: Records are used to track the running status
                     items:
                       properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
                         id:
                           type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
                         phase:
                           type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
                         selectorKey:
                           type: string
                       required:
                       - id
+                      - injectedCount
                       - phase
+                      - recoveredCount
                       - selectorKey
                       type: object
                     type: array
@@ -17096,9 +17824,8 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific block chaos action.
-                      Supported action: limit / delay'
+                      Supported action: delay'
                     enum:
-                    - limit
                     - delay
                     type: string
                   containerNames:
@@ -17121,9 +17848,6 @@ spec:
                   duration:
                     description: Duration represents the duration of the chaos action.
                     type: string
-                  iops:
-                    description: IOPS defines the limit of IO frequency.
-                    type: integer
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
                       mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -17960,6 +18684,7 @@ spec:
                     - stress
                     - gc
                     - ruleData
+                    - mysql
                     type: string
                   class:
                     description: Java class
@@ -17974,14 +18699,20 @@ spec:
                     description: the CPU core number needs to use, only set it when
                       action is stress
                     type: integer
+                  database:
+                    description: the match database default value is "", means match
+                      all database
+                    type: string
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
                   exception:
                     description: the exception which needs to throw for action `exception`
+                      or the exception message needs to throw in action `mysql`
                     type: string
                   latency:
                     description: the latency duration for action 'latency', unit ms
+                      or the latency duration in action `mysql`
                     type: integer
                   memType:
                     description: the memory type needs to locate, only set it when
@@ -18000,9 +18731,13 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  mysqlConnectorVersion:
+                    description: the version of mysql-connector-java, only support
+                      5.X.X(set to "5") and 8.X.X(set to "8") now
+                    type: string
                   name:
-                    description: byteman rule name, should be unique, and will use
-                      JVMChaos' name if not set
+                    description: byteman rule name, should be unique, and will generate
+                      one if not set
                     type: string
                   pid:
                     description: the pid of Java process which needs to attach
@@ -18104,6 +18839,15 @@ spec:
                           which pods belong, and the each values is a set of pod names.
                         type: object
                     type: object
+                  sqlType:
+                    description: the match sql type default value is "", means match
+                      all SQL type. The value can be 'select', 'insert', 'update',
+                      'delete', 'replace'.
+                    type: string
+                  table:
+                    description: the match table default value is "", means match
+                      all table
+                    type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -18121,6 +18865,12 @@ spec:
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
                 properties:
+                  containerNames:
+                    description: ContainerNames indicates list of the name of affected
+                      container. If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
                   duration:
                     description: Duration represents the duration of the chaos action
                     type: string
@@ -19195,7 +19945,9 @@ spec:
                         type: integer
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       workers:
                         description: specifies N workers to apply the stressor.
                         type: integer
@@ -19204,7 +19956,9 @@ spec:
                     properties:
                       options:
                         description: extend stress-ng options
-                        type: string
+                        items:
+                          type: string
+                        type: array
                       size:
                         description: specifies N bytes consumed per vm worker, default
                           is the total available memory. One can specify the size
@@ -19473,9 +20227,8 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific block chaos action.
-                          Supported action: limit / delay'
+                          Supported action: delay'
                         enum:
-                        - limit
                         - delay
                         type: string
                       containerNames:
@@ -19500,9 +20253,6 @@ spec:
                         description: Duration represents the duration of the chaos
                           action.
                         type: string
-                      iops:
-                        description: IOPS defines the limit of IO frequency.
-                        type: integer
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
                           mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -20346,6 +21096,7 @@ spec:
                         - stress
                         - gc
                         - ruleData
+                        - mysql
                         type: string
                       class:
                         description: Java class
@@ -20361,17 +21112,22 @@ spec:
                         description: the CPU core number needs to use, only set it
                           when action is stress
                         type: integer
+                      database:
+                        description: the match database default value is "", means
+                          match all database
+                        type: string
                       duration:
                         description: Duration represents the duration of the chaos
                           action
                         type: string
                       exception:
                         description: the exception which needs to throw for action
-                          `exception`
+                          `exception` or the exception message needs to throw in action
+                          `mysql`
                         type: string
                       latency:
                         description: the latency duration for action 'latency', unit
-                          ms
+                          ms or the latency duration in action `mysql`
                         type: integer
                       memType:
                         description: the memory type needs to locate, only set it
@@ -20390,9 +21146,13 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
+                      mysqlConnectorVersion:
+                        description: the version of mysql-connector-java, only support
+                          5.X.X(set to "5") and 8.X.X(set to "8") now
+                        type: string
                       name:
                         description: byteman rule name, should be unique, and will
-                          use JVMChaos' name if not set
+                          generate one if not set
                         type: string
                       pid:
                         description: the pid of Java process which needs to attach
@@ -20496,6 +21256,15 @@ spec:
                               names.
                             type: object
                         type: object
+                      sqlType:
+                        description: the match sql type default value is "", means
+                          match all SQL type. The value can be 'select', 'insert',
+                          'update', 'delete', 'replace'.
+                        type: string
+                      table:
+                        description: the match table default value is "", means match
+                          all table
+                        type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
                           / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -20513,6 +21282,13 @@ spec:
                   kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
                     properties:
+                      containerNames:
+                        description: ContainerNames indicates list of the name of
+                          affected container. If not set, the first container will
+                          be injected
+                        items:
+                          type: string
+                        type: array
                       duration:
                         description: Duration represents the duration of the chaos
                           action
@@ -21607,7 +22383,9 @@ spec:
                             type: integer
                           options:
                             description: extend stress-ng options
-                            type: string
+                            items:
+                              type: string
+                            type: array
                           workers:
                             description: specifies N workers to apply the stressor.
                             type: integer
@@ -21616,7 +22394,9 @@ spec:
                         properties:
                           options:
                             description: extend stress-ng options
-                            type: string
+                            items:
+                              type: string
+                            type: array
                           size:
                             description: specifies N bytes consumed per vm worker,
                               default is the total available memory. One can specify
@@ -22258,9 +23038,8 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific block
-                                    chaos action. Supported action: limit / delay'
+                                    chaos action. Supported action: delay'
                                   enum:
-                                  - limit
                                   - delay
                                   type: string
                                 containerNames:
@@ -22286,9 +23065,6 @@ spec:
                                   description: Duration represents the duration of
                                     the chaos action.
                                   type: string
-                                iops:
-                                  description: IOPS defines the limit of IO frequency.
-                                  type: integer
                                 mode:
                                   description: 'Mode defines the mode to run chaos
                                     action. Supported mode: one / all / fixed / fixed-percent
@@ -23210,6 +23986,7 @@ spec:
                                   - stress
                                   - gc
                                   - ruleData
+                                  - mysql
                                   type: string
                                 class:
                                   description: Java class
@@ -23225,17 +24002,22 @@ spec:
                                   description: the CPU core number needs to use, only
                                     set it when action is stress
                                   type: integer
+                                database:
+                                  description: the match database default value is
+                                    "", means match all database
+                                  type: string
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
                                   type: string
                                 exception:
                                   description: the exception which needs to throw
-                                    for action `exception`
+                                    for action `exception` or the exception message
+                                    needs to throw in action `mysql`
                                   type: string
                                 latency:
                                   description: the latency duration for action 'latency',
-                                    unit ms
+                                    unit ms or the latency duration in action `mysql`
                                   type: integer
                                 memType:
                                   description: the memory type needs to locate, only
@@ -23256,9 +24038,14 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                mysqlConnectorVersion:
+                                  description: the version of mysql-connector-java,
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
+                                  type: string
                                 name:
                                   description: byteman rule name, should be unique,
-                                    and will use JVMChaos' name if not set
+                                    and will generate one if not set
                                   type: string
                                 pid:
                                   description: the pid of Java process which needs
@@ -23372,6 +24159,15 @@ spec:
                                         and the each values is a set of pod names.
                                       type: object
                                   type: object
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -23391,6 +24187,13 @@ spec:
                               description: KernelChaosSpec defines the desired state
                                 of KernelChaos
                               properties:
+                                containerNames:
+                                  description: ContainerNames indicates list of the
+                                    name of affected container. If not set, the first
+                                    container will be injected
+                                  items:
+                                    type: string
+                                  type: array
                                 duration:
                                   description: Duration represents the duration of
                                     the chaos action
@@ -24590,7 +25393,9 @@ spec:
                                       type: integer
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     workers:
                                       description: specifies N workers to apply the
                                         stressor.
@@ -24600,7 +25405,9 @@ spec:
                                   properties:
                                     options:
                                       description: extend stress-ng options
-                                      type: string
+                                      items:
+                                        type: string
+                                      type: array
                                     size:
                                       description: specifies N bytes consumed per
                                         vm worker, default is the total available
@@ -24896,9 +25703,8 @@ spec:
                                   properties:
                                     action:
                                       description: 'Action defines the specific block
-                                        chaos action. Supported action: limit / delay'
+                                        chaos action. Supported action: delay'
                                       enum:
-                                      - limit
                                       - delay
                                       type: string
                                     containerNames:
@@ -24924,9 +25730,6 @@ spec:
                                       description: Duration represents the duration
                                         of the chaos action.
                                       type: string
-                                    iops:
-                                      description: IOPS defines the limit of IO frequency.
-                                      type: integer
                                     mode:
                                       description: 'Mode defines the mode to run chaos
                                         action. Supported mode: one / all / fixed
@@ -25856,6 +26659,7 @@ spec:
                                       - stress
                                       - gc
                                       - ruleData
+                                      - mysql
                                       type: string
                                     class:
                                       description: Java class
@@ -25871,17 +26675,23 @@ spec:
                                       description: the CPU core number needs to use,
                                         only set it when action is stress
                                       type: integer
+                                    database:
+                                      description: the match database default value
+                                        is "", means match all database
+                                      type: string
                                     duration:
                                       description: Duration represents the duration
                                         of the chaos action
                                       type: string
                                     exception:
                                       description: the exception which needs to throw
-                                        for action `exception`
+                                        for action `exception` or the exception message
+                                        needs to throw in action `mysql`
                                       type: string
                                     latency:
                                       description: the latency duration for action
-                                        'latency', unit ms
+                                        'latency', unit ms or the latency duration
+                                        in action `mysql`
                                       type: integer
                                     memType:
                                       description: the memory type needs to locate,
@@ -25902,9 +26712,14 @@ spec:
                                       - fixed-percent
                                       - random-max-percent
                                       type: string
+                                    mysqlConnectorVersion:
+                                      description: the version of mysql-connector-java,
+                                        only support 5.X.X(set to "5") and 8.X.X(set
+                                        to "8") now
+                                      type: string
                                     name:
                                       description: byteman rule name, should be unique,
-                                        and will use JVMChaos' name if not set
+                                        and will generate one if not set
                                       type: string
                                     pid:
                                       description: the pid of Java process which needs
@@ -26023,6 +26838,16 @@ spec:
                                             pod names.
                                           type: object
                                       type: object
+                                    sqlType:
+                                      description: the match sql type default value
+                                        is "", means match all SQL type. The value
+                                        can be 'select', 'insert', 'update', 'delete',
+                                        'replace'.
+                                      type: string
+                                    table:
+                                      description: the match table default value is
+                                        "", means match all table
+                                      type: string
                                     value:
                                       description: Value is required when the mode
                                         is set to `FixedMode` / `FixedPercentMode`
@@ -26043,6 +26868,13 @@ spec:
                                   description: KernelChaosSpec defines the desired
                                     state of KernelChaos
                                   properties:
+                                    containerNames:
+                                      description: ContainerNames indicates list of
+                                        the name of affected container. If not set,
+                                        the first container will be injected
+                                      items:
+                                        type: string
+                                      type: array
                                     duration:
                                       description: Duration represents the duration
                                         of the chaos action
@@ -27285,7 +28117,9 @@ spec:
                                           type: integer
                                         options:
                                           description: extend stress-ng options
-                                          type: string
+                                          items:
+                                            type: string
+                                          type: array
                                         workers:
                                           description: specifies N workers to apply
                                             the stressor.
@@ -27295,7 +28129,9 @@ spec:
                                       properties:
                                         options:
                                           description: extend stress-ng options
-                                          type: string
+                                          items:
+                                            type: string
+                                          type: array
                                         size:
                                           description: specifies N bytes consumed
                                             per vm worker, default is the total available
@@ -35112,9 +35948,8 @@ spec:
                       properties:
                         action:
                           description: 'Action defines the specific block chaos action.
-                            Supported action: limit / delay'
+                            Supported action: delay'
                           enum:
-                          - limit
                           - delay
                           type: string
                         containerNames:
@@ -35140,9 +35975,6 @@ spec:
                           description: Duration represents the duration of the chaos
                             action.
                           type: string
-                        iops:
-                          description: IOPS defines the limit of IO frequency.
-                          type: integer
                         mode:
                           description: 'Mode defines the mode to run chaos action.
                             Supported mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -36011,6 +36843,7 @@ spec:
                           - stress
                           - gc
                           - ruleData
+                          - mysql
                           type: string
                         class:
                           description: Java class
@@ -36026,17 +36859,22 @@ spec:
                           description: the CPU core number needs to use, only set
                             it when action is stress
                           type: integer
+                        database:
+                          description: the match database default value is "", means
+                            match all database
+                          type: string
                         duration:
                           description: Duration represents the duration of the chaos
                             action
                           type: string
                         exception:
                           description: the exception which needs to throw for action
-                            `exception`
+                            `exception` or the exception message needs to throw in
+                            action `mysql`
                           type: string
                         latency:
                           description: the latency duration for action 'latency',
-                            unit ms
+                            unit ms or the latency duration in action `mysql`
                           type: integer
                         memType:
                           description: the memory type needs to locate, only set it
@@ -36055,9 +36893,13 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        mysqlConnectorVersion:
+                          description: the version of mysql-connector-java, only support
+                            5.X.X(set to "5") and 8.X.X(set to "8") now
+                          type: string
                         name:
                           description: byteman rule name, should be unique, and will
-                            use JVMChaos' name if not set
+                            generate one if not set
                           type: string
                         pid:
                           description: the pid of Java process which needs to attach
@@ -36162,6 +37004,15 @@ spec:
                                 a set of pod names.
                               type: object
                           type: object
+                        sqlType:
+                          description: the match sql type default value is "", means
+                            match all SQL type. The value can be 'select', 'insert',
+                            'update', 'delete', 'replace'.
+                          type: string
+                        table:
+                          description: the match table default value is "", means
+                            match all table
+                          type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
                             / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -36179,6 +37030,13 @@ spec:
                     kernelChaos:
                       description: KernelChaosSpec defines the desired state of KernelChaos
                       properties:
+                        containerNames:
+                          description: ContainerNames indicates list of the name of
+                            affected container. If not set, the first container will
+                            be injected
+                          items:
+                            type: string
+                          type: array
                         duration:
                           description: Duration represents the duration of the chaos
                             action
@@ -37301,7 +38159,9 @@ spec:
                               type: integer
                             options:
                               description: extend stress-ng options
-                              type: string
+                              items:
+                                type: string
+                              type: array
                             workers:
                               description: specifies N workers to apply the stressor.
                               type: integer
@@ -37310,7 +38170,9 @@ spec:
                           properties:
                             options:
                               description: extend stress-ng options
-                              type: string
+                              items:
+                                type: string
+                              type: array
                             size:
                               description: specifies N bytes consumed per vm worker,
                                 default is the total available memory. One can specify
@@ -37589,9 +38451,8 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific block chaos
-                                action. Supported action: limit / delay'
+                                action. Supported action: delay'
                               enum:
-                              - limit
                               - delay
                               type: string
                             containerNames:
@@ -37617,9 +38478,6 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action.
                               type: string
-                            iops:
-                              description: IOPS defines the limit of IO frequency.
-                              type: integer
                             mode:
                               description: 'Mode defines the mode to run chaos action.
                                 Supported mode: one / all / fixed / fixed-percent
@@ -38497,6 +39355,7 @@ spec:
                               - stress
                               - gc
                               - ruleData
+                              - mysql
                               type: string
                             class:
                               description: Java class
@@ -38512,17 +39371,22 @@ spec:
                               description: the CPU core number needs to use, only
                                 set it when action is stress
                               type: integer
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
                             exception:
                               description: the exception which needs to throw for
-                                action `exception`
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
                               type: string
                             latency:
                               description: the latency duration for action 'latency',
-                                unit ms
+                                unit ms or the latency duration in action `mysql`
                               type: integer
                             memType:
                               description: the memory type needs to locate, only set
@@ -38543,9 +39407,13 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
+                              type: string
                             name:
                               description: byteman rule name, should be unique, and
-                                will use JVMChaos' name if not set
+                                will generate one if not set
                               type: string
                             pid:
                               description: the pid of Java process which needs to
@@ -38654,6 +39522,15 @@ spec:
                                     values is a set of pod names.
                                   type: object
                               type: object
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -38673,6 +39550,13 @@ spec:
                           description: KernelChaosSpec defines the desired state of
                             KernelChaos
                           properties:
+                            containerNames:
+                              description: ContainerNames indicates list of the name
+                                of affected container. If not set, the first container
+                                will be injected
+                              items:
+                                type: string
+                              type: array
                             duration:
                               description: Duration represents the duration of the
                                 chaos action
@@ -39830,7 +40714,9 @@ spec:
                                   type: integer
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 workers:
                                   description: specifies N workers to apply the stressor.
                                   type: integer
@@ -39839,7 +40725,9 @@ spec:
                               properties:
                                 options:
                                   description: extend stress-ng options
-                                  type: string
+                                  items:
+                                    type: string
+                                  type: array
                                 size:
                                   description: specifies N bytes consumed per vm worker,
                                     default is the total available memory. One can

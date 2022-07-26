@@ -16,7 +16,28 @@ jobs:
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
-
+      - name: Build Chaos Mesh Build Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
+          fi
+          make image-build-env
+      - name: Build Chaos Mesh Dev Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
+          fi
+          make image-dev-env
       # once the https://github.com/actions/cache/pull/498 gets merged,
       # we can switch to the official cache action
       - name: Restore build cache
@@ -34,7 +55,7 @@ jobs:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
           GO_BUILD_CACHE: ${{ github.workspace }}/cache
-          DOCKER_CLI_EXPERIMENTAL: enabled 
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker buildx create --use --name chaos-mesh-builder
           make -j4 image e2e-image
@@ -134,6 +155,7 @@ jobs:
           kubernetes version: ${{ matrix.kubernetes-version }}
           start args: --cni flannel
           github token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: load image into minikube
         run: |
           minikube image load ./output/saved-images/chaos-dashboard.tgz
@@ -150,10 +172,10 @@ jobs:
         run: |
           # if kubernetes does not support apiextensions.k8s.io/v1, fallback to apiextensions.k8s.io/v1beta1
           if kubectl api-resources | grep -w apiextensions.k8s.io/v1; then
-            helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dnsServer.create=${{ matrix.arch == 'x86_64' }} --set dashboard.create=true --set images.tag=latest
+            helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dnsServer.create=true --set dashboard.create=true --set images.tag=latest
           else
             kubectl create --validate=false -f ./manifests/crd-v1beta1.yaml && \
-            helm install --skip-crds --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dnsServer.create=${{ matrix.arch == 'x86_64' }} --set dashboard.create=true --set images.tag=latest
+            helm install --skip-crds --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dnsServer.create=true --set dashboard.create=true --set images.tag=latest
           fi
       - name: e2e tests
         env:
@@ -170,10 +192,10 @@ jobs:
           mkdir -p $PROFILE_DIRECTORY/logs
           mkdir -p $PROFILE_DIRECTORY/manifests/pods
           mkdir -p $PROFILE_DIRECTORY/manifests/services
-          for item in $(kubectl -n chaos-testing get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-testing logs $item > $PROFILE_DIRECTORY/logs/$item.log; done;
-          for item in $(kubectl -n chaos-testing get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-testing get pod $item -oyaml > $PROFILE_DIRECTORY/manifests/pods/pod-$item.yaml; done;
-          for item in $(kubectl -n chaos-testing get services --no-headers | awk '{print $1}'); do kubectl -n chaos-testing get services $item -oyaml > $PROFILE_DIRECTORY/manifests/services/service-$item.yaml; done;
-          for item in $(kubectl -n chaos-testing get endpoints --no-headers | awk '{print $1}'); do kubectl -n chaos-testing get endpoints $item -oyaml > $PROFILE_DIRECTORY/manifests/services/endpoint-$item.yaml; done;
+          for item in $(kubectl -n chaos-mesh get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh logs $item > $PROFILE_DIRECTORY/logs/$item.log; done;
+          for item in $(kubectl -n chaos-mesh get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get pod $item -oyaml > $PROFILE_DIRECTORY/manifests/pods/pod-$item.yaml; done;
+          for item in $(kubectl -n chaos-mesh get services --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get services $item -oyaml > $PROFILE_DIRECTORY/manifests/services/service-$item.yaml; done;
+          for item in $(kubectl -n chaos-mesh get endpoints --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get endpoints $item -oyaml > $PROFILE_DIRECTORY/manifests/services/endpoint-$item.yaml; done;
       - name: post run - upload Chaos Mesh profile info
         if: always()
         uses: actions/upload-artifact@v2

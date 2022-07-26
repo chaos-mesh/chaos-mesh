@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 )
 
@@ -56,36 +57,15 @@ func Register(r *gin.RouterGroup, s *Service) {
 	statusCheckEndpoint.DELETE("/statuscheck", s.deleteStatusCheckTemplate)
 }
 
-type StatusCheckTemplateBase struct {
-	Namespace   string `json:"namespace"`
-	Name        string `json:"name"`
-	UID         string `json:"uid"`
-	Description string `json:"description,omitempty"`
-	Created     string `json:"created_at"`
-}
-
-// StatusCheckTemplateDetail represent details of StatusCheckTemplate.
-type StatusCheckTemplateDetail struct {
-	StatusCheckTemplateBase `json:",inline,omitempty"`
-	Spec                    v1alpha1.StatusCheckTemplate `json:"spec"`
-}
-
-type StatusCheckTemplate struct {
-	Namespace   string                       `json:"namespace"`
-	Name        string                       `json:"name"`
-	Description string                       `json:"description,omitempty"`
-	Spec        v1alpha1.StatusCheckTemplate `json:"spec"`
-}
-
 // @Summary List status check templates.
 // @Description Get status check templates from k8s cluster in real time.
 // @Tags template
 // @Produce json
 // @Param namespace query string false "filter status check templates by namespace"
 // @Param name query string false "filter status check templates by name"
-// @Success 200 {array} StatusCheckTemplateBase
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {array} apiservertypes.StatusCheckTemplateBase
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /templates/statuschecks [get]
 func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -112,7 +92,7 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 
-	templates := make([]*StatusCheckTemplateBase, 0)
+	templates := make([]*apiservertypes.StatusCheckTemplateBase, 0)
 	for _, cm := range configMapList.Items {
 		templateName := v1alpha1.GetTemplateName(cm)
 		if templateName == "" {
@@ -123,7 +103,7 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 			continue
 		}
 
-		templates = append(templates, &StatusCheckTemplateBase{
+		templates = append(templates, &apiservertypes.StatusCheckTemplateBase{
 			Namespace:   cm.Namespace,
 			Name:        templateName,
 			UID:         string(cm.UID),
@@ -144,10 +124,10 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 // @Tags templates
 // @Accept json
 // @Produce json
-// @Param statuscheck body StatusCheckTemplate true "the status check definition"
-// @Success 200 {object} StatusCheckTemplate
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Param statuscheck body apiservertypes.StatusCheckTemplate true "the status check definition"
+// @Success 200 {object} apiservertypes.StatusCheckTemplate
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /templates/statuschecks [post]
 func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -156,7 +136,7 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 
-	var template StatusCheckTemplate
+	var template apiservertypes.StatusCheckTemplate
 	if err = u.ShouldBindBodyWithJSON(c, &template); err != nil {
 		return
 	}
@@ -200,10 +180,10 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 // @Produce json
 // @Param namespace query string true "the namespace of status check templates"
 // @Param name query string true "the name of status check templates"
-// @Success 200 {object} StatusCheckTemplateDetail
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} apiservertypes.StatusCheckTemplateDetail
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /templates/statuschecks/statuscheck [get]
 func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -242,8 +222,8 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	detail := StatusCheckTemplateDetail{
-		StatusCheckTemplateBase: StatusCheckTemplateBase{
+	detail := apiservertypes.StatusCheckTemplateDetail{
+		StatusCheckTemplateBase: apiservertypes.StatusCheckTemplateBase{
 			Namespace:   cm.Namespace,
 			Name:        v1alpha1.GetTemplateName(cm),
 			UID:         string(cm.UID),
@@ -259,10 +239,10 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 // @Description Update a status check template by namespaced name.
 // @Tags templates
 // @Produce json
-// @Param request body StatusCheckTemplate true "Request body"
-// @Success 200 {object} StatusCheckTemplate
-// @Failure 400 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Param request body apiservertypes.StatusCheckTemplate true "Request body"
+// @Success 200 {object} apiservertypes.StatusCheckTemplate
+// @Failure 400 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /templates/statuschecks/statuscheck [put]
 func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -271,7 +251,7 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 
-	var template StatusCheckTemplate
+	var template apiservertypes.StatusCheckTemplate
 	if err = u.ShouldBindBodyWithJSON(c, &template); err != nil {
 		return
 	}
@@ -320,10 +300,10 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 // @Produce json
 // @Param namespace query string true "the namespace of status check templates"
 // @Param name query string true "the name of status check templates"
-// @Success 200 {object} utils.Response
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Success 200 {object} u.Response
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /templates/statuschecks/statuscheck [delete]
 func (s *Service) deleteStatusCheckTemplate(c *gin.Context) {
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)

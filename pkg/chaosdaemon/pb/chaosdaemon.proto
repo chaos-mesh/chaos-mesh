@@ -24,6 +24,9 @@ service ChaosDaemon {
 
   rpc ApplyHttpChaos(ApplyHttpChaosRequest) returns (ApplyHttpChaosResponse) {}
 
+  rpc ApplyBlockChaos(ApplyBlockChaosRequest) returns (ApplyBlockChaosResponse) {}
+  rpc RecoverBlockChaos(RecoverBlockChaosRequest) returns (google.protobuf.Empty) {}
+
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
 
   rpc InstallJVMRules(InstallJVMRulesRequest) returns (google.protobuf.Empty) {}
@@ -281,4 +284,34 @@ message UninstallJVMRulesRequest {
   string rule = 2;
   int32 port = 3;
   bool enterNS = 4;
+}
+
+message ApplyBlockChaosRequest {
+  string container_id = 1;
+  string volume_path = 2;
+  enum Action {
+    Delay = 0;
+  }
+  Action action = 3;
+  BlockDelaySpec delay = 5;
+  bool enterNS = 6;
+}
+
+message BlockDelaySpec {
+  int32 delay = 1;
+  float correlation = 2;
+  int32 jitter = 3;
+}
+
+message BlockLimitSpec {
+  uint64 quota = 1;
+  uint64 period_us = 2;
+}
+
+message ApplyBlockChaosResponse {
+  int32 injection_id = 1;
+}
+
+message RecoverBlockChaosRequest {
+  int32 injection_id = 1;
 }

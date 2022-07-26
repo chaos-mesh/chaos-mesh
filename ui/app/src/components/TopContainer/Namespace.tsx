@@ -15,17 +15,20 @@
  *
  */
 import { Autocomplete, TextField } from '@mui/material'
+import api from 'api'
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Paper from '@ui/mui-extends/esm/Paper'
-import api from 'api'
-import { getNamespaces } from 'slices/experiments'
-import i18n from 'components/T'
-import { setNameSpace } from 'slices/globalStatus'
-import { useEffect } from 'react'
 
-const ControlBar = () => {
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { getNamespaces } from 'slices/experiments'
+import { setNameSpace } from 'slices/globalStatus'
+
+import i18n from 'components/T'
+
+const Namespace = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
@@ -61,4 +64,4 @@ const ControlBar = () => {
   )
 }
 
-export default ControlBar
+export default Namespace

@@ -18,6 +18,7 @@ package podhttpchaos
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-logr/logr"
@@ -72,6 +73,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		Namespace: obj.Namespace,
 	}, pod)
 	if err != nil {
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Log.Error(err, "fail to find pod")
 		return ctrl.Result{}, nil
 	}
@@ -103,6 +105,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		})
 
 		if updateError != nil {
+			updateError = errors.Wrapf(updateError, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 			r.Log.Error(updateError, "fail to update")
 			r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update status: %s", updateError.Error())
 		}
@@ -113,6 +116,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		Name:      obj.Name,
 	})
 	if err != nil {
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
@@ -141,6 +145,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	input, err := json.Marshal(rules)
 	if err != nil {
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{}, nil
 	}
@@ -157,12 +162,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		EnterNS:   true,
 	})
 	if err != nil {
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}
 
 	if res.StatusCode != http.StatusOK {
-		err = errors.Errorf("status(%d), apply fail: %s", res.StatusCode, res.Error)
+		err = errors.Wrapf(fmt.Errorf("%s", res.Error),
+			"failed to apply for pod %s/%s, status(%d)",
+			pod.Namespace, pod.Name, res.StatusCode)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{Requeue: true}, nil
 	}

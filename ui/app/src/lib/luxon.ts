@@ -36,4 +36,6 @@ export const now = DateTime.local
 export const format = (date: string, locale: string = 'en') =>
   DateTime.fromISO(date, { locale }).toFormat('yyyy-MM-dd HH:mm:ss a')
 
+export const toRelative = (date: string, locale: string = 'en') => DateTime.fromISO(date, { locale }).toRelative()
+
 export default DateTime

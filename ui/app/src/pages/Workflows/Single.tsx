@@ -14,29 +14,33 @@
  * limitations under the License.
  *
  */
+import loadable from '@loadable/component'
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+import { makeStyles } from '@mui/styles'
+import api from 'api'
+import { EventHandler } from 'cytoscape'
+import yaml from 'js-yaml'
+import { CoreEvent, CoreWorkflowDetail } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import { Event } from 'api/events.type'
-import { EventHandler } from 'cytoscape'
-import EventsTimeline from 'components/EventsTimeline'
-import NodeConfiguration from 'components/ObjectConfiguration/Node'
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import { WorkflowSingle } from 'api/workflows.type'
-import api from 'api'
-import { constructWorkflowTopology } from 'lib/cytoscape'
-import i18n from 'components/T'
-import loadable from '@loadable/component'
-import { makeStyles } from '@mui/styles'
-import { useIntervalFetch } from 'lib/hooks'
-import { useIntl } from 'react-intl'
+
 import { useStoreDispatch } from 'store'
-import yaml from 'js-yaml'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import EventsTimeline from 'components/EventsTimeline'
+import Helmet from 'components/Helmet'
+import NodeConfiguration from 'components/ObjectConfiguration/Node'
+import i18n from 'components/T'
+
+import { constructWorkflowTopology } from 'lib/cytoscape'
+import { useIntervalFetch } from 'lib/hooks'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -65,22 +69,24 @@ const Single = () => {
 
   const dispatch = useStoreDispatch()
 
-  const [single, setSingle] = useState<WorkflowSingle>()
+  const [single, setSingle] = useState<CoreWorkflowDetail>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
   const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
 
-  const [events, setEvents] = useState<Event[]>([])
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchWorkflowSingle = (intervalID?: number) =>
     api.workflows
-      .single(uuid!)
+      .workflowsUidGet({
+        uid: uuid!,
+      })
       .then(({ data }) => {
         // TODO: remove noise in API
-        data.kube_object.metadata.annotations &&
-          delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
+        data.kube_object!.metadata!.annotations &&
+          delete data.kube_object!.metadata!.annotations['kubectl.kubernetes.io/last-applied-configuration']
 
         setSingle(data)
 
@@ -103,14 +109,17 @@ const Single = () => {
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, theme, handleNodeClick)
+      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single as any, theme, handleNodeClick)
 
       topologyRef.current = updateElements
     }
 
     const fetchEvents = () => {
       api.events
-        .cascadeFetchEventsForWorkflow(uuid!, { limit: 999 })
+        .eventsWorkflowUidGet({
+          uid: uuid!,
+          limit: 999,
+        })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {
@@ -135,7 +144,7 @@ const Single = () => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.workflows.del
+        actionFunc = api.workflows.workflowsUidDelete
 
         break
       default:
@@ -143,7 +152,7 @@ const Single = () => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({
@@ -163,7 +172,7 @@ const Single = () => {
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
     const { template: nodeTemplate } = node.data()
-    const template = single?.kube_object.spec.templates.find((t: any) => t.name === nodeTemplate)
+    const template = (single?.kube_object!.spec as any).templates.find((t: any) => t.name === nodeTemplate)
 
     setData(template)
     setSelected('node')
@@ -174,7 +183,8 @@ const Single = () => {
   return (
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
-        <div>
+        <div style={{ height: '100%' }}>
+          {single && <Helmet title={`Workflow ${single.name}`} />}
           <Space spacing={6} className={classes.root}>
             <Space direction="row">
               <Button
@@ -191,13 +201,7 @@ const Single = () => {
               </Button>
             </Space>
             <Paper sx={{ display: 'flex', flexDirection: 'column', height: 450 }}>
-              <PaperTop
-                title={
-                  <Space spacing={1.5} alignItems="center">
-                    <Box>{i18n('workflow.topology')}</Box>
-                  </Space>
-                }
-              ></PaperTop>
+              <PaperTop title={i18n('workflow.topology')} />
               <div ref={topologyRef} style={{ flex: 1 }} />
             </Paper>
 

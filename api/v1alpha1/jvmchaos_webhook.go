@@ -18,6 +18,7 @@ package v1alpha1
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -29,9 +30,8 @@ func (in *JVMChaosSpec) Default(root interface{}, field *reflect.StructField) {
 		return
 	}
 
-	jvmChaos := root.(*JVMChaos)
 	if len(in.Name) == 0 {
-		in.Name = jvmChaos.Name
+		in.Name = fmt.Sprintf("%s-%s-%s-%d", in.Class, in.Method, in.Action, time.Now().Unix())
 	}
 
 	if in.Port == 0 {
@@ -78,6 +78,15 @@ func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 	case JVMRuleDataAction:
 		if len(in.RuleData) == 0 {
 			allErrs = append(allErrs, field.Invalid(path, in, "rule data not provide"))
+		}
+	case JVMMySQLAction:
+		if len(in.MySQLConnectorVersion) == 0 {
+			allErrs = append(allErrs, field.Invalid(path, in, "MySQL connector version not provided"))
+		} else if in.MySQLConnectorVersion != "5" && in.MySQLConnectorVersion != "8" {
+			allErrs = append(allErrs, field.Invalid(path, in, "MySQL connector version only support 5.X.X(set to 5) and 8.X.X(set to 8)"))
+		}
+		if len(in.ThrowException) == 0 && in.LatencyDuration == 0 {
+			allErrs = append(allErrs, field.Invalid(path, in, "must set one of exception or latency"))
 		}
 	case "":
 		allErrs = append(allErrs, field.Invalid(path, in, "action not provided"))
