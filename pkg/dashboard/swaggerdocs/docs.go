@@ -2366,6 +2366,11 @@ const docTemplate = `{
         "config.ChaosDashboardConfig": {
             "type": "object",
             "properties": {
+                "burst": {
+                    "description": "The Burst config for kubernetes client",
+                    "type": "integer",
+                    "default": 300
+                },
                 "cluster_mode": {
                     "description": "ClusterScoped means control Chaos Object in cluster level(all namespace).",
                     "type": "boolean",
@@ -2392,6 +2397,11 @@ const docTemplate = `{
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
+                },
+                "qps": {
+                    "description": "The QPS config for kubernetes client",
+                    "type": "number",
+                    "default": 200
                 },
                 "root_path": {
                     "type": "string",

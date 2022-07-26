@@ -52,6 +52,11 @@ type ChaosDashboardConfig struct {
 
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
+
+	// The QPS config for kubernetes client
+	QPS float32 `envconfig:"QPS" default:"200"`
+	// The Burst config for kubernetes client
+	Burst int `envconfig:"BURST" default:"300"`
 }
 
 // PersistTTLConfig defines the configuration of ttl
