@@ -22,6 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add implementation of blockchaos in chaos-daemon [#2907](https://github.com/chaos-mesh/chaos-mesh/pull/2907)
 - Bump chaos-tproxy to v0.5.1 [#3412](https://github.com/chaos-mesh/chaos-mesh/pull/3412)
 - Allow importing external workflows and copying flow nodes in next generation `New Workflow` [#3368](https://github.com/chaos-mesh/chaos-mesh/pull/3368)
+- Add `QPS` and `Burst` for Chaos Dashboard Configuration [#3476](https://github.com/chaos-mesh/chaos-mesh/pull/3476)
 
 ### Changed
 
@@ -41,6 +42,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Run build image ci on self-hosted machine [#3429](https://github.com/chaos-mesh/chaos-mesh/pull/3429)
 - Simplified logic and add test case about finalizers. [#3422](https://github.com/chaos-mesh/chaos-mesh/pull/3422)
 - Update API requests with OpenAPI generated client [#2926](https://github.com/chaos-mesh/chaos-mesh/pull/2926)
+- Implement some missing methods in ctrl server [#3462](https://github.com/chaos-mesh/chaos-mesh/pull/3462)
 
 ### Deprecated
 
@@ -70,6 +72,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - StressChaos: run `pause` before `choom` [#3405](https://github.com/chaos-mesh/chaos-mesh/pull/3405)
 - JVMChaos: update the error message that can be ignored [#3415](https://github.com/chaos-mesh/chaos-mesh/pull/3415)
 - Fix Workflow Validating Webhook Panic [#3413](https://github.com/chaos-mesh/chaos-mesh/pull/3413)
+- Overwrite $IMAGE_BUILD_ENV_TAG with $IMAGE_TAG-$ARCH in `upload_env_image.yml` github action [#3444](https://github.com/chaos-mesh/chaos-mesh/pull/3444)
+- Add a judgement of `enterNS` in `getAllInterfaces()` [#3459](https://github.com/chaos-mesh/chaos-mesh/pull/3459)
 
 ### Security
 

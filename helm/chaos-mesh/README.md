@@ -95,7 +95,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.service.clusterIP`         | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil`           |
 | `dashboard.service.nodePort`          | Set the `nodePort` of the dashboard service if the type is `NodePort`  | `nil`           |
 | `dashboard.resources` | CPU/Memory resource requests/limits for chaos-dashboard pod  | `requests: { cpu: "25m", memory: "256Mi" }, limits:{}`  |
-| `dashboard.persistentVolume.enable` | Enable storage volume for chaos-dashboard. If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence| `false` |
+| `dashboard.persistentVolume.enabled` | Enable storage volume for chaos-dashboard. If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence| `false` |
 | `dashboard.persistentVolume.existingClaim` | Use the existing PVC for persisting chaos event| `` |
 | `dashboard.persistentVolume.size` | Chaos Dashboard data Persistent Volume size | `8Gi` |
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
