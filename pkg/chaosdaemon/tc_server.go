@@ -17,8 +17,8 @@ package chaosdaemon
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -73,34 +73,18 @@ func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
 	return args, nil
 }
 
-func getAllInterfaces(ctx context.Context, log logr.Logger, pid uint32, enterNS bool) ([]string, error) {
-	processBuilder := bpm.DefaultProcessBuilder("ip", "-j", "addr", "show").SetContext(ctx)
-	if enterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
-	}
-	cmd := processBuilder.Build(ctx)
-	ipOutput, err := cmd.CombinedOutput()
+func getAllInterfaces(ctx context.Context, log logr.Logger) ([]string, error) {
+	interfaces, err := net.Interfaces()
 	if err != nil {
-		return []string{}, err
-	}
-	var data []map[string]interface{}
-
-	err = json.Unmarshal(ipOutput, &data)
-	if err != nil {
-		return []string{}, err
+		return []string{}, errors.New("fail to read ifname from net.Interfaces()")
 	}
 
 	var ifaces []string
-	for _, iface := range data {
-		name, ok := iface["ifname"]
-		if !ok {
-			return []string{}, errors.New("fail to read ifname from ip -j addr show")
-		}
-
-		ifaces = append(ifaces, name.(string))
+	for _, iface := range interfaces {
+		ifaces = append(ifaces, iface.Name)
 	}
 
-	log.Info("get interfaces from ip command", "ifaces", ifaces)
+	log.Info("get interfaces from net.Interfaces()", "ifaces", ifaces)
 	return ifaces, nil
 }
 
@@ -115,7 +99,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	tcCli := buildTcClient(ctx, log, in.EnterNS, pid)
 
-	ifaces, err := getAllInterfaces(ctx, log, pid, in.EnterNS)
+	ifaces, err := getAllInterfaces(ctx, log)
 	if err != nil {
 		log.Error(err, "error while getting interfaces")
 		return nil, err
