@@ -173,7 +173,7 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-prepare-install: all docker-push docker-push-dns-server
+prepare-install: all docker-push
 
 prepare-e2e: e2e-image docker-push-e2e
 
@@ -222,14 +222,15 @@ docker-push:
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-dashboard:${IMAGE_TAG}"
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-daemon:${IMAGE_TAG}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-kernel:${IMAGE_TAG}"
 
 docker-push-e2e:
 	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
 
 # the version of dns server should keep consistent with helm
-DNS_SERVER_VERSION ?= v0.2.0
+DNS_SERVER_VERSION ?= v0.2.1-r1
 docker-push-dns-server:
-	docker pull pingcap/coredns:${DNS_SERVER_VERSION}
+	docker pull ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION}
 	docker tag pingcap/coredns:${DNS_SERVER_VERSION} "${IMAGE_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
 	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
 

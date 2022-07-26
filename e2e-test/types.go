@@ -81,7 +81,7 @@ func NewDefaultOperatorConfig() OperatorConfig {
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
 		},
-		DNSImage: "pingcap/coredns:v0.2.0",
+		DNSImage: "ghcr.io/chaos-mesh/chaos-coredns:v0.2.1-r1",
 	}
 }
 
