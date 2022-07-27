@@ -87,6 +87,8 @@ spec:
               value: "{{ .Values.dnsServer.create }}"
             - name: ROOT_URL
               value: "{{ .Values.dashboard.rootUrl }}"
+            - name: ENABLE_PROFILING
+              value: "{{ .Values.enableProfiling }}"
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
