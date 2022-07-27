@@ -173,7 +173,7 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-prepare-install: all docker-push
+prepare-install: all docker-push docker-push-dns-server
 
 prepare-e2e: e2e-image docker-push-e2e
 
