@@ -28,8 +28,7 @@ header:
     - 'pkg/chaoskernel/pb/bpfki.proto'
     - 'test/integration_test/utils/check_contains'
     # skip auto-generated files
-    - 'manifests/crd-v1beta1.yaml'
-    - 'manifests/crd.yaml'
+    - 'manifests/**'
     - 'helm/chaos-mesh/crds/*'
     - 'config/**'
     - '**/*_gen.go'
