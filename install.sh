@@ -1504,6 +1504,8 @@ spec:
               value: "false"
             - name: ROOT_URL
               value: "http://localhost:2333"
+            - name: ENABLE_PROFILING
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data

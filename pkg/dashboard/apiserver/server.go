@@ -60,8 +60,10 @@ func register(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 	r := gin.Default()
 
-	// default is "/debug/pprof"
-	pprof.Register(r)
+	if config.EnableProfiling {
+		// default is "/debug/pprof"
+		pprof.Register(r)
+	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("NameValid", apivalidator.NameValid)
