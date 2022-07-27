@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: chaos-dashboard
+spec:
+  endpoints:
+    - interval: 30s
+      port: metric
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/component: chaos-dashboard
