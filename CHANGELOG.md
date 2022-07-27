@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Add `QPS` and `Burst` for Chaos Dashboard Configuration [#3476](https://github.com/chaos-mesh/chaos-mesh/pull/3476)
 
 ### Changed
 
