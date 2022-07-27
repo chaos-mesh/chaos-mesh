@@ -62,7 +62,7 @@ jobs:
           docker image save ghcr.io/chaos-mesh/chaos-dashboard:latest > ./output/saved-images/chaos-dashboard.tgz
           docker image save ghcr.io/chaos-mesh/chaos-daemon:latest > ./output/saved-images/chaos-daemon.tgz
           docker image save ghcr.io/chaos-mesh/chaos-mesh:latest > ./output/saved-images/chaos-mesh.tgz
-          docker image save ghcr.io/pingcap/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
+          docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
 
       - name: upload saved images
         uses: actions/upload-artifact@v2
@@ -173,7 +173,7 @@ jobs:
         run: |
           # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
-          KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -p -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/pingcap/e2e-helper:latest
+          KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -p -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
         if: always()
         env:

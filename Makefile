@@ -10,8 +10,8 @@ export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
 
 # todo: rename the project/repository of e2e-helper to chaos-mesh
-export IMAGE_E2E_HELPER_PROJECT ?= pingcap
-export IMAGE_CHAOS_MESH_E2E_PROJECT ?= pingcap
+export IMAGE_E2E_HELPER_PROJECT ?= chaos-mesh
+export IMAGE_CHAOS_MESH_E2E_PROJECT ?= chaos-mesh
 
 ROOT=$(shell pwd)
 HELM_BIN=$(ROOT)/output/bin/helm
@@ -179,7 +179,7 @@ prepare-e2e: e2e-image docker-push-e2e
 
 GINKGO_FLAGS ?=
 e2e: e2e-build
-	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG}
 
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
@@ -225,17 +225,17 @@ docker-push:
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-kernel:${IMAGE_TAG}"
 
 docker-push-e2e:
-	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG}"
 
 # the version of dns server should keep consistent with helm
 DNS_SERVER_VERSION ?= v0.2.1-r1
 docker-push-dns-server:
 	docker pull ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION}
-	docker tag pingcap/coredns:${DNS_SERVER_VERSION} "${IMAGE_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
-	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
+	docker tag ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION} "${IMAGE_REGISTRY_PREFIX}chaos-mesh/coredns:${DNS_SERVER_VERSION}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/coredns:${DNS_SERVER_VERSION}"
 
 docker-push-chaos-kernel:
-	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-kernel:${IMAGE_TAG}"
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt

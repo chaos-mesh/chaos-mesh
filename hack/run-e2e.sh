@@ -31,7 +31,7 @@ hack::ensure_kind
 PROVIDER=${PROVIDER:-}
 CLUSTER=${CLUSTER:-}
 IMAGE_TAG=${IMAGE_TAG:-}
-E2E_IMAGE=${E2E_IMAGE:-ghcr.io/pingcap/chaos-mesh-e2e:latest}
+E2E_IMAGE=${E2E_IMAGE:-ghcr.io/chaos-mesh/chaos-mesh-e2e:latest}
 KUBECONFIG=${KUBECONFIG:-$HOME/.kube/config}
 KUBECONTEXT=${KUBECONTEXT:-kind-chaos-mesh}
 REPORT_DIR=${REPORT_DIR:-}
@@ -68,7 +68,7 @@ function e2e::image_load() {
     local images=(
         chaos-mesh/chaos-mesh
         chaos-mesh/chaos-daemon
-        pingcap/e2e-helper
+        chaos-mesh/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
         local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
@@ -143,7 +143,7 @@ e2e_args=(
     --daemon-image-registry="${IMAGE_REGISTRY}"
     --daemon-image="chaos-mesh/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
-    --e2e-image="${IMAGE_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
+    --e2e-image="${IMAGE_REGISTRY}/chaos-mesh/e2e-helper:${IMAGE_TAG}"
     --install-chaos-mesh
 )
 
