@@ -2385,6 +2385,11 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": false
                 },
+                "enableProfiling": {
+                    "description": "enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon",
+                    "type": "boolean",
+                    "default": true
+                },
                 "gcp_security_mode": {
                     "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
                     "type": "boolean",
