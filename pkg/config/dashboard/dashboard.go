@@ -50,6 +50,9 @@ type ChaosDashboardConfig struct {
 
 	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 
+	// enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
+	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true"`
+
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
 
