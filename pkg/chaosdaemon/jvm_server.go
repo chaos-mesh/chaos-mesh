@@ -89,6 +89,10 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
+		err = copyFileAcrossNS(ctx, fmt.Sprintf("%s/lib/chaos-agent.jar", bytemanHome), "/usr/local/byteman/lib/chaos-agent.jar", pid)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	bmInstallCmd := fmt.Sprintf(bmInstallCommand, req.Port, pid)
