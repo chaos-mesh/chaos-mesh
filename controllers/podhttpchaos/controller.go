@@ -157,10 +157,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		ProxyPorts:  proxyPorts,
 		ContainerId: containerID,
 
-		Instance:   obj.Status.Pid,
-		StartTime:  obj.Status.StartTime,
-		EnterNS:    true,
-		UnixSocket: true,
+		Instance:  obj.Status.Pid,
+		StartTime: obj.Status.StartTime,
+		EnterNS:   true,
 	})
 	if err != nil {
 		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)

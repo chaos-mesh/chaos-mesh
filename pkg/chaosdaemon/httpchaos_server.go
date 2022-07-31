@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"io"
-	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -32,9 +32,10 @@ import (
 )
 
 const (
-	tproxyBin            = "/usr/local/bin/tproxy"
-	pathEnv              = "PATH"
-	tproxyUnixSocketAddr = "@tproxy-%s.sock"
+	tproxyBin                      = "/usr/local/bin/tproxy"
+	pathEnv                        = "PATH"
+	tproxyUnixSocketFilePath       = "/proc/%d/tproxy-%s.sock"
+	tproxyClientUnixSocketFilePath = "/proc/%d/tproxy-%s.sock"
 )
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
@@ -73,12 +74,17 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
 	log := s.getLoggerFromContext(ctx)
 
+	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting PID")
+	}
+
 	transport := &unixSocketTransport{
-		addr: fmt.Sprintf(tproxyUnixSocketAddr, in.ContainerId),
+		addr: fmt.Sprintf(tproxyClientUnixSocketFilePath, pid, in.InstanceUid),
 	}
 
 	var rules []tproxyconfig.PodHttpChaosBaseRule
-	err := json.Unmarshal([]byte(in.Rules), &rules)
+	err = json.Unmarshal([]byte(in.Rules), &rules)
 	if err != nil {
 		return nil, errors.Wrap(err, "unmarshal rules")
 	}
@@ -124,31 +130,22 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 }
 
 func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) error {
+	log := s.getLoggerFromContext(ctx)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
 		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
 	}
-	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, "-i", "-vv").
+
+	args := fmt.Sprintf("-i -vv --unix-socket-path %s", fmt.Sprintf(tproxyUnixSocketFilePath, pid, in.InstanceUid))
+	log.Info("executing", "cmd", tproxyBin+" "+args)
+
+	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, strings.Split(args, " ")...).
 		EnableLocalMnt().
 		SetIdentifier(fmt.Sprintf("tproxy-%s", in.ContainerId)).
 		SetEnv(pathEnv, os.Getenv(pathEnv))
 
 	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.PidNS).SetNS(pid, bpm.NetNS)
-	}
-
-	if in.UnixSocket {
-		unixListener, err1 := net.Listen("unix", fmt.Sprintf(tproxyUnixSocketAddr, in.ContainerId))
-		if err1 != nil {
-			return errors.Wrap(err, "create tproxy unixListener")
-		}
-		listener := unixListener.(*net.UnixListener)
-		listenSocket, err1 := listener.File()
-		if err1 != nil {
-			return errors.Wrap(err, "create tproxy listenSocket")
-		}
-		processBuilder.SetExtraFiles([]*os.File{listenSocket})
-		processBuilder = processBuilder.SetNoPathNS("3", bpm.KeepFdNS)
 	}
 
 	cmd := processBuilder.Build(ctx)
