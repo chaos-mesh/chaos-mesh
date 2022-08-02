@@ -34,8 +34,8 @@ import (
 const (
 	tproxyBin                      = "/usr/local/bin/tproxy"
 	pathEnv                        = "PATH"
-	tproxyUnixSocketFilePath       = "/proc/%d/tproxy-%s.sock"
-	tproxyClientUnixSocketFilePath = "/proc/%d/tproxy-%s.sock"
+	tproxyUnixSocketFilePath       = "/proc/%d/root/tproxy.sock"
+	tproxyClientUnixSocketFilePath = "/proc/%d/root/tproxy.sock"
 )
 
 func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaosRequest) (*pb.ApplyHttpChaosResponse, error) {
@@ -80,7 +80,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}
 
 	transport := &unixSocketTransport{
-		addr: fmt.Sprintf(tproxyClientUnixSocketFilePath, pid, in.InstanceUid),
+		addr: fmt.Sprintf(tproxyClientUnixSocketFilePath, pid),
 	}
 
 	var rules []tproxyconfig.PodHttpChaosBaseRule
@@ -136,7 +136,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
 	}
 
-	args := fmt.Sprintf("-i -vv --unix-socket-path %s", fmt.Sprintf(tproxyUnixSocketFilePath, pid, in.InstanceUid))
+	args := fmt.Sprintf("-i -vv --unix-socket-path %s", fmt.Sprintf(tproxyUnixSocketFilePath, pid))
 	log.Info("executing", "cmd", tproxyBin+" "+args)
 
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, strings.Split(args, " ")...).

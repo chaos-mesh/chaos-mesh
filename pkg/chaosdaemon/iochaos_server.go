@@ -33,8 +33,8 @@ import (
 
 const (
 	todaBin                      = "/usr/local/bin/toda"
-	todaUnixSocketFilePath       = "/toda-%s.sock"
-	todaClientUnixScoketFilePath = "/proc/%d/toda-%s.sock"
+	todaUnixSocketFilePath       = "/toda.sock"
+	todaClientUnixScoketFilePath = "/proc/%d/root/toda.sock"
 )
 
 func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) (*pb.ApplyIOChaosResponse, error) {
@@ -89,7 +89,7 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	}
 
 	transport := &unixSocketTransport{
-		addr: fmt.Sprintf(todaClientUnixScoketFilePath, pid, in.InstanceUid),
+		addr: fmt.Sprintf(todaClientUnixScoketFilePath, pid),
 	}
 
 	req, err := http.NewRequest(http.MethodPut, "http://psedo-host/update", bytes.NewReader([]byte(in.Actions)))
@@ -141,7 +141,7 @@ func (s *DaemonServer) createIOChaos(ctx context.Context, in *pb.ApplyIOChaosReq
 	}
 
 	// TODO: make this log level configurable
-	args := fmt.Sprintf("--path %s --verbose info --unix-socket-path %s", in.Volume, fmt.Sprintf(todaUnixSocketFilePath, in.InstanceUid))
+	args := fmt.Sprintf("--path %s --verbose info --unix-socket-path %s", in.Volume, fmt.Sprintf(todaUnixSocketFilePath))
 	log.Info("executing", "cmd", todaBin+" "+args)
 
 	processBuilder := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
