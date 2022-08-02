@@ -31,7 +31,7 @@ To become a Chaos Mesh member, you are expected to:
     - Join community discussions (e.g. community meetings, Slack).
 - Sponsored by at least 1 Chaos Mesh [maintainer or committer](https://github.com/chaos-mesh/chaos-mesh/blob/master/MAINTAINERS.md).
 
-Contributors that meet the above requirements will then be nominated by their sponsor through a PR. It is recommended to describe the reasons for the nomination and the contribution of the nominee in the PR. To get the PR merged, at least two approvals are required from committers or maintainers. Chaos Mesh members will be invited into the Chaos Mesh organization, which is recognized by the Chaos Mesh badge under the profile.
+Contributors that meet the above requirements will then be invited to the GitHub organization "Chaos Mesh" by a sponsor, and there would be an announcement published in the slack channel [(#project-chaos-mesh)](https://slack.cncf.io/). 
 
 Members are expected to respond to issues and PRs assigned to them, and be the owners of the code or docs they have contributed. Members that have not contributed to the project or community in any way in over 6 months will lose their membership.
 

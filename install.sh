@@ -1207,6 +1207,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-daemon
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "31766"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1239,6 +1242,9 @@ metadata:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: chaos-dashboard
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "2334"
 spec:
   selector:
     app.kubernetes.io/name: chaos-mesh
@@ -1275,6 +1281,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-mesh-controller-manager
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10080"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1495,6 +1504,8 @@ spec:
               value: "false"
             - name: ROOT_URL
               value: "http://localhost:2333"
+            - name: ENABLE_PROFILING
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data

@@ -2366,6 +2366,11 @@ const docTemplate = `{
         "config.ChaosDashboardConfig": {
             "type": "object",
             "properties": {
+                "burst": {
+                    "description": "The Burst config for kubernetes client",
+                    "type": "integer",
+                    "default": 300
+                },
                 "cluster_mode": {
                     "description": "ClusterScoped means control Chaos Object in cluster level(all namespace).",
                     "type": "boolean",
@@ -2380,6 +2385,11 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": false
                 },
+                "enableProfiling": {
+                    "description": "enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon",
+                    "type": "boolean",
+                    "default": true
+                },
                 "gcp_security_mode": {
                     "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
                     "type": "boolean",
@@ -2392,6 +2402,11 @@ const docTemplate = `{
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
+                },
+                "qps": {
+                    "description": "The QPS config for kubernetes client",
+                    "type": "number",
+                    "default": 200
                 },
                 "root_path": {
                     "type": "string",
