@@ -65,6 +65,7 @@ var (
 	PMFileAppendAction           PhysicalMachineChaosAction = "file-append"
 	PMFileReplaceAction          PhysicalMachineChaosAction = "file-replace"
 	PMVMAction                   PhysicalMachineChaosAction = "vm"
+	PMUserDefinedAction          PhysicalMachineChaosAction = "user_defined"
 )
 
 // +kubebuilder:object:root=true
@@ -87,7 +88,7 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined;
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -333,6 +334,10 @@ type ExpInfo struct {
 	// +ui:form:when=action=='vm'
 	// +optional
 	VM *VMSpec `json:"vm,omitempty"`
+
+	// +ui:form:when=action=='user_defined'
+	// +optional
+	UserDefined *UserDefinedSpec `json:"user_defined,omitempty"`
 }
 
 type StressCPUSpec struct {
@@ -750,4 +755,11 @@ type FileReplaceSpec struct {
 type VMSpec struct {
 	// The name of the VM to be injected
 	VMName string `json:"vm-name,omitempty"`
+}
+
+type UserDefinedSpec struct {
+	// The command to be executed when attack
+	AttackCmd string `json:"attackCmd,omitempty"`
+	// The command to be executed when recover
+	RecoverCmd string `json:"recoverCmd,omitempty"`
 }

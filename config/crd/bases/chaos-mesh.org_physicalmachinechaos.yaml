@@ -85,6 +85,7 @@ spec:
                 - file-append
                 - file-replace
                 - vm
+                - user_defined
                 type: string
               address:
                 description: 'DEPRECATED: Use Selector instead. Only one of Address
@@ -963,6 +964,15 @@ spec:
               uid:
                 description: the experiment ID
                 type: string
+              user_defined:
+                properties:
+                  attackCmd:
+                    description: The command to be executed when attack
+                    type: string
+                  recoverCmd:
+                    description: The command to be executed when recover
+                    type: string
+                type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
                   / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide

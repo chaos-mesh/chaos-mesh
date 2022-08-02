@@ -6492,7 +6492,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;",
+                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined;",
                     "type": "string"
                 },
                 "address": {
@@ -6677,6 +6677,10 @@ const docTemplate = `{
                 "stress-mem": {
                     "description": "+ui:form:when=action=='stress-mem'\n+optional",
                     "$ref": "#/definitions/v1alpha1.StressMemorySpec"
+                },
+                "user_defined": {
+                    "description": "+ui:form:when=action=='user_defined'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.UserDefinedSpec"
                 },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of physical machines to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
@@ -7604,6 +7608,19 @@ const docTemplate = `{
                 },
                 "sec": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.UserDefinedSpec": {
+            "type": "object",
+            "properties": {
+                "attackCmd": {
+                    "description": "The command to be executed when attack",
+                    "type": "string"
+                },
+                "recoverCmd": {
+                    "description": "The command to be executed when recover",
+                    "type": "string"
                 }
             }
         },

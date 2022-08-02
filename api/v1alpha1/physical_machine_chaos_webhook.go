@@ -166,6 +166,8 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateFileAppendAction(in.FileAppend)
 	case PMFileReplaceAction:
 		validateConfigErr = validateFileReplaceAction(in.FileReplace)
+	case PMUserDefinedAction:
+		validateConfigErr = validateUserDefinedAction(in.UserDefined)
 	default:
 	}
 
@@ -733,6 +735,18 @@ func validateFileReplaceAction(spec *FileReplaceSpec) error {
 
 	if len(spec.OriginStr) == 0 || len(spec.DestStr) == 0 {
 		return errors.New("both origin and destination string are required")
+	}
+
+	return nil
+}
+
+func validateUserDefinedAction(spec *UserDefinedSpec) error {
+	if len(spec.AttackCmd) == 0 {
+		return errors.New("attack command not provided")
+	}
+
+	if len(spec.RecoverCmd) == 0 {
+		return errors.New("recover command not provided")
 	}
 
 	return nil
