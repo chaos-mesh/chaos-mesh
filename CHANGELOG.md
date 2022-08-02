@@ -22,6 +22,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add implementation of blockchaos in chaos-daemon [#2907](https://github.com/chaos-mesh/chaos-mesh/pull/2907)
 - Bump chaos-tproxy to v0.5.1 [#3412](https://github.com/chaos-mesh/chaos-mesh/pull/3412)
 - Allow importing external workflows and copying flow nodes in next generation `New Workflow` [#3368](https://github.com/chaos-mesh/chaos-mesh/pull/3368)
+- Add `QPS` and `Burst` for Chaos Dashboard Configuration [#3476](https://github.com/chaos-mesh/chaos-mesh/pull/3476)
+- Add guide and example for monitoring Chaos Mesh [#3030](https://github.com/chaos-mesh/chaos-mesh/pull/3030)
 - Support `KernelChaos` in `AutoForm` [#3449](https://github.com/chaos-mesh/chaos-mesh/pull/3449)
 - Sync latest Chaosd and PhysicalMachineChaos [#3477](https://github.com/chaos-mesh/chaos-mesh/pull/3477)
 
