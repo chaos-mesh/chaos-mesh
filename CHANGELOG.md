@@ -75,6 +75,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Overwrite $IMAGE_BUILD_ENV_TAG with $IMAGE_TAG-$ARCH in `upload_env_image.yml` github action [#3444](https://github.com/chaos-mesh/chaos-mesh/pull/3444)
 - Add a judgement of `enterNS` in `getAllInterfaces()` [#3459](https://github.com/chaos-mesh/chaos-mesh/pull/3459)
 - Fix JVMChaos loading missing jar file for injection [#3491](https://github.com/chaos-mesh/chaos-mesh/pull/3491)
+- Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
 - Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
 
 ### Security
