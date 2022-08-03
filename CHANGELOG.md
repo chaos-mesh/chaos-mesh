@@ -30,7 +30,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
+- Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
 
 ### Security
 
@@ -63,7 +64,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - PhysicalMachineChaos: update stress options type [#3354](https://github.com/chaos-mesh/chaos-mesh/pull/3354)
 - StressChaos: run `pause` before `choom` [#3405](https://github.com/chaos-mesh/chaos-mesh/pull/3405)
-- Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
 
 ### Security
 
