@@ -36,7 +36,7 @@ type StatusCheck struct {
 
 	// +optional
 	// Most recently observed status of status check
-	Status StatusCheckStatus `json:"status"`
+	Status StatusCheckStatus `json:"status,omitempty"`
 }
 
 type StatusCheckMode string

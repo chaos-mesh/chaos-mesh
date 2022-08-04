@@ -51,7 +51,7 @@ type DNSChaos struct {
 
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
-	Status DNSChaosStatus `json:"status"`
+	Status DNSChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithSelector = (*DNSChaos)(nil)
@@ -78,7 +78,7 @@ type DNSChaosSpec struct {
 	// 		The value is ["google.com", "github.*", "chaos-mes?.org"],
 	// 		will take effect on "google.com", "github.com" and "chaos-mesh.org"
 	// +optional
-	DomainNamePatterns []string `json:"patterns"`
+	DomainNamePatterns []string `json:"patterns,omitempty"`
 }
 
 // DNSChaosStatus defines the observed state of DNSChaos

@@ -41,7 +41,7 @@ type WorkflowNode struct {
 
 	// +optional
 	// Most recently observed status of the workflow node
-	Status WorkflowNodeStatus `json:"status"`
+	Status WorkflowNodeStatus `json:"status,omitempty"`
 }
 
 type WorkflowNodeSpec struct {

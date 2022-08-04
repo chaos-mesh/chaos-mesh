@@ -33,7 +33,7 @@ type PodChaos struct {
 
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
-	Status PodChaosStatus `json:"status"`
+	Status PodChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithSelector = (*PodChaos)(nil)
@@ -75,7 +75,7 @@ type PodChaosSpec struct {
 	// Value must be non-negative integer. The default value is zero that indicates delete immediately.
 	// +optional
 	// +kubebuilder:validation:Minimum=0
-	GracePeriod int64 `json:"gracePeriod"`
+	GracePeriod int64 `json:"gracePeriod,omitempty"`
 }
 
 // PodChaosStatus represents the current status of the chaos experiment about pods.
