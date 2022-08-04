@@ -33,6 +33,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
 )
@@ -230,18 +231,26 @@ func (s *Service) listNamespaces(c *gin.Context) {
 // @Router /common/chaos-available-namespaces [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrBadRequest.WrapWithNoMessage(err))
+		return
+	}
 
 	var namespaces sort.StringSlice
 
 	if s.conf.ClusterScoped {
 		var nsList v1.NamespaceList
-		if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
+		if err := kubeCli.List(context.Background(), &nsList); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
 		namespaces = make(sort.StringSlice, 0, len(nsList.Items))
 		for _, ns := range nsList.Items {
+			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(context.TODO(), kubeCli, ns.Name) {
+				continue
+			}
 			namespaces = append(namespaces, ns.Name)
 		}
 	} else {
