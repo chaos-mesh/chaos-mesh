@@ -78,6 +78,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.replicaCount` | Replicas of chaos-dashboard | `1` |
 | `dashboard.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `dashboard.serviceAccount` | The serviceAccount for chaos-dashboard  | `chaos-dashboard` |
+| `dashboard.serviceAccountAnnotations` | Annotations for serviceAccount for chaos-dashboard  | `{}` |
 | `dashboard.image.registry` | Override global registry, empty value means using the global images.registry | `` |
 | `dashboard.image.repository` | Repository part for image of chaos-dashboard | `chaos-mesh/chaos-dashboard` |
 | `dashboard.image.tag` | Override global tag, empty value means using the global images.tag | `` |
