@@ -23,7 +23,9 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-dashboard
   annotations:
-    {{- include "chaos-mesh.annotations" . | nindent 4 }}
+    {{- with .Values.dashboard.serviceAccountAnnotations }}
+{{ toYaml . | indent 8 }}
+    {{- end }}
 
 ---
 # ClusterRole for chaos-dashboard at cluster scope
