@@ -240,6 +240,7 @@ dashboard:
   priorityClassName: ""
   # The serviceAccount for chaos-dashboard
   serviceAccount: chaos-dashboard
+  serviceAccountAnnotations: {}
   image:
     # override global registry, empty value means using the global images.registry
     registry: ""
