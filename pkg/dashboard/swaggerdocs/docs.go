@@ -5332,6 +5332,96 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.FileAppendSpec": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "Count is the number of times to append the data.",
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "Data is the data for append.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileCreateSpec": {
+            "type": "object",
+            "properties": {
+                "dir-name": {
+                    "description": "DirName is the directory name to create or delete.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileDeleteSpec": {
+            "type": "object",
+            "properties": {
+                "dir-name": {
+                    "description": "DirName is the directory name to create or delete.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileModifyPrivilegeSpec": {
+            "type": "object",
+            "properties": {
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                },
+                "privilege": {
+                    "description": "Privilege is the file privilege to be set.",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.FileRenameSpec": {
+            "type": "object",
+            "properties": {
+                "dest-file": {
+                    "description": "DestFile is the name to be renamed.",
+                    "type": "string"
+                },
+                "source-file": {
+                    "description": "SourceFile is the name need to be renamed.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileReplaceSpec": {
+            "type": "object",
+            "properties": {
+                "dest-string": {
+                    "description": "DestStr is the destination string of the file.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                },
+                "line": {
+                    "description": "Line is the line number of the file to be replaced.",
+                    "type": "integer"
+                },
+                "origin-string": {
+                    "description": "OriginStr is the origin string of the file.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.Frame": {
             "type": "object",
             "properties": {
@@ -5381,6 +5471,38 @@ const docTemplate = `{
                 },
                 "zone": {
                     "description": "Zone defines the zone of gcp project.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPAbortSpec": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Code is a rule to select target by http status code in response",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "HTTP method",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Match path of Uri with wildcard matches",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The TCP port that the target service listens on",
+                    "type": "integer"
+                },
+                "proxy_ports": {
+                    "description": "Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "target": {
+                    "description": "HTTP target: Request or Response",
                     "type": "string"
                 }
             }
@@ -5456,11 +5578,73 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.HTTPConfigSpec": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "description": "The config file path",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.HTTPCriteria": {
             "type": "object",
             "properties": {
                 "statusCode": {
                     "description": "StatusCode defines the expected http status code for the request.\nA statusCode string could be a single code (e.g. 200), or\nan inclusive range (e.g. 200-400, both ` + "`" + `200` + "`" + ` and ` + "`" + `400` + "`" + ` are included).",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPDelaySpec": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Code is a rule to select target by http status code in response",
+                    "type": "string"
+                },
+                "delay": {
+                    "description": "Delay represents the delay of the target request/response",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "HTTP method",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Match path of Uri with wildcard matches",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The TCP port that the target service listens on",
+                    "type": "integer"
+                },
+                "proxy_ports": {
+                    "description": "Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "target": {
+                    "description": "HTTP target: Request or Response",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPRequestSpec": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "The number of requests to send",
+                    "type": "integer"
+                },
+                "enable-conn-pool": {
+                    "description": "Enable connection pool",
+                    "type": "boolean"
+                },
+                "url": {
+                    "description": "Request to send\"",
                     "type": "string"
                 }
             }
@@ -5770,6 +5954,97 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.KafkaFillSpec": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "The host of kafka server",
+                    "type": "string"
+                },
+                "maxBytes": {
+                    "description": "The max bytes to fill",
+                    "type": "integer"
+                },
+                "messageSize": {
+                    "description": "The size of each message",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "The password of kafka client",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The port of kafka server",
+                    "type": "integer"
+                },
+                "reloadCommand": {
+                    "description": "The command to reload kafka config",
+                    "type": "string"
+                },
+                "topic": {
+                    "description": "The topic to attack",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The username of kafka client",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.KafkaFloodSpec": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "The host of kafka server",
+                    "type": "string"
+                },
+                "messageSize": {
+                    "description": "The size of each message",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "The password of kafka client",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The port of kafka server",
+                    "type": "integer"
+                },
+                "threads": {
+                    "description": "The number of worker threads",
+                    "type": "integer"
+                },
+                "topic": {
+                    "description": "The topic to attack",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The username of kafka client",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.KafkaIOSpec": {
+            "type": "object",
+            "properties": {
+                "configFile": {
+                    "description": "The path of server config",
+                    "type": "string"
+                },
+                "nonReadable": {
+                    "description": "Make kafka cluster non-readable",
+                    "type": "boolean"
+                },
+                "nonWritable": {
+                    "description": "Make kafka cluster non-writable",
+                    "type": "boolean"
+                },
+                "topic": {
+                    "description": "The topic to attack",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.KernelChaosSpec": {
             "type": "object",
             "properties": {
@@ -6050,6 +6325,19 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.NetworkDownSpec": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "description": "The network interface to impact",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "NIC down time, time units: ns, us (or µs), ms, s, m, h.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.NetworkDuplicateSpec": {
             "type": "object",
             "properties": {
@@ -6083,6 +6371,31 @@ const docTemplate = `{
                 },
                 "source-port": {
                     "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkFloodSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "The number of seconds to run the iperf test",
+                    "type": "string"
+                },
+                "ip-address": {
+                    "description": "Generate traffic to this IP address",
+                    "type": "string"
+                },
+                "parallel": {
+                    "description": "The number of iperf parallel client threads to run",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "Generate traffic to this port on the IP address",
+                    "type": "string"
+                },
+                "rate": {
+                    "description": "The speed of network traffic, allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second",
                     "type": "string"
                 }
             }
@@ -6153,11 +6466,48 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.PMJVMMySQLSpec": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "description": "the match database\ndefault value is \"\", means match all database",
+                    "type": "string"
+                },
+                "exception": {
+                    "description": "The exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `",
+                    "type": "string"
+                },
+                "latency": {
+                    "description": "The latency duration for action 'latency'\nor the latency duration in action ` + "`" + `mysql` + "`" + `",
+                    "type": "integer"
+                },
+                "mysqlConnectorVersion": {
+                    "description": "the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which needs to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "+optional\nthe port of agent server, default 9277",
+                    "type": "integer"
+                },
+                "sqlType": {
+                    "description": "the match sql type\ndefault value is \"\", means match all SQL type.\nThe value can be 'select', 'insert', 'update', 'delete', 'replace'.",
+                    "type": "string"
+                },
+                "table": {
+                    "description": "the match table\ndefault value is \"\", means match all table",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.PhysicalMachineChaosSpec": {
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock",
+                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined;",
                     "type": "string"
                 },
                 "address": {
@@ -6187,6 +6537,46 @@ const docTemplate = `{
                     "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
+                "file-append": {
+                    "description": "+ui:form:when=action=='file-append'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileAppendSpec"
+                },
+                "file-create": {
+                    "description": "+ui:form:when=action=='file-create'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileCreateSpec"
+                },
+                "file-delete": {
+                    "description": "+ui:form:when=action=='file-delete'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileDeleteSpec"
+                },
+                "file-modify": {
+                    "description": "+ui:form:when=action=='file-modify'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileModifyPrivilegeSpec"
+                },
+                "file-rename": {
+                    "description": "+ui:form:when=action=='file-create'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileRenameSpec"
+                },
+                "file-replace": {
+                    "description": "+ui:form:when=action=='file-replace'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileReplaceSpec"
+                },
+                "http-abort": {
+                    "description": "+ui:form:when=action=='http-abort'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPAbortSpec"
+                },
+                "http-config": {
+                    "description": "+ui:form:when=action=='http-config'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPConfigSpec"
+                },
+                "http-delay": {
+                    "description": "+ui:form:when=action=='http-delay'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPDelaySpec"
+                },
+                "http-request": {
+                    "description": "+ui:form:when=action=='http-request'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPRequestSpec"
+                },
                 "jvm-exception": {
                     "description": "+ui:form:when=action=='jvm-exception'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMExceptionSpec"
@@ -6199,6 +6589,10 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='jvm-latency'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMLatencySpec"
                 },
+                "jvm-mysql": {
+                    "description": "+ui:form:when=action=='jvm-mysql'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.PMJVMMySQLSpec"
+                },
                 "jvm-return": {
                     "description": "+ui:form:when=action=='jvm-return'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMReturnSpec"
@@ -6210,6 +6604,18 @@ const docTemplate = `{
                 "jvm-stress": {
                     "description": "+ui:form:when=action=='jvm-stress'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
+                },
+                "kafka-fill": {
+                    "description": "+ui:form:when=action=='kafka-fill'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.KafkaFillSpec"
+                },
+                "kafka-flood": {
+                    "description": "+ui:form:when=action=='kafka-flood'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.KafkaFloodSpec"
+                },
+                "kafka-io": {
+                    "description": "+ui:form:when=action=='kafka-io'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.KafkaIOSpec"
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
@@ -6231,9 +6637,17 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='network-dns'\n+optional",
                     "$ref": "#/definitions/v1alpha1.NetworkDNSSpec"
                 },
+                "network-down": {
+                    "description": "+ui:form:when=action=='network-down'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.NetworkDownSpec"
+                },
                 "network-duplicate": {
                     "description": "+ui:form:when=action=='network-duplicate'\n+optional",
                     "$ref": "#/definitions/v1alpha1.NetworkDuplicateSpec"
+                },
+                "network-flood": {
+                    "description": "+ui:form:when=action=='network-flood'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.NetworkFloodSpec"
                 },
                 "network-loss": {
                     "description": "+ui:form:when=action=='network-loss'\n+optional",
@@ -6247,6 +6661,26 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='process'\n+optional",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
                 },
+                "redis-cacheLimit": {
+                    "description": "+ui:form:when=action=='redis-cacheLimit'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisCacheLimitSpec"
+                },
+                "redis-expiration": {
+                    "description": "+ui:form:when=action=='redis-expiration'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisExpirationSpec"
+                },
+                "redis-penetration": {
+                    "description": "+ui:form:when=action=='redis-penetration'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisPenetrationSpec"
+                },
+                "redis-restart": {
+                    "description": "+ui:form:when=action=='redis-restart'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisSentinelRestartSpec"
+                },
+                "redis-stop": {
+                    "description": "+ui:form:when=action=='redis-stop'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisSentinelStopSpec"
+                },
                 "selector": {
                     "description": "Selector is used to select physical machines that are used to inject chaos action.\n+optional",
                     "$ref": "#/definitions/v1alpha1.PhysicalMachineSelectorSpec"
@@ -6259,9 +6693,17 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='stress-mem'\n+optional",
                     "$ref": "#/definitions/v1alpha1.StressMemorySpec"
                 },
+                "user_defined": {
+                    "description": "+ui:form:when=action=='user_defined'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.UserDefinedSpec"
+                },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of physical machines to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
+                },
+                "vm": {
+                    "description": "+ui:form:when=action=='vm'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.VMSpec"
                 }
             }
         },
@@ -6519,6 +6961,119 @@ const docTemplate = `{
                 "signal": {
                     "description": "the signal number to send",
                     "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.RedisCacheLimitSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "cacheSize": {
+                    "description": "The size of ` + "`" + `maxmemory` + "`" + `",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "percent": {
+                    "description": "Specifies maxmemory as a percentage of the original value",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.RedisExpirationSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "expiration": {
+                    "description": "The expiration of the keys",
+                    "type": "string"
+                },
+                "key": {
+                    "description": "The keys to be expired",
+                    "type": "string"
+                },
+                "option": {
+                    "description": "Additional options for ` + "`" + `expiration` + "`" + `",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.RedisPenetrationSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "requestNum": {
+                    "description": "The number of requests to be sent",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.RedisSentinelRestartSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "conf": {
+                    "description": "The path of Sentinel conf",
+                    "type": "string"
+                },
+                "flushConfig": {
+                    "description": "The control flag determines whether to flush config",
+                    "type": "boolean"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "redisPath": {
+                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
+                    "type": "boolean"
+                }
+            }
+        },
+        "v1alpha1.RedisSentinelStopSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "conf": {
+                    "description": "The path of Sentinel conf",
+                    "type": "string"
+                },
+                "flushConfig": {
+                    "description": "The control flag determines whether to flush config",
+                    "type": "boolean"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "redisPath": {
+                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
+                    "type": "boolean"
                 }
             }
         },
@@ -7068,6 +7623,28 @@ const docTemplate = `{
                 },
                 "sec": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.UserDefinedSpec": {
+            "type": "object",
+            "properties": {
+                "attackCmd": {
+                    "description": "The command to be executed when attack",
+                    "type": "string"
+                },
+                "recoverCmd": {
+                    "description": "The command to be executed when recover",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.VMSpec": {
+            "type": "object",
+            "properties": {
+                "vm-name": {
+                    "description": "The name of the VM to be injected",
+                    "type": "string"
                 }
             }
         },
