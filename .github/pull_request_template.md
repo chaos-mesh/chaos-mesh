@@ -7,10 +7,7 @@ https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md
 
 If you still have questions, please let us know via issues.
 
-Please follow the **Title Formats** below when you open a new PR:
-
-1. https://www.conventionalcommits.org/en/v1.0.0/
-2. *: what's changed
+Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new PR:
 -->
 
 ### What problem does this PR solve?
