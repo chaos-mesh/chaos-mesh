@@ -27,7 +27,7 @@ import (
 func (s *Service) Middleware(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	log.Info("handling gcp middleware")
+	s.logger.Info("handling gcp middleware")
 	if c.Request.Header.Get("X-Authorization-Method") != "gcp" {
 		c.Next()
 		return
@@ -50,9 +50,9 @@ func (s *Service) Middleware(c *gin.Context) {
 		return
 	}
 
-	log.Info("setting request header")
+	s.logger.Info("setting request header")
 	token.SetAuthHeader(c.Request)
-	log.Info("setting request header", "header", c.Request.Header)
+	s.logger.Info("setting request header", "header", c.Request.Header)
 	setCookie(c, token)
 
 	c.Next()

@@ -21,25 +21,25 @@ import (
 	"path"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 )
 
-var log = ctrl.Log.WithName("gcp auth api")
-
 type Service struct {
 	clientId     string
 	clientSecret string
 	rootUrl      *url.URL
+	logger       logr.Logger
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
+	logger logr.Logger,
 ) (*Service, error) {
 	rootUrl, err := url.Parse(conf.RootUrl)
 	if err != nil {
@@ -53,6 +53,7 @@ func NewService(
 		clientId:     conf.GcpClientId,
 		clientSecret: conf.GcpClientSecret,
 		rootUrl:      rootUrl,
+		logger:       logger.WithName("gcp auth api"),
 	}, nil
 }
 
