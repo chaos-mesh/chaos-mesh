@@ -7,9 +7,9 @@ https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md
 
 If you still have questions, please let us know via issues.
 
-Please follow the Title Formats below when you open a new PR:
+Please follow the **Title Formats** below when you open a new PR:
 
-1. module[, module2, module3]: what's changed
+1. https://www.conventionalcommits.org/en/v1.0.0/
 2. *: what's changed
 -->
 
@@ -25,12 +25,11 @@ Please follow the Title Formats below when you open a new PR:
 
 ### Related changes
 
-- [ ] Need to update `chaos-mesh/website`
-- [ ] Need to update `Dashboard UI`
+- [ ] This change also requires further upadtes to `chaos-mesh/website` (e.g. docs)
+- [ ] This change also requires further updates to `UI interface`
 - Need to **cheery-pick to release branches**
   - [ ] release-2.3
   - [ ] release-2.2
-  - [ ] release-2.1
 
 ### Checklist
 
@@ -54,7 +53,7 @@ Tests
 
 Side effects
 
-- [ ] Breaking backward compatibility
+- [ ] **Breaking backward compatibility**
 
 ### DCO
 
