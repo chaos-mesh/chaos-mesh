@@ -42,7 +42,7 @@ FLAGS:
         --microk8s           Install chaos-mesh in microk8s environment
         --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
-    -v, --version            Version of chaos-mesh, default value: v2.1.5
+    -v, --version            Version of chaos-mesh, default value: v2.1.7
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
@@ -60,7 +60,7 @@ EOF
 
 main() {
     local local_kube=""
-    local cm_version="v2.1.5"
+    local cm_version="v2.1.7"
     local kind_name="kind"
     local kind_version="v0.11.1"
     local node_num=3
@@ -827,7 +827,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: chaos-daemon
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -854,7 +854,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
@@ -881,7 +881,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: webhook-secret
 type: Opaque
 data:
@@ -899,7 +899,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -941,7 +941,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -965,7 +965,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -986,7 +986,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1007,7 +1007,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
@@ -1035,7 +1035,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -1070,7 +1070,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: chaos-daemon
 spec:
   clusterIP: None
@@ -1134,7 +1134,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 spec:
   type: ClusterIP
@@ -1185,7 +1185,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
 spec:
   selector:
     matchLabels:
@@ -1198,7 +1198,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/part-of: chaos-mesh
-        app.kubernetes.io/version: 2.1.5
+        app.kubernetes.io/version: 2.1.7
         app.kubernetes.io/component: chaos-daemon
       annotations:
     spec:
@@ -1270,7 +1270,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: chaos-dashboard
 spec:
   replicas: 1
@@ -1285,7 +1285,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/part-of: chaos-mesh
-        app.kubernetes.io/version: 2.1.5
+        app.kubernetes.io/version: 2.1.7
         app.kubernetes.io/component: chaos-dashboard
       annotations:
     spec:
@@ -1365,7 +1365,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: controller-manager
 spec:
   replicas: 3
@@ -1380,7 +1380,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/part-of: chaos-mesh
-        app.kubernetes.io/version: 2.1.5
+        app.kubernetes.io/version: 2.1.7
         app.kubernetes.io/component: controller-manager
       annotations:
         rollme: "install.sh"
@@ -1656,7 +1656,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - name: admission-webhook.chaos-mesh.org
@@ -1982,7 +1982,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - clientConfig:
@@ -2289,7 +2289,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/part-of: chaos-mesh
-    app.kubernetes.io/version: 2.1.5
+    app.kubernetes.io/version: 2.1.7
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - clientConfig:

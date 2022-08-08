@@ -2029,6 +2029,11 @@
         "config.ChaosDashboardConfig": {
             "type": "object",
             "properties": {
+                "burst": {
+                    "description": "The Burst config for kubernetes client",
+                    "type": "integer",
+                    "default": 300
+                },
                 "cluster_mode": {
                     "description": "ClusterScoped means control Chaos Object in cluster level(all namespace).",
                     "type": "boolean",
@@ -2055,6 +2060,11 @@
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
+                },
+                "qps": {
+                    "description": "The QPS config for kubernetes client",
+                    "type": "number",
+                    "default": 200
                 },
                 "root_path": {
                     "type": "string",
@@ -4014,6 +4024,10 @@
             "properties": {
                 "process": {
                     "description": "the process name or the process ID",
+                    "type": "string"
+                },
+                "recoverCmd": {
+                    "description": "the command to be run when recovering experiment",
                     "type": "string"
                 },
                 "signal": {

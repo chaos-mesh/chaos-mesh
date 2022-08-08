@@ -27,6 +27,10 @@ definitions:
     type: object
   config.ChaosDashboardConfig:
     properties:
+      burst:
+        default: 300
+        description: The Burst config for kubernetes client
+        type: integer
       cluster_mode:
         default: true
         description: ClusterScoped means control Chaos Object in cluster level(all
@@ -52,6 +56,10 @@ definitions:
       listen_port:
         default: 2333
         type: integer
+      qps:
+        default: 200
+        description: The QPS config for kubernetes client
+        type: number
       root_path:
         default: http://localhost:2333
         type: string
@@ -1880,6 +1888,9 @@ definitions:
     properties:
       process:
         description: the process name or the process ID
+        type: string
+      recoverCmd:
+        description: the command to be run when recovering experiment
         type: string
       signal:
         description: the signal number to send

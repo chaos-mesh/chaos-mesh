@@ -34,7 +34,7 @@
   },
   "newE": {
     "title": "新的实验",
-    "titleStep1": "实验类型",
+    "titleStep1": "注入到",
     "titleStep2": "实验信息",
     "steps": {
       "basic": "元信息",

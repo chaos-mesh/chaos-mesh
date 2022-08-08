@@ -74,6 +74,12 @@ func NewServer(
 	var err error
 
 	cfg := ctrl.GetConfigOrDie()
+
+	if conf.QPS > 0 {
+		cfg.QPS = conf.QPS
+		cfg.Burst = conf.Burst
+	}
+
 	s.Manager, err = ctrl.NewManager(cfg, options)
 	if err != nil {
 		log.Error(err, "unable to start collector")

@@ -35,6 +35,13 @@ Please follow the Title Formats below when you open a new PR:
 
 ### Checklist
 
+CHANGELOG
+
+<!-- Must include at least one of them. -->
+
+- [ ] I have updated the `CHANGELOG.md`
+- [ ] I have labeled this PR with "no-need-update-changelog"
+
 Tests
 
 <!-- Must include at least one of them. -->
@@ -48,10 +55,11 @@ Side effects
 
 - [ ] Breaking backward compatibility
 
-### Release note <!-- bugfixes or new feature need a release note -->
+### DCO
 
-```text
-Please add a release note.
+If you find the DCO check fails, please run commands like below (Depends on the actual situations. For example, if the failed commit isn't the most recent) to fix it:
 
-You can safely ignore this section if you don't think this PR needs a release note.
+```shell
+git commit --amend --signoff
+git push --force
 ```
