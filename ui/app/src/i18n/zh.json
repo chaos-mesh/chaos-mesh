@@ -84,6 +84,9 @@
       "jvm": {
         "title": "JVM 故障"
       },
+      "block": {
+        "title": "块存储故障"
+      },
       "kernel": {
         "title": "内核故障"
       },
