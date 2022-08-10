@@ -337,7 +337,7 @@
     "durationHelper": "持续时间支持的格式有：ms / s / m / h。",
     "edit": "修改",
     "ip": "IP 地址",
-    "isKVHelperText": "键入 key:value 并以 TAB 结尾来创建一个键值对",
+    "isKVHelperText": "键入 key:value 并以回车结束来创建一个键值对。",
     "logout": "登出",
     "logoutDesc": "登出后需要重新输入令牌",
     "multiOptions": "支持多选",
