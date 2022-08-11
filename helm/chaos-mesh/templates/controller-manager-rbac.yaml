@@ -110,6 +110,9 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get" ]
 ---
 # bindings cluster level
 kind: ClusterRoleBinding
