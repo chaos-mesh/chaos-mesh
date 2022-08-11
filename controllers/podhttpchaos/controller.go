@@ -143,17 +143,17 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		proxyPorts = append(proxyPorts, port)
 	}
 
-	input, err := json.Marshal(rules)
+	inputRules, err := json.Marshal(rules)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
 		return ctrl.Result{}, nil
 	}
 
-	r.Log.Info("input with", "rules", string(input))
+	r.Log.Info("input with", "rules", string(inputRules))
 
 	res, err := pbClient.ApplyHttpChaos(ctx, &pb.ApplyHttpChaosRequest{
-		Rules:       string(input),
+		Rules:       string(inputRules),
 		ProxyPorts:  proxyPorts,
 		ContainerId: containerID,
 

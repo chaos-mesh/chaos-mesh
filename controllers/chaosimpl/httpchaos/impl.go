@@ -114,6 +114,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			Actions: httpchaos.Spec.PodHttpChaosActions,
 		},
 	})
+
+	if httpchaos.Spec.TLS != nil {
+		m.T.Append(httpchaos.Spec.TLS)
+	}
+
 	generationNumber, err := m.Commit(ctx)
 	if err != nil {
 		return v1alpha1.NotInjected, err

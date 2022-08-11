@@ -70,6 +70,11 @@ type HTTPChaosSpec struct {
 	// +optional
 	ResponseHeaders map[string]string `json:"response_headers,omitempty"`
 
+	// TLS is the tls config,
+	// will override PodHttpChaos if there are multiple HTTPChaos experiments are applied
+	// +optional
+	TLS *PodHttpChaosTLS `json:"tls,omitempty"`
+
 	// Duration represents the duration of the chaos action.
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
