@@ -15,23 +15,24 @@
  *
  */
 import { Grow, Typography } from '@mui/material'
+import api from 'api'
+import { CoreEvent } from 'openapi'
 import { useEffect, useState } from 'react'
 
-import { Event } from 'api/events.type'
-import EventsTable from 'components/EventsTable'
 import Loading from '@ui/mui-extends/esm/Loading'
+
+import EventsTable from 'components/EventsTable'
 import NotFound from 'components/NotFound'
-import api from 'api'
 import i18n from 'components/T'
 
 export default function Events() {
   const [loading, setLoading] = useState(true)
-  const [events, setEvents] = useState<Event[]>([])
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   useEffect(() => {
     const fetchEvents = () => {
       api.events
-        .events()
+        .eventsGet()
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => setLoading(false))

@@ -41,7 +41,7 @@ var _ InnerObject = (*KernelChaos)(nil)
 
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
-	PodSelector `json:",inline"`
+	ContainerSelector `json:",inline"`
 
 	// FailKernRequest defines the request of kernel injection
 	FailKernRequest FailKernRequest `json:"failKernRequest"`

@@ -14,11 +14,13 @@
  * limitations under the License.
  *
  */
-import { Box, Divider, FormHelperText, MenuItem, Typography } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import { Box, Button, Chip, Divider, FormHelperText, MenuItem, Typography } from '@mui/material'
 import { eval as expEval, parse } from 'expression-eval'
-import { Form, Formik, getIn } from 'formik'
-import type { FormikConfig, FormikErrors, FormikTouched, FormikValues } from 'formik'
-import { useEffect, useState } from 'react'
+import { Form, Formik, FormikProps, getIn } from 'formik'
+import type { FormikConfig, FormikValues } from 'formik'
+import _ from 'lodash'
+import { Fragment, useEffect, useState } from 'react'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import Space from '@ui/mui-extends/esm/Space'
@@ -26,6 +28,7 @@ import Space from '@ui/mui-extends/esm/Space'
 import { useStoreSelector } from 'store'
 
 import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
+import { SpecialTemplateType } from 'components/NewWorkflowNext/utils/convert'
 import Scope from 'components/Scope'
 import { T } from 'components/T'
 
@@ -62,12 +65,17 @@ export interface AtomFormData {
 }
 
 const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kind, act: action, formikProps }) => {
-  const [initialValues, setInitialValues] = useState<Record<string, any>>({
+  const kindAction = concatKindAction(kind, action)
+  const [initialValues, setInitialValues] = useState<FormikValues>({
     id,
     kind,
     action,
     ...(kind === 'NetworkChaos' && { target: scopeInitialValues }),
-    ...(kind !== 'PhysicalMachineChaos' && kind !== 'Suspend' && scopeInitialValues),
+    ...(kind !== 'PhysicalMachineChaos' &&
+      kind !== SpecialTemplateType.Suspend &&
+      kind !== SpecialTemplateType.Serial &&
+      kind !== SpecialTemplateType.Parallel &&
+      scopeInitialValues),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
   const [form, setForm] = useState<AtomFormData[]>([])
@@ -79,21 +87,22 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     function formToRecords(form: AtomFormData[]) {
       return form.reduce((acc, d) => {
         if (d.field === 'ref') {
-          acc[d.label] = formToRecords(d.children!)
+          acc[d.label] = d.multiple ? [formToRecords(d.children!)] : formToRecords(d.children!)
         } else {
           acc[d.label] = d.value
         }
 
         return acc
-      }, {} as Record<string, any>)
+      }, {} as FormikValues)
     }
 
     async function loadData() {
-      if (kind === 'Suspend') {
-        setInitialValues((oldValues) => ({
-          ...oldValues,
-          ...formikProps.initialValues,
-        }))
+      if (
+        kind === SpecialTemplateType.Suspend ||
+        kind === SpecialTemplateType.Serial ||
+        kind === SpecialTemplateType.Parallel
+      ) {
+        setInitialValues((oldValues) => _.merge({}, oldValues, formikProps.initialValues))
 
         return
       }
@@ -116,10 +125,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
           })
         : data
 
-      setInitialValues((oldValues) => ({
-        ...oldValues,
-        ...(formikProps.initialValues || formToRecords(form)),
-      }))
+      setInitialValues((oldValues) => _.merge({}, oldValues, formikProps.initialValues || formToRecords(form)))
       setForm(form)
     }
 
@@ -130,17 +136,26 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
 
   const renderForm = (
     form: AtomFormData[],
-    errors: FormikErrors<Record<string, any>>,
-    touched: FormikTouched<Record<string, any>>,
-    parent?: string
+    props: FormikProps<FormikValues>,
+    parent?: string,
+    index?: number
   ): any[] => {
+    const { values, errors, touched, setFieldValue } = props
+
     // eslint-disable-next-line array-callback-return
     return form.map(({ field, label, items, helperText, children, multiple }) => {
-      const touch = getIn(touched, label)
       const error = getIn(errors, label)
-      const touchAndError = touch && error
+      const touch = getIn(touched, label)
+      const errorAndTouch = error && touch
 
-      const _label = parent ? [parent, label].join('.') : label
+      let _label = label
+      if (parent) {
+        if (index !== undefined) {
+          _label = `${parent}[${index}].${label}`
+        } else {
+          _label = `${parent}.${label}`
+        }
+      }
 
       switch (field) {
         case 'text':
@@ -149,8 +164,8 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               key={_label}
               name={_label}
               label={label}
-              helperText={touchAndError ? error : helperText}
-              error={touchAndError}
+              helperText={errorAndTouch ? error : helperText}
+              error={errorAndTouch}
             />
           )
         case 'number':
@@ -160,8 +175,8 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               key={_label}
               name={_label}
               label={label}
-              helperText={touchAndError ? error : helperText}
-              error={touchAndError}
+              helperText={errorAndTouch ? error : helperText}
+              error={errorAndTouch}
             />
           )
         case 'select':
@@ -170,8 +185,8 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               key={_label}
               name={_label}
               label={label}
-              helperText={touchAndError ? error : helperText}
-              error={touchAndError}
+              helperText={errorAndTouch ? error : helperText}
+              error={errorAndTouch}
             >
               {items!.map((option) => (
                 <MenuItem key={option.toString()} value={option}>
@@ -188,8 +203,8 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               key={_label}
               name={_label}
               label={label}
-              helperText={touchAndError ? error : helperText}
-              error={touchAndError}
+              helperText={errorAndTouch ? error : helperText}
+              error={errorAndTouch}
               options={[]}
             />
           )
@@ -205,15 +220,50 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
             />
           )
         case 'ref':
+          const value = getIn(values, _label)
+          const isMultiple = multiple && _.isArray(value)
+
           return (
             <Box key={_label}>
-              <Typography variant="body2" fontWeight={500} mb={3}>
+              <Typography fontWeight={500} mb={3}>
                 {label}
               </Typography>
               {helperText && <FormHelperText>{helperText}</FormHelperText>}
               <Space direction="row">
                 <Divider orientation="vertical" flexItem />
-                <Space>{renderForm(children!, errors, touched, _label)}</Space>
+                <Space>
+                  {isMultiple
+                    ? value.map((_, index) => (
+                        <Fragment key={index}>
+                          <Box>
+                            <Chip
+                              label={`Item ${index + 1}`}
+                              color="primary"
+                              size="small"
+                              onDelete={() => {
+                                setFieldValue(
+                                  _label,
+                                  value.filter((_, i) => i !== index)
+                                )
+                              }}
+                            />
+                          </Box>
+                          {renderForm(children!, props, _label, index)}
+                        </Fragment>
+                      ))
+                    : renderForm(children!, props, _label)}
+                  {isMultiple && (
+                    <Box>
+                      <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                          setFieldValue(_label, [...value, _.mapValues(value[0], () => '')])
+                        }}
+                      >{`Add ${label} Item`}</Button>
+                    </Box>
+                  )}
+                </Space>
               </Space>
             </Box>
           )
@@ -242,11 +292,11 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
       validationSchema={chooseSchemaByBelong(belong, kind, action)}
       onSubmit={formikProps.onSubmit!}
     >
-      {({ errors, touched }) => (
+      {(props) => (
         <Form>
           <Space>
             <Typography variant="h6" fontWeight="bold">
-              {concatKindAction(kind, action)}
+              {kindAction}
             </Typography>
             {action && (
               <SelectField
@@ -258,10 +308,10 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                 <MenuItem value={action}>{action}</MenuItem>
               </SelectField>
             )}
-            {renderForm(form, errors, touched)}
+            {renderForm(form, props)}
             {kind === 'NetworkChaos' && (
               <>
-                <Typography variant="body2" fontWeight={500} mb={3}>
+                <Typography fontWeight={500} mb={3}>
                   target
                 </Typography>
                 <Space direction="row">
@@ -271,34 +321,35 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                     scope="target.selector"
                     modeScope="target"
                     podsPreviewTitle={<T id="newE.target.network.target.podsPreview" />}
-                    podsPreviewDesc={<T id="newE.target.network.target.podsPreviewHelper" />}
                   />
                 </Space>
               </>
             )}
-            {kind !== 'Suspend' && (
-              <>
-                <Divider />
-                <Typography variant="h6" fontWeight="bold">
-                  <T id="newE.steps.scope" />
-                </Typography>
-                {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
-                <Divider />
-                <Box>
+            {kind !== SpecialTemplateType.Suspend &&
+              kind !== SpecialTemplateType.Serial &&
+              kind !== SpecialTemplateType.Parallel && (
+                <>
+                  <Divider />
                   <Typography variant="h6" fontWeight="bold">
-                    Schedule
+                    <T id="newE.steps.scope" />
                   </Typography>
-                  <Checkbox
-                    label="Scheduled"
-                    helperText="Check the box to convert the Experiment into a Schedule."
-                    checked={scheduled}
-                    onChange={switchToSchedule}
-                  />
-                </Box>
-                {scheduled && <Schedule />}
-                <Divider />
-              </>
-            )}
+                  {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
+                  <Divider />
+                  <Box>
+                    <Typography variant="h6" fontWeight="bold">
+                      Schedule
+                    </Typography>
+                    <Checkbox
+                      label="Scheduled"
+                      helperText={`Check the box to convert ${kindAction} into a Schedule.`}
+                      checked={scheduled}
+                      onChange={switchToSchedule}
+                    />
+                  </Box>
+                  {scheduled && <Schedule />}
+                  <Divider />
+                </>
+              )}
             <Typography variant="h6" fontWeight="bold">
               Info
             </Typography>

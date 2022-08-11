@@ -17,7 +17,7 @@
 import { getBezierPath, getEdgeCenter } from 'react-flow-renderer'
 import type { EdgeProps } from 'react-flow-renderer'
 
-import CustomTooltip from './CustomTooltip'
+import FlowTooltip from './FlowTooltip'
 
 const foreignObjectSize = 24
 
@@ -56,9 +56,9 @@ export default function SuspendEdge({
         x={edgeCenterX - foreignObjectSize / 2}
         y={edgeCenterY - foreignObjectSize / 2}
       >
-        <CustomTooltip arrow placement="top" {...data.tooltipProps}>
+        <FlowTooltip arrow placement="top" {...data.tooltipProps}>
           <div style={{ width: '100%', height: '100%' }} />
-        </CustomTooltip>
+        </FlowTooltip>
       </foreignObject>
     </>
   )

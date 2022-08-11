@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
-
 import { InputAdornment, MenuItem } from '@mui/material'
-import { SelectField, TextField } from 'components/FormField'
 import { getIn, useFormikContext } from 'formik'
 
+import { SelectField, TextField } from 'components/FormField'
 import { T } from 'components/T'
 
 const modes = [

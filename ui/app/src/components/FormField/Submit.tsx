@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
-
 import { Box, Button } from '@mui/material'
-
 import type { ButtonProps } from '@mui/material'
+
 import { T } from 'components/T'
 
 export default function Submit({ sx, ...rest }: ButtonProps) {

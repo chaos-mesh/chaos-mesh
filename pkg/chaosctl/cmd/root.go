@@ -58,7 +58,7 @@ func Execute() {
 	}
 	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
 
-	rootCmd.PersistentFlags().StringVarP(&managerNamespace, "manager-namespace", "N", "chaos-testing", "the namespace chaos-controller-manager in")
+	rootCmd.PersistentFlags().StringVarP(&managerNamespace, "manager-namespace", "N", "chaos-mesh", "the namespace chaos-controller-manager in")
 	rootCmd.PersistentFlags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")
 	err = rootCmd.RegisterFlagCompletionFunc("manager-namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		// TODO: list namespaces without ctrlserver

@@ -26,3 +26,7 @@ package-lock.json
 
 # eslint
 .eslintcache
+
+# yarn
+.yarn
+.yarnrc

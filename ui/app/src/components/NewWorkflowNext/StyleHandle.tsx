@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  *
  */
-import { Experiment } from './experiments.type'
+import { styled } from '@mui/material'
+import { Handle } from 'react-flow-renderer'
 
-export interface ScheduleParams {
-  namespace?: string
-}
+const StyledHandle = styled(Handle)(({ theme }) => ({
+  width: '8px !important',
+  height: '8px !important',
+  background: `${theme.palette.background.default} !important`,
+  borderColor: `${theme.palette.outline.main} !important`,
+  zIndex: 1,
+}))
 
-export type Schedule = { is: 'schedule' } & Omit<Experiment, 'is'>
-
-export interface ScheduleSingle extends Schedule {
-  experiment_uids: uuid[]
-  kube_object: any
-}
+export default StyledHandle

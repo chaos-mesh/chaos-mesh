@@ -17,10 +17,10 @@
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import api from 'api'
-import { RBACConfigParams } from 'api/common.type'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
+import { CommonApiCommonRbacConfigGetRequest } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -58,23 +58,24 @@ const RBACGenerator = () => {
   const [clustered, setClustered] = useState(false)
   const [rbac, setRBAC] = useState('')
   const [getSecret, setGetSecret] = useState('')
-
+  const [generateToken, setGenerateToken] = useState('')
   const containerRef = useRef(null)
 
-  const fetchRBACConfig = (values: RBACConfigParams) =>
-    api.common.rbacConfig(values).then(({ data }) => {
-      const entries = Object.entries<string>(data)
+  const fetchRBACConfig = (values: CommonApiCommonRbacConfigGetRequest) =>
+    api.common.commonRbacConfigGet(values).then(({ data }) => {
+      const entries = Object.entries(data)
       const [name, yaml] = entries[0]
 
       setRBAC(yaml)
       setGetSecret(`kubectl describe${name.includes('cluster') ? '' : ` -n ${values.namespace}`} secrets ${name}`)
+      setGenerateToken(`kubectl create token ${name}`)
     })
 
   useEffect(() => {
     fetchRBACConfig({ namespace: 'default', role: 'viewer' })
   }, [])
 
-  const onValidate = ({ namespace, role, clustered }: RBACConfigParams & { clustered: boolean }) => {
+  const onValidate = ({ namespace, role, clustered }: CommonApiCommonRbacConfigGetRequest & { clustered: boolean }) => {
     fetchRBACConfig({
       namespace: clustered ? '' : namespace,
       role,
@@ -154,10 +155,20 @@ const RBACGenerator = () => {
           {i18n('settings.addToken.generatorHelper3')}
         </Typography>
         <pre className={classes.pre}>kubectl apply -f rbac.yaml</pre>
+
         <Typography variant="body2" color="textSecondary">
-          {i18n('settings.addToken.generatorHelper4')}
+          {i18n('settings.addToken.generatorHelperGetTokenHeader')}
         </Typography>
-        <pre className={classes.pre}>{getSecret}</pre>
+        <Box position="relative" pl={2}>
+          <Typography variant="body2" color="textSecondary">
+            {i18n('settings.addToken.generatorHelperGetTokenCase1')}
+          </Typography>
+          <pre className={classes.pre}>{generateToken}</pre>
+          <Typography variant="body2" color="textSecondary">
+            {i18n('settings.addToken.generatorHelperGetTokenCase2')}
+          </Typography>
+          <pre className={classes.pre}>{getSecret}</pre>
+        </Box>
       </Space>
     </div>
   )

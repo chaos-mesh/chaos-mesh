@@ -15,16 +15,18 @@
  *
  */
 import { Box, BoxProps } from '@mui/material'
+import { CoreEvent } from 'openapi'
 import { useEffect, useRef } from 'react'
 
-import { Event } from 'api/events.type'
-import NotFound from 'components/NotFound'
-import genEventsChart from 'lib/d3/eventsChart'
-import i18n from 'components/T'
 import { useStoreSelector } from 'store'
 
+import NotFound from 'components/NotFound'
+import i18n from 'components/T'
+
+import genEventsChart from 'lib/d3/eventsChart'
+
 interface EventsChartProps extends BoxProps {
-  events: Event[]
+  events: CoreEvent[]
 }
 
 const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {

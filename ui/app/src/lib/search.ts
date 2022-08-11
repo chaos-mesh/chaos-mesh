@@ -14,18 +14,15 @@
  * limitations under the License.
  *
  */
-import { Archive } from 'api/archives.type'
-import { Experiment } from 'api/experiments.type'
-import { Schedule } from 'api/schedules.type'
-import { Workflow } from 'api/workflows.type'
+import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 
 type Keyword = 'namespace' | 'ns' | 'kind'
 
 interface SearchData {
-  workflows: Workflow[]
-  schedules: Schedule[]
-  experiments: Experiment[]
-  archives: Archive[]
+  workflows: CoreWorkflowMeta[]
+  schedules: TypesSchedule[]
+  experiments: TypesExperiment[]
+  archives: TypesArchive[]
 }
 
 interface KeywordToken {
@@ -122,7 +119,7 @@ function searchCommon(data: any, keyword: Keyword, value: string) {
   return data.filter((d: any) => d[keyword].toLowerCase().includes(value))
 }
 
-function searchObjects<T extends { name: string }>(data: T[], tokens: Token[]) {
+function searchObjects<T extends { name?: string }>(data: T[], tokens: Token[]) {
   let filtered = data
 
   tokens.forEach((t) => {
@@ -131,7 +128,7 @@ function searchObjects<T extends { name: string }>(data: T[], tokens: Token[]) {
     if (t.type === 'keyword') {
       filtered = searchCommon(filtered, t.keyword, val)
     } else if (t.type === 'content') {
-      filtered = filtered.filter((d) => d.name.toLowerCase().includes(val))
+      filtered = filtered.filter((d) => d.name!.toLowerCase().includes(val))
     }
   })
 

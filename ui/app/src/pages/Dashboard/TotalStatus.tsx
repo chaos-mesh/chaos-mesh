@@ -15,20 +15,20 @@
  *
  */
 import { Box, BoxProps } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { PropertyAccessor } from '@nivo/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
+import api from 'api'
+import { schemeTableau10 } from 'd3-scale-chromatic'
+import { StatusAllChaosStatus } from 'openapi'
 import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
 
 import NotFound from 'components/NotFound'
-import { PropertyAccessor } from '@nivo/core'
-import { StatusOfExperiments } from 'api/experiments.type'
-import api from 'api'
 import i18n from 'components/T'
-import { schemeTableau10 } from 'd3-scale-chromatic'
-import { useIntl } from 'react-intl'
-import { useTheme } from '@mui/material/styles'
 
 interface SingleData {
-  id: keyof StatusOfExperiments
+  id: keyof StatusAllChaosStatus
   label: string
   value: number
 }
@@ -57,10 +57,10 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
   useEffect(() => {
     const fetchState = () => {
       api.experiments
-        .state()
+        .experimentsStateGet()
         .then((resp) =>
           setS(
-            (Object.entries(resp.data) as [keyof StatusOfExperiments, number][]).map(([k, v]) => ({
+            (Object.entries(resp.data) as [keyof StatusAllChaosStatus, number][]).map(([k, v]) => ({
               id: k,
               label: i18n(`status.${k}`, intl),
               value: v === 0 ? 0.01 : v,

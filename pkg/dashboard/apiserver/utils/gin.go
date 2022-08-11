@@ -20,6 +20,9 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
+// MapSliceResponse is an alias of map[string][]string.
+type MapStringSliceResponse map[string][]string
+
 // Response defines a common status struct.
 type Response struct {
 	Status string `json:"status"`

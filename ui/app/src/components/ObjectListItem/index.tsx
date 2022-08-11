@@ -14,29 +14,30 @@
  * limitations under the License.
  *
  */
-import { Box, IconButton, Typography } from '@mui/material'
-import DateTime, { format } from 'lib/luxon'
-
-import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import { Experiment } from 'api/experiments.type'
-import Paper from '@ui/mui-extends/esm/Paper'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import { Schedule } from 'api/schedules.type'
-import Space from '@ui/mui-extends/esm/Space'
-import StatusLabel from 'components/StatusLabel'
+import { Box, IconButton, Typography } from '@mui/material'
 import _ from 'lodash'
-import i18n from 'components/T'
+import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreSelector } from 'store'
+
+import StatusLabel from 'components/StatusLabel'
+import i18n from 'components/T'
+
+import DateTime, { format } from 'lib/luxon'
 
 interface ObjectListItemProps {
   type?: 'schedule' | 'experiment' | 'archive'
   archive?: 'workflow' | 'schedule' | 'experiment'
-  data: Schedule | Experiment | Archive
+  data: TypesSchedule | TypesExperiment | TypesArchive
   onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
 }
 
@@ -55,7 +56,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           title: `${i18n('archives.single', intl)} ${data.name}`,
           description: i18n(`${type}s.deleteDesc`, intl),
           action,
-          uuid: data.uid,
+          uuid: data.uid!,
         })
 
         return
@@ -64,7 +65,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           title: `${i18n('common.pause', intl)} ${data.name}`,
           description: i18n('experiments.pauseDesc', intl),
           action,
-          uuid: data.uid,
+          uuid: data.uid!,
         })
 
         return
@@ -73,7 +74,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           title: `${i18n('common.start', intl)} ${data.name}`,
           description: i18n('experiments.startDesc', intl),
           action,
-          uuid: data.uid,
+          uuid: data.uid!,
         })
 
         return
@@ -82,7 +83,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
           title: `${i18n('common.delete', intl)} ${data.name}`,
           description: i18n('archives.deleteDesc', intl),
           action,
-          uuid: data.uid,
+          uuid: data.uid!,
         })
 
         return
@@ -155,7 +156,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experimen
     >
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Space direction="row" alignItems="center">
-          {type !== 'archive' && <StatusLabel status={(data as Experiment).status} />}
+          {type !== 'archive' && <StatusLabel status={(data as any).status} />}
           <Typography component="div" title={data.name}>
             {_.truncate(data.name!)}
           </Typography>

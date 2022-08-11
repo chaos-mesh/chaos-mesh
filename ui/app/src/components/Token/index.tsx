@@ -14,15 +14,19 @@
  * limitations under the License.
  *
  */
+import api from 'api'
 import { Form, Formik, FormikHelpers } from 'formik'
-import { Submit, TextField } from 'components/FormField'
-import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
+
+import { Submit, TextField } from 'components/FormField'
 import i18n from 'components/T'
-import { useIntl } from 'react-intl'
+
 import { validateName } from 'lib/formikhelpers'
 
 function validateToken(value: string) {
@@ -79,7 +83,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
 
     // Test the validity of the token in advance
     api.experiments
-      .state()
+      .experimentsStateGet()
       .then(restSteps)
       .catch((error) => {
         const data = error.response?.data

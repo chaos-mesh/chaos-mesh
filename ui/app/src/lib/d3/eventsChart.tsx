@@ -14,15 +14,16 @@
  * limitations under the License.
  *
  */
-import * as d3 from 'd3'
-
 import { Box, Typography } from '@mui/material'
+import * as d3 from 'd3'
+import _ from 'lodash'
+import { CoreEvent as Event } from 'openapi'
+import { renderToString } from 'react-dom/server'
+
+import { Theme } from 'slices/settings'
+
 import DateTime, { format, now } from 'lib/luxon'
 
-import { Event } from 'api/events.type'
-import { Theme } from 'slices/settings'
-import _ from 'lodash'
-import { renderToString } from 'react-dom/server'
 import wrapText from './wrapText'
 
 /**
@@ -81,14 +82,14 @@ export default function gen({
     margin.right = enableLegends && document.documentElement.offsetWidth > 768 ? 150 : 0
   }
 
-  const halfHourLater = (events.length ? DateTime.fromISO(events[0].created_at) : now()).plus({
+  const halfHourLater = (events.length ? DateTime.fromISO(events[0].created_at!) : now()).plus({
     hours: 0.5,
   })
 
   const colorPalette = d3
     .scaleOrdinal<string, string>()
     .range(d3.schemeTableau10)
-    .domain(events.map((d) => d.object_id))
+    .domain(events.map((d) => d.object_id!))
 
   const allUniqueExperiments = [...new Set(events.map((d) => d.name + '/' + d.object_id))].map((d) => {
     const [name, uuid] = d.split('/')
@@ -198,7 +199,7 @@ export default function gen({
             d3.zoomIdentity
               .translate((width - margin.left - margin.right) / 2, 0)
               .scale(3)
-              .translate(-x(DateTime.fromISO(event.created_at)), 0)
+              .translate(-x(DateTime.fromISO(event.created_at!)), 0)
           )
       })
     legends
@@ -220,7 +221,7 @@ export default function gen({
     return renderToString(
       <Box width={360}>
         <Typography>{d.name}</Typography>
-        <Typography variant="overline">{format(d.created_at)}</Typography>
+        <Typography variant="overline">{format(d.created_at!)}</Typography>
         <Typography variant="body2" color="textSecondary">
           {d.message}
         </Typography>
@@ -244,7 +245,7 @@ export default function gen({
       .selectAll('circle')
       .data(events)
       .join((enter) => {
-        const newCx = (d: Event) => newX(DateTime.fromISO(d.created_at))
+        const newCx = (d: Event) => newX(DateTime.fromISO(d.created_at!))
 
         return enter
           .append('circle')
@@ -252,8 +253,8 @@ export default function gen({
           .attr('cx', (d) => newCx(d) + 30)
           .call((enter) => enter.transition().duration(750).attr('opacity', 1).attr('cx', newCx))
       })
-      .attr('cy', (d) => y(d.object_id)! + y.bandwidth() / 2 + margin.top)
-      .attr('fill', (d) => colorPalette(d.object_id))
+      .attr('cy', (d) => y(d.object_id!)! + y.bandwidth() / 2 + margin.top)
+      .attr('fill', (d) => colorPalette(d.object_id!))
       .attr('r', 4)
       .style('cursor', 'pointer')
       .on('click', (_, d) => {
@@ -288,7 +289,7 @@ export default function gen({
 
       gXAxis.call(xAxis.scale(newX))
       gXAxis.selectAll('.tick text').call(wrapText, 30)
-      circles.attr('cx', (d) => newX(DateTime.fromISO(d.created_at))!)
+      circles.attr('cx', (d) => newX(DateTime.fromISO(d.created_at!))!)
     }
 
     zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([0.1, 6]).on('zoom', zoomed)
@@ -305,7 +306,7 @@ export default function gen({
       gXAxis.selectAll('.tick text').call(wrapText, 30)
       gYAxisRight.attr('transform', `translate(${width - margin.right + 0.5}, ${margin.top})`)
       timelines.attr('x2', width - margin.right - margin.left)
-      circles.attr('cx', (d) => x(DateTime.fromISO(d.created_at)))
+      circles.attr('cx', (d) => x(DateTime.fromISO(d.created_at!)))
     }
 
     d3.select(window).on('resize', _.debounce(reGen, 250))

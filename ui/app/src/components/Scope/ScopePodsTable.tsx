@@ -16,12 +16,15 @@
  */
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
+import { useMemo } from 'react'
 
 import PaperContainer from '@ui/mui-extends/esm/PaperContainer'
-import i18n from 'components/T'
-import { setAlert } from 'slices/globalStatus'
-import { useMemo } from 'react'
+
 import { useStoreDispatch } from 'store'
+
+import { setAlert } from 'slices/globalStatus'
+
+import i18n from 'components/T'
 
 interface ScopePodsTableProps {
   scope?: string

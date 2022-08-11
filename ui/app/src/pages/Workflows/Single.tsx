@@ -19,10 +19,9 @@ import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import api from 'api'
-import { Event } from 'api/events.type'
-import { WorkflowSingle } from 'api/workflows.type'
 import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
+import { CoreEvent, CoreWorkflowDetail } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -70,22 +69,24 @@ const Single = () => {
 
   const dispatch = useStoreDispatch()
 
-  const [single, setSingle] = useState<WorkflowSingle>()
+  const [single, setSingle] = useState<CoreWorkflowDetail>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
   const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
 
-  const [events, setEvents] = useState<Event[]>([])
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchWorkflowSingle = (intervalID?: number) =>
     api.workflows
-      .single(uuid!)
+      .workflowsUidGet({
+        uid: uuid!,
+      })
       .then(({ data }) => {
         // TODO: remove noise in API
-        data.kube_object.metadata.annotations &&
-          delete data.kube_object.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
+        data.kube_object!.metadata!.annotations &&
+          delete data.kube_object!.metadata!.annotations['kubectl.kubernetes.io/last-applied-configuration']
 
         setSingle(data)
 
@@ -108,14 +109,17 @@ const Single = () => {
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single, theme, handleNodeClick)
+      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single as any, theme, handleNodeClick)
 
       topologyRef.current = updateElements
     }
 
     const fetchEvents = () => {
       api.events
-        .cascadeFetchEventsForWorkflow(uuid!, { limit: 999 })
+        .eventsWorkflowUidGet({
+          uid: uuid!,
+          limit: 999,
+        })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {
@@ -140,7 +144,7 @@ const Single = () => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.workflows.del
+        actionFunc = api.workflows.workflowsUidDelete
 
         break
       default:
@@ -148,7 +152,7 @@ const Single = () => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({
@@ -168,7 +172,7 @@ const Single = () => {
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
     const { template: nodeTemplate } = node.data()
-    const template = single?.kube_object.spec.templates.find((t: any) => t.name === nodeTemplate)
+    const template = (single?.kube_object!.spec as any).templates.find((t: any) => t.name === nodeTemplate)
 
     setData(template)
     setSelected('node')

@@ -14,21 +14,25 @@
  * limitations under the License.
  *
  */
-
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
-import { setDebugMode, setEnableKubeSystemNS, setLang, setTheme, setUseNextWorkflowInterface } from 'slices/settings'
-import { useStoreDispatch, useStoreSelector } from 'store'
+import type { SelectChangeEvent } from '@mui/material'
+import messages from 'i18n/messages'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import type { SelectChangeEvent } from '@mui/material'
 import SelectField from '@ui/mui-extends/esm/SelectField'
 import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setDebugMode, setEnableKubeSystemNS, setLang, setTheme, setUseNextWorkflowInterface } from 'slices/settings'
+
 import { T } from 'components/T'
-import Token from './Token'
-import logo from 'images/logo.svg'
+
 import logoWhite from 'images/logo-white.svg'
-import messages from 'i18n/messages'
+import logo from 'images/logo.svg'
+
+import Token from './Token'
 
 const Settings = () => {
   const state = useStoreSelector((state) => state)

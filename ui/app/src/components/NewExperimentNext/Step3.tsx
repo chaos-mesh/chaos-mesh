@@ -14,21 +14,25 @@
  * limitations under the License.
  *
  */
-import { Box, Typography } from '@mui/material'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
 import DoneAllIcon from '@mui/icons-material/DoneAll'
-import { ExperimentKind } from 'components/NewExperiment/types'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import { Submit } from 'components/FormField'
+import { Box, Typography } from '@mui/material'
 import api from 'api'
-import i18n from 'components/T'
-import { parseSubmit } from 'lib/formikhelpers'
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { resetNewExperiment } from 'slices/experiments'
+import { setAlert } from 'slices/globalStatus'
+
+import { Submit } from 'components/FormField'
+import { ExperimentKind } from 'components/NewExperiment/types'
+import i18n from 'components/T'
+
+import { parseSubmit } from 'lib/formikhelpers'
 
 interface Step3Props {
   onSubmit?: (parsedValues: any) => void
@@ -67,7 +71,9 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
         onSubmit(parsedValues)
       } else {
         api.experiments
-          .newExperiment(parsedValues)
+          .experimentsPost({
+            chaos: parsedValues,
+          })
           .then(() => {
             dispatch(
               setAlert({

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2022 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
  * limitations under the License.
  *
  */
+import { ElementTypes } from './Elements/types'
+import { SpecialTemplateType } from './utils/convert'
 
-export interface Config {
-  security_mode: boolean
-  dns_server_create: boolean
-  gcp_security_mode: boolean
-  version: string
-}
-
-export interface RBACConfigParams {
-  namespace: string
-  role: 'manager' | 'viewer'
-}
+export const dndAccept = [
+  ElementTypes.Kubernetes,
+  ElementTypes.PhysicalNodes,
+  ElementTypes.Suspend,
+  SpecialTemplateType.Serial,
+  SpecialTemplateType.Parallel,
+]

@@ -15,14 +15,17 @@
  *
  */
 import { Grid } from '@mui/material'
-import NewExperiment from 'components/NewExperimentNext'
 import api from 'api'
-import i18n from 'components/T'
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+
 import { useStoreDispatch } from 'store'
+
+import { resetNewExperiment } from 'slices/experiments'
+import { setAlert } from 'slices/globalStatus'
+
+import NewExperiment from 'components/NewExperimentNext'
+import i18n from 'components/T'
 
 const New = () => {
   const navigate = useNavigate()
@@ -32,7 +35,7 @@ const New = () => {
 
   const onSubmit = (parsedValues: any) => {
     api.schedules
-      .newSchedule(parsedValues)
+      .schedulesPost({ schedule: parsedValues })
       .then(() => {
         dispatch(
           setAlert({

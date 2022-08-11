@@ -14,7 +14,11 @@
  * limitations under the License.
  *
  */
-
+import loadable from '@loadable/component'
+import CheckIcon from '@mui/icons-material/Check'
+import PublishIcon from '@mui/icons-material/Publish'
+import RemoveIcon from '@mui/icons-material/Remove'
+import UndoIcon from '@mui/icons-material/Undo'
 import {
   Box,
   Button,
@@ -28,33 +32,33 @@ import {
   Stepper,
   Typography,
 } from '@mui/material'
-import { Form, Formik } from 'formik'
-import { SelectField, TextField } from 'components/FormField'
-import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { useEffect, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-import { validateDeadline, validateName } from 'lib/formikhelpers'
-
-import { Ace } from 'ace-builds'
-import Add from './Add'
-import CheckIcon from '@mui/icons-material/Check'
-import Menu from '@ui/mui-extends/esm/Menu'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PublishIcon from '@mui/icons-material/Publish'
-import RemoveIcon from '@mui/icons-material/Remove'
-import Space from '@ui/mui-extends/esm/Space'
-import UndoIcon from '@mui/icons-material/Undo'
-import _ from 'lodash'
-import api from 'api'
-import { constructWorkflow } from 'lib/formikhelpers'
-import i18n from 'components/T'
-import loadable from '@loadable/component'
 import { makeStyles } from '@mui/styles'
-import { resetNewExperiment } from 'slices/experiments'
+import { Ace } from 'ace-builds'
+import api from 'api'
+import { Form, Formik } from 'formik'
+import yaml from 'js-yaml'
+import _ from 'lodash'
+import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-import yaml from 'js-yaml'
+
+import Menu from '@ui/mui-extends/esm/Menu'
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { resetNewExperiment } from 'slices/experiments'
+import { setAlert, setConfirm } from 'slices/globalStatus'
+import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
+
+import { SelectField, TextField } from 'components/FormField'
+import i18n from 'components/T'
+
+import { validateDeadline, validateName } from 'lib/formikhelpers'
+import { constructWorkflow } from 'lib/formikhelpers'
+
+import Add from './Add'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -171,14 +175,16 @@ const NewWorkflow = () => {
   const onValidate = setWorkflowBasic
 
   const submitWorkflow = () => {
-    const workflow = yamlEditor?.getValue()
+    const workflow = yamlEditor?.getValue()!
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('Debug workflow:', workflow)
     }
 
     api.workflows
-      .newWorkflow(yaml.load(workflow!))
+      .workflowsPost({
+        request: yaml.load(workflow) as any,
+      })
       .then(() => {
         dispatch(resetWorkflow())
 
