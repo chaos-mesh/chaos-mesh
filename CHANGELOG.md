@@ -15,7 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Replace io/ioutil package with os package. [#3539](https://github.com/chaos-mesh/chaos-mesh/pull/3539)
 
 ### Deprecated
 
