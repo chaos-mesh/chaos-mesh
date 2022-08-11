@@ -28,7 +28,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
@@ -134,7 +133,7 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	}
 
 	if len(in.Tls) != 0 {
-		httpChaosSpec.TLS = new(v1alpha1.PodHttpChaosTLS)
+		httpChaosSpec.TLS = new(tproxyconfig.TLSConfig)
 		err = json.Unmarshal([]byte(in.Tls), httpChaosSpec.TLS)
 		if err != nil {
 			return nil, errors.Wrap(err, "unmarshal tls config")

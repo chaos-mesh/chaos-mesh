@@ -35,6 +35,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tproxyconfig"
 )
 
 // Reconciler applys podhttpchaos
@@ -152,7 +153,56 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	inputTLS := []byte("")
 	if obj.Spec.TLS != nil {
-		inputTLS, err = json.Marshal(obj.Spec.TLS)
+		tlsKeys := obj.Spec.TLS
+		var secret v1.Secret
+		if err := r.Client.Get(context.TODO(), req.NamespacedName, &secret); err != nil {
+			r.Log.Error(err, "unable to get secret")
+			return ctrl.Result{}, nil
+		}
+
+		cert, ok := secret.Data[tlsKeys.CertName]
+		if !ok {
+			err = errors.Wrapf(err, "get cert %s", tlsKeys.CertName)
+			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			return ctrl.Result{}, nil
+		}
+
+		key, ok := secret.Data[tlsKeys.KeyName]
+		if !ok {
+			err = errors.Wrapf(err, "get key %s", tlsKeys.KeyName)
+			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			return ctrl.Result{}, nil
+		}
+
+		var ca []byte
+		if tlsKeys.CAName != nil {
+			ca, ok = secret.Data[*tlsKeys.CAName]
+			if !ok {
+				err = errors.Wrapf(err, "get ca %s", *tlsKeys.CAName)
+				r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+				return ctrl.Result{}, nil
+			}
+		}
+
+		tlsConfig := tproxyconfig.TLSConfig{
+			CertFile: tproxyconfig.TLSConfigItem{
+				Type:  "Contents",
+				Value: cert,
+			},
+			KeyFile: tproxyconfig.TLSConfigItem{
+				Type:  "Contents",
+				Value: key,
+			},
+		}
+
+		if ca != nil {
+			tlsConfig.CAFile = &tproxyconfig.TLSConfigItem{
+				Type:  "Contents",
+				Value: ca,
+			}
+		}
+
+		inputTLS, err = json.Marshal(tlsConfig)
 		if err != nil {
 			err = errors.Wrapf(err, "apply for pod %s/%s", pod.Namespace, pod.Name)
 			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
