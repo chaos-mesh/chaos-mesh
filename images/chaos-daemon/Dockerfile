@@ -42,7 +42,7 @@ RUN case "$TARGET_PLATFORM" in \
     esac; \
     curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.6/nsexec-$NSEXEC_ARCH-unknown-linux-gnu.tar.gz | tar xz -C /usr/local/bin; \
     mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so; \
-    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.1/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /usr/local/bin; \
+    curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.3/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /usr/local/bin; \
     curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3/memStress_v0.3-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
