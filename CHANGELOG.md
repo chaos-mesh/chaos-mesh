@@ -12,6 +12,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
+- Add TLS support for HTTPChaos [#3549](https://github.com/chaos-mesh/chaos-mesh/pull/3549)
 
 ### Changed
 
