@@ -14,15 +14,18 @@
  * limitations under the License.
  *
  */
+import { Typography } from '@mui/material'
 import { Form, Formik, getIn } from 'formik'
-import { LabelField, Submit, TextField } from 'components/FormField'
 import { useEffect, useState } from 'react'
 
-import MoreOptions from 'components/MoreOptions'
 import Space from '@ui/mui-extends/esm/Space'
-import { Typography } from '@mui/material'
-import typesData from '../data/types'
+
 import { useStoreSelector } from 'store'
+
+import { LabelField, Submit, TextField } from 'components/FormField'
+import MoreOptions from 'components/MoreOptions'
+
+import typesData from '../data/types'
 
 const validate = (values: any) => {
   let errors = {}
@@ -86,7 +89,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="stressors.cpu.options"
               label="Options of CPU stressors"
-              helperText="Type string and end with a space to generate the stress-ng options"
+              helperText="Type and end with Enter to generate the stress-ng options."
             />
 
             <Typography>Memory</Typography>
@@ -104,7 +107,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="stressors.memory.options"
               label="Options of Memory stressors"
-              helperText="Type string and end with a space to generate the stress-ng options"
+              helperText="Type and end with Enter to generate the stress-ng options."
             />
           </Space>
 
@@ -112,12 +115,12 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <TextField
               name="stressngStressors"
               label="Options of stress-ng"
-              helperText="The options of stress-ng, treated as a string"
+              helperText="The options of stress-ng, treated as a string."
             />
             <LabelField
               name="containerNames"
-              label="Container Name"
-              helperText="Optional. Type string and end with a space to generate the container names. If it's empty, the first container will be injected"
+              label="Container names"
+              helperText="Optional. Type and end with Enter to generate the container names. If it's empty, the first container will be injected."
             />
           </MoreOptions>
 

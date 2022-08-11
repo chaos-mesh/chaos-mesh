@@ -30,7 +30,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
 
 ### Security
 
@@ -66,6 +66,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
 
 ### Security
+
+- Nothing
 
 ## [2.2.2] - 2022-07-07
 
