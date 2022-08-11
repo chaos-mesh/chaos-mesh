@@ -150,10 +150,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
+	inputTLS := []byte("")
+	if obj.Spec.TLS != nil {
+		inputTLS, err = json.Marshal(obj.Spec.TLS)
+		if err != nil {
+			err = errors.Wrapf(err, "apply for pod %s/%s", pod.Namespace, pod.Name)
+			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
+			return ctrl.Result{}, nil
+		}
+	}
+
 	r.Log.Info("input with", "rules", string(inputRules))
 
 	res, err := pbClient.ApplyHttpChaos(ctx, &pb.ApplyHttpChaosRequest{
 		Rules:       string(inputRules),
+		Tls:         string(inputTLS),
 		ProxyPorts:  proxyPorts,
 		ContainerId: containerID,
 

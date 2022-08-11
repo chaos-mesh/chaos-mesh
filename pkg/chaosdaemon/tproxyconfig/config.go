@@ -17,11 +17,14 @@ package tproxyconfig
 
 import (
 	"encoding/json"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type Config struct {
-	ProxyPorts []uint32               `json:"proxy_ports,omitempty"`
-	Rules      []PodHttpChaosBaseRule `json:"rules"`
+	ProxyPorts []uint32                  `json:"proxy_ports,omitempty"`
+	Rules      []PodHttpChaosBaseRule    `json:"rules"`
+	TLS        *v1alpha1.PodHttpChaosTLS `json:"tls,omitempty"`
 }
 
 // PodHttpChaosBaseRule defines the injection rule without source and port.

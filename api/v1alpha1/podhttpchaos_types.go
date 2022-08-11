@@ -189,21 +189,21 @@ const (
 // PodHttpChaosTLS contains the tls config for HTTPChaos
 type PodHttpChaosTLS struct {
 	// SecretName represents the name of required secret resource
-	SecretName string
+	SecretName string `json:"secretName,omitempty"`
 
 	// SecretNamespace represents the namespace of required secret resource,
 	// should be the same with deployment/chaos-controller-manager in most cases
-	SecretNamespace string
+	SecretNamespace string `json:"secretNamespace,omitempty"`
 
 	// CertName represents the data name of cert file in secret, `tls.crt` for example
-	CertName string
+	CertName string `json:"certName,omitempty"`
 
 	// KeyName represents the data name of key file in secret, `tls.key` for example
-	KeyName string
+	KeyName string `json:"KeyName,omitempty"`
 
 	// CAName represents the data name of ca file in secret, `ca.crt` for example
 	// +optional
-	CAName *string
+	CAName *string `json:"caName,omitempty"`
 }
 
 // +kubebuilder:object:root=true

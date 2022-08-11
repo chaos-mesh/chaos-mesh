@@ -1353,6 +1353,31 @@ spec:
               - Request
               - Response
               type: string
+            tls:
+              description: TLS is the tls config, will override PodHttpChaos if there
+                are multiple HTTPChaos experiments are applied
+              properties:
+                KeyName:
+                  description: KeyName represents the data name of key file in secret,
+                    `tls.key` for example
+                  type: string
+                caName:
+                  description: CAName represents the data name of ca file in secret,
+                    `ca.crt` for example
+                  type: string
+                certName:
+                  description: CertName represents the data name of cert file in secret,
+                    `tls.crt` for example
+                  type: string
+                secretName:
+                  description: SecretName represents the name of required secret resource
+                  type: string
+                secretNamespace:
+                  description: SecretNamespace represents the namespace of required
+                    secret resource, should be the same with deployment/chaos-controller-manager
+                    in most cases
+                  type: string
+              type: object
             value:
               description: Value is required when the mode is set to `FixedMode` /
                 `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
@@ -4616,6 +4641,31 @@ spec:
                 - target
                 type: object
               type: array
+            tls:
+              description: TLS is the tls config, will be override if there are multiple
+                HTTPChaos experiments are applied
+              properties:
+                KeyName:
+                  description: KeyName represents the data name of key file in secret,
+                    `tls.key` for example
+                  type: string
+                caName:
+                  description: CAName represents the data name of ca file in secret,
+                    `ca.crt` for example
+                  type: string
+                certName:
+                  description: CertName represents the data name of cert file in secret,
+                    `tls.crt` for example
+                  type: string
+                secretName:
+                  description: SecretName represents the name of required secret resource
+                  type: string
+                secretNamespace:
+                  description: SecretNamespace represents the namespace of required
+                    secret resource, should be the same with deployment/chaos-controller-manager
+                    in most cases
+                  type: string
+              type: object
           type: object
         status:
           description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
@@ -5906,6 +5956,32 @@ spec:
                   - Request
                   - Response
                   type: string
+                tls:
+                  description: TLS is the tls config, will override PodHttpChaos if
+                    there are multiple HTTPChaos experiments are applied
+                  properties:
+                    KeyName:
+                      description: KeyName represents the data name of key file in
+                        secret, `tls.key` for example
+                      type: string
+                    caName:
+                      description: CAName represents the data name of ca file in secret,
+                        `ca.crt` for example
+                      type: string
+                    certName:
+                      description: CertName represents the data name of cert file
+                        in secret, `tls.crt` for example
+                      type: string
+                    secretName:
+                      description: SecretName represents the name of required secret
+                        resource
+                      type: string
+                    secretNamespace:
+                      description: SecretNamespace represents the namespace of required
+                        secret resource, should be the same with deployment/chaos-controller-manager
+                        in most cases
+                      type: string
+                  type: object
                 value:
                   description: Value is required when the mode is set to `FixedMode`
                     / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -9096,6 +9172,33 @@ spec:
                             - Request
                             - Response
                             type: string
+                          tls:
+                            description: TLS is the tls config, will override PodHttpChaos
+                              if there are multiple HTTPChaos experiments are applied
+                            properties:
+                              KeyName:
+                                description: KeyName represents the data name of key
+                                  file in secret, `tls.key` for example
+                                type: string
+                              caName:
+                                description: CAName represents the data name of ca
+                                  file in secret, `ca.crt` for example
+                                type: string
+                              certName:
+                                description: CertName represents the data name of
+                                  cert file in secret, `tls.crt` for example
+                                type: string
+                              secretName:
+                                description: SecretName represents the name of required
+                                  secret resource
+                                type: string
+                              secretNamespace:
+                                description: SecretNamespace represents the namespace
+                                  of required secret resource, should be the same
+                                  with deployment/chaos-controller-manager in most
+                                  cases
+                                type: string
+                            type: object
                           value:
                             description: Value is required when the mode is set to
                               `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -12043,6 +12146,34 @@ spec:
                                 - Request
                                 - Response
                                 type: string
+                              tls:
+                                description: TLS is the tls config, will override
+                                  PodHttpChaos if there are multiple HTTPChaos experiments
+                                  are applied
+                                properties:
+                                  KeyName:
+                                    description: KeyName represents the data name
+                                      of key file in secret, `tls.key` for example
+                                    type: string
+                                  caName:
+                                    description: CAName represents the data name of
+                                      ca file in secret, `ca.crt` for example
+                                    type: string
+                                  certName:
+                                    description: CertName represents the data name
+                                      of cert file in secret, `tls.crt` for example
+                                    type: string
+                                  secretName:
+                                    description: SecretName represents the name of
+                                      required secret resource
+                                    type: string
+                                  secretNamespace:
+                                    description: SecretNamespace represents the namespace
+                                      of required secret resource, should be the same
+                                      with deployment/chaos-controller-manager in
+                                      most cases
+                                    type: string
+                                type: object
                               value:
                                 description: Value is required when the mode is set
                                   to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -19811,6 +19942,32 @@ spec:
                   - Request
                   - Response
                   type: string
+                tls:
+                  description: TLS is the tls config, will override PodHttpChaos if
+                    there are multiple HTTPChaos experiments are applied
+                  properties:
+                    KeyName:
+                      description: KeyName represents the data name of key file in
+                        secret, `tls.key` for example
+                      type: string
+                    caName:
+                      description: CAName represents the data name of ca file in secret,
+                        `ca.crt` for example
+                      type: string
+                    certName:
+                      description: CertName represents the data name of cert file
+                        in secret, `tls.crt` for example
+                      type: string
+                    secretName:
+                      description: SecretName represents the name of required secret
+                        resource
+                      type: string
+                    secretNamespace:
+                      description: SecretNamespace represents the namespace of required
+                        secret resource, should be the same with deployment/chaos-controller-manager
+                        in most cases
+                      type: string
+                  type: object
                 value:
                   description: Value is required when the mode is set to `FixedMode`
                     / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -22599,6 +22756,32 @@ spec:
                       - Request
                       - Response
                       type: string
+                    tls:
+                      description: TLS is the tls config, will override PodHttpChaos
+                        if there are multiple HTTPChaos experiments are applied
+                      properties:
+                        KeyName:
+                          description: KeyName represents the data name of key file
+                            in secret, `tls.key` for example
+                          type: string
+                        caName:
+                          description: CAName represents the data name of ca file
+                            in secret, `ca.crt` for example
+                          type: string
+                        certName:
+                          description: CertName represents the data name of cert file
+                            in secret, `tls.crt` for example
+                          type: string
+                        secretName:
+                          description: SecretName represents the name of required
+                            secret resource
+                          type: string
+                        secretNamespace:
+                          description: SecretNamespace represents the namespace of
+                            required secret resource, should be the same with deployment/chaos-controller-manager
+                            in most cases
+                          type: string
+                      type: object
                     value:
                       description: Value is required when the mode is set to `FixedMode`
                         / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -25834,6 +26017,34 @@ spec:
                                 - Request
                                 - Response
                                 type: string
+                              tls:
+                                description: TLS is the tls config, will override
+                                  PodHttpChaos if there are multiple HTTPChaos experiments
+                                  are applied
+                                properties:
+                                  KeyName:
+                                    description: KeyName represents the data name
+                                      of key file in secret, `tls.key` for example
+                                    type: string
+                                  caName:
+                                    description: CAName represents the data name of
+                                      ca file in secret, `ca.crt` for example
+                                    type: string
+                                  certName:
+                                    description: CertName represents the data name
+                                      of cert file in secret, `tls.crt` for example
+                                    type: string
+                                  secretName:
+                                    description: SecretName represents the name of
+                                      required secret resource
+                                    type: string
+                                  secretNamespace:
+                                    description: SecretNamespace represents the namespace
+                                      of required secret resource, should be the same
+                                      with deployment/chaos-controller-manager in
+                                      most cases
+                                    type: string
+                                type: object
                               value:
                                 description: Value is required when the mode is set
                                   to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -28872,6 +29083,35 @@ spec:
                                     - Request
                                     - Response
                                     type: string
+                                  tls:
+                                    description: TLS is the tls config, will override
+                                      PodHttpChaos if there are multiple HTTPChaos
+                                      experiments are applied
+                                    properties:
+                                      KeyName:
+                                        description: KeyName represents the data name
+                                          of key file in secret, `tls.key` for example
+                                        type: string
+                                      caName:
+                                        description: CAName represents the data name
+                                          of ca file in secret, `ca.crt` for example
+                                        type: string
+                                      certName:
+                                        description: CertName represents the data
+                                          name of cert file in secret, `tls.crt` for
+                                          example
+                                        type: string
+                                      secretName:
+                                        description: SecretName represents the name
+                                          of required secret resource
+                                        type: string
+                                      secretNamespace:
+                                        description: SecretNamespace represents the
+                                          namespace of required secret resource, should
+                                          be the same with deployment/chaos-controller-manager
+                                          in most cases
+                                        type: string
+                                    type: object
                                   value:
                                     description: Value is required when the mode is
                                       set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -39287,6 +39527,32 @@ spec:
                         - Request
                         - Response
                         type: string
+                      tls:
+                        description: TLS is the tls config, will override PodHttpChaos
+                          if there are multiple HTTPChaos experiments are applied
+                        properties:
+                          KeyName:
+                            description: KeyName represents the data name of key file
+                              in secret, `tls.key` for example
+                            type: string
+                          caName:
+                            description: CAName represents the data name of ca file
+                              in secret, `ca.crt` for example
+                            type: string
+                          certName:
+                            description: CertName represents the data name of cert
+                              file in secret, `tls.crt` for example
+                            type: string
+                          secretName:
+                            description: SecretName represents the name of required
+                              secret resource
+                            type: string
+                          secretNamespace:
+                            description: SecretNamespace represents the namespace
+                              of required secret resource, should be the same with
+                              deployment/chaos-controller-manager in most cases
+                            type: string
+                        type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
                           / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -42159,6 +42425,33 @@ spec:
                             - Request
                             - Response
                             type: string
+                          tls:
+                            description: TLS is the tls config, will override PodHttpChaos
+                              if there are multiple HTTPChaos experiments are applied
+                            properties:
+                              KeyName:
+                                description: KeyName represents the data name of key
+                                  file in secret, `tls.key` for example
+                                type: string
+                              caName:
+                                description: CAName represents the data name of ca
+                                  file in secret, `ca.crt` for example
+                                type: string
+                              certName:
+                                description: CertName represents the data name of
+                                  cert file in secret, `tls.crt` for example
+                                type: string
+                              secretName:
+                                description: SecretName represents the name of required
+                                  secret resource
+                                type: string
+                              secretNamespace:
+                                description: SecretNamespace represents the namespace
+                                  of required secret resource, should be the same
+                                  with deployment/chaos-controller-manager in most
+                                  cases
+                                type: string
+                            type: object
                           value:
                             description: Value is required when the mode is set to
                               `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.

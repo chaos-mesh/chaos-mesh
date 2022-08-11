@@ -1164,6 +1164,9 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
