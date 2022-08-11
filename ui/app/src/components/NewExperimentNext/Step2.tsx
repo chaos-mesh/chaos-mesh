@@ -187,8 +187,16 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                           ))}
                         </SelectField>
                       )}
-                      <LabelField name="metadata.labels" label={i18n('k8s.labels')} />
-                      <LabelField name="metadata.annotations" label={i18n('k8s.annotations')} />
+                      <LabelField
+                        name="metadata.labels"
+                        label={i18n('k8s.labels')}
+                        helperText={i18n('common.isKVHelperText')}
+                      />
+                      <LabelField
+                        name="metadata.annotations"
+                        label={i18n('k8s.annotations')}
+                        helperText={i18n('common.isKVHelperText')}
+                      />
                     </MoreOptions>
                     {!inWorkflow && (
                       <>
