@@ -336,7 +336,7 @@
     "durationHelper": "Supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair.",
     "logout": "Logout",
     "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
@@ -397,6 +397,6 @@
   },
   "physic": {
     "address": "Address",
-    "addressHelper": "Type and end with Enter to add one or more chaosd addresses"
+    "addressHelper": "Type and end with Enter to add one or more chaosd addresses."
   }
 }

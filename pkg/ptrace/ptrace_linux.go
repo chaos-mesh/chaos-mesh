@@ -29,7 +29,7 @@ import (
 	"bytes"
 	"debug/elf"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"syscall"
@@ -91,7 +91,7 @@ func Trace(pid int, logger logr.Logger) (*TracedProgram, error) {
 	// ...
 	// only the first way finally worked for every situations
 	for {
-		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
+		threads, err := os.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
