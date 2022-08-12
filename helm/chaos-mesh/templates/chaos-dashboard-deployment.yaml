@@ -87,6 +87,8 @@ spec:
               value: "{{ .Values.dnsServer.create }}"
             - name: ROOT_URL
               value: "{{ .Values.dashboard.rootUrl }}"
+            - name: ENABLE_PROFILING
+              value: "{{ .Values.enableProfiling }}"
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
@@ -143,8 +145,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: chaos-dashboard
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
-{{- with .Values.dashboard.service.annotations }}
   annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.dashboard.env.METRIC_PORT }}"
+{{- with .Values.dashboard.service.annotations }}
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
