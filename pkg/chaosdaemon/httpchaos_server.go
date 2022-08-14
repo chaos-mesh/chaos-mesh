@@ -20,11 +20,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -108,17 +110,28 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		return nil, errors.Wrap(err, "create http request")
 	}
 
-	resp, err := transport.RoundTrip(req)
+	var body []byte
+	var resp *http.Response
+	err = retry.Do(func() error {
+		log.Info("http retry Do", "time", time.Now())
+		resp, err = transport.RoundTrip(req)
+		if err != nil {
+			return errors.Wrap(err, "retry send http request")
+		}
+
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return errors.Wrap(err, "read response body")
+		}
+		return nil
+	}, retry.Delay(time.Second*5),
+		retry.Attempts(2),
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "send http request")
 	}
 
 	log.Info("http chaos applied")
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "read response body")
-	}
 
 	return &pb.ApplyHttpChaosResponse{
 		Instance:    in.Instance,
@@ -136,7 +149,7 @@ func (s *DaemonServer) createHttpChaos(ctx context.Context, in *pb.ApplyHttpChao
 		return errors.Wrapf(err, "get PID of container(%s)", in.ContainerId)
 	}
 
-	args := fmt.Sprintf("-i -vv --unix-socket-path %s", fmt.Sprintf(tproxyUnixSocketFilePath, pid))
+	args := fmt.Sprintf("-vv --interactive-path %s", fmt.Sprintf(tproxyUnixSocketFilePath, pid))
 	log.Info("executing", "cmd", tproxyBin+" "+args)
 
 	processBuilder := bpm.DefaultProcessBuilder(tproxyBin, strings.Split(args, " ")...).

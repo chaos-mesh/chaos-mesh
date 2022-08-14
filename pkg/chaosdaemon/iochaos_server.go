@@ -20,11 +20,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
@@ -97,19 +99,39 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		return nil, errors.Wrap(err, "create http://psedo-host/update request")
 	}
 
-	_, _ = transport.RoundTrip(req)
+	err = retry.Do(func() error {
+		log.Info("update retry io retry Do", "time", time.Now())
+		_, err = transport.RoundTrip(req)
+		if err != nil {
+			return errors.Wrap(err, "transport RoundTrip http://psedo-host/update")
+		}
+		return nil
+	}, retry.Delay(time.Second*5),
+		retry.Attempts(2),
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err = http.NewRequest(http.MethodPut, "http://psedo-host/get_status", bytes.NewReader([]byte("ping")))
 	if err != nil {
 		return nil, errors.Wrap(err, "create http://psedo-host/get_status request")
 	}
-	resp, err := transport.RoundTrip(req)
+	err = retry.Do(func() error {
+		log.Info("get status io retry Do", "time", time.Now())
+		resp, err := transport.RoundTrip(req)
+		if err != nil {
+			return errors.Wrap(err, "retry send http reques")
+		}
+		body, err := io.ReadAll(resp.Body)
+		if err != nil || string(body) != "ok" {
+			return errors.Wrap(err, "toda startup takes too long or an error occurs")
+		}
+		return nil
+	}, retry.Delay(time.Second*5),
+		retry.Attempts(2))
 	if err != nil {
 		return nil, errors.Wrap(err, "send http request")
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil || string(body) != "ok" {
-		return nil, errors.Wrap(err, "toda startup takes too long or an error occurs")
 	}
 
 	log.Info("http chaos applied")
@@ -141,7 +163,7 @@ func (s *DaemonServer) createIOChaos(ctx context.Context, in *pb.ApplyIOChaosReq
 	}
 
 	// TODO: make this log level configurable
-	args := fmt.Sprintf("--path %s --verbose info --unix-socket-path %s", in.Volume, fmt.Sprintf(todaUnixSocketFilePath))
+	args := fmt.Sprintf("--path %s --verbose info --interactive-path %s", in.Volume, fmt.Sprintf(todaUnixSocketFilePath))
 	log.Info("executing", "cmd", todaBin+" "+args)
 
 	processBuilder := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
