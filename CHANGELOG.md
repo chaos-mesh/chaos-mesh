@@ -16,6 +16,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Replace io/ioutil package with os package. [#3539](https://github.com/chaos-mesh/chaos-mesh/pull/3539)
+- Fixed kubectl namespace in GitHub bug reporting issue template [#3556](https://github.com/chaos-mesh/chaos-mesh/pull/3556)
 
 ### Deprecated
 
