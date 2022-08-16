@@ -37,7 +37,7 @@ type PodNetworkChaos struct {
 
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
-	Status PodNetworkChaosStatus `json:"status"`
+	Status PodNetworkChaosStatus `json:"status,omitempty"`
 }
 
 // PodNetworkChaosSpec defines the desired state of PodNetworkChaos

@@ -3552,6 +3552,74 @@ definitions:
           +kubebuilder:validation:Minimum=0
         type: integer
     type: object
+  v1alpha1.FileAppendSpec:
+    properties:
+      count:
+        description: Count is the number of times to append the data.
+        type: integer
+      data:
+        description: Data is the data for append.
+        type: string
+      file-name:
+        description: FileName is the name of the file to be created, modified, deleted,
+          renamed, or appended.
+        type: string
+    type: object
+  v1alpha1.FileCreateSpec:
+    properties:
+      dir-name:
+        description: DirName is the directory name to create or delete.
+        type: string
+      file-name:
+        description: FileName is the name of the file to be created, modified, deleted,
+          renamed, or appended.
+        type: string
+    type: object
+  v1alpha1.FileDeleteSpec:
+    properties:
+      dir-name:
+        description: DirName is the directory name to create or delete.
+        type: string
+      file-name:
+        description: FileName is the name of the file to be created, modified, deleted,
+          renamed, or appended.
+        type: string
+    type: object
+  v1alpha1.FileModifyPrivilegeSpec:
+    properties:
+      file-name:
+        description: FileName is the name of the file to be created, modified, deleted,
+          renamed, or appended.
+        type: string
+      privilege:
+        description: Privilege is the file privilege to be set.
+        type: integer
+    type: object
+  v1alpha1.FileRenameSpec:
+    properties:
+      dest-file:
+        description: DestFile is the name to be renamed.
+        type: string
+      source-file:
+        description: SourceFile is the name need to be renamed.
+        type: string
+    type: object
+  v1alpha1.FileReplaceSpec:
+    properties:
+      dest-string:
+        description: DestStr is the destination string of the file.
+        type: string
+      file-name:
+        description: FileName is the name of the file to be created, modified, deleted,
+          renamed, or appended.
+        type: string
+      line:
+        description: Line is the line number of the file to be replaced.
+        type: integer
+      origin-string:
+        description: OriginStr is the origin string of the file.
+        type: string
+    type: object
   v1alpha1.Frame:
     properties:
       funcname:
@@ -3608,6 +3676,30 @@ definitions:
         type: string
       zone:
         description: Zone defines the zone of gcp project.
+        type: string
+    type: object
+  v1alpha1.HTTPAbortSpec:
+    properties:
+      code:
+        description: Code is a rule to select target by http status code in response
+        type: string
+      method:
+        description: HTTP method
+        type: string
+      path:
+        description: Match path of Uri with wildcard matches
+        type: string
+      port:
+        description: The TCP port that the target service listens on
+        type: integer
+      proxy_ports:
+        description: Composed with one of the port of HTTP connection, we will only
+          attack HTTP connection with port inside proxy_ports
+        items:
+          type: integer
+        type: array
+      target:
+        description: 'HTTP target: Request or Response'
         type: string
     type: object
   v1alpha1.HTTPChaosSpec:
@@ -3699,6 +3791,12 @@ definitions:
           +optional
         type: string
     type: object
+  v1alpha1.HTTPConfigSpec:
+    properties:
+      file_path:
+        description: The config file path
+        type: string
+    type: object
   v1alpha1.HTTPCriteria:
     properties:
       statusCode:
@@ -3706,6 +3804,45 @@ definitions:
           StatusCode defines the expected http status code for the request.
           A statusCode string could be a single code (e.g. 200), or
           an inclusive range (e.g. 200-400, both `200` and `400` are included).
+        type: string
+    type: object
+  v1alpha1.HTTPDelaySpec:
+    properties:
+      code:
+        description: Code is a rule to select target by http status code in response
+        type: string
+      delay:
+        description: Delay represents the delay of the target request/response
+        type: string
+      method:
+        description: HTTP method
+        type: string
+      path:
+        description: Match path of Uri with wildcard matches
+        type: string
+      port:
+        description: The TCP port that the target service listens on
+        type: integer
+      proxy_ports:
+        description: Composed with one of the port of HTTP connection, we will only
+          attack HTTP connection with port inside proxy_ports
+        items:
+          type: integer
+        type: array
+      target:
+        description: 'HTTP target: Request or Response'
+        type: string
+    type: object
+  v1alpha1.HTTPRequestSpec:
+    properties:
+      count:
+        description: The number of requests to send
+        type: integer
+      enable-conn-pool:
+        description: Enable connection pool
+        type: boolean
+      url:
+        description: Request to send"
         type: string
     type: object
   v1alpha1.HTTPStatusCheck:
@@ -4048,6 +4185,72 @@ definitions:
           the port of agent server, default 9277
         type: integer
     type: object
+  v1alpha1.KafkaFillSpec:
+    properties:
+      host:
+        description: The host of kafka server
+        type: string
+      maxBytes:
+        description: The max bytes to fill
+        type: integer
+      messageSize:
+        description: The size of each message
+        type: integer
+      password:
+        description: The password of kafka client
+        type: string
+      port:
+        description: The port of kafka server
+        type: integer
+      reloadCommand:
+        description: The command to reload kafka config
+        type: string
+      topic:
+        description: The topic to attack
+        type: string
+      username:
+        description: The username of kafka client
+        type: string
+    type: object
+  v1alpha1.KafkaFloodSpec:
+    properties:
+      host:
+        description: The host of kafka server
+        type: string
+      messageSize:
+        description: The size of each message
+        type: integer
+      password:
+        description: The password of kafka client
+        type: string
+      port:
+        description: The port of kafka server
+        type: integer
+      threads:
+        description: The number of worker threads
+        type: integer
+      topic:
+        description: The topic to attack
+        type: string
+      username:
+        description: The username of kafka client
+        type: string
+    type: object
+  v1alpha1.KafkaIOSpec:
+    properties:
+      configFile:
+        description: The path of server config
+        type: string
+      nonReadable:
+        description: Make kafka cluster non-readable
+        type: boolean
+      nonWritable:
+        description: Make kafka cluster non-writable
+        type: boolean
+      topic:
+        description: The topic to attack
+        type: string
+    type: object
   v1alpha1.KernelChaosSpec:
     properties:
       containerNames:
@@ -4335,6 +4538,15 @@ definitions:
           it can only be used in conjunction with -p tcp or -p udp
         type: string
     type: object
+  v1alpha1.NetworkDownSpec:
+    properties:
+      device:
+        description: The network interface to impact
+        type: string
+      duration:
+        description: 'NIC down time, time units: ns, us (or µs), ms, s, m, h.'
+        type: string
+    type: object
   v1alpha1.NetworkDuplicateSpec:
     properties:
       correlation:
@@ -4365,6 +4577,25 @@ definitions:
         description: |-
           only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.
           it can only be used in conjunction with -p tcp or -p udp
+        type: string
+    type: object
+  v1alpha1.NetworkFloodSpec:
+    properties:
+      duration:
+        description: The number of seconds to run the iperf test
+        type: string
+      ip-address:
+        description: Generate traffic to this IP address
+        type: string
+      parallel:
+        description: The number of iperf parallel client threads to run
+        type: integer
+      port:
+        description: Generate traffic to this port on the IP address
+        type: string
+      rate:
+        description: The speed of network traffic, allows bps, kbps, mbps, gbps, tbps
+          unit. bps means bytes per second
         type: string
     type: object
   v1alpha1.NetworkLossSpec:
@@ -4425,10 +4656,51 @@ definitions:
         description: only impact egress traffic to these IP addresses
         type: string
     type: object
+  v1alpha1.PMJVMMySQLSpec:
+    properties:
+      database:
+        description: |-
+          the match database
+          default value is "", means match all database
+        type: string
+      exception:
+        description: |-
+          The exception which needs to throw for action `exception`
+          or the exception message needs to throw in action `mysql`
+        type: string
+      latency:
+        description: |-
+          The latency duration for action 'latency'
+          or the latency duration in action `mysql`
+        type: integer
+      mysqlConnectorVersion:
+        description: the version of mysql-connector-java, only support 5.X.X(set to
+          "5") and 8.X.X(set to "8") now
+        type: string
+      pid:
+        description: the pid of Java process which needs to attach
+        type: integer
+      port:
+        description: |-
+          +optional
+          the port of agent server, default 9277
+        type: integer
+      sqlType:
+        description: |-
+          the match sql type
+          default value is "", means match all SQL type.
+          The value can be 'select', 'insert', 'update', 'delete', 'replace'.
+        type: string
+      table:
+        description: |-
+          the match table
+          default value is "", means match all table
+        type: string
+    type: object
   v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
-        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
+        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined;
         type: string
       address:
         description: |-
@@ -4463,6 +4735,56 @@ definitions:
           Duration represents the duration of the chaos action
           +optional
         type: string
+      file-append:
+        $ref: '#/definitions/v1alpha1.FileAppendSpec'
+        description: |-
+          +ui:form:when=action=='file-append'
+          +optional
+      file-create:
+        $ref: '#/definitions/v1alpha1.FileCreateSpec'
+        description: |-
+          +ui:form:when=action=='file-create'
+          +optional
+      file-delete:
+        $ref: '#/definitions/v1alpha1.FileDeleteSpec'
+        description: |-
+          +ui:form:when=action=='file-delete'
+          +optional
+      file-modify:
+        $ref: '#/definitions/v1alpha1.FileModifyPrivilegeSpec'
+        description: |-
+          +ui:form:when=action=='file-modify'
+          +optional
+      file-rename:
+        $ref: '#/definitions/v1alpha1.FileRenameSpec'
+        description: |-
+          +ui:form:when=action=='file-create'
+          +optional
+      file-replace:
+        $ref: '#/definitions/v1alpha1.FileReplaceSpec'
+        description: |-
+          +ui:form:when=action=='file-replace'
+          +optional
+      http-abort:
+        $ref: '#/definitions/v1alpha1.HTTPAbortSpec'
+        description: |-
+          +ui:form:when=action=='http-abort'
+          +optional
+      http-config:
+        $ref: '#/definitions/v1alpha1.HTTPConfigSpec'
+        description: |-
+          +ui:form:when=action=='http-config'
+          +optional
+      http-delay:
+        $ref: '#/definitions/v1alpha1.HTTPDelaySpec'
+        description: |-
+          +ui:form:when=action=='http-delay'
+          +optional
+      http-request:
+        $ref: '#/definitions/v1alpha1.HTTPRequestSpec'
+        description: |-
+          +ui:form:when=action=='http-request'
+          +optional
       jvm-exception:
         $ref: '#/definitions/v1alpha1.JVMExceptionSpec'
         description: |-
@@ -4478,6 +4800,11 @@ definitions:
         description: |-
           +ui:form:when=action=='jvm-latency'
           +optional
+      jvm-mysql:
+        $ref: '#/definitions/v1alpha1.PMJVMMySQLSpec'
+        description: |-
+          +ui:form:when=action=='jvm-mysql'
+          +optional
       jvm-return:
         $ref: '#/definitions/v1alpha1.JVMReturnSpec'
         description: |-
@@ -4492,6 +4819,21 @@ definitions:
         $ref: '#/definitions/v1alpha1.JVMStressSpec'
         description: |-
           +ui:form:when=action=='jvm-stress'
+          +optional
+      kafka-fill:
+        $ref: '#/definitions/v1alpha1.KafkaFillSpec'
+        description: |-
+          +ui:form:when=action=='kafka-fill'
+          +optional
+      kafka-flood:
+        $ref: '#/definitions/v1alpha1.KafkaFloodSpec'
+        description: |-
+          +ui:form:when=action=='kafka-flood'
+          +optional
+      kafka-io:
+        $ref: '#/definitions/v1alpha1.KafkaIOSpec'
+        description: |-
+          +ui:form:when=action=='kafka-io'
           +optional
       mode:
         description: |-
@@ -4519,10 +4861,20 @@ definitions:
         description: |-
           +ui:form:when=action=='network-dns'
           +optional
+      network-down:
+        $ref: '#/definitions/v1alpha1.NetworkDownSpec'
+        description: |-
+          +ui:form:when=action=='network-down'
+          +optional
       network-duplicate:
         $ref: '#/definitions/v1alpha1.NetworkDuplicateSpec'
         description: |-
           +ui:form:when=action=='network-duplicate'
+          +optional
+      network-flood:
+        $ref: '#/definitions/v1alpha1.NetworkFloodSpec'
+        description: |-
+          +ui:form:when=action=='network-flood'
           +optional
       network-loss:
         $ref: '#/definitions/v1alpha1.NetworkLossSpec'
@@ -4539,6 +4891,31 @@ definitions:
         description: |-
           +ui:form:when=action=='process'
           +optional
+      redis-cacheLimit:
+        $ref: '#/definitions/v1alpha1.RedisCacheLimitSpec'
+        description: |-
+          +ui:form:when=action=='redis-cacheLimit'
+          +optional
+      redis-expiration:
+        $ref: '#/definitions/v1alpha1.RedisExpirationSpec'
+        description: |-
+          +ui:form:when=action=='redis-expiration'
+          +optional
+      redis-penetration:
+        $ref: '#/definitions/v1alpha1.RedisPenetrationSpec'
+        description: |-
+          +ui:form:when=action=='redis-penetration'
+          +optional
+      redis-restart:
+        $ref: '#/definitions/v1alpha1.RedisSentinelRestartSpec'
+        description: |-
+          +ui:form:when=action=='redis-restart'
+          +optional
+      redis-stop:
+        $ref: '#/definitions/v1alpha1.RedisSentinelStopSpec'
+        description: |-
+          +ui:form:when=action=='redis-stop'
+          +optional
       selector:
         $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
         description: |-
@@ -4554,6 +4931,11 @@ definitions:
         description: |-
           +ui:form:when=action=='stress-mem'
           +optional
+      user_defined:
+        $ref: '#/definitions/v1alpha1.UserDefinedSpec'
+        description: |-
+          +ui:form:when=action=='user_defined'
+          +optional
       value:
         description: |-
           Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -4562,6 +4944,11 @@ definitions:
           IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
           +optional
         type: string
+      vm:
+        $ref: '#/definitions/v1alpha1.VMSpec'
+        description: |-
+          +ui:form:when=action=='vm'
+          +optional
     type: object
   v1alpha1.PhysicalMachineSelectorSpec:
     properties:
@@ -4841,6 +5228,87 @@ definitions:
       signal:
         description: the signal number to send
         type: integer
+    type: object
+  v1alpha1.RedisCacheLimitSpec:
+    properties:
+      addr:
+        description: The adress of Redis server
+        type: string
+      cacheSize:
+        description: The size of `maxmemory`
+        type: string
+      password:
+        description: The password of Redis server
+        type: string
+      percent:
+        description: Specifies maxmemory as a percentage of the original value
+        type: string
+    type: object
+  v1alpha1.RedisExpirationSpec:
+    properties:
+      addr:
+        description: The adress of Redis server
+        type: string
+      expiration:
+        description: The expiration of the keys
+        type: string
+      key:
+        description: The keys to be expired
+        type: string
+      option:
+        description: Additional options for `expiration`
+        type: string
+      password:
+        description: The password of Redis server
+        type: string
+    type: object
+  v1alpha1.RedisPenetrationSpec:
+    properties:
+      addr:
+        description: The adress of Redis server
+        type: string
+      password:
+        description: The password of Redis server
+        type: string
+      requestNum:
+        description: The number of requests to be sent
+        type: integer
+    type: object
+  v1alpha1.RedisSentinelRestartSpec:
+    properties:
+      addr:
+        description: The adress of Redis server
+        type: string
+      conf:
+        description: The path of Sentinel conf
+        type: string
+      flushConfig:
+        description: The control flag determines whether to flush config
+        type: boolean
+      password:
+        description: The password of Redis server
+        type: string
+      redisPath:
+        description: The path of `redis-server` command-line tool
+        type: boolean
+    type: object
+  v1alpha1.RedisSentinelStopSpec:
+    properties:
+      addr:
+        description: The adress of Redis server
+        type: string
+      conf:
+        description: The path of Sentinel conf
+        type: string
+      flushConfig:
+        description: The control flag determines whether to flush config
+        type: boolean
+      password:
+        description: The password of Redis server
+        type: string
+      redisPath:
+        description: The path of `redis-server` command-line tool
+        type: boolean
     type: object
   v1alpha1.ReorderSpec:
     properties:
@@ -5551,6 +6019,21 @@ definitions:
         type: integer
       sec:
         type: integer
+    type: object
+  v1alpha1.UserDefinedSpec:
+    properties:
+      attackCmd:
+        description: The command to be executed when attack
+        type: string
+      recoverCmd:
+        description: The command to be executed when recover
+        type: string
+    type: object
+  v1alpha1.VMSpec:
+    properties:
+      vm-name:
+        description: The name of the VM to be injected
+        type: string
     type: object
   v1alpha1.Workflow:
     properties:

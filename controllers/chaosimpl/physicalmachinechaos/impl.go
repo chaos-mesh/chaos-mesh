@@ -73,7 +73,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	// for example, physicalMachinechaos.Spec.Action is 'network-delay', action is 'network', subAction is 'delay'
-	// notice: 'process' and 'clock' action has no subAction, set subAction to ""
+	// notice: 'process', 'vm', 'clock' and 'user_defined' action has no subAction, set subAction to ""
 	actions := strings.SplitN(string(physicalMachineChaos.Spec.Action), "-", 2)
 	if len(actions) == 1 {
 		actions = append(actions, "")
