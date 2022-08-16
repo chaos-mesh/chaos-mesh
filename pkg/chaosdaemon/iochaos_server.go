@@ -100,16 +100,17 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	}
 
 	err = retry.Do(func() error {
-		log.Info("update retry io retry Do", "time", time.Now())
-		_, err = transport.RoundTrip(req)
-		if err != nil {
-			return errors.Wrap(err, "transport RoundTrip http://psedo-host/update")
+		_, retryErr := transport.RoundTrip(req)
+		if retryErr != nil {
+			log.Error(retryErr, "transport RoundTrip http://psedo-host/update")
+			return errors.Wrap(retryErr, "transport RoundTrip http://psedo-host/update")
 		}
 		return nil
 	}, retry.Delay(time.Second*5),
-		retry.Attempts(2),
-	)
+		retry.Attempts(2))
+
 	if err != nil {
+		log.Error(err, "applyIOChaos update io retry Do")
 		return nil, err
 	}
 
@@ -118,23 +119,26 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		return nil, errors.Wrap(err, "create http://psedo-host/get_status request")
 	}
 	err = retry.Do(func() error {
-		log.Info("get status io retry Do", "time", time.Now())
-		resp, err := transport.RoundTrip(req)
-		if err != nil {
-			return errors.Wrap(err, "retry send http reques")
+		resp, retryErr := transport.RoundTrip(req)
+		if retryErr != nil {
+			log.Error(retryErr, "retry send http request, error")
+			return errors.Wrap(retryErr, "retry send http request")
 		}
-		body, err := io.ReadAll(resp.Body)
-		if err != nil || string(body) != "ok" {
-			return errors.Wrap(err, "toda startup takes too long or an error occurs")
+		body, retryErr := io.ReadAll(resp.Body)
+		if retryErr != nil || string(body) != "ok" {
+			log.Error(retryErr, "toda startup takes too long or an error occurs, error")
+			return errors.Wrap(retryErr, "toda startup takes too long or an error occurs")
 		}
 		return nil
 	}, retry.Delay(time.Second*5),
 		retry.Attempts(2))
+
 	if err != nil {
+		log.Error(err, "applyIOChaos get status io retry Do")
 		return nil, errors.Wrap(err, "send http request")
 	}
 
-	log.Info("http chaos applied")
+	log.Info("io chaos applied")
 
 	return &pb.ApplyIOChaosResponse{
 		Instance:    in.Instance,

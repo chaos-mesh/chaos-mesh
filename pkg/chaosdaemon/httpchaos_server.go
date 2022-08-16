@@ -113,21 +113,23 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	var body []byte
 	var resp *http.Response
 	err = retry.Do(func() error {
-		log.Info("http retry Do", "time", time.Now())
 		resp, err = transport.RoundTrip(req)
 		if err != nil {
+			log.Error(err, "retry send http request")
 			return errors.Wrap(err, "retry send http request")
 		}
 
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
-			return errors.Wrap(err, "read response body")
+			log.Error(err, "retry read response body")
+			return errors.Wrap(err, "retry read response body")
 		}
 		return nil
 	}, retry.Delay(time.Second*5),
-		retry.Attempts(2),
-	)
+		retry.Attempts(2))
+
 	if err != nil {
+		log.Error(err, "applyHttpChaos http retry Do")
 		return nil, errors.Wrap(err, "send http request")
 	}
 
