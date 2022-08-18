@@ -34,6 +34,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
 - Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
 - Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
+- Fix "sidecar config" e2e test cases run failed in some scenario.[#3564](https://github.com/chaos-mesh/chaos-mesh/pull/3564)
 
 ### Security
 
