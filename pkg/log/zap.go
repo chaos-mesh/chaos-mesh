@@ -16,9 +16,12 @@
 package log
 
 import (
+	"io"
+
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 // NewDefaultZapLogger is the recommended way to create a new logger, you could call this function to initialize the root
@@ -31,4 +34,17 @@ func NewDefaultZapLogger() (logr.Logger, error) {
 	}
 	logger := zapr.NewLogger(zapLogger)
 	return logger, nil
+}
+
+//NewZapLoggerWithWriter creates a new logger with io.writer
+//The provided encoder presets NewDevelopmentEncoderConfig used by NewDevelopmentConfig do not enable function name logging.
+//To enable function name, a non-empty value for config.EncoderConfig.FunctionKey.
+func NewZapLoggerWithWriter(out io.Writer) logr.Logger {
+	bWriter := out
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.FunctionKey = "function"
+	core := zapcore.NewCore(zapcore.NewJSONEncoder(config.EncoderConfig), zapcore.AddSync(bWriter), config.Level)
+	zapLogger := zap.New(core)
+	logger := zapr.NewLogger(zapLogger)
+	return logger
 }

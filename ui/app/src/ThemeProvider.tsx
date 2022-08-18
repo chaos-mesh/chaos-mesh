@@ -14,20 +14,20 @@
  * limitations under the License.
  *
  */
-import { ThemeProvider as MUIThemeProvider, StyledEngineProvider } from '@mui/material/styles'
-import customTheme, { darkTheme as customDarkTheme } from 'theme'
-
+import { ThemeProvider as MuiThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import { useMemo } from 'react'
+import theme, { darkTheme } from 'theme'
+
 import { useStoreSelector } from 'store'
 
 const ThemeProvider: React.FC = ({ children }) => {
-  const { theme } = useStoreSelector((state) => state.settings)
-  const globalTheme = useMemo(() => (theme === 'light' ? customTheme : customDarkTheme), [theme])
+  const { theme: t } = useStoreSelector((state) => state.settings)
+  const globalTheme = useMemo(() => (t === 'light' ? theme : darkTheme), [t])
 
   return (
-    <MUIThemeProvider theme={globalTheme}>
+    <MuiThemeProvider theme={globalTheme}>
       <StyledEngineProvider injectFirst>{children}</StyledEngineProvider>
-    </MUIThemeProvider>
+    </MuiThemeProvider>
   )
 }
 

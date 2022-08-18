@@ -9,7 +9,7 @@ const actions = {
   GCPChaos: ['node-stop', 'node-reset', 'disk-loss'],
   HTTPChaos: [],
   IOChaos: ['latency', 'fault', 'attrOverride', 'mistake'],
-  JVMChaos: ['latency', 'return', 'exception', 'stress', 'gc', 'ruleData'],
+  JVMChaos: ['latency', 'return', 'exception', 'stress', 'gc', 'ruleData', 'mysql'],
   KernelChaos: [],
   NetworkChaos: ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'partition', 'bandwidth'],
   PhysicalMachineChaos: [

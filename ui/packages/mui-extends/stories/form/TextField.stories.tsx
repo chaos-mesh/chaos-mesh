@@ -1,7 +1,8 @@
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import SearchIcon from '@mui/icons-material/Search'
 import { InputAdornment } from '@mui/material'
 import React from 'react'
-import SearchIcon from '@mui/icons-material/Search'
+
 import Space from '../../esm/Space'
 import TextField from '../../esm/TextField'
 import type { TextFieldProps } from '../../esm/TextField'
@@ -46,7 +47,7 @@ HasInputAdornment.args = {
 export const Group = () => (
   <Space>
     <Template label="Name" placeholder="experiment-1" helperText="This field is required" />
-    <Template label="Namespace" placeholder="chaos-testing" helperText="This field is optional" />
+    <Template label="Namespace" placeholder="chaos-mesh" helperText="This field is optional" />
   </Space>
 )
 

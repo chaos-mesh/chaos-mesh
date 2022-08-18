@@ -20,6 +20,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
+	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotecluster"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
@@ -34,9 +36,8 @@ var Module = fx.Options(
 	fx.Provide(
 		chaosdaemon.New,
 		recorder.NewRecorderBuilder,
-	),
-	fx.Provide(
 		common.AllSteps,
+		clusterregistry.New,
 	),
 	fx.Invoke(common.Bootstrap),
 	fx.Invoke(podhttpchaos.Bootstrap),
@@ -44,6 +45,7 @@ var Module = fx.Options(
 	fx.Invoke(podiochaos.Bootstrap),
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
 	fx.Invoke(statuscheck.Bootstrap),
+	fx.Invoke(remotecluster.Bootstrap),
 
 	schedule.Module,
 	chaosimpl.AllImpl)

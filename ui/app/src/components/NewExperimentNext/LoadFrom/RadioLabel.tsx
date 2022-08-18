@@ -14,9 +14,7 @@
  * limitations under the License.
  *
  */
-
 import { Box, Typography } from '@mui/material'
-
 import _ from 'lodash'
 
 const RadioLabel = (label: string, uuid?: string) => (

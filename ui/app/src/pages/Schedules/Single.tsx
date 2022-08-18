@@ -20,9 +20,8 @@ import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, Button, Grid, Grow } from '@mui/material'
 import api from 'api'
-import { Event } from 'api/events.type'
-import { ScheduleSingle } from 'api/schedules.type'
 import yaml from 'js-yaml'
+import { CoreEvent, TypesScheduleDetail } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -52,12 +51,14 @@ const Single = () => {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<ScheduleSingle>()
-  const [events, setEvents] = useState<Event[]>([])
+  const [single, setSingle] = useState<TypesScheduleDetail>()
+  const [events, setEvents] = useState<CoreEvent[]>([])
 
   const fetchSchedule = () => {
     api.schedules
-      .single(uuid!)
+      .schedulesUidGet({
+        uid: uuid!,
+      })
       .then(({ data }) => setSingle(data))
       .catch(console.error)
   }
@@ -70,7 +71,7 @@ const Single = () => {
   useEffect(() => {
     const fetchEvents = () => {
       api.events
-        .events({ object_id: uuid, limit: 999 })
+        .eventsGet({ objectId: uuid, limit: 999 })
         .then(({ data }) => setEvents(data))
         .catch(console.error)
         .finally(() => {
@@ -123,15 +124,15 @@ const Single = () => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.schedules.del
+        actionFunc = api.schedules.schedulesUidDelete
 
         break
       case 'pause':
-        actionFunc = api.schedules.pause
+        actionFunc = api.schedules.schedulesPauseUidPut
 
         break
       case 'start':
-        actionFunc = api.schedules.start
+        actionFunc = api.schedules.schedulesStartUidPut
 
         break
       default:
@@ -139,7 +140,7 @@ const Single = () => {
     }
 
     if (actionFunc) {
-      actionFunc(uuid)
+      actionFunc({ uid: uuid })
         .then(() => {
           dispatch(
             setAlert({

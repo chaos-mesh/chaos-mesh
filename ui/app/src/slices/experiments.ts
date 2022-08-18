@@ -14,32 +14,51 @@
  * limitations under the License.
  *
  */
-
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import api from 'api'
+import { V1alpha1PodSelectorSpec } from 'openapi'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
-import { Scope } from 'components/NewExperiment/types'
-import api from 'api'
 
 export const getNamespaces = createAsyncThunk(
   'common/chaos-available-namespaces',
-  async () => (await api.common.chaosAvailableNamespaces()).data
+  async () => (await api.common.commonChaosAvailableNamespacesGet()).data
 )
 export const getLabels = createAsyncThunk(
   'common/labels',
-  async (podNamespaceList: string[]) => (await api.common.labels(podNamespaceList)).data
+  async (podNamespaceList: string[]) =>
+    (
+      await api.common.commonLabelsGet({
+        podNamespaceList: podNamespaceList.join(','),
+      })
+    ).data
 )
 export const getAnnotations = createAsyncThunk(
   'common/annotations',
-  async (podNamespaceList: string[]) => (await api.common.annotations(podNamespaceList)).data
+  async (podNamespaceList: string[]) =>
+    (
+      await api.common.commonAnnotationsGet({
+        podNamespaceList: podNamespaceList.join(','),
+      })
+    ).data
 )
-export const getCommonPodsByNamespaces = createAsyncThunk(
+export const getCommonPods = createAsyncThunk(
   'common/pods',
-  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
+  async (data: V1alpha1PodSelectorSpec) =>
+    (
+      await api.common.commonPodsPost({
+        request: data,
+      })
+    ).data
 )
-export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
+export const getNetworkTargetPods = createAsyncThunk(
   'network/target/pods',
-  async (data: Partial<Scope['selector']>) => (await api.common.pods(data)).data
+  async (data: V1alpha1PodSelectorSpec) =>
+    (
+      await api.common.commonPodsPost({
+        request: data,
+      })
+    ).data
 )
 
 export type Env = 'k8s' | 'physic'
@@ -77,6 +96,10 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
+    clearPods(state) {
+      state.pods = []
+      state.networkTargetPods = []
+    },
     clearNetworkTargetPods(state) {
       state.networkTargetPods = []
     },
@@ -128,16 +151,17 @@ const experimentsSlice = createSlice({
     builder.addCase(getAnnotations.fulfilled, (state, action) => {
       state.annotations = action.payload
     })
-    builder.addCase(getCommonPodsByNamespaces.fulfilled, (state, action) => {
-      state.pods = action.payload as any[]
+    builder.addCase(getCommonPods.fulfilled, (state, action) => {
+      state.pods = action.payload
     })
-    builder.addCase(getNetworkTargetPodsByNamespaces.fulfilled, (state, action) => {
-      state.networkTargetPods = action.payload as any[]
+    builder.addCase(getNetworkTargetPods.fulfilled, (state, action) => {
+      state.networkTargetPods = action.payload
     })
   },
 })
 
 export const {
+  clearPods,
   clearNetworkTargetPods,
   setStep1,
   setStep2,

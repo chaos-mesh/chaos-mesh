@@ -22,10 +22,10 @@ export IMAGE_DEV_ENV_BUILD ?= 0
 # Every branch should have its own image tag for build-env and dev-env
 # using := with ifeq instead of ?= for performance issue
 ifeq ($(IMAGE_BUILD_ENV_TAG),)
-IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
 endif
 ifeq ($(IMAGE_DEV_ENV_TAG),)
-IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
 endif
 
 export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
@@ -110,7 +110,7 @@ schedule-migration.tar.gz: schedule-migration
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
 
-NAMESPACE ?= chaos-testing
+NAMESPACE ?= chaos-mesh
 # Install CRDs into a cluster
 install: manifests
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
@@ -118,7 +118,7 @@ install: manifests
 clean:
 	rm -rf $(CLEAN_TARGETS)
 
-SKYWALKING_EYES_HEADER = /bin/license-eye header -c ./.github/.licenserc.yaml
+SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
 boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
 boilerplate: images/dev-env/.dockerbuilt
 	$(SKYWALKING_EYES_HEADER) check
@@ -161,12 +161,15 @@ images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
 
 pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/build-env/.dockerbuilt
-	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o
+	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
+	cc -c ./pkg/time/fakeclock/fake_clock_gettime.c -fPIE -O2 -o pkg/time/fakeclock/fake_clock_gettime.o $$CFLAGS
 pkg/time/fakeclock/fake_gettimeofday.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c images/build-env/.dockerbuilt
-	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o
+	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
+	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon-helper/main.go,1))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
@@ -204,7 +207,7 @@ $(2)/.dockerbuilt:$(3) $(2)/Dockerfile
 	touch $(2)/.dockerbuilt
 endef
 
-$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause))
+$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause images/chaos-daemon/bin/cdh))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
 $(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
@@ -353,9 +356,9 @@ install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
 install.sh: images/dev-env/.dockerbuilt
 	./hack/update_install_script.sh
 
-swagger_spec:SHELL:=$(RUN_IN_DEV_SHELL)
+swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config \

@@ -18,10 +18,11 @@ import { useDrag } from 'react-dnd'
 
 import BareNode from '../BareNode'
 import type { BareNodeProps } from '../BareNode'
+import { SpecialTemplateType } from '../utils/convert'
 import { ElementTypes } from './types'
 
 interface DraggableBareNodeProps extends BareNodeProps {
-  elementType: ElementTypes
+  elementType: ElementTypes | SpecialTemplateType
   act?: string
 
   /**

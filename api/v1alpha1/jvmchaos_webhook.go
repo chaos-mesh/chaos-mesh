@@ -79,6 +79,15 @@ func (in *JVMChaosSpec) Validate(root interface{}, path *field.Path) field.Error
 		if len(in.RuleData) == 0 {
 			allErrs = append(allErrs, field.Invalid(path, in, "rule data not provide"))
 		}
+	case JVMMySQLAction:
+		if len(in.MySQLConnectorVersion) == 0 {
+			allErrs = append(allErrs, field.Invalid(path, in, "MySQL connector version not provided"))
+		} else if in.MySQLConnectorVersion != "5" && in.MySQLConnectorVersion != "8" {
+			allErrs = append(allErrs, field.Invalid(path, in, "MySQL connector version only support 5.X.X(set to 5) and 8.X.X(set to 8)"))
+		}
+		if len(in.ThrowException) == 0 && in.LatencyDuration == 0 {
+			allErrs = append(allErrs, field.Invalid(path, in, "must set one of exception or latency"))
+		}
 	case "":
 		allErrs = append(allErrs, field.Invalid(path, in, "action not provided"))
 	default:

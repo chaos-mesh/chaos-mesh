@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
-
-import { FormikProps, FormikValues, getIn } from 'formik'
 import { InputAdornment, MenuItem } from '@mui/material'
-import { SelectField, TextField } from 'components/FormField'
+import { FormikProps, FormikValues, getIn } from 'formik'
 import { number, string } from 'yup'
 
+import { SelectField, TextField } from 'components/FormField'
 import { T } from 'components/T'
 
 export interface ScheduleSpecific {

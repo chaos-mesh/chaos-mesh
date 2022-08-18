@@ -43,14 +43,13 @@ type SelectImpl struct {
 type NodeVolumePath struct {
 	*container.Container
 
-	nodeName string
 	// volumePath is a volumePath to the block device or directory on a node
 	volumePath string
 }
 
 func (n *NodeVolumePath) Id() string {
 	// The path may contain "/", but it doesn't matter
-	return n.nodeName + "/" + n.volumePath
+	return n.Container.Id() + "/" + n.volumePath
 }
 
 func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.ContainerNodeVolumePathSelector) ([]*NodeVolumePath, error) {
@@ -69,7 +68,6 @@ func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.Container
 				if volume.HostPath != nil {
 					result = append(result, &NodeVolumePath{
 						Container:  container,
-						nodeName:   container.Spec.NodeName,
 						volumePath: volume.HostPath.Path,
 					})
 				} else if volume.PersistentVolumeClaim != nil {
@@ -89,13 +87,11 @@ func (impl *SelectImpl) Select(ctx context.Context, selector *v1alpha1.Container
 						if pv.Spec.HostPath != nil {
 							result = append(result, &NodeVolumePath{
 								Container:  container,
-								nodeName:   container.Spec.NodeName,
 								volumePath: pv.Spec.HostPath.Path,
 							})
 						} else if pv.Spec.Local != nil {
 							result = append(result, &NodeVolumePath{
 								Container:  container,
-								nodeName:   container.Spec.NodeName,
 								volumePath: pv.Spec.Local.Path,
 							})
 						} else {

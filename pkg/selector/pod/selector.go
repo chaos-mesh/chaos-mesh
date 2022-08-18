@@ -155,7 +155,10 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	namespaceCheck := make(map[string]bool)
-
+	logger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		return pods, errors.Wrap(err, "failed to create logger")
+	}
 	for ns, names := range spec.Pods {
 		if !clusterScoped {
 			if targetNamespace != ns {
@@ -167,7 +170,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 		if enableFilterNamespace {
 			allow, ok := namespaceCheck[ns]
 			if !ok {
-				allow = genericnamespace.CheckNamespace(ctx, c, ns)
+				allow = genericnamespace.CheckNamespace(ctx, c, ns, logger)
 				namespaceCheck[ns] = allow
 			}
 			if !allow {
@@ -251,7 +254,10 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 	selectorChain generic.SelectorChain, enableFilterNamespace bool) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	namespaceCheck := make(map[string]bool)
-
+	logger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		return pods, errors.Wrap(err, "failed to create logger")
+	}
 	if err := selectorChain.ListObjects(c, r,
 		func(listFunc generic.ListFunc, opts client.ListOptions) error {
 			var podList v1.PodList
@@ -260,7 +266,7 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 					if enableFilterNamespace {
 						allow, ok := namespaceCheck[namespace]
 						if !ok {
-							allow = genericnamespace.CheckNamespace(ctx, c, namespace)
+							allow = genericnamespace.CheckNamespace(ctx, c, namespace, logger)
 							namespaceCheck[namespace] = allow
 						}
 						if !allow {

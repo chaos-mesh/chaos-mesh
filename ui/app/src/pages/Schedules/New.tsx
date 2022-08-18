@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 import { Grid } from '@mui/material'
 import NewExperiment from 'components/NewExperimentNext'
 import api from 'api'
@@ -32,7 +33,7 @@ const New = () => {
 
   const onSubmit = (parsedValues: any) => {
     api.schedules
-      .newSchedule(parsedValues)
+      .schedulesPost({ schedule: parsedValues })
       .then(() => {
         dispatch(
           setAlert({

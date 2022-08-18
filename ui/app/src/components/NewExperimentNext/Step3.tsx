@@ -67,7 +67,9 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
         onSubmit(parsedValues)
       } else {
         api.experiments
-          .newExperiment(parsedValues)
+          .experimentsPost({
+            chaos: parsedValues,
+          })
           .then(() => {
             dispatch(
               setAlert({

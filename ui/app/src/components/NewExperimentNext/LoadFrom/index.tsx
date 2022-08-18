@@ -15,21 +15,24 @@
  *
  */
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
-import { PreDefinedValue, getDB } from 'lib/idb'
+import api from 'api'
+import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
 import { useEffect, useState } from 'react'
+import { useIntl } from 'react-intl'
 
-import { Archive } from 'api/archives.type'
-import { Experiment } from 'api/experiments.type'
 import Paper from '@ui/mui-extends/esm/Paper'
-import RadioLabel from './RadioLabel'
-import { Schedule } from 'api/schedules.type'
 import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
 import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
-import i18n from 'components/T'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
+
 import { useStoreDispatch } from 'store'
+
+import { setAlert } from 'slices/globalStatus'
+
+import i18n from 'components/T'
+
+import { PreDefinedValue, getDB } from 'lib/idb'
+
+import RadioLabel from './RadioLabel'
 
 interface LoadFromProps {
   callback?: (data: any) => void
@@ -44,9 +47,9 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<{
-    experiments: Experiment[]
-    archives: Archive[]
-    schedules: Schedule[]
+    experiments: TypesExperiment[]
+    archives: TypesArchive[]
+    schedules: TypesSchedule[]
   }>({
     experiments: [],
     archives: [],
@@ -56,12 +59,12 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
   const [radio, setRadio] = useState('')
 
   useEffect(() => {
-    const fetchExperiments = api.experiments.experiments
-    const fetchArchives = inSchedule ? api.schedules.archives : api.archives.archives
+    const fetchExperiments = api.experiments.experimentsGet
+    const fetchArchives = inSchedule ? api.archives.archivesSchedulesGet : api.archives.archivesGet
     const promises: Promise<any>[] = [fetchExperiments(), fetchArchives()]
 
     if (inSchedule) {
-      promises.push(api.schedules.schedules())
+      promises.push(api.schedules.schedulesGet())
     }
 
     const fetchAll = async () => {
@@ -110,20 +113,20 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
     let apiRequest
     switch (type) {
       case 's':
-        apiRequest = api.schedules.single
+        apiRequest = api.schedules.schedulesUidGet
         break
       case 'e':
-        apiRequest = api.experiments.single
+        apiRequest = api.experiments.experimentsUidGet
         break
       case 'a':
-        apiRequest = inSchedule ? api.schedules.singleArchive : api.archives.single
+        apiRequest = inSchedule ? api.archives.archivesSchedulesUidGet : api.archives.archivesUidGet
         break
     }
 
     setRadio(e.target.value)
 
     if (apiRequest) {
-      apiRequest(uuid)
+      apiRequest({ uid: uuid })
         .then(({ data }) => {
           callback && callback(data.kube_object)
 
@@ -155,7 +158,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
                       key={d.uid}
                       value={`s+${d.uid}`}
                       control={<Radio color="primary" />}
-                      label={RadioLabel(d.name, d.uid)}
+                      label={RadioLabel(d.name!, d.uid)}
                     />
                   ))}
                 </Box>
@@ -182,7 +185,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
                       key={d.uid}
                       value={`e+${d.uid}`}
                       control={<Radio color="primary" />}
-                      label={RadioLabel(d.name, d.uid)}
+                      label={RadioLabel(d.name!, d.uid)}
                     />
                   ))}
                 </Box>
@@ -207,7 +210,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
                   key={d.uid}
                   value={`a+${d.uid}`}
                   control={<Radio color="primary" />}
-                  label={RadioLabel(d.name, d.uid)}
+                  label={RadioLabel(d.name!, d.uid)}
                 />
               ))}
             </Box>

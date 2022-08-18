@@ -14,14 +14,15 @@
  * limitations under the License.
  *
  */
-
-import { AppBar, Box, IconButton, Toolbar } from '@mui/material'
-
 import MenuIcon from '@mui/icons-material/Menu'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
-import Namespace from './Namespace'
-import Search from 'components/Search'
+import { AppBar, Box, IconButton, Toolbar } from '@mui/material'
+
 import Space from '@ui/mui-extends/esm/Space'
+
+import Search from 'components/Search'
+
+import Namespace from './Namespace'
 
 interface HeaderProps {
   openDrawer: boolean

@@ -88,14 +88,14 @@ spec:
     - IPC_LOCK
   {{- end }}
   allowedHostPaths:
-    - pathPrefix: {{ .Values.chaosDaemon.socketPath }}
+    - pathPrefix: {{template "chaos-daemon.socket-path" . }}
       readOnly: false
     - pathPrefix: /sys
       readOnly: false
+    - pathPrefix: /lib/modules
+      readOnly: false
     {{- if .Values.bpfki.create }}
     - pathPrefix: /etc/localtime
-      readOnly: false
-    - pathPrefix: /lib/modules
       readOnly: false
     - pathPrefix: /usr/src
       readOnly: false

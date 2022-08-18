@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
-
+import { FormControlLabel } from '@mui/material'
 import Checkbox, { CheckboxProps as MuiCheckboxProps } from '@mui/material/Checkbox'
 
 import FormControl from '../FormControl'
-import { FormControlLabel } from '@mui/material'
 
 export type CheckboxProps = MuiCheckboxProps & {
   /**

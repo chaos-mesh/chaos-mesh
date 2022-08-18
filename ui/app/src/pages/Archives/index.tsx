@@ -14,31 +14,35 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useCallback, useEffect, useState } from 'react'
-
-import { Archive } from 'api/archives.type'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import Space from '@ui/mui-extends/esm/Space'
-import Tab from '@mui/material/Tab'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
-import _ from 'lodash'
+import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
+import Tab from '@mui/material/Tab'
 import api from 'api'
-import i18n from 'components/T'
-import { transByKind } from 'lib/byKind'
+import _ from 'lodash'
+import { TypesArchive } from 'openapi'
+import { useCallback, useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'lib/hooks'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch } from 'store'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import NotFound from 'components/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
+import i18n from 'components/T'
+
+import { transByKind } from 'lib/byKind'
+import { useQuery } from 'lib/hooks'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -61,7 +65,7 @@ export default function Archives() {
 
   const [panel, setPanel] = useState<PanelType>(kind as PanelType)
   const [loading, setLoading] = useState(true)
-  const [archives, setArchives] = useState<Archive[]>([])
+  const [archives, setArchives] = useState<TypesArchive[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
@@ -70,14 +74,14 @@ export default function Archives() {
     let request
     switch (kind) {
       case 'workflow':
-        request = api.workflows.archives
+        request = api.archives.archivesWorkflowsGet
         break
       case 'schedule':
-        request = api.schedules.archives
+        request = api.archives.archivesSchedulesGet
         break
       case 'experiment':
       default:
-        request = api.archives.archives
+        request = api.archives.archivesGet
         break
     }
 
@@ -109,34 +113,38 @@ export default function Archives() {
       case 'delete':
         switch (kind) {
           case 'workflow':
-            actionFunc = api.workflows.delArchive
+            actionFunc = api.archives.archivesWorkflowsUidDelete
             break
           case 'schedule':
-            actionFunc = api.schedules.delArchive
+            actionFunc = api.archives.archivesSchedulesUidDelete
             break
           case 'experiment':
           default:
-            actionFunc = api.archives.del
+            actionFunc = api.archives.archivesUidDelete
             break
         }
-        arg = uuid
+        arg = { uid: uuid }
 
         break
       case 'deleteMulti':
         action = 'delete'
         switch (kind) {
           case 'workflow':
-            actionFunc = api.workflows.delArchives
+            actionFunc = api.archives.archivesWorkflowsDelete
             break
           case 'schedule':
-            actionFunc = api.schedules.delArchives
+            actionFunc = api.archives.archivesSchedulesDelete
             break
           case 'experiment':
           default:
-            actionFunc = api.archives.delMulti
+            actionFunc = api.archives.archivesDelete
             break
         }
-        arg = Object.keys(batch).filter((d) => batch[d] === true)
+        arg = {
+          uids: Object.keys(batch)
+            .filter((d) => batch[d] === true)
+            .join(','),
+        }
         setBatch({})
 
         break
@@ -158,13 +166,13 @@ export default function Archives() {
     }
   }
 
-  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [archives[0].uid]: true } : {})
+  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [archives[0].uid!]: true } : {})
 
   const handleBatchSelectAll = () =>
     setBatch(
       batchLength <= archives.length
         ? archives.reduce<Record<uuid, boolean>>((acc, d) => {
-            acc[d.uid] = true
+            acc[d.uid!] = true
 
             return acc
           }, {})

@@ -15,7 +15,7 @@
  *
  */
 import { MenuItem } from '@mui/material'
-import type { FormikErrors, FormikTouched } from 'formik'
+import { useFormikContext } from 'formik'
 import { getIn } from 'formik'
 
 import { useStoreSelector } from 'store'
@@ -31,11 +31,11 @@ interface InfoProps {
   belong: Belong
   kind: string
   action?: string
-  errors: FormikErrors<Record<string, any>>
-  touched: FormikTouched<Record<string, any>>
 }
 
-export default function Info({ belong, kind, action, errors, touched }: InfoProps) {
+export default function Info({ belong, kind, action }: InfoProps) {
+  const { errors, touched } = useFormikContext()
+
   const { namespaces } = useStoreSelector((state) => state.experiments)
 
   return (
@@ -81,7 +81,7 @@ export default function Info({ belong, kind, action, errors, touched }: InfoProp
             name="name"
             label={<T id="common.name" />}
             helperText={
-              getIn(errors, 'name') && getIn(touched, 'name') ? getIn(errors, 'name') : <T id="newE.basic.nameHelper" />
+              getIn(errors, 'name') && getIn(touched, 'name') ? getIn(errors, 'name') : <T id="newW.node.nameHelper" />
             }
             error={getIn(errors, 'name') && getIn(touched, 'name')}
           />

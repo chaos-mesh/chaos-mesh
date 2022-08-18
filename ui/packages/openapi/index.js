@@ -14,17 +14,16 @@
  * limitations under the License.
  *
  */
-
-import { appPath, ignores } from './constants.js'
-import { getUIFormEnum, isUIFormIgnore } from './utils.js'
-
+import fs from 'fs'
+import yaml from 'js-yaml'
 import _get from 'lodash.get'
 import _set from 'lodash.set'
-import fs from 'fs'
-import { nodeToField } from './factory.js'
 import sig from 'signale'
 import ts from 'typescript'
-import yaml from 'js-yaml'
+
+import { appPath, ignores } from './constants.js'
+import { nodeToField } from './factory.js'
+import { getUIFormEnum, isUIFormIgnore } from './utils.js'
 
 const { factory } = ts
 

@@ -14,32 +14,72 @@
  * limitations under the License.
  *
  */
+import { arrToObjBySep, isDeepEmpty, sanitize } from './utils'
 
-import { sanitize } from './utils'
+describe('lib/utils', () => {
+  describe('arrToObjBySep', () => {
+    it('should convert array to object', () => {
+      const arr = ['foo=bar', 'baz=qux']
+      const result = arrToObjBySep(arr, '=')
 
-test('sanitize an object', () => {
-  expect(
-    sanitize({
-      a: 1,
-      b: '',
-      c: null,
-      d: 'd',
+      expect(result).toEqual({ foo: 'bar', baz: 'qux' })
     })
-  ).toEqual({
-    a: 1,
-    d: 'd',
   })
-})
 
-test('sanitize an object where all values are empty', () => {
-  expect(
-    sanitize({
-      a: 0,
-      b: '',
-      c: null,
-      d: undefined,
-      e: [],
-      f: {},
+  describe('isDeepEmpty', () => {
+    it('checks some primitive values', () => {
+      expect(isDeepEmpty(true)).toBeFalsy()
+      expect(isDeepEmpty(false)).toBeTruthy()
+      expect(isDeepEmpty(null)).toBeTruthy()
+      expect(isDeepEmpty(undefined)).toBeTruthy()
+      expect(isDeepEmpty(1)).toBeFalsy()
+      expect(isDeepEmpty(0)).toBeTruthy()
+      expect(isDeepEmpty(NaN)).toBeTruthy()
+      expect(isDeepEmpty('string')).toBeFalsy()
+      expect(isDeepEmpty('')).toBeTruthy()
     })
-  ).toEqual({})
+
+    it('checks arrays', () => {
+      expect(isDeepEmpty([])).toBeTruthy()
+      expect(isDeepEmpty([1])).toBeFalsy()
+    })
+
+    it('checks some objects', () => {
+      expect(isDeepEmpty({})).toBeTruthy()
+      expect(isDeepEmpty({ a: 1 })).toBeFalsy()
+    })
+
+    it('checks a nested object', () => {
+      expect(isDeepEmpty({ a: { b: { c: {} } } })).toBeTruthy()
+    })
+  })
+
+  describe('sanitize', () => {
+    it('sanitizes an normal object', () => {
+      expect(
+        sanitize({
+          a: 1,
+          b: '',
+          c: null,
+          d: 'd',
+        })
+      ).toEqual({
+        a: 1,
+        d: 'd',
+      })
+    })
+
+    it('sanitizes an object where all values are empty', () => {
+      expect(
+        sanitize({
+          a: 0,
+          b: '',
+          c: null,
+          d: undefined,
+          e: [],
+          f: {},
+        })
+      ).toEqual({})
+    })
+  })
 })

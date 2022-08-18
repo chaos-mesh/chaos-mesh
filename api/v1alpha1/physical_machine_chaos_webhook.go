@@ -116,6 +116,10 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateNetworkBandwidthAction(in.NetworkBandwidth)
 	case PMNetworkDNSAction:
 		validateConfigErr = validateNetworkDNSAction(in.NetworkDNS)
+	case PMNetworkFloodAction:
+		validateConfigErr = validateNetworkFlood(in.NetworkFlood)
+	case PMNetworkDownAction:
+		validateConfigErr = validateNetworkDownAction(in.NetworkDown)
 	case PMProcessAction:
 		validateConfigErr = validateProcessAction(in.Process)
 	case PMJVMExceptionAction:
@@ -130,8 +134,40 @@ func (in *PhysicalMachineChaosSpec) Validate(root interface{}, path *field.Path)
 		validateConfigErr = validateJVMStressAction(in.JVMStress)
 	case PMJVMRuleDataAction:
 		validateConfigErr = validateJVMRuleDataAction(in.JVMRuleData)
+	case PMJVMMySQLAction:
+		validateConfigErr = validateJVMMySQLAction(in.JVMMySQL)
 	case PMClockAction:
 		validateConfigErr = validateClockAction(in.Clock)
+	case PMRedisExpirationAction:
+		validateConfigErr = validateRedisExpirationAction(in.RedisExpiration)
+	case PMRedisCacheLimitAction:
+		validateConfigErr = validateRedisCacheLimitAction(in.RedisCacheLimit)
+	case PMRedisPenetrationAction:
+		validateConfigErr = validateRedisPenetrationAction(in.RedisPenetration)
+	case PMRedisSentinelStopAction:
+		validateConfigErr = validateRedisSentinelStopAction(in.RedisSentinelStop)
+	case PMRedisSentinelRestartAction:
+		validateConfigErr = validateRedisSentinelRestartAction(in.RedisSentinelRestart)
+	case PMKafkaFillAction:
+		validateConfigErr = validateKafkaFillAction(in.KafkaFill)
+	case PMKafkaFloodAction:
+		validateConfigErr = validateKafkaFloodAction(in.KafkaFlood)
+	case PMKafkaIOAction:
+		validateConfigErr = validateKafkaIOAction(in.KafkaIO)
+	case PMFileCreateAction:
+		validateConfigErr = validateFileCreateAction(in.FileCreate)
+	case PMFileModifyPrivilegeAction:
+		validateConfigErr = validateFileModifyPrivilegeAction(in.FileModifyPrivilege)
+	case PMFileDeleteAction:
+		validateConfigErr = validateFileDeleteAction(in.FileDelete)
+	case PMFileRenameAction:
+		validateConfigErr = validateFileRenameAction(in.FileRename)
+	case PMFileAppendAction:
+		validateConfigErr = validateFileAppendAction(in.FileAppend)
+	case PMFileReplaceAction:
+		validateConfigErr = validateFileReplaceAction(in.FileReplace)
+	case PMUserDefinedAction:
+		validateConfigErr = validateUserDefinedAction(in.UserDefined)
 	default:
 	}
 
@@ -300,6 +336,37 @@ func validateNetworkDNSAction(spec *NetworkDNSSpec) error {
 	return nil
 }
 
+func validateNetworkFlood(spec *NetworkFloodSpec) error {
+	if len(spec.IPAddress) == 0 {
+		return errors.New("ip-address is required")
+	}
+
+	if len(spec.Port) == 0 {
+		return errors.New("port is required")
+	}
+
+	if len(spec.Rate) == 0 {
+		return errors.New("rate is required")
+	}
+
+	if len(spec.Duration) == 0 {
+		return errors.New("duration is required")
+	}
+
+	return nil
+}
+
+func validateNetworkDownAction(spec *NetworkDownSpec) error {
+	if len(spec.Device) == 0 {
+		return errors.New("device is required")
+	}
+	if len(spec.Duration) == 0 {
+		return errors.New("duration is required")
+	}
+
+	return nil
+}
+
 func validateProcessAction(spec *ProcessSpec) error {
 	if len(spec.Process) == 0 {
 		return errors.New("process is required")
@@ -404,6 +471,21 @@ func validateJVMRuleDataAction(spec *JVMRuleDataSpec) error {
 	return nil
 }
 
+func validateJVMMySQLAction(spec *PMJVMMySQLSpec) error {
+	if err := CheckPid(spec.Pid); err != nil {
+		return err
+	}
+
+	if len(spec.MySQLConnectorVersion) == 0 {
+		return errors.New("MySQL connector version not provided")
+	}
+
+	if len(spec.ThrowException) == 0 && spec.LatencyDuration == 0 {
+		return errors.New("must set one of exception or latency")
+	}
+
+	return nil
+}
 func validateClockAction(spec *ClockSpec) error {
 	if err := CheckPid(spec.Pid); err != nil {
 		return err
@@ -486,4 +568,186 @@ func (in *NetworkBandwidthSpec) Validate(root interface{}, path *field.Path) fie
 	}
 
 	return allErrs
+}
+
+var ValidOptions = map[string]bool{"XX": true, "NX": true, "GT": true, "LT": true}
+
+func validateRedisCommonAction(spec *RedisCommonSpec) error {
+	if len(spec.Addr) == 0 {
+		return errors.New("addr of redis server is required")
+	}
+
+	return nil
+}
+
+func validateRedisExpirationAction(spec *RedisExpirationSpec) error {
+	if err := validateRedisCommonAction(&spec.RedisCommonSpec); err != nil {
+		return err
+	}
+
+	if _, ok := ValidOptions[spec.Option]; ok {
+		return errors.New("option invalid")
+	}
+
+	return nil
+}
+
+func validateRedisCacheLimitAction(spec *RedisCacheLimitSpec) error {
+	if err := validateRedisCommonAction(&spec.RedisCommonSpec); err != nil {
+		return err
+	}
+
+	if spec.Size != "0" && spec.Percent != "" {
+		return errors.New("only one of size and percent can be set")
+	}
+
+	return nil
+}
+
+func validateRedisPenetrationAction(spec *RedisPenetrationSpec) error {
+	if err := validateRedisCommonAction(&spec.RedisCommonSpec); err != nil {
+		return err
+	}
+
+	if spec.RequestNum == 0 {
+		return errors.New("requestNum is required")
+	}
+
+	return nil
+}
+
+func validateRedisSentinelStopAction(spec *RedisSentinelStopSpec) error {
+	return validateRedisCommonAction(&spec.RedisCommonSpec)
+}
+
+func validateRedisSentinelRestartAction(spec *RedisSentinelRestartSpec) error {
+	if err := validateRedisCommonAction(&spec.RedisCommonSpec); err != nil {
+		return err
+	}
+
+	if len(spec.Conf) == 0 {
+		return errors.New("conf is required to restart the sentinel")
+	}
+
+	return nil
+}
+
+func validateKafkaCommonAction(spec *KafkaCommonSpec) error {
+	if spec.Host == "" {
+		return errors.New("host is required")
+	}
+
+	if spec.Port == 0 {
+		return errors.New("port is required")
+	}
+
+	return nil
+}
+
+func validateKafkaFillAction(spec *KafkaFillSpec) error {
+	if err := validateKafkaCommonAction(&spec.KafkaCommonSpec); err != nil {
+		return err
+	}
+
+	if spec.MaxBytes == 0 {
+		return errors.New("max bytes is required")
+	}
+
+	if spec.ReloadCommand == "" {
+		return errors.New("reload command is required")
+	}
+
+	return nil
+}
+
+func validateKafkaFloodAction(spec *KafkaFloodSpec) error {
+	if err := validateKafkaCommonAction(&spec.KafkaCommonSpec); err != nil {
+		return err
+	}
+
+	if spec.Threads == 0 {
+		return errors.New("threads is required")
+	}
+
+	return nil
+}
+
+func validateKafkaIOAction(spec *KafkaIOSpec) error {
+	if !spec.NonReadable && !spec.NonWritable {
+		return errors.New("at least one of non-readable or non-writable is required")
+	}
+
+	return nil
+}
+
+func validateFileCreateAction(spec *FileCreateSpec) error {
+	if len(spec.FileName) == 0 && len(spec.DirName) == 0 {
+		return errors.New("one of file-name and dir-name is required")
+	}
+
+	return nil
+}
+
+func validateFileModifyPrivilegeAction(spec *FileModifyPrivilegeSpec) error {
+	if len(spec.FileName) == 0 {
+		return errors.New("file name is required")
+	}
+
+	if spec.Privilege == 0 {
+		return errors.New("file privilege is required")
+	}
+
+	return nil
+}
+
+func validateFileDeleteAction(spec *FileDeleteSpec) error {
+	if len(spec.FileName) == 0 && len(spec.DirName) == 0 {
+		return errors.New("one of file-name and dir-name is required")
+	}
+
+	return nil
+}
+
+func validateFileRenameAction(spec *FileRenameSpec) error {
+	if len(spec.SourceFile) == 0 || len(spec.DestFile) == 0 {
+		return errors.New("both source file and destination file are required")
+	}
+
+	return nil
+}
+
+func validateFileAppendAction(spec *FileAppendSpec) error {
+	if len(spec.FileName) == 0 {
+		return errors.New("file-name is required")
+	}
+
+	if len(spec.Data) == 0 {
+		return errors.New("append data is required")
+	}
+
+	return nil
+}
+
+func validateFileReplaceAction(spec *FileReplaceSpec) error {
+	if len(spec.FileName) == 0 {
+		return errors.New("file-name is required")
+	}
+
+	if len(spec.OriginStr) == 0 || len(spec.DestStr) == 0 {
+		return errors.New("both origin and destination string are required")
+	}
+
+	return nil
+}
+
+func validateUserDefinedAction(spec *UserDefinedSpec) error {
+	if len(spec.AttackCmd) == 0 {
+		return errors.New("attack command not provided")
+	}
+
+	if len(spec.RecoverCmd) == 0 {
+		return errors.New("recover command not provided")
+	}
+
+	return nil
 }
