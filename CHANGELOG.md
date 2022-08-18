@@ -34,6 +34,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
 - Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
 - Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
 
 ### Security
 
@@ -78,6 +79,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Simplified logic and add test case about finalizers. [#3422](https://github.com/chaos-mesh/chaos-mesh/pull/3422)
 - Update API requests with OpenAPI generated client [#2926](https://github.com/chaos-mesh/chaos-mesh/pull/2926)
 - Implement some missing methods in ctrl server [#3462](https://github.com/chaos-mesh/chaos-mesh/pull/3462)
+- Use `net.Interfaces()` to implement `getAllInterfaces()` [#3484](https://github.com/chaos-mesh/chaos-mesh/pull/3484)
 
 ### Deprecated
 
