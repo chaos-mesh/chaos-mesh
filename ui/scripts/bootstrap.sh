@@ -51,7 +51,6 @@ elif [[ ! -f $CHAOS_DASHBOARD_BIN/chaos-dashboard ]]; then
 
   cd ..
   IN_DOCKER=1 make images/chaos-dashboard/bin/chaos-dashboard
-  cd -
 else
   echo "Already build chaos-dashboard."
 fi

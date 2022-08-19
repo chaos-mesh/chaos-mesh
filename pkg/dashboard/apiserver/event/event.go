@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,24 +35,25 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-var log = u.Log.WithName("events")
-
 // Service defines a handler service for events.
 type Service struct {
 	event         core.EventStore
 	workflowStore core.WorkflowStore
 	conf          *config.ChaosDashboardConfig
+	logger        logr.Logger
 }
 
 func NewService(
 	event core.EventStore,
 	workflowStore core.WorkflowStore,
 	conf *config.ChaosDashboardConfig,
+	logger logr.Logger,
 ) *Service {
 	return &Service{
 		event:         event,
 		workflowStore: workflowStore,
 		conf:          conf,
+		logger:        logger.WithName("events"),
 	}
 }
 
@@ -88,7 +90,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace with", ns)
 	}
 
 	start, _ := time.Parse(time.RFC3339, c.Query("start"))
@@ -144,7 +146,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace with", ns)
 	}
 
 	// we should fetch the events for Workflow and related WorkflowNode, so we need namespaced name at first
@@ -259,7 +261,7 @@ func (s *Service) get(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace with", ns)
 	}
 
 	event, err := s.event.Find(context.Background(), uint(intID))
