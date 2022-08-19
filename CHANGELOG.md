@@ -17,7 +17,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Replace io/ioutil package with os package. [#3539](https://github.com/chaos-mesh/chaos-mesh/pull/3539)
 - Refine logging in pkg/dashboard/apiserver/event, moved package level variable log into struct Service as a field. [#3528](https://github.com/chaos-mesh/chaos-mesh/pull/3528)
-- Change e2e config settings to append "pause image" args. [#3566](https://github.com/chaos-mesh/chaos-mesh/pull/3566)
+- Change e2e config settings to append "pause image" args. [#3567](https://github.com/chaos-mesh/chaos-mesh/pull/3567)
 
 ### Deprecated
 
