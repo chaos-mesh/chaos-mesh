@@ -27,7 +27,7 @@ type Config struct {
 	DaemonImage          string
 	DaemonTag            string
 	E2EImage             string
-	PauseImage 	     string
+	PauseImage           string
 	ChaosDNSImage        string
 	InstallChaosMesh     bool
 	EnableDashboard      bool
