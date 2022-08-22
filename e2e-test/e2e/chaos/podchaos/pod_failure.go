@@ -17,7 +17,6 @@ package podchaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -32,6 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 )
