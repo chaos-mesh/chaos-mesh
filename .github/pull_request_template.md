@@ -22,8 +22,8 @@ Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new
 
 ### Related changes
 
-- [ ] This change also requires further upadtes to `chaos-mesh/website` (e.g. docs)
-- [ ] This change also requires further updates to `UI interface`
+- [ ] This change also requires further updates to the [website](https://github.com/chaos-mesh/website) (e.g. docs)
+- [ ] This change also requires further updates to the `UI interface`
 - Need to **cheery-pick to release branches**
   - [ ] release-2.3
   - [ ] release-2.2
