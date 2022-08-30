@@ -38,8 +38,8 @@ const (
 	RecordFinalizer = "chaos-mesh/records"
 )
 
-// Reconciler for common chaos
-type Reconciler struct {
+// InitReconciler for common chaos to init the finalizer
+type InitReconciler struct {
 	// Object is used to mark the target type of this Reconciler
 	Object v1alpha1.InnerObject
 
@@ -51,8 +51,74 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Reconcile the common chaos
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+// Reconcile the common chaos to init the finalizer
+func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
+
+	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("chaos not found")
+		} else {
+			// TODO: handle this error
+			r.Log.Error(err, "unable to get chaos")
+		}
+		return ctrl.Result{}, nil
+	}
+
+	finalizers := obj.GetFinalizers()
+	shouldUpdate := false
+	if !obj.IsDeleted() {
+		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
+			r.Recorder.Event(obj, recorder.FinalizerInited{})
+			shouldUpdate = true
+			finalizers = append(obj.GetFinalizers(), RecordFinalizer)
+		}
+	}
+
+	if shouldUpdate {
+		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
+
+			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+				r.Log.Error(err, "unable to get chaos")
+				return err
+			}
+
+			obj.SetFinalizers(finalizers)
+			return r.Client.Update(context.TODO(), obj)
+		})
+		if updateError != nil {
+			// TODO: handle this error
+			r.Log.Error(updateError, "fail to update")
+			r.Recorder.Event(obj, recorder.Failed{
+				Activity: "update finalizer",
+				Err:      "updateError.Error()",
+			})
+			return ctrl.Result{}, nil
+		}
+
+		r.Recorder.Event(obj, recorder.Updated{
+			Field: "finalizer",
+		})
+	}
+	return ctrl.Result{}, nil
+}
+
+// CleanReconciler for common chaos to clean the finalizer
+type CleanReconciler struct {
+	// Object is used to mark the target type of this Reconciler
+	Object v1alpha1.InnerObject
+
+	// Client is used to operate on the Kubernetes cluster
+	client.Client
+
+	Recorder recorder.ChaosRecorder
+
+	Log logr.Logger
+}
+
+// Reconcile the common chaos to clean the finalizer
+func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
 	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
@@ -80,12 +146,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			r.Recorder.Event(obj, recorder.FinalizerRemoved{})
 			finalizers = []string{}
 			shouldUpdate = true
-		}
-	} else {
-		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
-			r.Recorder.Event(obj, recorder.FinalizerInited{})
-			shouldUpdate = true
-			finalizers = append(obj.GetFinalizers(), RecordFinalizer)
 		}
 	}
 
