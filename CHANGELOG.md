@@ -26,6 +26,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Nothing
+
 ## [v2.1.8] - 2020-08.30
 
 ### Added
