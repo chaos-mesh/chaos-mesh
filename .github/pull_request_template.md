@@ -26,7 +26,6 @@ Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new
 - [ ] This change also requires further updates to the `UI interface`
 - Need to **cheery-pick to release branches**
   - [ ] release-2.3
-  - [ ] release-2.2
 
 ### Checklist
 
