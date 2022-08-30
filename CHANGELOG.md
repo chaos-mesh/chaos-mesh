@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Uniformly use Enter to add item in LabelField [#3580](https://github.com/chaos-mesh/chaos-mesh/pull/3580)
 
 ## [2.1.7] - 2022-07-29
 
