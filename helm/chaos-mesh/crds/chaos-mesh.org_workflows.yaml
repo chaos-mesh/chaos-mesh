@@ -1830,6 +1830,8 @@ spec:
                           - network-partition
                           - network-dns
                           - network-bandwidth
+                          - network-flood
+                          - network-down
                           - process
                           - jvm-exception
                           - jvm-gc
@@ -1837,7 +1839,24 @@ spec:
                           - jvm-return
                           - jvm-stress
                           - jvm-rule-data
+                          - jvm-mysql
                           - clock
+                          - redis-expiration
+                          - redis-penetration
+                          - redis-cacheLimit
+                          - redis-restart
+                          - redis-stop
+                          - kafka-fill
+                          - kafka-flood
+                          - kafka-io
+                          - file-create
+                          - file-modify
+                          - file-delete
+                          - file-rename
+                          - file-append
+                          - file-replace
+                          - vm
+                          - user_defined
                           type: string
                         address:
                           description: 'DEPRECATED: Use Selector instead. Only one
@@ -1921,6 +1940,166 @@ spec:
                           description: Duration represents the duration of the chaos
                             action
                           type: string
+                        file-append:
+                          properties:
+                            count:
+                              description: Count is the number of times to append
+                                the data.
+                              type: integer
+                            data:
+                              description: Data is the data for append.
+                              type: string
+                            file-name:
+                              description: FileName is the name of the file to be
+                                created, modified, deleted, renamed, or appended.
+                              type: string
+                          type: object
+                        file-create:
+                          properties:
+                            dir-name:
+                              description: DirName is the directory name to create
+                                or delete.
+                              type: string
+                            file-name:
+                              description: FileName is the name of the file to be
+                                created, modified, deleted, renamed, or appended.
+                              type: string
+                          type: object
+                        file-delete:
+                          properties:
+                            dir-name:
+                              description: DirName is the directory name to create
+                                or delete.
+                              type: string
+                            file-name:
+                              description: FileName is the name of the file to be
+                                created, modified, deleted, renamed, or appended.
+                              type: string
+                          type: object
+                        file-modify:
+                          properties:
+                            file-name:
+                              description: FileName is the name of the file to be
+                                created, modified, deleted, renamed, or appended.
+                              type: string
+                            privilege:
+                              description: Privilege is the file privilege to be set.
+                              format: int32
+                              type: integer
+                          type: object
+                        file-rename:
+                          properties:
+                            dest-file:
+                              description: DestFile is the name to be renamed.
+                              type: string
+                            source-file:
+                              description: SourceFile is the name need to be renamed.
+                              type: string
+                          type: object
+                        file-replace:
+                          properties:
+                            dest-string:
+                              description: DestStr is the destination string of the
+                                file.
+                              type: string
+                            file-name:
+                              description: FileName is the name of the file to be
+                                created, modified, deleted, renamed, or appended.
+                              type: string
+                            line:
+                              description: Line is the line number of the file to
+                                be replaced.
+                              type: integer
+                            origin-string:
+                              description: OriginStr is the origin string of the file.
+                              type: string
+                          type: object
+                        http-abort:
+                          properties:
+                            code:
+                              description: Code is a rule to select target by http
+                                status code in response
+                              type: string
+                            method:
+                              description: HTTP method
+                              type: string
+                            path:
+                              description: Match path of Uri with wildcard matches
+                              type: string
+                            port:
+                              description: The TCP port that the target service listens
+                                on
+                              format: int32
+                              type: integer
+                            proxy_ports:
+                              description: Composed with one of the port of HTTP connection,
+                                we will only attack HTTP connection with port inside
+                                proxy_ports
+                              items:
+                                type: integer
+                              type: array
+                            target:
+                              description: 'HTTP target: Request or Response'
+                              type: string
+                          required:
+                          - proxy_ports
+                          - target
+                          type: object
+                        http-config:
+                          properties:
+                            file_path:
+                              description: The config file path
+                              type: string
+                          type: object
+                        http-delay:
+                          properties:
+                            code:
+                              description: Code is a rule to select target by http
+                                status code in response
+                              type: string
+                            delay:
+                              description: Delay represents the delay of the target
+                                request/response
+                              type: string
+                            method:
+                              description: HTTP method
+                              type: string
+                            path:
+                              description: Match path of Uri with wildcard matches
+                              type: string
+                            port:
+                              description: The TCP port that the target service listens
+                                on
+                              format: int32
+                              type: integer
+                            proxy_ports:
+                              description: Composed with one of the port of HTTP connection,
+                                we will only attack HTTP connection with port inside
+                                proxy_ports
+                              items:
+                                type: integer
+                              type: array
+                            target:
+                              description: 'HTTP target: Request or Response'
+                              type: string
+                          required:
+                          - delay
+                          - proxy_ports
+                          - target
+                          type: object
+                        http-request:
+                          description: used for HTTP request, now only support GET
+                          properties:
+                            count:
+                              description: The number of requests to send
+                              type: integer
+                            enable-conn-pool:
+                              description: Enable connection pool
+                              type: boolean
+                            url:
+                              description: Request to send"
+                              type: string
+                          type: object
                         jvm-exception:
                           properties:
                             class:
@@ -1973,6 +2152,43 @@ spec:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
+                          type: object
+                        jvm-mysql:
+                          properties:
+                            database:
+                              description: the match database default value is "",
+                                means match all database
+                              type: string
+                            exception:
+                              description: The exception which needs to throw for
+                                action `exception` or the exception message needs
+                                to throw in action `mysql`
+                              type: string
+                            latency:
+                              description: The latency duration for action 'latency'
+                                or the latency duration in action `mysql`
+                              type: integer
+                            mysqlConnectorVersion:
+                              description: the version of mysql-connector-java, only
+                                support 5.X.X(set to "5") and 8.X.X(set to "8") now
+                              type: string
+                            pid:
+                              description: the pid of Java process which needs to
+                                attach
+                              type: integer
+                            port:
+                              description: the port of agent server, default 9277
+                              format: int32
+                              type: integer
+                            sqlType:
+                              description: the match sql type default value is "",
+                                means match all SQL type. The value can be 'select',
+                                'insert', 'update', 'delete', 'replace'.
+                              type: string
+                            table:
+                              description: the match table default value is "", means
+                                match all table
+                              type: string
                           type: object
                         jvm-return:
                           properties:
@@ -2028,6 +2244,73 @@ spec:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
+                          type: object
+                        kafka-fill:
+                          properties:
+                            host:
+                              description: The host of kafka server
+                              type: string
+                            maxBytes:
+                              description: The max bytes to fill
+                              format: int64
+                              type: integer
+                            messageSize:
+                              description: The size of each message
+                              type: integer
+                            password:
+                              description: The password of kafka client
+                              type: string
+                            port:
+                              description: The port of kafka server
+                              type: integer
+                            reloadCommand:
+                              description: The command to reload kafka config
+                              type: string
+                            topic:
+                              description: The topic to attack
+                              type: string
+                            username:
+                              description: The username of kafka client
+                              type: string
+                          type: object
+                        kafka-flood:
+                          properties:
+                            host:
+                              description: The host of kafka server
+                              type: string
+                            messageSize:
+                              description: The size of each message
+                              type: integer
+                            password:
+                              description: The password of kafka client
+                              type: string
+                            port:
+                              description: The port of kafka server
+                              type: integer
+                            threads:
+                              description: The number of worker threads
+                              type: integer
+                            topic:
+                              description: The topic to attack
+                              type: string
+                            username:
+                              description: The username of kafka client
+                              type: string
+                          type: object
+                        kafka-io:
+                          properties:
+                            configFile:
+                              description: The path of server config
+                              type: string
+                            nonReadable:
+                              description: Make kafka cluster non-readable
+                              type: boolean
+                            nonWritable:
+                              description: Make kafka cluster non-writable
+                              type: boolean
+                            topic:
+                              description: The topic to attack
+                              type: string
                           type: object
                         mode:
                           description: 'Mode defines the mode to run chaos action.
@@ -2157,6 +2440,16 @@ spec:
                                 with this value
                               type: string
                           type: object
+                        network-down:
+                          properties:
+                            device:
+                              description: The network interface to impact
+                              type: string
+                            duration:
+                              description: 'NIC down time, time units: ns, us (or
+                                µs), ms, s, m, h.'
+                              type: string
+                          type: object
                         network-duplicate:
                           properties:
                             correlation:
@@ -2192,6 +2485,32 @@ spec:
                                 such as 80, 8001:8010. it can only be used in conjunction
                                 with -p tcp or -p udp
                               type: string
+                          type: object
+                        network-flood:
+                          properties:
+                            duration:
+                              description: The number of seconds to run the iperf
+                                test
+                              type: string
+                            ip-address:
+                              description: Generate traffic to this IP address
+                              type: string
+                            parallel:
+                              description: The number of iperf parallel client threads
+                                to run
+                              format: int32
+                              type: integer
+                            port:
+                              description: Generate traffic to this port on the IP
+                                address
+                              type: string
+                            rate:
+                              description: The speed of network traffic, allows bps,
+                                kbps, mbps, gbps, tbps unit. bps means bytes per second
+                              type: string
+                          required:
+                          - duration
+                          - rate
                           type: object
                         network-loss:
                           properties:
@@ -2268,6 +2587,92 @@ spec:
                             signal:
                               description: the signal number to send
                               type: integer
+                          type: object
+                        redis-cacheLimit:
+                          properties:
+                            addr:
+                              description: The adress of Redis server
+                              type: string
+                            cacheSize:
+                              description: The size of `maxmemory`
+                              type: string
+                            password:
+                              description: The password of Redis server
+                              type: string
+                            percent:
+                              description: Specifies maxmemory as a percentage of
+                                the original value
+                              type: string
+                          type: object
+                        redis-expiration:
+                          properties:
+                            addr:
+                              description: The adress of Redis server
+                              type: string
+                            expiration:
+                              description: The expiration of the keys
+                              type: string
+                            key:
+                              description: The keys to be expired
+                              type: string
+                            option:
+                              description: Additional options for `expiration`
+                              type: string
+                            password:
+                              description: The password of Redis server
+                              type: string
+                          type: object
+                        redis-penetration:
+                          properties:
+                            addr:
+                              description: The adress of Redis server
+                              type: string
+                            password:
+                              description: The password of Redis server
+                              type: string
+                            requestNum:
+                              description: The number of requests to be sent
+                              type: integer
+                          type: object
+                        redis-restart:
+                          properties:
+                            addr:
+                              description: The adress of Redis server
+                              type: string
+                            conf:
+                              description: The path of Sentinel conf
+                              type: string
+                            flushConfig:
+                              description: The control flag determines whether to
+                                flush config
+                              type: boolean
+                            password:
+                              description: The password of Redis server
+                              type: string
+                            redisPath:
+                              description: The path of `redis-server` command-line
+                                tool
+                              type: boolean
+                          type: object
+                        redis-stop:
+                          properties:
+                            addr:
+                              description: The adress of Redis server
+                              type: string
+                            conf:
+                              description: The path of Sentinel conf
+                              type: string
+                            flushConfig:
+                              description: The control flag determines whether to
+                                flush config
+                              type: boolean
+                            password:
+                              description: The password of Redis server
+                              type: string
+                            redisPath:
+                              description: The path of `redis-server` command-line
+                                tool
+                              type: boolean
                           type: object
                         selector:
                           description: Selector is used to select physical machines
@@ -2375,6 +2780,15 @@ spec:
                         uid:
                           description: the experiment ID
                           type: string
+                        user_defined:
+                          properties:
+                            attackCmd:
+                              description: The command to be executed when attack
+                              type: string
+                            recoverCmd:
+                              description: The command to be executed when recover
+                              type: string
+                          type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
                             / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -2385,6 +2799,12 @@ spec:
                             number from 0-100 to specify the max percent of pods to
                             do chaos action
                           type: string
+                        vm:
+                          properties:
+                            vm-name:
+                              description: The name of the VM to be injected
+                              type: string
+                          type: object
                       required:
                       - action
                       - mode
@@ -4370,6 +4790,8 @@ spec:
                               - network-partition
                               - network-dns
                               - network-bandwidth
+                              - network-flood
+                              - network-down
                               - process
                               - jvm-exception
                               - jvm-gc
@@ -4377,7 +4799,24 @@ spec:
                               - jvm-return
                               - jvm-stress
                               - jvm-rule-data
+                              - jvm-mysql
                               - clock
+                              - redis-expiration
+                              - redis-penetration
+                              - redis-cacheLimit
+                              - redis-restart
+                              - redis-stop
+                              - kafka-fill
+                              - kafka-flood
+                              - kafka-io
+                              - file-create
+                              - file-modify
+                              - file-delete
+                              - file-rename
+                              - file-append
+                              - file-replace
+                              - vm
+                              - user_defined
                               type: string
                             address:
                               description: 'DEPRECATED: Use Selector instead. Only
@@ -4464,6 +4903,169 @@ spec:
                               description: Duration represents the duration of the
                                 chaos action
                               type: string
+                            file-append:
+                              properties:
+                                count:
+                                  description: Count is the number of times to append
+                                    the data.
+                                  type: integer
+                                data:
+                                  description: Data is the data for append.
+                                  type: string
+                                file-name:
+                                  description: FileName is the name of the file to
+                                    be created, modified, deleted, renamed, or appended.
+                                  type: string
+                              type: object
+                            file-create:
+                              properties:
+                                dir-name:
+                                  description: DirName is the directory name to create
+                                    or delete.
+                                  type: string
+                                file-name:
+                                  description: FileName is the name of the file to
+                                    be created, modified, deleted, renamed, or appended.
+                                  type: string
+                              type: object
+                            file-delete:
+                              properties:
+                                dir-name:
+                                  description: DirName is the directory name to create
+                                    or delete.
+                                  type: string
+                                file-name:
+                                  description: FileName is the name of the file to
+                                    be created, modified, deleted, renamed, or appended.
+                                  type: string
+                              type: object
+                            file-modify:
+                              properties:
+                                file-name:
+                                  description: FileName is the name of the file to
+                                    be created, modified, deleted, renamed, or appended.
+                                  type: string
+                                privilege:
+                                  description: Privilege is the file privilege to
+                                    be set.
+                                  format: int32
+                                  type: integer
+                              type: object
+                            file-rename:
+                              properties:
+                                dest-file:
+                                  description: DestFile is the name to be renamed.
+                                  type: string
+                                source-file:
+                                  description: SourceFile is the name need to be renamed.
+                                  type: string
+                              type: object
+                            file-replace:
+                              properties:
+                                dest-string:
+                                  description: DestStr is the destination string of
+                                    the file.
+                                  type: string
+                                file-name:
+                                  description: FileName is the name of the file to
+                                    be created, modified, deleted, renamed, or appended.
+                                  type: string
+                                line:
+                                  description: Line is the line number of the file
+                                    to be replaced.
+                                  type: integer
+                                origin-string:
+                                  description: OriginStr is the origin string of the
+                                    file.
+                                  type: string
+                              type: object
+                            http-abort:
+                              properties:
+                                code:
+                                  description: Code is a rule to select target by
+                                    http status code in response
+                                  type: string
+                                method:
+                                  description: HTTP method
+                                  type: string
+                                path:
+                                  description: Match path of Uri with wildcard matches
+                                  type: string
+                                port:
+                                  description: The TCP port that the target service
+                                    listens on
+                                  format: int32
+                                  type: integer
+                                proxy_ports:
+                                  description: Composed with one of the port of HTTP
+                                    connection, we will only attack HTTP connection
+                                    with port inside proxy_ports
+                                  items:
+                                    type: integer
+                                  type: array
+                                target:
+                                  description: 'HTTP target: Request or Response'
+                                  type: string
+                              required:
+                              - proxy_ports
+                              - target
+                              type: object
+                            http-config:
+                              properties:
+                                file_path:
+                                  description: The config file path
+                                  type: string
+                              type: object
+                            http-delay:
+                              properties:
+                                code:
+                                  description: Code is a rule to select target by
+                                    http status code in response
+                                  type: string
+                                delay:
+                                  description: Delay represents the delay of the target
+                                    request/response
+                                  type: string
+                                method:
+                                  description: HTTP method
+                                  type: string
+                                path:
+                                  description: Match path of Uri with wildcard matches
+                                  type: string
+                                port:
+                                  description: The TCP port that the target service
+                                    listens on
+                                  format: int32
+                                  type: integer
+                                proxy_ports:
+                                  description: Composed with one of the port of HTTP
+                                    connection, we will only attack HTTP connection
+                                    with port inside proxy_ports
+                                  items:
+                                    type: integer
+                                  type: array
+                                target:
+                                  description: 'HTTP target: Request or Response'
+                                  type: string
+                              required:
+                              - delay
+                              - proxy_ports
+                              - target
+                              type: object
+                            http-request:
+                              description: used for HTTP request, now only support
+                                GET
+                              properties:
+                                count:
+                                  description: The number of requests to send
+                                  type: integer
+                                enable-conn-pool:
+                                  description: Enable connection pool
+                                  type: boolean
+                                url:
+                                  description: Request to send"
+                                  type: string
+                              type: object
                             jvm-exception:
                               properties:
                                 class:
@@ -4516,6 +5118,44 @@ spec:
                                   description: the port of agent server, default 9277
                                   format: int32
                                   type: integer
+                              type: object
+                            jvm-mysql:
+                              properties:
+                                database:
+                                  description: the match database default value is
+                                    "", means match all database
+                                  type: string
+                                exception:
+                                  description: The exception which needs to throw
+                                    for action `exception` or the exception message
+                                    needs to throw in action `mysql`
+                                  type: string
+                                latency:
+                                  description: The latency duration for action 'latency'
+                                    or the latency duration in action `mysql`
+                                  type: integer
+                                mysqlConnectorVersion:
+                                  description: the version of mysql-connector-java,
+                                    only support 5.X.X(set to "5") and 8.X.X(set to
+                                    "8") now
+                                  type: string
+                                pid:
+                                  description: the pid of Java process which needs
+                                    to attach
+                                  type: integer
+                                port:
+                                  description: the port of agent server, default 9277
+                                  format: int32
+                                  type: integer
+                                sqlType:
+                                  description: the match sql type default value is
+                                    "", means match all SQL type. The value can be
+                                    'select', 'insert', 'update', 'delete', 'replace'.
+                                  type: string
+                                table:
+                                  description: the match table default value is "",
+                                    means match all table
+                                  type: string
                               type: object
                             jvm-return:
                               properties:
@@ -4571,6 +5211,73 @@ spec:
                                   description: the port of agent server, default 9277
                                   format: int32
                                   type: integer
+                              type: object
+                            kafka-fill:
+                              properties:
+                                host:
+                                  description: The host of kafka server
+                                  type: string
+                                maxBytes:
+                                  description: The max bytes to fill
+                                  format: int64
+                                  type: integer
+                                messageSize:
+                                  description: The size of each message
+                                  type: integer
+                                password:
+                                  description: The password of kafka client
+                                  type: string
+                                port:
+                                  description: The port of kafka server
+                                  type: integer
+                                reloadCommand:
+                                  description: The command to reload kafka config
+                                  type: string
+                                topic:
+                                  description: The topic to attack
+                                  type: string
+                                username:
+                                  description: The username of kafka client
+                                  type: string
+                              type: object
+                            kafka-flood:
+                              properties:
+                                host:
+                                  description: The host of kafka server
+                                  type: string
+                                messageSize:
+                                  description: The size of each message
+                                  type: integer
+                                password:
+                                  description: The password of kafka client
+                                  type: string
+                                port:
+                                  description: The port of kafka server
+                                  type: integer
+                                threads:
+                                  description: The number of worker threads
+                                  type: integer
+                                topic:
+                                  description: The topic to attack
+                                  type: string
+                                username:
+                                  description: The username of kafka client
+                                  type: string
+                              type: object
+                            kafka-io:
+                              properties:
+                                configFile:
+                                  description: The path of server config
+                                  type: string
+                                nonReadable:
+                                  description: Make kafka cluster non-readable
+                                  type: boolean
+                                nonWritable:
+                                  description: Make kafka cluster non-writable
+                                  type: boolean
+                                topic:
+                                  description: The topic to attack
+                                  type: string
                               type: object
                             mode:
                               description: 'Mode defines the mode to run chaos action.
@@ -4703,6 +5410,16 @@ spec:
                                     with this value
                                   type: string
                               type: object
+                            network-down:
+                              properties:
+                                device:
+                                  description: The network interface to impact
+                                  type: string
+                                duration:
+                                  description: 'NIC down time, time units: ns, us
+                                    (or µs), ms, s, m, h.'
+                                  type: string
+                              type: object
                             network-duplicate:
                               properties:
                                 correlation:
@@ -4739,6 +5456,33 @@ spec:
                                     the range, such as 80, 8001:8010. it can only
                                     be used in conjunction with -p tcp or -p udp
                                   type: string
+                              type: object
+                            network-flood:
+                              properties:
+                                duration:
+                                  description: The number of seconds to run the iperf
+                                    test
+                                  type: string
+                                ip-address:
+                                  description: Generate traffic to this IP address
+                                  type: string
+                                parallel:
+                                  description: The number of iperf parallel client
+                                    threads to run
+                                  format: int32
+                                  type: integer
+                                port:
+                                  description: Generate traffic to this port on the
+                                    IP address
+                                  type: string
+                                rate:
+                                  description: The speed of network traffic, allows
+                                    bps, kbps, mbps, gbps, tbps unit. bps means bytes
+                                    per second
+                                  type: string
+                              required:
+                              - duration
+                              - rate
                               type: object
                             network-loss:
                               properties:
@@ -4820,6 +5564,92 @@ spec:
                                 signal:
                                   description: the signal number to send
                                   type: integer
+                              type: object
+                            redis-cacheLimit:
+                              properties:
+                                addr:
+                                  description: The adress of Redis server
+                                  type: string
+                                cacheSize:
+                                  description: The size of `maxmemory`
+                                  type: string
+                                password:
+                                  description: The password of Redis server
+                                  type: string
+                                percent:
+                                  description: Specifies maxmemory as a percentage
+                                    of the original value
+                                  type: string
+                              type: object
+                            redis-expiration:
+                              properties:
+                                addr:
+                                  description: The adress of Redis server
+                                  type: string
+                                expiration:
+                                  description: The expiration of the keys
+                                  type: string
+                                key:
+                                  description: The keys to be expired
+                                  type: string
+                                option:
+                                  description: Additional options for `expiration`
+                                  type: string
+                                password:
+                                  description: The password of Redis server
+                                  type: string
+                              type: object
+                            redis-penetration:
+                              properties:
+                                addr:
+                                  description: The adress of Redis server
+                                  type: string
+                                password:
+                                  description: The password of Redis server
+                                  type: string
+                                requestNum:
+                                  description: The number of requests to be sent
+                                  type: integer
+                              type: object
+                            redis-restart:
+                              properties:
+                                addr:
+                                  description: The adress of Redis server
+                                  type: string
+                                conf:
+                                  description: The path of Sentinel conf
+                                  type: string
+                                flushConfig:
+                                  description: The control flag determines whether
+                                    to flush config
+                                  type: boolean
+                                password:
+                                  description: The password of Redis server
+                                  type: string
+                                redisPath:
+                                  description: The path of `redis-server` command-line
+                                    tool
+                                  type: boolean
+                              type: object
+                            redis-stop:
+                              properties:
+                                addr:
+                                  description: The adress of Redis server
+                                  type: string
+                                conf:
+                                  description: The path of Sentinel conf
+                                  type: string
+                                flushConfig:
+                                  description: The control flag determines whether
+                                    to flush config
+                                  type: boolean
+                                password:
+                                  description: The password of Redis server
+                                  type: string
+                                redisPath:
+                                  description: The path of `redis-server` command-line
+                                    tool
+                                  type: boolean
                               type: object
                             selector:
                               description: Selector is used to select physical machines
@@ -4930,6 +5760,15 @@ spec:
                             uid:
                               description: the experiment ID
                               type: string
+                            user_defined:
+                              properties:
+                                attackCmd:
+                                  description: The command to be executed when attack
+                                  type: string
+                                recoverCmd:
+                                  description: The command to be executed when recover
+                                  type: string
+                              type: object
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -4940,6 +5779,12 @@ spec:
                                 a number from 0-100 to specify the max percent of
                                 pods to do chaos action
                               type: string
+                            vm:
+                              properties:
+                                vm-name:
+                                  description: The name of the VM to be injected
+                                  type: string
+                              type: object
                           required:
                           - action
                           - mode
