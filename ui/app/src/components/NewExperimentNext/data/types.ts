@@ -47,6 +47,14 @@ export interface Definition {
   spec?: Spec
 }
 
+const containerNames = {
+  field: 'label' as FieldType,
+  label: 'Container names',
+  value: [],
+  helperText:
+    "Optional. Type and end with Enter to generate the container names. If it's empty, the first container will be injected.",
+}
+
 const awsCommon: Spec = {
   secretName: {
     field: 'text',
@@ -73,15 +81,9 @@ const dnsCommon: Spec = {
     field: 'label',
     label: 'Patterns',
     value: [],
-    helperText: 'Specify the DNS patterns. For example, type google.com and then press TAB to add it.',
+    helperText: 'Specify the DNS patterns. For example, type google.com and then press Enter to add it.',
   },
-  containerNames: {
-    field: 'label',
-    label: 'Affected container names',
-    value: [],
-    helperText:
-      "Optional. Type string and end with a TAB to generate the container names. If it's empty, all containers will be injected",
-  },
+  containerNames,
 }
 
 const gcpCommon: Spec = {
@@ -280,7 +282,7 @@ const networkCommon: Spec = {
     field: 'label',
     label: 'External targets',
     value: [],
-    helperText: 'Type string and end with a TAB to generate the network targets outside k8s',
+    helperText: 'Type and end with Enter to generate the network targets outside k8s.',
   },
   target: undefined as any,
 }
@@ -377,7 +379,7 @@ const data: Record<Kind, Definition> = {
             field: 'label',
             label: 'Device names',
             value: [],
-            helperText: 'Type string and end with a TAB to generate the device names',
+            helperText: 'Type and end with Enter to generate the device names.',
           },
         },
       },
@@ -711,12 +713,7 @@ const data: Record<Kind, Definition> = {
         key: 'container-kill',
         spec: {
           action: 'container-kill' as any,
-          containerNames: {
-            field: 'label',
-            label: 'Container names',
-            value: [],
-            helperText: 'Type string and end with a TAB to generate the container names.',
-          },
+          containerNames,
         },
       },
     ],
@@ -754,15 +751,9 @@ const data: Record<Kind, Definition> = {
         label: 'Clock ids',
         value: [],
         helperText:
-          "Optional. Type string and end with a TAB to generate the clock ids. If it's empty, it will be set to ['CLOCK_REALTIME']",
+          "Optional. Type and end with Enter to generate the clock ids. If it's empty, it will be set to ['CLOCK_REALTIME'].",
       },
-      containerNames: {
-        field: 'label',
-        label: 'Affected container names',
-        value: [],
-        helperText:
-          "Optional. Type string and end with a TAB to generate the container names. If it's empty, all containers will be injected",
-      },
+      containerNames,
     },
   },
   JVMChaos: {

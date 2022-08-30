@@ -113,7 +113,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
               <LabelField
                 name="failKernRequest.headers"
                 label="Headers"
-                helperText="Type string and end with a space to generate the appropriate kernel headers"
+                helperText="Type and end with Enter to generate the appropriate kernel headers"
               />
               <TextField
                 type="number"
