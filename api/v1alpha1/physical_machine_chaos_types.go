@@ -23,26 +23,49 @@ import (
 type PhysicalMachineChaosAction string
 
 var (
-	PMStressCPUAction        PhysicalMachineChaosAction = "stress-cpu"
-	PMStressMemAction        PhysicalMachineChaosAction = "stress-mem"
-	PMDiskWritePayloadAction PhysicalMachineChaosAction = "disk-write-payload"
-	PMDiskReadPayloadAction  PhysicalMachineChaosAction = "disk-read-payload"
-	PMDiskFillAction         PhysicalMachineChaosAction = "disk-fill"
-	PMNetworkCorruptAction   PhysicalMachineChaosAction = "network-corrupt"
-	PMNetworkDuplicateAction PhysicalMachineChaosAction = "network-duplicate"
-	PMNetworkLossAction      PhysicalMachineChaosAction = "network-loss"
-	PMNetworkDelayAction     PhysicalMachineChaosAction = "network-delay"
-	PMNetworkPartitionAction PhysicalMachineChaosAction = "network-partition"
-	PMNetworkBandwidthAction PhysicalMachineChaosAction = "network-bandwidth"
-	PMNetworkDNSAction       PhysicalMachineChaosAction = "network-dns"
-	PMProcessAction          PhysicalMachineChaosAction = "process"
-	PMJVMExceptionAction     PhysicalMachineChaosAction = "jvm-exception"
-	PMJVMGCAction            PhysicalMachineChaosAction = "jvm-gc"
-	PMJVMLatencyAction       PhysicalMachineChaosAction = "jvm-latency"
-	PMJVMReturnAction        PhysicalMachineChaosAction = "jvm-return"
-	PMJVMStressAction        PhysicalMachineChaosAction = "jvm-stress"
-	PMJVMRuleDataAction      PhysicalMachineChaosAction = "jvm-rule-data"
-	PMClockAction            PhysicalMachineChaosAction = "clock"
+	PMStressCPUAction            PhysicalMachineChaosAction = "stress-cpu"
+	PMStressMemAction            PhysicalMachineChaosAction = "stress-mem"
+	PMDiskWritePayloadAction     PhysicalMachineChaosAction = "disk-write-payload"
+	PMDiskReadPayloadAction      PhysicalMachineChaosAction = "disk-read-payload"
+	PMDiskFillAction             PhysicalMachineChaosAction = "disk-fill"
+	PMNetworkCorruptAction       PhysicalMachineChaosAction = "network-corrupt"
+	PMNetworkDuplicateAction     PhysicalMachineChaosAction = "network-duplicate"
+	PMNetworkLossAction          PhysicalMachineChaosAction = "network-loss"
+	PMNetworkDelayAction         PhysicalMachineChaosAction = "network-delay"
+	PMNetworkPartitionAction     PhysicalMachineChaosAction = "network-partition"
+	PMNetworkBandwidthAction     PhysicalMachineChaosAction = "network-bandwidth"
+	PMNetworkDNSAction           PhysicalMachineChaosAction = "network-dns"
+	PMNetworkFloodAction         PhysicalMachineChaosAction = "network-flood"
+	PMNetworkDownAction          PhysicalMachineChaosAction = "network-down"
+	PMProcessAction              PhysicalMachineChaosAction = "process"
+	PMJVMExceptionAction         PhysicalMachineChaosAction = "jvm-exception"
+	PMJVMGCAction                PhysicalMachineChaosAction = "jvm-gc"
+	PMJVMLatencyAction           PhysicalMachineChaosAction = "jvm-latency"
+	PMJVMReturnAction            PhysicalMachineChaosAction = "jvm-return"
+	PMJVMStressAction            PhysicalMachineChaosAction = "jvm-stress"
+	PMJVMRuleDataAction          PhysicalMachineChaosAction = "jvm-rule-data"
+	PMJVMMySQLAction             PhysicalMachineChaosAction = "jvm-mysql"
+	PMClockAction                PhysicalMachineChaosAction = "clock"
+	PMRedisExpirationAction      PhysicalMachineChaosAction = "redis-expiration"
+	PMRedisPenetrationAction     PhysicalMachineChaosAction = "redis-penetration"
+	PMRedisCacheLimitAction      PhysicalMachineChaosAction = "redis-cacheLimit"
+	PMRedisSentinelRestartAction PhysicalMachineChaosAction = "redis-restart"
+	PMRedisSentinelStopAction    PhysicalMachineChaosAction = "redis-stop"
+	PMKafkaFillAction            PhysicalMachineChaosAction = "kafka-fill"
+	PMKafkaFloodAction           PhysicalMachineChaosAction = "kafka-flood"
+	PMKafkaIOAction              PhysicalMachineChaosAction = "kafka-io"
+	PMHTTPAbortAction            PhysicalMachineChaosAction = "http-abort"
+	PMHTTPDelayAction            PhysicalMachineChaosAction = "http-delay"
+	PMHTTPConfigAction           PhysicalMachineChaosAction = "http-config"
+	PMHTTPRequestAction          PhysicalMachineChaosAction = "http-request"
+	PMFileCreateAction           PhysicalMachineChaosAction = "file-create"
+	PMFileModifyPrivilegeAction  PhysicalMachineChaosAction = "file-modify"
+	PMFileDeleteAction           PhysicalMachineChaosAction = "file-delete"
+	PMFileRenameAction           PhysicalMachineChaosAction = "file-rename"
+	PMFileAppendAction           PhysicalMachineChaosAction = "file-append"
+	PMFileReplaceAction          PhysicalMachineChaosAction = "file-replace"
+	PMVMAction                   PhysicalMachineChaosAction = "vm"
+	PMUserDefinedAction          PhysicalMachineChaosAction = "user_defined"
 )
 
 // +kubebuilder:object:root=true
@@ -65,7 +88,7 @@ type PhysicalMachineChaos struct {
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
 type PhysicalMachineChaosSpec struct {
-	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
+	// +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined;
 	Action PhysicalMachineChaosAction `json:"action"`
 
 	PhysicalMachineSelector `json:",inline"`
@@ -192,6 +215,14 @@ type ExpInfo struct {
 	// +optional
 	NetworkBandwidth *NetworkBandwidthSpec `json:"network-bandwidth,omitempty"`
 
+	// +ui:form:when=action=='network-flood'
+	// +optional
+	NetworkFlood *NetworkFloodSpec `json:"network-flood,omitempty"`
+
+	// +ui:form:when=action=='network-down'
+	// +optional
+	NetworkDown *NetworkDownSpec `json:"network-down,omitempty"`
+
 	// +ui:form:when=action=='process'
 	// +optional
 	Process *ProcessSpec `json:"process,omitempty"`
@@ -220,9 +251,93 @@ type ExpInfo struct {
 	// +optional
 	JVMRuleData *JVMRuleDataSpec `json:"jvm-rule-data,omitempty"`
 
+	// +ui:form:when=action=='jvm-mysql'
+	// +optional
+	JVMMySQL *PMJVMMySQLSpec `json:"jvm-mysql,omitempty"`
+
 	// +ui:form:when=action=='clock'
 	// +optional
 	Clock *ClockSpec `json:"clock,omitempty"`
+
+	// +ui:form:when=action=='redis-expiration'
+	// +optional
+	RedisExpiration *RedisExpirationSpec `json:"redis-expiration,omitempty"`
+
+	// +ui:form:when=action=='redis-penetration'
+	// +optional
+	RedisPenetration *RedisPenetrationSpec `json:"redis-penetration,omitempty"`
+
+	// +ui:form:when=action=='redis-cacheLimit'
+	// +optional
+	RedisCacheLimit *RedisCacheLimitSpec `json:"redis-cacheLimit,omitempty"`
+
+	// +ui:form:when=action=='redis-restart'
+	// +optional
+	RedisSentinelRestart *RedisSentinelRestartSpec `json:"redis-restart,omitempty"`
+
+	// +ui:form:when=action=='redis-stop'
+	// +optional
+	RedisSentinelStop *RedisSentinelStopSpec `json:"redis-stop,omitempty"`
+
+	// +ui:form:when=action=='kafka-fill'
+	// +optional
+	KafkaFill *KafkaFillSpec `json:"kafka-fill,omitempty"`
+
+	// +ui:form:when=action=='kafka-flood'
+	// +optional
+	KafkaFlood *KafkaFloodSpec `json:"kafka-flood,omitempty"`
+
+	// +ui:form:when=action=='kafka-io'
+	// +optional
+	KafkaIO *KafkaIOSpec `json:"kafka-io,omitempty"`
+
+	// +ui:form:when=action=='http-abort'
+	// +optional
+	HTTPAbort *HTTPAbortSpec `json:"http-abort,omitempty"`
+
+	// +ui:form:when=action=='http-delay'
+	// +optional
+	HTTPDelay *HTTPDelaySpec `json:"http-delay,omitempty"`
+
+	// +ui:form:when=action=='http-config'
+	// +optional
+	HTTPConfig *HTTPConfigSpec `json:"http-config,omitempty"`
+
+	// +ui:form:when=action=='http-request'
+	// +optional
+	HTTPRequest *HTTPRequestSpec `json:"http-request,omitempty"`
+
+	// +ui:form:when=action=='file-create'
+	// +optional
+	FileCreate *FileCreateSpec `json:"file-create,omitempty"`
+
+	// +ui:form:when=action=='file-modify'
+	// +optional
+	FileModifyPrivilege *FileModifyPrivilegeSpec `json:"file-modify,omitempty"`
+
+	// +ui:form:when=action=='file-delete'
+	// +optional
+	FileDelete *FileDeleteSpec `json:"file-delete,omitempty"`
+
+	// +ui:form:when=action=='file-create'
+	// +optional
+	FileRename *FileRenameSpec `json:"file-rename,omitempty"`
+
+	// +ui:form:when=action=='file-append'
+	// +optional
+	FileAppend *FileAppendSpec `json:"file-append,omitempty"`
+
+	// +ui:form:when=action=='file-replace'
+	// +optional
+	FileReplace *FileReplaceSpec `json:"file-replace,omitempty"`
+
+	// +ui:form:when=action=='vm'
+	// +optional
+	VM *VMSpec `json:"vm,omitempty"`
+
+	// +ui:form:when=action=='user_defined'
+	// +optional
+	UserDefined *UserDefinedSpec `json:"user_defined,omitempty"`
 }
 
 type StressCPUSpec struct {
@@ -356,6 +471,26 @@ type NetworkBandwidthSpec struct {
 	Hostname  string `json:"hostname,omitempty"`
 }
 
+type NetworkFloodSpec struct {
+	// The speed of network traffic, allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second
+	Rate string `json:"rate"`
+	// Generate traffic to this IP address
+	IPAddress string `json:"ip-address,omitempty"`
+	// Generate traffic to this port on the IP address
+	Port string `json:"port,omitempty"`
+	// The number of iperf parallel client threads to run
+	Parallel int32 `json:"parallel,omitempty"`
+	// The number of seconds to run the iperf test
+	Duration string `json:"duration"`
+}
+
+type NetworkDownSpec struct {
+	// The network interface to impact
+	Device string `json:"device,omitempty"`
+	// NIC down time, time units: ns, us (or µs), ms, s, m, h.
+	Duration string `json:"duration,omitempty"`
+}
+
 type ProcessSpec struct {
 	// the process name or the process ID
 	Process string `json:"process,omitempty"`
@@ -411,6 +546,20 @@ type JVMRuleDataSpec struct {
 	RuleData string `json:"rule-data,omitempty"`
 }
 
+type PMJVMMySQLSpec struct {
+	JVMCommonSpec `json:",inline"`
+
+	JVMMySQLSpec `json:",inline"`
+
+	// The exception which needs to throw for action `exception`
+	// or the exception message needs to throw in action `mysql`
+	ThrowException string `json:"exception,omitempty"`
+
+	// The latency duration for action 'latency'
+	// or the latency duration in action `mysql`
+	LatencyDuration int `json:"latency,omitempty"`
+}
+
 type ClockSpec struct {
 	// the pid of target program.
 	Pid int `json:"pid,omitempty"`
@@ -420,4 +569,197 @@ type ClockSpec struct {
 	// More clock description in linux kernel can be found in man page of clock_getres, clock_gettime, clock_settime.
 	// Muti clock ids should be split with ","
 	ClockIdsSlice string `json:"clock-ids-slice,omitempty"`
+}
+
+type RedisCommonSpec struct {
+	// The adress of Redis server
+	Addr string `json:"addr,omitempty"`
+	// The password of Redis server
+	Password string `json:"password,omitempty"`
+}
+
+type RedisExpirationSpec struct {
+	RedisCommonSpec `json:",inline"`
+	// The expiration of the keys
+	Expiration string `json:"expiration,omitempty"`
+	// The keys to be expired
+	Key string `json:"key,omitempty"`
+	// Additional options for `expiration`
+	Option string `json:"option,omitempty"`
+}
+
+type RedisPenetrationSpec struct {
+	RedisCommonSpec `json:",inline"`
+	// The number of requests to be sent
+	RequestNum int `json:"requestNum,omitempty"`
+}
+
+type RedisCacheLimitSpec struct {
+	RedisCommonSpec `json:",inline"`
+	// The size of `maxmemory`
+	Size string `json:"cacheSize,omitempty"`
+	// Specifies maxmemory as a percentage of the original value
+	Percent string `json:"percent,omitempty"`
+}
+
+type RedisSentinelRestartSpec struct {
+	RedisCommonSpec `json:",inline"`
+	// The path of Sentinel conf
+	Conf string `json:"conf,omitempty"`
+	// The control flag determines whether to flush config
+	FlushConfig bool `json:"flushConfig,omitempty"`
+	// The path of `redis-server` command-line tool
+	RedisPath bool `json:"redisPath,omitempty"`
+}
+
+type RedisSentinelStopSpec struct {
+	RedisCommonSpec `json:",inline"`
+	// The path of Sentinel conf
+	Conf string `json:"conf,omitempty"`
+	// The control flag determines whether to flush config
+	FlushConfig bool `json:"flushConfig,omitempty"`
+	// The path of `redis-server` command-line tool
+	RedisPath bool `json:"redisPath,omitempty"`
+}
+
+type KafkaCommonSpec struct {
+	// The topic to attack
+	Topic string `json:"topic,omitempty"`
+	// The host of kafka server
+	Host string `json:"host,omitempty"`
+	// The port of kafka server
+	Port uint16 `json:"port,omitempty"`
+	// The username of kafka client
+	Username string `json:"username,omitempty"`
+	// The password of kafka client
+	Password string `json:"password,omitempty"`
+}
+
+type KafkaFillSpec struct {
+	KafkaCommonSpec `json:",inline"`
+	// The size of each message
+	MessageSize uint `json:"messageSize,omitempty"`
+	// The max bytes to fill
+	MaxBytes uint64 `json:"maxBytes,omitempty"`
+	// The command to reload kafka config
+	ReloadCommand string `json:"reloadCommand,omitempty"`
+}
+
+type KafkaFloodSpec struct {
+	KafkaCommonSpec `json:",inline"`
+	// The size of each message
+	MessageSize uint `json:"messageSize,omitempty"`
+	// The number of worker threads
+	Threads uint `json:"threads,omitempty"`
+}
+
+type KafkaIOSpec struct {
+	// The topic to attack
+	Topic string `json:"topic,omitempty"`
+	// The path of server config
+	ConfigFile string `json:"configFile,omitempty"`
+	// Make kafka cluster non-readable
+	NonReadable bool `json:"nonReadable,omitempty"`
+	// Make kafka cluster non-writable
+	NonWritable bool `json:"nonWritable,omitempty"`
+}
+
+type HTTPCommonSpec struct {
+	// Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports
+	ProxyPorts []uint `json:"proxy_ports"`
+	// HTTP target: Request or Response
+	Target string `json:"target"`
+	// The TCP port that the target service listens on
+	Port int32 `json:"port,omitempty"`
+	// Match path of Uri with wildcard matches
+	Path string `json:"path,omitempty"`
+	// HTTP method
+	Method string `json:"method,omitempty"`
+	// Code is a rule to select target by http status code in response
+	Code string `json:"code,omitempty"`
+}
+
+type HTTPAbortSpec struct {
+	HTTPCommonSpec `json:",inline"`
+}
+
+type HTTPDelaySpec struct {
+	HTTPCommonSpec `json:",inline"`
+	// Delay represents the delay of the target request/response
+	Delay string `json:"delay"`
+}
+
+type HTTPConfigSpec struct {
+	// The config file path
+	FilePath string `json:"file_path,omitempty"`
+}
+
+// used for HTTP request, now only support GET
+type HTTPRequestSpec struct {
+	// Request to send"
+	URL string `json:"url,omitempty"`
+	// Enable connection pool
+	EnableConnPool bool `json:"enable-conn-pool,omitempty"`
+	// The number of requests to send
+	Count int `json:"count,omitempty"`
+}
+
+type FileCreateSpec struct {
+	// FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+	FileName string `json:"file-name,omitempty"`
+	// DirName is the directory name to create or delete.
+	DirName string `json:"dir-name,omitempty"`
+}
+
+type FileModifyPrivilegeSpec struct {
+	// FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+	FileName string `json:"file-name,omitempty"`
+	// Privilege is the file privilege to be set.
+	Privilege uint32 `json:"privilege,omitempty"`
+}
+
+type FileDeleteSpec struct {
+	// FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+	FileName string `json:"file-name,omitempty"`
+	// DirName is the directory name to create or delete.
+	DirName string `json:"dir-name,omitempty"`
+}
+
+type FileRenameSpec struct {
+	// SourceFile is the name need to be renamed.
+	SourceFile string `json:"source-file,omitempty"`
+	// DestFile is the name to be renamed.
+	DestFile string `json:"dest-file,omitempty"`
+}
+
+type FileAppendSpec struct {
+	// FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+	FileName string `json:"file-name,omitempty"`
+	// Data is the data for append.
+	Data string `json:"data,omitempty"`
+	// Count is the number of times to append the data.
+	Count int `json:"count,omitempty"`
+}
+
+type FileReplaceSpec struct {
+	// FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+	FileName string `json:"file-name,omitempty"`
+	// OriginStr is the origin string of the file.
+	OriginStr string `json:"origin-string,omitempty"`
+	// DestStr is the destination string of the file.
+	DestStr string `json:"dest-string,omitempty"`
+	// Line is the line number of the file to be replaced.
+	Line int `json:"line,omitempty"`
+}
+
+type VMSpec struct {
+	// The name of the VM to be injected
+	VMName string `json:"vm-name,omitempty"`
+}
+
+type UserDefinedSpec struct {
+	// The command to be executed when attack
+	AttackCmd string `json:"attackCmd,omitempty"`
+	// The command to be executed when recover
+	RecoverCmd string `json:"recoverCmd,omitempty"`
 }
