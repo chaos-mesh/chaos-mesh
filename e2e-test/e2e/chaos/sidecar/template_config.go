@@ -60,7 +60,7 @@ selector:
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
 		}
-		if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
+		if len(newPods.Items) > 0 && newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
 			return true, nil
 		}
 		return false, nil
@@ -103,7 +103,7 @@ selector:
 		if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
 			return true, nil
 		}
-		if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
+		if len(newPods.Items) > 0 && newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
 			return true, nil
 		}
 		return false, nil
