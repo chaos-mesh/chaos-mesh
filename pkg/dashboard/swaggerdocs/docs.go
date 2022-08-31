@@ -6287,6 +6287,10 @@ const docTemplate = `{
         "v1alpha1.NetworkDelaySpec": {
             "type": "object",
             "properties": {
+                "accept-tcp-flags": {
+                    "description": "only the packet which match the tcp flag can be accepted, others will be dropped.\nonly set when the IPProtocol is tcp, used for partition.",
+                    "type": "string"
+                },
                 "correlation": {
                     "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
