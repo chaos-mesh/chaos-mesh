@@ -22,7 +22,7 @@ jobs:
         # released version of kind-action doesn't support arm64
         uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
         with:
-          kubectl_version: v1.23.1
+          kubectl_version: v1.25.0
 
       - name: Setup Helm
         uses: azure/setup-helm@v2.1
