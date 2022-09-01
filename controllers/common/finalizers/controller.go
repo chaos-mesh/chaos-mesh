@@ -38,7 +38,7 @@ const (
 	RecordFinalizer = "chaos-mesh/records"
 )
 
-// ReconcilerMeta define the meta struct for InitReconciler and CleanReconciler.
+// ReconcilerMeta defines the meta of InitReconciler and CleanReconciler struct.
 type ReconcilerMeta struct {
 	// Object is used to mark the target type of this Reconciler
 	Object v1alpha1.InnerObject
