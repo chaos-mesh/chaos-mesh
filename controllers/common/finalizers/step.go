@@ -22,19 +22,40 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 )
 
-func Step(ctx *pipeline.PipelineContext) reconcile.Reconciler {
-	setupLog := ctx.Logger.WithName("setup-finalizers")
-	name := ctx.Object.Name + "-finalizers"
+func InitStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+	setupLog := ctx.Logger.WithName("setup-initFinalizers")
+	name := ctx.Object.Name + "-initFinalizers"
 	if !config.ShouldSpawnController(name) {
 		return nil
 	}
 
 	setupLog.Info("setting up controller", "name", name)
 
-	return &Reconciler{
-		Object:   ctx.Object.Object,
-		Client:   ctx.Client,
-		Recorder: ctx.RecorderBuilder.Build("finalizers"),
-		Log:      ctx.Logger.WithName("finalizers"),
+	return &InitReconciler{
+		ReconcilerMeta{
+			Object:   ctx.Object.Object,
+			Client:   ctx.Client,
+			Recorder: ctx.RecorderBuilder.Build("initFinalizers"),
+			Log:      ctx.Logger.WithName("initFinalizers"),
+		},
+	}
+}
+
+func CleanStep(ctx *pipeline.PipelineContext) reconcile.Reconciler {
+	setupLog := ctx.Logger.WithName("setup-cleanFinalizers")
+	name := ctx.Object.Name + "-cleanFinalizers"
+	if !config.ShouldSpawnController(name) {
+		return nil
+	}
+
+	setupLog.Info("setting up controller", "name", name)
+
+	return &CleanReconciler{
+		ReconcilerMeta{
+			Object:   ctx.Object.Object,
+			Client:   ctx.Client,
+			Recorder: ctx.RecorderBuilder.Build("initFinalizers"),
+			Log:      ctx.Logger.WithName("initFinalizers"),
+		},
 	}
 }
