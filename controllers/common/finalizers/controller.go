@@ -70,11 +70,10 @@ func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, nil
 	}
 
-	finalizers := obj.GetFinalizers()
 	if !obj.IsDeleted() {
 		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
 			r.Recorder.Event(obj, recorder.FinalizerInited{})
-			finalizers = append(obj.GetFinalizers(), RecordFinalizer)
+			finalizers := append(obj.GetFinalizers(), RecordFinalizer)
 			return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
 		}
 	}
