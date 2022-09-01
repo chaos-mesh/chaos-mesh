@@ -71,18 +71,14 @@ func (r *InitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	finalizers := obj.GetFinalizers()
-	shouldUpdate := false
 	if !obj.IsDeleted() {
 		if !ContainsFinalizer(obj.(metav1.Object), RecordFinalizer) {
 			r.Recorder.Event(obj, recorder.FinalizerInited{})
-			shouldUpdate = true
 			finalizers = append(obj.GetFinalizers(), RecordFinalizer)
+			return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
 		}
 	}
 
-	if shouldUpdate {
-		return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
-	}
 	return ctrl.Result{}, nil
 }
 
@@ -107,7 +103,6 @@ func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	finalizers := obj.GetFinalizers()
 	records := obj.GetStatus().Experiment.Records
-	shouldUpdate := false
 	if obj.IsDeleted() {
 		resumed := true
 		for _, record := range records {
@@ -119,13 +114,10 @@ func (r *CleanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		if obj.GetAnnotations()[AnnotationCleanFinalizer] == AnnotationCleanFinalizerForced || (resumed && len(finalizers) != 0) {
 			r.Recorder.Event(obj, recorder.FinalizerRemoved{})
 			finalizers = []string{}
-			shouldUpdate = true
+			return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
 		}
 	}
 
-	if shouldUpdate {
-		return updateFinalizer(r.ReconcilerMeta, obj, req, finalizers)
-	}
 	return ctrl.Result{}, nil
 }
 
