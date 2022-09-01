@@ -427,6 +427,9 @@ type NetworkDelaySpec struct {
 	Jitter string `json:"jitter,omitempty"`
 	// delay egress time, time units: ns, us (or µs), ms, s, m, h.
 	Latency string `json:"latency,omitempty"`
+	// only the packet which match the tcp flag can be accepted, others will be dropped.
+	// only set when the IPProtocol is tcp, used for partition.
+	AcceptTCPFlags string `json:"accept-tcp-flags,omitempty"`
 }
 
 type NetworkPartitionSpec struct {
