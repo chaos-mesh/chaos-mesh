@@ -33,6 +33,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
 - Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
 - Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
+- Fix generate RBAC template failed on chaos dashboard [#3595](https://github.com/chaos-mesh/chaos-mesh/pull/3595)
 
 ### Security
 
