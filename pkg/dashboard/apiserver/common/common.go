@@ -227,7 +227,7 @@ func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
 		}
 		namespaces = make(sort.StringSlice, 0, len(nsList.Items))
 		for _, ns := range nsList.Items {
-			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(context.TODO(), kubeCli, ns.Name, u.Log) {
+			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(context.TODO(), s.kubeCli, ns.Name, u.Log) {
 				continue
 			}
 			namespaces = append(namespaces, ns.Name)
