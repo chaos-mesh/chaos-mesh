@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+//go:build integration
+
 package helm
 
 import (
