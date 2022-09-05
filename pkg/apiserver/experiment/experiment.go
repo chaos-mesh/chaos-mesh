@@ -274,10 +274,6 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 		},
 	}
 
-	if exp.Target.IOChaos.ContainerName != "" {
-		chaos.Spec.ContainerNames = []string{exp.Target.IOChaos.ContainerName}
-	}
-
 	if exp.Scheduler.Duration != "" {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}

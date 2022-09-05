@@ -109,7 +109,7 @@ export interface ExperimentTargetStress {
     }
   }
   stressng_stressors: string
-  container_name: string
+  container_names: string[]
 }
 
 export type ExperimentKind =

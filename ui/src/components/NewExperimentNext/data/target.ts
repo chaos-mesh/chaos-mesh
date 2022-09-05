@@ -24,6 +24,14 @@ export interface Target {
   spec?: Spec
 }
 
+const containerNames = {
+  field: 'label' as FieldType,
+  label: 'Container names',
+  value: [],
+  helperText:
+    "Optional. Type and end with Enter to generate the container names. If it's empty, the first container will be injected.",
+}
+
 const networkCommon: Spec = {
   direction: {
     field: 'select',
@@ -36,7 +44,7 @@ const networkCommon: Spec = {
     field: 'label',
     label: 'External targets',
     value: [],
-    helperText: 'Type string and end with a space to generate the network targets outside k8s',
+    helperText: 'Type and end with Enter to generate the network targets outside k8s.',
   },
   target_scope: undefined as any,
 }
@@ -90,12 +98,7 @@ const ioCommon: Spec = {
     value: '',
     helperText: "Optional. The path of files for injecting. If it's empty, the action will inject into all files.",
   },
-  container_name: {
-    field: 'text',
-    label: 'Container name',
-    value: '',
-    helperText: 'Optional. The target container to inject in',
-  },
+  container_names: containerNames,
   percent: {
     field: 'number',
     label: 'Percent',
@@ -118,13 +121,7 @@ const dnsCommon: Spec = {
     value: [],
     helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
-  container_names: {
-    field: 'label',
-    label: 'Affected container names',
-    value: [],
-    helperText:
-      "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
-  },
+  container_names: containerNames,
 }
 
 const awsCommon: Spec = {
@@ -204,12 +201,7 @@ const data: Record<Kind, Target> = {
         key: 'container-kill',
         spec: {
           action: 'container-kill' as any,
-          container_names: {
-            field: 'label',
-            label: 'Container names',
-            value: [],
-            helperText: 'Type string and end with a space to generate the container names.',
-          },
+          container_names: containerNames,
         },
       },
     ],
@@ -445,15 +437,9 @@ const data: Record<Kind, Target> = {
         label: 'Clock ids',
         value: [],
         helperText:
-          "Optional. Type string and end with a space to generate the clock ids. If it's empty, it will be set to ['CLOCK_REALTIME']",
+          "Optional. Type and end with Enter to generate the clock ids. If it's empty, it will be set to ['CLOCK_REALTIME'].",
       },
-      container_names: {
-        field: 'label',
-        label: 'Affected container names',
-        value: [],
-        helperText:
-          "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
-      },
+      container_names: containerNames,
     },
   },
   // DNS Fault
@@ -547,7 +533,7 @@ const data: Record<Kind, Target> = {
             field: 'label',
             label: 'Device names',
             value: [],
-            helperText: 'Type string and end with a space to generate the device names',
+            helperText: 'Type and end with Enter to generate the device names.',
           },
         },
       },

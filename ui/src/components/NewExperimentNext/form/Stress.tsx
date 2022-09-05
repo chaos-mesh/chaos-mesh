@@ -70,7 +70,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="stressors.cpu.options"
               label="Options of CPU stressors"
-              helperText="Type string and end with a space to generate the stress-ng options"
+              helperText="Type and end with Enter to generate the stress-ng options"
             />
 
             <Typography>Memory</Typography>
@@ -88,7 +88,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="stressors.memory.options"
               label="Options of Memory stressors"
-              helperText="Type string and end with a space to generate the stress-ng options"
+              helperText="Type and end with Enter to generate the stress-ng options"
             />
           </Space>
 
@@ -101,7 +101,7 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             <LabelField
               name="container_names"
               label="Container Names"
-              helperText="Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected"
+              helperText="Optional. Type and end with Enter to generate the container names. If it's empty, the first container will be injected"
             />
           </AdvancedOptions>
 
