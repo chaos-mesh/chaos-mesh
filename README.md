@@ -89,7 +89,7 @@ Please reach out for bugs, feature requests, and other issues via:
   - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
   - [Meeting minutes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
 
-- Chaos Mesh Development Biweekly (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc)
+- Chaos Mesh Development Meeting (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc)
   - Time: Every other Tuesday ((unless otherwise specified)
   - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
   - [Meeting minutes](https://docs.google.com/document/d/1s9X6tTOy3OGZaLDZQesGw1BNOrxQfWExjBFIn5irpPE/edit#heading=h.94nzmll6m8n5)
