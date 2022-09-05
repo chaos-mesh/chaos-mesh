@@ -54,7 +54,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/btree v1.0.1 // indirect
-	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
@@ -153,6 +152,8 @@ replace (
 	k8s.io/csi-translation-lib => k8s.io/csi-translation-lib v0.23.1
 	k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.23.1
 	k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.23.1
+	// remove this line after we upgrade kubernetes dependency to 1.24.x
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65
 	k8s.io/kube-proxy => k8s.io/kube-proxy v0.23.1
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.23.1
 	k8s.io/kubectl => k8s.io/kubectl v0.23.1
