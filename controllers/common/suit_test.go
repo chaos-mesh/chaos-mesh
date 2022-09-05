@@ -100,7 +100,7 @@ var _ = BeforeSuite(func() {
 			selector.Module,
 			fx.Provide(chaosdaemon.New),
 			fx.Provide(func() []pipeline.PipelineStep {
-				return []pipeline.PipelineStep{finalizers.Step, desiredphase.Step, condition.Step}
+				return []pipeline.PipelineStep{finalizers.InitStep, desiredphase.Step, condition.Step, finalizers.CleanStep}
 			}),
 			fx.Invoke(Bootstrap),
 			fx.Supply(cfg),
