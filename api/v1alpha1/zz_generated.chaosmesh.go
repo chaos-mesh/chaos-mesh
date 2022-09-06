@@ -1375,10 +1375,6 @@ func (in *NetworkChaos) Validate() error {
 var _ webhook.Defaulter = &NetworkChaos{}
 
 func (in *NetworkChaos) Default() {
-	x := in.Spec.Device
-	if idx := strings.Index(x, "@"); idx != -1 {
-		in.Spec.Device = x[:idx]
-	}
 	gw.Default(in)
 }
 
