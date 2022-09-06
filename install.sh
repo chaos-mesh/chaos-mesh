@@ -1449,6 +1449,8 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
       annotations:
     spec:
+      securityContext:
+            {}
       serviceAccountName: chaos-dashboard
       containers:
         - name: chaos-dashboard
@@ -1564,6 +1566,8 @@ spec:
       annotations:
         rollme: "install.sh"
     spec:
+      securityContext:
+            {}
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
       containers:
