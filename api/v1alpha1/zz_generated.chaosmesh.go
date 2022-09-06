@@ -20,7 +20,6 @@ package v1alpha1
 import (
 	"encoding/json"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
