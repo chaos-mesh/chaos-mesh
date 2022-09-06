@@ -39,7 +39,7 @@ spec:
     {{- end }}
     spec:
       securityContext:
-{{ toYaml .Values.controllerManager.securityContext | indent 12 }}
+{{ toYaml .Values.dashboard.securityContext | indent 12 }}
       {{- if .Values.dashboard.hostNetwork }}
       hostNetwork: true
       {{- end }}
