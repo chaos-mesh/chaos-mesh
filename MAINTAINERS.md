@@ -13,7 +13,7 @@ The Maintainers of Chaos Mesh, along with their emails, are listed be
 | Calvin Weng ([dcalvin](https://github.com/dcalvin))           |  [wenghao@pingcap.com](mailto:wenghao@pingcap.com)      |  [PingCAP](https://www.pingcap.com/)       |
 | Ben Ye ([yeya24](https://github.com/yeya24))                  |  [yb532204897@gmail.com](mailto:yb532204897@gmail.com)  |  [ByteDance](https://www.bytedance.com/)   |
 | Hengliang Tan ([Gallardot](https://github.com/Gallardot))     |  [tttick@gmail.com](mailto:tttick@gmail.com)            |  [Xpeng Motors](https://www.xiaopeng.com/) |
-| Zhiqiang Zhou ([STRRL](https://github.com/STRRL))                | [zhouzhiqiang@pingcap.com](mailto:zhouzhiqiang@pingcap.com)                   | [PingCAP](https://www.pingcap.com/)   |
+| Zhiqiang Zhou ([STRRL](https://github.com/STRRL))             | [im@strrl.dev](mailto:im@strrl.dev)                     |  Freelancer                                |
 
 ## Committers
 
