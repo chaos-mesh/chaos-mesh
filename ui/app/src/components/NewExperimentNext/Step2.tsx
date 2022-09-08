@@ -140,7 +140,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                         <Nodes />
                         <Divider />
                         <Typography>{i18n('newE.scope.mode')}</Typography>
-                        <Mode disabled={false} modeScope={'spec'} scope={'spec.selector'} />
+                        <Mode modeScope={'spec'} scope={'spec.selector'} />
                       </>
                     )}
                   </Space>
