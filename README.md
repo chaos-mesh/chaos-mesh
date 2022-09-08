@@ -82,14 +82,17 @@ Please reach out for bugs, feature requests, and other issues via:
 
 - Filing an issue or opening a PR against this repository.
 
-### Community meeting
+### Community meetings
 
-On the fourth Thursday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
+- Chaos Mesh Community Monthly (Community and project-level updates, community sharing/demo, office hours)
+  - Time: on the fourth Thursday of every month (unless otherwise specified)
+  - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
+  - [Meeting minutes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
 
-**Quick links:**
-
-- [RSVP here](https://community.cncf.io/chaos-mesh-community/)
-- [Meeting notes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
+- Chaos Mesh Development Meeting (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc)
+  - Time: Every other Tuesday (unless otherwise specified)
+  - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
+  - [Meeting minutes](https://docs.google.com/document/d/1s9X6tTOy3OGZaLDZQesGw1BNOrxQfWExjBFIn5irpPE/edit#heading=h.94nzmll6m8n5)
 
 ### Community blogs
 
