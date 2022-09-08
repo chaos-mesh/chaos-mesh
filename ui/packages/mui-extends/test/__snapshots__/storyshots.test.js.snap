@@ -478,13 +478,13 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
 >
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-xvv0ef-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1ypcskt-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
   >
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1exuzsl-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1gah11y-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -494,7 +494,7 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
         aria-invalid={false}
         autoCapitalize="none"
         autoComplete="off"
-        className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
+        className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -575,13 +575,13 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
   </label>
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-xvv0ef-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1ypcskt-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
   >
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1exuzsl-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1gah11y-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -591,7 +591,7 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
         aria-invalid={false}
         autoCapitalize="none"
         autoComplete="off"
-        className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
+        className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -677,13 +677,13 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
   </label>
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-xvv0ef-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1ypcskt-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
   >
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1exuzsl-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-1gah11y-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
@@ -693,7 +693,7 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
         aria-invalid={false}
         autoCapitalize="none"
         autoComplete="off"
-        className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
+        className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -776,7 +776,7 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
-      className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -834,7 +834,7 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
   >
     <span
       aria-disabled={true}
-      className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root Mui-disabled MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root Mui-disabled css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -891,7 +891,7 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
-      className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -949,7 +949,7 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
   >
     <span
-      className="MuiCheckbox-root MuiCheckbox-colorPrimary MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -999,14 +999,13 @@ exports[`Storyshots Form/SelectField Default 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
-    variant="outlined"
   >
     <div
       aria-expanded="false"
       aria-haspopup="listbox"
-      className="MuiSelect-select MuiSelect-outlined MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
       onBlur={[Function]}
       onFocus={[Function]}
       onKeyDown={[Function]}
@@ -1069,15 +1068,14 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
     Fruits
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
-    variant="outlined"
   >
     <div
       aria-disabled="true"
       aria-expanded="false"
       aria-haspopup="listbox"
-      className="MuiSelect-select MuiSelect-outlined Mui-disabled MuiOutlinedInput-input MuiInputBase-input Mui-disabled MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiSelect-select MuiSelect-outlined Mui-disabled MuiInputBase-input MuiOutlinedInput-input Mui-disabled MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
       onBlur={[Function]}
       onFocus={[Function]}
       onKeyDown={[Function]}
@@ -1145,14 +1143,13 @@ exports[`Storyshots Form/SelectField Error 1`] = `
     Fruits
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
-    variant="outlined"
   >
     <div
       aria-expanded="false"
       aria-haspopup="listbox"
-      className="MuiSelect-select MuiSelect-outlined MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
       onBlur={[Function]}
       onFocus={[Function]}
       onKeyDown={[Function]}
@@ -1220,14 +1217,13 @@ exports[`Storyshots Form/SelectField Label And Helper Text 1`] = `
     Fruits
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
-    variant="outlined"
   >
     <div
       aria-expanded="false"
       aria-haspopup="listbox"
-      className="MuiSelect-select MuiSelect-outlined MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
       onBlur={[Function]}
       onFocus={[Function]}
       onKeyDown={[Function]}
@@ -1290,12 +1286,12 @@ exports[`Storyshots Form/TextField Default 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
       aria-invalid={false}
-      className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
       disabled={false}
       onAnimationStart={[Function]}
       onBlur={[Function]}
@@ -1333,12 +1329,12 @@ exports[`Storyshots Form/TextField Disabled 1`] = `
     Schedule
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-disabled MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
       aria-invalid={false}
-      className="MuiOutlinedInput-input MuiInputBase-input Mui-disabled MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiInputBase-input MuiOutlinedInput-input Mui-disabled MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
       disabled={true}
       onAnimationStart={[Function]}
       onBlur={[Function]}
@@ -1381,12 +1377,12 @@ exports[`Storyshots Form/TextField Error 1`] = `
     Schedule
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary Mui-error MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
       aria-invalid={true}
-      className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
       disabled={false}
       onAnimationStart={[Function]}
       onBlur={[Function]}
@@ -1432,12 +1428,12 @@ exports[`Storyshots Form/TextField Group 1`] = `
       Name
     </label>
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
         aria-invalid={false}
-        className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
+        className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -1477,12 +1473,12 @@ exports[`Storyshots Form/TextField Group 1`] = `
       Namespace
     </label>
     <div
-      className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+      className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
       onClick={[Function]}
     >
       <input
         aria-invalid={false}
-        className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
+        className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -1521,7 +1517,7 @@ exports[`Storyshots Form/TextField Has Input Adornment 1`] = `
   className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
 >
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedStart MuiInputBase-adornedEnd css-zdqiun-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall MuiInputBase-adornedStart MuiInputBase-adornedEnd css-8h16no-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <div
@@ -1546,7 +1542,7 @@ exports[`Storyshots Form/TextField Has Input Adornment 1`] = `
     </div>
     <input
       aria-invalid={false}
-      className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedStart MuiInputBase-inputAdornedEnd css-12yjm75-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedStart MuiInputBase-inputAdornedEnd css-12yjm75-MuiInputBase-input-MuiOutlinedInput-input"
       disabled={false}
       onAnimationStart={[Function]}
       onBlur={[Function]}
@@ -1598,12 +1594,12 @@ exports[`Storyshots Form/TextField Label And Helper Text 1`] = `
     Schedule
   </label>
   <div
-    className="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1sr04sh-MuiInputBase-root-MuiOutlinedInput-root"
+    className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-1ufgj6y-MuiInputBase-root-MuiOutlinedInput-root"
     onClick={[Function]}
   >
     <input
       aria-invalid={false}
-      className="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input"
       disabled={false}
       onAnimationStart={[Function]}
       onBlur={[Function]}
