@@ -35,14 +35,13 @@ import Mode from './Mode'
 import ScopePodsTable from './ScopePodsTable'
 
 interface ScopeProps {
-  kind?: string
   namespaces: string[]
   scope?: string
   modeScope?: string
   podsPreviewTitle?: string | JSX.Element
 }
 
-const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', modeScope = '', podsPreviewTitle }) => {
+const Scope = ({ namespaces, scope = 'selector', modeScope = '', podsPreviewTitle }: ScopeProps) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
@@ -56,7 +55,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
   const isTargetField = scope.startsWith('target')
   const pods = !isTargetField ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
-  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -99,12 +97,7 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
     }
   }, [dispatch, getPods, currentNamespaces, currentLabels, currentAnnotations])
 
-  return disabled ? (
-    <Typography
-      variant="body2"
-      sx={{ color: 'text.disabled' }}
-    >{`${kind} does not need to define the scope.`}</Typography>
-  ) : (
+  return (
     <Space>
       <AutocompleteField
         freeSolo
@@ -175,4 +168,21 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
   )
 }
 
-export default Scope
+interface ConditionalScopeProps extends ScopeProps {
+  kind?: string
+}
+
+const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {
+  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+
+  return disabled ? (
+    <Typography
+      variant="body2"
+      sx={{ color: 'text.disabled' }}
+    >{`${kind} does not need to define the scope.`}</Typography>
+  ) : (
+    <Scope {...rest} />
+  )
+}
+
+export default ConditionalScope
