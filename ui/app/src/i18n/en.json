@@ -39,7 +39,6 @@
     "steps": {
       "basic": "Metadata",
       "scope": "Scope",
-      "scopeDisabled": " (No need to fill in)",
       "run": "Run"
     },
     "loadFrom": "Load from",

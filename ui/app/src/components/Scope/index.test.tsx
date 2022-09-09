@@ -84,9 +84,7 @@ describe('<Scope />', () => {
       </Formik>
     )
 
-    const nsSelectors = screen.getByRole('combobox', { name: 'Namespace Selectors' })
-
-    expect(nsSelectors.className).toContain('disabled')
+    expect(screen.getByText('AWSChaos does not need to define the scope.')).toBeInTheDocument()
   })
 
   it('loads and then choose a namespace', async () => {
