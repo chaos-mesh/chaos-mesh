@@ -1,6 +1,6 @@
 {
   "name": "@ui/openapi",
-  "version": "2.1.0",
+  "version": "0.1.0",
   "description": "Generate @ui/app needed codes from OpenAPI",
   "private": true,
   "main": "index.js",
