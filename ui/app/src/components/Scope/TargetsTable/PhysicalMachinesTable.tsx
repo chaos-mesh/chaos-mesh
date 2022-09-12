@@ -21,7 +21,7 @@ import PaperContainer from '@ui/mui-extends/esm/PaperContainer'
 
 import { T } from 'components/T'
 
-import { TargetsTableActions } from './TargetsTable'
+import { TargetsTableActions } from '.'
 
 interface PhysicalMachinesTableProps extends TargetsTableActions {
   data: TypesPhysicalMachine[]
