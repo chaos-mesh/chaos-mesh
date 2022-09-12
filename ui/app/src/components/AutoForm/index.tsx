@@ -320,7 +320,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                     namespaces={namespaces}
                     scope="target.selector"
                     modeScope="target"
-                    podsPreviewTitle={<T id="newE.target.network.target.podsPreview" />}
+                    previewTitle={<T id="newE.target.network.target.podsPreview" />}
                   />
                 </Space>
               </>
@@ -330,15 +330,13 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               kind !== SpecialTemplateType.Parallel && (
                 <>
                   <Divider />
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6">
                     <T id="newE.steps.scope" />
                   </Typography>
                   {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
                   <Divider />
                   <Box>
-                    <Typography variant="h6" fontWeight="bold">
-                      Schedule
-                    </Typography>
+                    <Typography variant="h6">Schedule</Typography>
                     <Checkbox
                       label="Scheduled"
                       helperText={`Check the box to convert ${kindAction} into a Schedule.`}
@@ -350,9 +348,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                   <Divider />
                 </>
               )}
-            <Typography variant="h6" fontWeight="bold">
-              Info
-            </Typography>
+            <Typography variant="h6">Info</Typography>
             <Info belong={belong} kind={kind} action={action} />
             <Submit />
           </Space>
