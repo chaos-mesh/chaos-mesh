@@ -66,7 +66,7 @@ jest.mock('api', () => ({
 
 const Default = () => (
   <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-    <Scope namespaces={['ns1', 'ns2']} />
+    <Scope env="k8s" kind="PodChaos" namespaces={['ns1', 'ns2']} />
   </Formik>
 )
 
@@ -80,7 +80,7 @@ describe('<Scope />', () => {
   it('disables when kind is AWSChaos', () => {
     render(
       <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-        <Scope kind="AWSChaos" namespaces={['ns1', 'ns2']} />
+        <Scope env="k8s" kind="AWSChaos" namespaces={['ns1', 'ns2']} />
       </Formik>
     )
 

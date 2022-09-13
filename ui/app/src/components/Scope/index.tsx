@@ -44,14 +44,14 @@ import Mode from './Mode'
 import TargetsTable from './TargetsTable'
 
 interface ScopeProps {
-  env?: Env
+  env: Env
   namespaces: string[]
   scope?: string
   modeScope?: string
   previewTitle?: string | JSX.Element
 }
 
-const Scope = ({ env = 'k8s', namespaces, scope = 'selector', modeScope = '', previewTitle }: ScopeProps) => {
+const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTitle }: ScopeProps) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
@@ -185,7 +185,7 @@ const Scope = ({ env = 'k8s', namespaces, scope = 'selector', modeScope = '', pr
 }
 
 interface ConditionalScopeProps extends ScopeProps {
-  kind?: string
+  kind: string
 }
 
 const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {

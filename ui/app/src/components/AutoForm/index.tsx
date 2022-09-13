@@ -66,16 +66,20 @@ export interface AtomFormData {
 
 const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kind, act: action, formikProps }) => {
   const kindAction = concatKindAction(kind, action)
+
+  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const noScope =
+    kind === SpecialTemplateType.Suspend ||
+    kind === SpecialTemplateType.Serial ||
+    kind === SpecialTemplateType.Parallel ||
+    (kind === 'PhysicalMachineChaos' && !useNewPhysicalMachine)
+
   const [initialValues, setInitialValues] = useState<FormikValues>({
     id,
     kind,
     action,
     ...(kind === 'NetworkChaos' && { target: scopeInitialValues }),
-    ...(kind !== 'PhysicalMachineChaos' &&
-      kind !== SpecialTemplateType.Suspend &&
-      kind !== SpecialTemplateType.Serial &&
-      kind !== SpecialTemplateType.Parallel &&
-      scopeInitialValues),
+    ...(!noScope && scopeInitialValues),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
   const [form, setForm] = useState<AtomFormData[]>([])
@@ -317,6 +321,8 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                 <Space direction="row">
                   <Divider orientation="vertical" flexItem />
                   <Scope
+                    env="k8s"
+                    kind={kind}
                     namespaces={namespaces}
                     scope="target.selector"
                     modeScope="target"
@@ -333,7 +339,13 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                   <Typography variant="h6">
                     <T id="newE.steps.scope" />
                   </Typography>
-                  {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
+                  {useNewPhysicalMachine && (
+                    <Scope
+                      env={kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'}
+                      kind={kind}
+                      namespaces={namespaces}
+                    />
+                  )}
                   <Divider />
                   <Box>
                     <Typography variant="h6">Schedule</Typography>
