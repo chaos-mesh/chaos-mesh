@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
+
 import axios, { AxiosError } from 'axios'
 
-import store from 'store'
-
 import { setAlert } from 'slices/globalStatus'
+import store from 'store'
 
 interface ErrorData {
   code: number
