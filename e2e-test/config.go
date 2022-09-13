@@ -27,6 +27,7 @@ type Config struct {
 	DaemonImage          string
 	DaemonTag            string
 	E2EImage             string
+	PauseImage           string
 	ChaosDNSImage        string
 	InstallChaosMesh     bool
 	EnableDashboard      bool
@@ -46,6 +47,7 @@ func NewDefaultConfig() *Config {
 		DaemonTag:            "latest",
 		E2EImage:             "ghcr.io/chaos-mesh/e2e-helper:latest",
 		ChaosDNSImage:        "ghcr.io/chaos-mesh/chaos-dns:latest",
+		PauseImage:           "gcr.io/google-containers/pause:latest",
 		InstallChaosMesh:     false,
 		EnableDashboard:      false,
 	}

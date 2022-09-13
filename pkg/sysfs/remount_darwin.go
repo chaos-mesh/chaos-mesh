@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,9 +13,12 @@
 // limitations under the License.
 //
 
-package e2econst
+package sysfs
 
-const (
-	ChaosMeshNamespace     = "chaos-mesh"
-	ChaosControllerManager = "chaos-controller-manager"
+import (
+	"github.com/pkg/errors"
 )
+
+func RemountWithOption(options ...func(uintptr) uintptr) error {
+	return errors.New("Remount is not supported on darwin for now.")
+}
