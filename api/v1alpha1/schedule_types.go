@@ -33,7 +33,7 @@ type Schedule struct {
 	Spec ScheduleSpec `json:"spec"`
 
 	// +optional
-	Status ScheduleStatus `json:"status"`
+	Status ScheduleStatus `json:"status,omitempty"`
 }
 
 type ConcurrencyPolicy string

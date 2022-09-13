@@ -83,7 +83,7 @@ type PhysicalMachineChaos struct {
 
 	// +optional
 	// Most recently observed status of the chaos experiment
-	Status PhysicalMachineChaosStatus `json:"status"`
+	Status PhysicalMachineChaosStatus `json:"status,omitempty"`
 }
 
 // PhysicalMachineChaosSpec defines the desired state of PhysicalMachineChaos
@@ -120,7 +120,7 @@ type PhysicalMachineSelector struct {
 
 	// Selector is used to select physical machines that are used to inject chaos action.
 	// +optional
-	Selector PhysicalMachineSelectorSpec `json:"selector"`
+	Selector PhysicalMachineSelectorSpec `json:"selector,omitempty"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
@@ -427,6 +427,9 @@ type NetworkDelaySpec struct {
 	Jitter string `json:"jitter,omitempty"`
 	// delay egress time, time units: ns, us (or µs), ms, s, m, h.
 	Latency string `json:"latency,omitempty"`
+	// only the packet which match the tcp flag can be accepted, others will be dropped.
+	// only set when the IPProtocol is tcp, used for partition.
+	AcceptTCPFlags string `json:"accept-tcp-flags,omitempty"`
 }
 
 type NetworkPartitionSpec struct {

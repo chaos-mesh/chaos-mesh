@@ -293,6 +293,10 @@ func validateNetworkDelayAction(spec *NetworkDelaySpec) error {
 		return errors.New("latency is invalid")
 	}
 
+	if len(spec.AcceptTCPFlags) > 0 && spec.IPProtocol != "tcp" {
+		return errors.New("protocol should be 'tcp' when set accept-tcp-flags")
+	}
+
 	return nil
 }
 

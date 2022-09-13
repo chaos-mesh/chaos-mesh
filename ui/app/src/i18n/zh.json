@@ -39,7 +39,6 @@
     "steps": {
       "basic": "元信息",
       "scope": "范围",
-      "scopeDisabled": "（无需填写）",
       "run": "运行"
     },
     "loadFrom": "加载自",
