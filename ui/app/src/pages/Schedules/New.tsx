@@ -14,18 +14,16 @@
  * limitations under the License.
  *
  */
+
 import { Grid } from '@mui/material'
+import NewExperiment from 'components/NewExperimentNext'
 import api from 'api'
-import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
-
-import { useStoreDispatch } from 'store'
-
+import i18n from 'components/T'
 import { resetNewExperiment } from 'slices/experiments'
 import { setAlert } from 'slices/globalStatus'
-
-import NewExperiment from 'components/NewExperimentNext'
-import i18n from 'components/T'
+import { useIntl } from 'react-intl'
+import { useNavigate } from 'react-router-dom'
+import { useStoreDispatch } from 'store'
 
 const New = () => {
   const navigate = useNavigate()

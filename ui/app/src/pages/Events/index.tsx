@@ -15,14 +15,13 @@
  *
  */
 import { Grow, Typography } from '@mui/material'
-import api from 'api'
-import { CoreEvent } from 'openapi'
 import { useEffect, useState } from 'react'
 
-import Loading from '@ui/mui-extends/esm/Loading'
-
+import { CoreEvent } from 'openapi'
 import EventsTable from 'components/EventsTable'
+import Loading from '@ui/mui-extends/esm/Loading'
 import NotFound from 'components/NotFound'
+import api from 'api'
 import i18n from 'components/T'
 
 export default function Events() {

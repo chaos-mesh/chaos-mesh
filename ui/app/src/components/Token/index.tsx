@@ -14,19 +14,16 @@
  * limitations under the License.
  *
  */
-import api from 'api'
+
 import { Form, Formik, FormikHelpers } from 'formik'
-import { useIntl } from 'react-intl'
-
-import Space from '@ui/mui-extends/esm/Space'
-
+import { Submit, TextField } from 'components/FormField'
+import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
-
-import { Submit, TextField } from 'components/FormField'
+import Space from '@ui/mui-extends/esm/Space'
+import api from 'api'
 import i18n from 'components/T'
-
+import { useIntl } from 'react-intl'
 import { validateName } from 'lib/formikhelpers'
 
 function validateToken(value: string) {
