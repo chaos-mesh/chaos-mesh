@@ -35,14 +35,13 @@ import Mode from './Mode'
 import ScopePodsTable from './ScopePodsTable'
 
 interface ScopeProps {
-  kind?: string
   namespaces: string[]
   scope?: string
   modeScope?: string
   podsPreviewTitle?: string | JSX.Element
 }
 
-const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', modeScope = '', podsPreviewTitle }) => {
+const Scope = ({ namespaces, scope = 'selector', modeScope = '', podsPreviewTitle }: ScopeProps) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
@@ -56,7 +55,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
   const isTargetField = scope.startsWith('target')
   const pods = !isTargetField ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
-  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -115,7 +113,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
         }
         options={!enableKubeSystemNS ? namespaces.filter((d) => d !== 'kube-system') : namespaces}
         error={getIn(errors, `${scope}.namespaces`) && getIn(touched, `${scope}.namespaces`) ? true : false}
-        disabled={disabled}
       />
 
       <AutocompleteField
@@ -125,10 +122,9 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
         label={<T id="k8s.labelSelectors" />}
         helperText={<T id="newE.scope.labelSelectorsHelper" />}
         options={labelKVs}
-        disabled={disabled}
       />
 
-      <MoreOptions disabled={disabled}>
+      <MoreOptions>
         <AutocompleteField
           freeSolo
           multiple
@@ -136,7 +132,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
           label={<T id="k8s.annotationSelectors" />}
           helperText={<T id="newE.scope.annotationSelectorsHelper" />}
           options={annotationKVs}
-          disabled={disabled}
         />
 
         <SelectField<string[]>
@@ -144,7 +139,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
           name={`${scope}.podPhaseSelectors`}
           label={<T id="k8s.podPhaseSelectors" />}
           helperText={<T id="newE.scope.phaseSelectorsHelper" />}
-          disabled={disabled}
           fullWidth
         >
           {podPhases.map((option) => (
@@ -155,20 +149,18 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
         </SelectField>
       </MoreOptions>
 
-      <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
+      <Mode modeScope={modeScope} scope={scope} />
 
       <div>
-        <Typography fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          {podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}
-        </Typography>
-        <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>
+        <Typography fontWeight="bold">{podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           <T id="newE.scope.targetPodsPreviewHelper" />
         </Typography>
       </div>
       {pods.length > 0 ? (
         <ScopePodsTable scope={scope} pods={pods} />
       ) : (
-        <Typography variant="body2" fontWeight="medium" sx={{ color: disabled ? 'text.disabled' : undefined }}>
+        <Typography variant="body2" fontWeight="medium">
           <T id="newE.scope.noPodsFound" />
         </Typography>
       )}
@@ -176,4 +168,21 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
   )
 }
 
-export default Scope
+interface ConditionalScopeProps extends ScopeProps {
+  kind?: string
+}
+
+const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {
+  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+
+  return disabled ? (
+    <Typography
+      variant="body2"
+      sx={{ color: 'text.disabled' }}
+    >{`${kind} does not need to define the scope.`}</Typography>
+  ) : (
+    <Scope {...rest} />
+  )
+}
+
+export default ConditionalScope
