@@ -390,7 +390,7 @@ dnsServer:
   # Name of serviceaccount for chaos-dns-server.
   serviceAccount: chaos-dns-server
   # Image of DNS Server
-  image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.1-r1
+  image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.3
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server
