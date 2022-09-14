@@ -16,7 +16,6 @@
 package cmd
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -24,6 +23,7 @@ import (
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 var managerNamespace, managerSvc string
