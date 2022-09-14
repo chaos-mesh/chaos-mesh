@@ -773,7 +773,7 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
   className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
       className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
@@ -830,7 +830,7 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
   className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root Mui-disabled MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root Mui-disabled MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
       aria-disabled={true}
@@ -888,7 +888,7 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
   className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-ot9zlz-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-wuturk-MuiFormControlLabel-root"
   >
     <span
       className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
@@ -946,7 +946,7 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
   className="MuiFormControl-root css-15tfdqx-MuiFormControl-root"
 >
   <label
-    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-ot9zlz-MuiFormControlLabel-root"
+    className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
       className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"

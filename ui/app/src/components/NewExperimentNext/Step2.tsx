@@ -125,10 +125,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
               <Grid container spacing={6}>
                 <Grid item xs={6}>
                   <Space>
-                    <Typography sx={{ color: scopeDisabled ? 'text.disabled' : undefined }}>
-                      {i18n('newE.steps.scope')}
-                      {scopeDisabled && i18n('newE.steps.scopeDisabled')}
-                    </Typography>
+                    <Typography>{i18n('newE.steps.scope')}</Typography>
                     {env === 'k8s' ? (
                       namespaces.length ? (
                         <Scope kind={kind} namespaces={namespaces} scope="spec.selector" modeScope="spec" />
@@ -140,7 +137,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                         <Nodes />
                         <Divider />
                         <Typography>{i18n('newE.scope.mode')}</Typography>
-                        <Mode disabled={false} modeScope={'spec'} scope={'spec.selector'} />
+                        <Mode modeScope={'spec'} scope={'spec.selector'} />
                       </>
                     )}
                   </Space>
