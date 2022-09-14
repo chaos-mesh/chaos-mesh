@@ -241,10 +241,6 @@ func validateNetworkCommon(spec *NetworkCommonSpec) error {
 		return errors.New("device is required")
 	}
 
-	if len(spec.IPAddress) == 0 && len(spec.Hostname) == 0 {
-		return errors.New("one of ip-address and hostname is required")
-	}
-
 	return nil
 }
 
