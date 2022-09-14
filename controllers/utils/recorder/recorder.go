@@ -63,7 +63,7 @@ func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	}
 
 	if !util.ValidateEventType(eventtype) {
-		r.log.Errorf("Unsupported event type: '%v'", eventtype)
+		r.log.Error(fmt.Errorf("unsupported event type:'%v'", eventtype), "eventtype", eventtype)
 		return
 	}
 
