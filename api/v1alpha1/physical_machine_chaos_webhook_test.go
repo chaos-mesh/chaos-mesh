@@ -398,18 +398,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							NetworkCommonSpec: NetworkCommonSpec{
 								Correlation: "100",
 								Device:      "eth0",
-							},
-						},
-					},
-					"one of ip-address and hostname is required",
-				},
-				{
-					PMNetworkCorruptAction,
-					ExpInfo{
-						NetworkCorrupt: &NetworkCorruptSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
 								IPAddress:   "123.123.123.123",
 							},
 							Percent: "0",
@@ -461,18 +449,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 							NetworkCommonSpec: NetworkCommonSpec{
 								Correlation: "100",
 								Device:      "eth0",
-							},
-						},
-					},
-					"one of ip-address and hostname is required",
-				},
-				{
-					PMNetworkDuplicateAction,
-					ExpInfo{
-						NetworkDuplicate: &NetworkDuplicateSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
 								IPAddress:   "123.123.123.123",
 							},
 							Percent: "0",
@@ -505,18 +481,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 						},
 					},
 					"device is required",
-				},
-				{
-					PMNetworkLossAction,
-					ExpInfo{
-						NetworkLoss: &NetworkLossSpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-							},
-						},
-					},
-					"one of ip-address and hostname is required",
 				},
 				{
 					PMNetworkLossAction,
@@ -568,18 +532,6 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 						},
 					},
 					"device is required",
-				},
-				{
-					PMNetworkDelayAction,
-					ExpInfo{
-						NetworkDelay: &NetworkDelaySpec{
-							NetworkCommonSpec: NetworkCommonSpec{
-								Correlation: "100",
-								Device:      "eth0",
-							},
-						},
-					},
-					"one of ip-address and hostname is required",
 				},
 				{
 					PMNetworkDelayAction,
