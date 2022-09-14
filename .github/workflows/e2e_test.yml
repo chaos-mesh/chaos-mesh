@@ -105,9 +105,9 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.15.12
           - v1.20.15
           - v1.23.4
+          - v1.25.0
         focus:
           - '[Graceful-Shutdown] [IOChaos]'
           - '[Graceful-Shutdown] [HTTPChaos]'
