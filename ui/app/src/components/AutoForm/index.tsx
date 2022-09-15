@@ -119,6 +119,10 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               return false
             }
 
+            if (kind === 'PhysicalMachineChaos' && useNewPhysicalMachine && d.label === 'address') {
+              return false
+            }
+
             if (d.when) {
               const parsed = parse(d.when)
 
