@@ -71,12 +71,6 @@ const Default = () => (
 )
 
 describe('<Scope />', () => {
-  it('first load', () => {
-    render(<Default />)
-
-    expect(screen.getByText('No pods found')).toBeInTheDocument()
-  })
-
   it('disables when kind is AWSChaos', () => {
     render(
       <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
@@ -85,6 +79,12 @@ describe('<Scope />', () => {
     )
 
     expect(screen.getByText('AWSChaos does not need to define the scope.')).toBeInTheDocument()
+  })
+
+  it('first load', () => {
+    render(<Default />)
+
+    expect(screen.getByText('No Pods found.')).toBeInTheDocument()
   })
 
   it('loads and then choose a namespace', async () => {

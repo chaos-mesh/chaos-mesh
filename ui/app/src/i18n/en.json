@@ -59,7 +59,7 @@
       "modeValueHelper": "Please fill the mode value",
       "targetPodsPreview": "Preview of Pods to be injected",
       "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope.",
-      "noPodsFound": "No pods found.",
+      "noPodsFound": "No Pods found.",
       "targetPhysicalMachinesPreview": "Preview of physical machines to be injected",
       "targetPhysicalMachinesPreviewHelper": "Checking or unchecking physical machines to further limit the scope.",
       "noPhysicalMachinesFound": "No physical machines found."
