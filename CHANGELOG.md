@@ -22,6 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update display of disabled scope in UI [#3621](https://github.com/chaos-mesh/chaos-mesh/pull/3621)
 - Make the Scope render conditionally [#3622](https://github.com/chaos-mesh/chaos-mesh/pull/3622)
 - Dashboard: Fix rbac.yaml for token generation verbs/resources [#3370](https://github.com/chaos-mesh/chaos-mesh/pull/3370)
+- Refine logging, remove the usage of klog in event recorder [#3629](https://github.com/chaos-mesh/chaos-mesh/pull/3629)
 
 ### Deprecated
 
