@@ -33,7 +33,8 @@ export function parseSubmit<K extends ExperimentKind>(
   env: Env,
   _kind: K,
   e: Experiment<Exclude<K, 'Schedule'>>,
-  options?: {
+  options: {
+    useNewPhysicalMachine: boolean
     inSchedule?: boolean
   }
 ) {
@@ -169,17 +170,16 @@ export function parseSubmit<K extends ExperimentKind>(
   }
 
   function parsePhysicalMachineChaos(spec: any) {
-    delete spec.selector
-
-    const { action, address, duration, mode } = spec as any
+    const { action, address, selector, duration, mode } = spec as any
 
     delete spec.action
+    delete spec.selector
     delete spec.address
     delete spec.duration
     delete spec.mode
 
     return {
-      address,
+      ...(options.useNewPhysicalMachine ? { selector } : { address }),
       action,
       mode,
       [action]: spec,
@@ -187,7 +187,7 @@ export function parseSubmit<K extends ExperimentKind>(
     }
   }
 
-  if (options?.inSchedule) {
+  if (options.inSchedule) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
     const scheduleSpec = {
@@ -201,7 +201,7 @@ export function parseSubmit<K extends ExperimentKind>(
     spec = scheduleSpec as any
   }
 
-  if (!options?.inSchedule && kind === 'PhysicalMachineChaos') {
+  if (!options.inSchedule && kind === 'PhysicalMachineChaos') {
     spec = parsePhysicalMachineChaos(spec) as any
   }
 
