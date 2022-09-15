@@ -140,7 +140,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     if (kind) {
       loadData()
     }
-  }, [kind, action, formikProps.initialValues])
+  }, [kind, action, useNewPhysicalMachine, formikProps.initialValues])
 
   const renderForm = (
     form: AtomFormData[],
