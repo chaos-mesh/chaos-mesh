@@ -1,4 +1,5 @@
-<img src="static/logo.svg" alt="Chaos Mesh Logo" width="450"/>
+![chaos_mesh_logo](./static/logo.svg#gh-light-mode-only)
+![chaos_mesh_logo](./static/logo-white.svg#gh-dark-mode-only)
 
 <!-- markdown-link-check-disable -->
 [![Upload Image](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml/badge.svg?event=schedule)](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml)
