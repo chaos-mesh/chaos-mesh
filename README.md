@@ -1,5 +1,7 @@
-![chaos_mesh_logo](./static/logo.svg#gh-light-mode-only)
-![chaos_mesh_logo](./static/logo-white.svg#gh-dark-mode-only)
+<img src="static/logo.svg#gh-light-mode-only" alt="Chaos Mesh Logo" width="450"/>
+<img src="static/logo-white.svg#gh-dark-mode-only" alt="Chaos Mesh Logo" width="450"/>
+
+---
 
 <!-- markdown-link-check-disable -->
 [![Upload Image](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml/badge.svg?event=schedule)](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml)
