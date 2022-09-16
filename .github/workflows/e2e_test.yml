@@ -145,7 +145,7 @@ jobs:
           driver: docker
           minikube version: v1.26.1
           kubernetes version: ${{ matrix.kubernetes-version }}
-          start args: --cni calico
+          start args: --cni cilium
           github token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: load image into minikube
