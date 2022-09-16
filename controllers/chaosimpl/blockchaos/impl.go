@@ -91,9 +91,9 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			VolumePath:  volumePath,
 			Action:      pb.ApplyBlockChaosRequest_Delay,
 			Delay: &pb.BlockDelaySpec{
-				Delay:       int32(delay.Nanoseconds()),
-				Correlation: float32(corr),
-				Jitter:      int32(jitter.Nanoseconds()),
+				Delay:       delay.Nanoseconds(),
+				Correlation: corr,
+				Jitter:      jitter.Nanoseconds(),
 			},
 			EnterNS: true,
 		})
