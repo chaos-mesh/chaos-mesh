@@ -35,18 +35,49 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Respect flag `enableProfiling` and do not register profiler endpoints when it's false [#3474](https://github.com/chaos-mesh/chaos-mesh/pull/3474)
 - fix NetworkChaos fail with @ifXX in the device [#3605](https://github.com/chaos-mesh/chaos-mesh/pull/3605)
-- Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
 - Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
 - Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
 - Fix "sidecar config" e2e test cases run failed in some scenario.[#3564](https://github.com/chaos-mesh/chaos-mesh/pull/3564)
 - Fix Integration test with bumping kubectl version. [#3589](https://github.com/chaos-mesh/chaos-mesh/pull/3589)
-- Fix generate token failed on chaos dashboard [#3595](https://github.com/chaos-mesh/chaos-mesh/pull/3595)
 
 ### Security
 
 - Nothing
+
+## [2.3.1] - 2022-09-02
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Protect chaos available namespace and filter namespaces if needed [#3473](https://github.com/chaos-mesh/chaos-mesh/pull/3473)
+- Respect flag `enableProfiling` and do not register profiler endpoints when it's false [#3474](https://github.com/chaos-mesh/chaos-mesh/pull/3474)
+- Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
+- Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
+- Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
+- Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
+- Fix generate RBAC template failed on chaos dashboard [#3595](https://github.com/chaos-mesh/chaos-mesh/pull/3595)
+
+### Security
+
+- Nothing
+
 
 ## [2.3.0] - 2022-07-29
 
