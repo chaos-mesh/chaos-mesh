@@ -20,13 +20,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/avast/retry-go"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/avast/retry-go"
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -50,17 +51,19 @@ func (s *DaemonServer) ApplyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		}
 	}
 
-	if in.InstanceUid != "" {
-		// chaos daemon may restart, create another tproxy instance
-		if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); err != nil {
-			// ignore this error
-			log.Error(err, "kill background process", "uid", in.InstanceUid)
+	if _, ok := s.backgroundProcessManager.GetProc(in.InstanceUid); !ok {
+		if in.InstanceUid != "" {
+			// chaos daemon may restart, create another tproxy instance
+			if err := s.backgroundProcessManager.KillBackgroundProcess(ctx, in.InstanceUid); err != nil {
+				// ignore this error
+				log.Error(err, "kill background process", "uid", in.InstanceUid)
+			}
 		}
-	}
 
-	// set uid internally
-	if err := s.createHttpChaos(ctx, in); err != nil {
-		return nil, errors.Wrap(err, "create http chaos")
+		// set uid internally
+		if err := s.createHttpChaos(ctx, in); err != nil {
+			return nil, errors.Wrap(err, "create http chaos")
+		}
 	}
 
 	resp, err := s.applyHttpChaos(ctx, in)

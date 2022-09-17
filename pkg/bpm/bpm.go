@@ -286,19 +286,11 @@ func (m *BackgroundProcessManager) GetUID(pair ProcessPair) (string, bool) {
 	return "", false
 }
 
-func (m *BackgroundProcessManager) getProc(uid string) (*Process, bool) {
+func (m *BackgroundProcessManager) GetProc(uid string) (*Process, bool) {
 	if proc, loaded := m.processes.Load(uid); loaded {
 		return proc.(*Process), true
 	}
 	return nil, false
-}
-
-func (m *BackgroundProcessManager) GetPipes(uid string) (Pipes, bool) {
-	proc, ok := m.getProc(uid)
-	if !ok {
-		return Pipes{}, false
-	}
-	return proc.Pipes, true
 }
 
 // KillBackgroundProcess sends SIGTERM to process
@@ -307,7 +299,7 @@ func (m *BackgroundProcessManager) KillBackgroundProcess(ctx context.Context, ui
 
 	log = log.WithValues("uid", uid)
 
-	proc, loaded := m.getProc(uid)
+	proc, loaded := m.GetProc(uid)
 	if !loaded {
 		return errors.Errorf("failed to find process with uid %s", uid)
 	}
