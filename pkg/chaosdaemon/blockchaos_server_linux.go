@@ -67,7 +67,7 @@ func (s *DaemonServer) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockCh
 	if req.Action == pb.ApplyBlockChaosRequest_Delay {
 		log.Info("Injecting IOEM Delay", "delay", req.Delay.Delay, "jitter", req.Delay.Jitter, "corr", req.Delay.Correlation)
 
-		id, err := c.InjectIOEMDelay(volumePath, 0, uint(pid), int64(req.Delay.Delay), int64(req.Delay.Jitter), float64(req.Delay.Correlation))
+		id, err := c.InjectIOEMDelay(volumePath, 0, uint(pid), req.Delay.Delay, req.Delay.Jitter, float64(req.Delay.Correlation))
 		if err != nil {
 			log.Error(err, "inject ioem delay")
 			return nil, err
