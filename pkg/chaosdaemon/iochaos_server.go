@@ -20,17 +20,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/avast/retry-go"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -54,6 +54,20 @@ func (s *DaemonServer) ApplyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 			// ignore this error
 			log.Error(err, "kill background process", "uid", in.InstanceUid)
 		}
+	}
+
+	var actions []v1alpha1.IOChaosAction
+	err := json.Unmarshal([]byte(in.Actions), &actions)
+	if err != nil {
+		return nil, errors.Wrap(err, "unmarshal json bytes")
+	}
+
+	log.Info("the length of actions", "length", len(actions))
+	if len(actions) == 0 {
+		return &pb.ApplyIOChaosResponse{
+			Instance:  0,
+			StartTime: 0,
+		}, nil
 	}
 
 	if err := s.createIOChaos(ctx, in); err != nil {
@@ -118,6 +132,7 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	if err != nil {
 		return nil, errors.Wrap(err, "create http://psedo-host/get_status request")
 	}
+
 	err = retry.Do(func() error {
 		resp, retryErr := transport.RoundTrip(req)
 		if retryErr != nil {
@@ -150,24 +165,13 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 func (s *DaemonServer) createIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequest) error {
 	log := s.getLoggerFromContext(ctx)
 
-	var actions []v1alpha1.IOChaosAction
-	err := json.Unmarshal([]byte(in.Actions), &actions)
-	if err != nil {
-		return errors.Wrap(err, "unmarshal json bytes")
-	}
-
-	log.Info("the length of actions", "length", len(actions))
-	if len(actions) == 0 {
-		return nil
-	}
-
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 	if err != nil {
 		return errors.Wrap(err, "getting PID")
 	}
 
 	// TODO: make this log level configurable
-	args := fmt.Sprintf("--path %s --verbose info --interactive-path %s", in.Volume, fmt.Sprintf(todaUnixSocketFilePath))
+	args := fmt.Sprintf("--path %s --verbose info --interactive-path %s", in.Volume, todaUnixSocketFilePath)
 	log.Info("executing", "cmd", todaBin+" "+args)
 
 	processBuilder := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
