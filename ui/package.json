@@ -1,7 +1,7 @@
 {
   "name": "@ui/root",
-  "version": "2.1.0",
-  "description": "A Web UI for Chaos Mesh",
+  "version": "0.0.0",
+  "description": "The official, comprehensive Chaos Mesh dashboard user interface",
   "author": "Yue Yang <g1enyy0ung@gmail.com>",
   "private": true,
   "workspaces": [

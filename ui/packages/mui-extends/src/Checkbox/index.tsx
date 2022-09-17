@@ -45,9 +45,7 @@ export default ({ label, helperText, error, ...rest }: CheckboxProps) => {
         control={<Checkbox {...rest} size="small" />}
         label={label}
         sx={{
-          ml: '-9px',
           '.MuiFormControlLabel-label': {
-            pt: 0.5,
             fontSize: 'body2.fontSize',
           },
         }}
