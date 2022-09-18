@@ -14,13 +14,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	gqlparser "github.com/vektah/gqlparser/v2"
-	"github.com/vektah/gqlparser/v2/ast"
-	v1 "k8s.io/api/core/v1"
-	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
+	gqlparser "github.com/vektah/gqlparser/v2"
+	"github.com/vektah/gqlparser/v2/ast"
+	"k8s.io/api/core/v1"
+	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -792,6 +791,8 @@ type HTTPChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.HTTPChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.HTTPChaos) (map[string]interface{}, error)
 
+	ClusterName(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error)
+
 	Podhttp(ctx context.Context, obj *v1alpha1.HTTPChaos) ([]*v1alpha1.PodHttpChaos, error)
 }
 type HTTPChaosSpecResolver interface {
@@ -813,6 +814,8 @@ type IOChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.IOChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.IOChaos) (map[string]interface{}, error)
+
+	ClusterName(ctx context.Context, obj *v1alpha1.IOChaos) (string, error)
 
 	Podios(ctx context.Context, obj *v1alpha1.IOChaos) ([]*v1alpha1.PodIOChaos, error)
 }
@@ -887,6 +890,7 @@ type NetworkChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.NetworkChaos) (map[string]interface{}, error)
 
+	ClusterName(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error)
 	Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error)
 }
 type OwnerReferenceResolver interface {
@@ -900,6 +904,8 @@ type PodResolver interface {
 
 	Labels(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1.Pod) (map[string]interface{}, error)
+
+	ClusterName(ctx context.Context, obj *v1.Pod) (string, error)
 
 	Logs(ctx context.Context, obj *v1.Pod) (string, error)
 	Daemon(ctx context.Context, obj *v1.Pod) (*v1.Pod, error)
@@ -924,6 +930,8 @@ type PodHTTPChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.PodHttpChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodHttpChaos) (map[string]interface{}, error)
 
+	ClusterName(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error)
+
 	Pod(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*v1.Pod, error)
 }
 type PodHttpChaosReplaceActionsResolver interface {
@@ -947,6 +955,8 @@ type PodIOChaosResolver interface {
 	Labels(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodIOChaos) (map[string]interface{}, error)
 
+	ClusterName(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error)
+
 	Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) (*v1.Pod, error)
 	Ios(ctx context.Context, obj *v1alpha1.PodIOChaos) ([]*v1alpha1.IOChaos, error)
 }
@@ -958,6 +968,8 @@ type PodNetworkChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (map[string]interface{}, error)
+
+	ClusterName(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error)
 
 	Pod(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*v1.Pod, error)
 }
@@ -1006,6 +1018,8 @@ type StressChaosResolver interface {
 
 	Labels(ctx context.Context, obj *v1alpha1.StressChaos) (map[string]interface{}, error)
 	Annotations(ctx context.Context, obj *v1alpha1.StressChaos) (map[string]interface{}, error)
+
+	ClusterName(ctx context.Context, obj *v1alpha1.StressChaos) (string, error)
 
 	Podstress(ctx context.Context, obj *v1alpha1.StressChaos) ([]*model.PodStressChaos, error)
 }
@@ -8608,14 +8622,14 @@ func (ec *executionContext) _HTTPChaos_clusterName(ctx context.Context, field gr
 		Object:     "HTTPChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.HTTPChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -9872,14 +9886,14 @@ func (ec *executionContext) _IOChaos_clusterName(ctx context.Context, field grap
 		Object:     "IOChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.IOChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -12903,14 +12917,14 @@ func (ec *executionContext) _NetworkChaos_clusterName(ctx context.Context, field
 		Object:     "NetworkChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.NetworkChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -13716,14 +13730,14 @@ func (ec *executionContext) _Pod_clusterName(ctx context.Context, field graphql.
 		Object:     "Pod",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.Pod().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -14791,14 +14805,14 @@ func (ec *executionContext) _PodHTTPChaos_clusterName(ctx context.Context, field
 		Object:     "PodHTTPChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.PodHTTPChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -16489,14 +16503,14 @@ func (ec *executionContext) _PodIOChaos_clusterName(ctx context.Context, field g
 		Object:     "PodIOChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.PodIOChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -17465,14 +17479,14 @@ func (ec *executionContext) _PodNetworkChaos_clusterName(ctx context.Context, fi
 		Object:     "PodNetworkChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.PodNetworkChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -20408,14 +20422,14 @@ func (ec *executionContext) _StressChaos_clusterName(ctx context.Context, field 
 		Object:     "StressChaos",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
+		return ec.resolvers.StressChaos().ClusterName(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -23543,15 +23557,25 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._HTTPChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._HTTPChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._HTTPChaos_spec(ctx, field, obj)
@@ -24030,15 +24054,25 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._IOChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._IOChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._IOChaos_spec(ctx, field, obj)
@@ -25419,15 +25453,25 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._NetworkChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._NetworkChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "podnetwork":
 			field := field
 
@@ -25744,15 +25788,25 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Pod_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Pod_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Pod_spec(ctx, field, obj)
@@ -26221,15 +26275,25 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PodHTTPChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodHTTPChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodHTTPChaos_spec(ctx, field, obj)
@@ -26953,15 +27017,25 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PodIOChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodIOChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodIOChaos_spec(ctx, field, obj)
@@ -27358,15 +27432,25 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PodNetworkChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PodNetworkChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodNetworkChaos_spec(ctx, field, obj)
@@ -28665,15 +28749,25 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = innerFunc(ctx)
 
 		case "clusterName":
+			field := field
+
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._StressChaos_clusterName(ctx, field, obj)
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._StressChaos_clusterName(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
 
-			out.Values[i] = innerFunc(ctx)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			})
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._StressChaos_spec(ctx, field, obj)
