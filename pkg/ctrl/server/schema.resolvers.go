@@ -12,15 +12,14 @@ import (
 	"io"
 	"time"
 
-	v1 "k8s.io/api/core/v1"
-	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/generated"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 	podSelector "github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"k8s.io/api/core/v1"
+	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (r *attrOverrideSpecResolver) Ino(ctx context.Context, obj *v1alpha1.AttrOverrideSpec) (*int, error) {
@@ -175,6 +174,10 @@ func (r *hTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.HTTPC
 	return annotations, nil
 }
 
+func (r *hTTPChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *hTTPChaosResolver) Podhttp(ctx context.Context, obj *v1alpha1.HTTPChaos) ([]*v1alpha1.PodHttpChaos, error) {
 	podhttps := make([]*v1alpha1.PodHttpChaos, 0, len(obj.Status.Instances))
 	for id := range obj.Status.Instances {
@@ -245,6 +248,10 @@ func (r *iOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.IOChaos
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *iOChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.IOChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *iOChaosResolver) Podios(ctx context.Context, obj *v1alpha1.IOChaos) ([]*v1alpha1.PodIOChaos, error) {
@@ -710,6 +717,10 @@ func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Ne
 	return annotations, nil
 }
 
+func (r *networkChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *networkChaosResolver) Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
 	podnetworks := make([]*v1alpha1.PodNetworkChaos, 0, len(obj.Status.Instances))
 	for id := range obj.Status.Instances {
@@ -752,6 +763,10 @@ func (r *podResolver) Annotations(ctx context.Context, obj *v1.Pod) (map[string]
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *podResolver) ClusterName(ctx context.Context, obj *v1.Pod) (string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
@@ -844,6 +859,10 @@ func (r *podHTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Po
 	return annotations, nil
 }
 
+func (r *podHTTPChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *podHTTPChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*v1.Pod, error) {
 	pod := new(v1.Pod)
 	if err := r.Client.Get(ctx, types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, pod); err != nil {
@@ -926,6 +945,10 @@ func (r *podIOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.PodI
 	return annotations, nil
 }
 
+func (r *podIOChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *podIOChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) (*v1.Pod, error) {
 	pod := new(v1.Pod)
 	key := types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}
@@ -979,6 +1002,10 @@ func (r *podNetworkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *podNetworkChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *podNetworkChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*v1.Pod, error) {
@@ -1198,6 +1225,10 @@ func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Str
 		annotations[k] = v
 	}
 	return annotations, nil
+}
+
+func (r *stressChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.StressChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *stressChaosResolver) Podstress(ctx context.Context, obj *v1alpha1.StressChaos) ([]*model.PodStressChaos, error) {
