@@ -248,11 +248,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, servicePort := range svc.Spec.Ports {
 				if servicePort.Name == "http" {
 					port = uint16(servicePort.NodePort)
-					break
+					continue
 				}
 				if servicePort.Name == "https" {
 					tlsPort = uint16(servicePort.NodePort)
-					break
+					continue
 				}
 			}
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
