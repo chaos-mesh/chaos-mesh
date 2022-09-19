@@ -1157,9 +1157,12 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+  - apiGroups: [ "coordination.k8s.io" ]
+    resources: [ "leases" ]
     verbs: [ "*" ]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
