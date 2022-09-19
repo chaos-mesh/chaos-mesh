@@ -2,9 +2,12 @@ package httpchaos
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"time"
@@ -29,7 +32,7 @@ type TLSServerKeys struct {
 	Key  []byte `json:"key"`
 }
 
-func setupEmbedFiles(serverIP string) (TLSServerKeys, []byte) {
+func setupHTTPS(cli *http.Client, serverIP string) (TLSServerKeys, []byte) {
 	c, err := content.ReadDir("keys")
 	framework.ExpectNoError(err, "read key dir error")
 	var key []byte
@@ -69,6 +72,21 @@ func setupEmbedFiles(serverIP string) (TLSServerKeys, []byte) {
 	crt, err := os.ReadFile("server.crt")
 	framework.ExpectNoError(err, "read server.crt file error")
 
+	roots := x509.NewCertPool()
+	caPk, err := os.ReadFile("ca.crt")
+	if err != nil {
+		panic(err)
+	}
+	ok := roots.AppendCertsFromPEM(caPk)
+	if !ok {
+		panic("failed to parse root certificate")
+	}
+	cli.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			RootCAs: roots,
+		},
+	}
+
 	return TLSServerKeys{
 		Cert: crt,
 		Key:  key,
@@ -83,7 +101,7 @@ func TestcaseHttpTLSThenRecover(
 	port uint16,
 	tlsPort uint16,
 ) {
-	serverKeys, ca := setupEmbedFiles(c.IP)
+	serverKeys, ca := setupHTTPS(c.C, c.IP)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
