@@ -338,6 +338,11 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Port:       8080,
 					TargetPort: intstr.IntOrString{IntVal: 8080},
 				},
+				{
+					Name:       "https",
+					Port:       8081,
+					TargetPort: intstr.IntOrString{IntVal: 8081},
+				},
 				// Only used in network chaos
 				{
 					Name:       "nc-port",

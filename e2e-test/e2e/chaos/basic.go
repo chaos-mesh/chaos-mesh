@@ -236,6 +236,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		var (
 			err      error
 			port     uint16
+			tlsPort  uint16
 			pfCancel context.CancelFunc
 			client   httpchaostestcases.HTTPE2EClient
 		)
@@ -247,6 +248,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, servicePort := range svc.Spec.Ports {
 				if servicePort.Name == "http" {
 					port = uint16(servicePort.NodePort)
+					break
+				}
+				if servicePort.Name == "https" {
+					tlsPort = uint16(servicePort.NodePort)
 					break
 				}
 			}
@@ -326,7 +331,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		// http chaos case in [HTTPPatch] context
 		ginkgo.Context("[HTTP TLS]", func() {
 			ginkgo.It("[Schedule]", func() {
-				httpchaostestcases.TestcaseHttpTLSThenRecover(ns, kubeCli, cli, client, port, 8081)
+				httpchaostestcases.TestcaseHttpTLSThenRecover(ns, kubeCli, cli, client, port, tlsPort)
 			})
 		})
 	})
