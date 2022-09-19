@@ -175,10 +175,6 @@ func (r *hTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.HTTPC
 	return annotations, nil
 }
 
-func (r *hTTPChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *hTTPChaosResolver) Podhttp(ctx context.Context, obj *v1alpha1.HTTPChaos) ([]*v1alpha1.PodHttpChaos, error) {
 	podhttps := make([]*v1alpha1.PodHttpChaos, 0, len(obj.Status.Instances))
 	for id := range obj.Status.Instances {
@@ -249,10 +245,6 @@ func (r *iOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.IOChaos
 		annotations[k] = v
 	}
 	return annotations, nil
-}
-
-func (r *iOChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.IOChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *iOChaosResolver) Podios(ctx context.Context, obj *v1alpha1.IOChaos) ([]*v1alpha1.PodIOChaos, error) {
@@ -718,10 +710,6 @@ func (r *networkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Ne
 	return annotations, nil
 }
 
-func (r *networkChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *networkChaosResolver) Podnetwork(ctx context.Context, obj *v1alpha1.NetworkChaos) ([]*v1alpha1.PodNetworkChaos, error) {
 	podnetworks := make([]*v1alpha1.PodNetworkChaos, 0, len(obj.Status.Instances))
 	for id := range obj.Status.Instances {
@@ -764,10 +752,6 @@ func (r *podResolver) Annotations(ctx context.Context, obj *v1.Pod) (map[string]
 		annotations[k] = v
 	}
 	return annotations, nil
-}
-
-func (r *podResolver) ClusterName(ctx context.Context, obj *v1.Pod) (string, error) {
-	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *podResolver) Logs(ctx context.Context, obj *v1.Pod) (string, error) {
@@ -860,10 +844,6 @@ func (r *podHTTPChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Po
 	return annotations, nil
 }
 
-func (r *podHTTPChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *podHTTPChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodHttpChaos) (*v1.Pod, error) {
 	pod := new(v1.Pod)
 	if err := r.Client.Get(ctx, types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}, pod); err != nil {
@@ -946,10 +926,6 @@ func (r *podIOChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.PodI
 	return annotations, nil
 }
 
-func (r *podIOChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *podIOChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodIOChaos) (*v1.Pod, error) {
 	pod := new(v1.Pod)
 	key := types.NamespacedName{Namespace: obj.Namespace, Name: obj.Name}
@@ -1003,10 +979,6 @@ func (r *podNetworkChaosResolver) Annotations(ctx context.Context, obj *v1alpha1
 		annotations[k] = v
 	}
 	return annotations, nil
-}
-
-func (r *podNetworkChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *podNetworkChaosResolver) Pod(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (*v1.Pod, error) {
@@ -1226,10 +1198,6 @@ func (r *stressChaosResolver) Annotations(ctx context.Context, obj *v1alpha1.Str
 		annotations[k] = v
 	}
 	return annotations, nil
-}
-
-func (r *stressChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.StressChaos) (string, error) {
-	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *stressChaosResolver) Podstress(ctx context.Context, obj *v1alpha1.StressChaos) ([]*model.PodStressChaos, error) {
@@ -1461,3 +1429,34 @@ type recordResolver struct{ *Resolver }
 type stressChaosResolver struct{ *Resolver }
 type stressChaosSpecResolver struct{ *Resolver }
 type stressChaosStatusResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *hTTPChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.HTTPChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *iOChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.IOChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *networkChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.NetworkChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *podResolver) ClusterName(ctx context.Context, obj *v1.Pod) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *podHTTPChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodHttpChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *podIOChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodIOChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *podNetworkChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.PodNetworkChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *stressChaosResolver) ClusterName(ctx context.Context, obj *v1alpha1.StressChaos) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
