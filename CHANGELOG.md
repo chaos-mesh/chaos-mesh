@@ -13,10 +13,19 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add TLS support for HTTPChaos [#3549](https://github.com/chaos-mesh/chaos-mesh/pull/3549)
+- Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
 
 ### Changed
 
 - Replace io/ioutil package with os package. [#3539](https://github.com/chaos-mesh/chaos-mesh/pull/3539)
+- Refine logging in pkg/dashboard/apiserver/event, moved package level variable log into struct Service as a field. [#3528](https://github.com/chaos-mesh/chaos-mesh/pull/3528)
+- Refine logging in pkg/dashboard/apiserver/auth/gcp, moved package level variable log into struct Service as a field [#3527](https://github.com/chaos-mesh/chaos-mesh/pull/3527)
+- Change e2e config settings to append "pause image" args. [#3567](https://github.com/chaos-mesh/chaos-mesh/pull/3567)
+- Update display of disabled scope in UI [#3621](https://github.com/chaos-mesh/chaos-mesh/pull/3621)
+- Make the Scope render conditionally [#3622](https://github.com/chaos-mesh/chaos-mesh/pull/3622)
+- Dashboard: Fix rbac.yaml for token generation verbs/resources [#3370](https://github.com/chaos-mesh/chaos-mesh/pull/3370)
+- Refine logging, remove the usage of klog in event recorder [#3629](https://github.com/chaos-mesh/chaos-mesh/pull/3629)
+- Use int64 to restore latency for BlockChaos [#3638](https://github.com/chaos-mesh/chaos-mesh/pull/3638)
 
 ### Deprecated
 
@@ -32,8 +41,14 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Respect flag `enableProfiling` and do not register profiler endpoints when it's false [#3474](https://github.com/chaos-mesh/chaos-mesh/pull/3474)
 - Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
 - Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
+- fix NetworkChaos fail with @ifXX in the device [#3605](https://github.com/chaos-mesh/chaos-mesh/pull/3605)
 - Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
 - Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
+- Fix "sidecar config" e2e test cases run failed in some scenario.[#3564](https://github.com/chaos-mesh/chaos-mesh/pull/3564)
+- Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
+- Fix Integration test with bumping kubectl version. [#3589](https://github.com/chaos-mesh/chaos-mesh/pull/3589)
+- Fix generate token failed on chaos dashboard [#3595](https://github.com/chaos-mesh/chaos-mesh/pull/3595)
 
 ### Security
 
@@ -58,6 +73,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add guide and example for monitoring Chaos Mesh [#3030](https://github.com/chaos-mesh/chaos-mesh/pull/3030)
 - Support `KernelChaos` in `AutoForm` [#3449](https://github.com/chaos-mesh/chaos-mesh/pull/3449)
 - Sync latest Chaosd and PhysicalMachineChaos [#3477](https://github.com/chaos-mesh/chaos-mesh/pull/3477)
+- Add accept-tcp-flag to network delay in PysicalMachineChaos [#3588](https://github.com/chaos-mesh/chaos-mesh/pull/3588)
+
 
 ### Changed
 
@@ -78,6 +95,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Simplified logic and add test case about finalizers. [#3422](https://github.com/chaos-mesh/chaos-mesh/pull/3422)
 - Update API requests with OpenAPI generated client [#2926](https://github.com/chaos-mesh/chaos-mesh/pull/2926)
 - Implement some missing methods in ctrl server [#3462](https://github.com/chaos-mesh/chaos-mesh/pull/3462)
+- Use `net.Interfaces()` to implement `getAllInterfaces()` [#3484](https://github.com/chaos-mesh/chaos-mesh/pull/3484)
 
 ### Deprecated
 
@@ -104,6 +122,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix make check does not respect the env-images.yaml [#3210] (https://github.com/chaos-mesh/chaos-mesh/pull/3210)
 - SC2004: Remove unnecessary $ on arithmetic variables [#3247](https://github.com/chaos-mesh/chaos-mesh/pull/3247)
 - PhysicalMachineChaos: update stress options type [#3347](https://github.com/chaos-mesh/chaos-mesh/pull/3347)
+- PhysicalMachineChaos: remove validate for IP and host for delay, loss, duplicate, corruption [#3483](https://github.com/chaos-mesh/chaos-mesh/pull/3483)
 - StressChaos: run `pause` before `choom` [#3405](https://github.com/chaos-mesh/chaos-mesh/pull/3405)
 - JVMChaos: update the error message that can be ignored [#3415](https://github.com/chaos-mesh/chaos-mesh/pull/3415)
 - Fix Workflow Validating Webhook Panic [#3413](https://github.com/chaos-mesh/chaos-mesh/pull/3413)

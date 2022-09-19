@@ -22,7 +22,15 @@ import Space from '@ui/mui-extends/esm/Space'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { clearPods, getAnnotations, getCommonPods, getLabels, getNetworkTargetPods } from 'slices/experiments'
+import {
+  Env,
+  clearPods,
+  getAnnotations,
+  getCommonPods,
+  getLabels,
+  getNetworkTargetPods,
+  getPhysicalMachines,
+} from 'slices/experiments'
 
 import { podPhases } from 'components/AutoForm/data'
 import { AutocompleteField, SelectField } from 'components/FormField'
@@ -31,18 +39,19 @@ import { T } from 'components/T'
 
 import { arrToObjBySep, objToArrBySep } from 'lib/utils'
 
+import DeprecatedAddress from './DeprecatedAddress'
 import Mode from './Mode'
-import ScopePodsTable from './ScopePodsTable'
+import TargetsTable from './TargetsTable'
 
 interface ScopeProps {
-  kind?: string
+  env: Env
   namespaces: string[]
   scope?: string
   modeScope?: string
-  podsPreviewTitle?: string | JSX.Element
+  previewTitle?: string | JSX.Element
 }
 
-const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', modeScope = '', podsPreviewTitle }) => {
+const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTitle }: ScopeProps) => {
   const { values, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespaces: currentNamespaces,
@@ -50,13 +59,14 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
     annotationSelectors: currentAnnotations,
   } = getIn(values, scope)
 
-  const state = useStoreSelector((state) => state)
-  const { enableKubeSystemNS } = state.settings
-  const { labels, annotations } = state.experiments
+  const { settings, experiments } = useStoreSelector((state) => state)
+  const { enableKubeSystemNS } = settings
+  const { labels, annotations, pods: storePods, networkTargetPods, physicalMachines } = experiments
   const isTargetField = scope.startsWith('target')
-  const pods = !isTargetField ? state.experiments.pods : state.experiments.networkTargetPods
+  const pods = !isTargetField ? storePods : networkTargetPods
   const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
-  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+  const targets = env === 'k8s' ? pods : physicalMachines
+  const getTargets = env === 'k8s' ? getPods : getPhysicalMachines // Get different targets according to the env.
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -70,10 +80,11 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
   }, [dispatch])
 
   useEffect(() => {
-    // Set ns selectors automatically when `CLUSTER_MODE=false` because there is only one namespace.
+    // Set namespaces automatically when `targetNamespace` is set because there is only one namespace.
     if (namespaces.length === 1) {
       setFieldValue(`${scope}.namespace`, namespaces)
 
+      // Set namespace in metadata automatically too.
       if (scope === 'spec.selector') {
         setFieldValue('namespace', namespaces[0])
       }
@@ -90,14 +101,14 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
   useEffect(() => {
     if (currentNamespaces.length) {
       dispatch(
-        getPods({
+        getTargets({
           namespaces: currentNamespaces,
           labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
           annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
         })
       )
     }
-  }, [dispatch, getPods, currentNamespaces, currentLabels, currentAnnotations])
+  }, [dispatch, getTargets, currentNamespaces, currentLabels, currentAnnotations])
 
   return (
     <Space>
@@ -113,9 +124,8 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
             <T id="newE.scope.namespaceSelectorsHelper" />
           )
         }
-        options={!enableKubeSystemNS ? namespaces.filter((d) => d !== 'kube-system') : namespaces}
+        options={enableKubeSystemNS ? namespaces : namespaces.filter((d) => d !== 'kube-system')}
         error={getIn(errors, `${scope}.namespaces`) && getIn(touched, `${scope}.namespaces`) ? true : false}
-        disabled={disabled}
       />
 
       <AutocompleteField
@@ -125,10 +135,9 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
         label={<T id="k8s.labelSelectors" />}
         helperText={<T id="newE.scope.labelSelectorsHelper" />}
         options={labelKVs}
-        disabled={disabled}
       />
 
-      <MoreOptions disabled={disabled}>
+      <MoreOptions>
         <AutocompleteField
           freeSolo
           multiple
@@ -136,7 +145,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
           label={<T id="k8s.annotationSelectors" />}
           helperText={<T id="newE.scope.annotationSelectorsHelper" />}
           options={annotationKVs}
-          disabled={disabled}
         />
 
         <SelectField<string[]>
@@ -144,7 +152,6 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
           name={`${scope}.podPhaseSelectors`}
           label={<T id="k8s.podPhaseSelectors" />}
           helperText={<T id="newE.scope.phaseSelectorsHelper" />}
-          disabled={disabled}
           fullWidth
         >
           {podPhases.map((option) => (
@@ -155,25 +162,51 @@ const Scope: React.FC<ScopeProps> = ({ kind, namespaces, scope = 'selector', mod
         </SelectField>
       </MoreOptions>
 
-      <Mode disabled={disabled} modeScope={modeScope} scope={scope} />
+      <Mode modeScope={modeScope} scope={scope} />
 
       <div>
-        <Typography fontWeight="bold" sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          {podsPreviewTitle || <T id="newE.scope.targetPodsPreview" />}
+        <Typography fontWeight="medium">
+          {previewTitle || <T id={`newE.scope.target${env === 'k8s' ? 'Pods' : 'PhysicalMachines'}Preview`} />}
         </Typography>
-        <Typography variant="body2" sx={{ color: disabled ? 'text.disabled' : 'text.secondary' }}>
-          <T id="newE.scope.targetPodsPreviewHelper" />
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          <T id={`newE.scope.target${env === 'k8s' ? 'Pods' : 'PhysicalMachines'}PreviewHelper`} />
         </Typography>
       </div>
-      {pods.length > 0 ? (
-        <ScopePodsTable scope={scope} pods={pods} />
+
+      {targets.length > 0 ? (
+        <TargetsTable env={env} scope={scope} data={targets} />
       ) : (
-        <Typography variant="body2" fontWeight="medium" sx={{ color: disabled ? 'text.disabled' : undefined }}>
-          <T id="newE.scope.noPodsFound" />
+        <Typography variant="body2" fontWeight="medium">
+          <T id={`newE.scope.no${env === 'k8s' ? 'Pods' : 'PhysicalMachines'}Found`} />
         </Typography>
       )}
     </Space>
   )
 }
 
-export default Scope
+interface ConditionalScopeProps extends ScopeProps {
+  kind: string
+}
+
+const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {
+  const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
+
+  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+
+  if (disabled) {
+    return (
+      <Typography
+        variant="body2"
+        sx={{ color: 'text.disabled' }}
+      >{`${kind} does not need to define the scope.`}</Typography>
+    )
+  }
+
+  if (rest.env === 'physic' && !useNewPhysicalMachine) {
+    return <DeprecatedAddress />
+  }
+
+  return <Scope {...rest} />
+}
+
+export default ConditionalScope

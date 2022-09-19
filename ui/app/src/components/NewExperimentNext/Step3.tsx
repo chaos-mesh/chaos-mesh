@@ -45,7 +45,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
 
   const state = useStoreSelector((state) => state)
   const { step1, step2, kindAction, env, basic, spec } = state.experiments
-  const { debugMode } = state.settings
+  const { debugMode, useNewPhysicalMachine } = state.settings
   const dispatch = useStoreDispatch()
 
   const submitExperiment = () => {
@@ -59,7 +59,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
           ...spec,
         },
       },
-      { inSchedule }
+      { inSchedule, useNewPhysicalMachine }
     )
 
     if (process.env.NODE_ENV === 'development' || debugMode) {

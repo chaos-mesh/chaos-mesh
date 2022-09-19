@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/e2econst"
+	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/util"
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 )
@@ -93,7 +93,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 		}
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
-			if c.Image == e2econst.PauseImage {
+			if c.Image == config.TestConfig.PauseImage {
 				return true, nil
 			}
 		}
@@ -186,7 +186,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		}
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
-			if c.Image == e2econst.PauseImage {
+			if c.Image == config.TestConfig.PauseImage {
 				return true, nil
 			}
 		}
@@ -219,7 +219,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
-			if c.Image == e2econst.PauseImage {
+			if c.Image == config.TestConfig.PauseImage {
 				return false, nil
 			}
 		}
@@ -250,7 +250,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
-			if c.Image == e2econst.PauseImage {
+			if c.Image == config.TestConfig.PauseImage {
 				return true, nil
 			}
 		}

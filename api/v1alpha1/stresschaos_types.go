@@ -37,7 +37,7 @@ type StressChaos struct {
 
 	// +optional
 	// Most recently observed status of the time chaos experiment
-	Status StressChaosStatus `json:"status"`
+	Status StressChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
@@ -80,16 +80,16 @@ type StressChaosStatus struct {
 type StressInstance struct {
 	// UID is the stress-ng identifier
 	// +optional
-	UID string `json:"uid"`
+	UID string `json:"uid,omitempty"`
 	// MemoryUID is the memStress identifier
 	// +optional
-	MemoryUID string `json:"memoryUid"`
+	MemoryUID string `json:"memoryUid,omitempty"`
 	// StartTime specifies when the stress-ng starts
 	// +optional
-	StartTime *metav1.Time `json:"startTime"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 	// MemoryStartTime specifies when the memStress starts
 	// +optional
-	MemoryStartTime *metav1.Time `json:"memoryStartTime"`
+	MemoryStartTime *metav1.Time `json:"memoryStartTime,omitempty"`
 }
 
 // Stressors defines plenty of stressors supported to stress system components out.

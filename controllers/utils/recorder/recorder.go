@@ -29,7 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record/util"
 	ref "k8s.io/client-go/tools/reference"
-	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/metrics"
@@ -64,7 +63,7 @@ func (r *chaosRecorder) Event(object runtime.Object, ev ChaosEvent) {
 	}
 
 	if !util.ValidateEventType(eventtype) {
-		klog.Errorf("Unsupported event type: '%v'", eventtype)
+		r.log.Error(fmt.Errorf("unsupported event type:'%v'", eventtype), "eventtype", eventtype)
 		return
 	}
 

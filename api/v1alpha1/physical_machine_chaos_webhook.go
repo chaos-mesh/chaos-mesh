@@ -241,10 +241,6 @@ func validateNetworkCommon(spec *NetworkCommonSpec) error {
 		return errors.New("device is required")
 	}
 
-	if len(spec.IPAddress) == 0 && len(spec.Hostname) == 0 {
-		return errors.New("one of ip-address and hostname is required")
-	}
-
 	return nil
 }
 
@@ -291,6 +287,10 @@ func validateNetworkDelayAction(spec *NetworkDelaySpec) error {
 
 	if len(spec.Latency) == 0 {
 		return errors.New("latency is invalid")
+	}
+
+	if len(spec.AcceptTCPFlags) > 0 && spec.IPProtocol != "tcp" {
+		return errors.New("protocol should be 'tcp' when set accept-tcp-flags")
 	}
 
 	return nil
