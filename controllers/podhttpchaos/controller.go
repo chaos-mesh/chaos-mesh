@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/retry"
@@ -154,7 +155,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	inputTLS := []byte("")
 	if obj.Spec.TLS != nil {
 		tlsKeys := obj.Spec.TLS
-		var secret v1.Secret
+		secret := v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      tlsKeys.SecretName,
+				Namespace: tlsKeys.SecretNamespace,
+			},
+		}
 		if err := r.Client.Get(context.TODO(), req.NamespacedName, &secret); err != nil {
 			r.Log.Error(err, "unable to get secret")
 			return ctrl.Result{}, nil

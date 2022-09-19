@@ -16,6 +16,7 @@
 package util
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -160,6 +161,30 @@ func WaitE2EHelperReady(c http.Client, port uint16) error {
 func WaitHTTPE2EHelperReady(c http.Client, ip string, port uint16) error {
 	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://%s:%d/ping", ip, port)); err != nil {
+			framework.Logf("Err : %v , IP : %s", err, ip)
+			return false, nil
+		}
+		return true, nil
+	})
+}
+
+func SetupHTTPE2EHelperTLSConfig(c http.Client, ip string, port uint16, tls_port uint16, body []byte) error {
+	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+		if _, err = c.Post(fmt.Sprintf("http://%s:%d/setup_https", ip, port), "application/json", bytes.NewBuffer(body)); err != nil {
+			framework.Logf("Err : %v , IP : %s", err, ip)
+			return false, nil
+		}
+		if _, err = c.Get(fmt.Sprintf("https://%s:%d/ping", ip, tls_port)); err != nil {
+			framework.Logf("Err : %v , IP : %s", err, ip)
+			return false, nil
+		}
+		return true, nil
+	})
+}
+
+func WaitHTTPE2EHelperTLSReady(c http.Client, ip string, port uint16) error {
+	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
+		if _, err = c.Get(fmt.Sprintf("https://%s:%d/ping", ip, port)); err != nil {
 			framework.Logf("Err : %v , IP : %s", err, ip)
 			return false, nil
 		}

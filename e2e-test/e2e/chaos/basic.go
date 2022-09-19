@@ -322,6 +322,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				httpchaostestcases.TestcaseHttpPatchPauseAndUnPause(ns, cli, client, port)
 			})
 		})
+
+		// http chaos case in [HTTPPatch] context
+		ginkgo.Context("[HTTP TLS]", func() {
+			ginkgo.It("[Schedule]", func() {
+				httpchaostestcases.TestcaseHttpTLSThenRecover(ns, kubeCli, cli, client, port, 8081)
+			})
+		})
 	})
 
 	ginkgo.Context("[Sidecar Config]", func() {
