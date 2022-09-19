@@ -34,6 +34,7 @@ const data = {
       annotationSelectors: [],
       podPhaseSelectors: [],
       pods: [],
+      physicalMachines: [],
     },
     mode: 'all',
     value: undefined,
