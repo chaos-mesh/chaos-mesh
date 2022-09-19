@@ -72,9 +72,9 @@ func setupEmbedFiles(serverIP string) (TLSServerKeys, []byte) {
 
 	cmdStr := "openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650 -sha256 -extfile server.ext"
 	cmd := exec.Command("bash", "-c", cmdStr)
-	err = cmd.Run()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		framework.ExpectNoError(err, "run openssl cmd error")
+		framework.ExpectNoError(err, "run openssl cmd error: "+string(output))
 	}
 
 	return TLSServerKeys{
