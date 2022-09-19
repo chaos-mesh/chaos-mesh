@@ -216,10 +216,12 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
               >
                 {values.target && (
                   <Scope
+                    env="k8s"
+                    kind={kind}
                     namespaces={namespaces}
                     scope="target.selector"
                     modeScope="target"
-                    podsPreviewTitle={i18n('newE.target.network.target.podsPreview')}
+                    previewTitle={i18n('newE.target.network.target.podsPreview')}
                   />
                 )}
               </MoreOptions>

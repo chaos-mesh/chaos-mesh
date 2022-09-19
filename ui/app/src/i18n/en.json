@@ -57,10 +57,12 @@
       "modeHelper": "Specifies the mode of the experiment.",
       "modeValue": "Mode Value",
       "modeValueHelper": "Please fill the mode value",
-      "targetPods": "Target Pods",
       "targetPodsPreview": "Preview of Pods to be injected",
       "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope.",
-      "noPodsFound": "No pods found"
+      "noPodsFound": "No Pods found.",
+      "targetPhysicalMachinesPreview": "Preview of physical machines to be injected",
+      "targetPhysicalMachinesPreviewHelper": "Checking or unchecking physical machines to further limit the scope.",
+      "noPhysicalMachinesFound": "No physical machines found."
     },
     "target": {
       "kind": "Kind",
@@ -258,6 +260,10 @@
       "title": "Allow kube-system namespace",
       "choose": "The kube-system namespace is allowed to be selected in the scope when creating an experiment."
     },
+    "useNewPhysicalMachineCRD": {
+      "title": "Use new PhysicalMachine CRD",
+      "choose": "When creating PhysicalMachineChaos, retrieve the available PhysicalMachines instead of providing the address field."
+    },
     "useNextWorkflowInterface": {
       "title": "Use the next generation of workflow interface",
       "choose": "Over the past period of time, we have refactored the interface related to workflows. Now you can create workflows more easily in the form of the flowchart. (Note: This improvement is still under active development and the interface is still subject to change until it is stable.)"
@@ -349,6 +355,7 @@
     "seconds": "s",
     "selectAll": "Select all",
     "start": "Start",
+    "state": "State",
     "status": "Status",
     "submit": "Submit",
     "timeline": "Timeline",
