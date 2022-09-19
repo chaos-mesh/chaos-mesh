@@ -78,9 +78,8 @@ func setupHTTPS(cli *http.Client, serverIP string) (TLSServerKeys, []byte) {
 		panic(err)
 	}
 	ok := roots.AppendCertsFromPEM(caPk)
-	if !ok {
-		panic("failed to parse root certificate")
-	}
+	framework.ExpectEqual(ok, true, "failed to parse root certificate")
+
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
 			RootCAs: roots,
