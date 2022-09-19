@@ -28,6 +28,7 @@ interface Selector {
   annotationSelectors?: string[]
   podPhaseSelectors?: string[]
   pods?: string[]
+  physicalMachines?: string[]
 }
 
 export interface Scope {
