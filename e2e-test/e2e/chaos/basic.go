@@ -23,6 +23,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/onsi/ginkgo"
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	restClient "k8s.io/client-go/rest"
+	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/pod-security-admission/api"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	dnschaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/dnschaos"
 	httpchaostestcases "github.com/chaos-mesh/chaos-mesh/e2e-test/e2e/chaos/httpchaos"
@@ -38,18 +51,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/e2e-test/pkg/fixture"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward" // testcases
-	"github.com/onsi/ginkgo"
-	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	restClient "k8s.io/client-go/rest"
-	"k8s.io/kubernetes/test/e2e/framework"
-	"k8s.io/pod-security-admission/api"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {
