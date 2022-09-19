@@ -31,31 +31,23 @@ type TLSServerKeys struct {
 
 func setupEmbedFiles(serverIP string) (TLSServerKeys, []byte) {
 	c, err := content.ReadDir("keys")
-	if err != nil {
-		framework.ExpectNoError(err, "read key dir error")
-	}
-	var cert, key []byte
+	framework.ExpectNoError(err, "read key dir error")
+	var key []byte
 	var ca []byte
 	for _, f := range c {
 		if f.IsDir() {
 			continue
 		}
 		b, err := content.ReadFile("keys/" + f.Name())
-		if err != nil {
-			framework.ExpectNoError(err, "read key file error")
-		}
+		framework.ExpectNoError(err, "read key file error")
 		switch f.Name() {
-		case "server.crt":
-			cert = b
 		case "server.key":
 			key = b
 		case "ca.crt":
 			ca = b
 		}
 		err = os.WriteFile(f.Name(), b, 0644)
-		if err != nil {
-			framework.ExpectNoError(err, "write key file error")
-		}
+		framework.ExpectNoError(err, "write key file error")
 	}
 
 	f, err := os.OpenFile("server.ext", os.O_APPEND|os.O_WRONLY, 0644)
@@ -66,9 +58,7 @@ func setupEmbedFiles(serverIP string) (TLSServerKeys, []byte) {
 		framework.ExpectNoError(err, "write server.ext file error")
 	}
 	err = f.Close()
-	if err != nil {
-		framework.ExpectNoError(err, "close server.ext file error")
-	}
+	framework.ExpectNoError(err, "close server.ext file error")
 
 	cmdStr := "openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650 -sha256 -extfile server.ext"
 	cmd := exec.Command("bash", "-c", cmdStr)
@@ -76,9 +66,11 @@ func setupEmbedFiles(serverIP string) (TLSServerKeys, []byte) {
 	if err != nil {
 		framework.ExpectNoError(err, "run openssl cmd error: "+string(output))
 	}
+	crt, err := os.ReadFile("server.crt")
+	framework.ExpectNoError(err, "read server.crt file error")
 
 	return TLSServerKeys{
-		Cert: cert,
+		Cert: crt,
 		Key:  key,
 	}, ca
 }
