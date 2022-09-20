@@ -17,6 +17,7 @@ package chaos
 
 import (
 	"context"
+	"k8s.io/pod-security-admission/api"
 	"net/http"
 	"strings"
 	"time"
@@ -42,6 +43,7 @@ import (
 
 var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {
 	f := framework.NewDefaultFramework("chaos-mesh")
+	f.NamespacePodSecurityEnforceLevel = api.LevelPrivileged
 	var ns string
 	var fwCancel context.CancelFunc
 	var fw portforward.PortForward
