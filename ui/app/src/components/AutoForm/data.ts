@@ -25,6 +25,7 @@ export const scopeInitialValues = {
     annotationSelectors: [],
     podPhaseSelectors: [],
     pods: [],
+    physicalMachines: [],
   },
   mode: 'all',
   value: undefined,
