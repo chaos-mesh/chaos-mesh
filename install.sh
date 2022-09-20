@@ -583,7 +583,7 @@ install_kind() {
     err_msg=$(kind version 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(kind version | awk '{print $2}' | sed s/v//g)
-        target_version=$(echo "${kind_version}" | sed s/v//g)
+        target_version=${kind_version//v}
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
         else
@@ -1207,6 +1207,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-daemon
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "31766"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1239,6 +1242,9 @@ metadata:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: chaos-dashboard
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "2334"
 spec:
   selector:
     app.kubernetes.io/name: chaos-mesh
@@ -1275,6 +1281,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-mesh-controller-manager
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10080"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1388,7 +1397,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath:
+          hostPath: 
             path: ${socketDir}
         - name: sys-path
           hostPath:
@@ -1495,6 +1504,8 @@ spec:
               value: "false"
             - name: ROOT_URL
               value: "http://localhost:2333"
+            - name: ENABLE_PROFILING
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -2260,7 +2271,7 @@ webhooks:
       caBundle: "${CA_BUNDLE}"
       service:
         name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
+        namespace: "chaos-mesh"
         path: /mutate-chaos-mesh-org-v1alpha1-remotecluster
     failurePolicy: Fail
     name: mremotecluster.kb.io
@@ -2686,7 +2697,7 @@ webhooks:
       caBundle: "${CA_BUNDLE}"
       service:
         name: chaos-mesh-controller-manager
-        namespace: "chaos-testing"
+        namespace: "chaos-mesh"
         path: /validate-chaos-mesh-org-v1alpha1-remotecluster
     failurePolicy: Fail
     name: vremotecluster.kb.io

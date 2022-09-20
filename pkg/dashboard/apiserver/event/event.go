@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -34,24 +35,25 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-var log = u.Log.WithName("events")
-
 // Service defines a handler service for events.
 type Service struct {
 	event         core.EventStore
 	workflowStore core.WorkflowStore
 	conf          *config.ChaosDashboardConfig
+	logger        logr.Logger
 }
 
 func NewService(
 	event core.EventStore,
 	workflowStore core.WorkflowStore,
 	conf *config.ChaosDashboardConfig,
+	logger logr.Logger,
 ) *Service {
 	return &Service{
 		event:         event,
 		workflowStore: workflowStore,
 		conf:          conf,
+		logger:        logger.WithName("events"),
 	}
 }
 
@@ -78,9 +80,9 @@ const layout = "2006-01-02 15:04:05"
 // @Param namespace query string false "The namespace of the object"
 // @Param object_id query string false "The UID of the object"
 // @Param kind query string false "kind" Enums(PodChaos, IOChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos, AWSChaos, GCPChaos, DNSChaos, Schedule)
-// @Param limit query string false "The max length of events list"
+// @Param limit query number false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 // @Router /events [get]
 func (s *Service) list(c *gin.Context) {
 	ns := c.Query("namespace")
@@ -88,7 +90,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace with", ns)
 	}
 
 	start, _ := time.Parse(time.RFC3339, c.Query("start"))
@@ -120,9 +122,9 @@ func (s *Service) list(c *gin.Context) {
 // @Produce json
 // @Param namespace query string false "The namespace of the object"
 // @Param uid path string false "The UID of the Workflow"
-// @Param limit query string false "The max length of events list"
+// @Param limit query number false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Failure 500 {object} utils.APIError
+// @Failure 500 {object} u.APIError
 // @Router /events/workflow/{uid} [get]
 func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -144,7 +146,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace with", ns)
 	}
 
 	// we should fetch the events for Workflow and related WorkflowNode, so we need namespaced name at first
@@ -236,9 +238,9 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 // @Produce json
 // @Param id path uint true "The event ID"
 // @Success 200 {object} core.Event
-// @Failure 400 {object} utils.APIError
-// @Failure 404 {object} utils.APIError
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} u.APIError
+// @Failure 404 {object} u.APIError
+// @Failure 500 {object} u.APIError
 // @Router /events/{id} [get]
 func (s *Service) get(c *gin.Context) {
 	id, ns := c.Param("id"), c.Query("namespace")
@@ -259,7 +261,7 @@ func (s *Service) get(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		log.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace with", ns)
 	}
 
 	event, err := s.event.Find(context.Background(), uint(intID))

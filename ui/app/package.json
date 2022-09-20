@@ -1,21 +1,22 @@
 {
   "name": "@ui/app",
-  "version": "2.1.0",
+  "version": "0.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.3.0",
     "@loadable/component": "^5.14.1",
-    "@mui/icons-material": "^5.4.2",
-    "@mui/lab": "^5.0.0-alpha.70",
-    "@mui/material": "^5.4.3",
-    "@mui/styles": "^5.4.2",
-    "@mui/x-data-grid": "^5.9.0",
+    "@mui/icons-material": "^5.10.3",
+    "@mui/lab": "^5.0.0-alpha.98",
+    "@mui/material": "^5.10.4",
+    "@mui/styles": "^5.10.3",
+    "@mui/x-data-grid": "^5.17.1",
     "@nivo/core": "^0.74.0",
     "@nivo/pie": "^0.74.0",
     "@reactour/tour": "^2.3.0",
     "@reduxjs/toolkit": "^1.7.1",
     "ace-builds": "^1.4.12",
+    "auto-bind": "^5.0.1",
     "axios": "^0.24.0",
     "clsx": "^1.1.1",
     "copy-text-to-clipboard": "^3.0.1",
@@ -31,12 +32,13 @@
     "js-yaml": "^4.0.0",
     "lodash": "^4.17.21",
     "luxon": "^1.25.0",
+    "re-resizable": "^6.9.9",
     "react": "^17.0.1",
     "react-ace": "^9.2.1",
     "react-dnd": "^15.1.1",
     "react-dnd-html5-backend": "^15.1.2",
     "react-dom": "^17.0.1",
-    "react-flow-renderer": "^10.1.2",
+    "react-flow-renderer": "^10.3.0",
     "react-helmet": "^6.1.0",
     "react-intl": "^5.22.0",
     "react-redux": "^7.2.2",
@@ -99,6 +101,9 @@
     "source-map-explorer": "^2.5.2"
   },
   "jest": {
-    "resetMocks": false
+    "resetMocks": false,
+    "transformIgnorePatterns": [
+      "node_modules/(?!auto-bind)"
+    ]
   }
 }

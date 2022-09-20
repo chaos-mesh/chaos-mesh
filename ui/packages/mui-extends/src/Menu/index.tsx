@@ -14,32 +14,49 @@
  * limitations under the License.
  *
  */
-
-import { IconButton, Menu as MUIMenu, MenuProps } from '@mui/material'
-
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { IconButton, IconButtonProps, MenuProps, Menu as MuiMenu, SvgIconProps, styled } from '@mui/material'
 import { useState } from 'react'
 
-const Menu: React.FC<Omit<MenuProps, 'anchorEl' | 'open' | 'onClose'>> = ({ title, children, ...rest }) => {
+const StyledMenu = styled((props: MenuProps) => <MuiMenu elevation={0} {...props} />)(({ theme }) => ({
+  '& .MuiPaper-root': {
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  '& .MuiMenu-list': {
+    padding: '4px 0',
+  },
+  '& .MuiMenuItem-root': {
+    padding: '3px 8px',
+  },
+}))
+
+const Menu: React.FC<
+  Omit<MenuProps, 'anchorEl' | 'open' | 'onClose'> & { IconButtonProps?: IconButtonProps; IconProps?: SvgIconProps }
+> = ({ IconButtonProps, IconProps, children, ...rest }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
-  const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
+  const onClick = (e: React.SyntheticEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+
+    setAnchorEl(e.currentTarget)
   }
 
-  const onClose = () => {
+  const onClose = (e: React.SyntheticEvent) => {
+    e && e.stopPropagation() // Allow no event.
+
     setAnchorEl(null)
   }
 
   return (
-    <div>
-      <IconButton size="small" onClick={onClick}>
-        <MoreVertIcon />
+    <>
+      <IconButton {...IconButtonProps} onClick={onClick}>
+        <MoreVertIcon {...IconProps} />
       </IconButton>
-      <MUIMenu {...rest} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
-        {children}
-      </MUIMenu>
-    </div>
+      <StyledMenu {...rest} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
+        {/* If `children` is a function, the return type must be an array of React elements. */}
+        {typeof children === 'function' ? children({ onClose }) : children}
+      </StyledMenu>
+    </>
   )
 }
 

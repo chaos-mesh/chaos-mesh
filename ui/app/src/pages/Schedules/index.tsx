@@ -14,29 +14,33 @@
  * limitations under the License.
  *
  */
-import { Box, Button, Checkbox, styled } from '@mui/material'
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
-import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-import { useEffect, useState } from 'react'
-
 import AddIcon from '@mui/icons-material/Add'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
-import Loading from '@ui/mui-extends/esm/Loading'
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import { Schedule } from 'api/schedules.type'
-import Space from '@ui/mui-extends/esm/Space'
+import { Box, Button, Checkbox, styled } from '@mui/material'
 import { Typography } from '@mui/material'
-import _ from 'lodash'
 import api from 'api'
-import i18n from 'components/T'
-import { transByKind } from 'lib/byKind'
+import _ from 'lodash'
+import { TypesSchedule } from 'openapi'
+import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
+
+import Loading from '@ui/mui-extends/esm/Loading'
+import Space from '@ui/mui-extends/esm/Space'
+
 import { useStoreDispatch } from 'store'
+
+import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+
+import NotFound from 'components/NotFound'
+import ObjectListItem from 'components/ObjectListItem'
+import i18n from 'components/T'
+
+import { transByKind } from 'lib/byKind'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -54,14 +58,14 @@ const Schedules = () => {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(true)
-  const [schedules, setSchedules] = useState<Schedule[]>([])
+  const [schedules, setSchedules] = useState<TypesSchedule[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
   const fetchSchedules = () => {
     api.schedules
-      .schedules()
+      .schedulesGet()
       .then(({ data }) => setSchedules(data))
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -85,25 +89,25 @@ const Schedules = () => {
 
     switch (action) {
       case 'archive':
-        actionFunc = api.schedules.del
-        arg = uuid
+        actionFunc = api.schedules.schedulesUidDelete
+        arg = { uid: uuid }
 
         break
       case 'archiveMulti':
         action = 'archive'
-        actionFunc = api.schedules.delMulti
-        arg = Object.keys(batch)
+        actionFunc = api.schedules.schedulesDelete
+        arg = { uids: Object.keys(batch).join(',') }
         setBatch({})
 
         break
       case 'pause':
-        actionFunc = api.schedules.pause
-        arg = uuid
+        actionFunc = api.schedules.schedulesPauseUidPut
+        arg = { uid: uuid }
 
         break
       case 'start':
-        actionFunc = api.schedules.start
-        arg = uuid
+        actionFunc = api.schedules.schedulesStartUidPut
+        arg = { uid: uuid }
 
         break
     }
@@ -124,13 +128,13 @@ const Schedules = () => {
     }
   }
 
-  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [schedules[0].uid]: true } : {})
+  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [schedules[0].uid!]: true } : {})
 
   const handleBatchSelectAll = () =>
     setBatch(
       batchLength <= schedules.length
         ? schedules.reduce<Record<uuid, boolean>>((acc, d) => {
-            acc[d.uid] = true
+            acc[d.uid!] = true
 
             return acc
           }, {})

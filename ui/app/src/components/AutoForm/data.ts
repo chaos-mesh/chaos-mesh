@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import _ from 'lodash'
 
 export const podPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
@@ -26,12 +25,20 @@ export const scopeInitialValues = {
     annotationSelectors: [],
     podPhaseSelectors: [],
     pods: [],
+    physicalMachines: [],
   },
   mode: 'all',
   value: undefined,
 }
 
-export const scheduleInitialValues = {
+export interface Schedule {
+  schedule: string
+  historyLimit?: number
+  concurrencyPolicy?: 'Forbid' | 'Allow'
+  startingDeadlineSeconds?: number
+}
+
+export const scheduleInitialValues: Schedule = {
   schedule: '',
   historyLimit: 1,
   concurrencyPolicy: 'Forbid',

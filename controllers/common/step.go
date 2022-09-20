@@ -24,5 +24,5 @@ import (
 )
 
 func AllSteps() []pipeline.PipelineStep {
-	return []pipeline.PipelineStep{finalizers.Step, desiredphase.Step, condition.Step, records.Step}
+	return []pipeline.PipelineStep{finalizers.InitStep, desiredphase.Step, condition.Step, records.Step, finalizers.CleanStep}
 }

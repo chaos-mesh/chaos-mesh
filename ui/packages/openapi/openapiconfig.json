@@ -1,3 +1,4 @@
 {
-  "supportsES6": true
+  "supportsES6": true,
+  "useSingleRequestParameter": true
 }

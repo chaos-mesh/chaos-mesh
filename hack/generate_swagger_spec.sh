@@ -32,7 +32,7 @@ echo "+ Install swaggo/swag"
 go install github.com/swaggo/swag/cmd/swag
 
 echo "+ Generate swagger spec"
-swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
+swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
 
 echo "+ Update go mod"
 go mod tidy

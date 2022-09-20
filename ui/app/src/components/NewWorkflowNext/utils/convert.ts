@@ -16,14 +16,14 @@
  */
 import yaml from 'js-yaml'
 import _ from 'lodash'
-import type { Edge } from 'react-flow-renderer'
+import { Edge, Node, XYPosition, getIncomers } from 'react-flow-renderer'
 import { v4 as uuidv4 } from 'uuid'
 
-import { NodeExperiment } from 'slices/workflows'
+import type { NodeExperiment } from 'slices/workflows'
 
-import { scheduleInitialValues } from 'components/AutoForm/data'
+import { Schedule, scheduleInitialValues } from 'components/AutoForm/data'
 
-import { isDeepEmpty } from 'lib/utils'
+import { arrToObjBySep, isDeepEmpty, objToArrBySep } from 'lib/utils'
 
 export enum ExperimentKind {
   AWSChaos = 'AWSChaos',
@@ -59,8 +59,8 @@ const mapping = new Map<ExperimentKind, string>([
   [ExperimentKind.PhysicalMachineChaos, 'physicalmachineChaos'],
 ])
 
-export function templateTypeToFieldName(templateType: ExperimentKind): string {
-  return mapping.get(templateType)!
+export function templateTypeToFieldName(templateType: ExperimentKind) {
+  return mapping.get(templateType)
 }
 
 export enum SpecialTemplateType {
@@ -75,38 +75,8 @@ export interface Template {
   name: string
   templateType: SpecialTemplateType | ExperimentKind | 'Schedule'
   deadline?: string
-  schedule?: { type: string } & typeof scheduleInitialValues
+  schedule?: { type: string; [key: string]: any } & Schedule
   children?: string[]
-}
-
-/**
- * Convert edges to ES6 Map with source node UUID as key and edges array as value.
- *
- * @param {Edge[]} edges
- * @return {Map<uuid, Edge[]>}
- */
-function edgesToSourceMap(edges: Edge[]): Map<uuid, Edge[]> {
-  const map = new Map()
-
-  edges.forEach((edge) => {
-    if (map.has(edge.source)) {
-      map.set(edge.source, [...map.get(edge.source), edge])
-    } else {
-      map.set(edge.source, [edge])
-    }
-  })
-
-  return map
-}
-
-function findNextNodeArray(origin: string, result: uuid[], edgesMap: Map<uuid, Edge[]>): uuid[] {
-  if (edgesMap.has(origin)) {
-    const target = edgesMap.get(origin)![0].target
-
-    return findNextNodeArray(target, [...result, target], edgesMap)
-  }
-
-  return result
 }
 
 export function nodeExperimentToTemplate(node: NodeExperiment): Template {
@@ -125,7 +95,7 @@ export function nodeExperimentToTemplate(node: NodeExperiment): Template {
         concurrencyPolicy,
         startingDeadlineSeconds,
         type: templateType,
-        [templateTypeToFieldName(templateType)]: restrest,
+        [templateTypeToFieldName(templateType)!]: restrest,
       },
     }
   }
@@ -140,151 +110,68 @@ export function nodeExperimentToTemplate(node: NodeExperiment): Template {
   }
 }
 
-export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, NodeExperiment>, edges: Edge[]) {
-  const sourceMap = edgesToSourceMap(edges)
-  const scannedNodes: uuid[] = []
-  const realNexts: uuid[] = []
+export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Record<string, NodeExperiment>) {
+  const origin = nodes
+    .filter((n) => !n.parentNode)
+    .map((n) => ({ ...n, incomers: getIncomers(n, nodes, edges) }))
+    .find((n) => n.incomers.length === 0)!
+  const nodeMap = _.keyBy(nodes, 'id')
+  const sourceMap = _.keyBy(edges, 'source')
 
-  function genTemplates(origin: NodeExperiment, level: number): Template[] {
-    if (scannedNodes.includes(origin.id)) {
-      return []
+  function genTemplates(origin: Node, level: number): Template[] {
+    const originalTemplate = storeTemplates[origin.data.name]
+    let currentTemplate: Template
+    let restTemplates: Template[] = []
+
+    if (
+      originalTemplate.templateType === SpecialTemplateType.Serial ||
+      originalTemplate.templateType === SpecialTemplateType.Parallel
+    ) {
+      const children = nodes
+        .filter((n) => n.parentNode === origin.id)
+        .map((n) => ({ id: n.id, ...storeTemplates[n.data.name] }))
+
+      currentTemplate = {
+        level,
+        name: originalTemplate.name,
+        templateType: originalTemplate.templateType,
+        children: children.map((n) => n.name),
+      }
+
+      restTemplates = children.flatMap((n) => genTemplates(nodeMap[n.id], level + 1))
+    } else {
+      currentTemplate = { level, ...nodeExperimentToTemplate(originalTemplate) }
     }
 
-    scannedNodes.push(origin.id)
-
-    const eds = sourceMap.get(origin.id)
-    let nextNodes: NodeExperiment[] = []
-    const extraNodes: Template[] = []
-
-    eds?.forEach((edge) => {
-      if (edge.target) {
-        nextNodes.push(nodesMap[edge.target])
-      }
-    })
-
-    // This indicates that the next node is parallel.
-    if (nextNodes.length > 1) {
-      extraNodes.push({
-        level,
-        name: SpecialTemplateType.Parallel + '-' + uuidv4(),
-        templateType: SpecialTemplateType.Parallel,
-        children: nextNodes.map((n) => n.name),
-      })
-
-      let realNext: uuid = ''
-      const uniqNexts = _.uniqWith(
-        nextNodes.map((n) => {
-          const nds = findNextNodeArray(n.id, [], sourceMap)
-
-          return { ...n, next: nds }
-        }),
-        (a, b) => {
-          const intersection = _.intersection<uuid>(a.next, b.next)
-
-          if (intersection.length > 0) {
-            realNext = intersection[0]
-          }
-
-          return a.next[0] === b.next[0]
-        }
-      )
-      // If all next nodes have the same next node, then jump to the next node.
-      const sameNext = uniqNexts.length === 1 && uniqNexts[0] && nodesMap[realNext]
-
-      if (sameNext) {
-        nextNodes.forEach((n) => {
-          extraNodes.push({ level: level + 1, ...nodeExperimentToTemplate(n) })
-        })
-
-        nextNodes = [sameNext]
-      }
-
-      // This indicates that all next nodes have non-direct next node.
-      if (realNext && !sameNext) {
-        realNexts.push(realNext)
-      }
+    const edge = sourceMap[origin.id]
+    let nextNode
+    if (edge) {
+      nextNode = nodeMap[edge.target]
     }
 
     return [
-      { level, ...nodeExperimentToTemplate(origin) },
-      ...extraNodes,
-      ...nextNodes.flatMap((node) =>
-        genTemplates(
-          node,
-          nextNodes.length > 1
-            ? level + 1
-            : nextNodes.length === 1 && realNexts.includes(nextNodes[0].id)
-            ? level - 1
-            : level
-        )
-      ),
+      currentTemplate,
+      ...restTemplates,
+      ...(nextNode && !nextNode.parentNode ? genTemplates(nextNode, level) : []),
     ]
   }
 
-  function findPotentialSerials(nodeName: string, siblings: string[], templates: Template[]) {
-    const node = templates.find((t) => t.name === nodeName)!
-    let matchedIndex = -1
-    const children = []
-
-    for (let i = 0; i < templates.length; i++) {
-      const name = templates[i].name
-
-      if (name === nodeName) {
-        matchedIndex = i
-      }
-
-      if (realNexts.includes(templates[i].id!) || siblings.includes(name) || i === templates.length - 1) {
-        return children.length > 1
-          ? {
-              level: node.level,
-              name: SpecialTemplateType.Serial + '-' + uuidv4(),
-              templateType: SpecialTemplateType.Serial,
-              children,
-            }
-          : null
-      }
-
-      if (matchedIndex > 0 && templates[i].level === node.level && !siblings.includes(name)) {
-        children.push(name)
-      }
-    }
-  }
-
-  function genPotentialSerials(templates: Template[]) {
-    return templates
-      .map((template) => {
-        const serials: Template[] = []
-
-        if (template.templateType === SpecialTemplateType.Parallel) {
-          template.children = template.children?.map((child, i) => {
-            const serial = findPotentialSerials(
-              child,
-              template.children!.slice(i).filter((name) => name !== child),
-              templates
-            )
-
-            if (serial) {
-              serials.push(serial)
-
-              return serial.name
-            }
-
-            return child
-          })
-        }
-
-        return [template, ...serials]
-      })
-      .flat()
-  }
-
-  let templates = genPotentialSerials(genTemplates(origin, 0))
+  let templates = _.uniqBy(genTemplates(origin, 0), 'name')
+  const templatesWithLevel0 = templates.filter((t) => t.level === 0)
+  const hasEntry =
+    templatesWithLevel0.length === 1 &&
+    (templatesWithLevel0[0].templateType === SpecialTemplateType.Serial ||
+      templatesWithLevel0[0].templateType === SpecialTemplateType.Parallel)
   templates = [
-    {
-      name: 'entry',
-      templateType: SpecialTemplateType.Serial,
-      children: templates.filter((t) => t.level === 0).map((t) => t.name),
-    },
+    ...(!hasEntry
+      ? [
+          {
+            name: 'entry',
+            templateType: SpecialTemplateType.Serial,
+            children: templatesWithLevel0.map((t) => t.name),
+          },
+        ]
+      : []),
     ...templates.map((t) => _.omit(t, 'level')),
   ]
 
@@ -294,7 +181,7 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
       kind: 'Workflow',
       metadata: {},
       spec: {
-        entry: 'entry',
+        entry: hasEntry ? templatesWithLevel0[0].name : 'entry',
         templates,
       },
     },
@@ -317,18 +204,265 @@ export function flowToWorkflow(origin: NodeExperiment, nodesMap: Record<uuid, No
           }
         }
 
-        // Parse labels, annotations, labelSelectors, and annotationSelectors to object
+        // Parse labels, annotations, labelSelectors, and annotationSelectors to object.
         if (['labels', 'annotations', 'labelSelectors', 'annotationSelectors'].includes(key)) {
-          return (value as string[]).reduce<Record<string, string>>((acc, val) => {
-            const [k, v] = val.replace(/\s/g, '').split(':')
-            acc[k] = v
-
-            return acc
-          }, {})
+          return arrToObjBySep(value, ': ')
         }
 
         return value
       },
     }
   )
+}
+
+export function templateToNodeExperiment(t: Template, scheduled?: boolean): NodeExperiment {
+  let result
+
+  if (scheduled) {
+    const { type, schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } = t['schedule']!
+    const fieldName = templateTypeToFieldName(type as ExperimentKind)!
+    const chaos = rest[fieldName]
+
+    result = {
+      kind: type,
+      name: t.name,
+      templateType: type,
+      deadline: t.deadline,
+      scheduled: true,
+      ..._.defaults(
+        {
+          schedule,
+          historyLimit,
+          concurrencyPolicy,
+          startingDeadlineSeconds,
+        },
+        scheduleInitialValues
+      ),
+      ...chaos,
+    }
+  } else {
+    const fieldName = templateTypeToFieldName(t.templateType as ExperimentKind)
+
+    result = {
+      kind: t.templateType,
+      name: t.name,
+      templateType: t.templateType,
+      deadline: t.deadline,
+      ...(fieldName && (t as any)[fieldName]),
+    }
+  }
+
+  // Parse labelSelectors, and annotationSelectors to array.
+  if (_.has(result, 'selector.labelSelectors')) {
+    _.update(result, 'selector.labelSelectors', (obj) => objToArrBySep(obj, ': '))
+  }
+  if (_.has(result, 'selector.annotationSelectors')) {
+    _.update(result, 'selector.annotationSelectors', (obj) => objToArrBySep(obj, ': '))
+  }
+
+  return result
+}
+
+export function connectNodes(nodes: Node[]) {
+  const edges: Edge[] = []
+
+  for (let i = 1; i < nodes.length; i++) {
+    const prev = nodes[i - 1]
+    const cur = nodes[i]
+
+    const id = uuidv4()
+
+    edges.push({
+      id,
+      type: 'adjustableEdge',
+      source: prev.id,
+      target: cur.id,
+      data: {
+        id,
+      },
+    })
+  }
+
+  return edges
+}
+
+type ParentNode = {
+  id: uuid
+  type: SpecialTemplateType.Serial | SpecialTemplateType.Parallel
+}
+export enum View {
+  NodeWidth = 200,
+  NodeHeight = 30,
+  PaddingX = 30,
+  PaddingY = 15,
+  GroupNodeTypographyHeight = 32,
+}
+
+export function workflowToFlow(workflow: string) {
+  const { entry, templates }: { entry: string; templates: Template[] } = (yaml.load(workflow) as any).spec
+  const templatesMap = _.keyBy(templates, 'name')
+  // Convert templates to store.
+  //
+  // The `name` is used here as the unique id,
+  // because the name of a template inside a Workflow is unique.
+  const store = _.transform<Template, Record<string, NodeExperiment>>(templatesMap, (acc, t, k) => {
+    if (t.templateType === 'Schedule') {
+      acc[k] = templateToNodeExperiment(t, true)
+    } else {
+      acc[k] = templateToNodeExperiment(t)
+    }
+  })
+  const nodes: Record<uuid, Node> = {}
+  const edges: Edge[] = []
+
+  function recurInsertNodesAndEdges(
+    entry: Template,
+    relativePos: XYPosition,
+    level: number,
+    index: number,
+    parentNode?: ParentNode
+  ): { id: uuid; width: number; height: number } {
+    function addNode(id: uuid, parentNode?: ParentNode): Node {
+      return {
+        id,
+        type: 'flowNode',
+        position: {
+          x:
+            parentNode?.type === SpecialTemplateType.Serial
+              ? relativePos.x + View.PaddingX * (index + 1)
+              : View.PaddingX,
+          y:
+            View.GroupNodeTypographyHeight +
+            (parentNode?.type === SpecialTemplateType.Parallel
+              ? relativePos.y + View.PaddingY * (index + 1)
+              : View.PaddingY),
+        },
+        data: {
+          name: entry.name,
+          kind: entry.templateType,
+          children: _.truncate(entry.name, { length: 20 }),
+        },
+        ...(parentNode && {
+          parentNode: parentNode.id,
+          extent: 'parent',
+        }),
+      }
+    }
+
+    const id = uuidv4()
+    let width = 0
+    let height = 0
+
+    if (entry.templateType === SpecialTemplateType.Serial || entry.templateType === SpecialTemplateType.Parallel) {
+      const childrenNum = entry.children!.length
+
+      nodes[id] = {
+        id,
+        type: 'groupNode',
+        position: {
+          x:
+            parentNode?.type === SpecialTemplateType.Serial
+              ? relativePos.x + View.PaddingX * (index + 1)
+              : parentNode?.type === SpecialTemplateType.Parallel
+              ? View.PaddingX
+              : relativePos.x,
+          y:
+            View.GroupNodeTypographyHeight +
+            (parentNode?.type === SpecialTemplateType.Parallel
+              ? relativePos.y + View.PaddingY * (index + 1)
+              : parentNode?.type === SpecialTemplateType.Serial
+              ? View.PaddingY
+              : relativePos.y - View.GroupNodeTypographyHeight),
+        },
+        data: {
+          name: entry.name,
+          type: entry.templateType,
+          childrenNum,
+        },
+        ...(parentNode && {
+          parentNode: parentNode.id,
+          extent: 'parent',
+          connectable: parentNode.type === SpecialTemplateType.Serial,
+        }),
+        zIndex: -1, // Make edges visible on the top of the group node.
+      }
+
+      const children = entry.children!.map((child) => templatesMap[child])
+
+      let prevWidth = 0
+      let prevHeight = 0
+      const uuids = children.map((child, i) => {
+        const {
+          id: uuid,
+          width: w,
+          height: h,
+        } = recurInsertNodesAndEdges(
+          child,
+          {
+            x: prevWidth,
+            y: prevHeight,
+          },
+          level + 1,
+          i,
+          {
+            id,
+            type: entry.templateType as any,
+          }
+        )
+
+        if (entry.templateType === SpecialTemplateType.Serial) {
+          width += w
+          height = Math.max(height, h)
+
+          prevWidth += w
+        }
+
+        if (entry.templateType === SpecialTemplateType.Parallel) {
+          width = Math.max(width, w)
+          height += h
+
+          prevHeight += h
+        }
+
+        if (nodes[uuid].type === 'groupNode') {
+          prevHeight += View.GroupNodeTypographyHeight
+        }
+
+        return uuid
+      })
+
+      // If Serial, connect all child nodes.
+      if (entry.templateType === SpecialTemplateType.Serial) {
+        edges.push(...connectNodes(uuids.map((uuid) => nodes[uuid])))
+      }
+
+      // Calculate the padding of the group node.
+      width += entry.templateType === SpecialTemplateType.Serial ? View.PaddingX * (childrenNum + 1) : View.PaddingX * 2
+      height +=
+        entry.templateType === SpecialTemplateType.Parallel ? View.PaddingY * (childrenNum + 1) : View.PaddingY * 2
+
+      // Calculate the height of all headers.
+      const specialUUIDs = _.sumBy(uuids, (uuid) => (nodes[uuid].type === 'groupNode' ? 1 : 0))
+      if (specialUUIDs > 0) {
+        height +=
+          entry.templateType === SpecialTemplateType.Serial
+            ? View.GroupNodeTypographyHeight
+            : View.GroupNodeTypographyHeight * specialUUIDs
+      }
+
+      nodes[id].data.width = width
+      nodes[id].data.height = height
+    } else {
+      nodes[id] = addNode(id, parentNode)
+
+      width = View.NodeWidth
+      height = View.NodeHeight
+    }
+
+    return { id, width, height }
+  }
+
+  recurInsertNodesAndEdges(templatesMap[entry], { x: 100, y: 100 }, 0, 0)
+
+  return { store, nodes: _.values(nodes), edges }
 }

@@ -14,30 +14,42 @@
  * limitations under the License.
  *
  */
-
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
-import { setDebugMode, setEnableKubeSystemNS, setLang, setTheme, setUseNextWorkflowInterface } from 'slices/settings'
-import { useStoreDispatch, useStoreSelector } from 'store'
+import type { SelectChangeEvent } from '@mui/material'
+import messages from 'i18n/messages'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import type { SelectChangeEvent } from '@mui/material'
 import SelectField from '@ui/mui-extends/esm/SelectField'
 import Space from '@ui/mui-extends/esm/Space'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import {
+  setDebugMode,
+  setEnableKubeSystemNS,
+  setLang,
+  setTheme,
+  setUseNewPhysicalMachine,
+  setUseNextWorkflowInterface,
+} from 'slices/settings'
+
 import { T } from 'components/T'
-import Token from './Token'
-import logo from 'images/logo.svg'
+
 import logoWhite from 'images/logo-white.svg'
-import messages from 'i18n/messages'
+import logo from 'images/logo.svg'
+
+import Token from './Token'
 
 const Settings = () => {
   const state = useStoreSelector((state) => state)
   const { securityMode, version } = state.globalStatus
-  const { debugMode, enableKubeSystemNS, useNextWorkflowInterface, theme, lang } = state.settings
+  const { debugMode, enableKubeSystemNS, useNewPhysicalMachine, useNextWorkflowInterface, theme, lang } = state.settings
   const dispatch = useStoreDispatch()
 
   const handleChangeDebugMode = () => dispatch(setDebugMode(!debugMode))
   const handleChangeEnableKubeSystemNS = () => dispatch(setEnableKubeSystemNS(!enableKubeSystemNS))
+  const handleChangeUseNewPhysicalMachine = () => dispatch(setUseNewPhysicalMachine(!useNewPhysicalMachine))
   const handleChangeUseNextWorkflowInterface = () => dispatch(setUseNextWorkflowInterface(!useNextWorkflowInterface))
   const handleChangeTheme = (e: SelectChangeEvent) => dispatch(setTheme(e.target.value))
   const handleChangeLang = (e: SelectChangeEvent) => dispatch(setLang(e.target.value))
@@ -60,6 +72,19 @@ const Settings = () => {
             helperText={<T id="settings.enableKubeSystemNS.choose" />}
             checked={enableKubeSystemNS}
             onChange={handleChangeEnableKubeSystemNS}
+          />
+          <Checkbox
+            label={
+              <Space spacing={1} direction="row" alignItems="center">
+                <Box>
+                  <T id="settings.useNewPhysicalMachineCRD.title" />
+                </Box>
+                <Chip label="Preview" color="primary" size="small" />
+              </Space>
+            }
+            helperText={<T id="settings.useNewPhysicalMachineCRD.choose" />}
+            checked={useNewPhysicalMachine}
+            onChange={handleChangeUseNewPhysicalMachine}
           />
           <PaperTop title={<T id="workflows.title" />} />
           <Checkbox

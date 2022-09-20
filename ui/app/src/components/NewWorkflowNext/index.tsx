@@ -15,6 +15,7 @@
  *
  */
 import { Badge, Box, Button, Divider, Grow, Typography } from '@mui/material'
+import _ from 'lodash'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactFlowInstance } from 'react-flow-renderer'
 
@@ -23,7 +24,9 @@ import Space from '@ui/mui-extends/esm/Space'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { LoadRecentlyUsedExperiments } from 'slices/workflows'
+import { loadRecentlyUsedExperiments } from 'slices/workflows'
+
+import YAML from 'components/YAML'
 
 import FunctionalNodesElements from './Elements/FunctionalNodes'
 import KubernetesElements from './Elements/Kubernetes'
@@ -40,21 +43,24 @@ export default function NewWorkflow() {
   const dispatch = useStoreDispatch()
 
   useEffect(() => {
-    dispatch(LoadRecentlyUsedExperiments())
+    dispatch(loadRecentlyUsedExperiments())
   }, [dispatch])
 
   const flowRef = useRef<ReactFlowInstance>()
 
   const handleClickElement = (kind: string, act?: string) => {
-    ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 50, y: 50 }) // TODO: calculate the appropriate coordinates automatically
+    ;(flowRef.current as any).initNode({ kind, act }, undefined, { x: 100, y: 100 }) // TODO: calculate the appropriate coordinates automatically
+  }
+
+  const handleImportWorkflow = (workflow: string) => {
+    ;(flowRef.current as any).importWorkflow(workflow)
   }
 
   const onFinishWorkflow = () => {
     const nds = flowRef.current?.getNodes()!
-    const origin = nds.find((n) => n.data.origin)!
     const eds = flowRef.current?.getEdges()!
 
-    const workflow = flowToWorkflow(nodes[origin.id], nodes, eds)
+    const workflow = flowToWorkflow(nds, eds, nodes)
 
     setWorkflow(workflow)
     setOpenSubmitDialog(true)
@@ -73,11 +79,14 @@ export default function NewWorkflow() {
               </Badge>
               <Typography variant="body2">Use flowchart to create a new workflow.</Typography>
             </Box>
-            {Object.keys(nodes).length > 0 && (
-              <Button variant="contained" size="small" onClick={onFinishWorkflow}>
-                Submit Workflow
-              </Button>
-            )}
+            <Space direction="row">
+              <YAML callback={handleImportWorkflow}>Import Workflow</YAML>
+              {!_.isEmpty(nodes) && (
+                <Button variant="contained" size="small" onClick={onFinishWorkflow}>
+                  Submit Workflow
+                </Button>
+              )}
+            </Space>
           </Box>
           <Paper sx={{ display: 'flex', flex: 1 }}>
             <Space sx={{ width: 256, pr: 4, borderRight: (theme) => `1px solid ${theme.palette.divider}` }}>
