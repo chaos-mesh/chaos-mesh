@@ -58,8 +58,7 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "namespaces"]
   verbs: ["get", "watch", "list"]
-- apiGroups:
-  - chaos-mesh.org
+- apiGroups: ["chaos-mesh.org"]
   resources: [ "*" ]
   verbs: [%s]
 `
@@ -71,8 +70,7 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "namespaces"]
   verbs: ["get", "watch", "list"]
-- apiGroups:
-  - chaos-mesh.org
+- apiGroups: ["chaos-mesh.org"]
   resources: [ "*" ]
   verbs: [%s]
 `

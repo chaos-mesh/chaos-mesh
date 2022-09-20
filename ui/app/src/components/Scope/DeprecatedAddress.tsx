@@ -14,30 +14,26 @@
  * limitations under the License.
  *
  */
-
 import { getIn, useFormikContext } from 'formik'
 
 import { LabelField } from 'components/FormField'
-import Space from '@ui/mui-extends/esm/Space'
 import i18n from 'components/T'
 
-const Nodes = () => {
+const DeprecatedAddress = () => {
   const { errors, touched } = useFormikContext()
 
   return (
-    <Space>
-      <LabelField
-        name={'spec.address'}
-        label={i18n('physic.address')}
-        helperText={
-          getIn(touched, 'spec.address') && getIn(errors, 'spec.address')
-            ? getIn(errors, 'spec.address')
-            : i18n('physic.addressHelper')
-        }
-        error={getIn(errors, 'spec.address') && getIn(touched, 'spec.address') ? true : false}
-      />
-    </Space>
+    <LabelField
+      name={'spec.address'}
+      label={i18n('physic.address')}
+      helperText={
+        getIn(touched, 'spec.address') && getIn(errors, 'spec.address')
+          ? getIn(errors, 'spec.address')
+          : i18n('physic.addressHelper')
+      }
+      error={getIn(errors, 'spec.address') && getIn(touched, 'spec.address') ? true : false}
+    />
   )
 }
 
-export default Nodes
+export default DeprecatedAddress
