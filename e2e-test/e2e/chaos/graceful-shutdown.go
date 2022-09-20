@@ -17,7 +17,6 @@ package chaos
 
 import (
 	"context"
-	"k8s.io/pod-security-admission/api"
 	"net/http"
 	"strings"
 	"time"
@@ -29,6 +28,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/pod-security-admission/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
