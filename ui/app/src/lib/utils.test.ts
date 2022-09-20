@@ -24,6 +24,20 @@ describe('lib/utils', () => {
 
       expect(result).toEqual({ foo: 'bar', baz: 'qux' })
     })
+
+    it('should remove all spaces from the array items', () => {
+      const arr = ['foo = bar', 'baz = qux ']
+      const result = arrToObjBySep(arr, '=', { removeAllSpaces: true })
+
+      expect(result).toEqual({ foo: 'bar', baz: 'qux' })
+    })
+
+    it('should convert array to object with value to a number', () => {
+      const arr = ['foo=1', 'baz=2']
+      const result = arrToObjBySep(arr, '=', { updateVal: (s) => +s })
+
+      expect(result).toEqual({ foo: 1, baz: 2 })
+    })
   })
 
   describe('isDeepEmpty', () => {

@@ -16,18 +16,30 @@
  */
 import _ from 'lodash'
 
-export function objToArrBySep(obj: Record<string, string | string[]>, separator: string, filters?: string[]) {
-  return Object.entries(obj)
-    .filter((d) => !filters?.includes(d[0]))
-    .reduce<string[]>(
-      (acc, [k, v]) => acc.concat(Array.isArray(v) ? v.map((d) => `${k}${separator}${d}`) : `${k}${separator}${v}`),
-      []
-    )
+export function objToArrBySep(obj: Record<string, string | string[]>, separator: string) {
+  return Object.entries(obj).reduce<string[]>(
+    (acc, [k, v]) => acc.concat(Array.isArray(v) ? v.map((d) => `${k}${separator}${d}`) : `${k}${separator}${v}`),
+    []
+  )
 }
 
-export function arrToObjBySep(arr: string[], sep: string): Record<string, string> {
+export function arrToObjBySep(
+  arr: string[],
+  sep: string,
+  options?: { removeAllSpaces?: boolean; updateVal?: (s: string) => any }
+) {
   return arr.reduce<Record<string, string>>((acc, d) => {
-    const [k, v] = d.split(sep)
+    let processed = d
+
+    if (options?.removeAllSpaces) {
+      processed = processed.replace(/\s/g, '')
+    }
+
+    let [k, v] = processed.split(sep)
+
+    if (options?.updateVal) {
+      v = options.updateVal(v)
+    }
 
     acc[k] = v
 
