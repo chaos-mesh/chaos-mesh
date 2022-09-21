@@ -66,16 +66,20 @@ export interface AtomFormData {
 
 const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kind, act: action, formikProps }) => {
   const kindAction = concatKindAction(kind, action)
+
+  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const noScope =
+    kind === SpecialTemplateType.Suspend ||
+    kind === SpecialTemplateType.Serial ||
+    kind === SpecialTemplateType.Parallel ||
+    (kind === 'PhysicalMachineChaos' && !useNewPhysicalMachine)
+
   const [initialValues, setInitialValues] = useState<FormikValues>({
     id,
     kind,
     action,
     ...(kind === 'NetworkChaos' && { target: scopeInitialValues }),
-    ...(kind !== 'PhysicalMachineChaos' &&
-      kind !== SpecialTemplateType.Suspend &&
-      kind !== SpecialTemplateType.Serial &&
-      kind !== SpecialTemplateType.Parallel &&
-      scopeInitialValues),
+    ...(!noScope && scopeInitialValues),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
   const [form, setForm] = useState<AtomFormData[]>([])
@@ -115,6 +119,10 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               return false
             }
 
+            if (kind === 'PhysicalMachineChaos' && useNewPhysicalMachine && d.label === 'address') {
+              return false
+            }
+
             if (d.when) {
               const parsed = parse(d.when)
 
@@ -132,7 +140,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     if (kind) {
       loadData()
     }
-  }, [kind, action, formikProps.initialValues])
+  }, [kind, action, useNewPhysicalMachine, formikProps.initialValues])
 
   const renderForm = (
     form: AtomFormData[],
@@ -317,10 +325,12 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                 <Space direction="row">
                   <Divider orientation="vertical" flexItem />
                   <Scope
+                    env="k8s"
+                    kind={kind}
                     namespaces={namespaces}
                     scope="target.selector"
                     modeScope="target"
-                    podsPreviewTitle={<T id="newE.target.network.target.podsPreview" />}
+                    previewTitle={<T id="newE.target.network.target.podsPreview" />}
                   />
                 </Space>
               </>
@@ -330,15 +340,19 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
               kind !== SpecialTemplateType.Parallel && (
                 <>
                   <Divider />
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6">
                     <T id="newE.steps.scope" />
                   </Typography>
-                  {kind !== 'PhysicalMachineChaos' && <Scope kind={kind} namespaces={namespaces} />}
+                  {useNewPhysicalMachine && (
+                    <Scope
+                      env={kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'}
+                      kind={kind}
+                      namespaces={namespaces}
+                    />
+                  )}
                   <Divider />
                   <Box>
-                    <Typography variant="h6" fontWeight="bold">
-                      Schedule
-                    </Typography>
+                    <Typography variant="h6">Schedule</Typography>
                     <Checkbox
                       label="Scheduled"
                       helperText={`Check the box to convert ${kindAction} into a Schedule.`}
@@ -350,9 +364,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                   <Divider />
                 </>
               )}
-            <Typography variant="h6" fontWeight="bold">
-              Info
-            </Typography>
+            <Typography variant="h6">Info</Typography>
             <Info belong={belong} kind={kind} action={action} />
             <Submit />
           </Space>

@@ -66,25 +66,25 @@ jest.mock('api', () => ({
 
 const Default = () => (
   <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-    <Scope namespaces={['ns1', 'ns2']} />
+    <Scope env="k8s" kind="PodChaos" namespaces={['ns1', 'ns2']} />
   </Formik>
 )
 
 describe('<Scope />', () => {
-  it('first load', () => {
-    render(<Default />)
-
-    expect(screen.getByText('No pods found')).toBeInTheDocument()
-  })
-
   it('disables when kind is AWSChaos', () => {
     render(
       <Formik initialValues={scopeInitialValues} onSubmit={() => {}}>
-        <Scope kind="AWSChaos" namespaces={['ns1', 'ns2']} />
+        <Scope env="k8s" kind="AWSChaos" namespaces={['ns1', 'ns2']} />
       </Formik>
     )
 
     expect(screen.getByText('AWSChaos does not need to define the scope.')).toBeInTheDocument()
+  })
+
+  it('first load', () => {
+    render(<Default />)
+
+    expect(screen.getByText('No Pods found.')).toBeInTheDocument()
   })
 
   it('loads and then choose a namespace', async () => {

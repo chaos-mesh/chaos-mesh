@@ -16,7 +16,7 @@
  */
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from 'api'
-import { V1alpha1PodSelectorSpec } from 'openapi'
+import { TypesPhysicalMachine, V1alpha1PhysicalMachineSelectorSpec, V1alpha1PodSelectorSpec } from 'openapi'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
 
@@ -60,6 +60,11 @@ export const getNetworkTargetPods = createAsyncThunk(
       })
     ).data
 )
+export const getPhysicalMachines = createAsyncThunk(
+  'common/physical-machines',
+  async (data: V1alpha1PhysicalMachineSelectorSpec) =>
+    (await api.common.commonPhysicalmachinesPost({ request: data })).data
+)
 
 export type Env = 'k8s' | 'physic'
 
@@ -69,6 +74,7 @@ const initialState: {
   annotations: Record<string, string[]>
   pods: any[]
   networkTargetPods: any[]
+  physicalMachines: TypesPhysicalMachine[]
   fromExternal: boolean
   step1: boolean
   step2: boolean
@@ -77,12 +83,14 @@ const initialState: {
   spec: any
   basic: any
 } = {
+  // Selector related.
   namespaces: [],
   labels: {},
   annotations: {},
   pods: [],
   networkTargetPods: [],
-  // New Experiment needed
+  physicalMachines: [],
+  // Creating experiments related.
   fromExternal: false,
   step1: false,
   step2: false,
@@ -156,6 +164,9 @@ const experimentsSlice = createSlice({
     })
     builder.addCase(getNetworkTargetPods.fulfilled, (state, action) => {
       state.networkTargetPods = action.payload
+    })
+    builder.addCase(getPhysicalMachines.fulfilled, (state, action) => {
+      state.physicalMachines = action.payload
     })
   },
 })
