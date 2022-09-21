@@ -361,20 +361,6 @@ const data: Record<Kind, Definition> = {
           ...blockCommon,
         },
       },
-      {
-        name: 'Limit',
-        key: 'limit',
-        spec: {
-          action: 'limit' as any,
-          iops: {
-            field: 'number',
-            label: 'IOPS',
-            value: 0,
-            helperText: 'The maximum IOPS',
-          },
-          ...blockCommon,
-        },
-      },
     ],
   },
   // DNS Fault
