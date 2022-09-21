@@ -28,6 +28,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/pod-security-admission/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -42,6 +43,7 @@ import (
 
 var _ = ginkgo.Describe("[Graceful-Shutdown]", func() {
 	f := framework.NewDefaultFramework("chaos-mesh")
+	f.NamespacePodSecurityEnforceLevel = api.LevelPrivileged
 	var ns string
 	var fwCancel context.CancelFunc
 	var fw portforward.PortForward

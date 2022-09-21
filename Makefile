@@ -255,15 +255,7 @@ manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
 manifests/crd.yaml: config images/dev-env/.dockerbuilt
 	kustomize build config/default > manifests/crd.yaml
 
-manifests/crd-v1beta1.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
-manifests/crd-v1beta1.yaml: config images/dev-env/.dockerbuilt
-	mkdir -p ./output
-	cp -Tr ./config ./output/config-v1beta1
-	cd ./api ;\
-		controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../output/config-v1beta1/crd/bases ;
-	kustomize build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
-
-yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
+yaml: manifests/crd.yaml
 
 config: SHELL:=$(RUN_IN_DEV_SHELL)
 config: images/dev-env/.dockerbuilt

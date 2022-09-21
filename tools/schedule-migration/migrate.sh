@@ -51,11 +51,7 @@ update_yaml () {
 reapply_crd () {
     local crd=""
     kubectl delete -f https://mirrors.chaos-mesh.org/v1.2.1/crd.yaml
-    if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
-        crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
-    else
-        crd="https://mirrors.chaos-mesh.org/latest/crd-v1beta1.yaml"
-    fi
+    crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
     kubectl create -f ${crd}
 }
 
