@@ -27,13 +27,14 @@ import basicData from 'components/NewExperimentNext/data/basic'
 import { WorkflowBasic } from 'components/NewWorkflow'
 import { ScheduleSpecific } from 'components/Schedule/types'
 
-import { sanitize } from './utils'
+import { arrToObjBySep, sanitize } from './utils'
 
 export function parseSubmit<K extends ExperimentKind>(
   env: Env,
   _kind: K,
   e: Experiment<Exclude<K, 'Schedule'>>,
-  options?: {
+  options: {
+    useNewPhysicalMachine: boolean
     inSchedule?: boolean
   }
 ) {
@@ -41,69 +42,40 @@ export function parseSubmit<K extends ExperimentKind>(
   const values: typeof e = JSON.parse(JSON.stringify(e))
   let { metadata, spec } = values
 
-  // Set default namespace when it's not present
+  // Set default namespace when it's not present.
   if (!metadata.namespace) {
     metadata.namespace = env === 'k8s' ? spec.selector.namespaces[0] : 'default'
   }
 
-  // Parse labels, annotations, labelSelectors, and annotationSelectors to object
-  function helper1(selectors: string[], updateVal?: (s: string) => any) {
-    return selectors.reduce((acc: Record<string, any>, d) => {
-      const splited = d.replace(/\s/g, '').split(/:(.+)/)
-
-      acc[splited[0]] = typeof updateVal === 'function' ? updateVal(splited[1]) : splited[1]
-
-      return acc
-    }, {})
+  if (metadata.labels?.length) {
+    metadata.labels = arrToObjBySep(metadata.labels, ':', { removeAllSpaces: true }) as any
+  } else {
+    delete metadata.labels
   }
 
-  // Parse http headers to object
-  function helperHTTPHeaders(selectors: string[]) {
-    return selectors.reduce((acc: Record<string, any>, d) => {
-      const splited = d.split(/:(.+)/)
-      acc[splited[0].trim()] = splited[1].trim()
-      return acc
-    }, {})
+  if (metadata.annotations?.length) {
+    metadata.annotations = arrToObjBySep(metadata.annotations, ':', { removeAllSpaces: true }) as any
+  } else {
+    delete metadata.annotations
   }
 
-  // Parse http queries to patch object
-  function helperHTTPPatchQueries(selectors: string[]) {
-    return selectors.map((d) => {
-      return d
-        .replace(/\s/g, '')
-        .split(/:(.+)/)
-        .slice(0, 2)
-        .map((s) => s.trim())
-    })
-  }
-
-  // Parse http headers to patch object
-  function helperHTTPPatchHeaders(selectors: string[]) {
-    return selectors.map((d) => {
-      return d
-        .split(/:(.+)/)
-        .slice(0, 2)
-        .map((s) => s.trim())
-    })
-  }
-
-  // Parse selector
-  function helper2(scope: Scope['selector']) {
+  function parseSelector(scope: Scope['selector']) {
     if (scope.labelSelectors?.length) {
-      scope.labelSelectors = helper1(scope.labelSelectors) as any
+      scope.labelSelectors = arrToObjBySep(scope.labelSelectors, ':', { removeAllSpaces: true }) as any
     } else {
       delete scope.labelSelectors
     }
+
     if (scope.annotationSelectors?.length) {
-      scope.annotationSelectors = helper1(scope.annotationSelectors) as any
+      scope.annotationSelectors = arrToObjBySep(scope.annotationSelectors, ':', { removeAllSpaces: true }) as any
     } else {
       delete scope.annotationSelectors
     }
 
-    // Parse pods
-    if (scope.pods?.length) {
-      scope.pods = scope.pods.reduce((acc, d) => {
+    function parsePodsOrPhysicalMachines(data: string[]) {
+      return data.reduce((acc, d) => {
         const [namespace, name] = d.split(':')
+
         if (acc.hasOwnProperty(namespace)) {
           acc[namespace].push(name)
         } else {
@@ -111,27 +83,28 @@ export function parseSubmit<K extends ExperimentKind>(
         }
 
         return acc
-      }, {} as Record<string, string[]>) as any
+      }, {} as Record<string, string[]>)
+    }
+
+    // Parse pods if exists.
+    if (scope.pods?.length) {
+      scope.pods = parsePodsOrPhysicalMachines(scope.pods) as any
     } else {
       delete scope.pods
     }
+
+    // Parse physical machines if exists.
+    if (scope.physicalMachines?.length) {
+      scope.physicalMachines = parsePodsOrPhysicalMachines(scope.physicalMachines) as any
+    } else {
+      delete scope.physicalMachines
+    }
   }
 
-  if (metadata.labels?.length) {
-    metadata.labels = helper1(metadata.labels) as any
-  } else {
-    delete metadata.labels
-  }
-  if (metadata.annotations?.length) {
-    metadata.annotations = helper1(metadata.annotations) as any
-  } else {
-    delete metadata.annotations
-  }
+  parseSelector(spec.selector)
 
   if (env === 'k8s') {
-    helper2(spec.selector)
-
-    delete (spec as any).address // remove the address field only used in PhysicalMachineChaos
+    delete (spec as any).address // Remove the address field because it's only used in PhysicalMachineChaos.
   }
 
   if (env === 'k8s' && kind === 'NetworkChaos') {
@@ -141,7 +114,7 @@ export function parseSubmit<K extends ExperimentKind>(
 
     if ((spec as any).target) {
       if ((spec as any).target.mode) {
-        helper2((spec as any).target.selector)
+        parseSelector((spec as any).target.selector)
       } else {
         ;(spec as any).target = undefined
       }
@@ -149,40 +122,64 @@ export function parseSubmit<K extends ExperimentKind>(
   }
 
   if (kind === 'IOChaos' && (spec as any).action === 'attrOverride') {
-    ;(spec as any).attr = helper1((spec as any).attr as string[], (s: string) => parseInt(s, 10))
+    ;(spec as any).attr = arrToObjBySep((spec as any).attr, ':', { updateVal: (s: string) => parseInt(s, 10) })
   }
 
   if (kind === 'HTTPChaos') {
-    ;(spec as any).request_headers = helperHTTPHeaders((spec as any).request_headers as string[])
+    // Parse http headers to object
+    function helperHTTPHeaders(selectors: string[]) {
+      return selectors.reduce((acc: Record<string, any>, d) => {
+        const [k, v] = d.split(':')
+
+        acc[k.trim()] = v.trim()
+
+        return acc
+      }, {})
+    }
+
+    // Parse http queries to patch object
+    function helperHTTPPatchQueries(selectors: string[]) {
+      return selectors.map((d) => {
+        return d.replace(/\s/g, '').split(':')
+      })
+    }
+
+    // Parse http headers to patch object
+    function helperHTTPPatchHeaders(selectors: string[]) {
+      return selectors.map((d) => {
+        return d.split(':').map((s) => s.trim())
+      })
+    }
+
+    ;(spec as any).request_headers = helperHTTPHeaders((spec as any).request_headers)
     if ((spec as any).response_headers) {
-      ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers as string[])
+      ;(spec as any).response_headers = helperHTTPHeaders((spec as any).response_headers)
     }
     if ((spec as any).replace && (spec as any).replace.headers) {
-      ;(spec as any).replace.headers = helperHTTPHeaders((spec as any).replace.headers as string[])
+      ;(spec as any).replace.headers = helperHTTPHeaders((spec as any).replace.headers)
     }
     if ((spec as any).replace && (spec as any).replace.queries) {
-      ;(spec as any).replace.queries = helper1((spec as any).replace.queries as string[])
+      ;(spec as any).replace.queries = arrToObjBySep((spec as any).replace.queries, ':', { removeAllSpaces: true })
     }
     if ((spec as any).patch && (spec as any).patch.headers) {
-      ;(spec as any).patch.headers = helperHTTPPatchHeaders((spec as any).patch.headers as string[])
+      ;(spec as any).patch.headers = helperHTTPPatchHeaders((spec as any).patch.headers)
     }
     if ((spec as any).patch && (spec as any).patch.queries) {
-      ;(spec as any).patch.queries = helperHTTPPatchQueries((spec as any).patch.queries as string[])
+      ;(spec as any).patch.queries = helperHTTPPatchQueries((spec as any).patch.queries)
     }
   }
 
   function parsePhysicalMachineChaos(spec: any) {
-    delete spec.selector
-
-    const { action, address, duration, mode } = spec as any
+    const { action, address, selector, duration, mode } = spec as any
 
     delete spec.action
+    delete spec.selector
     delete spec.address
     delete spec.duration
     delete spec.mode
 
     return {
-      address,
+      ...(options.useNewPhysicalMachine ? { selector } : { address }),
       action,
       mode,
       [action]: spec,
@@ -190,7 +187,7 @@ export function parseSubmit<K extends ExperimentKind>(
     }
   }
 
-  if (options?.inSchedule) {
+  if (options.inSchedule) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
     const scheduleSpec = {
@@ -204,7 +201,7 @@ export function parseSubmit<K extends ExperimentKind>(
     spec = scheduleSpec as any
   }
 
-  if (!options?.inSchedule && kind === 'PhysicalMachineChaos') {
+  if (!options.inSchedule && kind === 'PhysicalMachineChaos') {
     spec = parsePhysicalMachineChaos(spec) as any
   }
 

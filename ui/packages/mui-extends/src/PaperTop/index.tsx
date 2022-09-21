@@ -31,7 +31,7 @@ const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, h1, divider, boxPr
   <Space width="100%">
     <Box {...boxProps} display="flex" justifyContent="space-between" alignItems="center">
       <Box flex={1}>
-        <Typography variant={h1 ? 'h5' : 'h6'} component={h1 ? 'h1' : 'div'} fontWeight="bold">
+        <Typography variant={h1 ? 'h5' : 'h6'} component={h1 ? 'h1' : 'div'} fontWeight={h1 ? 'bold' : undefined}>
           {title}
         </Typography>
         {subtitle && (

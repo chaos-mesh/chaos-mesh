@@ -17,7 +17,6 @@
 set -e
 
 NAMESPACES=$(kubectl get namespace | sed '1d' | awk '{print $1}')
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 CRDS="awschaos
 dnschaos
 gcpchaos
