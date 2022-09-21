@@ -48,6 +48,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
 - Fix Integration test with bumping kubectl version. [#3589](https://github.com/chaos-mesh/chaos-mesh/pull/3589)
 - Fix generate token failed on chaos dashboard [#3595](https://github.com/chaos-mesh/chaos-mesh/pull/3595)
+- Remove `limit` action of `BlockChaos` in the dashboard [#3655](https://github.com/chaos-mesh/chaos-mesh/pull/3655)
 
 ### Security
 
