@@ -6,6 +6,13 @@
 export const actions = [],
   data = [
     {
+      field: 'label',
+      label: 'containerNames',
+      value: [],
+      helperText:
+        'Optional. ContainerNames indicates list of the name of affected container. If not set, the first container will be injected',
+    },
+    {
       field: 'ref',
       label: 'failKernRequest',
       children: [
