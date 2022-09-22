@@ -241,11 +241,7 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
-        else
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
-        fi
+        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
@@ -1161,9 +1157,12 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+  - apiGroups: [ "coordination.k8s.io" ]
+    resources: [ "leases" ]
     verbs: [ "*" ]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace

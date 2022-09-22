@@ -457,7 +457,7 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type of the volume that you want to mount.
+          fsType is the filesystem type of the volume that you want to mount.
           Tip: Ensure that the filesystem type is supported by the host operating system.
           Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
@@ -466,7 +466,7 @@ definitions:
         type: string
       partition:
         description: |-
-          The partition in the volume that you want to mount.
+          partition is the partition in the volume that you want to mount.
           If omitted, the default is to mount by volume name.
           Examples: For volume /dev/sda1, you specify the partition as "1".
           Similarly, the volume partition for /dev/sda is "0" (or you can leave the property empty).
@@ -474,14 +474,13 @@ definitions:
         type: integer
       readOnly:
         description: |-
-          Specify "true" to force and set the ReadOnly property in VolumeMounts to "true".
-          If omitted, the default is "false".
+          readOnly value true will force the readOnly setting in VolumeMounts.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
           +optional
         type: boolean
       volumeID:
         description: |-
-          Unique ID of the persistent disk resource in AWS (Amazon EBS volume).
+          volumeID is unique ID of the persistent disk resource in AWS (Amazon EBS volume).
           More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
         type: string
     type: object
@@ -489,30 +488,30 @@ definitions:
     properties:
       cachingMode:
         description: |-
-          Host Caching mode: None, Read Only, Read Write.
+          cachingMode is the Host Caching mode: None, Read Only, Read Write.
           +optional
         type: string
       diskName:
-        description: The Name of the data disk in the blob storage
+        description: diskName is the Name of the data disk in the blob storage
         type: string
       diskURI:
-        description: The URI the data disk in the blob storage
+        description: diskURI is the URI of data disk in the blob storage
         type: string
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is Filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           +optional
         type: string
       kind:
-        description: 'Expected values Shared: multiple blob disks per storage account  Dedicated:
-          single blob disk per storage account  Managed: azure managed data disk (only
-          in managed availability set). defaults to shared'
+        description: 'kind expected values are Shared: multiple blob disks per storage
+          account  Dedicated: single blob disk per storage account  Managed: azure
+          managed data disk (only in managed availability set). defaults to shared'
         type: string
       readOnly:
         description: |-
-          Defaults to false (read/write). ReadOnly here will force
+          readOnly Defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
@@ -521,28 +520,28 @@ definitions:
     properties:
       readOnly:
         description: |-
-          Defaults to false (read/write). ReadOnly here will force
+          readOnly defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
       secretName:
-        description: the name of secret that contains Azure Storage Account Name and
-          Key
+        description: secretName is the  name of secret that contains Azure Storage
+          Account Name and Key
         type: string
       shareName:
-        description: Share Name
+        description: shareName is the azure share Name
         type: string
     type: object
   v1.CSIVolumeSource:
     properties:
       driver:
         description: |-
-          Driver is the name of the CSI driver that handles this volume.
+          driver is the name of the CSI driver that handles this volume.
           Consult with your admin for the correct name as registered in the cluster.
         type: string
       fsType:
         description: |-
-          Filesystem type to mount. Ex. "ext4", "xfs", "ntfs".
+          fsType to mount. Ex. "ext4", "xfs", "ntfs".
           If not provided, the empty value is passed to the associated CSI driver
           which will determine the default filesystem to apply.
           +optional
@@ -550,7 +549,7 @@ definitions:
       nodePublishSecretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          NodePublishSecretRef is a reference to the secret object containing
+          nodePublishSecretRef is a reference to the secret object containing
           sensitive information to pass to the CSI driver to complete the CSI
           NodePublishVolume and NodeUnpublishVolume calls.
           This field is optional, and  may be empty if no secret is required. If the
@@ -558,7 +557,7 @@ definitions:
           +optional
       readOnly:
         description: |-
-          Specifies a read-only configuration for the volume.
+          readOnly specifies a read-only configuration for the volume.
           Defaults to false (read/write).
           +optional
         type: boolean
@@ -566,7 +565,7 @@ definitions:
         additionalProperties:
           type: string
         description: |-
-          VolumeAttributes stores driver-specific properties that are passed to the CSI
+          volumeAttributes stores driver-specific properties that are passed to the CSI
           driver. Consult your driver's documentation for supported values.
           +optional
         type: object
@@ -592,38 +591,38 @@ definitions:
     properties:
       monitors:
         description: |-
-          Required: Monitors is a collection of Ceph monitors
+          monitors is Required: Monitors is a collection of Ceph monitors
           More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
         items:
           type: string
         type: array
       path:
         description: |-
-          Optional: Used as the mounted root, rather than the full Ceph tree, default is /
+          path is Optional: Used as the mounted root, rather than the full Ceph tree, default is /
           +optional
         type: string
       readOnly:
         description: |-
-          Optional: Defaults to false (read/write). ReadOnly here will force
+          readOnly is Optional: Defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
           +optional
         type: boolean
       secretFile:
         description: |-
-          Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret
+          secretFile is Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret
           More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
           +optional
         type: string
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          Optional: SecretRef is reference to the authentication secret for User, default is empty.
+          secretRef is Optional: SecretRef is reference to the authentication secret for User, default is empty.
           More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
           +optional
       user:
         description: |-
-          Optional: User is the rados user name, default is admin
+          user is optional: User is the rados user name, default is admin
           More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it
           +optional
         type: string
@@ -632,7 +631,7 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is the filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           More info: https://examples.k8s.io/mysql-cinder-pd/README.md
@@ -640,7 +639,7 @@ definitions:
         type: string
       readOnly:
         description: |-
-          Optional: Defaults to false (read/write). ReadOnly here will force
+          readOnly defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           More info: https://examples.k8s.io/mysql-cinder-pd/README.md
           +optional
@@ -648,12 +647,12 @@ definitions:
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          Optional: points to a secret object containing parameters used to connect
+          secretRef is optional: points to a secret object containing parameters used to connect
           to OpenStack.
           +optional
       volumeID:
         description: |-
-          volume id used to identify the volume in cinder.
+          volumeID used to identify the volume in cinder.
           More info: https://examples.k8s.io/mysql-cinder-pd/README.md
         type: string
     type: object
@@ -694,7 +693,7 @@ definitions:
     properties:
       items:
         description: |-
-          If unspecified, each key-value pair in the Data field of the referenced
+          items if unspecified, each key-value pair in the Data field of the referenced
           ConfigMap will be projected into the volume as a file whose name is the
           key and content is the value. If specified, the listed keys will be
           projected into the specified paths, and unlisted keys will not be
@@ -714,7 +713,7 @@ definitions:
         type: string
       optional:
         description: |-
-          Specify whether the ConfigMap or its keys must be defined
+          optional specify whether the ConfigMap or its keys must be defined
           +optional
         type: boolean
     type: object
@@ -722,7 +721,7 @@ definitions:
     properties:
       defaultMode:
         description: |-
-          Optional: mode bits used to set permissions on created files by default.
+          defaultMode is optional: mode bits used to set permissions on created files by default.
           Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511.
           YAML accepts both octal and decimal values, JSON requires decimal values for mode bits.
           Defaults to 0644.
@@ -733,7 +732,7 @@ definitions:
         type: integer
       items:
         description: |-
-          If unspecified, each key-value pair in the Data field of the referenced
+          items if unspecified, each key-value pair in the Data field of the referenced
           ConfigMap will be projected into the volume as a file whose name is the
           key and content is the value. If specified, the listed keys will be
           projected into the specified paths, and unlisted keys will not be
@@ -753,7 +752,7 @@ definitions:
         type: string
       optional:
         description: |-
-          Specify whether the ConfigMap or its keys must be defined
+          optional specify whether the ConfigMap or its keys must be defined
           +optional
         type: boolean
     type: object
@@ -762,7 +761,7 @@ definitions:
       args:
         description: |-
           Arguments to the entrypoint.
-          The docker image's CMD is used if this is not provided.
+          The container image's CMD is used if this is not provided.
           Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
           cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced
           to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will
@@ -776,7 +775,7 @@ definitions:
       command:
         description: |-
           Entrypoint array. Not executed within a shell.
-          The docker image's ENTRYPOINT is used if this is not provided.
+          The container image's ENTRYPOINT is used if this is not provided.
           Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
           cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced
           to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will
@@ -811,7 +810,7 @@ definitions:
         type: array
       image:
         description: |-
-          Docker image name.
+          Container image name.
           More info: https://kubernetes.io/docs/concepts/containers/images
           This field is optional to allow higher level config management to default or override
           container images in workload controllers like Deployments and StatefulSets.
@@ -1071,7 +1070,7 @@ definitions:
     properties:
       medium:
         description: |-
-          What type of storage medium should back this directory.
+          medium represents what type of storage medium should back this directory.
           The default is "" which means to use the node's default medium.
           Must be an empty string (default) or Memory.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
@@ -1080,7 +1079,7 @@ definitions:
       sizeLimit:
         $ref: '#/definitions/resource.Quantity'
         description: |-
-          Total amount of local storage required for this EmptyDir volume.
+          sizeLimit is the total amount of local storage required for this EmptyDir volume.
           The size limit is also applicable for memory medium.
           The maximum usage on memory medium EmptyDir would be the minimum value between
           the SizeLimit specified here and the sum of memory limits of all containers in a pod.
@@ -1200,7 +1199,7 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is the filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           TODO: how do we prevent errors in the filesystem from compromising the machine
@@ -1208,25 +1207,25 @@ definitions:
         type: string
       lun:
         description: |-
-          Optional: FC target lun number
+          lun is Optional: FC target lun number
           +optional
         type: integer
       readOnly:
         description: |-
-          Optional: Defaults to false (read/write). ReadOnly here will force
+          readOnly is Optional: Defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
       targetWWNs:
         description: |-
-          Optional: FC target worldwide names (WWNs)
+          targetWWNs is Optional: FC target worldwide names (WWNs)
           +optional
         items:
           type: string
         type: array
       wwids:
         description: |-
-          Optional: FC volume world wide identifiers (wwids)
+          wwids Optional: FC volume world wide identifiers (wwids)
           Either wwids or combination of targetWWNs and lun must be set, but not both simultaneously.
           +optional
         items:
@@ -1238,11 +1237,11 @@ definitions:
   v1.FlexVolumeSource:
     properties:
       driver:
-        description: Driver is the name of the driver to use for this volume.
+        description: driver is the name of the driver to use for this volume.
         type: string
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is the filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs". The default filesystem depends on FlexVolume script.
           +optional
@@ -1251,19 +1250,19 @@ definitions:
         additionalProperties:
           type: string
         description: |-
-          Optional: Extra command options if any.
+          options is Optional: this field holds extra command options if any.
           +optional
         type: object
       readOnly:
         description: |-
-          Optional: Defaults to false (read/write). ReadOnly here will force
+          readOnly is Optional: defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          Optional: SecretRef is reference to the secret object containing
+          secretRef is Optional: secretRef is reference to the secret object containing
           sensitive information to pass to the plugin scripts. This may be
           empty if no secret object is specified. If the secret object
           contains more than one secret, all secrets are passed to the plugin
@@ -1274,13 +1273,13 @@ definitions:
     properties:
       datasetName:
         description: |-
-          Name of the dataset stored as metadata -> name on the dataset for Flocker
+          datasetName is Name of the dataset stored as metadata -> name on the dataset for Flocker
           should be considered as deprecated
           +optional
         type: string
       datasetUUID:
         description: |-
-          UUID of the dataset. This is unique identifier of a Flocker dataset
+          datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset
           +optional
         type: string
     type: object
@@ -1288,7 +1287,7 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type of the volume that you want to mount.
+          fsType is filesystem type of the volume that you want to mount.
           Tip: Ensure that the filesystem type is supported by the host operating system.
           Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
@@ -1297,7 +1296,7 @@ definitions:
         type: string
       partition:
         description: |-
-          The partition in the volume that you want to mount.
+          partition is the partition in the volume that you want to mount.
           If omitted, the default is to mount by volume name.
           Examples: For volume /dev/sda1, you specify the partition as "1".
           Similarly, the volume partition for /dev/sda is "0" (or you can leave the property empty).
@@ -1306,12 +1305,12 @@ definitions:
         type: integer
       pdName:
         description: |-
-          Unique name of the PD resource in GCE. Used to identify the disk in GCE.
+          pdName is unique name of the PD resource in GCE. Used to identify the disk in GCE.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
         type: string
       readOnly:
         description: |-
-          ReadOnly here will force the ReadOnly setting in VolumeMounts.
+          readOnly here will force the ReadOnly setting in VolumeMounts.
           Defaults to false.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
           +optional
@@ -1337,18 +1336,18 @@ definitions:
     properties:
       directory:
         description: |-
-          Target directory name.
+          directory is the target directory name.
           Must not contain or start with '..'.  If '.' is supplied, the volume directory will be the
           git repository.  Otherwise, if specified, the volume will contain the git repository in
           the subdirectory with the given name.
           +optional
         type: string
       repository:
-        description: Repository URL
+        description: repository is the URL
         type: string
       revision:
         description: |-
-          Commit hash for the specified revision.
+          revision is the commit hash for the specified revision.
           +optional
         type: string
     type: object
@@ -1356,17 +1355,17 @@ definitions:
     properties:
       endpoints:
         description: |-
-          EndpointsName is the endpoint name that details Glusterfs topology.
+          endpoints is the endpoint name that details Glusterfs topology.
           More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod
         type: string
       path:
         description: |-
-          Path is the Glusterfs volume path.
+          path is the Glusterfs volume path.
           More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod
         type: string
       readOnly:
         description: |-
-          ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.
+          readOnly here will force the Glusterfs volume to be mounted with read-only permissions.
           Defaults to false.
           More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod
           +optional
@@ -1418,13 +1417,13 @@ definitions:
     properties:
       path:
         description: |-
-          Path of the directory on the host.
+          path of the directory on the host.
           If the path is a symlink, it will follow the link to the real path.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath
         type: string
       type:
         description: |-
-          Type for HostPath Volume
+          type for HostPath Volume
           Defaults to ""
           More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath
           +optional
@@ -1434,17 +1433,17 @@ definitions:
     properties:
       chapAuthDiscovery:
         description: |-
-          whether support iSCSI Discovery CHAP authentication
+          chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication
           +optional
         type: boolean
       chapAuthSession:
         description: |-
-          whether support iSCSI Session CHAP authentication
+          chapAuthSession defines whether support iSCSI Session CHAP authentication
           +optional
         type: boolean
       fsType:
         description: |-
-          Filesystem type of the volume that you want to mount.
+          fsType is the filesystem type of the volume that you want to mount.
           Tip: Ensure that the filesystem type is supported by the host operating system.
           Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi
@@ -1453,26 +1452,26 @@ definitions:
         type: string
       initiatorName:
         description: |-
-          Custom iSCSI Initiator Name.
+          initiatorName is the custom iSCSI Initiator Name.
           If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface
           <target portal>:<volume name> will be created for the connection.
           +optional
         type: string
       iqn:
-        description: Target iSCSI Qualified Name.
+        description: iqn is the target iSCSI Qualified Name.
         type: string
       iscsiInterface:
         description: |-
-          iSCSI Interface Name that uses an iSCSI transport.
+          iscsiInterface is the interface Name that uses an iSCSI transport.
           Defaults to 'default' (tcp).
           +optional
         type: string
       lun:
-        description: iSCSI Target Lun number.
+        description: lun represents iSCSI Target Lun number.
         type: integer
       portals:
         description: |-
-          iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port
+          portals is the iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port
           is other than default (typically TCP ports 860 and 3260).
           +optional
         items:
@@ -1480,29 +1479,29 @@ definitions:
         type: array
       readOnly:
         description: |-
-          ReadOnly here will force the ReadOnly setting in VolumeMounts.
+          readOnly here will force the ReadOnly setting in VolumeMounts.
           Defaults to false.
           +optional
         type: boolean
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          CHAP Secret for iSCSI target and initiator authentication
+          secretRef is the CHAP Secret for iSCSI target and initiator authentication
           +optional
       targetPortal:
         description: |-
-          iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port
+          targetPortal is iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port
           is other than default (typically TCP ports 860 and 3260).
         type: string
     type: object
   v1.KeyToPath:
     properties:
       key:
-        description: The key to project.
+        description: key is the key to project.
         type: string
       mode:
         description: |-
-          Optional: mode bits used to set permissions on this file.
+          mode is Optional: mode bits used to set permissions on this file.
           Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511.
           YAML accepts both octal and decimal values, JSON requires decimal values for mode bits.
           If not specified, the volume defaultMode will be used.
@@ -1512,7 +1511,7 @@ definitions:
         type: integer
       path:
         description: |-
-          The relative path of the file to map the key to.
+          path is the relative path of the file to map the key to.
           May not be an absolute path.
           May not contain the path element '..'.
           May not start with the string '..'.
@@ -1654,7 +1653,11 @@ definitions:
         type: string
       time:
         description: |-
-          Time is timestamp of when these fields were set. It should always be empty if Operation is 'Apply'
+          Time is the timestamp of when the ManagedFields entry was added. The
+          timestamp will also be updated if a field is added, the manager
+          changes any of the owned fields value or removes a field. The
+          timestamp does not update when a field is removed from the entry
+          because another manager took it over.
           +optional
         type: string
     type: object
@@ -1662,20 +1665,19 @@ definitions:
     properties:
       path:
         description: |-
-          Path that is exported by the NFS server.
+          path that is exported by the NFS server.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
         type: string
       readOnly:
         description: |-
-          ReadOnly here will force
-          the NFS export to be mounted with read-only permissions.
+          readOnly here will force the NFS export to be mounted with read-only permissions.
           Defaults to false.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
           +optional
         type: boolean
       server:
         description: |-
-          Server is the hostname or IP address of the NFS server.
+          server is the hostname or IP address of the NFS server.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
         type: string
     type: object
@@ -1750,6 +1752,8 @@ definitions:
           If true, AND if the owner has the "foregroundDeletion" finalizer, then
           the owner cannot be deleted from the key-value store until this
           reference is removed.
+          See https://kubernetes.io/docs/concepts/architecture/garbage-collection/#foreground-deletion
+          for how the garbage collector interacts with this field and enforces the foreground deletion.
           Defaults to false.
           To set this field, a user needs "delete" permission of the owner,
           otherwise 422 (Unprocessable Entity) will be returned.
@@ -1780,7 +1784,7 @@ definitions:
     properties:
       accessModes:
         description: |-
-          AccessModes contains the desired access modes the volume should have.
+          accessModes contains the desired access modes the volume should have.
           More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1
           +optional
         items:
@@ -1789,7 +1793,7 @@ definitions:
       dataSource:
         $ref: '#/definitions/v1.TypedLocalObjectReference'
         description: |-
-          This field can be used to specify either:
+          dataSource field can be used to specify either:
           * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)
           * An existing PVC (PersistentVolumeClaim)
           If the provisioner or an external controller can support the specified data source,
@@ -1800,7 +1804,7 @@ definitions:
       dataSourceRef:
         $ref: '#/definitions/v1.TypedLocalObjectReference'
         description: |-
-          Specifies the object from which to populate the volume with data, if a non-empty
+          dataSourceRef specifies the object from which to populate the volume with data, if a non-empty
           volume is desired. This may be any local object from a non-empty API group (non
           core object) or a PersistentVolumeClaim object.
           When this field is specified, volume binding will only succeed if the type of
@@ -1816,12 +1820,12 @@ definitions:
           * While DataSource ignores disallowed values (dropping them), DataSourceRef
             preserves all values, and generates an error if a disallowed value is
             specified.
-          (Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
+          (Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.
           +optional
       resources:
         $ref: '#/definitions/v1.ResourceRequirements'
         description: |-
-          Resources represents the minimum resources the volume should have.
+          resources represents the minimum resources the volume should have.
           If RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements
           that are lower than previous value but must still be higher than capacity recorded in the
           status field of the claim.
@@ -1830,11 +1834,11 @@ definitions:
       selector:
         $ref: '#/definitions/v1.LabelSelector'
         description: |-
-          A label query over volumes to consider for binding.
+          selector is a label query over volumes to consider for binding.
           +optional
       storageClassName:
         description: |-
-          Name of the StorageClass required by the claim.
+          storageClassName is the name of the StorageClass required by the claim.
           More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
           +optional
         type: string
@@ -1846,7 +1850,7 @@ definitions:
         type: string
       volumeName:
         description: |-
-          VolumeName is the binding reference to the PersistentVolume backing this claim.
+          volumeName is the binding reference to the PersistentVolume backing this claim.
           +optional
         type: string
     type: object
@@ -1864,9 +1868,12 @@ definitions:
         type: object
       clusterName:
         description: |-
-          The name of the cluster which the object belongs to.
-          This is used to distinguish resources with same name and namespace in different clusters.
-          This field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.
+          Deprecated: ClusterName is a legacy field that was always cleared by
+          the system and never used; it will be removed completely in 1.25.
+
+          The name in the go struct is changed to help clients detect
+          accidental use.
+
           +optional
         type: string
       creationTimestamp:
@@ -1941,10 +1948,7 @@ definitions:
           and may be truncated by the length of the suffix required to make the value
           unique on the server.
 
-          If this field is specified and the generated name exists, the server will
-          NOT return a 409 - instead, it will either return 201 Created or 500 with Reason
-          ServerTimeout indicating a unique name could not be found in the time allotted, and the client
-          should retry (optionally after the time indicated in the Retry-After header).
+          If this field is specified and the generated name exists, the server will return a 409.
 
           Applied only if Name is not specified.
           More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency
@@ -2030,13 +2034,7 @@ definitions:
         type: string
       selfLink:
         description: |-
-          SelfLink is a URL representing this object.
-          Populated by the system.
-          Read-only.
-
-          DEPRECATED
-          Kubernetes will stop propagating this field in 1.20 release and the field is planned
-          to be removed in 1.21 release.
+          Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.
           +optional
         type: string
       spec:
@@ -2062,12 +2060,12 @@ definitions:
     properties:
       claimName:
         description: |-
-          ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.
+          claimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.
           More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
         type: string
       readOnly:
         description: |-
-          Will force the ReadOnly setting in VolumeMounts.
+          readOnly Will force the ReadOnly setting in VolumeMounts.
           Default false.
           +optional
         type: boolean
@@ -2076,30 +2074,30 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is the filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
         type: string
       pdID:
-        description: ID that identifies Photon Controller persistent disk
+        description: pdID is the ID that identifies Photon Controller persistent disk
         type: string
     type: object
   v1.PortworxVolumeSource:
     properties:
       fsType:
         description: |-
-          FSType represents the filesystem type to mount
+          fSType represents the filesystem type to mount
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs". Implicitly inferred to be "ext4" if unspecified.
         type: string
       readOnly:
         description: |-
-          Defaults to false (read/write). ReadOnly here will force
+          readOnly defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
       volumeID:
-        description: VolumeID uniquely identifies a Portworx volume
+        description: volumeID uniquely identifies a Portworx volume
         type: string
     type: object
   v1.Probe:
@@ -2119,7 +2117,7 @@ definitions:
         $ref: '#/definitions/v1.GRPCAction'
         description: |-
           GRPC specifies an action involving a GRPC port.
-          This is an alpha field and requires enabling GRPCContainerProbe feature gate.
+          This is a beta field and requires enabling GRPCContainerProbe feature gate.
           +featureGate=GRPCContainerProbe
           +optional
       httpGet:
@@ -2176,7 +2174,7 @@ definitions:
     properties:
       defaultMode:
         description: |-
-          Mode bits used to set permissions on created files by default.
+          defaultMode are the mode bits used to set permissions on created files by default.
           Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511.
           YAML accepts both octal and decimal values, JSON requires decimal values for mode bits.
           Directories within the path are not affected by this setting.
@@ -2186,7 +2184,7 @@ definitions:
         type: integer
       sources:
         description: |-
-          list of volume projections
+          sources is the list of volume projections
           +optional
         items:
           $ref: '#/definitions/v1.VolumeProjection'
@@ -2196,36 +2194,36 @@ definitions:
     properties:
       group:
         description: |-
-          Group to map volume access to
+          group to map volume access to
           Default is no group
           +optional
         type: string
       readOnly:
         description: |-
-          ReadOnly here will force the Quobyte volume to be mounted with read-only permissions.
+          readOnly here will force the Quobyte volume to be mounted with read-only permissions.
           Defaults to false.
           +optional
         type: boolean
       registry:
         description: |-
-          Registry represents a single or multiple Quobyte Registry services
+          registry represents a single or multiple Quobyte Registry services
           specified as a string as host:port pair (multiple entries are separated with commas)
           which acts as the central registry for volumes
         type: string
       tenant:
         description: |-
-          Tenant owning the given Quobyte volume in the Backend
+          tenant owning the given Quobyte volume in the Backend
           Used with dynamically provisioned Quobyte volumes, value is set by the plugin
           +optional
         type: string
       user:
         description: |-
-          User to map volume access to
+          user to map volume access to
           Defaults to serivceaccount user
           +optional
         type: string
       volume:
-        description: Volume is a string that references an already created Quobyte
+        description: volume is a string that references an already created Quobyte
           volume by name.
         type: string
     type: object
@@ -2233,7 +2231,7 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type of the volume that you want to mount.
+          fsType is the filesystem type of the volume that you want to mount.
           Tip: Ensure that the filesystem type is supported by the host operating system.
           Examples: "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd
@@ -2242,33 +2240,33 @@ definitions:
         type: string
       image:
         description: |-
-          The rados image name.
+          image is the rados image name.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
         type: string
       keyring:
         description: |-
-          Keyring is the path to key ring for RBDUser.
+          keyring is the path to key ring for RBDUser.
           Default is /etc/ceph/keyring.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
           +optional
         type: string
       monitors:
         description: |-
-          A collection of Ceph monitors.
+          monitors is a collection of Ceph monitors.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
         items:
           type: string
         type: array
       pool:
         description: |-
-          The rados pool name.
+          pool is the rados pool name.
           Default is rbd.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
           +optional
         type: string
       readOnly:
         description: |-
-          ReadOnly here will force the ReadOnly setting in VolumeMounts.
+          readOnly here will force the ReadOnly setting in VolumeMounts.
           Defaults to false.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
           +optional
@@ -2276,14 +2274,14 @@ definitions:
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          SecretRef is name of the authentication secret for RBDUser. If provided
+          secretRef is name of the authentication secret for RBDUser. If provided
           overrides keyring.
           Default is nil.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
           +optional
       user:
         description: |-
-          The rados user name.
+          user is the rados user name.
           Default is admin.
           More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it
           +optional
@@ -2353,53 +2351,53 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is the filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs".
           Default is "xfs".
           +optional
         type: string
       gateway:
-        description: The host address of the ScaleIO API Gateway.
+        description: gateway is the host address of the ScaleIO API Gateway.
         type: string
       protectionDomain:
         description: |-
-          The name of the ScaleIO Protection Domain for the configured storage.
+          protectionDomain is the name of the ScaleIO Protection Domain for the configured storage.
           +optional
         type: string
       readOnly:
         description: |-
-          Defaults to false (read/write). ReadOnly here will force
+          readOnly Defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          SecretRef references to the secret for ScaleIO user and other
+          secretRef references to the secret for ScaleIO user and other
           sensitive information. If this is not provided, Login operation will fail.
       sslEnabled:
         description: |-
-          Flag to enable/disable SSL communication with Gateway, default false
+          sslEnabled Flag enable/disable SSL communication with Gateway, default false
           +optional
         type: boolean
       storageMode:
         description: |-
-          Indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.
+          storageMode indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.
           Default is ThinProvisioned.
           +optional
         type: string
       storagePool:
         description: |-
-          The ScaleIO Storage Pool associated with the protection domain.
+          storagePool is the ScaleIO Storage Pool associated with the protection domain.
           +optional
         type: string
       system:
-        description: The name of the storage system as configured in ScaleIO.
+        description: system is the name of the storage system as configured in ScaleIO.
         type: string
       volumeName:
         description: |-
-          The name of a volume already created in the ScaleIO system
+          volumeName is the name of a volume already created in the ScaleIO system
           that is associated with this volume source.
         type: string
     type: object
@@ -2462,7 +2460,7 @@ definitions:
     properties:
       items:
         description: |-
-          If unspecified, each key-value pair in the Data field of the referenced
+          items if unspecified, each key-value pair in the Data field of the referenced
           Secret will be projected into the volume as a file whose name is the
           key and content is the value. If specified, the listed keys will be
           projected into the specified paths, and unlisted keys will not be
@@ -2482,7 +2480,7 @@ definitions:
         type: string
       optional:
         description: |-
-          Specify whether the Secret or its key must be defined
+          optional field specify whether the Secret or its key must be defined
           +optional
         type: boolean
     type: object
@@ -2490,7 +2488,7 @@ definitions:
     properties:
       defaultMode:
         description: |-
-          Optional: mode bits used to set permissions on created files by default.
+          defaultMode is Optional: mode bits used to set permissions on created files by default.
           Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511.
           YAML accepts both octal and decimal values, JSON requires decimal values
           for mode bits. Defaults to 0644.
@@ -2501,7 +2499,7 @@ definitions:
         type: integer
       items:
         description: |-
-          If unspecified, each key-value pair in the Data field of the referenced
+          items If unspecified, each key-value pair in the Data field of the referenced
           Secret will be projected into the volume as a file whose name is the
           key and content is the value. If specified, the listed keys will be
           projected into the specified paths, and unlisted keys will not be
@@ -2514,12 +2512,12 @@ definitions:
         type: array
       optional:
         description: |-
-          Specify whether the Secret or its keys must be defined
+          optional field specify whether the Secret or its keys must be defined
           +optional
         type: boolean
       secretName:
         description: |-
-          Name of the secret in the pod's namespace to use.
+          secretName is the name of the secret in the pod's namespace to use.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
           +optional
         type: string
@@ -2626,7 +2624,7 @@ definitions:
     properties:
       audience:
         description: |-
-          Audience is the intended audience of the token. A recipient of a token
+          audience is the intended audience of the token. A recipient of a token
           must identify itself with an identifier specified in the audience of the
           token, and otherwise should reject the token. The audience defaults to the
           identifier of the apiserver.
@@ -2634,7 +2632,7 @@ definitions:
         type: string
       expirationSeconds:
         description: |-
-          ExpirationSeconds is the requested duration of validity of the service
+          expirationSeconds is the requested duration of validity of the service
           account token. As the token approaches expiration, the kubelet volume
           plugin will proactively rotate the service account token. The kubelet will
           start trying to rotate the token if the token is older than 80 percent of
@@ -2644,7 +2642,7 @@ definitions:
         type: integer
       path:
         description: |-
-          Path is the path relative to the mount point of the file to project the
+          path is the path relative to the mount point of the file to project the
           token into.
         type: string
     type: object
@@ -2652,31 +2650,31 @@ definitions:
     properties:
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is the filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           +optional
         type: string
       readOnly:
         description: |-
-          Defaults to false (read/write). ReadOnly here will force
+          readOnly defaults to false (read/write). ReadOnly here will force
           the ReadOnly setting in VolumeMounts.
           +optional
         type: boolean
       secretRef:
         $ref: '#/definitions/v1.LocalObjectReference'
         description: |-
-          SecretRef specifies the secret to use for obtaining the StorageOS API
+          secretRef specifies the secret to use for obtaining the StorageOS API
           credentials.  If not specified, default values will be attempted.
           +optional
       volumeName:
         description: |-
-          VolumeName is the human-readable name of the StorageOS volume.  Volume
+          volumeName is the human-readable name of the StorageOS volume.  Volume
           names are only unique within a namespace.
         type: string
       volumeNamespace:
         description: |-
-          VolumeNamespace specifies the scope of the volume within StorageOS.  If no
+          volumeNamespace specifies the scope of the volume within StorageOS.  If no
           namespace is specified then the Pod's namespace will be used.  This allows the
           Kubernetes name scoping to be mirrored within StorageOS for tighter integration.
           Set VolumeName to any name to override the default behaviour.
@@ -2720,56 +2718,56 @@ definitions:
       awsElasticBlockStore:
         $ref: '#/definitions/v1.AWSElasticBlockStoreVolumeSource'
         description: |-
-          AWSElasticBlockStore represents an AWS Disk resource that is attached to a
+          awsElasticBlockStore represents an AWS Disk resource that is attached to a
           kubelet's host machine and then exposed to the pod.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
           +optional
       azureDisk:
         $ref: '#/definitions/v1.AzureDiskVolumeSource'
         description: |-
-          AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.
+          azureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.
           +optional
       azureFile:
         $ref: '#/definitions/v1.AzureFileVolumeSource'
         description: |-
-          AzureFile represents an Azure File Service mount on the host and bind mount to the pod.
+          azureFile represents an Azure File Service mount on the host and bind mount to the pod.
           +optional
       cephfs:
         $ref: '#/definitions/v1.CephFSVolumeSource'
         description: |-
-          CephFS represents a Ceph FS mount on the host that shares a pod's lifetime
+          cephFS represents a Ceph FS mount on the host that shares a pod's lifetime
           +optional
       cinder:
         $ref: '#/definitions/v1.CinderVolumeSource'
         description: |-
-          Cinder represents a cinder volume attached and mounted on kubelets host machine.
+          cinder represents a cinder volume attached and mounted on kubelets host machine.
           More info: https://examples.k8s.io/mysql-cinder-pd/README.md
           +optional
       configMap:
         $ref: '#/definitions/v1.ConfigMapVolumeSource'
         description: |-
-          ConfigMap represents a configMap that should populate this volume
+          configMap represents a configMap that should populate this volume
           +optional
       csi:
         $ref: '#/definitions/v1.CSIVolumeSource'
         description: |-
-          CSI (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers (Beta feature).
+          csi (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers (Beta feature).
           +optional
       downwardAPI:
         $ref: '#/definitions/v1.DownwardAPIVolumeSource'
         description: |-
-          DownwardAPI represents downward API about the pod that should populate this volume
+          downwardAPI represents downward API about the pod that should populate this volume
           +optional
       emptyDir:
         $ref: '#/definitions/v1.EmptyDirVolumeSource'
         description: |-
-          EmptyDir represents a temporary directory that shares a pod's lifetime.
+          emptyDir represents a temporary directory that shares a pod's lifetime.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir
           +optional
       ephemeral:
         $ref: '#/definitions/v1.EphemeralVolumeSource'
         description: |-
-          Ephemeral represents a volume that is handled by a cluster storage driver.
+          ephemeral represents a volume that is handled by a cluster storage driver.
           The volume's lifecycle is tied to the pod that defines it - it will be created before the pod starts,
           and deleted when the pod is removed.
 
@@ -2798,30 +2796,30 @@ definitions:
       fc:
         $ref: '#/definitions/v1.FCVolumeSource'
         description: |-
-          FC represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to the pod.
+          fc represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to the pod.
           +optional
       flexVolume:
         $ref: '#/definitions/v1.FlexVolumeSource'
         description: |-
-          FlexVolume represents a generic volume resource that is
+          flexVolume represents a generic volume resource that is
           provisioned/attached using an exec based plugin.
           +optional
       flocker:
         $ref: '#/definitions/v1.FlockerVolumeSource'
         description: |-
-          Flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running
+          flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running
           +optional
       gcePersistentDisk:
         $ref: '#/definitions/v1.GCEPersistentDiskVolumeSource'
         description: |-
-          GCEPersistentDisk represents a GCE Disk resource that is attached to a
+          gcePersistentDisk represents a GCE Disk resource that is attached to a
           kubelet's host machine and then exposed to the pod.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk
           +optional
       gitRepo:
         $ref: '#/definitions/v1.GitRepoVolumeSource'
         description: |-
-          GitRepo represents a git repository at a particular revision.
+          gitRepo represents a git repository at a particular revision.
           DEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an
           EmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir
           into the Pod's container.
@@ -2829,13 +2827,13 @@ definitions:
       glusterfs:
         $ref: '#/definitions/v1.GlusterfsVolumeSource'
         description: |-
-          Glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.
+          glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.
           More info: https://examples.k8s.io/volumes/glusterfs/README.md
           +optional
       hostPath:
         $ref: '#/definitions/v1.HostPathVolumeSource'
         description: |-
-          HostPath represents a pre-existing file or directory on the host
+          hostPath represents a pre-existing file or directory on the host
           machine that is directly exposed to the container. This is generally
           used for system agents or other privileged things that are allowed
           to see the host machine. Most containers will NOT need this.
@@ -2847,73 +2845,73 @@ definitions:
       iscsi:
         $ref: '#/definitions/v1.ISCSIVolumeSource'
         description: |-
-          ISCSI represents an ISCSI Disk resource that is attached to a
+          iscsi represents an ISCSI Disk resource that is attached to a
           kubelet's host machine and then exposed to the pod.
           More info: https://examples.k8s.io/volumes/iscsi/README.md
           +optional
       name:
         description: |-
-          Volume's name.
+          name of the volume.
           Must be a DNS_LABEL and unique within the pod.
           More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
         type: string
       nfs:
         $ref: '#/definitions/v1.NFSVolumeSource'
         description: |-
-          NFS represents an NFS mount on the host that shares a pod's lifetime
+          nfs represents an NFS mount on the host that shares a pod's lifetime
           More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
           +optional
       persistentVolumeClaim:
         $ref: '#/definitions/v1.PersistentVolumeClaimVolumeSource'
         description: |-
-          PersistentVolumeClaimVolumeSource represents a reference to a
+          persistentVolumeClaimVolumeSource represents a reference to a
           PersistentVolumeClaim in the same namespace.
           More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
           +optional
       photonPersistentDisk:
         $ref: '#/definitions/v1.PhotonPersistentDiskVolumeSource'
-        description: PhotonPersistentDisk represents a PhotonController persistent
+        description: photonPersistentDisk represents a PhotonController persistent
           disk attached and mounted on kubelets host machine
       portworxVolume:
         $ref: '#/definitions/v1.PortworxVolumeSource'
         description: |-
-          PortworxVolume represents a portworx volume attached and mounted on kubelets host machine
+          portworxVolume represents a portworx volume attached and mounted on kubelets host machine
           +optional
       projected:
         $ref: '#/definitions/v1.ProjectedVolumeSource'
-        description: Items for all in one resources secrets, configmaps, and downward
-          API
+        description: projected items for all in one resources secrets, configmaps,
+          and downward API
       quobyte:
         $ref: '#/definitions/v1.QuobyteVolumeSource'
         description: |-
-          Quobyte represents a Quobyte mount on the host that shares a pod's lifetime
+          quobyte represents a Quobyte mount on the host that shares a pod's lifetime
           +optional
       rbd:
         $ref: '#/definitions/v1.RBDVolumeSource'
         description: |-
-          RBD represents a Rados Block Device mount on the host that shares a pod's lifetime.
+          rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.
           More info: https://examples.k8s.io/volumes/rbd/README.md
           +optional
       scaleIO:
         $ref: '#/definitions/v1.ScaleIOVolumeSource'
         description: |-
-          ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
+          scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.
           +optional
       secret:
         $ref: '#/definitions/v1.SecretVolumeSource'
         description: |-
-          Secret represents a secret that should populate this volume.
+          secret represents a secret that should populate this volume.
           More info: https://kubernetes.io/docs/concepts/storage/volumes#secret
           +optional
       storageos:
         $ref: '#/definitions/v1.StorageOSVolumeSource'
         description: |-
-          StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.
+          storageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.
           +optional
       vsphereVolume:
         $ref: '#/definitions/v1.VsphereVirtualDiskVolumeSource'
         description: |-
-          VsphereVolume represents a vSphere volume attached and mounted on kubelets host machine
+          vsphereVolume represents a vSphere volume attached and mounted on kubelets host machine
           +optional
     type: object
   v1.VolumeDevice:
@@ -2970,45 +2968,45 @@ definitions:
       configMap:
         $ref: '#/definitions/v1.ConfigMapProjection'
         description: |-
-          information about the configMap data to project
+          configMap information about the configMap data to project
           +optional
       downwardAPI:
         $ref: '#/definitions/v1.DownwardAPIProjection'
         description: |-
-          information about the downwardAPI data to project
+          downwardAPI information about the downwardAPI data to project
           +optional
       secret:
         $ref: '#/definitions/v1.SecretProjection'
         description: |-
-          information about the secret data to project
+          secret information about the secret data to project
           +optional
       serviceAccountToken:
         $ref: '#/definitions/v1.ServiceAccountTokenProjection'
         description: |-
-          information about the serviceAccountToken data to project
+          serviceAccountToken is information about the serviceAccountToken data to project
           +optional
     type: object
   v1.VsphereVirtualDiskVolumeSource:
     properties:
       fsType:
         description: |-
-          Filesystem type to mount.
+          fsType is filesystem type to mount.
           Must be a filesystem type supported by the host operating system.
           Ex. "ext4", "xfs", "ntfs". Implicitly inferred to be "ext4" if unspecified.
           +optional
         type: string
       storagePolicyID:
         description: |-
-          Storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.
+          storagePolicyID is the storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.
           +optional
         type: string
       storagePolicyName:
         description: |-
-          Storage Policy Based Management (SPBM) profile name.
+          storagePolicyName is the storage Policy Based Management (SPBM) profile name.
           +optional
         type: string
       volumePath:
-        description: Path that identifies vSphere volume vmdk
+        description: volumePath is the path that identifies vSphere volume vmdk
         type: string
     type: object
   v1.WindowsSecurityContextOptions:
@@ -4705,7 +4703,7 @@ definitions:
   v1alpha1.PhysicalMachineChaosSpec:
     properties:
       action:
-        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined;
+        description: +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined
         type: string
       address:
         description: |-
@@ -5348,9 +5346,12 @@ definitions:
         type: string
       clusterName:
         description: |-
-          The name of the cluster which the object belongs to.
-          This is used to distinguish resources with same name and namespace in different clusters.
-          This field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.
+          Deprecated: ClusterName is a legacy field that was always cleared by
+          the system and never used; it will be removed completely in 1.25.
+
+          The name in the go struct is changed to help clients detect
+          accidental use.
+
           +optional
         type: string
       creationTimestamp:
@@ -5425,10 +5426,7 @@ definitions:
           and may be truncated by the length of the suffix required to make the value
           unique on the server.
 
-          If this field is specified and the generated name exists, the server will
-          NOT return a 409 - instead, it will either return 201 Created or 500 with Reason
-          ServerTimeout indicating a unique name could not be found in the time allotted, and the client
-          should retry (optionally after the time indicated in the Retry-After header).
+          If this field is specified and the generated name exists, the server will return a 409.
 
           Applied only if Name is not specified.
           More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency
@@ -5523,13 +5521,7 @@ definitions:
         type: string
       selfLink:
         description: |-
-          SelfLink is a URL representing this object.
-          Populated by the system.
-          Read-only.
-
-          DEPRECATED
-          Kubernetes will stop propagating this field in 1.20 release and the field is planned
-          to be removed in 1.21 release.
+          Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.
           +optional
         type: string
       spec:
@@ -6062,9 +6054,12 @@ definitions:
         type: string
       clusterName:
         description: |-
-          The name of the cluster which the object belongs to.
-          This is used to distinguish resources with same name and namespace in different clusters.
-          This field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.
+          Deprecated: ClusterName is a legacy field that was always cleared by
+          the system and never used; it will be removed completely in 1.25.
+
+          The name in the go struct is changed to help clients detect
+          accidental use.
+
           +optional
         type: string
       creationTimestamp:
@@ -6139,10 +6134,7 @@ definitions:
           and may be truncated by the length of the suffix required to make the value
           unique on the server.
 
-          If this field is specified and the generated name exists, the server will
-          NOT return a 409 - instead, it will either return 201 Created or 500 with Reason
-          ServerTimeout indicating a unique name could not be found in the time allotted, and the client
-          should retry (optionally after the time indicated in the Retry-After header).
+          If this field is specified and the generated name exists, the server will return a 409.
 
           Applied only if Name is not specified.
           More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency
@@ -6237,13 +6229,7 @@ definitions:
         type: string
       selfLink:
         description: |-
-          SelfLink is a URL representing this object.
-          Populated by the system.
-          Read-only.
-
-          DEPRECATED
-          Kubernetes will stop propagating this field in 1.20 release and the field is planned
-          to be removed in 1.21 release.
+          Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.
           +optional
         type: string
       spec:
