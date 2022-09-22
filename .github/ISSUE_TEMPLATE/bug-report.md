@@ -1,6 +1,6 @@
 ---
 name: "\U0001F41B Bug Report"
-about: Something isn't working as expected
+about: Something NOT works as expected, and I could provide the Minimal Reproducible Example.
 
 ---
 
@@ -12,7 +12,7 @@ about: Something isn't working as expected
 **What version of Chaos Mesh are you using?**
 <!-- You can run `kubectl exec -n chaos-mesh {chaos-controller-manager-pod-name} -- /usr/local/bin/chaos-controller-manager -version` -->
 
-**What did you do?**
+**What did you do? / Minimal Reproducible Example**
 <!-- If possible, provide a recipe for reproducing the error. How you installed chaos-mesh. -->
 
 **What did you expect to see?**
