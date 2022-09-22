@@ -38,6 +38,8 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+      securityContext:
+{{ toYaml .Values.dashboard.securityContext | indent 12 }}
       {{- if .Values.dashboard.hostNetwork }}
       hostNetwork: true
       {{- end }}
