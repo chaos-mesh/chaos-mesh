@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+- name: 🤔 Ask a question
+  url: https://github.com/chaos-mesh/chaos-mesh/discussions/new?category=q-a
+  about: Chaos Mesh not works as expected? Or not sure about how to use Chaos Mesh? Ask a question here!
