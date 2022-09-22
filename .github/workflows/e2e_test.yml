@@ -105,9 +105,9 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes-version:
-          - v1.15.12
           - v1.20.15
           - v1.23.4
+          - v1.25.1
         focus:
           - '[Graceful-Shutdown] [IOChaos]'
           - '[Graceful-Shutdown] [HTTPChaos]'
@@ -143,9 +143,9 @@ jobs:
         uses: manusa/actions-setup-minikube@v2.4.3
         with:
           driver: docker
-          minikube version: v1.24.0
+          minikube version: v1.27.0
           kubernetes version: ${{ matrix.kubernetes-version }}
-          start args: --cni flannel
+          start args: --cni calico
           github token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: load image into minikube
@@ -160,13 +160,7 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          # if kubernetes does not support apiextensions.k8s.io/v1, fallback to apiextensions.k8s.io/v1beta1
-          if kubectl api-resources | grep -w apiextensions.k8s.io/v1; then
-            helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dnsServer.create=true --set dashboard.create=true --set images.tag=latest
-          else
-            kubectl create --validate=false -f ./manifests/crd-v1beta1.yaml && \
-            helm install --skip-crds --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dnsServer.create=true --set dashboard.create=true --set images.tag=latest
-          fi
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dnsServer.create=true --set dashboard.create=true --set images.tag=latest
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
