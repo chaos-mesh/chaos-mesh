@@ -28,7 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Remove the explicit use of pingcap/log [#3674](https://github.com/chaos-mesh/chaos-mesh/pull/3674)
 
 ### Security
 
