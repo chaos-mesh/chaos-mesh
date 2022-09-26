@@ -155,11 +155,8 @@ func (oa *operatorAction) UpgradeOperator(info *OperatorConfig) error {
 
 func (oa *operatorAction) InstallCRD(info *OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
-	if oa.apiextensionsV1Available() {
-		oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
-	} else {
-		oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd-v1beta1.yaml"), "--validate=false")
-	}
+	oa.runKubectlOrDie("create", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
+
 	e2eutil.WaitForCRDsEstablished(oa.apiExtCli, labels.Everything())
 	// workaround for https://github.com/kubernetes/kubernetes/issues/65517
 	klog.Infof("force sync kubectl cache")
@@ -223,16 +220,6 @@ func (oa *operatorAction) restartComponent(info *OperatorConfig, prefix string) 
 		return err
 	}
 	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
-}
-
-// check apiextensions.k8s.io/v1 CustomResourceDefinition is Availabel or not
-func (oa *operatorAction) apiextensionsV1Available() bool {
-	for _, item := range oa.apiVersions() {
-		if item == "apiextensions.k8s.io/v1" {
-			return true
-		}
-	}
-	return false
 }
 
 func (oa *operatorAction) CleanCRDOrDie() {
