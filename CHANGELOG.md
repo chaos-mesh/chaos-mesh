@@ -13,6 +13,31 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `controller.securityContext` and `dashboard.securityContext` to Helm chart [#3603](https://github.com/chaos-mesh/chaos-mesh/pull/3603)
 - Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.4.0] - 2022-09-23
+
+### Added
+
 - Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
 
 ### Changed
@@ -44,7 +69,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
 - fix NetworkChaos fail with @ifXX in the device [#3605](https://github.com/chaos-mesh/chaos-mesh/pull/3605)
 - Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
-- Fix BlockChaos can't show Chinese name.  [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Fix BlockChaos can't show Chinese name. [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
 - Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
 - Fix "sidecar config" e2e test cases run failed in some scenario.[#3564](https://github.com/chaos-mesh/chaos-mesh/pull/3564)
 - Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
@@ -77,7 +102,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support `KernelChaos` in `AutoForm` [#3449](https://github.com/chaos-mesh/chaos-mesh/pull/3449)
 - Sync latest Chaosd and PhysicalMachineChaos [#3477](https://github.com/chaos-mesh/chaos-mesh/pull/3477)
 - Add accept-tcp-flag to network delay in PysicalMachineChaos [#3588](https://github.com/chaos-mesh/chaos-mesh/pull/3588)
-
 
 ### Changed
 
