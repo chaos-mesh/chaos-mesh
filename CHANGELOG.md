@@ -302,7 +302,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Nothing
 
-## [v2.1.8] - 2020-08-30
+## [v2.1.8] - 2022-08-30
 
 ### Added
 
