@@ -84,12 +84,12 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 			source := fmt.Sprintf("%s/lib/%s", bytemanHome, jar)
 			dest := fmt.Sprintf("/usr/local/byteman/lib/%s", jar)
 
-			err = copyFileAcrossNS(ctx, source, dest, pid)
+			output, err = copyFileAcrossNS(ctx, source, dest, pid)
 			if err != nil {
 				return nil, err
 			}
 
-			log.Info("copy", jar, "from source:", source, "to destination:", dest)
+			log.Info("copy", jar, "from source:", source, "to destination:", dest, "output:", string(output))
 		}
 	}
 
@@ -214,19 +214,19 @@ func writeDataIntoFile(data string, filename string) (string, error) {
 	return tmpfile.Name(), err
 }
 
-func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) error {
+func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) ([]byte, error) {
 	sourceFile, err := os.Open(source)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer sourceFile.Close()
 
 	processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cat > %s", dest)).SetContext(ctx)
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(sourceFile)
-	_, err = processBuilder.Build(ctx).CombinedOutput()
+	output, err := processBuilder.Build(ctx).CombinedOutput()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return output, nil
 }
