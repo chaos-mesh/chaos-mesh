@@ -73,6 +73,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Nothing
 
+## [2.3.2] - 2022-09-20
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Use int64 to restore latency for BlockChaos [#3638](https://github.com/chaos-mesh/chaos-mesh/pull/3638)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix: update helm chart annotation artifacthub.io/prerelease to false [#3626](https://github.com/chaos-mesh/chaos-mesh/pull/3626)
+
+### Security
+
+- Nothing
+
 ## [2.3.1] - 2022-09-02
 
 ### Added
