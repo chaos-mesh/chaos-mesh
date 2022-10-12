@@ -34,11 +34,9 @@ import { LabelField, SelectField, TextField } from 'components/FormField'
 import MoreOptions from 'components/MoreOptions'
 import { Fields as ScheduleSpecificFields, data as scheduleSpecificData } from 'components/Schedule/types'
 import Scope from 'components/Scope'
-import Mode from 'components/Scope/Mode'
 import i18n from 'components/T'
 
 import basicData, { schema as basicSchema } from './data/basic'
-import Nodes from './form/Nodes'
 import Scheduler from './form/Scheduler'
 
 interface Step2Props {
@@ -125,26 +123,17 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
               <Grid container spacing={6}>
                 <Grid item xs={6}>
                   <Space>
-                    <Typography>{i18n('newE.steps.scope')}</Typography>
-                    {env === 'k8s' ? (
-                      namespaces.length ? (
-                        <Scope kind={kind} namespaces={namespaces} scope="spec.selector" modeScope="spec" />
-                      ) : (
-                        <SkeletonN n={6} />
-                      )
+                    <Typography fontWeight={500}>{i18n('newE.steps.scope')}</Typography>
+                    {namespaces.length ? (
+                      <Scope env={env} kind={kind} namespaces={namespaces} scope="spec.selector" modeScope="spec" />
                     ) : (
-                      <>
-                        <Nodes />
-                        <Divider />
-                        <Typography>{i18n('newE.scope.mode')}</Typography>
-                        <Mode modeScope={'spec'} scope={'spec.selector'} />
-                      </>
+                      <SkeletonN n={6} />
                     )}
                   </Space>
                 </Grid>
                 <Grid item xs={6}>
                   <Space>
-                    <Typography>{i18n('newE.steps.basic')}</Typography>
+                    <Typography fontWeight={500}>{i18n('newE.steps.basic')}</Typography>
                     <TextField
                       fast
                       name="metadata.name"

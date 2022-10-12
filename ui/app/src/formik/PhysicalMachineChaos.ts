@@ -16,6 +16,8 @@ export const actions = [
     'network-partition',
     'network-dns',
     'network-bandwidth',
+    'network-flood',
+    'network-down',
     'process',
     'jvm-exception',
     'jvm-gc',
@@ -23,7 +25,24 @@ export const actions = [
     'jvm-return',
     'jvm-stress',
     'jvm-rule-data',
+    'jvm-mysql',
     'clock',
+    'redis-expiration',
+    'redis-penetration',
+    'redis-cacheLimit',
+    'redis-restart',
+    'redis-stop',
+    'kafka-fill',
+    'kafka-flood',
+    'kafka-io',
+    'file-create',
+    'file-modify',
+    'file-delete',
+    'file-rename',
+    'file-append',
+    'file-replace',
+    'vm',
+    'user_defined',
   ],
   data = [
     {
@@ -142,6 +161,271 @@ export const actions = [
     },
     {
       field: 'ref',
+      label: 'file-append',
+      children: [
+        {
+          field: 'number',
+          label: 'count',
+          value: 0,
+          helperText: 'Count is the number of times to append the data.',
+        },
+        {
+          field: 'text',
+          label: 'data',
+          value: '',
+          helperText: 'Data is the data for append.',
+        },
+        {
+          field: 'text',
+          label: 'file-name',
+          value: '',
+          helperText: 'FileName is the name of the file to be created, modified, deleted, renamed, or appended.',
+        },
+      ],
+      when: "action=='file-append'",
+    },
+    {
+      field: 'ref',
+      label: 'file-create',
+      children: [
+        {
+          field: 'text',
+          label: 'dir-name',
+          value: '',
+          helperText: 'DirName is the directory name to create or delete.',
+        },
+        {
+          field: 'text',
+          label: 'file-name',
+          value: '',
+          helperText: 'FileName is the name of the file to be created, modified, deleted, renamed, or appended.',
+        },
+      ],
+      when: "action=='file-create'",
+    },
+    {
+      field: 'ref',
+      label: 'file-delete',
+      children: [
+        {
+          field: 'text',
+          label: 'dir-name',
+          value: '',
+          helperText: 'DirName is the directory name to create or delete.',
+        },
+        {
+          field: 'text',
+          label: 'file-name',
+          value: '',
+          helperText: 'FileName is the name of the file to be created, modified, deleted, renamed, or appended.',
+        },
+      ],
+      when: "action=='file-delete'",
+    },
+    {
+      field: 'ref',
+      label: 'file-modify',
+      children: [
+        {
+          field: 'text',
+          label: 'file-name',
+          value: '',
+          helperText: 'FileName is the name of the file to be created, modified, deleted, renamed, or appended.',
+        },
+        {
+          field: 'number',
+          label: 'privilege',
+          value: 0,
+          helperText: 'Privilege is the file privilege to be set.',
+        },
+      ],
+      when: "action=='file-modify'",
+    },
+    {
+      field: 'ref',
+      label: 'file-rename',
+      children: [
+        {
+          field: 'text',
+          label: 'dest-file',
+          value: '',
+          helperText: 'DestFile is the name to be renamed.',
+        },
+        {
+          field: 'text',
+          label: 'source-file',
+          value: '',
+          helperText: 'SourceFile is the name need to be renamed.',
+        },
+      ],
+      when: "action=='file-create'",
+    },
+    {
+      field: 'ref',
+      label: 'file-replace',
+      children: [
+        {
+          field: 'text',
+          label: 'dest-string',
+          value: '',
+          helperText: 'DestStr is the destination string of the file.',
+        },
+        {
+          field: 'text',
+          label: 'file-name',
+          value: '',
+          helperText: 'FileName is the name of the file to be created, modified, deleted, renamed, or appended.',
+        },
+        {
+          field: 'number',
+          label: 'line',
+          value: 0,
+          helperText: 'Line is the line number of the file to be replaced.',
+        },
+        {
+          field: 'text',
+          label: 'origin-string',
+          value: '',
+          helperText: 'OriginStr is the origin string of the file.',
+        },
+      ],
+      when: "action=='file-replace'",
+    },
+    {
+      field: 'ref',
+      label: 'http-abort',
+      children: [
+        {
+          field: 'text',
+          label: 'code',
+          value: '',
+          helperText: 'Code is a rule to select target by http status code in response',
+        },
+        {
+          field: 'text',
+          label: 'method',
+          value: '',
+          helperText: 'HTTP method',
+        },
+        {
+          field: 'text',
+          label: 'path',
+          value: '',
+          helperText: 'Match path of Uri with wildcard matches',
+        },
+        {
+          field: 'number',
+          label: 'port',
+          value: 0,
+          helperText: 'The TCP port that the target service listens on',
+        },
+        {
+          field: 'numbers',
+          label: 'proxy_ports',
+          value: [],
+          helperText:
+            'Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports',
+        },
+        {
+          field: 'text',
+          label: 'target',
+          value: '',
+          helperText: 'HTTP target: Request or Response',
+        },
+      ],
+      when: "action=='http-abort'",
+    },
+    {
+      field: 'ref',
+      label: 'http-config',
+      children: [
+        {
+          field: 'text',
+          label: 'file_path',
+          value: '',
+          helperText: 'The config file path',
+        },
+      ],
+      when: "action=='http-config'",
+    },
+    {
+      field: 'ref',
+      label: 'http-delay',
+      children: [
+        {
+          field: 'text',
+          label: 'code',
+          value: '',
+          helperText: 'Code is a rule to select target by http status code in response',
+        },
+        {
+          field: 'text',
+          label: 'delay',
+          value: '',
+          helperText: 'Delay represents the delay of the target request/response',
+        },
+        {
+          field: 'text',
+          label: 'method',
+          value: '',
+          helperText: 'HTTP method',
+        },
+        {
+          field: 'text',
+          label: 'path',
+          value: '',
+          helperText: 'Match path of Uri with wildcard matches',
+        },
+        {
+          field: 'number',
+          label: 'port',
+          value: 0,
+          helperText: 'The TCP port that the target service listens on',
+        },
+        {
+          field: 'numbers',
+          label: 'proxy_ports',
+          value: [],
+          helperText:
+            'Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports',
+        },
+        {
+          field: 'text',
+          label: 'target',
+          value: '',
+          helperText: 'HTTP target: Request or Response',
+        },
+      ],
+      when: "action=='http-delay'",
+    },
+    {
+      field: 'ref',
+      label: 'http-request',
+      children: [
+        {
+          field: 'number',
+          label: 'count',
+          value: 0,
+          helperText: 'The number of requests to send',
+        },
+        {
+          field: 'select',
+          label: 'enable-conn-pool',
+          value: false,
+          items: [true, false],
+          helperText: 'Enable connection pool',
+        },
+        {
+          field: 'text',
+          label: 'url',
+          value: '',
+          helperText: 'Request to send"',
+        },
+      ],
+      when: "action=='http-request'",
+    },
+    {
+      field: 'ref',
       label: 'jvm-exception',
       children: [
         {
@@ -232,6 +516,63 @@ export const actions = [
         },
       ],
       when: "action=='jvm-latency'",
+    },
+    {
+      field: 'ref',
+      label: 'jvm-mysql',
+      children: [
+        {
+          field: 'text',
+          label: 'database',
+          value: '',
+          helperText: 'the match database default value is "", means match all database',
+        },
+        {
+          field: 'text',
+          label: 'exception',
+          value: '',
+          helperText:
+            'The exception which needs to throw for action `exception` or the exception message needs to throw in action `mysql`',
+        },
+        {
+          field: 'number',
+          label: 'latency',
+          value: 0,
+          helperText: "The latency duration for action 'latency' or the latency duration in action `mysql`",
+        },
+        {
+          field: 'text',
+          label: 'mysqlConnectorVersion',
+          value: '',
+          helperText: 'the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now',
+        },
+        {
+          field: 'number',
+          label: 'pid',
+          value: 0,
+          helperText: 'the pid of Java process which needs to attach',
+        },
+        {
+          field: 'number',
+          label: 'port',
+          value: 0,
+          helperText: 'Optional.  the port of agent server, default 9277',
+        },
+        {
+          field: 'text',
+          label: 'sqlType',
+          value: '',
+          helperText:
+            "the match sql type default value is \"\", means match all SQL type. The value can be 'select', 'insert', 'update', 'delete', 'replace'.",
+        },
+        {
+          field: 'text',
+          label: 'table',
+          value: '',
+          helperText: 'the match table default value is "", means match all table',
+        },
+      ],
+      when: "action=='jvm-mysql'",
     },
     {
       field: 'ref',
@@ -326,6 +667,143 @@ export const actions = [
         },
       ],
       when: "action=='jvm-stress'",
+    },
+    {
+      field: 'ref',
+      label: 'kafka-fill',
+      children: [
+        {
+          field: 'text',
+          label: 'host',
+          value: '',
+          helperText: 'The host of kafka server',
+        },
+        {
+          field: 'number',
+          label: 'maxBytes',
+          value: 0,
+          helperText: 'The max bytes to fill',
+        },
+        {
+          field: 'number',
+          label: 'messageSize',
+          value: 0,
+          helperText: 'The size of each message',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of kafka client',
+        },
+        {
+          field: 'number',
+          label: 'port',
+          value: 0,
+          helperText: 'The port of kafka server',
+        },
+        {
+          field: 'text',
+          label: 'reloadCommand',
+          value: '',
+          helperText: 'The command to reload kafka config',
+        },
+        {
+          field: 'text',
+          label: 'topic',
+          value: '',
+          helperText: 'The topic to attack',
+        },
+        {
+          field: 'text',
+          label: 'username',
+          value: '',
+          helperText: 'The username of kafka client',
+        },
+      ],
+      when: "action=='kafka-fill'",
+    },
+    {
+      field: 'ref',
+      label: 'kafka-flood',
+      children: [
+        {
+          field: 'text',
+          label: 'host',
+          value: '',
+          helperText: 'The host of kafka server',
+        },
+        {
+          field: 'number',
+          label: 'messageSize',
+          value: 0,
+          helperText: 'The size of each message',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of kafka client',
+        },
+        {
+          field: 'number',
+          label: 'port',
+          value: 0,
+          helperText: 'The port of kafka server',
+        },
+        {
+          field: 'number',
+          label: 'threads',
+          value: 0,
+          helperText: 'The number of worker threads',
+        },
+        {
+          field: 'text',
+          label: 'topic',
+          value: '',
+          helperText: 'The topic to attack',
+        },
+        {
+          field: 'text',
+          label: 'username',
+          value: '',
+          helperText: 'The username of kafka client',
+        },
+      ],
+      when: "action=='kafka-flood'",
+    },
+    {
+      field: 'ref',
+      label: 'kafka-io',
+      children: [
+        {
+          field: 'text',
+          label: 'configFile',
+          value: '',
+          helperText: 'The path of server config',
+        },
+        {
+          field: 'select',
+          label: 'nonReadable',
+          value: false,
+          items: [true, false],
+          helperText: 'Make kafka cluster non-readable',
+        },
+        {
+          field: 'select',
+          label: 'nonWritable',
+          value: false,
+          items: [true, false],
+          helperText: 'Make kafka cluster non-writable',
+        },
+        {
+          field: 'text',
+          label: 'topic',
+          value: '',
+          helperText: 'The topic to attack',
+        },
+      ],
+      when: "action=='kafka-io'",
     },
     {
       field: 'ref',
@@ -445,6 +923,13 @@ export const actions = [
       children: [
         {
           field: 'text',
+          label: 'accept-tcp-flags',
+          value: '',
+          helperText:
+            'only the packet which match the tcp flag can be accepted, others will be dropped. only set when the IPProtocol is tcp, used for partition.',
+        },
+        {
+          field: 'text',
           label: 'correlation',
           value: '',
           helperText: 'correlation is percentage (10 is 10%)',
@@ -529,6 +1014,25 @@ export const actions = [
     },
     {
       field: 'ref',
+      label: 'network-down',
+      children: [
+        {
+          field: 'text',
+          label: 'device',
+          value: '',
+          helperText: 'The network interface to impact',
+        },
+        {
+          field: 'text',
+          label: 'duration',
+          value: '',
+          helperText: 'NIC down time, time units: ns, us (or \u00B5s), ms, s, m, h.',
+        },
+      ],
+      when: "action=='network-down'",
+    },
+    {
+      field: 'ref',
       label: 'network-duplicate',
       children: [
         {
@@ -583,6 +1087,44 @@ export const actions = [
         },
       ],
       when: "action=='network-duplicate'",
+    },
+    {
+      field: 'ref',
+      label: 'network-flood',
+      children: [
+        {
+          field: 'text',
+          label: 'duration',
+          value: '',
+          helperText: 'The number of seconds to run the iperf test',
+        },
+        {
+          field: 'text',
+          label: 'ip-address',
+          value: '',
+          helperText: 'Generate traffic to this IP address',
+        },
+        {
+          field: 'number',
+          label: 'parallel',
+          value: 0,
+          helperText: 'The number of iperf parallel client threads to run',
+        },
+        {
+          field: 'text',
+          label: 'port',
+          value: '',
+          helperText: 'Generate traffic to this port on the IP address',
+        },
+        {
+          field: 'text',
+          label: 'rate',
+          value: '',
+          helperText:
+            'The speed of network traffic, allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second',
+        },
+      ],
+      when: "action=='network-flood'",
     },
     {
       field: 'ref',
@@ -713,6 +1255,177 @@ export const actions = [
     },
     {
       field: 'ref',
+      label: 'redis-cacheLimit',
+      children: [
+        {
+          field: 'text',
+          label: 'addr',
+          value: '',
+          helperText: 'The adress of Redis server',
+        },
+        {
+          field: 'text',
+          label: 'cacheSize',
+          value: '',
+          helperText: 'The size of `maxmemory`',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of Redis server',
+        },
+        {
+          field: 'text',
+          label: 'percent',
+          value: '',
+          helperText: 'Specifies maxmemory as a percentage of the original value',
+        },
+      ],
+      when: "action=='redis-cacheLimit'",
+    },
+    {
+      field: 'ref',
+      label: 'redis-expiration',
+      children: [
+        {
+          field: 'text',
+          label: 'addr',
+          value: '',
+          helperText: 'The adress of Redis server',
+        },
+        {
+          field: 'text',
+          label: 'expiration',
+          value: '',
+          helperText: 'The expiration of the keys',
+        },
+        {
+          field: 'text',
+          label: 'key',
+          value: '',
+          helperText: 'The keys to be expired',
+        },
+        {
+          field: 'text',
+          label: 'option',
+          value: '',
+          helperText: 'Additional options for `expiration`',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of Redis server',
+        },
+      ],
+      when: "action=='redis-expiration'",
+    },
+    {
+      field: 'ref',
+      label: 'redis-penetration',
+      children: [
+        {
+          field: 'text',
+          label: 'addr',
+          value: '',
+          helperText: 'The adress of Redis server',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of Redis server',
+        },
+        {
+          field: 'number',
+          label: 'requestNum',
+          value: 0,
+          helperText: 'The number of requests to be sent',
+        },
+      ],
+      when: "action=='redis-penetration'",
+    },
+    {
+      field: 'ref',
+      label: 'redis-restart',
+      children: [
+        {
+          field: 'text',
+          label: 'addr',
+          value: '',
+          helperText: 'The adress of Redis server',
+        },
+        {
+          field: 'text',
+          label: 'conf',
+          value: '',
+          helperText: 'The path of Sentinel conf',
+        },
+        {
+          field: 'select',
+          label: 'flushConfig',
+          value: false,
+          items: [true, false],
+          helperText: 'The control flag determines whether to flush config',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of Redis server',
+        },
+        {
+          field: 'select',
+          label: 'redisPath',
+          value: false,
+          items: [true, false],
+          helperText: 'The path of `redis-server` command-line tool',
+        },
+      ],
+      when: "action=='redis-restart'",
+    },
+    {
+      field: 'ref',
+      label: 'redis-stop',
+      children: [
+        {
+          field: 'text',
+          label: 'addr',
+          value: '',
+          helperText: 'The adress of Redis server',
+        },
+        {
+          field: 'text',
+          label: 'conf',
+          value: '',
+          helperText: 'The path of Sentinel conf',
+        },
+        {
+          field: 'select',
+          label: 'flushConfig',
+          value: false,
+          items: [true, false],
+          helperText: 'The control flag determines whether to flush config',
+        },
+        {
+          field: 'text',
+          label: 'password',
+          value: '',
+          helperText: 'The password of Redis server',
+        },
+        {
+          field: 'select',
+          label: 'redisPath',
+          value: false,
+          items: [true, false],
+          helperText: 'The path of `redis-server` command-line tool',
+        },
+      ],
+      when: "action=='redis-stop'",
+    },
+    {
+      field: 'ref',
       label: 'stress-cpu',
       children: [
         {
@@ -756,5 +1469,37 @@ export const actions = [
         },
       ],
       when: "action=='stress-mem'",
+    },
+    {
+      field: 'ref',
+      label: 'user_defined',
+      children: [
+        {
+          field: 'text',
+          label: 'attackCmd',
+          value: '',
+          helperText: 'The command to be executed when attack',
+        },
+        {
+          field: 'text',
+          label: 'recoverCmd',
+          value: '',
+          helperText: 'The command to be executed when recover',
+        },
+      ],
+      when: "action=='user_defined'",
+    },
+    {
+      field: 'ref',
+      label: 'vm',
+      children: [
+        {
+          field: 'text',
+          label: 'vm-name',
+          value: '',
+          helperText: 'The name of the VM to be injected',
+        },
+      ],
+      when: "action=='vm'",
     },
   ]

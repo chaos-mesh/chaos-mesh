@@ -298,9 +298,9 @@ message ApplyBlockChaosRequest {
 }
 
 message BlockDelaySpec {
-  int32 delay = 1;
-  float correlation = 2;
-  int32 jitter = 3;
+  int64 delay = 1;
+  double correlation = 2;
+  int64 jitter = 3;
 }
 
 message BlockLimitSpec {

@@ -211,7 +211,6 @@ type ComplexityRoot struct {
 	HTTPChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -258,7 +257,6 @@ type ComplexityRoot struct {
 	IOChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -385,7 +383,6 @@ type ComplexityRoot struct {
 	NetworkChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -415,7 +412,6 @@ type ComplexityRoot struct {
 	Pod struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		Daemon                     func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
@@ -453,7 +449,6 @@ type ComplexityRoot struct {
 	PodHTTPChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -531,7 +526,6 @@ type ComplexityRoot struct {
 	PodIOChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -572,7 +566,6 @@ type ComplexityRoot struct {
 	PodNetworkChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -702,7 +695,6 @@ type ComplexityRoot struct {
 	StressChaos struct {
 		APIVersion                 func(childComplexity int) int
 		Annotations                func(childComplexity int) int
-		ClusterName                func(childComplexity int) int
 		CreationTimestamp          func(childComplexity int) int
 		DeletionGracePeriodSeconds func(childComplexity int) int
 		DeletionTimestamp          func(childComplexity int) int
@@ -1500,13 +1492,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.HTTPChaos.Annotations(childComplexity), true
 
-	case "HTTPChaos.clusterName":
-		if e.complexity.HTTPChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.HTTPChaos.ClusterName(childComplexity), true
-
 	case "HTTPChaos.creationTimestamp":
 		if e.complexity.HTTPChaos.CreationTimestamp == nil {
 			break
@@ -1765,13 +1750,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.IOChaos.Annotations(childComplexity), true
-
-	case "IOChaos.clusterName":
-		if e.complexity.IOChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.IOChaos.ClusterName(childComplexity), true
 
 	case "IOChaos.creationTimestamp":
 		if e.complexity.IOChaos.CreationTimestamp == nil {
@@ -2457,13 +2435,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NetworkChaos.Annotations(childComplexity), true
 
-	case "NetworkChaos.clusterName":
-		if e.complexity.NetworkChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.NetworkChaos.ClusterName(childComplexity), true
-
 	case "NetworkChaos.creationTimestamp":
 		if e.complexity.NetworkChaos.CreationTimestamp == nil {
 			break
@@ -2624,13 +2595,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Pod.Annotations(childComplexity), true
-
-	case "Pod.clusterName":
-		if e.complexity.Pod.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.Pod.ClusterName(childComplexity), true
 
 	case "Pod.creationTimestamp":
 		if e.complexity.Pod.CreationTimestamp == nil {
@@ -2848,13 +2812,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PodHTTPChaos.Annotations(childComplexity), true
-
-	case "PodHTTPChaos.clusterName":
-		if e.complexity.PodHTTPChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.PodHTTPChaos.ClusterName(childComplexity), true
 
 	case "PodHTTPChaos.creationTimestamp":
 		if e.complexity.PodHTTPChaos.CreationTimestamp == nil {
@@ -3206,13 +3163,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodIOChaos.Annotations(childComplexity), true
 
-	case "PodIOChaos.clusterName":
-		if e.complexity.PodIOChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.PodIOChaos.ClusterName(childComplexity), true
-
 	case "PodIOChaos.creationTimestamp":
 		if e.complexity.PodIOChaos.CreationTimestamp == nil {
 			break
@@ -3408,13 +3358,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PodNetworkChaos.Annotations(childComplexity), true
-
-	case "PodNetworkChaos.clusterName":
-		if e.complexity.PodNetworkChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.PodNetworkChaos.ClusterName(childComplexity), true
 
 	case "PodNetworkChaos.creationTimestamp":
 		if e.complexity.PodNetworkChaos.CreationTimestamp == nil {
@@ -4014,13 +3957,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StressChaos.Annotations(childComplexity), true
 
-	case "StressChaos.clusterName":
-		if e.complexity.StressChaos.ClusterName == nil {
-			break
-		}
-
-		return e.complexity.StressChaos.ClusterName(childComplexity), true
-
 	case "StressChaos.creationTimestamp":
 		if e.complexity.StressChaos.CreationTimestamp == nil {
 			break
@@ -4467,7 +4403,6 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodSpec!
     status: PodStatus!
@@ -4713,7 +4648,6 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodIOChaosSpec!
     status: PodIOChaosStatus!
@@ -4822,7 +4756,6 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: IOChaosSpec!
     status: IOChaosStatus!
@@ -4950,7 +4883,6 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodHttpChaosSpec!
     status: PodHttpChaosStatus!
@@ -5050,7 +4982,6 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: HTTPChaosSpec!
     status: HTTPChaosStatus!
@@ -5243,7 +5174,6 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodNetworkChaosSpec!
     status: PodNetworkChaosStatus!
@@ -5418,7 +5348,6 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
@@ -5522,7 +5451,6 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: StressChaosSpec!
 
@@ -8597,41 +8525,6 @@ func (ec *executionContext) _HTTPChaos_finalizers(ctx context.Context, field gra
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _HTTPChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "HTTPChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _HTTPChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.HTTPChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9859,41 +9752,6 @@ func (ec *executionContext) _IOChaos_finalizers(ctx context.Context, field graph
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _IOChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "IOChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _IOChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.IOChaos) (ret graphql.Marshaler) {
@@ -12892,41 +12750,6 @@ func (ec *executionContext) _NetworkChaos_finalizers(ctx context.Context, field 
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _NetworkChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "NetworkChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _NetworkChaos_podnetwork(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.NetworkChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -13703,41 +13526,6 @@ func (ec *executionContext) _Pod_finalizers(ctx context.Context, field graphql.C
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Pod_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Pod",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Pod_spec(ctx context.Context, field graphql.CollectedField, obj *v1.Pod) (ret graphql.Marshaler) {
@@ -14778,41 +14566,6 @@ func (ec *executionContext) _PodHTTPChaos_finalizers(ctx context.Context, field 
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _PodHTTPChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "PodHTTPChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodHTTPChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaos) (ret graphql.Marshaler) {
@@ -16478,41 +16231,6 @@ func (ec *executionContext) _PodIOChaos_finalizers(ctx context.Context, field gr
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _PodIOChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "PodIOChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _PodIOChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -17452,41 +17170,6 @@ func (ec *executionContext) _PodNetworkChaos_finalizers(ctx context.Context, fie
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _PodNetworkChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "PodNetworkChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodNetworkChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodNetworkChaos) (ret graphql.Marshaler) {
@@ -20395,41 +20078,6 @@ func (ec *executionContext) _StressChaos_finalizers(ctx context.Context, field g
 	res := resTmp.([]string)
 	fc.Result = res
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _StressChaos_clusterName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaos) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "StressChaos",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ClusterName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _StressChaos_spec(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.StressChaos) (ret graphql.Marshaler) {
@@ -23542,16 +23190,6 @@ func (ec *executionContext) _HTTPChaos(ctx context.Context, sel ast.SelectionSet
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._HTTPChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._HTTPChaos_spec(ctx, field, obj)
@@ -24029,16 +23667,6 @@ func (ec *executionContext) _IOChaos(ctx context.Context, sel ast.SelectionSet, 
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._IOChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._IOChaos_spec(ctx, field, obj)
@@ -25418,16 +25046,6 @@ func (ec *executionContext) _NetworkChaos(ctx context.Context, sel ast.Selection
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._NetworkChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "podnetwork":
 			field := field
 
@@ -25743,16 +25361,6 @@ func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj 
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Pod_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Pod_spec(ctx, field, obj)
@@ -26220,16 +25828,6 @@ func (ec *executionContext) _PodHTTPChaos(ctx context.Context, sel ast.Selection
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PodHTTPChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodHTTPChaos_spec(ctx, field, obj)
@@ -26952,16 +26550,6 @@ func (ec *executionContext) _PodIOChaos(ctx context.Context, sel ast.SelectionSe
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PodIOChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodIOChaos_spec(ctx, field, obj)
@@ -27357,16 +26945,6 @@ func (ec *executionContext) _PodNetworkChaos(ctx context.Context, sel ast.Select
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._PodNetworkChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodNetworkChaos_spec(ctx, field, obj)
@@ -28664,16 +28242,6 @@ func (ec *executionContext) _StressChaos(ctx context.Context, sel ast.SelectionS
 
 			out.Values[i] = innerFunc(ctx)
 
-		case "clusterName":
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._StressChaos_clusterName(ctx, field, obj)
-			}
-
-			out.Values[i] = innerFunc(ctx)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "spec":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._StressChaos_spec(ctx, field, obj)
