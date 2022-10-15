@@ -3,7 +3,7 @@ name: Release helm chart files
 on:
   push:
     tags:
-    - 'chart-*'
+      - "chart-*"
 
 jobs:
   release-chart:
@@ -44,6 +44,5 @@ jobs:
           owner: chaos-mesh
           repository: charts
           branch: gh-pages
-          app_version: ${{ steps.extract_version.outputs.version}}
-          chart_version: ${{ steps.extract_version.outputs.version}}
-
+          app_version: ${{ steps.extract_version.outputs.version }}
+          chart_version: ${{ steps.extract_version.outputs.version }}
