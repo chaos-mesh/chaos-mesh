@@ -241,11 +241,7 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
-        else
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
-        fi
+        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
@@ -1161,6 +1157,9 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
+  - apiGroups: [ "coordination.k8s.io" ]
+    resources: [ "leases" ]
+    verbs: [ "*" ]
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
@@ -1400,7 +1399,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: ${socketDir}
         - name: sys-path
           hostPath:
@@ -1452,6 +1451,8 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
       annotations:
     spec:
+      securityContext:
+            {}
       serviceAccountName: chaos-dashboard
       containers:
         - name: chaos-dashboard
@@ -1567,6 +1568,8 @@ spec:
       annotations:
         rollme: "install.sh"
     spec:
+      securityContext:
+            {}
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
       containers:

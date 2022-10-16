@@ -19,6 +19,7 @@ header:
     - '**/*.ext'
     - '**/*.csr'
     - '.github/workflows/*'
+    - '.github/ISSUE_TEMPLATE/config.yml'
     - '.github/.licenserc.yaml'
     - 'Makefile'
     - 'PROJECT'

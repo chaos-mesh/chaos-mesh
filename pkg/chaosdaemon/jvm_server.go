@@ -22,9 +22,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pingcap/log"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -69,7 +67,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 		return nil, errors.New("environment variable BYTEMAN_HOME not set")
 	}
 
-	// copy byteman.jar and byteman-helper.jar to container's namespace
+	// Copy byteman.jar, byteman-helper.jar and chaos-agent.jar into container's namespace.
 	if req.EnterNS {
 		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("mkdir -p %s/lib/", bytemanHome)).SetContext(ctx).SetNS(pid, bpm.MountNS)
 		output, err := processBuilder.Build(ctx).CombinedOutput()
@@ -80,18 +78,18 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 			log.Info("mkdir", "output", string(output))
 		}
 
-		err = copyFileAcrossNS(ctx, fmt.Sprintf("%s/lib/byteman.jar", bytemanHome), "/usr/local/byteman/lib/byteman.jar", pid)
-		if err != nil {
-			return nil, err
-		}
+		jars := []string{"byteman.jar", "byteman-helper.jar", "chaos-agent.jar"}
 
-		err = copyFileAcrossNS(ctx, fmt.Sprintf("%s/lib/byteman-helper.jar", bytemanHome), "/usr/local/byteman/lib/byteman-helper.jar", pid)
-		if err != nil {
-			return nil, err
-		}
-		err = copyFileAcrossNS(ctx, fmt.Sprintf("%s/lib/chaos-agent.jar", bytemanHome), "/usr/local/byteman/lib/chaos-agent.jar", pid)
-		if err != nil {
-			return nil, err
+		for _, jar := range jars {
+			source := fmt.Sprintf("%s/lib/%s", bytemanHome, jar)
+			dest := fmt.Sprintf("/usr/local/byteman/lib/%s", jar)
+
+			output, err = copyFileAcrossNS(ctx, source, dest, pid)
+			if err != nil {
+				return nil, err
+			}
+
+			log.Info("copy", jar, "from source:", source, "to destination:", dest, "output:", string(output))
 		}
 	}
 
@@ -216,10 +214,10 @@ func writeDataIntoFile(data string, filename string) (string, error) {
 	return tmpfile.Name(), err
 }
 
-func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) error {
+func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint32) ([]byte, error) {
 	sourceFile, err := os.Open(source)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer sourceFile.Close()
 
@@ -227,11 +225,8 @@ func copyFileAcrossNS(ctx context.Context, source string, dest string, pid uint3
 	processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetStdin(sourceFile)
 	output, err := processBuilder.Build(ctx).CombinedOutput()
 	if err != nil {
-		return err
-	}
-	if len(output) > 0 {
-		log.Info("copy file", zap.String("source", source), zap.String("destination", dest), zap.String("output", string(output)))
+		return nil, err
 	}
 
-	return nil
+	return output, nil
 }
