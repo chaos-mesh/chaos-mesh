@@ -69,7 +69,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.Injected, nil
 	}
 
-	var res *pb.ApplyBlockChaosResponse
 	if blockchaos.Spec.Action == v1alpha1.BlockDelay {
 		delay, err := time.ParseDuration(blockchaos.Spec.Delay.Latency)
 		if err != nil {
@@ -86,7 +85,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			return v1alpha1.NotInjected, errors.Wrapf(err, "parse jitter: %s", blockchaos.Spec.Delay.Jitter)
 		}
 
-		res, err = pbClient.ApplyBlockChaos(ctx, &pb.ApplyBlockChaosRequest{
+		res, err := pbClient.ApplyBlockChaos(ctx, &pb.ApplyBlockChaosRequest{
 			ContainerId: containerId,
 			VolumePath:  volumePath,
 			Action:      pb.ApplyBlockChaosRequest_Delay,
@@ -101,11 +100,20 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		if err != nil {
 			return v1alpha1.NotInjected, err
 		}
+
+		blockchaos.Status.InjectionIds[records[index].Id] = int(res.InjectionId)
+	} else if blockchaos.Spec.Action == v1alpha1.BlockFreeze {
+		_, err := pbClient.FreezeBlockDevice(ctx, &pb.FreezeBlockDeviceRequest{
+			ContainerId: containerId,
+			VolumePath:  volumePath,
+		})
+
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
 	} else {
 		return v1alpha1.NotInjected, utils.ErrUnknownAction
 	}
-
-	blockchaos.Status.InjectionIds[records[index].Id] = int(res.InjectionId)
 
 	return v1alpha1.Injected, nil
 }
@@ -113,8 +121,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("blockchaos recover", "record", records[index])
 
+	_, _, volumePath, err := controller.ParseNamespacedNameContainerVolumePath(records[index].Id)
+	if err != nil {
+		return v1alpha1.NotInjected, errors.Wrapf(err, "parse container and volumePath %s", records[index].Id)
+	}
+
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
+	containerId := decodedContainer.ContainerId
 	if pbClient != nil {
 		defer pbClient.Close()
 	}
@@ -127,22 +141,37 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	blockchaos := obj.(*v1alpha1.BlockChaos)
-	if blockchaos.Status.InjectionIds == nil {
-		blockchaos.Status.InjectionIds = make(map[string]int)
-	}
-	injection_id, ok := blockchaos.Status.InjectionIds[records[index].Id]
-	if !ok {
-		impl.Log.Info("the blockchaos has already been recovered")
-		return v1alpha1.NotInjected, nil
+
+	if blockchaos.Spec.Action == v1alpha1.BlockDelay {
+		if blockchaos.Status.InjectionIds == nil {
+			blockchaos.Status.InjectionIds = make(map[string]int)
+		}
+		injection_id, ok := blockchaos.Status.InjectionIds[records[index].Id]
+		if !ok {
+			impl.Log.Info("the blockchaos has already been recovered")
+			return v1alpha1.NotInjected, nil
+		}
+
+		if _, err = pbClient.RecoverBlockChaos(ctx, &pb.RecoverBlockChaosRequest{
+			InjectionId: int32(injection_id),
+		}); err != nil {
+			// TODO: check whether the error still exists
+			return v1alpha1.Injected, err
+		}
+		delete(blockchaos.Status.InjectionIds, records[index].Id)
+	} else if blockchaos.Spec.Action == v1alpha1.BlockFreeze {
+		_, err := pbClient.UnfreezeBlockDevice(ctx, &pb.UnfreezeBlockDeviceRequest{
+			ContainerId: containerId,
+			VolumePath:  volumePath,
+		})
+
+		if err != nil {
+			return v1alpha1.Injected, err
+		}
+	} else {
+		return v1alpha1.Injected, utils.ErrUnknownAction
 	}
 
-	if _, err = pbClient.RecoverBlockChaos(ctx, &pb.RecoverBlockChaosRequest{
-		InjectionId: int32(injection_id),
-	}); err != nil {
-		// TODO: check whether the error still exists
-		return v1alpha1.Injected, err
-	}
-	delete(blockchaos.Status.InjectionIds, records[index].Id)
 	return v1alpha1.NotInjected, nil
 }
 

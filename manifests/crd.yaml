@@ -399,9 +399,10 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific block chaos action. Supported
-                  action: delay'
+                  action: delay,freeze'
                 enum:
                 - delay
+                - freeze
                 type: string
               containerNames:
                 description: ContainerNames indicates list of the name of affected
@@ -5380,9 +5381,10 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific block chaos action.
-                      Supported action: delay'
+                      Supported action: delay,freeze'
                     enum:
                     - delay
+                    - freeze
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
@@ -8540,9 +8542,10 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific block chaos
-                                action. Supported action: delay'
+                                action. Supported action: delay,freeze'
                               enum:
                               - delay
+                              - freeze
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name
@@ -11557,9 +11560,10 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific block
-                                    chaos action. Supported action: delay'
+                                    chaos action. Supported action: delay,freeze'
                                   enum:
                                   - delay
+                                  - freeze
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
@@ -19546,9 +19550,10 @@ spec:
                 properties:
                   action:
                     description: 'Action defines the specific block chaos action.
-                      Supported action: delay'
+                      Supported action: delay,freeze'
                     enum:
                     - delay
+                    - freeze
                     type: string
                   containerNames:
                     description: ContainerNames indicates list of the name of affected
@@ -22361,9 +22366,10 @@ spec:
                     properties:
                       action:
                         description: 'Action defines the specific block chaos action.
-                          Supported action: delay'
+                          Supported action: delay,freeze'
                         enum:
                         - delay
+                        - freeze
                         type: string
                       containerNames:
                         description: ContainerNames indicates list of the name of
@@ -25592,9 +25598,10 @@ spec:
                               properties:
                                 action:
                                   description: 'Action defines the specific block
-                                    chaos action. Supported action: delay'
+                                    chaos action. Supported action: delay,freeze'
                                   enum:
                                   - delay
+                                  - freeze
                                   type: string
                                 containerNames:
                                   description: ContainerNames indicates list of the
@@ -28701,9 +28708,10 @@ spec:
                                   properties:
                                     action:
                                       description: 'Action defines the specific block
-                                        chaos action. Supported action: delay'
+                                        chaos action. Supported action: delay,freeze'
                                       enum:
                                       - delay
+                                      - freeze
                                       type: string
                                     containerNames:
                                       description: ContainerNames indicates list of
@@ -39443,9 +39451,10 @@ spec:
                       properties:
                         action:
                           description: 'Action defines the specific block chaos action.
-                            Supported action: delay'
+                            Supported action: delay,freeze'
                           enum:
                           - delay
+                          - freeze
                           type: string
                         containerNames:
                           description: ContainerNames indicates list of the name of
@@ -42371,9 +42380,10 @@ spec:
                           properties:
                             action:
                               description: 'Action defines the specific block chaos
-                                action. Supported action: delay'
+                                action. Supported action: delay,freeze'
                               enum:
                               - delay
+                              - freeze
                               type: string
                             containerNames:
                               description: ContainerNames indicates list of the name

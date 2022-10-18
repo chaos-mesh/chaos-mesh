@@ -111,5 +111,13 @@ func (c *MockChaosDaemonClient) ApplyBlockChaos(ctx context.Context, req *pb.App
 }
 
 func (c *MockChaosDaemonClient) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return &empty.Empty{}, nil
+	return nil, mockError("RecoverBlockChaosRequest")
+}
+
+func (c *MockChaosDaemonClient) FreezeBlockDevice(ctx context.Context, req *pb.FreezeBlockDeviceRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("UnfreezeBlockDeviceRequest")
+}
+
+func (c *MockChaosDaemonClient) UnfreezeBlockDevice(ctx context.Context, req *pb.UnfreezeBlockDeviceRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("UnfreezeBlockDevceRequest")
 }

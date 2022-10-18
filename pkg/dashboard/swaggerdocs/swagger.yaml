@@ -3209,8 +3209,8 @@ definitions:
       action:
         description: |-
           Action defines the specific block chaos action.
-          Supported action: delay
-          +kubebuilder:validation:Enum=delay
+          Supported action: delay,freeze
+          +kubebuilder:validation:Enum=delay;freeze
         type: string
       containerNames:
         description: |-

@@ -34,14 +34,15 @@ type BlockChaos struct {
 type BlockChaosAction string
 
 const (
-	BlockDelay BlockChaosAction = "delay"
+	BlockDelay  BlockChaosAction = "delay"
+	BlockFreeze BlockChaosAction = "freeze"
 )
 
 // BlockChaosSpec is the content of the specification for a BlockChaos
 type BlockChaosSpec struct {
 	// Action defines the specific block chaos action.
-	// Supported action: delay
-	// +kubebuilder:validation:Enum=delay
+	// Supported action: delay,freeze
+	// +kubebuilder:validation:Enum=delay;freeze
 	Action BlockChaosAction `json:"action"`
 
 	// Delay defines the delay distribution.

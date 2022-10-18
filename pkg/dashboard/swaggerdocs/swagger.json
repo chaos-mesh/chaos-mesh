@@ -4988,7 +4988,7 @@
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific block chaos action.\nSupported action: delay\n+kubebuilder:validation:Enum=delay",
+                    "description": "Action defines the specific block chaos action.\nSupported action: delay,freeze\n+kubebuilder:validation:Enum=delay;freeze",
                     "type": "string"
                 },
                 "containerNames": {

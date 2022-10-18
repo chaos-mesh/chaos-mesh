@@ -27,6 +27,9 @@ service ChaosDaemon {
   rpc ApplyBlockChaos(ApplyBlockChaosRequest) returns (ApplyBlockChaosResponse) {}
   rpc RecoverBlockChaos(RecoverBlockChaosRequest) returns (google.protobuf.Empty) {}
 
+  rpc FreezeBlockDevice(FreezeBlockDeviceRequest) returns (google.protobuf.Empty) {}
+  rpc UnfreezeBlockDevice(UnfreezeBlockDeviceRequest) returns (google.protobuf.Empty) {}
+
   rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
 
   rpc InstallJVMRules(InstallJVMRulesRequest) returns (google.protobuf.Empty) {}
@@ -303,15 +306,20 @@ message BlockDelaySpec {
   int64 jitter = 3;
 }
 
-message BlockLimitSpec {
-  uint64 quota = 1;
-  uint64 period_us = 2;
-}
-
 message ApplyBlockChaosResponse {
   int32 injection_id = 1;
 }
 
 message RecoverBlockChaosRequest {
   int32 injection_id = 1;
+}
+
+message FreezeBlockDeviceRequest {
+  string container_id = 1;
+  string volume_path = 2;
+}
+
+message UnfreezeBlockDeviceRequest {
+  string container_id = 1;
+  string volume_path = 2;
 }
