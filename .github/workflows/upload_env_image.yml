@@ -10,10 +10,11 @@ on:
       - master
       - release-*
 
+permissions: read-all
+
 jobs:
   build-specific-architecture:
     permissions:
-      contents: read
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
     runs-on: ubuntu-latest
@@ -74,7 +75,6 @@ jobs:
 
   upload-manifest:
     permissions:
-      contents: read
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
     runs-on: ubuntu-latest
