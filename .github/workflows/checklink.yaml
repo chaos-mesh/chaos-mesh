@@ -8,6 +8,8 @@ on:
       - "**.md"
       - ".github/workflows/checklink_config.json"
 
+permissions: read-all
+
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
