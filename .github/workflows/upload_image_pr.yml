@@ -1,7 +1,10 @@
 name: Upload Image for PR
+
 on:
   issue_comment:
     types: [created]
+
+permissions: read-all
 
 jobs:
   build-for-pr:
@@ -13,14 +16,14 @@ jobs:
       - name: Install jq
         run: |
           sudo apt-get install jq -y
-      
+
       - name: Cache docker image and go
         uses: actions/cache@v2
         with:
           path: |
             cache
           key: chaos-mesh-build-${{ github.event.issue.number }}
-      
+
       - name: Enable docker builder
         run: |
           DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder
@@ -56,7 +59,7 @@ jobs:
             DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \
             GO_BUILD_CACHE=$GITHUB_WORKSPACE/cache \
             image-dev-env
-      
+
       - name: Build Chaos Mesh
         run: |
           make \
@@ -68,7 +71,7 @@ jobs:
             DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \
             GO_BUILD_CACHE=$GITHUB_WORKSPACE/cache \
             image
-          
+
           for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
           do
             docker image save ghcr.io/chaos-mesh/$IMAGE > $IMAGE.tar
@@ -80,7 +83,7 @@ jobs:
           name: chaos-mesh-images
           path: |
             *.tar
-        
+
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
         with:

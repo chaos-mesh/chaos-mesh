@@ -5,6 +5,8 @@ on:
     tags:
       - "chart-*"
 
+permissions: read-all
+
 jobs:
   release-chart:
     runs-on: ubuntu-latest
