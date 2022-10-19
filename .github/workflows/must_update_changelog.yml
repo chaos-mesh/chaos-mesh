@@ -2,6 +2,7 @@
 # the label "no-need-update-changelog" is tagged on the PR.
 
 name: "Must Update CHANGELOG"
+
 on:
   pull_request:
     types:
@@ -13,6 +14,9 @@ on:
     branches:
       - master
       - release-*
+
+permissions: read-all
+
 jobs:
   must-update-changelog:
     name: "Must Update CHANGELOG"

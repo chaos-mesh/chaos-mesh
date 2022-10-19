@@ -1,8 +1,11 @@
 name: Integration Test
+
 on:
   pull_request:
     branches:
       - master
+
+permissions: read-all
 
 jobs:
   run:
@@ -40,7 +43,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.18'
+          go-version: "1.18"
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
