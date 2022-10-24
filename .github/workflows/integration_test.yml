@@ -6,6 +6,8 @@ on:
       - master
     paths-ignore:
       - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
 
 permissions: read-all
 
