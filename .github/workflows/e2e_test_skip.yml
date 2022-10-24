@@ -1,5 +1,5 @@
 # Please refer to the file comments in `e2e_test.yml` for more information.
-name: E2E Test
+name: E2E Test Passed
 
 on:
   pull_request:
