@@ -1,0 +1,21 @@
+# Please refer to the file comments in `integration_test.yml` for more information.
+name: Integration Test
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "**.md"
+
+permissions: read-all
+
+jobs:
+  run:
+    name: Integration Test
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    steps:
+      - run: echo "Not required"

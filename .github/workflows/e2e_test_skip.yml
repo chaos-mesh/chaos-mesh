@@ -1,0 +1,18 @@
+# Please refer to the file comments in `e2e_test.yml` for more information.
+name: E2E Test
+
+on:
+  pull_request:
+    branches:
+      - master
+      - release-*
+    paths:
+      - "**.md"
+
+permissions: read-all
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Not required"
