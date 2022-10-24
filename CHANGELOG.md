@@ -17,7 +17,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Use the next generation `New Workflow` UI by default []()
 
 ### Deprecated
 
