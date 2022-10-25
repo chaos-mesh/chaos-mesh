@@ -6,6 +6,9 @@ on:
     branches:
       - master
       - release-*
+
+permissions: read-all
+
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -109,16 +112,16 @@ jobs:
           - v1.23.4
           - v1.25.1
         focus:
-          - '[Graceful-Shutdown] [IOChaos]'
-          - '[Graceful-Shutdown] [HTTPChaos]'
-          - '[Basic] [PodChaos]'
-          - '[Basic] [TimeChaos]'
-          - '[Basic] [IOChaos]'
-          - '[Basic] [HTTPChaos]'
-          - '[Basic] [Sidecar Config]'
-          - '[Basic] [NetworkChaos]'
-          - '[Basic] [DNSChaos]'
-          - '[Basic] [StressChaos]'
+          - "[Graceful-Shutdown] [IOChaos]"
+          - "[Graceful-Shutdown] [HTTPChaos]"
+          - "[Basic] [PodChaos]"
+          - "[Basic] [TimeChaos]"
+          - "[Basic] [IOChaos]"
+          - "[Basic] [HTTPChaos]"
+          - "[Basic] [Sidecar Config]"
+          - "[Basic] [NetworkChaos]"
+          - "[Basic] [DNSChaos]"
+          - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
         uses: actions/checkout@v2

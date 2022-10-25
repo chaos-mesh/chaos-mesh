@@ -6,6 +6,9 @@ on:
     branches:
       - master
       - release-*
+
+permissions: read-all
+
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -17,7 +20,7 @@ jobs:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
           GO_BUILD_CACHE: ${{github.workspace}}/cache
-          DOCKER_CLI_EXPERIMENTAL: enabled 
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker buildx create --use --name chaos-mesh-builder
           make -j4 image e2e-image
@@ -44,4 +47,3 @@ jobs:
         with:
           path: cache
           key: e2e-binary-build-cache-${{ runner.os }}
-
