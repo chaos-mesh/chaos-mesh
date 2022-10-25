@@ -30,3 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Not required to run E2E Test."
+  not-passed:
+    needs: changed-files
+    if: needs.changed-files.outputs.only_changed == 'false'
+    name: E2E Test Not Passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Required to run E2E Test."
+          exit 1
