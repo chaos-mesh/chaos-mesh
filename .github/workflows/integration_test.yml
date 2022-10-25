@@ -92,8 +92,14 @@ jobs:
         run: |
           bash test/integration_test/run.sh
 
-      - name: post run - print k8s info
+      - name: post run - dump kubernetes cluster info
         if: always()
         run: |
-          kubectl describe pods
-          kubectl describe pods -n chaos-mesh
+          kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
+      - name: post run - upload kubernetes cluster info dump
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
+          path: cluster-info-dump
+          retention-days: 7

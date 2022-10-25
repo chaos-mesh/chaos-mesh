@@ -89,7 +89,7 @@ func (s *DaemonServer) InstallJVMRules(ctx context.Context,
 				return nil, err
 			}
 
-			log.Info("copy", jar, "from source:", source, "to destination:", dest, "output:", string(output))
+			log.Info("copy", "jar name", jar, "from source", source, "to destination", dest, "output", string(output))
 		}
 	}
 
