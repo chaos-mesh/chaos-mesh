@@ -8,10 +8,8 @@ on:
       - release-*
     paths:
       - "**.md"
-      - "!**.md"
       # Not available for frontend code for now.
       - "ui/**"
-      - "!ui/**"
 
 permissions: read-all
 
