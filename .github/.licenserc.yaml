@@ -68,3 +68,5 @@ header:
     - 'ui/packages/mui-extends/test/storyshots.test.js'
     # codecov configuration file
     - codecov.yml
+    - .gitkeep
+    - yarn.lock
