@@ -1,7 +1,7 @@
 # This workflow defines the e2e test related jobs.
 #
 # Please note that due to the GitHub required checks, the `E2E Test Passed` job
-# also needs to run to report the status. So here we need to define an additional
+# needs to run to report the status. So here we need to define an additional
 # "skip" file to ensure that the status is reported. For details, please refer to:
 #
 # - `e2e_skip.yml`
