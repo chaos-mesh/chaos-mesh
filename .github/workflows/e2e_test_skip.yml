@@ -33,12 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Not required to run E2E Test."
-  not-passed:
+  activate:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    name: E2E Test Passed
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "Required to run E2E Test."
-          exit 1
+    name: Activate E2E Test
+    uses: ./.github/workflows/e2e_test.yml
