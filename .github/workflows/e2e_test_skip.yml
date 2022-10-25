@@ -1,20 +1,29 @@
 # Please refer to the file comments in `e2e_test.yml` for more information.
-name: E2E Test Passed
+name: Whether to skip E2E Test
 
 on:
   pull_request:
     branches:
       - master
       - release-*
-    paths:
-      - "**.md"
-      # Not available for frontend code for now.
-      - "ui/**"
 
 permissions: read-all
 
 jobs:
-  run:
+  changed-files:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Not required"
+      - name: Get changed files
+        uses: tj-actions/changed-files@v33
+        with:
+          files: |
+            - "**.md"
+            # Not available for frontend code for now.
+            - "ui/**"
+  pass:
+    needs: changed-files
+    if: needs.changed-files.outputs.only_changed == 'true'
+    name: E2E Test Passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Not required to run E2E Test."
