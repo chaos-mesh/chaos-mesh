@@ -29,7 +29,20 @@ jobs:
   pass:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'true'
-    # Note: set only one matrix job to prevent this job report status.
+    # Note: a matrix job is set up to prevent this job from reporting status.
+    #
+    # If this job is not set up as a matrix job, like:
+    #
+    # ```
+    # pass:
+    #   needs: changed-files
+    #   if: needs.changed-files.outputs.only_changed == 'true'
+    #   runs-on: ubuntu-latest
+    #   steps:
+    #     - run: echo "Not required to run E2E test."
+    # ```
+    #
+    # Even if it is skipped, it will also report the status.
     strategy:
       matrix:
         job:
