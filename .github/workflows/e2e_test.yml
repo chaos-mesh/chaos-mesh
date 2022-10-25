@@ -10,7 +10,14 @@ name: E2E Test
 
 on:
   workflow_dispatch: {}
-  workflow_call:
+  pull_request:
+    branches:
+      - master
+      - release-*
+    paths-ignore:
+      - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
 
 permissions: read-all
 

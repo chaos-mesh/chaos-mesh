@@ -29,6 +29,7 @@ jobs:
   pass:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'true'
+    # Note: set only one matrix job to prevent this job report status.
     strategy:
       matrix:
         job:
@@ -36,8 +37,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Not required to run E2E Test."
-  activate:
-    needs: changed-files
-    if: needs.changed-files.outputs.only_changed == 'false'
-    name: Activate E2E Test
-    uses: ./.github/workflows/e2e_test.yml
