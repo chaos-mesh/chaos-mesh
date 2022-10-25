@@ -29,7 +29,10 @@ jobs:
   pass:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'true'
-    name: E2E Test Passed
+    strategy:
+      matrix:
+        job:
+          - E2E Test Passed
     runs-on: ubuntu-latest
     steps:
       - run: echo "Not required to run E2E Test."
