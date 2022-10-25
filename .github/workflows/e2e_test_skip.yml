@@ -12,12 +12,15 @@ permissions: read-all
 jobs:
   changed-files:
     runs-on: ubuntu-latest
+    outputs:
+      only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 2
       - name: Get changed files
         uses: tj-actions/changed-files@v33
+        id: filter
         with:
           files: |
             - "**.md"
@@ -30,12 +33,3 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Not required to run E2E Test."
-  not-passed:
-    needs: changed-files
-    if: needs.changed-files.outputs.only_changed == 'false'
-    name: E2E Test Not Passed
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "Required to run E2E Test."
-          exit 1
