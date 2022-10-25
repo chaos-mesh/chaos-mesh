@@ -1,4 +1,5 @@
 name: Upload Image
+
 on:
   workflow_dispatch: {}
   schedule:
@@ -6,12 +7,18 @@ on:
   release:
     types: [published]
 
+permissions: read-all
+
 jobs:
   build-specific-architecture:
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
     strategy:
       matrix:
         arch: [amd64, arm64]
-        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
+        image:
+          [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
@@ -75,10 +82,14 @@ jobs:
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-$ARCH
 
   upload-manifest:
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
+        image:
+          [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     needs: build-specific-architecture
     steps:
       - name: Build Chaos Mesh manifest

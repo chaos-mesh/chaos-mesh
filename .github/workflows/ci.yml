@@ -18,6 +18,8 @@ on:
       - master
       - release-*
 
+permissions: read-all
+
 jobs:
   # JOB to run change detection
   changes:

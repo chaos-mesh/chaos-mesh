@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	err = r.SetIPSets(ctx, pod, obj, pbClient)
 	if err != nil {
-		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Log.Error(err, "fail to set ipsets")
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set ipsets",
@@ -156,7 +156,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	err = r.SetIptables(ctx, pod, obj, pbClient)
 	if err != nil {
-		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Log.Error(err, "fail to set iptables")
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set iptables",
@@ -167,7 +167,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	err = r.SetTcs(ctx, pod, obj, pbClient)
 	if err != nil {
-		err = errors.Wrapf(err, "fialed to apply for pod %s/%s", pod.Namespace, pod.Name)
+		err = errors.Wrapf(err, "failed to apply for pod %s/%s", pod.Namespace, pod.Name)
 		r.Recorder.Event(obj, recorder.Failed{
 			Activity: "set tc",
 			Err:      err.Error(),
