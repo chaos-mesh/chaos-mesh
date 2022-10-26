@@ -223,3 +223,76 @@ func TestcaseTimeSkewPauseThenUnpause(
 	By("delete chaos CRD objects")
 	cli.Delete(ctx, timeChaos)
 }
+
+func TestcaseTimeSkewShouldAlsoAffectChildProces(
+	ns string,
+	cli client.Client,
+	c http.Client,
+	port uint16,
+) {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	By("wait e2e helper ready")
+	err := util.WaitE2EHelperReady(c, port)
+	framework.ExpectNoError(err, "wait e2e helper ready error")
+
+	By("create chaos CRD objects")
+	initTime, err := getPodChildProcessTimeNS(c, port)
+	framework.ExpectNoError(err, "failed to get pod time")
+
+	timeChaos := &v1alpha1.TimeChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "timer-time-chaos",
+			Namespace: ns,
+		},
+		Spec: v1alpha1.TimeChaosSpec{
+			Duration:   pointer.StringPtr("9m"),
+			TimeOffset: "-1h",
+			ContainerSelector: v1alpha1.ContainerSelector{
+				PodSelector: v1alpha1.PodSelector{
+					Selector: v1alpha1.PodSelectorSpec{
+						GenericSelectorSpec: v1alpha1.GenericSelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "timer"},
+						},
+					},
+					Mode: v1alpha1.OneMode,
+				},
+			},
+		},
+	}
+	err = cli.Create(ctx, timeChaos)
+	framework.ExpectNoError(err, "create time chaos error")
+
+	By("waiting for assertion")
+	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		podTime, err := getPodChildProcessTimeNS(c, port)
+		framework.ExpectNoError(err, "failed to get pod time")
+		if podTime.Before(*initTime) {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectNoError(err, "time chaos doesn't work as expected")
+
+	By("delete chaos CRD objects")
+	err = cli.Delete(ctx, timeChaos)
+	framework.ExpectNoError(err, "failed to delete time chaos")
+
+	By("waiting for assertion recovering")
+	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		podTime, err := getPodChildProcessTimeNS(c, port)
+		framework.ExpectNoError(err, "failed to get pod time")
+		// since there is no timechaos now, current pod time should not be earlier
+		// than the init time
+		if podTime.Before(*initTime) {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectError(err, "wait no timechaos error")
+	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	By("success to perform time chaos")
+}
