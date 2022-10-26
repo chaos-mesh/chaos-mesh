@@ -41,3 +41,23 @@ func getPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
 	}
 	return &t, nil
 }
+
+// get pod current time in nanosecond
+func getPodChildProcessTimeNS(c http.Client, port uint16) (*time.Time, error) {
+	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/child-process-time", port))
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := time.Parse(time.RFC3339Nano, string(out))
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
