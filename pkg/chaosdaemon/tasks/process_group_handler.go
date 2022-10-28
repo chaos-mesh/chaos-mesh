@@ -95,7 +95,7 @@ func (gp *ProcessGroupHandler) Inject(pid IsID) error {
 				gp.Logger.Error(err, "failed to create child process")
 				continue
 			}
-			err = childProcessChaos.Inject(pid)
+			err = childProcessChaos.Inject(childSysPID)
 			if err != nil {
 				gp.Logger.Error(err, "failed to inject new child process")
 				continue

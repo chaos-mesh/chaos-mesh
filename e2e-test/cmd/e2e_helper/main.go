@@ -17,6 +17,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -37,6 +38,10 @@ func main() {
 	flag.Parse()
 
 	s := newServer(*dataDir)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go s.childProcessTimeServer.Start(ctx)
 	err := s.setupUDPServer()
 	if err != nil {
 		fmt.Println("failed to serve udp server", err)
@@ -51,8 +56,9 @@ func main() {
 }
 
 type server struct {
-	mux     *http.ServeMux
-	dataDir string
+	mux                    *http.ServeMux
+	dataDir                string
+	childProcessTimeServer childProcessTimeServer
 
 	// ONLY FOR TEST: a buf without lock
 	recvBuf []byte
@@ -60,12 +66,14 @@ type server struct {
 
 func newServer(dataDir string) *server {
 	s := &server{
-		mux:     http.NewServeMux(),
-		dataDir: dataDir,
-		recvBuf: make([]byte, 5),
+		mux:                    http.NewServeMux(),
+		dataDir:                dataDir,
+		recvBuf:                make([]byte, 5),
+		childProcessTimeServer: &defaultChildProcessTimeServer{},
 	}
 	s.mux.HandleFunc("/ping", pong)
-	s.mux.HandleFunc("/time", s.timer)
+	s.mux.HandleFunc("/time", s.time)
+	s.mux.HandleFunc("/child-process-time", s.childProcessTime)
 	s.mux.HandleFunc("/io", s.ioTest)
 	s.mux.HandleFunc("/mistake", s.mistakeTest)
 	s.mux.HandleFunc("/network/send", s.networkSendTest)
@@ -100,9 +108,18 @@ func (s *server) setupUDPServer() error {
 	return nil
 }
 
-// a handler to print out the current time
-func (s *server) timer(w http.ResponseWriter, _ *http.Request) {
+// time write the current time as response body
+func (s *server) time(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte(time.Now().Format(time.RFC3339Nano)))
+}
+
+// childProcessTime write the child process current time as response body
+func (s *server) childProcessTime(w http.ResponseWriter, _ *http.Request) {
+	now, err := s.childProcessTimeServer.Time()
+	if err != nil {
+		panic(err)
+	}
+	w.Write([]byte(now.Format(time.RFC3339Nano)))
 }
 
 // a handler to test io chaos
