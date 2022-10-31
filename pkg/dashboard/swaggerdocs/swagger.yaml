@@ -5138,10 +5138,6 @@ definitions:
     type: object
   v1alpha1.PodHttpChaosTLS:
     properties:
-      KeyName:
-        description: KeyName represents the data name of key file in secret, `tls.key`
-          for example
-        type: string
       caName:
         description: |-
           CAName represents the data name of ca file in secret, `ca.crt` for example
@@ -5151,13 +5147,15 @@ definitions:
         description: CertName represents the data name of cert file in secret, `tls.crt`
           for example
         type: string
+      keyName:
+        description: KeyName represents the data name of key file in secret, `tls.key`
+          for example
+        type: string
       secretName:
         description: SecretName represents the name of required secret resource
         type: string
       secretNamespace:
-        description: |-
-          SecretNamespace represents the namespace of required secret resource,
-          should be the same with deployment/chaos-controller-manager in most cases
+        description: SecretNamespace represents the namespace of required secret resource
         type: string
     type: object
   v1alpha1.PodSelector:
