@@ -1,3 +1,11 @@
+# This workflow defines the e2e test related jobs.
+#
+# Please note that due to the GitHub required checks, the `E2E Test Passed` job
+# needs to run to report the status. So here we need to define an additional
+# "skip" file to ensure that the status is reported. For details, please refer to:
+#
+# - `e2e_skip.yml`
+# - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
 name: E2E Test
 
 on:
@@ -6,6 +14,10 @@ on:
     branches:
       - master
       - release-*
+    paths-ignore:
+      - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
 
 permissions: read-all
 
@@ -201,7 +213,7 @@ jobs:
     name: E2E Test Passed
     runs-on: ubuntu-latest
     steps:
-      - run: exit 0
+      - run: echo "🎉 E2E Test Passed!"
     needs:
       - e2e-test-matrix
       - build-image

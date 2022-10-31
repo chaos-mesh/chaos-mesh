@@ -28,22 +28,20 @@ jobs:
             ui:
               - 'ui/yarn.lock'
               - '**.js'
-              - '**.ts'
-              - '**.tsx'
+              - '**.ts?(x)'
   go:
     needs: skip-changes
     if: ${{ needs.skip-changes.outputs.go != 'true' }}
     strategy:
-      fail-fast: false
       matrix:
         arch: [amd64, arm64]
         job:
           - verify
           - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "Not required"
+      - run: echo "Not required to run go jobs."
   ui:
     needs: skip-changes
     if: ${{ needs.skip-changes.outputs.ui != 'true' }}
@@ -53,6 +51,6 @@ jobs:
           - verify
           - build
           - test
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     steps:
-      - run: echo "Not required"
+      - run: echo "Not required to run ui jobs."

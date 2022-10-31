@@ -6,6 +6,10 @@ on:
     branches:
       - master
       - release-*
+    paths-ignore:
+      - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
 
 permissions: read-all
 
