@@ -3,6 +3,10 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
 
 jobs:
   run:
