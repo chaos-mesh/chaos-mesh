@@ -6,8 +6,6 @@ on:
     branches:
       - master
       - release-*
-<<<<<<< HEAD
-=======
     paths-ignore:
       - "**.md"
       # Not available for frontend code for now.
@@ -15,7 +13,6 @@ on:
 
 permissions: read-all
 
->>>>>>> 604bef2b0 (fix: ignore unnecessary workflows when `**.md` or `ui/**` changes (#3721))
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -27,7 +24,7 @@ jobs:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
           GO_BUILD_CACHE: ${{github.workspace}}/cache
-          DOCKER_CLI_EXPERIMENTAL: enabled 
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker buildx create --use --name chaos-mesh-builder
           make -j4 image e2e-image
