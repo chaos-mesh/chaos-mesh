@@ -6,6 +6,16 @@ on:
     branches:
       - master
       - release-*
+<<<<<<< HEAD
+=======
+    paths-ignore:
+      - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
+
+permissions: read-all
+
+>>>>>>> 604bef2b0 (fix: ignore unnecessary workflows when `**.md` or `ui/**` changes (#3721))
 jobs:
   build-image:
     runs-on: ubuntu-latest
