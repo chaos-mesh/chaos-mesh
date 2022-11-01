@@ -13,8 +13,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `controller.securityContext` and `dashboard.securityContext` to Helm chart [#3603](https://github.com/chaos-mesh/chaos-mesh/pull/3603)
 - Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
-- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
 - Add new CI "Manually Sign Container Images" to sign existing container images [#3708](https://github.com/chaos-mesh/chaos-mesh/pull/3708)
+- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
 - Install and uninstall chaos mesh in remote cluster through `RemoteCluster` resource [#3414](https://github.com/chaos-mesh/chaos-mesh/pull/3414)
 
 ### Changed
@@ -45,7 +45,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
-- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
 
 ### Changed
 
