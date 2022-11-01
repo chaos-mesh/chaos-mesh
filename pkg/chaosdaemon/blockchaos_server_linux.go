@@ -158,27 +158,20 @@ func (s *DaemonServer) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlo
 
 func (s *DaemonServer) FreezeBlockDevice(ctx context.Context, req *pb.FreezeBlockDeviceRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
-
-	volumeName, err := normalizeVolumeName(ctx, req.VolumePath)
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "normalize volume name", "volumePath", req.VolumePath)
+		log.Error(err, "error while getting PID")
 		return nil, err
 	}
 
-	volumePath := "/dev/" + volumeName
-	if _, err := os.Stat(volumePath); err != nil {
-		log.Error(err, "error while getting stat of volume", "volumePath", volumePath)
-		return nil, errors.Wrapf(err, "volume path %s does not exist", volumePath)
-	}
-
-	output, err := bpm.DefaultProcessBuilder("fsfreeze", "--freeze", volumePath).
+	output, err := bpm.DefaultProcessBuilder("fsfreeze", "--freeze", req.VolumePath).
 		SetContext(ctx).
-		SetNS(1, bpm.MountNS).
+		SetNS(pid, bpm.MountNS).
 		EnableLocalMnt().
 		Build(ctx).
 		Output()
 	if err != nil {
-		return nil, errors.Wrapf(err, "freeze volume %s: %s", volumePath, output)
+		return nil, errors.Wrapf(err, "freeze volume %s: %s", req.VolumePath, output)
 	}
 
 	return &empty.Empty{}, nil
@@ -186,27 +179,20 @@ func (s *DaemonServer) FreezeBlockDevice(ctx context.Context, req *pb.FreezeBloc
 
 func (s *DaemonServer) UnfreezeBlockDevice(ctx context.Context, req *pb.UnfreezeBlockDeviceRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
-
-	volumeName, err := normalizeVolumeName(ctx, req.VolumePath)
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
-		log.Error(err, "normalize volume name", "volumePath", req.VolumePath)
+		log.Error(err, "error while getting PID")
 		return nil, err
 	}
 
-	volumePath := "/dev/" + volumeName
-	if _, err := os.Stat(volumePath); err != nil {
-		log.Error(err, "error while getting stat of volume", "volumePath", volumePath)
-		return nil, errors.Wrapf(err, "volume path %s does not exist", volumePath)
-	}
-
-	output, err := bpm.DefaultProcessBuilder("fsfreeze", "--unfreeze", volumePath).
+	output, err := bpm.DefaultProcessBuilder("fsfreeze", "--unfreeze", req.VolumePath).
 		SetContext(ctx).
-		SetNS(1, bpm.MountNS).
+		SetNS(pid, bpm.MountNS).
 		EnableLocalMnt().
 		Build(ctx).
 		Output()
 	if err != nil {
-		return nil, errors.Wrapf(err, "unfreeze volume %s: %s", volumePath, output)
+		return nil, errors.Wrapf(err, "unfreeze volume %s: %s", req.VolumePath, output)
 	}
 
 	return &empty.Empty{}, nil

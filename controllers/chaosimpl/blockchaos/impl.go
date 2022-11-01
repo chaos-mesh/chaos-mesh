@@ -23,6 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
+	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -103,7 +104,20 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 		blockchaos.Status.InjectionIds[records[index].Id] = int(res.InjectionId)
 	} else if blockchaos.Spec.Action == v1alpha1.BlockFreeze {
-		_, err := pbClient.FreezeBlockDevice(ctx, &pb.FreezeBlockDeviceRequest{
+		// The volumePath here is the mount path in the target container, which is the same meaning of the
+		// `volumePath` in the IOChaos spec. However, we still didn't put the freeze action in iochaos, because
+		// it actually applies in for the whole block device (every bind mount point), but not only this file system.
+
+		// The problem is that other blockchaos doesn't need the volumePath in the target container, so we didn't get it
+		// from the selector. We use a util function to get it here, maybe need some refractor in the future.
+
+		// The same problem also exists in Recover.
+
+		volumePath, err := getVolumePathInTargetContainer(decodedContainer.Pod, decodedContainer.ContainerName, blockchaos.Spec.VolumeName)
+		if err != nil {
+			return v1alpha1.NotInjected, err
+		}
+		_, err = pbClient.FreezeBlockDevice(ctx, &pb.FreezeBlockDeviceRequest{
 			ContainerId: containerId,
 			VolumePath:  volumePath,
 		})
@@ -120,11 +134,6 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("blockchaos recover", "record", records[index])
-
-	_, _, volumePath, err := controller.ParseNamespacedNameContainerVolumePath(records[index].Id)
-	if err != nil {
-		return v1alpha1.NotInjected, errors.Wrapf(err, "parse container and volumePath %s", records[index].Id)
-	}
 
 	decodedContainer, err := impl.decoder.DecodeContainerRecord(ctx, records[index], obj)
 	pbClient := decodedContainer.PbClient
@@ -160,7 +169,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		}
 		delete(blockchaos.Status.InjectionIds, records[index].Id)
 	} else if blockchaos.Spec.Action == v1alpha1.BlockFreeze {
-		_, err := pbClient.UnfreezeBlockDevice(ctx, &pb.UnfreezeBlockDeviceRequest{
+		volumePath, err := getVolumePathInTargetContainer(decodedContainer.Pod, decodedContainer.ContainerName, blockchaos.Spec.VolumeName)
+		if err != nil {
+			// as the target volume doesn't exist, there is no need to recover
+			return v1alpha1.NotInjected, err
+		}
+
+		_, err = pbClient.UnfreezeBlockDevice(ctx, &pb.UnfreezeBlockDeviceRequest{
 			ContainerId: containerId,
 			VolumePath:  volumePath,
 		})
@@ -173,6 +188,20 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	}
 
 	return v1alpha1.NotInjected, nil
+}
+
+func getVolumePathInTargetContainer(pod *v1.Pod, containerName string, volumeName string) (string, error) {
+	for _, container := range pod.Spec.Containers {
+		if container.Name == containerName {
+			for _, volume := range container.VolumeMounts {
+				if volume.Name == volumeName {
+					return volume.MountPath, nil
+				}
+			}
+		}
+	}
+
+	return "", errors.New("volume not found in the target container")
 }
 
 func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {
