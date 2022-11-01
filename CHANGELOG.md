@@ -13,6 +13,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `controller.securityContext` and `dashboard.securityContext` to Helm chart [#3603](https://github.com/chaos-mesh/chaos-mesh/pull/3603)
 - Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
+- Add `freeze` action for `BlockChaos` to block all io operation on a block device [#3705](https://github.com/chaos-mesh/chaos-mesh/pull/3705)
 
 ### Changed
 

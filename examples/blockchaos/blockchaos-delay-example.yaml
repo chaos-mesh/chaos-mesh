@@ -15,13 +15,11 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: BlockChaos
 metadata:
-  name: hostpath-example-delay
+  name: hostpath-freeze-delay
 spec:
   selector:
     labelSelectors:
       app: hostpath-example
   mode: all
   volumeName: hostpath-example
-  action: delay
-  delay:
-    latency: 1s
+  action: freeze
