@@ -14,6 +14,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
 - Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
+- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
+- Install and uninstall chaos mesh in remote cluster through `RemoteCluster` resource [#3414](https://github.com/chaos-mesh/chaos-mesh/pull/3414)
 
 ### Changed
 
@@ -66,15 +68,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Support `Suspend` in next generation `New Workflow`'s UI [#3254](https://github.com/chaos-mesh/chaos-mesh/pull/3254)
 - Add helm annotations for Artifact Hub [#3355](https://github.com/chaos-mesh/chaos-mesh/pull/3355)
-<<<<<<< HEAD
-- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
-- Install and uninstall chaos mesh in remote cluster through `RemoteCluster` resource [#3414](https://github.com/chaos-mesh/chaos-mesh/pull/3414)
-=======
 - Add implementation of blockchaos in chaos-daemon [#2907](https://github.com/chaos-mesh/chaos-mesh/pull/2907)
-<<<<<<< HEAD
-- Bump chaos-tproxy to v0.5.1
->>>>>>> upstream/master
-=======
 - Bump chaos-tproxy to v0.5.1 [#3412](https://github.com/chaos-mesh/chaos-mesh/pull/3412)
 - Allow importing external workflows and copying flow nodes in next generation `New Workflow` [#3368](https://github.com/chaos-mesh/chaos-mesh/pull/3368)
 - Add `QPS` and `Burst` for Chaos Dashboard Configuration [#3476](https://github.com/chaos-mesh/chaos-mesh/pull/3476)
@@ -82,8 +76,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support `KernelChaos` in `AutoForm` [#3449](https://github.com/chaos-mesh/chaos-mesh/pull/3449)
 - Sync latest Chaosd and PhysicalMachineChaos [#3477](https://github.com/chaos-mesh/chaos-mesh/pull/3477)
 - Add accept-tcp-flag to network delay in PysicalMachineChaos [#3588](https://github.com/chaos-mesh/chaos-mesh/pull/3588)
-
->>>>>>> STRRL/integrate-with-helm
 
 ### Changed
 

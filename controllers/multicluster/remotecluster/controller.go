@@ -86,7 +86,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// if the remoteCluster itself is being deleted, we should remove the cluster controller manager
-	// TODO: uninstall the remote chaos mesh
 	if !obj.DeletionTimestamp.IsZero() {
 		err := r.registry.Stop(ctx, obj.Name)
 		if err != nil {
@@ -107,11 +106,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			r.Client.Get(ctx, req.NamespacedName, &newObj)
 
 			newObj.Finalizers = []string{}
-			for _, c := range newObj.Status.Conditions {
-				if c.Type == v1alpha1.RemoteClusterConditionInstalled {
-					c.Status = corev1.ConditionFalse
-				}
-			}
+			setRemoteClusterCondition(&newObj, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionFalse, "")
 
 			return r.Client.Update(ctx, &newObj)
 		})
@@ -145,11 +140,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.Client.Get(ctx, req.NamespacedName, &newObj)
 
 		newObj.Finalizers = obj.Finalizers
-		for _, c := range newObj.Status.Conditions {
-			if c.Type == v1alpha1.RemoteClusterConditionInstalled {
-				c.Status = corev1.ConditionTrue
-			}
-		}
+		setRemoteClusterCondition(&newObj, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionTrue, "")
 		// TODO: do auto config migration
 		newObj.Status.CurrentVersion = chaosMeshReleaseVersion
 		return r.Client.Update(ctx, &newObj)
