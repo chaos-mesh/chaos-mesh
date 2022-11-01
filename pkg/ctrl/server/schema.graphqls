@@ -153,7 +153,6 @@ type Pod @goModel(model: "k8s.io/api/core/v1.Pod") {
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodSpec!
     status: PodStatus!
@@ -399,7 +398,6 @@ type PodIOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.P
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodIOChaosSpec!
     status: PodIOChaosStatus!
@@ -508,7 +506,6 @@ type IOChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.IOCh
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: IOChaosSpec!
     status: IOChaosStatus!
@@ -636,7 +633,6 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodHttpChaosSpec!
     status: PodHttpChaosStatus!
@@ -736,7 +732,6 @@ type HTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.HT
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: HTTPChaosSpec!
     status: HTTPChaosStatus!
@@ -929,7 +924,6 @@ type PodNetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alp
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: PodNetworkChaosSpec!
     status: PodNetworkChaosStatus!
@@ -1104,7 +1098,6 @@ type NetworkChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     podnetwork: [PodNetworkChaos!]	@goField(forceResolver: true)
 }
@@ -1208,7 +1201,6 @@ type StressChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.
     annotations: Map
     ownerReferences: [OwnerReference!]
     finalizers: [String!]
-    clusterName: String!
 
     spec: StressChaosSpec!
 

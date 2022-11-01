@@ -26,7 +26,7 @@ const initialState = {
   debugMode: LS.get('debug-mode') === 'true',
   enableKubeSystemNS: LS.get('enable-kube-system-ns') === 'true',
   useNewPhysicalMachine: LS.get('use-new-physical-machine') === 'true',
-  useNextWorkflowInterface: LS.get('use-next-workflow-interface') === 'true',
+  useNextWorkflowInterface: (LS.get('use-next-workflow-interface') || 'true') === 'true',
 }
 
 const settingsSlice = createSlice({

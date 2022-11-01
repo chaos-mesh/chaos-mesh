@@ -107,9 +107,12 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+  - apiGroups: [ "coordination.k8s.io" ]
+    resources: [ "leases" ]
     verbs: [ "*" ]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["*"]
 ---
 # bindings cluster level
 kind: ClusterRoleBinding

@@ -15,6 +15,7 @@ header:
     - '**/go.mod'
     - '**/go.sum'
     - '.github/workflows/*'
+    - '.github/ISSUE_TEMPLATE/config.yml'
     - '.github/.licenserc.yaml'
     - 'Makefile'
     - 'PROJECT'
