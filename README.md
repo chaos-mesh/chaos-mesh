@@ -1,4 +1,7 @@
-<img src="static/logo.svg" alt="Chaos Mesh Logo" width="450"/>
+<img src="static/logo.svg#gh-light-mode-only" alt="Chaos Mesh Logo" width="450"/>
+<img src="static/logo-white.svg#gh-dark-mode-only" alt="Chaos Mesh Logo" width="450"/>
+
+---
 
 <!-- markdown-link-check-disable -->
 [![Upload Image](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml/badge.svg?event=schedule)](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml)
@@ -9,13 +12,22 @@
 [![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/chaos-mesh/chaos-mesh)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh?ref=badge_shield)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3680/badge)](https://bestpractices.coreinfrastructure.org/projects/3680)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https%3A%2F%2Fartifacthub.io%2Fbadge%2Frepository%2Fchaos-mesh)](https://artifacthub.io/packages/helm/chaos-mesh/chaos-mesh)
+
 <!-- markdown-link-check-enable -->
 
-> **Note:**
->
-> This readme and related documentation are Work in Progress.
+Chaos Mesh is an open source cloud-native Chaos Engineering platform. It offers various types of fault simulation and has an enormous capability to orchestrate fault scenarios.
 
-Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) hosted project. It is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
+Using Chaos Mesh, you can conveniently simulate various abnormalities that might occur in reality during the development, testing, and production environments and find potential problems in the system. To lower the threshold for a Chaos Engineering project, Chaos Mesh provides you with a visualization operation. You can easily design your Chaos scenarios on the Web UI and monitor the status of Chaos experiments.
+
+![cncf_logo](./static/cncf.png#gh-light-mode-only)
+![cncf_logo](./static/cncf-white.png#gh-dark-mode-only)
+
+Chaos Mesh is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) incubating project. If you are an organization that wants to help shape the evolution of technologies that are container-packaged, dynamically-scheduled and microservices-oriented, consider joining the CNCF. For details about who's involved and how Chaos Mesh plays a role, read the CNCF [announcement](https://www.cncf.io/announcements/2020/09/02/cloud-native-computing-foundation-announces-tikv-graduation/).
+
+---
+
+At the current stage, Chaos Mesh has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a Web UI for managing, designing, monitoring Chaos Experiments.
@@ -82,14 +94,17 @@ Please reach out for bugs, feature requests, and other issues via:
 
 - Filing an issue or opening a PR against this repository.
 
-### Community meeting
+### Community meetings
 
-On the fourth Thursday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
+- Chaos Mesh Community Monthly (Community and project-level updates, community sharing/demo, office hours)
+  - Time: on the fourth Thursday of every month (unless otherwise specified)
+  - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
+  - [Meeting minutes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
 
-**Quick links:**
-
-- [RSVP here](https://community.cncf.io/chaos-mesh-community/)
-- [Meeting notes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
+- Chaos Mesh Development Meeting (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc)
+  - Time: Every other Tuesday (unless otherwise specified)
+  - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
+  - [Meeting minutes](https://docs.google.com/document/d/1s9X6tTOy3OGZaLDZQesGw1BNOrxQfWExjBFIn5irpPE/edit#heading=h.94nzmll6m8n5)
 
 ### Community blogs
 

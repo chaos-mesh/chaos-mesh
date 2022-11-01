@@ -37,7 +37,7 @@ type NetworkChaos struct {
 
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
-	Status NetworkChaosStatus `json:"status"`
+	Status NetworkChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithCustomStatus = (*NetworkChaos)(nil)

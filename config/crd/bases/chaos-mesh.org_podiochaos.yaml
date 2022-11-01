@@ -177,10 +177,6 @@ spec:
                 description: 'TODO: support multiple different container to inject
                   in one pod'
                 type: string
-              remoteCluster:
-                description: RemoteCluster represents the remote cluster where the
-                  chaos will be deployed
-                type: string
               volumeMountPath:
                 description: 'VolumeMountPath represents the target mount path It
                   must be a root of mount path now. TODO: search the mount parent

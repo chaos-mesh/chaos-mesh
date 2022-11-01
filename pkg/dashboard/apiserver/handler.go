@@ -31,7 +31,7 @@ import (
 var handlerModule = fx.Options(
 	fx.Provide(
 		common.NewService,
-		experiment.NewService,
+		experiment.Bootstrap,
 		schedule.Bootstrap,
 		workflow.Bootstrap,
 		event.NewService,
@@ -42,7 +42,6 @@ var handlerModule = fx.Options(
 	fx.Invoke(
 		// gcp should register at the first, because it registers a middleware
 		gcp.Register,
-
 		common.Register,
 		experiment.Register,
 		schedule.Register,

@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2022 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,30 +13,12 @@
 // limitations under the License.
 //
 
-package common
+package sysfs
 
 import (
-	"github.com/go-logr/logr"
-	"k8s.io/klog/v2"
-	"k8s.io/klog/v2/klogr"
+	"github.com/pkg/errors"
 )
 
-type LoggerFlushFunc func()
-
-func NewStderrLogger() (logr.Logger, LoggerFlushFunc, error) {
-	logger := klogr.New()
-	return logger, klog.Flush, nil
-}
-
-var globalLogger logr.Logger
-
-func SetupGlobalLogger(logger logr.Logger) {
-	globalLogger = logger
-}
-
-func L() logr.Logger {
-	if globalLogger.GetSink() == nil {
-		panic("global logger not initialized")
-	}
-	return globalLogger
+func RemountWithOption(options ...func(uintptr) uintptr) error {
+	return errors.New("Remount is not supported on darwin for now.")
 }

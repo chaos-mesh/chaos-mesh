@@ -58,7 +58,7 @@ const RBACGenerator = () => {
   const [clustered, setClustered] = useState(false)
   const [rbac, setRBAC] = useState('')
   const [getSecret, setGetSecret] = useState('')
-
+  const [generateToken, setGenerateToken] = useState('')
   const containerRef = useRef(null)
 
   const fetchRBACConfig = (values: CommonApiCommonRbacConfigGetRequest) =>
@@ -68,6 +68,7 @@ const RBACGenerator = () => {
 
       setRBAC(yaml)
       setGetSecret(`kubectl describe${name.includes('cluster') ? '' : ` -n ${values.namespace}`} secrets ${name}`)
+      setGenerateToken(`kubectl create token ${name}`)
     })
 
   useEffect(() => {
@@ -154,10 +155,20 @@ const RBACGenerator = () => {
           {i18n('settings.addToken.generatorHelper3')}
         </Typography>
         <pre className={classes.pre}>kubectl apply -f rbac.yaml</pre>
+
         <Typography variant="body2" color="textSecondary">
-          {i18n('settings.addToken.generatorHelper4')}
+          {i18n('settings.addToken.generatorHelperGetTokenHeader')}
         </Typography>
-        <pre className={classes.pre}>{getSecret}</pre>
+        <Box position="relative" pl={2}>
+          <Typography variant="body2" color="textSecondary">
+            {i18n('settings.addToken.generatorHelperGetTokenCase1')}
+          </Typography>
+          <pre className={classes.pre}>{generateToken}</pre>
+          <Typography variant="body2" color="textSecondary">
+            {i18n('settings.addToken.generatorHelperGetTokenCase2')}
+          </Typography>
+          <pre className={classes.pre}>{getSecret}</pre>
+        </Box>
       </Space>
     </div>
   )

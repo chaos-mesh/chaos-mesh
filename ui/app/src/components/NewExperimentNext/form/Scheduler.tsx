@@ -17,13 +17,15 @@
 import { Box, FormControlLabel, Link, Switch, Typography } from '@mui/material'
 import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
-import { validateDuration, validateSchedule } from 'lib/formikhelpers'
-
-import { ExperimentKind } from 'components/NewExperiment/types'
 import { FormattedMessage } from 'react-intl'
-import { TextField } from 'components/FormField'
-import i18n from 'components/T'
+
 import { useStoreSelector } from 'store'
+
+import { TextField } from 'components/FormField'
+import { ExperimentKind } from 'components/NewExperiment/types'
+import i18n from 'components/T'
+
+import { validateDuration, validateSchedule } from 'lib/formikhelpers'
 
 function isInstant(kind: ExperimentKind | '', action: string) {
   if (kind === 'PodChaos' && (action === 'pod-kill' || action === 'container-kill')) {
@@ -67,7 +69,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = fal
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography>{i18n('newE.steps.run')}</Typography>
+        <Typography fontWeight={500}>{i18n('newE.steps.run')}</Typography>
         {!inSchedule && (
           <FormControlLabel
             style={{ marginRight: 0 }}

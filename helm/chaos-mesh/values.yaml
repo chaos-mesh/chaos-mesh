@@ -56,6 +56,8 @@ imagePullSecrets: []
 # - name: secretName
 
 controllerManager:
+  # securityContext if needed
+  securityContext: {}
   # running chaos-controller-manager on host network
   hostNetwork: false
   # Allow testing on `hostNetwork` pods. This is Dangerous. Please run only as temporary solution.
@@ -232,6 +234,8 @@ dashboard:
   create: true
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
+  # securityContext if needed
+  securityContext: {}
   # running chaos-dashboard on host network
   hostNetwork: false
   # replicas of chaos-dashboard
@@ -361,7 +365,6 @@ dashboard:
     ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
     hosts:
       - name: dashboard.local
-        paths: ["/"]
 
         ## Set this to true in order to enable TLS on the ingress record
         tls: false
@@ -375,6 +378,15 @@ dashboard:
 
         ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
         tlsSecret: dashboard.local-tls
+
+    # Paths that map requests to chaos dashboard
+    paths: ["/"]
+
+    # Override apiVersion of ingress rendered by this helm chart
+    apiVersionOverrides: ""
+
+    # Defines which ingress controller will implement the resource
+    ingressClassName: ""
 
 dnsServer:
   # Enable DNS Server which required by DNSChaos

@@ -29,12 +29,11 @@ const modes = [
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 interface ModeProps {
-  disabled: boolean
   modeScope: string
   scope: string
 }
 
-const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
+const Mode: React.FC<ModeProps> = ({ modeScope, scope }) => {
   const { values } = useFormikContext()
 
   return (
@@ -43,7 +42,6 @@ const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
         name={modeScope ? `${modeScope}.mode` : 'mode'}
         label={<T id="newE.scope.mode" />}
         helperText={<T id="newE.scope.modeHelper" />}
-        disabled={disabled}
       >
         <MenuItem value="all">All</MenuItem>
         {modes.map((option) => (
@@ -61,7 +59,6 @@ const Mode: React.FC<ModeProps> = ({ disabled, modeScope, scope }) => {
           endAdornment={
             modesWithAdornment.includes(getIn(values, scope).mode) && <InputAdornment position="end">%</InputAdornment>
           }
-          disabled={disabled}
         />
       )}
     </>

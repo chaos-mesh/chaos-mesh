@@ -40,8 +40,8 @@ const (
 // BlockChaosSpec is the content of the specification for a BlockChaos
 type BlockChaosSpec struct {
 	// Action defines the specific block chaos action.
-	// Supported action: limit / delay
-	// +kubebuilder:validation:Enum=limit;delay
+	// Supported action: delay
+	// +kubebuilder:validation:Enum=delay
 	Action BlockChaosAction `json:"action"`
 
 	// Delay defines the delay distribution.

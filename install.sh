@@ -241,11 +241,7 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
-        else
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
-        fi
+        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
@@ -1161,9 +1157,12 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
-  - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+  - apiGroups: [ "coordination.k8s.io" ]
+    resources: [ "leases" ]
     verbs: [ "*" ]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1207,6 +1206,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-daemon
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "31766"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1239,6 +1241,9 @@ metadata:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: chaos-dashboard
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "2334"
 spec:
   selector:
     app.kubernetes.io/name: chaos-mesh
@@ -1275,6 +1280,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-mesh-controller-manager
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10080"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1440,6 +1448,8 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
       annotations:
     spec:
+      securityContext:
+            {}
       serviceAccountName: chaos-dashboard
       containers:
         - name: chaos-dashboard
@@ -1495,6 +1505,8 @@ spec:
               value: "false"
             - name: ROOT_URL
               value: "http://localhost:2333"
+            - name: ENABLE_PROFILING
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1553,6 +1565,8 @@ spec:
       annotations:
         rollme: "install.sh"
     spec:
+      securityContext:
+            {}
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
       containers:

@@ -40,6 +40,12 @@ import { Configuration } from './configuration'
  */
 export interface ConfigChaosDashboardConfig {
   /**
+   * The Burst config for kubernetes client
+   * @type {number}
+   * @memberof ConfigChaosDashboardConfig
+   */
+  burst?: number
+  /**
    * ClusterScoped means control Chaos Object in cluster level(all namespace).
    * @type {boolean}
    * @memberof ConfigChaosDashboardConfig
@@ -58,6 +64,12 @@ export interface ConfigChaosDashboardConfig {
    */
   enableFilterNamespace?: boolean
   /**
+   * enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
+   * @type {boolean}
+   * @memberof ConfigChaosDashboardConfig
+   */
+  enableProfiling?: boolean
+  /**
    * GcpSecurityMode will use the gcloud authentication to login to GKE user
    * @type {boolean}
    * @memberof ConfigChaosDashboardConfig
@@ -75,6 +87,12 @@ export interface ConfigChaosDashboardConfig {
    * @memberof ConfigChaosDashboardConfig
    */
   listen_port?: number
+  /**
+   * The QPS config for kubernetes client
+   * @type {number}
+   * @memberof ConfigChaosDashboardConfig
+   */
+  qps?: number
   /**
    *
    * @type {string}
@@ -3858,7 +3876,7 @@ export interface V1alpha1BandwidthSpec {
  */
 export interface V1alpha1BlockChaosSpec {
   /**
-   * Action defines the specific block chaos action. Supported action: limit / delay +kubebuilder:validation:Enum=limit;delay
+   * Action defines the specific block chaos action. Supported action: delay +kubebuilder:validation:Enum=delay
    * @type {string}
    * @memberof V1alpha1BlockChaosSpec
    */
@@ -3881,12 +3899,6 @@ export interface V1alpha1BlockChaosSpec {
    * @memberof V1alpha1BlockChaosSpec
    */
   duration?: string
-  /**
-   * IOPS defines the limit of IO frequency. +optional
-   * @type {number}
-   * @memberof V1alpha1BlockChaosSpec
-   */
-  iops?: number
   /**
    * Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
    * @type {string}
@@ -4335,6 +4347,138 @@ export interface V1alpha1FailKernRequest {
 /**
  *
  * @export
+ * @interface V1alpha1FileAppendSpec
+ */
+export interface V1alpha1FileAppendSpec {
+  /**
+   * Count is the number of times to append the data.
+   * @type {number}
+   * @memberof V1alpha1FileAppendSpec
+   */
+  count?: number
+  /**
+   * Data is the data for append.
+   * @type {string}
+   * @memberof V1alpha1FileAppendSpec
+   */
+  data?: string
+  /**
+   * FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+   * @type {string}
+   * @memberof V1alpha1FileAppendSpec
+   */
+  'file-name'?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1FileCreateSpec
+ */
+export interface V1alpha1FileCreateSpec {
+  /**
+   * DirName is the directory name to create or delete.
+   * @type {string}
+   * @memberof V1alpha1FileCreateSpec
+   */
+  'dir-name'?: string
+  /**
+   * FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+   * @type {string}
+   * @memberof V1alpha1FileCreateSpec
+   */
+  'file-name'?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1FileDeleteSpec
+ */
+export interface V1alpha1FileDeleteSpec {
+  /**
+   * DirName is the directory name to create or delete.
+   * @type {string}
+   * @memberof V1alpha1FileDeleteSpec
+   */
+  'dir-name'?: string
+  /**
+   * FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+   * @type {string}
+   * @memberof V1alpha1FileDeleteSpec
+   */
+  'file-name'?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1FileModifyPrivilegeSpec
+ */
+export interface V1alpha1FileModifyPrivilegeSpec {
+  /**
+   * FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+   * @type {string}
+   * @memberof V1alpha1FileModifyPrivilegeSpec
+   */
+  'file-name'?: string
+  /**
+   * Privilege is the file privilege to be set.
+   * @type {number}
+   * @memberof V1alpha1FileModifyPrivilegeSpec
+   */
+  privilege?: number
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1FileRenameSpec
+ */
+export interface V1alpha1FileRenameSpec {
+  /**
+   * DestFile is the name to be renamed.
+   * @type {string}
+   * @memberof V1alpha1FileRenameSpec
+   */
+  'dest-file'?: string
+  /**
+   * SourceFile is the name need to be renamed.
+   * @type {string}
+   * @memberof V1alpha1FileRenameSpec
+   */
+  'source-file'?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1FileReplaceSpec
+ */
+export interface V1alpha1FileReplaceSpec {
+  /**
+   * DestStr is the destination string of the file.
+   * @type {string}
+   * @memberof V1alpha1FileReplaceSpec
+   */
+  'dest-string'?: string
+  /**
+   * FileName is the name of the file to be created, modified, deleted, renamed, or appended.
+   * @type {string}
+   * @memberof V1alpha1FileReplaceSpec
+   */
+  'file-name'?: string
+  /**
+   * Line is the line number of the file to be replaced.
+   * @type {number}
+   * @memberof V1alpha1FileReplaceSpec
+   */
+  line?: number
+  /**
+   * OriginStr is the origin string of the file.
+   * @type {string}
+   * @memberof V1alpha1FileReplaceSpec
+   */
+  'origin-string'?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1Frame
  */
 export interface V1alpha1Frame {
@@ -4405,6 +4549,49 @@ export interface V1alpha1GCPChaosSpec {
    * @memberof V1alpha1GCPChaosSpec
    */
   zone?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1HTTPAbortSpec
+ */
+export interface V1alpha1HTTPAbortSpec {
+  /**
+   * Code is a rule to select target by http status code in response
+   * @type {string}
+   * @memberof V1alpha1HTTPAbortSpec
+   */
+  code?: string
+  /**
+   * HTTP method
+   * @type {string}
+   * @memberof V1alpha1HTTPAbortSpec
+   */
+  method?: string
+  /**
+   * Match path of Uri with wildcard matches
+   * @type {string}
+   * @memberof V1alpha1HTTPAbortSpec
+   */
+  path?: string
+  /**
+   * The TCP port that the target service listens on
+   * @type {number}
+   * @memberof V1alpha1HTTPAbortSpec
+   */
+  port?: number
+  /**
+   * Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports
+   * @type {Array<number>}
+   * @memberof V1alpha1HTTPAbortSpec
+   */
+  proxy_ports?: Array<number>
+  /**
+   * HTTP target: Request or Response
+   * @type {string}
+   * @memberof V1alpha1HTTPAbortSpec
+   */
+  target?: string
 }
 /**
  *
@@ -4506,6 +4693,19 @@ export interface V1alpha1HTTPChaosSpec {
 /**
  *
  * @export
+ * @interface V1alpha1HTTPConfigSpec
+ */
+export interface V1alpha1HTTPConfigSpec {
+  /**
+   * The config file path
+   * @type {string}
+   * @memberof V1alpha1HTTPConfigSpec
+   */
+  file_path?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1HTTPCriteria
  */
 export interface V1alpha1HTTPCriteria {
@@ -4515,6 +4715,80 @@ export interface V1alpha1HTTPCriteria {
    * @memberof V1alpha1HTTPCriteria
    */
   statusCode?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1HTTPDelaySpec
+ */
+export interface V1alpha1HTTPDelaySpec {
+  /**
+   * Code is a rule to select target by http status code in response
+   * @type {string}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  code?: string
+  /**
+   * Delay represents the delay of the target request/response
+   * @type {string}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  delay?: string
+  /**
+   * HTTP method
+   * @type {string}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  method?: string
+  /**
+   * Match path of Uri with wildcard matches
+   * @type {string}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  path?: string
+  /**
+   * The TCP port that the target service listens on
+   * @type {number}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  port?: number
+  /**
+   * Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports
+   * @type {Array<number>}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  proxy_ports?: Array<number>
+  /**
+   * HTTP target: Request or Response
+   * @type {string}
+   * @memberof V1alpha1HTTPDelaySpec
+   */
+  target?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1HTTPRequestSpec
+ */
+export interface V1alpha1HTTPRequestSpec {
+  /**
+   * The number of requests to send
+   * @type {number}
+   * @memberof V1alpha1HTTPRequestSpec
+   */
+  count?: number
+  /**
+   * Enable connection pool
+   * @type {boolean}
+   * @memberof V1alpha1HTTPRequestSpec
+   */
+  'enable-conn-pool'?: boolean
+  /**
+   * Request to send\"
+   * @type {string}
+   * @memberof V1alpha1HTTPRequestSpec
+   */
+  url?: string
 }
 /**
  *
@@ -4960,9 +5234,150 @@ export interface V1alpha1JVMStressSpec {
 /**
  *
  * @export
+ * @interface V1alpha1KafkaFillSpec
+ */
+export interface V1alpha1KafkaFillSpec {
+  /**
+   * The host of kafka server
+   * @type {string}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  host?: string
+  /**
+   * The max bytes to fill
+   * @type {number}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  maxBytes?: number
+  /**
+   * The size of each message
+   * @type {number}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  messageSize?: number
+  /**
+   * The password of kafka client
+   * @type {string}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  password?: string
+  /**
+   * The port of kafka server
+   * @type {number}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  port?: number
+  /**
+   * The command to reload kafka config
+   * @type {string}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  reloadCommand?: string
+  /**
+   * The topic to attack
+   * @type {string}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  topic?: string
+  /**
+   * The username of kafka client
+   * @type {string}
+   * @memberof V1alpha1KafkaFillSpec
+   */
+  username?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1KafkaFloodSpec
+ */
+export interface V1alpha1KafkaFloodSpec {
+  /**
+   * The host of kafka server
+   * @type {string}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  host?: string
+  /**
+   * The size of each message
+   * @type {number}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  messageSize?: number
+  /**
+   * The password of kafka client
+   * @type {string}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  password?: string
+  /**
+   * The port of kafka server
+   * @type {number}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  port?: number
+  /**
+   * The number of worker threads
+   * @type {number}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  threads?: number
+  /**
+   * The topic to attack
+   * @type {string}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  topic?: string
+  /**
+   * The username of kafka client
+   * @type {string}
+   * @memberof V1alpha1KafkaFloodSpec
+   */
+  username?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1KafkaIOSpec
+ */
+export interface V1alpha1KafkaIOSpec {
+  /**
+   * The path of server config
+   * @type {string}
+   * @memberof V1alpha1KafkaIOSpec
+   */
+  configFile?: string
+  /**
+   * Make kafka cluster non-readable
+   * @type {boolean}
+   * @memberof V1alpha1KafkaIOSpec
+   */
+  nonReadable?: boolean
+  /**
+   * Make kafka cluster non-writable
+   * @type {boolean}
+   * @memberof V1alpha1KafkaIOSpec
+   */
+  nonWritable?: boolean
+  /**
+   * The topic to attack
+   * @type {string}
+   * @memberof V1alpha1KafkaIOSpec
+   */
+  topic?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1KernelChaosSpec
  */
 export interface V1alpha1KernelChaosSpec {
+  /**
+   * ContainerNames indicates list of the name of affected container. If not set, the first container will be injected +optional
+   * @type {Array<string>}
+   * @memberof V1alpha1KernelChaosSpec
+   */
+  containerNames?: Array<string>
   /**
    * Duration represents the duration of the chaos action
    * @type {string}
@@ -5308,6 +5723,12 @@ export interface V1alpha1NetworkDNSSpec {
  */
 export interface V1alpha1NetworkDelaySpec {
   /**
+   * only the packet which match the tcp flag can be accepted, others will be dropped. only set when the IPProtocol is tcp, used for partition.
+   * @type {string}
+   * @memberof V1alpha1NetworkDelaySpec
+   */
+  'accept-tcp-flags'?: string
+  /**
    * correlation is percentage (10 is 10%)
    * @type {string}
    * @memberof V1alpha1NetworkDelaySpec
@@ -5365,6 +5786,25 @@ export interface V1alpha1NetworkDelaySpec {
 /**
  *
  * @export
+ * @interface V1alpha1NetworkDownSpec
+ */
+export interface V1alpha1NetworkDownSpec {
+  /**
+   * The network interface to impact
+   * @type {string}
+   * @memberof V1alpha1NetworkDownSpec
+   */
+  device?: string
+  /**
+   * NIC down time, time units: ns, us (or µs), ms, s, m, h.
+   * @type {string}
+   * @memberof V1alpha1NetworkDownSpec
+   */
+  duration?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1NetworkDuplicateSpec
  */
 export interface V1alpha1NetworkDuplicateSpec {
@@ -5416,6 +5856,43 @@ export interface V1alpha1NetworkDuplicateSpec {
    * @memberof V1alpha1NetworkDuplicateSpec
    */
   'source-port'?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1NetworkFloodSpec
+ */
+export interface V1alpha1NetworkFloodSpec {
+  /**
+   * The number of seconds to run the iperf test
+   * @type {string}
+   * @memberof V1alpha1NetworkFloodSpec
+   */
+  duration?: string
+  /**
+   * Generate traffic to this IP address
+   * @type {string}
+   * @memberof V1alpha1NetworkFloodSpec
+   */
+  'ip-address'?: string
+  /**
+   * The number of iperf parallel client threads to run
+   * @type {number}
+   * @memberof V1alpha1NetworkFloodSpec
+   */
+  parallel?: number
+  /**
+   * Generate traffic to this port on the IP address
+   * @type {string}
+   * @memberof V1alpha1NetworkFloodSpec
+   */
+  port?: string
+  /**
+   * The speed of network traffic, allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second
+   * @type {string}
+   * @memberof V1alpha1NetworkFloodSpec
+   */
+  rate?: string
 }
 /**
  *
@@ -5518,11 +5995,66 @@ export interface V1alpha1NetworkPartitionSpec {
 /**
  *
  * @export
+ * @interface V1alpha1PMJVMMySQLSpec
+ */
+export interface V1alpha1PMJVMMySQLSpec {
+  /**
+   * the match database default value is \"\", means match all database
+   * @type {string}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  database?: string
+  /**
+   * The exception which needs to throw for action `exception` or the exception message needs to throw in action `mysql`
+   * @type {string}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  exception?: string
+  /**
+   * The latency duration for action \'latency\' or the latency duration in action `mysql`
+   * @type {number}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  latency?: number
+  /**
+   * the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now
+   * @type {string}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  mysqlConnectorVersion?: string
+  /**
+   * the pid of Java process which needs to attach
+   * @type {number}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  pid?: number
+  /**
+   * +optional the port of agent server, default 9277
+   * @type {number}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  port?: number
+  /**
+   * the match sql type default value is \"\", means match all SQL type. The value can be \'select\', \'insert\', \'update\', \'delete\', \'replace\'.
+   * @type {string}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  sqlType?: string
+  /**
+   * the match table default value is \"\", means match all table
+   * @type {string}
+   * @memberof V1alpha1PMJVMMySQLSpec
+   */
+  table?: string
+}
+/**
+ *
+ * @export
  * @interface V1alpha1PhysicalMachineChaosSpec
  */
 export interface V1alpha1PhysicalMachineChaosSpec {
   /**
-   * +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock
+   * +kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined
    * @type {string}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
@@ -5564,6 +6096,66 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   duration?: string
   /**
+   * +ui:form:when=action==\'file-append\' +optional
+   * @type {V1alpha1FileAppendSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'file-append'?: V1alpha1FileAppendSpec
+  /**
+   * +ui:form:when=action==\'file-create\' +optional
+   * @type {V1alpha1FileCreateSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'file-create'?: V1alpha1FileCreateSpec
+  /**
+   * +ui:form:when=action==\'file-delete\' +optional
+   * @type {V1alpha1FileDeleteSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'file-delete'?: V1alpha1FileDeleteSpec
+  /**
+   * +ui:form:when=action==\'file-modify\' +optional
+   * @type {V1alpha1FileModifyPrivilegeSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'file-modify'?: V1alpha1FileModifyPrivilegeSpec
+  /**
+   * +ui:form:when=action==\'file-create\' +optional
+   * @type {V1alpha1FileRenameSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'file-rename'?: V1alpha1FileRenameSpec
+  /**
+   * +ui:form:when=action==\'file-replace\' +optional
+   * @type {V1alpha1FileReplaceSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'file-replace'?: V1alpha1FileReplaceSpec
+  /**
+   * +ui:form:when=action==\'http-abort\' +optional
+   * @type {V1alpha1HTTPAbortSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'http-abort'?: V1alpha1HTTPAbortSpec
+  /**
+   * +ui:form:when=action==\'http-config\' +optional
+   * @type {V1alpha1HTTPConfigSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'http-config'?: V1alpha1HTTPConfigSpec
+  /**
+   * +ui:form:when=action==\'http-delay\' +optional
+   * @type {V1alpha1HTTPDelaySpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'http-delay'?: V1alpha1HTTPDelaySpec
+  /**
+   * +ui:form:when=action==\'http-request\' +optional
+   * @type {V1alpha1HTTPRequestSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'http-request'?: V1alpha1HTTPRequestSpec
+  /**
    * +ui:form:when=action==\'jvm-exception\' +optional
    * @type {V1alpha1JVMExceptionSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
@@ -5582,6 +6174,12 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   'jvm-latency'?: V1alpha1JVMLatencySpec
   /**
+   * +ui:form:when=action==\'jvm-mysql\' +optional
+   * @type {V1alpha1PMJVMMySQLSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'jvm-mysql'?: V1alpha1PMJVMMySQLSpec
+  /**
    * +ui:form:when=action==\'jvm-return\' +optional
    * @type {V1alpha1JVMReturnSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
@@ -5599,6 +6197,24 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'jvm-stress'?: V1alpha1JVMStressSpec
+  /**
+   * +ui:form:when=action==\'kafka-fill\' +optional
+   * @type {V1alpha1KafkaFillSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'kafka-fill'?: V1alpha1KafkaFillSpec
+  /**
+   * +ui:form:when=action==\'kafka-flood\' +optional
+   * @type {V1alpha1KafkaFloodSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'kafka-flood'?: V1alpha1KafkaFloodSpec
+  /**
+   * +ui:form:when=action==\'kafka-io\' +optional
+   * @type {V1alpha1KafkaIOSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'kafka-io'?: V1alpha1KafkaIOSpec
   /**
    * Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
    * @type {string}
@@ -5630,11 +6246,23 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   'network-dns'?: V1alpha1NetworkDNSSpec
   /**
+   * +ui:form:when=action==\'network-down\' +optional
+   * @type {V1alpha1NetworkDownSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'network-down'?: V1alpha1NetworkDownSpec
+  /**
    * +ui:form:when=action==\'network-duplicate\' +optional
    * @type {V1alpha1NetworkDuplicateSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   'network-duplicate'?: V1alpha1NetworkDuplicateSpec
+  /**
+   * +ui:form:when=action==\'network-flood\' +optional
+   * @type {V1alpha1NetworkFloodSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'network-flood'?: V1alpha1NetworkFloodSpec
   /**
    * +ui:form:when=action==\'network-loss\' +optional
    * @type {V1alpha1NetworkLossSpec}
@@ -5654,6 +6282,36 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   process?: V1alpha1ProcessSpec
   /**
+   * +ui:form:when=action==\'redis-cacheLimit\' +optional
+   * @type {V1alpha1RedisCacheLimitSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'redis-cacheLimit'?: V1alpha1RedisCacheLimitSpec
+  /**
+   * +ui:form:when=action==\'redis-expiration\' +optional
+   * @type {V1alpha1RedisExpirationSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'redis-expiration'?: V1alpha1RedisExpirationSpec
+  /**
+   * +ui:form:when=action==\'redis-penetration\' +optional
+   * @type {V1alpha1RedisPenetrationSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'redis-penetration'?: V1alpha1RedisPenetrationSpec
+  /**
+   * +ui:form:when=action==\'redis-restart\' +optional
+   * @type {V1alpha1RedisSentinelRestartSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'redis-restart'?: V1alpha1RedisSentinelRestartSpec
+  /**
+   * +ui:form:when=action==\'redis-stop\' +optional
+   * @type {V1alpha1RedisSentinelStopSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  'redis-stop'?: V1alpha1RedisSentinelStopSpec
+  /**
    *
    * @type {V1alpha1PhysicalMachineSelectorSpec}
    * @memberof V1alpha1PhysicalMachineChaosSpec
@@ -5672,11 +6330,23 @@ export interface V1alpha1PhysicalMachineChaosSpec {
    */
   'stress-mem'?: V1alpha1StressMemorySpec
   /**
+   * +ui:form:when=action==\'user_defined\' +optional
+   * @type {V1alpha1UserDefinedSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  user_defined?: V1alpha1UserDefinedSpec
+  /**
    * Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide an integer of physical machines to do chaos action. If `FixedPercentMode`, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action. IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action +optional
    * @type {string}
    * @memberof V1alpha1PhysicalMachineChaosSpec
    */
   value?: string
+  /**
+   * +ui:form:when=action==\'vm\' +optional
+   * @type {V1alpha1VMSpec}
+   * @memberof V1alpha1PhysicalMachineChaosSpec
+   */
+  vm?: V1alpha1VMSpec
 }
 /**
  *
@@ -5955,6 +6625,173 @@ export interface V1alpha1ProcessSpec {
    * @memberof V1alpha1ProcessSpec
    */
   signal?: number
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1RedisCacheLimitSpec
+ */
+export interface V1alpha1RedisCacheLimitSpec {
+  /**
+   * The adress of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisCacheLimitSpec
+   */
+  addr?: string
+  /**
+   * The size of `maxmemory`
+   * @type {string}
+   * @memberof V1alpha1RedisCacheLimitSpec
+   */
+  cacheSize?: string
+  /**
+   * The password of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisCacheLimitSpec
+   */
+  password?: string
+  /**
+   * Specifies maxmemory as a percentage of the original value
+   * @type {string}
+   * @memberof V1alpha1RedisCacheLimitSpec
+   */
+  percent?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1RedisExpirationSpec
+ */
+export interface V1alpha1RedisExpirationSpec {
+  /**
+   * The adress of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisExpirationSpec
+   */
+  addr?: string
+  /**
+   * The expiration of the keys
+   * @type {string}
+   * @memberof V1alpha1RedisExpirationSpec
+   */
+  expiration?: string
+  /**
+   * The keys to be expired
+   * @type {string}
+   * @memberof V1alpha1RedisExpirationSpec
+   */
+  key?: string
+  /**
+   * Additional options for `expiration`
+   * @type {string}
+   * @memberof V1alpha1RedisExpirationSpec
+   */
+  option?: string
+  /**
+   * The password of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisExpirationSpec
+   */
+  password?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1RedisPenetrationSpec
+ */
+export interface V1alpha1RedisPenetrationSpec {
+  /**
+   * The adress of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisPenetrationSpec
+   */
+  addr?: string
+  /**
+   * The password of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisPenetrationSpec
+   */
+  password?: string
+  /**
+   * The number of requests to be sent
+   * @type {number}
+   * @memberof V1alpha1RedisPenetrationSpec
+   */
+  requestNum?: number
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1RedisSentinelRestartSpec
+ */
+export interface V1alpha1RedisSentinelRestartSpec {
+  /**
+   * The adress of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisSentinelRestartSpec
+   */
+  addr?: string
+  /**
+   * The path of Sentinel conf
+   * @type {string}
+   * @memberof V1alpha1RedisSentinelRestartSpec
+   */
+  conf?: string
+  /**
+   * The control flag determines whether to flush config
+   * @type {boolean}
+   * @memberof V1alpha1RedisSentinelRestartSpec
+   */
+  flushConfig?: boolean
+  /**
+   * The password of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisSentinelRestartSpec
+   */
+  password?: string
+  /**
+   * The path of `redis-server` command-line tool
+   * @type {boolean}
+   * @memberof V1alpha1RedisSentinelRestartSpec
+   */
+  redisPath?: boolean
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1RedisSentinelStopSpec
+ */
+export interface V1alpha1RedisSentinelStopSpec {
+  /**
+   * The adress of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisSentinelStopSpec
+   */
+  addr?: string
+  /**
+   * The path of Sentinel conf
+   * @type {string}
+   * @memberof V1alpha1RedisSentinelStopSpec
+   */
+  conf?: string
+  /**
+   * The control flag determines whether to flush config
+   * @type {boolean}
+   * @memberof V1alpha1RedisSentinelStopSpec
+   */
+  flushConfig?: boolean
+  /**
+   * The password of Redis server
+   * @type {string}
+   * @memberof V1alpha1RedisSentinelStopSpec
+   */
+  password?: string
+  /**
+   * The path of `redis-server` command-line tool
+   * @type {boolean}
+   * @memberof V1alpha1RedisSentinelStopSpec
+   */
+  redisPath?: boolean
 }
 /**
  *
@@ -6719,6 +7556,38 @@ export interface V1alpha1Timespec {
    * @memberof V1alpha1Timespec
    */
   sec?: number
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1UserDefinedSpec
+ */
+export interface V1alpha1UserDefinedSpec {
+  /**
+   * The command to be executed when attack
+   * @type {string}
+   * @memberof V1alpha1UserDefinedSpec
+   */
+  attackCmd?: string
+  /**
+   * The command to be executed when recover
+   * @type {string}
+   * @memberof V1alpha1UserDefinedSpec
+   */
+  recoverCmd?: string
+}
+/**
+ *
+ * @export
+ * @interface V1alpha1VMSpec
+ */
+export interface V1alpha1VMSpec {
+  /**
+   * The name of the VM to be injected
+   * @type {string}
+   * @memberof V1alpha1VMSpec
+   */
+  'vm-name'?: string
 }
 /**
  *

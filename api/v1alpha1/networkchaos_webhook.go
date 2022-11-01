@@ -41,6 +41,13 @@ func (in *Direction) Default(root interface{}, field *reflect.StructField) {
 	}
 }
 
+func (in *NetworkChaosSpec) Default(root interface{}, field *reflect.StructField) {
+	x := in.Device
+	if idx := strings.Index(x, "@"); idx != -1 {
+		in.Device = x[:idx]
+	}
+}
+
 type Rate string
 
 // validateBandwidth validates the bandwidth

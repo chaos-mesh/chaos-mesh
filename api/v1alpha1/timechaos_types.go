@@ -33,7 +33,7 @@ type TimeChaos struct {
 
 	// +optional
 	// Most recently observed status of the time chaos experiment
-	Status TimeChaosStatus `json:"status"`
+	Status TimeChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithSelector = (*TimeChaos)(nil)

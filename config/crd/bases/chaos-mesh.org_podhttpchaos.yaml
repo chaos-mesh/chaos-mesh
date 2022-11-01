@@ -36,10 +36,6 @@ spec:
           spec:
             description: PodHttpChaosSpec defines the desired state of PodHttpChaos.
             properties:
-              remoteCluster:
-                description: RemoteCluster represents the remote cluster where the
-                  chaos will be deployed
-                type: string
               rules:
                 description: Rules are a list of injection rule for http request.
                 items:

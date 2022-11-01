@@ -39,7 +39,6 @@
     "steps": {
       "basic": "元信息",
       "scope": "范围",
-      "scopeDisabled": "（无需填写）",
       "run": "运行"
     },
     "loadFrom": "加载自",
@@ -58,10 +57,12 @@
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
       "modeValueHelper": "请填写模式值",
-      "targetPods": "目标 Pod",
       "targetPodsPreview": "预览目标 Pod",
       "targetPodsPreviewHelper": "通过勾选 Pod 来进一步限制范围",
-      "noPodsFound": "未发现 Pod"
+      "noPodsFound": "未发现 Pod",
+      "targetPhysicalMachinesPreview": "预览目标物理机",
+      "targetPhysicalMachinesPreviewHelper": "通过勾选物理机来进一步限制范围",
+      "noPhysicalMachinesFound": "未发现物理机"
     },
     "target": {
       "kind": "类别",
@@ -83,6 +84,9 @@
       },
       "jvm": {
         "title": "JVM 故障"
+      },
+      "block": {
+        "title": "块存储故障"
       },
       "kernel": {
         "title": "内核故障"
@@ -257,6 +261,10 @@
       "title": "允许 kube-system 命名空间",
       "choose": "在创建实验时允许在范围内选择 kube-system 命名空间。"
     },
+    "useNewPhysicalMachineCRD": {
+      "title": "使用新的 PhysicalMachine CRD",
+      "choose": "创建 PhysicalMachineChaos 时，检索可用的 PhysicalMachines 而不是提供地址字段。"
+    },
     "useNextWorkflowInterface": {
       "title": "使用全新的工作流界面",
       "choose": "在过去的一段时间里，我们将工作流的相关界面进行了重构。现在你可以通过流程图的形式来更加方便地创建工作流。（注意：这项改进仍处于活跃地开发状态中，在它稳定前界面仍有可能会发生变动。）"
@@ -281,7 +289,9 @@
       "generatorHelper": "👇 通过选择不同的命名空间和角色生成不同的令牌。",
       "generatorHelper2": "1. 选择后，将以下内容另存为 rbac.yaml。",
       "generatorHelper3": "2. 然后运行如下命令：",
-      "generatorHelper4": "3. 最后获取令牌：",
+      "generatorHelperGetTokenHeader": "3. 获取令牌",
+      "generatorHelperGetTokenCase1": "如果您使用的 Kubernetes 版本高于 1.24，您需要手动生成令牌：",
+      "generatorHelperGetTokenCase2": "否则令牌已经自动生成，请通过如下命令查看：",
       "clustered": "集群范围",
       "role": "角色",
       "roleHelper": "选择角色",
@@ -332,7 +342,7 @@
     "durationHelper": "持续时间支持的格式有：ms / s / m / h。",
     "edit": "修改",
     "ip": "IP 地址",
-    "isKVHelperText": "键入 key:value 并以 TAB 结尾来创建一个键值对",
+    "isKVHelperText": "键入 key:value 并以回车结束来创建一个键值对。",
     "logout": "登出",
     "logoutDesc": "登出后需要重新输入令牌",
     "multiOptions": "支持多选",
@@ -346,6 +356,7 @@
     "seconds": "秒",
     "selectAll": "全选",
     "start": "启动",
+    "state": "状态",
     "status": "状态",
     "submit": "提交",
     "timeline": "时间线",

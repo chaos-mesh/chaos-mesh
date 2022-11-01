@@ -2366,6 +2366,11 @@ const docTemplate = `{
         "config.ChaosDashboardConfig": {
             "type": "object",
             "properties": {
+                "burst": {
+                    "description": "The Burst config for kubernetes client",
+                    "type": "integer",
+                    "default": 300
+                },
                 "cluster_mode": {
                     "description": "ClusterScoped means control Chaos Object in cluster level(all namespace).",
                     "type": "boolean",
@@ -2380,6 +2385,11 @@ const docTemplate = `{
                     "type": "boolean",
                     "default": false
                 },
+                "enableProfiling": {
+                    "description": "enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon",
+                    "type": "boolean",
+                    "default": true
+                },
                 "gcp_security_mode": {
                     "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
                     "type": "boolean",
@@ -2392,6 +2402,11 @@ const docTemplate = `{
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
+                },
+                "qps": {
+                    "description": "The QPS config for kubernetes client",
+                    "type": "number",
+                    "default": 200
                 },
                 "root_path": {
                     "type": "string",
@@ -3001,19 +3016,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
+                    "description": "fsType is the filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
                     "type": "string"
                 },
                 "partition": {
-                    "description": "The partition in the volume that you want to mount.\nIf omitted, the default is to mount by volume name.\nExamples: For volume /dev/sda1, you specify the partition as \"1\".\nSimilarly, the volume partition for /dev/sda is \"0\" (or you can leave the property empty).\n+optional",
+                    "description": "partition is the partition in the volume that you want to mount.\nIf omitted, the default is to mount by volume name.\nExamples: For volume /dev/sda1, you specify the partition as \"1\".\nSimilarly, the volume partition for /dev/sda is \"0\" (or you can leave the property empty).\n+optional",
                     "type": "integer"
                 },
                 "readOnly": {
-                    "description": "Specify \"true\" to force and set the ReadOnly property in VolumeMounts to \"true\".\nIf omitted, the default is \"false\".\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
+                    "description": "readOnly value true will force the readOnly setting in VolumeMounts.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
                     "type": "boolean"
                 },
                 "volumeID": {
-                    "description": "Unique ID of the persistent disk resource in AWS (Amazon EBS volume).\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore",
+                    "description": "volumeID is unique ID of the persistent disk resource in AWS (Amazon EBS volume).\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore",
                     "type": "string"
                 }
             }
@@ -3022,27 +3037,27 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cachingMode": {
-                    "description": "Host Caching mode: None, Read Only, Read Write.\n+optional",
+                    "description": "cachingMode is the Host Caching mode: None, Read Only, Read Write.\n+optional",
                     "type": "string"
                 },
                 "diskName": {
-                    "description": "The Name of the data disk in the blob storage",
+                    "description": "diskName is the Name of the data disk in the blob storage",
                     "type": "string"
                 },
                 "diskURI": {
-                    "description": "The URI the data disk in the blob storage",
+                    "description": "diskURI is the URI of data disk in the blob storage",
                     "type": "string"
                 },
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
+                    "description": "fsType is Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
                     "type": "string"
                 },
                 "kind": {
-                    "description": "Expected values Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared",
+                    "description": "kind expected values are Shared: multiple blob disks per storage account  Dedicated: single blob disk per storage account  Managed: azure managed data disk (only in managed availability set). defaults to shared",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 }
             }
@@ -3051,15 +3066,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "readOnly": {
-                    "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 },
                 "secretName": {
-                    "description": "the name of secret that contains Azure Storage Account Name and Key",
+                    "description": "secretName is the  name of secret that contains Azure Storage Account Name and Key",
                     "type": "string"
                 },
                 "shareName": {
-                    "description": "Share Name",
+                    "description": "shareName is the azure share Name",
                     "type": "string"
                 }
             }
@@ -3068,23 +3083,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "driver": {
-                    "description": "Driver is the name of the CSI driver that handles this volume.\nConsult with your admin for the correct name as registered in the cluster.",
+                    "description": "driver is the name of the CSI driver that handles this volume.\nConsult with your admin for the correct name as registered in the cluster.",
                     "type": "string"
                 },
                 "fsType": {
-                    "description": "Filesystem type to mount. Ex. \"ext4\", \"xfs\", \"ntfs\".\nIf not provided, the empty value is passed to the associated CSI driver\nwhich will determine the default filesystem to apply.\n+optional",
+                    "description": "fsType to mount. Ex. \"ext4\", \"xfs\", \"ntfs\".\nIf not provided, the empty value is passed to the associated CSI driver\nwhich will determine the default filesystem to apply.\n+optional",
                     "type": "string"
                 },
                 "nodePublishSecretRef": {
-                    "description": "NodePublishSecretRef is a reference to the secret object containing\nsensitive information to pass to the CSI driver to complete the CSI\nNodePublishVolume and NodeUnpublishVolume calls.\nThis field is optional, and  may be empty if no secret is required. If the\nsecret object contains more than one secret, all secret references are passed.\n+optional",
+                    "description": "nodePublishSecretRef is a reference to the secret object containing\nsensitive information to pass to the CSI driver to complete the CSI\nNodePublishVolume and NodeUnpublishVolume calls.\nThis field is optional, and  may be empty if no secret is required. If the\nsecret object contains more than one secret, all secret references are passed.\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "readOnly": {
-                    "description": "Specifies a read-only configuration for the volume.\nDefaults to false (read/write).\n+optional",
+                    "description": "readOnly specifies a read-only configuration for the volume.\nDefaults to false (read/write).\n+optional",
                     "type": "boolean"
                 },
                 "volumeAttributes": {
-                    "description": "VolumeAttributes stores driver-specific properties that are passed to the CSI\ndriver. Consult your driver's documentation for supported values.\n+optional",
+                    "description": "volumeAttributes stores driver-specific properties that are passed to the CSI\ndriver. Consult your driver's documentation for supported values.\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -3115,30 +3130,30 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "monitors": {
-                    "description": "Required: Monitors is a collection of Ceph monitors\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
+                    "description": "monitors is Required: Monitors is a collection of Ceph monitors\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "path": {
-                    "description": "Optional: Used as the mounted root, rather than the full Ceph tree, default is /\n+optional",
+                    "description": "path is Optional: Used as the mounted root, rather than the full Ceph tree, default is /\n+optional",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
+                    "description": "readOnly is Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
                     "type": "boolean"
                 },
                 "secretFile": {
-                    "description": "Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
+                    "description": "secretFile is Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
                     "type": "string"
                 },
                 "secretRef": {
-                    "description": "Optional: SecretRef is reference to the authentication secret for User, default is empty.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
+                    "description": "secretRef is Optional: SecretRef is reference to the authentication secret for User, default is empty.\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "user": {
-                    "description": "Optional: User is the rados user name, default is admin\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
+                    "description": "user is optional: User is the rados user name, default is admin\nMore info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it\n+optional",
                     "type": "string"
                 }
             }
@@ -3147,19 +3162,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
+                    "description": "readOnly defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
                     "type": "boolean"
                 },
                 "secretRef": {
-                    "description": "Optional: points to a secret object containing parameters used to connect\nto OpenStack.\n+optional",
+                    "description": "secretRef is optional: points to a secret object containing parameters used to connect\nto OpenStack.\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "volumeID": {
-                    "description": "volume id used to identify the volume in cinder.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md",
+                    "description": "volumeID used to identify the volume in cinder.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md",
                     "type": "string"
                 }
             }
@@ -3198,7 +3213,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "items": {
-                    "description": "If unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
@@ -3209,7 +3224,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "optional": {
-                    "description": "Specify whether the ConfigMap or its keys must be defined\n+optional",
+                    "description": "optional specify whether the ConfigMap or its keys must be defined\n+optional",
                     "type": "boolean"
                 }
             }
@@ -3218,11 +3233,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "defaultMode": {
-                    "description": "Optional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDefaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "description": "defaultMode is optional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDefaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
                     "type": "integer"
                 },
                 "items": {
-                    "description": "If unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nConfigMap will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the ConfigMap,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
@@ -3233,7 +3248,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "optional": {
-                    "description": "Specify whether the ConfigMap or its keys must be defined\n+optional",
+                    "description": "optional specify whether the ConfigMap or its keys must be defined\n+optional",
                     "type": "boolean"
                 }
             }
@@ -3242,14 +3257,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "args": {
-                    "description": "Arguments to the entrypoint.\nThe docker image's CMD is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional",
+                    "description": "Arguments to the entrypoint.\nThe container image's CMD is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "command": {
-                    "description": "Entrypoint array. Not executed within a shell.\nThe docker image's ENTRYPOINT is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional",
+                    "description": "Entrypoint array. Not executed within a shell.\nThe container image's ENTRYPOINT is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced\nto a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will\nproduce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless\nof whether the variable exists or not. Cannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3270,7 +3285,7 @@ const docTemplate = `{
                     }
                 },
                 "image": {
-                    "description": "Docker image name.\nMore info: https://kubernetes.io/docs/concepts/containers/images\nThis field is optional to allow higher level config management to default or override\ncontainer images in workload controllers like Deployments and StatefulSets.\n+optional",
+                    "description": "Container image name.\nMore info: https://kubernetes.io/docs/concepts/containers/images\nThis field is optional to allow higher level config management to default or override\ncontainer images in workload controllers like Deployments and StatefulSets.\n+optional",
                     "type": "string"
                 },
                 "imagePullPolicy": {
@@ -3430,11 +3445,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "medium": {
-                    "description": "What type of storage medium should back this directory.\nThe default is \"\" which means to use the node's default medium.\nMust be an empty string (default) or Memory.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional",
+                    "description": "medium represents what type of storage medium should back this directory.\nThe default is \"\" which means to use the node's default medium.\nMust be an empty string (default) or Memory.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional",
                     "type": "string"
                 },
                 "sizeLimit": {
-                    "description": "Total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: http://kubernetes.io/docs/user-guide/volumes#emptydir\n+optional",
+                    "description": "sizeLimit is the total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: http://kubernetes.io/docs/user-guide/volumes#emptydir\n+optional",
                     "$ref": "#/definitions/resource.Quantity"
                 }
             }
@@ -3519,26 +3534,26 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
                     "type": "string"
                 },
                 "lun": {
-                    "description": "Optional: FC target lun number\n+optional",
+                    "description": "lun is Optional: FC target lun number\n+optional",
                     "type": "integer"
                 },
                 "readOnly": {
-                    "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly is Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 },
                 "targetWWNs": {
-                    "description": "Optional: FC target worldwide names (WWNs)\n+optional",
+                    "description": "targetWWNs is Optional: FC target worldwide names (WWNs)\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "wwids": {
-                    "description": "Optional: FC volume world wide identifiers (wwids)\nEither wwids or combination of targetWWNs and lun must be set, but not both simultaneously.\n+optional",
+                    "description": "wwids Optional: FC volume world wide identifiers (wwids)\nEither wwids or combination of targetWWNs and lun must be set, but not both simultaneously.\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -3553,26 +3568,26 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "driver": {
-                    "description": "Driver is the name of the driver to use for this volume.",
+                    "description": "driver is the name of the driver to use for this volume.",
                     "type": "string"
                 },
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". The default filesystem depends on FlexVolume script.\n+optional",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". The default filesystem depends on FlexVolume script.\n+optional",
                     "type": "string"
                 },
                 "options": {
-                    "description": "Optional: Extra command options if any.\n+optional",
+                    "description": "options is Optional: this field holds extra command options if any.\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     }
                 },
                 "readOnly": {
-                    "description": "Optional: Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly is Optional: defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 },
                 "secretRef": {
-                    "description": "Optional: SecretRef is reference to the secret object containing\nsensitive information to pass to the plugin scripts. This may be\nempty if no secret object is specified. If the secret object\ncontains more than one secret, all secrets are passed to the plugin\nscripts.\n+optional",
+                    "description": "secretRef is Optional: secretRef is reference to the secret object containing\nsensitive information to pass to the plugin scripts. This may be\nempty if no secret object is specified. If the secret object\ncontains more than one secret, all secrets are passed to the plugin\nscripts.\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 }
             }
@@ -3581,11 +3596,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "datasetName": {
-                    "description": "Name of the dataset stored as metadata -\u003e name on the dataset for Flocker\nshould be considered as deprecated\n+optional",
+                    "description": "datasetName is Name of the dataset stored as metadata -\u003e name on the dataset for Flocker\nshould be considered as deprecated\n+optional",
                     "type": "string"
                 },
                 "datasetUUID": {
-                    "description": "UUID of the dataset. This is unique identifier of a Flocker dataset\n+optional",
+                    "description": "datasetUUID is the UUID of the dataset. This is unique identifier of a Flocker dataset\n+optional",
                     "type": "string"
                 }
             }
@@ -3594,19 +3609,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
+                    "description": "fsType is filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
                     "type": "string"
                 },
                 "partition": {
-                    "description": "The partition in the volume that you want to mount.\nIf omitted, the default is to mount by volume name.\nExamples: For volume /dev/sda1, you specify the partition as \"1\".\nSimilarly, the volume partition for /dev/sda is \"0\" (or you can leave the property empty).\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
+                    "description": "partition is the partition in the volume that you want to mount.\nIf omitted, the default is to mount by volume name.\nExamples: For volume /dev/sda1, you specify the partition as \"1\".\nSimilarly, the volume partition for /dev/sda is \"0\" (or you can leave the property empty).\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
                     "type": "integer"
                 },
                 "pdName": {
-                    "description": "Unique name of the PD resource in GCE. Used to identify the disk in GCE.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk",
+                    "description": "pdName is unique name of the PD resource in GCE. Used to identify the disk in GCE.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
+                    "description": "readOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
                     "type": "boolean"
                 }
             }
@@ -3628,15 +3643,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "directory": {
-                    "description": "Target directory name.\nMust not contain or start with '..'.  If '.' is supplied, the volume directory will be the\ngit repository.  Otherwise, if specified, the volume will contain the git repository in\nthe subdirectory with the given name.\n+optional",
+                    "description": "directory is the target directory name.\nMust not contain or start with '..'.  If '.' is supplied, the volume directory will be the\ngit repository.  Otherwise, if specified, the volume will contain the git repository in\nthe subdirectory with the given name.\n+optional",
                     "type": "string"
                 },
                 "repository": {
-                    "description": "Repository URL",
+                    "description": "repository is the URL",
                     "type": "string"
                 },
                 "revision": {
-                    "description": "Commit hash for the specified revision.\n+optional",
+                    "description": "revision is the commit hash for the specified revision.\n+optional",
                     "type": "string"
                 }
             }
@@ -3645,15 +3660,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "endpoints": {
-                    "description": "EndpointsName is the endpoint name that details Glusterfs topology.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+                    "description": "endpoints is the endpoint name that details Glusterfs topology.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
                     "type": "string"
                 },
                 "path": {
-                    "description": "Path is the Glusterfs volume path.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+                    "description": "path is the Glusterfs volume path.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "ReadOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n+optional",
+                    "description": "readOnly here will force the Glusterfs volume to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod\n+optional",
                     "type": "boolean"
                 }
             }
@@ -3703,11 +3718,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "path": {
-                    "description": "Path of the directory on the host.\nIf the path is a symlink, it will follow the link to the real path.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath",
+                    "description": "path of the directory on the host.\nIf the path is a symlink, it will follow the link to the real path.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath",
                     "type": "string"
                 },
                 "type": {
-                    "description": "Type for HostPath Volume\nDefaults to \"\"\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n+optional",
+                    "description": "type for HostPath Volume\nDefaults to \"\"\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n+optional",
                     "type": "string"
                 }
             }
@@ -3716,50 +3731,50 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "chapAuthDiscovery": {
-                    "description": "whether support iSCSI Discovery CHAP authentication\n+optional",
+                    "description": "chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication\n+optional",
                     "type": "boolean"
                 },
                 "chapAuthSession": {
-                    "description": "whether support iSCSI Session CHAP authentication\n+optional",
+                    "description": "chapAuthSession defines whether support iSCSI Session CHAP authentication\n+optional",
                     "type": "boolean"
                 },
                 "fsType": {
-                    "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
+                    "description": "fsType is the filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
                     "type": "string"
                 },
                 "initiatorName": {
-                    "description": "Custom iSCSI Initiator Name.\nIf initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface\n\u003ctarget portal\u003e:\u003cvolume name\u003e will be created for the connection.\n+optional",
+                    "description": "initiatorName is the custom iSCSI Initiator Name.\nIf initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface\n\u003ctarget portal\u003e:\u003cvolume name\u003e will be created for the connection.\n+optional",
                     "type": "string"
                 },
                 "iqn": {
-                    "description": "Target iSCSI Qualified Name.",
+                    "description": "iqn is the target iSCSI Qualified Name.",
                     "type": "string"
                 },
                 "iscsiInterface": {
-                    "description": "iSCSI Interface Name that uses an iSCSI transport.\nDefaults to 'default' (tcp).\n+optional",
+                    "description": "iscsiInterface is the interface Name that uses an iSCSI transport.\nDefaults to 'default' (tcp).\n+optional",
                     "type": "string"
                 },
                 "lun": {
-                    "description": "iSCSI Target Lun number.",
+                    "description": "lun represents iSCSI Target Lun number.",
                     "type": "integer"
                 },
                 "portals": {
-                    "description": "iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).\n+optional",
+                    "description": "portals is the iSCSI Target Portal List. The portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "readOnly": {
-                    "description": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional",
+                    "description": "readOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\n+optional",
                     "type": "boolean"
                 },
                 "secretRef": {
-                    "description": "CHAP Secret for iSCSI target and initiator authentication\n+optional",
+                    "description": "secretRef is the CHAP Secret for iSCSI target and initiator authentication\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "targetPortal": {
-                    "description": "iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).",
+                    "description": "targetPortal is iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port\nis other than default (typically TCP ports 860 and 3260).",
                     "type": "string"
                 }
             }
@@ -3768,15 +3783,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "key": {
-                    "description": "The key to project.",
+                    "description": "key is the key to project.",
                     "type": "string"
                 },
                 "mode": {
-                    "description": "Optional: mode bits used to set permissions on this file.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nIf not specified, the volume defaultMode will be used.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "description": "mode is Optional: mode bits used to set permissions on this file.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nIf not specified, the volume defaultMode will be used.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
                     "type": "integer"
                 },
                 "path": {
-                    "description": "The relative path of the file to map the key to.\nMay not be an absolute path.\nMay not contain the path element '..'.\nMay not start with the string '..'.",
+                    "description": "path is the relative path of the file to map the key to.\nMay not be an absolute path.\nMay not contain the path element '..'.\nMay not start with the string '..'.",
                     "type": "string"
                 }
             }
@@ -3887,7 +3902,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "time": {
-                    "description": "Time is timestamp of when these fields were set. It should always be empty if Operation is 'Apply'\n+optional",
+                    "description": "Time is the timestamp of when the ManagedFields entry was added. The\ntimestamp will also be updated if a field is added, the manager\nchanges any of the owned fields value or removes a field. The\ntimestamp does not update when a field is removed from the entry\nbecause another manager took it over.\n+optional",
                     "type": "string"
                 }
             }
@@ -3896,15 +3911,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "path": {
-                    "description": "Path that is exported by the NFS server.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs",
+                    "description": "path that is exported by the NFS server.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "ReadOnly here will force\nthe NFS export to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional",
+                    "description": "readOnly here will force the NFS export to be mounted with read-only permissions.\nDefaults to false.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional",
                     "type": "boolean"
                 },
                 "server": {
-                    "description": "Server is the hostname or IP address of the NFS server.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs",
+                    "description": "server is the hostname or IP address of the NFS server.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs",
                     "type": "string"
                 }
             }
@@ -3963,7 +3978,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "blockOwnerDeletion": {
-                    "description": "If true, AND if the owner has the \"foregroundDeletion\" finalizer, then\nthe owner cannot be deleted from the key-value store until this\nreference is removed.\nDefaults to false.\nTo set this field, a user needs \"delete\" permission of the owner,\notherwise 422 (Unprocessable Entity) will be returned.\n+optional",
+                    "description": "If true, AND if the owner has the \"foregroundDeletion\" finalizer, then\nthe owner cannot be deleted from the key-value store until this\nreference is removed.\nSee https://kubernetes.io/docs/concepts/architecture/garbage-collection/#foreground-deletion\nfor how the garbage collector interacts with this field and enforces the foreground deletion.\nDefaults to false.\nTo set this field, a user needs \"delete\" permission of the owner,\notherwise 422 (Unprocessable Entity) will be returned.\n+optional",
                     "type": "boolean"
                 },
                 "controller": {
@@ -3988,30 +4003,30 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "accessModes": {
-                    "description": "AccessModes contains the desired access modes the volume should have.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1\n+optional",
+                    "description": "accessModes contains the desired access modes the volume should have.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "dataSource": {
-                    "description": "This field can be used to specify either:\n* An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)\n* An existing PVC (PersistentVolumeClaim)\nIf the provisioner or an external controller can support the specified data source,\nit will create a new volume based on the contents of the specified data source.\nIf the AnyVolumeDataSource feature gate is enabled, this field will always have\nthe same contents as the DataSourceRef field.\n+optional",
+                    "description": "dataSource field can be used to specify either:\n* An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)\n* An existing PVC (PersistentVolumeClaim)\nIf the provisioner or an external controller can support the specified data source,\nit will create a new volume based on the contents of the specified data source.\nIf the AnyVolumeDataSource feature gate is enabled, this field will always have\nthe same contents as the DataSourceRef field.\n+optional",
                     "$ref": "#/definitions/v1.TypedLocalObjectReference"
                 },
                 "dataSourceRef": {
-                    "description": "Specifies the object from which to populate the volume with data, if a non-empty\nvolume is desired. This may be any local object from a non-empty API group (non\ncore object) or a PersistentVolumeClaim object.\nWhen this field is specified, volume binding will only succeed if the type of\nthe specified object matches some installed volume populator or dynamic\nprovisioner.\nThis field will replace the functionality of the DataSource field and as such\nif both fields are non-empty, they must have the same value. For backwards\ncompatibility, both fields (DataSource and DataSourceRef) will be set to the same\nvalue automatically if one of them is empty and the other is non-empty.\nThere are two important differences between DataSource and DataSourceRef:\n* While DataSource only allows two specific types of objects, DataSourceRef\n  allows any non-core object, as well as PersistentVolumeClaim objects.\n* While DataSource ignores disallowed values (dropping them), DataSourceRef\n  preserves all values, and generates an error if a disallowed value is\n  specified.\n(Alpha) Using this field requires the AnyVolumeDataSource feature gate to be enabled.\n+optional",
+                    "description": "dataSourceRef specifies the object from which to populate the volume with data, if a non-empty\nvolume is desired. This may be any local object from a non-empty API group (non\ncore object) or a PersistentVolumeClaim object.\nWhen this field is specified, volume binding will only succeed if the type of\nthe specified object matches some installed volume populator or dynamic\nprovisioner.\nThis field will replace the functionality of the DataSource field and as such\nif both fields are non-empty, they must have the same value. For backwards\ncompatibility, both fields (DataSource and DataSourceRef) will be set to the same\nvalue automatically if one of them is empty and the other is non-empty.\nThere are two important differences between DataSource and DataSourceRef:\n* While DataSource only allows two specific types of objects, DataSourceRef\n  allows any non-core object, as well as PersistentVolumeClaim objects.\n* While DataSource ignores disallowed values (dropping them), DataSourceRef\n  preserves all values, and generates an error if a disallowed value is\n  specified.\n(Beta) Using this field requires the AnyVolumeDataSource feature gate to be enabled.\n+optional",
                     "$ref": "#/definitions/v1.TypedLocalObjectReference"
                 },
                 "resources": {
-                    "description": "Resources represents the minimum resources the volume should have.\nIf RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements\nthat are lower than previous value but must still be higher than capacity recorded in the\nstatus field of the claim.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources\n+optional",
+                    "description": "resources represents the minimum resources the volume should have.\nIf RecoverVolumeExpansionFailure feature is enabled users are allowed to specify resource requirements\nthat are lower than previous value but must still be higher than capacity recorded in the\nstatus field of the claim.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources\n+optional",
                     "$ref": "#/definitions/v1.ResourceRequirements"
                 },
                 "selector": {
-                    "description": "A label query over volumes to consider for binding.\n+optional",
+                    "description": "selector is a label query over volumes to consider for binding.\n+optional",
                     "$ref": "#/definitions/v1.LabelSelector"
                 },
                 "storageClassName": {
-                    "description": "Name of the StorageClass required by the claim.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1\n+optional",
+                    "description": "storageClassName is the name of the StorageClass required by the claim.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1\n+optional",
                     "type": "string"
                 },
                 "volumeMode": {
@@ -4019,7 +4034,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "volumeName": {
-                    "description": "VolumeName is the binding reference to the PersistentVolume backing this claim.\n+optional",
+                    "description": "volumeName is the binding reference to the PersistentVolume backing this claim.\n+optional",
                     "type": "string"
                 }
             }
@@ -4035,7 +4050,7 @@ const docTemplate = `{
                     }
                 },
                 "clusterName": {
-                    "description": "The name of the cluster which the object belongs to.\nThis is used to distinguish resources with same name and namespace in different clusters.\nThis field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.\n+optional",
+                    "description": "Deprecated: ClusterName is a legacy field that was always cleared by\nthe system and never used; it will be removed completely in 1.25.\n\nThe name in the go struct is changed to help clients detect\naccidental use.\n\n+optional",
                     "type": "string"
                 },
                 "creationTimestamp": {
@@ -4058,7 +4073,7 @@ const docTemplate = `{
                     }
                 },
                 "generateName": {
-                    "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will\nNOT return a 409 - instead, it will either return 201 Created or 500 with Reason\nServerTimeout indicating a unique name could not be found in the time allotted, and the client\nshould retry (optionally after the time indicated in the Retry-After header).\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency\n+optional",
+                    "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will return a 409.\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency\n+optional",
                     "type": "string"
                 },
                 "generation": {
@@ -4099,7 +4114,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "selfLink": {
-                    "description": "SelfLink is a URL representing this object.\nPopulated by the system.\nRead-only.\n\nDEPRECATED\nKubernetes will stop propagating this field in 1.20 release and the field is planned\nto be removed in 1.21 release.\n+optional",
+                    "description": "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.\n+optional",
                     "type": "string"
                 },
                 "spec": {
@@ -4116,11 +4131,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "claimName": {
-                    "description": "ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
+                    "description": "claimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Will force the ReadOnly setting in VolumeMounts.\nDefault false.\n+optional",
+                    "description": "readOnly Will force the ReadOnly setting in VolumeMounts.\nDefault false.\n+optional",
                     "type": "boolean"
                 }
             }
@@ -4129,11 +4144,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.",
                     "type": "string"
                 },
                 "pdID": {
-                    "description": "ID that identifies Photon Controller persistent disk",
+                    "description": "pdID is the ID that identifies Photon Controller persistent disk",
                     "type": "string"
                 }
             }
@@ -4142,15 +4157,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "FSType represents the filesystem type to mount\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\". Implicitly inferred to be \"ext4\" if unspecified.",
+                    "description": "fSType represents the filesystem type to mount\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\". Implicitly inferred to be \"ext4\" if unspecified.",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 },
                 "volumeID": {
-                    "description": "VolumeID uniquely identifies a Portworx volume",
+                    "description": "volumeID uniquely identifies a Portworx volume",
                     "type": "string"
                 }
             }
@@ -4167,7 +4182,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "grpc": {
-                    "description": "GRPC specifies an action involving a GRPC port.\nThis is an alpha field and requires enabling GRPCContainerProbe feature gate.\n+featureGate=GRPCContainerProbe\n+optional",
+                    "description": "GRPC specifies an action involving a GRPC port.\nThis is a beta field and requires enabling GRPCContainerProbe feature gate.\n+featureGate=GRPCContainerProbe\n+optional",
                     "$ref": "#/definitions/v1.GRPCAction"
                 },
                 "httpGet": {
@@ -4204,11 +4219,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "defaultMode": {
-                    "description": "Mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "description": "defaultMode are the mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values for mode bits.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
                     "type": "integer"
                 },
                 "sources": {
-                    "description": "list of volume projections\n+optional",
+                    "description": "sources is the list of volume projections\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.VolumeProjection"
@@ -4220,27 +4235,27 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "group": {
-                    "description": "Group to map volume access to\nDefault is no group\n+optional",
+                    "description": "group to map volume access to\nDefault is no group\n+optional",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "ReadOnly here will force the Quobyte volume to be mounted with read-only permissions.\nDefaults to false.\n+optional",
+                    "description": "readOnly here will force the Quobyte volume to be mounted with read-only permissions.\nDefaults to false.\n+optional",
                     "type": "boolean"
                 },
                 "registry": {
-                    "description": "Registry represents a single or multiple Quobyte Registry services\nspecified as a string as host:port pair (multiple entries are separated with commas)\nwhich acts as the central registry for volumes",
+                    "description": "registry represents a single or multiple Quobyte Registry services\nspecified as a string as host:port pair (multiple entries are separated with commas)\nwhich acts as the central registry for volumes",
                     "type": "string"
                 },
                 "tenant": {
-                    "description": "Tenant owning the given Quobyte volume in the Backend\nUsed with dynamically provisioned Quobyte volumes, value is set by the plugin\n+optional",
+                    "description": "tenant owning the given Quobyte volume in the Backend\nUsed with dynamically provisioned Quobyte volumes, value is set by the plugin\n+optional",
                     "type": "string"
                 },
                 "user": {
-                    "description": "User to map volume access to\nDefaults to serivceaccount user\n+optional",
+                    "description": "user to map volume access to\nDefaults to serivceaccount user\n+optional",
                     "type": "string"
                 },
                 "volume": {
-                    "description": "Volume is a string that references an already created Quobyte volume by name.",
+                    "description": "volume is a string that references an already created Quobyte volume by name.",
                     "type": "string"
                 }
             }
@@ -4249,38 +4264,38 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#rbd\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
+                    "description": "fsType is the filesystem type of the volume that you want to mount.\nTip: Ensure that the filesystem type is supported by the host operating system.\nExamples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#rbd\nTODO: how do we prevent errors in the filesystem from compromising the machine\n+optional",
                     "type": "string"
                 },
                 "image": {
-                    "description": "The rados image name.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+                    "description": "image is the rados image name.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
                     "type": "string"
                 },
                 "keyring": {
-                    "description": "Keyring is the path to key ring for RBDUser.\nDefault is /etc/ceph/keyring.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "keyring is the path to key ring for RBDUser.\nDefault is /etc/ceph/keyring.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
                     "type": "string"
                 },
                 "monitors": {
-                    "description": "A collection of Ceph monitors.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+                    "description": "monitors is a collection of Ceph monitors.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "pool": {
-                    "description": "The rados pool name.\nDefault is rbd.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "pool is the rados pool name.\nDefault is rbd.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "ReadOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "readOnly here will force the ReadOnly setting in VolumeMounts.\nDefaults to false.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
                     "type": "boolean"
                 },
                 "secretRef": {
-                    "description": "SecretRef is name of the authentication secret for RBDUser. If provided\noverrides keyring.\nDefault is nil.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "secretRef is name of the authentication secret for RBDUser. If provided\noverrides keyring.\nDefault is nil.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "user": {
-                    "description": "The rados user name.\nDefault is admin.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
+                    "description": "user is the rados user name.\nDefault is admin.\nMore info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it\n+optional",
                     "type": "string"
                 }
             }
@@ -4346,43 +4361,43 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\".\nDefault is \"xfs\".\n+optional",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\".\nDefault is \"xfs\".\n+optional",
                     "type": "string"
                 },
                 "gateway": {
-                    "description": "The host address of the ScaleIO API Gateway.",
+                    "description": "gateway is the host address of the ScaleIO API Gateway.",
                     "type": "string"
                 },
                 "protectionDomain": {
-                    "description": "The name of the ScaleIO Protection Domain for the configured storage.\n+optional",
+                    "description": "protectionDomain is the name of the ScaleIO Protection Domain for the configured storage.\n+optional",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 },
                 "secretRef": {
-                    "description": "SecretRef references to the secret for ScaleIO user and other\nsensitive information. If this is not provided, Login operation will fail.",
+                    "description": "secretRef references to the secret for ScaleIO user and other\nsensitive information. If this is not provided, Login operation will fail.",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "sslEnabled": {
-                    "description": "Flag to enable/disable SSL communication with Gateway, default false\n+optional",
+                    "description": "sslEnabled Flag enable/disable SSL communication with Gateway, default false\n+optional",
                     "type": "boolean"
                 },
                 "storageMode": {
-                    "description": "Indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.\nDefault is ThinProvisioned.\n+optional",
+                    "description": "storageMode indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned.\nDefault is ThinProvisioned.\n+optional",
                     "type": "string"
                 },
                 "storagePool": {
-                    "description": "The ScaleIO Storage Pool associated with the protection domain.\n+optional",
+                    "description": "storagePool is the ScaleIO Storage Pool associated with the protection domain.\n+optional",
                     "type": "string"
                 },
                 "system": {
-                    "description": "The name of the storage system as configured in ScaleIO.",
+                    "description": "system is the name of the storage system as configured in ScaleIO.",
                     "type": "string"
                 },
                 "volumeName": {
-                    "description": "The name of a volume already created in the ScaleIO system\nthat is associated with this volume source.",
+                    "description": "volumeName is the name of a volume already created in the ScaleIO system\nthat is associated with this volume source.",
                     "type": "string"
                 }
             }
@@ -4434,7 +4449,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "items": {
-                    "description": "If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items if unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
@@ -4445,7 +4460,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "optional": {
-                    "description": "Specify whether the Secret or its key must be defined\n+optional",
+                    "description": "optional field specify whether the Secret or its key must be defined\n+optional",
                     "type": "boolean"
                 }
             }
@@ -4454,22 +4469,22 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "defaultMode": {
-                    "description": "Optional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values\nfor mode bits. Defaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
+                    "description": "defaultMode is Optional: mode bits used to set permissions on created files by default.\nMust be an octal value between 0000 and 0777 or a decimal value between 0 and 511.\nYAML accepts both octal and decimal values, JSON requires decimal values\nfor mode bits. Defaults to 0644.\nDirectories within the path are not affected by this setting.\nThis might be in conflict with other options that affect the file\nmode, like fsGroup, and the result can be other mode bits set.\n+optional",
                     "type": "integer"
                 },
                 "items": {
-                    "description": "If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
+                    "description": "items If unspecified, each key-value pair in the Data field of the referenced\nSecret will be projected into the volume as a file whose name is the\nkey and content is the value. If specified, the listed keys will be\nprojected into the specified paths, and unlisted keys will not be\npresent. If a key is specified which is not present in the Secret,\nthe volume setup will error unless it is marked optional. Paths must be\nrelative and may not contain the '..' path or start with '..'.\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.KeyToPath"
                     }
                 },
                 "optional": {
-                    "description": "Specify whether the Secret or its keys must be defined\n+optional",
+                    "description": "optional field specify whether the Secret or its keys must be defined\n+optional",
                     "type": "boolean"
                 },
                 "secretName": {
-                    "description": "Name of the secret in the pod's namespace to use.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#secret\n+optional",
+                    "description": "secretName is the name of the secret in the pod's namespace to use.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#secret\n+optional",
                     "type": "string"
                 }
             }
@@ -4527,15 +4542,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "audience": {
-                    "description": "Audience is the intended audience of the token. A recipient of a token\nmust identify itself with an identifier specified in the audience of the\ntoken, and otherwise should reject the token. The audience defaults to the\nidentifier of the apiserver.\n+optional",
+                    "description": "audience is the intended audience of the token. A recipient of a token\nmust identify itself with an identifier specified in the audience of the\ntoken, and otherwise should reject the token. The audience defaults to the\nidentifier of the apiserver.\n+optional",
                     "type": "string"
                 },
                 "expirationSeconds": {
-                    "description": "ExpirationSeconds is the requested duration of validity of the service\naccount token. As the token approaches expiration, the kubelet volume\nplugin will proactively rotate the service account token. The kubelet will\nstart trying to rotate the token if the token is older than 80 percent of\nits time to live or if the token is older than 24 hours.Defaults to 1 hour\nand must be at least 10 minutes.\n+optional",
+                    "description": "expirationSeconds is the requested duration of validity of the service\naccount token. As the token approaches expiration, the kubelet volume\nplugin will proactively rotate the service account token. The kubelet will\nstart trying to rotate the token if the token is older than 80 percent of\nits time to live or if the token is older than 24 hours.Defaults to 1 hour\nand must be at least 10 minutes.\n+optional",
                     "type": "integer"
                 },
                 "path": {
-                    "description": "Path is the path relative to the mount point of the file to project the\ntoken into.",
+                    "description": "path is the path relative to the mount point of the file to project the\ntoken into.",
                     "type": "string"
                 }
             }
@@ -4544,23 +4559,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
+                    "description": "fsType is the filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
                     "type": "string"
                 },
                 "readOnly": {
-                    "description": "Defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
+                    "description": "readOnly defaults to false (read/write). ReadOnly here will force\nthe ReadOnly setting in VolumeMounts.\n+optional",
                     "type": "boolean"
                 },
                 "secretRef": {
-                    "description": "SecretRef specifies the secret to use for obtaining the StorageOS API\ncredentials.  If not specified, default values will be attempted.\n+optional",
+                    "description": "secretRef specifies the secret to use for obtaining the StorageOS API\ncredentials.  If not specified, default values will be attempted.\n+optional",
                     "$ref": "#/definitions/v1.LocalObjectReference"
                 },
                 "volumeName": {
-                    "description": "VolumeName is the human-readable name of the StorageOS volume.  Volume\nnames are only unique within a namespace.",
+                    "description": "volumeName is the human-readable name of the StorageOS volume.  Volume\nnames are only unique within a namespace.",
                     "type": "string"
                 },
                 "volumeNamespace": {
-                    "description": "VolumeNamespace specifies the scope of the volume within StorageOS.  If no\nnamespace is specified then the Pod's namespace will be used.  This allows the\nKubernetes name scoping to be mirrored within StorageOS for tighter integration.\nSet VolumeName to any name to override the default behaviour.\nSet to \"default\" if you are not using namespaces within StorageOS.\nNamespaces that do not pre-exist within StorageOS will be created.\n+optional",
+                    "description": "volumeNamespace specifies the scope of the volume within StorageOS.  If no\nnamespace is specified then the Pod's namespace will be used.  This allows the\nKubernetes name scoping to be mirrored within StorageOS for tighter integration.\nSet VolumeName to any name to override the default behaviour.\nSet to \"default\" if you are not using namespaces within StorageOS.\nNamespaces that do not pre-exist within StorageOS will be created.\n+optional",
                     "type": "string"
                 }
             }
@@ -4599,123 +4614,123 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "awsElasticBlockStore": {
-                    "description": "AWSElasticBlockStore represents an AWS Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
+                    "description": "awsElasticBlockStore represents an AWS Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore\n+optional",
                     "$ref": "#/definitions/v1.AWSElasticBlockStoreVolumeSource"
                 },
                 "azureDisk": {
-                    "description": "AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.\n+optional",
+                    "description": "azureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.\n+optional",
                     "$ref": "#/definitions/v1.AzureDiskVolumeSource"
                 },
                 "azureFile": {
-                    "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.\n+optional",
+                    "description": "azureFile represents an Azure File Service mount on the host and bind mount to the pod.\n+optional",
                     "$ref": "#/definitions/v1.AzureFileVolumeSource"
                 },
                 "cephfs": {
-                    "description": "CephFS represents a Ceph FS mount on the host that shares a pod's lifetime\n+optional",
+                    "description": "cephFS represents a Ceph FS mount on the host that shares a pod's lifetime\n+optional",
                     "$ref": "#/definitions/v1.CephFSVolumeSource"
                 },
                 "cinder": {
-                    "description": "Cinder represents a cinder volume attached and mounted on kubelets host machine.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
+                    "description": "cinder represents a cinder volume attached and mounted on kubelets host machine.\nMore info: https://examples.k8s.io/mysql-cinder-pd/README.md\n+optional",
                     "$ref": "#/definitions/v1.CinderVolumeSource"
                 },
                 "configMap": {
-                    "description": "ConfigMap represents a configMap that should populate this volume\n+optional",
+                    "description": "configMap represents a configMap that should populate this volume\n+optional",
                     "$ref": "#/definitions/v1.ConfigMapVolumeSource"
                 },
                 "csi": {
-                    "description": "CSI (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers (Beta feature).\n+optional",
+                    "description": "csi (Container Storage Interface) represents ephemeral storage that is handled by certain external CSI drivers (Beta feature).\n+optional",
                     "$ref": "#/definitions/v1.CSIVolumeSource"
                 },
                 "downwardAPI": {
-                    "description": "DownwardAPI represents downward API about the pod that should populate this volume\n+optional",
+                    "description": "downwardAPI represents downward API about the pod that should populate this volume\n+optional",
                     "$ref": "#/definitions/v1.DownwardAPIVolumeSource"
                 },
                 "emptyDir": {
-                    "description": "EmptyDir represents a temporary directory that shares a pod's lifetime.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional",
+                    "description": "emptyDir represents a temporary directory that shares a pod's lifetime.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional",
                     "$ref": "#/definitions/v1.EmptyDirVolumeSource"
                 },
                 "ephemeral": {
-                    "description": "Ephemeral represents a volume that is handled by a cluster storage driver.\nThe volume's lifecycle is tied to the pod that defines it - it will be created before the pod starts,\nand deleted when the pod is removed.\n\nUse this if:\na) the volume is only needed while the pod runs,\nb) features of normal volumes like restoring from snapshot or capacity\n   tracking are needed,\nc) the storage driver is specified through a storage class, and\nd) the storage driver supports dynamic volume provisioning through\n   a PersistentVolumeClaim (see EphemeralVolumeSource for more\n   information on the connection between this volume type\n   and PersistentVolumeClaim).\n\nUse PersistentVolumeClaim or one of the vendor-specific\nAPIs for volumes that persist for longer than the lifecycle\nof an individual pod.\n\nUse CSI for light-weight local ephemeral volumes if the CSI driver is meant to\nbe used that way - see the documentation of the driver for\nmore information.\n\nA pod can use both types of ephemeral volumes and\npersistent volumes at the same time.\n\n+optional",
+                    "description": "ephemeral represents a volume that is handled by a cluster storage driver.\nThe volume's lifecycle is tied to the pod that defines it - it will be created before the pod starts,\nand deleted when the pod is removed.\n\nUse this if:\na) the volume is only needed while the pod runs,\nb) features of normal volumes like restoring from snapshot or capacity\n   tracking are needed,\nc) the storage driver is specified through a storage class, and\nd) the storage driver supports dynamic volume provisioning through\n   a PersistentVolumeClaim (see EphemeralVolumeSource for more\n   information on the connection between this volume type\n   and PersistentVolumeClaim).\n\nUse PersistentVolumeClaim or one of the vendor-specific\nAPIs for volumes that persist for longer than the lifecycle\nof an individual pod.\n\nUse CSI for light-weight local ephemeral volumes if the CSI driver is meant to\nbe used that way - see the documentation of the driver for\nmore information.\n\nA pod can use both types of ephemeral volumes and\npersistent volumes at the same time.\n\n+optional",
                     "$ref": "#/definitions/v1.EphemeralVolumeSource"
                 },
                 "fc": {
-                    "description": "FC represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to the pod.\n+optional",
+                    "description": "fc represents a Fibre Channel resource that is attached to a kubelet's host machine and then exposed to the pod.\n+optional",
                     "$ref": "#/definitions/v1.FCVolumeSource"
                 },
                 "flexVolume": {
-                    "description": "FlexVolume represents a generic volume resource that is\nprovisioned/attached using an exec based plugin.\n+optional",
+                    "description": "flexVolume represents a generic volume resource that is\nprovisioned/attached using an exec based plugin.\n+optional",
                     "$ref": "#/definitions/v1.FlexVolumeSource"
                 },
                 "flocker": {
-                    "description": "Flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running\n+optional",
+                    "description": "flocker represents a Flocker volume attached to a kubelet's host machine. This depends on the Flocker control service being running\n+optional",
                     "$ref": "#/definitions/v1.FlockerVolumeSource"
                 },
                 "gcePersistentDisk": {
-                    "description": "GCEPersistentDisk represents a GCE Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
+                    "description": "gcePersistentDisk represents a GCE Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk\n+optional",
                     "$ref": "#/definitions/v1.GCEPersistentDiskVolumeSource"
                 },
                 "gitRepo": {
-                    "description": "GitRepo represents a git repository at a particular revision.\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an\nEmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir\ninto the Pod's container.\n+optional",
+                    "description": "gitRepo represents a git repository at a particular revision.\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an\nEmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir\ninto the Pod's container.\n+optional",
                     "$ref": "#/definitions/v1.GitRepoVolumeSource"
                 },
                 "glusterfs": {
-                    "description": "Glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md\n+optional",
+                    "description": "glusterfs represents a Glusterfs mount on the host that shares a pod's lifetime.\nMore info: https://examples.k8s.io/volumes/glusterfs/README.md\n+optional",
                     "$ref": "#/definitions/v1.GlusterfsVolumeSource"
                 },
                 "hostPath": {
-                    "description": "HostPath represents a pre-existing file or directory on the host\nmachine that is directly exposed to the container. This is generally\nused for system agents or other privileged things that are allowed\nto see the host machine. Most containers will NOT need this.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n---\nTODO(jonesdl) We need to restrict who can use host directory mounts and who can/can not\nmount host directories as read/write.\n+optional",
+                    "description": "hostPath represents a pre-existing file or directory on the host\nmachine that is directly exposed to the container. This is generally\nused for system agents or other privileged things that are allowed\nto see the host machine. Most containers will NOT need this.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath\n---\nTODO(jonesdl) We need to restrict who can use host directory mounts and who can/can not\nmount host directories as read/write.\n+optional",
                     "$ref": "#/definitions/v1.HostPathVolumeSource"
                 },
                 "iscsi": {
-                    "description": "ISCSI represents an ISCSI Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://examples.k8s.io/volumes/iscsi/README.md\n+optional",
+                    "description": "iscsi represents an ISCSI Disk resource that is attached to a\nkubelet's host machine and then exposed to the pod.\nMore info: https://examples.k8s.io/volumes/iscsi/README.md\n+optional",
                     "$ref": "#/definitions/v1.ISCSIVolumeSource"
                 },
                 "name": {
-                    "description": "Volume's name.\nMust be a DNS_LABEL and unique within the pod.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+                    "description": "name of the volume.\nMust be a DNS_LABEL and unique within the pod.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
                     "type": "string"
                 },
                 "nfs": {
-                    "description": "NFS represents an NFS mount on the host that shares a pod's lifetime\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional",
+                    "description": "nfs represents an NFS mount on the host that shares a pod's lifetime\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#nfs\n+optional",
                     "$ref": "#/definitions/v1.NFSVolumeSource"
                 },
                 "persistentVolumeClaim": {
-                    "description": "PersistentVolumeClaimVolumeSource represents a reference to a\nPersistentVolumeClaim in the same namespace.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims\n+optional",
+                    "description": "persistentVolumeClaimVolumeSource represents a reference to a\nPersistentVolumeClaim in the same namespace.\nMore info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims\n+optional",
                     "$ref": "#/definitions/v1.PersistentVolumeClaimVolumeSource"
                 },
                 "photonPersistentDisk": {
-                    "description": "PhotonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host machine",
+                    "description": "photonPersistentDisk represents a PhotonController persistent disk attached and mounted on kubelets host machine",
                     "$ref": "#/definitions/v1.PhotonPersistentDiskVolumeSource"
                 },
                 "portworxVolume": {
-                    "description": "PortworxVolume represents a portworx volume attached and mounted on kubelets host machine\n+optional",
+                    "description": "portworxVolume represents a portworx volume attached and mounted on kubelets host machine\n+optional",
                     "$ref": "#/definitions/v1.PortworxVolumeSource"
                 },
                 "projected": {
-                    "description": "Items for all in one resources secrets, configmaps, and downward API",
+                    "description": "projected items for all in one resources secrets, configmaps, and downward API",
                     "$ref": "#/definitions/v1.ProjectedVolumeSource"
                 },
                 "quobyte": {
-                    "description": "Quobyte represents a Quobyte mount on the host that shares a pod's lifetime\n+optional",
+                    "description": "quobyte represents a Quobyte mount on the host that shares a pod's lifetime\n+optional",
                     "$ref": "#/definitions/v1.QuobyteVolumeSource"
                 },
                 "rbd": {
-                    "description": "RBD represents a Rados Block Device mount on the host that shares a pod's lifetime.\nMore info: https://examples.k8s.io/volumes/rbd/README.md\n+optional",
+                    "description": "rbd represents a Rados Block Device mount on the host that shares a pod's lifetime.\nMore info: https://examples.k8s.io/volumes/rbd/README.md\n+optional",
                     "$ref": "#/definitions/v1.RBDVolumeSource"
                 },
                 "scaleIO": {
-                    "description": "ScaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.\n+optional",
+                    "description": "scaleIO represents a ScaleIO persistent volume attached and mounted on Kubernetes nodes.\n+optional",
                     "$ref": "#/definitions/v1.ScaleIOVolumeSource"
                 },
                 "secret": {
-                    "description": "Secret represents a secret that should populate this volume.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#secret\n+optional",
+                    "description": "secret represents a secret that should populate this volume.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#secret\n+optional",
                     "$ref": "#/definitions/v1.SecretVolumeSource"
                 },
                 "storageos": {
-                    "description": "StorageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.\n+optional",
+                    "description": "storageOS represents a StorageOS volume attached and mounted on Kubernetes nodes.\n+optional",
                     "$ref": "#/definitions/v1.StorageOSVolumeSource"
                 },
                 "vsphereVolume": {
-                    "description": "VsphereVolume represents a vSphere volume attached and mounted on kubelets host machine\n+optional",
+                    "description": "vsphereVolume represents a vSphere volume attached and mounted on kubelets host machine\n+optional",
                     "$ref": "#/definitions/v1.VsphereVirtualDiskVolumeSource"
                 }
             }
@@ -4766,19 +4781,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "configMap": {
-                    "description": "information about the configMap data to project\n+optional",
+                    "description": "configMap information about the configMap data to project\n+optional",
                     "$ref": "#/definitions/v1.ConfigMapProjection"
                 },
                 "downwardAPI": {
-                    "description": "information about the downwardAPI data to project\n+optional",
+                    "description": "downwardAPI information about the downwardAPI data to project\n+optional",
                     "$ref": "#/definitions/v1.DownwardAPIProjection"
                 },
                 "secret": {
-                    "description": "information about the secret data to project\n+optional",
+                    "description": "secret information about the secret data to project\n+optional",
                     "$ref": "#/definitions/v1.SecretProjection"
                 },
                 "serviceAccountToken": {
-                    "description": "information about the serviceAccountToken data to project\n+optional",
+                    "description": "serviceAccountToken is information about the serviceAccountToken data to project\n+optional",
                     "$ref": "#/definitions/v1.ServiceAccountTokenProjection"
                 }
             }
@@ -4787,19 +4802,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fsType": {
-                    "description": "Filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
+                    "description": "fsType is filesystem type to mount.\nMust be a filesystem type supported by the host operating system.\nEx. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.\n+optional",
                     "type": "string"
                 },
                 "storagePolicyID": {
-                    "description": "Storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.\n+optional",
+                    "description": "storagePolicyID is the storage Policy Based Management (SPBM) profile ID associated with the StoragePolicyName.\n+optional",
                     "type": "string"
                 },
                 "storagePolicyName": {
-                    "description": "Storage Policy Based Management (SPBM) profile name.\n+optional",
+                    "description": "storagePolicyName is the storage Policy Based Management (SPBM) profile name.\n+optional",
                     "type": "string"
                 },
                 "volumePath": {
-                    "description": "Path that identifies vSphere volume vmdk",
+                    "description": "volumePath is the path that identifies vSphere volume vmdk",
                     "type": "string"
                 }
             }
@@ -4989,7 +5004,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific block chaos action.\nSupported action: limit / delay\n+kubebuilder:validation:Enum=limit;delay",
+                    "description": "Action defines the specific block chaos action.\nSupported action: delay\n+kubebuilder:validation:Enum=delay",
                     "type": "string"
                 },
                 "containerNames": {
@@ -5333,6 +5348,96 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.FileAppendSpec": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "Count is the number of times to append the data.",
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "Data is the data for append.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileCreateSpec": {
+            "type": "object",
+            "properties": {
+                "dir-name": {
+                    "description": "DirName is the directory name to create or delete.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileDeleteSpec": {
+            "type": "object",
+            "properties": {
+                "dir-name": {
+                    "description": "DirName is the directory name to create or delete.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileModifyPrivilegeSpec": {
+            "type": "object",
+            "properties": {
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                },
+                "privilege": {
+                    "description": "Privilege is the file privilege to be set.",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.FileRenameSpec": {
+            "type": "object",
+            "properties": {
+                "dest-file": {
+                    "description": "DestFile is the name to be renamed.",
+                    "type": "string"
+                },
+                "source-file": {
+                    "description": "SourceFile is the name need to be renamed.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.FileReplaceSpec": {
+            "type": "object",
+            "properties": {
+                "dest-string": {
+                    "description": "DestStr is the destination string of the file.",
+                    "type": "string"
+                },
+                "file-name": {
+                    "description": "FileName is the name of the file to be created, modified, deleted, renamed, or appended.",
+                    "type": "string"
+                },
+                "line": {
+                    "description": "Line is the line number of the file to be replaced.",
+                    "type": "integer"
+                },
+                "origin-string": {
+                    "description": "OriginStr is the origin string of the file.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.Frame": {
             "type": "object",
             "properties": {
@@ -5386,6 +5491,38 @@ const docTemplate = `{
                 },
                 "zone": {
                     "description": "Zone defines the zone of gcp project.",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPAbortSpec": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Code is a rule to select target by http status code in response",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "HTTP method",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Match path of Uri with wildcard matches",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The TCP port that the target service listens on",
+                    "type": "integer"
+                },
+                "proxy_ports": {
+                    "description": "Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "target": {
+                    "description": "HTTP target: Request or Response",
                     "type": "string"
                 }
             }
@@ -5465,11 +5602,73 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.HTTPConfigSpec": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "description": "The config file path",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.HTTPCriteria": {
             "type": "object",
             "properties": {
                 "statusCode": {
                     "description": "StatusCode defines the expected http status code for the request.\nA statusCode string could be a single code (e.g. 200), or\nan inclusive range (e.g. 200-400, both ` + "`" + `200` + "`" + ` and ` + "`" + `400` + "`" + ` are included).",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPDelaySpec": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Code is a rule to select target by http status code in response",
+                    "type": "string"
+                },
+                "delay": {
+                    "description": "Delay represents the delay of the target request/response",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "HTTP method",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "Match path of Uri with wildcard matches",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The TCP port that the target service listens on",
+                    "type": "integer"
+                },
+                "proxy_ports": {
+                    "description": "Composed with one of the port of HTTP connection, we will only attack HTTP connection with port inside proxy_ports",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "target": {
+                    "description": "HTTP target: Request or Response",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.HTTPRequestSpec": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "The number of requests to send",
+                    "type": "integer"
+                },
+                "enable-conn-pool": {
+                    "description": "Enable connection pool",
+                    "type": "boolean"
+                },
+                "url": {
+                    "description": "Request to send\"",
                     "type": "string"
                 }
             }
@@ -5787,6 +5986,97 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.KafkaFillSpec": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "The host of kafka server",
+                    "type": "string"
+                },
+                "maxBytes": {
+                    "description": "The max bytes to fill",
+                    "type": "integer"
+                },
+                "messageSize": {
+                    "description": "The size of each message",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "The password of kafka client",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The port of kafka server",
+                    "type": "integer"
+                },
+                "reloadCommand": {
+                    "description": "The command to reload kafka config",
+                    "type": "string"
+                },
+                "topic": {
+                    "description": "The topic to attack",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The username of kafka client",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.KafkaFloodSpec": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "The host of kafka server",
+                    "type": "string"
+                },
+                "messageSize": {
+                    "description": "The size of each message",
+                    "type": "integer"
+                },
+                "password": {
+                    "description": "The password of kafka client",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "The port of kafka server",
+                    "type": "integer"
+                },
+                "threads": {
+                    "description": "The number of worker threads",
+                    "type": "integer"
+                },
+                "topic": {
+                    "description": "The topic to attack",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "The username of kafka client",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.KafkaIOSpec": {
+            "type": "object",
+            "properties": {
+                "configFile": {
+                    "description": "The path of server config",
+                    "type": "string"
+                },
+                "nonReadable": {
+                    "description": "Make kafka cluster non-readable",
+                    "type": "boolean"
+                },
+                "nonWritable": {
+                    "description": "Make kafka cluster non-writable",
+                    "type": "boolean"
+                },
+                "topic": {
+                    "description": "The topic to attack",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.KernelChaosSpec": {
             "type": "object",
             "properties": {
@@ -6037,6 +6327,10 @@ const docTemplate = `{
         "v1alpha1.NetworkDelaySpec": {
             "type": "object",
             "properties": {
+                "accept-tcp-flags": {
+                    "description": "only the packet which match the tcp flag can be accepted, others will be dropped.\nonly set when the IPProtocol is tcp, used for partition.",
+                    "type": "string"
+                },
                 "correlation": {
                     "description": "correlation is percentage (10 is 10%)",
                     "type": "string"
@@ -6075,6 +6369,19 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.NetworkDownSpec": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "description": "The network interface to impact",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "NIC down time, time units: ns, us (or µs), ms, s, m, h.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.NetworkDuplicateSpec": {
             "type": "object",
             "properties": {
@@ -6108,6 +6415,31 @@ const docTemplate = `{
                 },
                 "source-port": {
                     "description": "only impact egress traffic from these source ports, use a ',' to separate or to indicate the range, such as 80, 8001:8010.\nit can only be used in conjunction with -p tcp or -p udp",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.NetworkFloodSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "The number of seconds to run the iperf test",
+                    "type": "string"
+                },
+                "ip-address": {
+                    "description": "Generate traffic to this IP address",
+                    "type": "string"
+                },
+                "parallel": {
+                    "description": "The number of iperf parallel client threads to run",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "Generate traffic to this port on the IP address",
+                    "type": "string"
+                },
+                "rate": {
+                    "description": "The speed of network traffic, allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second",
                     "type": "string"
                 }
             }
@@ -6178,11 +6510,48 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.PMJVMMySQLSpec": {
+            "type": "object",
+            "properties": {
+                "database": {
+                    "description": "the match database\ndefault value is \"\", means match all database",
+                    "type": "string"
+                },
+                "exception": {
+                    "description": "The exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `",
+                    "type": "string"
+                },
+                "latency": {
+                    "description": "The latency duration for action 'latency'\nor the latency duration in action ` + "`" + `mysql` + "`" + `",
+                    "type": "integer"
+                },
+                "mysqlConnectorVersion": {
+                    "description": "the version of mysql-connector-java, only support 5.X.X(set to \"5\") and 8.X.X(set to \"8\") now",
+                    "type": "string"
+                },
+                "pid": {
+                    "description": "the pid of Java process which needs to attach",
+                    "type": "integer"
+                },
+                "port": {
+                    "description": "+optional\nthe port of agent server, default 9277",
+                    "type": "integer"
+                },
+                "sqlType": {
+                    "description": "the match sql type\ndefault value is \"\", means match all SQL type.\nThe value can be 'select', 'insert', 'update', 'delete', 'replace'.",
+                    "type": "string"
+                },
+                "table": {
+                    "description": "the match table\ndefault value is \"\", means match all table",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.PhysicalMachineChaosSpec": {
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;clock",
+                    "description": "+kubebuilder:validation:Enum=stress-cpu;stress-mem;disk-read-payload;disk-write-payload;disk-fill;network-corrupt;network-duplicate;network-loss;network-delay;network-partition;network-dns;network-bandwidth;network-flood;network-down;process;jvm-exception;jvm-gc;jvm-latency;jvm-return;jvm-stress;jvm-rule-data;jvm-mysql;clock;redis-expiration;redis-penetration;redis-cacheLimit;redis-restart;redis-stop;kafka-fill;kafka-flood;kafka-io;file-create;file-modify;file-delete;file-rename;file-append;file-replace;vm;user_defined",
                     "type": "string"
                 },
                 "address": {
@@ -6212,6 +6581,46 @@ const docTemplate = `{
                     "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
+                "file-append": {
+                    "description": "+ui:form:when=action=='file-append'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileAppendSpec"
+                },
+                "file-create": {
+                    "description": "+ui:form:when=action=='file-create'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileCreateSpec"
+                },
+                "file-delete": {
+                    "description": "+ui:form:when=action=='file-delete'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileDeleteSpec"
+                },
+                "file-modify": {
+                    "description": "+ui:form:when=action=='file-modify'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileModifyPrivilegeSpec"
+                },
+                "file-rename": {
+                    "description": "+ui:form:when=action=='file-create'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileRenameSpec"
+                },
+                "file-replace": {
+                    "description": "+ui:form:when=action=='file-replace'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.FileReplaceSpec"
+                },
+                "http-abort": {
+                    "description": "+ui:form:when=action=='http-abort'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPAbortSpec"
+                },
+                "http-config": {
+                    "description": "+ui:form:when=action=='http-config'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPConfigSpec"
+                },
+                "http-delay": {
+                    "description": "+ui:form:when=action=='http-delay'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPDelaySpec"
+                },
+                "http-request": {
+                    "description": "+ui:form:when=action=='http-request'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.HTTPRequestSpec"
+                },
                 "jvm-exception": {
                     "description": "+ui:form:when=action=='jvm-exception'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMExceptionSpec"
@@ -6224,6 +6633,10 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='jvm-latency'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMLatencySpec"
                 },
+                "jvm-mysql": {
+                    "description": "+ui:form:when=action=='jvm-mysql'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.PMJVMMySQLSpec"
+                },
                 "jvm-return": {
                     "description": "+ui:form:when=action=='jvm-return'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMReturnSpec"
@@ -6235,6 +6648,18 @@ const docTemplate = `{
                 "jvm-stress": {
                     "description": "+ui:form:when=action=='jvm-stress'\n+optional",
                     "$ref": "#/definitions/v1alpha1.JVMStressSpec"
+                },
+                "kafka-fill": {
+                    "description": "+ui:form:when=action=='kafka-fill'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.KafkaFillSpec"
+                },
+                "kafka-flood": {
+                    "description": "+ui:form:when=action=='kafka-flood'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.KafkaFloodSpec"
+                },
+                "kafka-io": {
+                    "description": "+ui:form:when=action=='kafka-io'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.KafkaIOSpec"
                 },
                 "mode": {
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
@@ -6256,9 +6681,17 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='network-dns'\n+optional",
                     "$ref": "#/definitions/v1alpha1.NetworkDNSSpec"
                 },
+                "network-down": {
+                    "description": "+ui:form:when=action=='network-down'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.NetworkDownSpec"
+                },
                 "network-duplicate": {
                     "description": "+ui:form:when=action=='network-duplicate'\n+optional",
                     "$ref": "#/definitions/v1alpha1.NetworkDuplicateSpec"
+                },
+                "network-flood": {
+                    "description": "+ui:form:when=action=='network-flood'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.NetworkFloodSpec"
                 },
                 "network-loss": {
                     "description": "+ui:form:when=action=='network-loss'\n+optional",
@@ -6271,6 +6704,26 @@ const docTemplate = `{
                 "process": {
                     "description": "+ui:form:when=action=='process'\n+optional",
                     "$ref": "#/definitions/v1alpha1.ProcessSpec"
+                },
+                "redis-cacheLimit": {
+                    "description": "+ui:form:when=action=='redis-cacheLimit'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisCacheLimitSpec"
+                },
+                "redis-expiration": {
+                    "description": "+ui:form:when=action=='redis-expiration'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisExpirationSpec"
+                },
+                "redis-penetration": {
+                    "description": "+ui:form:when=action=='redis-penetration'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisPenetrationSpec"
+                },
+                "redis-restart": {
+                    "description": "+ui:form:when=action=='redis-restart'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisSentinelRestartSpec"
+                },
+                "redis-stop": {
+                    "description": "+ui:form:when=action=='redis-stop'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RedisSentinelStopSpec"
                 },
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
@@ -6288,9 +6741,17 @@ const docTemplate = `{
                     "description": "+ui:form:when=action=='stress-mem'\n+optional",
                     "$ref": "#/definitions/v1alpha1.StressMemorySpec"
                 },
+                "user_defined": {
+                    "description": "+ui:form:when=action=='user_defined'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.UserDefinedSpec"
+                },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of physical machines to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of physical machines the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
+                },
+                "vm": {
+                    "description": "+ui:form:when=action=='vm'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.VMSpec"
                 }
             }
         },
@@ -6555,6 +7016,119 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.RedisCacheLimitSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "cacheSize": {
+                    "description": "The size of ` + "`" + `maxmemory` + "`" + `",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "percent": {
+                    "description": "Specifies maxmemory as a percentage of the original value",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.RedisExpirationSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "expiration": {
+                    "description": "The expiration of the keys",
+                    "type": "string"
+                },
+                "key": {
+                    "description": "The keys to be expired",
+                    "type": "string"
+                },
+                "option": {
+                    "description": "Additional options for ` + "`" + `expiration` + "`" + `",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.RedisPenetrationSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "requestNum": {
+                    "description": "The number of requests to be sent",
+                    "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.RedisSentinelRestartSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "conf": {
+                    "description": "The path of Sentinel conf",
+                    "type": "string"
+                },
+                "flushConfig": {
+                    "description": "The control flag determines whether to flush config",
+                    "type": "boolean"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "redisPath": {
+                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
+                    "type": "boolean"
+                }
+            }
+        },
+        "v1alpha1.RedisSentinelStopSpec": {
+            "type": "object",
+            "properties": {
+                "addr": {
+                    "description": "The adress of Redis server",
+                    "type": "string"
+                },
+                "conf": {
+                    "description": "The path of Sentinel conf",
+                    "type": "string"
+                },
+                "flushConfig": {
+                    "description": "The control flag determines whether to flush config",
+                    "type": "boolean"
+                },
+                "password": {
+                    "description": "The password of Redis server",
+                    "type": "string"
+                },
+                "redisPath": {
+                    "description": "The path of ` + "`" + `redis-server` + "`" + ` command-line tool",
+                    "type": "boolean"
+                }
+            }
+        },
         "v1alpha1.ReorderSpec": {
             "type": "object",
             "properties": {
@@ -6586,7 +7160,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "clusterName": {
-                    "description": "The name of the cluster which the object belongs to.\nThis is used to distinguish resources with same name and namespace in different clusters.\nThis field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.\n+optional",
+                    "description": "Deprecated: ClusterName is a legacy field that was always cleared by\nthe system and never used; it will be removed completely in 1.25.\n\nThe name in the go struct is changed to help clients detect\naccidental use.\n\n+optional",
                     "type": "string"
                 },
                 "creationTimestamp": {
@@ -6609,7 +7183,7 @@ const docTemplate = `{
                     }
                 },
                 "generateName": {
-                    "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will\nNOT return a 409 - instead, it will either return 201 Created or 500 with Reason\nServerTimeout indicating a unique name could not be found in the time allotted, and the client\nshould retry (optionally after the time indicated in the Retry-After header).\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency\n+optional",
+                    "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will return a 409.\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency\n+optional",
                     "type": "string"
                 },
                 "generation": {
@@ -6654,7 +7228,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "selfLink": {
-                    "description": "SelfLink is a URL representing this object.\nPopulated by the system.\nRead-only.\n\nDEPRECATED\nKubernetes will stop propagating this field in 1.20 release and the field is planned\nto be removed in 1.21 release.\n+optional",
+                    "description": "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.\n+optional",
                     "type": "string"
                 },
                 "spec": {
@@ -7112,6 +7686,28 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.UserDefinedSpec": {
+            "type": "object",
+            "properties": {
+                "attackCmd": {
+                    "description": "The command to be executed when attack",
+                    "type": "string"
+                },
+                "recoverCmd": {
+                    "description": "The command to be executed when recover",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.VMSpec": {
+            "type": "object",
+            "properties": {
+                "vm-name": {
+                    "description": "The name of the VM to be injected",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.Workflow": {
             "type": "object",
             "properties": {
@@ -7127,7 +7723,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "clusterName": {
-                    "description": "The name of the cluster which the object belongs to.\nThis is used to distinguish resources with same name and namespace in different clusters.\nThis field is not set anywhere right now and apiserver is going to ignore it if set in create or update request.\n+optional",
+                    "description": "Deprecated: ClusterName is a legacy field that was always cleared by\nthe system and never used; it will be removed completely in 1.25.\n\nThe name in the go struct is changed to help clients detect\naccidental use.\n\n+optional",
                     "type": "string"
                 },
                 "creationTimestamp": {
@@ -7150,7 +7746,7 @@ const docTemplate = `{
                     }
                 },
                 "generateName": {
-                    "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will\nNOT return a 409 - instead, it will either return 201 Created or 500 with Reason\nServerTimeout indicating a unique name could not be found in the time allotted, and the client\nshould retry (optionally after the time indicated in the Retry-After header).\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency\n+optional",
+                    "description": "GenerateName is an optional prefix, used by the server, to generate a unique\nname ONLY IF the Name field has not been provided.\nIf this field is used, the name returned to the client will be different\nthan the name passed. This value will also be combined with a unique suffix.\nThe provided value has the same validation rules as the Name field,\nand may be truncated by the length of the suffix required to make the value\nunique on the server.\n\nIf this field is specified and the generated name exists, the server will return a 409.\n\nApplied only if Name is not specified.\nMore info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#idempotency\n+optional",
                     "type": "string"
                 },
                 "generation": {
@@ -7195,7 +7791,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "selfLink": {
-                    "description": "SelfLink is a URL representing this object.\nPopulated by the system.\nRead-only.\n\nDEPRECATED\nKubernetes will stop propagating this field in 1.20 release and the field is planned\nto be removed in 1.21 release.\n+optional",
+                    "description": "Deprecated: selfLink is a legacy read-only field that is no longer populated by the system.\n+optional",
                     "type": "string"
                 },
                 "spec": {
