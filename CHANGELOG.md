@@ -13,11 +13,13 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add `controller.securityContext` and `dashboard.securityContext` to Helm chart [#3603](https://github.com/chaos-mesh/chaos-mesh/pull/3603)
 - Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
+- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
+- Add new CI "Manually Sign Container Images" to sign existing container images [#3708](https://github.com/chaos-mesh/chaos-mesh/pull/3708)
 - Add `freeze` action for `BlockChaos` to block all io operation on a block device [#3705](https://github.com/chaos-mesh/chaos-mesh/pull/3705)
 
 ### Changed
 
-- Nothing
+- Use the next generation `New Workflow` UI by default [#3718](https://github.com/chaos-mesh/chaos-mesh/pull/3718)
 
 ### Deprecated
 
@@ -30,6 +32,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Remove the explicit use of pingcap/log [#3674](https://github.com/chaos-mesh/chaos-mesh/pull/3674)
+- Fix typo in controller error message [#3704](https://github.com/chaos-mesh/chaos-mesh/pull/3704)
+- Fix panic when logging, log kvs as pair [#3716](https://github.com/chaos-mesh/chaos-mesh/pull/3716)
+- Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
 
 ### Security
 
@@ -198,7 +203,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Adapt install.sh for kubectl/kubernetes cluster greater than 1.24 [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
 - SC2166: Use || or && rather than -o or -a [#3235](https://github.com/chaos-mesh/chaos-mesh/pull/3235)
 - SC2206: Use quote to prevent word splitting/globbing [#3234](https://github.com/chaos-mesh/chaos-mesh/pull/3234)
-- Fix make check does not respect the env-images.yaml [#3210] (https://github.com/chaos-mesh/chaos-mesh/pull/3210)
+- Fix make check does not respect the env-images.yaml [#3210] (<https://github.com/chaos-mesh/chaos-mesh/pull/3210>)
 - SC2004: Remove unnecessary $ on arithmetic variables [#3247](https://github.com/chaos-mesh/chaos-mesh/pull/3247)
 - PhysicalMachineChaos: update stress options type [#3347](https://github.com/chaos-mesh/chaos-mesh/pull/3347)
 - PhysicalMachineChaos: remove validate for IP and host for delay, loss, duplicate, corruption [#3483](https://github.com/chaos-mesh/chaos-mesh/pull/3483)
