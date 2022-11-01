@@ -37,7 +37,7 @@ import (
 
 const remoteClusterControllerFinalizer = "chaos-mesh/remotecluster-controllers"
 const chaosMeshReleaseName = "chaos-mesh"
-const chaosMeshReleaseVersion = "2.2.1"
+const chaosMeshReleaseVersion = "2.4.1"
 
 type Reconciler struct {
 	Log      logr.Logger
