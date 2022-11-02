@@ -10,6 +10,21 @@ on:
       - "**.md"
       # Not available for frontend code for now.
       - "ui/**"
+      - .github/workflows/checklink.yaml
+      - .github/workflows/ci.yml
+      - .github/workflows/ci_skip.yml
+      - .github/workflows/codecov_unittest.yaml
+      - .github/workflows/integration_test.yml
+      - .github/workflows/license_checker.yml
+      - .github/workflows/manually-sign-container-images.yaml
+      - .github/workflows/must_update_changelog.yml
+      - .github/workflows/release_helm_chart.yml
+      - .github/workflows/stale.yml
+      - .github/workflows/upload_env_image.yml
+      - .github/workflows/upload_image.yml
+      - .github/workflows/upload_image_pr.yml
+      - .github/workflows/upload_latest_files.yml
+      - .github/workflows/upload_release_files.yml
 
 permissions: read-all
 
