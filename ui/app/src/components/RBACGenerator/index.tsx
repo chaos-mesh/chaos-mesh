@@ -16,12 +16,11 @@
  */
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import api from 'api'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
-import { CommonApiCommonRbacConfigGetRequest } from 'openapi'
-import { useEffect, useRef, useState } from 'react'
+import { useGetCommonRbacConfig } from 'openapi'
+import { useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
@@ -47,6 +46,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const initialValues = { namespace: 'default', role: 'viewer', clustered: false }
+
 const RBACGenerator = () => {
   const classes = useStyles()
 
@@ -55,32 +56,31 @@ const RBACGenerator = () => {
   const { namespaces } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
-  const [clustered, setClustered] = useState(false)
+  const [params, setParams] = useState(initialValues)
   const [rbac, setRBAC] = useState('')
   const [getSecret, setGetSecret] = useState('')
   const [generateToken, setGenerateToken] = useState('')
   const containerRef = useRef(null)
 
-  const fetchRBACConfig = (values: CommonApiCommonRbacConfigGetRequest) =>
-    api.common.commonRbacConfigGet(values).then(({ data }) => {
-      const entries = Object.entries(data)
-      const [name, yaml] = entries[0]
+  useGetCommonRbacConfig(params, {
+    query: {
+      onSuccess(data) {
+        const entries = Object.entries(data)
+        const [name, yaml] = entries[0]
 
-      setRBAC(yaml)
-      setGetSecret(`kubectl describe${name.includes('cluster') ? '' : ` -n ${values.namespace}`} secrets ${name}`)
-      setGenerateToken(`kubectl create token ${name}`)
-    })
+        setRBAC(yaml)
+        setGetSecret(`kubectl describe${name.includes('cluster') ? '' : ` -n ${params.namespace}`} secrets ${name}`)
+        setGenerateToken(`kubectl create token ${name}`)
+      },
+    },
+  })
 
-  useEffect(() => {
-    fetchRBACConfig({ namespace: 'default', role: 'viewer' })
-  }, [])
-
-  const onValidate = ({ namespace, role, clustered }: CommonApiCommonRbacConfigGetRequest & { clustered: boolean }) => {
-    fetchRBACConfig({
+  const onValidate = ({ namespace, role, clustered }: typeof params) => {
+    setParams({
       namespace: clustered ? '' : namespace,
       role,
+      clustered,
     })
-    setClustered(clustered)
   }
 
   const copyRBAC = () => {
@@ -100,45 +100,42 @@ const RBACGenerator = () => {
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper')}
         </Typography>
-        <Formik
-          initialValues={{ namespace: 'default', role: 'viewer', clustered: false }}
-          onSubmit={() => {}}
-          validate={onValidate}
-          validateOnBlur={false}
-        >
-          <Form>
-            <Space>
-              <FormControl>
-                <FormControlLabel
-                  control={<Field as={Checkbox} name="clustered" color="primary" />}
-                  label={<Typography variant="body2">{i18n('settings.addToken.clustered')}</Typography>}
-                />
-              </FormControl>
-              <SelectField
-                name="namespace"
-                label={i18n('k8s.namespace')}
-                helperText={i18n('common.chooseNamespace')}
-                disabled={clustered}
-              >
-                {namespaces.map((n) => (
-                  <MenuItem key={n} value={n}>
-                    {n}
-                  </MenuItem>
-                ))}
-              </SelectField>
-              <SelectField
-                name="role"
-                label={i18n('settings.addToken.role')}
-                helperText={i18n('settings.addToken.roleHelper')}
-              >
-                {['manager', 'viewer'].map((role) => (
-                  <MenuItem key={role} value={role}>
-                    {_.upperFirst(role)}
-                  </MenuItem>
-                ))}
-              </SelectField>
-            </Space>
-          </Form>
+        <Formik initialValues={initialValues} onSubmit={() => {}} validate={onValidate} validateOnBlur={false}>
+          {({ values: { clustered } }) => (
+            <Form>
+              <Space>
+                <FormControl>
+                  <FormControlLabel
+                    control={<Field as={Checkbox} name="clustered" color="primary" />}
+                    label={<Typography variant="body2">{i18n('settings.addToken.clustered')}</Typography>}
+                  />
+                </FormControl>
+                <SelectField
+                  name="namespace"
+                  label={i18n('k8s.namespace')}
+                  helperText={i18n('common.chooseNamespace')}
+                  disabled={clustered}
+                >
+                  {namespaces.map((n) => (
+                    <MenuItem key={n} value={n}>
+                      {n}
+                    </MenuItem>
+                  ))}
+                </SelectField>
+                <SelectField
+                  name="role"
+                  label={i18n('settings.addToken.role')}
+                  helperText={i18n('settings.addToken.roleHelper')}
+                >
+                  {['manager', 'viewer'].map((role) => (
+                    <MenuItem key={role} value={role}>
+                      {_.upperFirst(role)}
+                    </MenuItem>
+                  ))}
+                </SelectField>
+              </Space>
+            </Form>
+          )}
         </Formik>
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper2')}

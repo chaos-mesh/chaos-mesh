@@ -15,8 +15,7 @@
  *
  */
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
-import api from 'api'
-import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
+import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 

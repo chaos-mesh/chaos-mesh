@@ -15,7 +15,7 @@
  *
  */
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { ConfigChaosDashboardConfig } from 'openapi'
+import { ConfigChaosDashboardConfig } from 'openapi/index.schemas'
 import React from 'react'
 
 import { TokenFormValues } from 'components/Token'

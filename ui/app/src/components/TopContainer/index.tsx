@@ -28,8 +28,9 @@ import {
   useTheme,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import api from 'api'
+import * as auth from 'api/auth'
 import Cookies from 'js-cookie'
+import { useGetCommonConfig } from 'openapi'
 import { useEffect, useState } from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -87,71 +88,68 @@ const TopContainer = () => {
     LS.set('mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
-  const [loading, setLoading] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
 
-  useEffect(() => {
-    /**
-     * Set authorization (RBAC token / GCP) for API use.
-     *
-     */
-    function setAuth() {
-      // GCP
-      const accessToken = Cookies.get('access_token')
-      const expiry = Cookies.get('expiry')
+  /**
+   * Set authorization (RBAC token / GCP) for API use.
+   *
+   */
+  function setAuth() {
+    // GCP
+    const accessToken = Cookies.get('access_token')
+    const expiry = Cookies.get('expiry')
 
-      if (accessToken && expiry) {
-        const token = {
-          accessToken,
-          expiry,
+    if (accessToken && expiry) {
+      const token = {
+        accessToken,
+        expiry,
+      }
+
+      auth.token(token as any)
+      dispatch(setTokenName('gcp'))
+
+      return
+    }
+
+    const token = LS.get('token')
+    const tokenName = LS.get('token-name')
+    const globalNamespace = LS.get('global-namespace')
+
+    if (token && tokenName) {
+      const tokens: TokenFormValues[] = JSON.parse(token)
+
+      auth.token(tokens.find(({ name }) => name === tokenName)!.token)
+      dispatch(setTokens(tokens))
+      dispatch(setTokenName(tokenName))
+    } else {
+      setAuthOpen(true)
+    }
+
+    if (globalNamespace) {
+      auth.namespace(globalNamespace)
+      dispatch(setNameSpace(globalNamespace))
+    }
+  }
+
+  const { isLoading: loading } = useGetCommonConfig({
+    query: {
+      /**
+       * Render different components according to server configuration.
+       *
+       */
+      onSuccess(data) {
+        if (data.security_mode) {
+          setAuth()
         }
 
-        api.auth.token(token as any)
-        dispatch(setTokenName('gcp'))
+        dispatch(setConfig(data))
+      },
+    },
+  })
 
-        return
-      }
-
-      const token = LS.get('token')
-      const tokenName = LS.get('token-name')
-      const globalNamespace = LS.get('global-namespace')
-
-      if (token && tokenName) {
-        const tokens: TokenFormValues[] = JSON.parse(token)
-
-        api.auth.token(tokens.find(({ name }) => name === tokenName)!.token)
-        dispatch(setTokens(tokens))
-        dispatch(setTokenName(tokenName))
-      } else {
-        setAuthOpen(true)
-      }
-
-      if (globalNamespace) {
-        api.auth.namespace(globalNamespace)
-        dispatch(setNameSpace(globalNamespace))
-      }
-    }
-
-    /**
-     * Render different components according to server configuration.
-     *
-     */
-    function fetchServerConfig() {
-      api.common
-        .commonConfigGet()
-        .then(({ data }) => {
-          if (data.security_mode) {
-            setAuth()
-          }
-
-          dispatch(setConfig(data))
-        })
-        .finally(() => setLoading(false))
-    }
-
-    fetchServerConfig()
+  useEffect(() => {
     insertCommonStyle()
-  }, [dispatch])
+  }, [])
 
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('md'))
   useEffect(() => {

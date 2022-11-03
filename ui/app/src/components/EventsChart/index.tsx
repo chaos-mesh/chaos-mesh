@@ -14,18 +14,19 @@
  * limitations under the License.
  *
  */
-
 import { Box, BoxProps } from '@mui/material'
+import { CoreEvent } from 'openapi/index.schemas'
 import { useEffect, useRef } from 'react'
 
-import { CoreEvent } from 'openapi'
-import NotFound from 'components/NotFound'
-import genEventsChart from 'lib/d3/eventsChart'
-import i18n from 'components/T'
 import { useStoreSelector } from 'store'
 
+import NotFound from 'components/NotFound'
+import i18n from 'components/T'
+
+import genEventsChart from 'lib/d3/eventsChart'
+
 interface EventsChartProps extends BoxProps {
-  events: CoreEvent[]
+  events?: CoreEvent[]
 }
 
 const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
@@ -34,7 +35,7 @@ const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
   const chartRef = useRef<any>(null)
 
   useEffect(() => {
-    if (events.length) {
+    if (events) {
       const chart = chartRef.current!
 
       if (typeof chart === 'function') {

@@ -15,11 +15,9 @@
  *
  */
 import loadable from '@loadable/component'
-
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
-import api from 'api'
 import clsx from 'clsx'
 import yaml from 'js-yaml'
 import { useEffect, useRef, useState } from 'react'

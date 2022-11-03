@@ -144,6 +144,6 @@ export const actions = [],
       field: 'text',
       label: 'target',
       value: '',
-      helperText: 'Target is the object to be selected and injected. +kubebuilder:validation:Enum=Request;Response',
+      helperText: 'Target is the object to be selected and injected.',
     },
   ]

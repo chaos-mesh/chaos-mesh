@@ -16,7 +16,11 @@
  */
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from 'api'
-import { TypesPhysicalMachine, V1alpha1PhysicalMachineSelectorSpec, V1alpha1PodSelectorSpec } from 'openapi'
+import {
+  TypesPhysicalMachine,
+  V1alpha1PhysicalMachineSelectorSpec,
+  V1alpha1PodSelectorSpec,
+} from 'openapi/index.schemas'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
 

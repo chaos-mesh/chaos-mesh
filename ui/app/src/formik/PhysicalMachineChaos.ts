@@ -813,7 +813,7 @@ export const actions = [
           field: 'number',
           label: 'buffer',
           value: 0,
-          helperText: '+kubebuilder:validation:Minimum=1',
+          helperText: '',
         },
         {
           field: 'text',
@@ -837,7 +837,7 @@ export const actions = [
           field: 'number',
           label: 'limit',
           value: 0,
-          helperText: '+kubebuilder:validation:Minimum=1',
+          helperText: '',
         },
         {
           field: 'number',
