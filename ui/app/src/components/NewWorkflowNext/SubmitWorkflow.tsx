@@ -16,9 +16,9 @@
  */
 import loadable from '@loadable/component'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import api from 'api'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
+import { usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
@@ -89,6 +89,8 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
   const { namespaces } = state.experiments
   const dispatch = useStoreDispatch()
 
+  const { mutateAsync } = usePostWorkflows()
+
   const submitWorkflow = () => {
     const payload: any = yaml.load(data)
 
@@ -98,8 +100,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
       return
     }
 
-    api.workflows
-      .workflowsPost({ request: payload })
+    mutateAsync(payload)
       .then(() => {
         dispatch(resetWorkflow())
 

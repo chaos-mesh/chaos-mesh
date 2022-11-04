@@ -34,10 +34,10 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
-import api from 'api'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
+import { usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -111,6 +111,8 @@ const NewWorkflow = () => {
   })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
 
+  const { mutateAsync } = usePostWorkflows()
+
   useEffect(() => {
     return () => {
       dispatch(resetNewExperiment())
@@ -181,10 +183,7 @@ const NewWorkflow = () => {
       console.debug('Debug workflow:', workflow)
     }
 
-    api.workflows
-      .workflowsPost({
-        request: yaml.load(workflow) as any,
-      })
+    mutateAsync(yaml.load(workflow) as any)
       .then(() => {
         dispatch(resetWorkflow())
 

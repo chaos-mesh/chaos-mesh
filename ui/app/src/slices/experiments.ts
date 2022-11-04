@@ -15,7 +15,13 @@
  *
  */
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import api from 'api'
+import {
+  getCommonAnnotations,
+  getCommonChaosAvailableNamespaces,
+  getCommonLabels,
+  postCommonPhysicalmachines,
+  postCommonPods,
+} from 'openapi'
 import {
   TypesPhysicalMachine,
   V1alpha1PhysicalMachineSelectorSpec,
@@ -26,48 +32,33 @@ import { Kind } from 'components/NewExperimentNext/data/types'
 
 export const getNamespaces = createAsyncThunk(
   'common/chaos-available-namespaces',
-  async () => (await api.common.commonChaosAvailableNamespacesGet()).data
+  async () => await getCommonChaosAvailableNamespaces()
 )
 export const getLabels = createAsyncThunk(
   'common/labels',
   async (podNamespaceList: string[]) =>
-    (
-      await api.common.commonLabelsGet({
-        podNamespaceList: podNamespaceList.join(','),
-      })
-    ).data
+    await getCommonLabels({
+      podNamespaceList: podNamespaceList.join(','),
+    })
 )
 export const getAnnotations = createAsyncThunk(
   'common/annotations',
   async (podNamespaceList: string[]) =>
-    (
-      await api.common.commonAnnotationsGet({
-        podNamespaceList: podNamespaceList.join(','),
-      })
-    ).data
+    await getCommonAnnotations({
+      podNamespaceList: podNamespaceList.join(','),
+    })
 )
 export const getCommonPods = createAsyncThunk(
   'common/pods',
-  async (data: V1alpha1PodSelectorSpec) =>
-    (
-      await api.common.commonPodsPost({
-        request: data,
-      })
-    ).data
+  async (data: V1alpha1PodSelectorSpec) => await postCommonPods(data)
 )
 export const getNetworkTargetPods = createAsyncThunk(
   'network/target/pods',
-  async (data: V1alpha1PodSelectorSpec) =>
-    (
-      await api.common.commonPodsPost({
-        request: data,
-      })
-    ).data
+  async (data: V1alpha1PodSelectorSpec) => await postCommonPods(data)
 )
 export const getPhysicalMachines = createAsyncThunk(
   'common/physical-machines',
-  async (data: V1alpha1PhysicalMachineSelectorSpec) =>
-    (await api.common.commonPhysicalmachinesPost({ request: data })).data
+  async (data: V1alpha1PhysicalMachineSelectorSpec) => await postCommonPhysicalmachines(data)
 )
 
 export type Env = 'k8s' | 'physic'

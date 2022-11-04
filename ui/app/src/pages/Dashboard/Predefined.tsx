@@ -20,6 +20,7 @@ import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
 import clsx from 'clsx'
 import yaml from 'js-yaml'
+import { postExperiments, postSchedules } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -110,9 +111,7 @@ const Predefined = () => {
     const exp: any = yaml.load(yamlEditor!.getValue())
 
     const isSchedule = exp['kind'] === 'Schedule'
-    const action = isSchedule
-      ? (schedule: any) => api.schedules.schedulesPost({ schedule })
-      : (chaos: any) => api.experiments.experimentsPost({ chaos })
+    const action = isSchedule ? (schedule: any) => postSchedules(schedule) : (chaos: any) => postExperiments(chaos)
 
     action(exp)
       .then(() => {
