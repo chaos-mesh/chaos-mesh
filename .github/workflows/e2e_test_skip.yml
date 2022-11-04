@@ -26,6 +26,7 @@ jobs:
           files: |
             **.md
             ui/**
+            ui/yarn.lock
             .github/workflows/checklink.yaml
             .github/workflows/ci.yml
             .github/workflows/ci_skip.yml
