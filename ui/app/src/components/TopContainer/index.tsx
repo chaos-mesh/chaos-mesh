@@ -133,10 +133,6 @@ const TopContainer = () => {
 
   const { isLoading: loading } = useGetCommonConfig({
     query: {
-      /**
-       * Render different components according to server configuration.
-       *
-       */
       onSuccess(data) {
         if (data.security_mode) {
           setAuth()

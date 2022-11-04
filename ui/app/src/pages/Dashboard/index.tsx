@@ -179,7 +179,7 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('common.timeline')} boxProps={{ mb: 3 }} />
-                <EventsChart events={events} position="relative" height={300} />
+                {events && <EventsChart events={events} position="relative" height={300} />}
               </Paper>
             </Grid>
           </Grid>

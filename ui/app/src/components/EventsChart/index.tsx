@@ -26,7 +26,7 @@ import i18n from 'components/T'
 import genEventsChart from 'lib/d3/eventsChart'
 
 interface EventsChartProps extends BoxProps {
-  events?: CoreEvent[]
+  events: CoreEvent[]
 }
 
 const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
@@ -35,7 +35,7 @@ const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
   const chartRef = useRef<any>(null)
 
   useEffect(() => {
-    if (events) {
+    if (events.length) {
       const chart = chartRef.current!
 
       if (typeof chart === 'function') {
@@ -54,7 +54,7 @@ const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
 
   return (
     <Box {...rest} ref={chartRef}>
-      {events?.length === 0 && <NotFound>{i18n('events.notFound')}</NotFound>}
+      {events.length === 0 && <NotFound>{i18n('events.notFound')}</NotFound>}
     </Box>
   )
 }

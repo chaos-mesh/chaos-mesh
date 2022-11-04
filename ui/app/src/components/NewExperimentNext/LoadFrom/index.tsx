@@ -75,17 +75,45 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
       })
     )
   }
-  const { data: schedule } = useGetSchedulesUid(scheduleUUID, {
-    query: { enabled: scheduleUUID !== '', onSuccess: afterLoad },
+  useGetSchedulesUid(scheduleUUID, {
+    query: {
+      enabled: !!scheduleUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setScheduleUUID('')
+      },
+    },
   })
-  const { data: experiment } = useGetExperimentsUid(experimentUUID, {
-    query: { enabled: experimentUUID !== '', onSuccess: afterLoad },
+  useGetExperimentsUid(experimentUUID, {
+    query: {
+      enabled: !!experimentUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setExperimentUUID('')
+      },
+    },
   })
-  const { data: scheduleArchive } = useGetArchivesSchedulesUid(scheduleArchiveUUID, {
-    query: { enabled: scheduleArchiveUUID !== '', onSuccess: afterLoad },
+  useGetArchivesSchedulesUid(scheduleArchiveUUID, {
+    query: {
+      enabled: !!scheduleArchiveUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setScheduleArchiveUUID('')
+      },
+    },
   })
-  const { data: archive } = useGetArchivesUid(archiveUUID, {
-    query: { enabled: archiveUUID !== '', onSuccess: afterLoad },
+  useGetArchivesUid(archiveUUID, {
+    query: {
+      enabled: !!archiveUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setArchiveUUID('')
+      },
+    },
   })
 
   useEffect(() => {
