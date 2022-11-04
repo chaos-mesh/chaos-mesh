@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v34
+        uses: tj-actions/changed-files@v33
         id: filter
         with:
           files: |
@@ -42,7 +42,7 @@ jobs:
             - .github/workflows/upload_latest_files.yml
             - .github/workflows/upload_release_files.yml
       - name: Echo changed files
-        run: echo ${{ steps.filter.outputs }}
+        run: echo "${{ toJSON(steps.filter.outputs) }}"
   pass:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'true'
