@@ -24,9 +24,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pingcap/errors"
-	"github.com/pingcap/log"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -130,6 +128,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
 	err = generateRuleData(&jvmChaos.Spec)
 	if err != nil {
+		impl.Log.Error(err, "fail to generate rule data")
+
 		return v1alpha1.Injected, err
 	}
 
@@ -173,6 +173,8 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	jvmChaos := obj.(*v1alpha1.JVMChaos)
 	err = generateRuleData(&jvmChaos.Spec)
 	if err != nil {
+		impl.Log.Error(err, "fail to generate rule data")
+
 		return v1alpha1.Injected, err
 	}
 
@@ -286,7 +288,6 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 	}
 	err := t.Execute(buf, bytemanTemplateSpec)
 	if err != nil {
-		log.Error("executing template", zap.Error(err))
 		return err
 	}
 
@@ -295,7 +296,7 @@ func generateRuleData(spec *v1alpha1.JVMChaosSpec) error {
 }
 
 // Object would return the instance of chaos
-func NewImpl(c client.Client, log logr.Logger, decoder *utils.ContainerRecordDecoder) *impltypes.ChaosImplPair {
+func NewImpl(c client.Client, decoder *utils.ContainerRecordDecoder, log logr.Logger) *impltypes.ChaosImplPair {
 	return &impltypes.ChaosImplPair{
 		Name:   "jvmchaos",
 		Object: &v1alpha1.JVMChaos{},

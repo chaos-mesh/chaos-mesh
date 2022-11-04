@@ -1,8 +1,12 @@
 name: Upload tagged install related files to CDN
+
 on:
   push:
     tags:
       - v*
+
+permissions: read-all
+
 jobs:
   run:
     name: Upload
@@ -27,7 +31,7 @@ jobs:
           echo "The tag must start with 'v'"
           echo "GITHUB_REF: ${GITHUB_REF}"
           exit 1
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
         with:
           # Must use at least depth 2!
           fetch-depth: 2
@@ -35,7 +39,7 @@ jobs:
       - uses: actions/setup-python@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.18'
+          go-version: "1.18"
       - name: Configure awscli
         run: |
           pip3 install awscli
@@ -57,7 +61,6 @@ jobs:
           GIT_TAG=${GITHUB_REF##*/}
           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
-          aws s3 cp manifests/crd-v1beta1.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd-v1beta1.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
           aws s3 cp bin/chaosctl ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosctl
           aws s3 cp schedule-migration.tar.gz ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/schedule-migration.tar.gz

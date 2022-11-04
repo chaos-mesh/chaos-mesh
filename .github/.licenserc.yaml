@@ -15,6 +15,7 @@ header:
     - '**/go.mod'
     - '**/go.sum'
     - '.github/workflows/*'
+    - '.github/ISSUE_TEMPLATE/config.yml'
     - '.github/.licenserc.yaml'
     - 'Makefile'
     - 'PROJECT'
@@ -67,3 +68,5 @@ header:
     - 'ui/packages/mui-extends/test/storyshots.test.js'
     # codecov configuration file
     - codecov.yml
+    - .gitkeep
+    - yarn.lock

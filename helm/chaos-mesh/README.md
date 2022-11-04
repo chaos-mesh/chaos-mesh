@@ -27,6 +27,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `images.registry` | The global container registry for the images, you could replace it with your self-hosted container registry. | `ghcr.io` |
 | `images.tag` | The global image tag (for example, semiVer with prefix v, or latest). | `latest` |
 | `imagePullSecrets` | Global Docker registry secret names as an array  | [] (does not add image pull secrets to deployed pods) |
+| `controllerManager.securityContext` | Pod securityContext if needed | `{}` |
 | `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
@@ -74,6 +75,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.updateStrategy` | Specify DaemonSetUpdateStrategy for chaos-daemon | `{}` |
 | `dashboard.create` | Enable chaos-dashboard | `false` |
 | `dashboard.rootUrl` | Specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL. | `http://localhost:2333` |
+| `dashboard.securityContext` | Pod securityContext if needed | `{}` |
 | `dashboard.hostNetwork` | Running chaos-dashboard on host network | `false` |
 | `dashboard.replicaCount` | Replicas of chaos-dashboard | `1` |
 | `dashboard.priorityClassName` | Custom priorityClassName for using pod priorities | `` |

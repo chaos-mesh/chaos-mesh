@@ -56,6 +56,8 @@ imagePullSecrets: []
 # - name: secretName
 
 controllerManager:
+  # securityContext if needed
+  securityContext: {}
   # running chaos-controller-manager on host network
   hostNetwork: false
   # Allow testing on `hostNetwork` pods. This is Dangerous. Please run only as temporary solution.
@@ -232,6 +234,8 @@ dashboard:
   create: true
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
+  # securityContext if needed
+  securityContext: {}
   # running chaos-dashboard on host network
   hostNetwork: false
   # replicas of chaos-dashboard

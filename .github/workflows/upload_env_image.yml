@@ -1,16 +1,22 @@
 name: Upload Env Images
+
 on:
   workflow_dispatch: {}
   push:
     paths:
-      - 'images/build-env/Dockerfile'
-      - 'images/dev-env/Dockerfile'
+      - "images/build-env/Dockerfile"
+      - "images/dev-env/Dockerfile"
     branches:
       - master
       - release-*
 
+permissions: read-all
+
 jobs:
   build-specific-architecture:
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -19,7 +25,7 @@ jobs:
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
 
       - name: Extract Image Tag
         shell: bash
@@ -68,6 +74,9 @@ jobs:
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-$ARCH
 
   upload-manifest:
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
