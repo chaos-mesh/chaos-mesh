@@ -23,9 +23,9 @@ jobs:
         id: filter
         with:
           files: |
-            - "**.md"
+            - **.md
             # Not available for frontend code for now.
-            - "ui/**"
+            - ui/**
             - .github/workflows/checklink.yaml
             - .github/workflows/ci.yml
             - .github/workflows/ci_skip.yml
