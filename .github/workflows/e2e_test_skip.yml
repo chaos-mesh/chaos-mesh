@@ -43,7 +43,7 @@ jobs:
             - .github/workflows/upload_latest_files.yml
             - .github/workflows/upload_release_files.yml
       - name: Echo changed files
-        run: echo ${{ toJSON(steps.filter.outputs) }}
+        run: echo "${{ toJSON(steps.filter.outputs) }}"
   pass:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'true'
