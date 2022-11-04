@@ -12,27 +12,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Nothing
 
-<<<<<<< HEAD
-=======
-### Fixed
-
-- Remove the explicit use of pingcap/log [#3674](https://github.com/chaos-mesh/chaos-mesh/pull/3674)
-- Fix typo in controller error message [#3704](https://github.com/chaos-mesh/chaos-mesh/pull/3704)
-- Fix panic when logging, log kvs as pair [#3716](https://github.com/chaos-mesh/chaos-mesh/pull/3716)
-- Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
-- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
-
-### Security
-
-- Nothing
-
-## [2.4.0] - 2022-09-23
-
-### Added
-
-- Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
-
->>>>>>> 8b13f5ad2 (fix(swagger): update `is mandatory` to true (#3743))
 ### Changed
 
 - Nothing
@@ -48,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Fix timechaos not injected into the child process [#3730](https://github.com/chaos-mesh/chaos-mesh/pull/3730)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
 
 ### Security
 
