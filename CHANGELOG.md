@@ -19,6 +19,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Use the next generation `New Workflow` UI by default [#3718](https://github.com/chaos-mesh/chaos-mesh/pull/3718)
+- Replace openapi-generator with Orval and React Query [#3748](https://github.com/chaos-mesh/chaos-mesh/pull/3748)
 
 ### Deprecated
 
