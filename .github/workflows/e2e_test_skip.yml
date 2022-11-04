@@ -23,13 +23,14 @@ jobs:
         id: filter
         with:
           files: |
-            - "**.md"
+            - **.md
             # Not available for frontend code for now.
-            - "ui/**"
+            - ui/**
             - .github/workflows/checklink.yaml
             - .github/workflows/ci.yml
             - .github/workflows/ci_skip.yml
             - .github/workflows/codecov_unittest.yaml
+            - .github/workflows/e2e_test_skip.yml
             - .github/workflows/integration_test.yml
             - .github/workflows/license_checker.yml
             - .github/workflows/manually-sign-container-images.yaml
@@ -41,6 +42,8 @@ jobs:
             - .github/workflows/upload_image_pr.yml
             - .github/workflows/upload_latest_files.yml
             - .github/workflows/upload_release_files.yml
+      - name: Echo changed files
+        run: echo ${{ toJSON(steps.filter.outputs) }}
   pass:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'true'
