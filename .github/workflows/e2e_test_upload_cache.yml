@@ -7,6 +7,7 @@ on:
       - master
       - release-*
     paths-ignore:
+      - .gitignore
       - "**.md"
       # Not available for frontend code for now.
       - "ui/**"
@@ -14,7 +15,6 @@ on:
       - .github/workflows/ci.yml
       - .github/workflows/ci_skip.yml
       - .github/workflows/codecov_unittest.yaml
-      - .github/workflows/e2e_test_skip.yml
       - .github/workflows/integration_test.yml
       - .github/workflows/license_checker.yml
       - .github/workflows/manually-sign-container-images.yaml
