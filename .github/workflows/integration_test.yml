@@ -13,7 +13,6 @@ on:
       - .github/workflows/ci_skip.yml
       - .github/workflows/codecov_unittest.yaml
       - .github/workflows/e2e_test.yml
-      - .github/workflows/e2e_test_skip.yml
       - .github/workflows/e2e_test_upload_cache.yml
       - .github/workflows/license_checker.yml
       - .github/workflows/manually-sign-container-images.yaml
