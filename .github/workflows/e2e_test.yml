@@ -1,8 +1,4 @@
 # This workflow defines the e2e test related jobs.
-#
-# Please note that due to the GitHub required checks, the `E2E Test Passed` job
-# needs to run to report the status. So here we define an additional "skip" job
-# with the same name to ensure that the status is reported when e2e jobs are not required to run.
 name: E2E Test
 
 on:
@@ -216,7 +212,6 @@ jobs:
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -p -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/pingcap/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
-        if: always()
         env:
           PROFILE_DIRECTORY: ./output/chaos-mesh-profile
         run: |
@@ -228,30 +223,26 @@ jobs:
           for item in $(kubectl -n chaos-mesh get services --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get services $item -oyaml > $PROFILE_DIRECTORY/manifests/services/service-$item.yaml; done;
           for item in $(kubectl -n chaos-mesh get endpoints --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get endpoints $item -oyaml > $PROFILE_DIRECTORY/manifests/services/endpoint-$item.yaml; done;
       - name: post run - upload Chaos Mesh profile info
-        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
-        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"
           retention-days: 7
 
-  skip:
-    needs: changed-files
-    if: needs.changed-files.outputs.only_changed == 'true'
-    name: E2E Test Passed
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Not required to run E2E Test."
   pass:
-    needs: e2e-test-matrix
+    needs:
+      - changed-files
+      - e2e-test-matrix
     name: E2E Test Passed
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 E2E Test Passed!"
+      - if: needs.changed-files.outputs.only_changed == 'true'
+        run: echo "Not required to run E2E Test."
+      - if: needs.changed-files.outputs.only_changed == 'false'
+        run: echo "🎉 E2E Test Passed!"
