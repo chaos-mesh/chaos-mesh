@@ -7,6 +7,7 @@ on:
       - master
       - release-*
     paths-ignore:
+      - .gitignore
       - "**.md"
       # Not available for frontend code for now.
       - "ui/**"
