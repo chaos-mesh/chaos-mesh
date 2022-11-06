@@ -944,15 +944,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The namespace of the object",
-                        "name": "namespace",
-                        "in": "query"
+                        "description": "The UID of the Workflow",
+                        "name": "uid",
+                        "in": "path",
+                        "required": true
                     },
                     {
                         "type": "string",
-                        "description": "The UID of the Workflow",
-                        "name": "uid",
-                        "in": "path"
+                        "description": "The namespace of the object",
+                        "name": "namespace",
+                        "in": "query"
                     },
                     {
                         "type": "number",
