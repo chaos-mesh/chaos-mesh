@@ -1,11 +1,4 @@
 # This workflow defines the e2e test related jobs.
-#
-# Please note that due to the GitHub required checks, the `E2E Test Passed` job
-# needs to run to report the status. So here we need to define an additional
-# "skip" file to ensure that the status is reported. For details, please refer to:
-#
-# - `e2e_skip.yml`
-# - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
 name: E2E Test
 
 on:
@@ -14,30 +7,48 @@ on:
     branches:
       - master
       - release-*
-    paths-ignore:
-      - "**.md"
-      # Not available for frontend code for now.
-      - "ui/**"
-      - .github/workflows/checklink.yaml
-      - .github/workflows/ci.yml
-      - .github/workflows/ci_skip.yml
-      - .github/workflows/codecov_unittest.yaml
-      - .github/workflows/integration_test.yml
-      - .github/workflows/license_checker.yml
-      - .github/workflows/manually-sign-container-images.yaml
-      - .github/workflows/must_update_changelog.yml
-      - .github/workflows/release_helm_chart.yml
-      - .github/workflows/stale.yml
-      - .github/workflows/upload_env_image.yml
-      - .github/workflows/upload_image.yml
-      - .github/workflows/upload_image_pr.yml
-      - .github/workflows/upload_latest_files.yml
-      - .github/workflows/upload_release_files.yml
 
 permissions: read-all
 
 jobs:
+  changed-files:
+    runs-on: ubuntu-latest
+    outputs:
+      only_changed: ${{ steps.filter.outputs.only_changed }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Get changed files
+        uses: tj-actions/changed-files@v34
+        id: filter
+        with:
+          # Not available for frontend code for now.
+          files: |
+            .gitignore
+            **.md
+            ui/**
+            .github/workflows/checklink.yaml
+            .github/workflows/ci.yml
+            .github/workflows/ci_skip.yml
+            .github/workflows/codecov_unittest.yaml
+            .github/workflows/integration_test.yml
+            .github/workflows/license_checker.yml
+            .github/workflows/manually-sign-container-images.yaml
+            .github/workflows/must_update_changelog.yml
+            .github/workflows/release_helm_chart.yml
+            .github/workflows/stale.yml
+            .github/workflows/upload_env_image.yml
+            .github/workflows/upload_image.yml
+            .github/workflows/upload_image_pr.yml
+            .github/workflows/upload_latest_files.yml
+            .github/workflows/upload_release_files.yml
+      - name: Echo changed files
+        run: echo "${{ toJSON(steps.filter.outputs) }}"
+
   build-image:
+    needs: changed-files
+    if: needs.changed-files.outputs.only_changed == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: checkout codes
@@ -102,6 +113,8 @@ jobs:
           retention-days: 7
 
   build-e2e-binary:
+    needs: changed-files
+    if: needs.changed-files.outputs.only_changed == 'false'
     runs-on: ubuntu-latest
     steps:
       - name: checkout codes
@@ -224,12 +237,11 @@ jobs:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"
           retention-days: 7
+
   pass:
+    needs:
+      - e2e-test-matrix
     name: E2E Test Passed
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 E2E Test Passed!"
-    needs:
-      - e2e-test-matrix
-      - build-image
-      - build-e2e-binary
