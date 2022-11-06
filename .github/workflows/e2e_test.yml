@@ -265,12 +265,8 @@ jobs:
 
   pass:
     needs:
-      - changed-files
       - e2e-test-matrix
     name: E2E Test Passed
     runs-on: ubuntu-latest
     steps:
-      - if: needs.changed-files.outputs.only_changed == 'true'
-        run: echo "Not required to run E2E Test."
-      - if: needs.changed-files.outputs.only_changed == 'false'
-        run: echo "🎉 E2E Test Passed!"
+      - run: echo "🎉 E2E Test Passed!"
