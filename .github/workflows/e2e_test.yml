@@ -212,6 +212,7 @@ jobs:
           export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
           KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -p -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/pingcap/e2e-helper:latest
       - name: post run - extract profile info from kubernetes
+        if: always()
         env:
           PROFILE_DIRECTORY: ./output/chaos-mesh-profile
         run: |
@@ -223,12 +224,14 @@ jobs:
           for item in $(kubectl -n chaos-mesh get services --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get services $item -oyaml > $PROFILE_DIRECTORY/manifests/services/service-$item.yaml; done;
           for item in $(kubectl -n chaos-mesh get endpoints --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get endpoints $item -oyaml > $PROFILE_DIRECTORY/manifests/services/endpoint-$item.yaml; done;
       - name: post run - upload Chaos Mesh profile info
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
