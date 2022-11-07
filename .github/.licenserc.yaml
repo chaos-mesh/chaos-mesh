@@ -65,7 +65,7 @@ header:
     - 'ui/packages/mui-extends/.storybook/**'
     - 'ui/packages/mui-extends/stories/**'
     - 'ui/packages/mui-extends/test/storyshots.test.js'
-    - ui/yarn.lock
+    - 'ui/yarn.lock'
     # codecov configuration file
-    - codecov.yml
-    - .gitkeep
+    - 'codecov.yml'
+    - '.gitkeep'
