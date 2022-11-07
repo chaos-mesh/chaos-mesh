@@ -120,8 +120,8 @@ func (s *Service) list(c *gin.Context) {
 // @Description list all events for Workflow and related WorkflowNode.
 // @Tags events
 // @Produce json
+// @Param uid path string true "The UID of the Workflow"
 // @Param namespace query string false "The namespace of the object"
-// @Param uid path string false "The UID of the Workflow"
 // @Param limit query number false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Failure 500 {object} u.APIError

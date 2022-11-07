@@ -22,9 +22,9 @@ core.sqlite
 # But it is just tools that can be installed with make setup
 /_tools/
 
-/images/chaos-dashboard/build
-node_modules
-yarn.lock
+/node_modules
+# FIXME: comment this line temporarily to get e2e_test.yml working.
+# /yarn.lock
 
 output/
 _artifacts/
