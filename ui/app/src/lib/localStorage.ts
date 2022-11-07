@@ -29,14 +29,14 @@ export default class LocalStorage {
   }
 
   static set(key: string, val: string) {
-    return LocalStorage.ls.setItem(PREFIX + key, val)
+    LocalStorage.ls.setItem(PREFIX + key, val)
   }
 
   static setObj(key: string, obj: any) {
-    return LocalStorage.set(key, JSON.stringify(obj))
+    LocalStorage.set(key, JSON.stringify(obj))
   }
 
   static remove(key: string) {
-    return LocalStorage.ls.removeItem(PREFIX + key)
+    LocalStorage.ls.removeItem(PREFIX + key)
   }
 }
