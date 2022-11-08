@@ -29,6 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: Extract Image Tag
+        id: image_tag
         shell: bash
         run: |
           IMAGE_TAG=${GITHUB_REF##*/}
@@ -37,9 +38,8 @@ jobs:
           fi
 
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
-        id: image_tag
 
-      - name: Log in to GitHub Docker Registry
+      - name: Login to GitHub Container registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -82,21 +82,22 @@ jobs:
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-$ARCH
 
   upload-manifest:
+    needs: build-specific-architecture
+    runs-on: ubuntu-latest
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         image:
           [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
-    needs: build-specific-architecture
+    env:
+      IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+      GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
     steps:
-      - name: Build Chaos Mesh manifest
+      - name: Create the manifest list
         env:
           IMAGE: ${{ matrix.image }}
-          IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           # ${VAR,,} convert VAR to lower case
           docker manifest create ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG \
@@ -110,18 +111,86 @@ jobs:
             ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG-arm64 \
             --os linux --arch arm64
 
-      - name: Log in to GitHub Docker Registry
+      - name: Login to GitHub Container registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Chaos Mesh
+      - name: Push the manifest list
         env:
           IMAGE: ${{ matrix.image }}
-          IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           # ${VAR,,} convert VAR to lower case
           docker manifest push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE:$IMAGE_TAG
+
+  sign:
+    needs:
+      - build-specific-architecture
+      - upload-manifest
+    if: needs.build-specific-architecture.outputs.image_tag != 'latest'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Need to upload files to the related release.
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
+    env:
+      IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: "v1.13.1"
+      - name: Login to GitHub Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sign Chaos Mesh Container images
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-mesh:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
+          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-daemon:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
+          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-dashboard:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
+          cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
+          cosign public-key --key env://COSIGN_PRIVATE_KEY > cosign.pub
+      - name: Upload cosign.pub and sigs
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            cosign.pub
+            ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
+            ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
+            ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
+            ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
+
+  sbom:
+    needs: build-specific-architecture
+    if: needs.build-specific-architecture.outputs.image_tag != 'latest'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Need to upload files to the related release.
+    env:
+      IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.18"
+
+      - name: Install bom
+        run: go install sigs.k8s.io/bom/cmd/bom
+
+      - name: Generate SBOM
+        run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
+
+      - name: Upload SBOM
+        uses: softprops/action-gh-release@v1
+        with:
+          files: chaos-mesh-$IMAGE_TAG-sbom.spdx

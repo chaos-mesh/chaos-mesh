@@ -15,7 +15,6 @@ on:
       - .github/workflows/e2e_test.yml
       - .github/workflows/e2e_test_upload_cache.yml
       - .github/workflows/license_checker.yml
-      - .github/workflows/manually-sign-container-images.yaml
       - .github/workflows/must_update_changelog.yml
       - .github/workflows/release_helm_chart.yml
       - .github/workflows/stale.yml
