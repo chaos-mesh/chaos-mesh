@@ -1148,7 +1148,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "services", "endpoints" ]
+    resources: [ "services", "endpoints", "secrets" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
@@ -1163,9 +1163,6 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
-  - apiGroups: [ "" ]
-    resources: [ "secrets" ]
-    verbs: [ "get" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
