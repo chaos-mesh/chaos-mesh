@@ -55,7 +55,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
 		if !k8sError.IsNotFound(err) {
-			r.Log.Error(err, "unable to get chaos")
+			r.Log.Error(err, "unable to get schedule chaos")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -81,7 +81,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	})
 
 	exceededHistory := len(metaItems) - schedule.Spec.HistoryLimit
-	requeuAfter := time.Duration(0)
+
+	// clean finished jobs every 10 minutes default
+	requeuAfter := time.Duration(10*time.Minute)
 	if exceededHistory > 0 {
 		for _, obj := range metaItems[0:exceededHistory] {
 			innerObj, ok := obj.(v1alpha1.InnerObject)
@@ -90,7 +92,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 				if !finished {
 					if untilStop != 0 {
-						if requeuAfter == 0 || requeuAfter > untilStop {
+						if untilStop>requeuAfter {
 							requeuAfter = untilStop
 						}
 
