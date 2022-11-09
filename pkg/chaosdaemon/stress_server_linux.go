@@ -17,16 +17,17 @@ package chaosdaemon
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/golang/protobuf/ptypes/empty"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/cgroups"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/util"
-	"github.com/golang/protobuf/ptypes/empty"
 )
 
 func (s *DaemonServer) ExecStressors(ctx context.Context,
