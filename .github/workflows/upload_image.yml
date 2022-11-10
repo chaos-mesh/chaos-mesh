@@ -163,10 +163,10 @@ jobs:
         with:
           files: |
             cosign.pub
-            ghcr.io-chaos-mesh-chaos-mesh-$IMAGE_TAG.sig
-            ghcr.io-chaos-mesh-chaos-daemon-$IMAGE_TAG.sig
-            ghcr.io-chaos-mesh-chaos-dashboard-$IMAGE_TAG.sig
-            ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
+            ghcr.io-chaos-mesh-chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}.sig
+            ghcr.io-chaos-mesh-chaos-daemon-${{ needs.build-specific-architecture.outputs.image_tag }}.sig
+            ghcr.io-chaos-mesh-chaos-dashboard-${{ needs.build-specific-architecture.outputs.image_tag }}.sig
+            ghcr.io-chaos-mesh-chaos-kernel-${{ needs.build-specific-architecture.outputs.image_tag }}.sig
 
   sbom:
     needs: build-specific-architecture
@@ -185,7 +185,7 @@ jobs:
           go-version: "1.18"
 
       - name: Install bom
-        run: go install sigs.k8s.io/bom/cmd/bom
+        run: go install sigs.k8s.io/bom/cmd/bom@latest
 
       - name: Generate SBOM
         run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
@@ -193,4 +193,4 @@ jobs:
       - name: Upload SBOM
         uses: softprops/action-gh-release@v1
         with:
-          files: chaos-mesh-$IMAGE_TAG-sbom.spdx
+          files: chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}-sbom.spdx
