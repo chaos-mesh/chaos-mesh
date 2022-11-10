@@ -38,7 +38,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Sign images and generate sbom when uploading images in CI [#3766](https://github.com/chaos-mesh/chaos-mesh/pull/3766)
 
 ## [2.4.2] - 2022-11-07
 
