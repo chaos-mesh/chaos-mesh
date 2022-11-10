@@ -35,6 +35,60 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix panic when logging, log kvs as pair [#3716](https://github.com/chaos-mesh/chaos-mesh/pull/3716)
 - Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
 - Ignore some events and set default time period of cleaning finished chaos to 10 minutes to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+
+### Security
+
+- Sign images and generate sbom when uploading images in CI [#3766](https://github.com/chaos-mesh/chaos-mesh/pull/3766)
+
+## [2.4.2] - 2022-11-07
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix timechaos not injected into the child process [#3730](https://github.com/chaos-mesh/chaos-mesh/pull/3730)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+
+### Security
+
+- Nothing
+
+## [2.4.1] - 2022-09-27
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix: mark 2.4.1 not as pre-release version[#3679](https://github.com/chaos-mesh/chaos-mesh/pull/3679)
 
 ### Security
 
@@ -79,6 +133,36 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Security
 
 - Nothing
+
+## [2.3.3] - 2022-11-07
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Remove `limit` action of `BlockChaos` in the dashboard [#3655](https://github.com/chaos-mesh/chaos-mesh/pull/3655)
+- Sync PhysicalMachineChaos to API client and forms [#3660](https://github.com/chaos-mesh/chaos-mesh/pull/3660)
+- Fix timechaos not injected into the child process [#3729](https://github.com/chaos-mesh/chaos-mesh/pull/3729)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+
+### Security
+
+- Nothing
+
 
 ## [2.3.2] - 2022-09-20
 
