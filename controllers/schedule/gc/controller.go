@@ -82,7 +82,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	exceededHistory := len(metaItems) - schedule.Spec.HistoryLimit
 
-	// clean finished jobs every 10 minutes default
+	// clean finished jobs every 10 minutes
 	requeuAfter := time.Duration(10*time.Minute)
 	if exceededHistory > 0 {
 		for _, obj := range metaItems[0:exceededHistory] {
@@ -95,10 +95,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 						if untilStop>requeuAfter {
 							requeuAfter = untilStop
 						}
-
-						r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
-							RunningName: innerObj.GetName(),
-						})
 						continue
 					}
 
@@ -112,9 +108,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 						finished := controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue)
 
 						if !finished {
-							r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
-								RunningName: workflow.Name,
-							})
 							continue
 						}
 					}
