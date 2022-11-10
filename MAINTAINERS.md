@@ -14,6 +14,7 @@ The Maintainers of Chaos Mesh, along with their emails, are listed be
 | Ben Ye ([yeya24](https://github.com/yeya24))               |  [yb532204897@gmail.com](mailto:yb532204897@gmail.com)  |  [ByteDance](https://www.bytedance.com/)   |
 | Hengliang Tan ([Gallardot](https://github.com/Gallardot))  |  [tttick@gmail.com](mailto:tttick@gmail.com)            |  [Xpeng Motors](https://www.xiaopeng.com/) |
 | Zhiqiang Zhou ([STRRL](https://github.com/STRRL))          | [im@strrl.dev](mailto:im@strrl.dev)                     | Freelancer                                 |
+| Glen Yang ([g1eny0ung](https://github.com/g1eny0ung))      | [g1enyy0ung@gmail.com](mailto:g1enyy0ung@gmail.com)     | [EMQ](https://www.emqx.com/)          |
 
 ## Committers
 
@@ -21,7 +22,6 @@ The Committers of Chaos Mesh, along with their emails, are listed below:
 
 | Name                                                             | Email                                                                         | Org                                   |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
-| Glen Yang ([g1eny0ung](https://github.com/g1eny0ung))            | [g1enyy0ung@gmail.com](mailto:g1enyy0ung@gmail.com)                           | [EMQ](https://www.emqx.com/)          |
 | Yihao Fu ([fewdan](https://github.com/fewdan))                   | [fuyihao@pingcap.com](mailto:fuyihao@pingcap.com)                             | [PingCAP](https://www.pingcap.com/)   |
 | Jiaxing Wu ([Colstuwjx](https://github.com/Colstuwjx))           | [wjx_colstu@hotmail.com](mailto:wjx_colstu@hotmail.com)                       | [Kingnet](https://www.kingnet.com/)   |
 | Shuyang Wu ([Yiyiyimu](https://github.com/Yiyiyimu))             | [wosoyoung@gmail.com](mailto:wosoyoung@gmail.com)                             | [APISIX](https://apisix.apache.org/)  |
