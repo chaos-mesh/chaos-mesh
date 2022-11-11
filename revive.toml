@@ -18,6 +18,7 @@ confidence = 0.8
 errorCode = 1
 warningCode = 0
 
+# https://github.com/mgechev/revive#recommended-configuration
 [rule.blank-imports]
 [rule.context-as-argument]
 [rule.dot-imports]
@@ -25,39 +26,38 @@ warningCode = 0
 [rule.error-strings]
 [rule.error-naming]
 [rule.if-return]
-[rule.package-comments]
+[rule.increment-decrement]
+# FIXME: resolve warnings and uncomment.
+# [rule.var-naming]
+#   severity = "warning"
+# FIXME: resolve warnings and uncomment.
+# [rule.package-comments]
+#   severity = "warning"
 [rule.range]
 [rule.receiver-naming]
 [rule.indent-error-flow]
 [rule.empty-block]
 [rule.superfluous-else]
-[rule.modifies-parameter]
+# FIXME: resolve warnings and uncomment.
+# [rule.unused-parameter]
+#   severity = "warning"
+[rule.redefines-builtin-id]
 
-# Add these once issues are fixed
-#[rule.var-naming]
-#  severity = "warning"
-#[rule.confusing-naming]
-#  severity = "warning"
 [rule.confusing-results]
-  severity = "warning"
 [rule.flag-parameter]
   severity = "warning"
-#[rule.unused-parameter]
-#  severity = "warning"
 
-# Decide whether we want these rules
+# Decide whether we want these rules.
 # [rule.exported]
 
-# Already checked by megacheck
+# Already checked by megacheck.
 # [rule.unreachable-code]
 
-# Adding these will slow down the linter
-# They are already provided by megacheck
-# [rule.unexported-return]
+# Adding these slows down the linter because they are already provided by megacheck.
 # [rule.time-naming]
+# [rule.unexported-return]
 # [rule.errorf]
 
-# Adding these will slow down the linter
-# Not sure if they are already provided by megacheck
-# [rule.var-declaration]
+# Adding these slows down the linter but not sure if they are already provided by megacheck.
 # [rule.context-keys-type]
+# [rule.var-declaration]
