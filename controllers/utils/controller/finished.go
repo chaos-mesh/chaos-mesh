@@ -39,8 +39,8 @@ func IsChaosFinishedWithUntilStop(obj v1alpha1.InnerObject, now time.Time) (bool
 				}
 			}
 		}
-		// this oneshot chaos hasn't finished, retry after 10 minutes
-		return finished, time.Duration(10 * time.Minute)
+		// this oneshot chaos hasn't finished, retry after 1 second
+		return finished, time.Duration(time.Second)
 	}
 
 	finished := true

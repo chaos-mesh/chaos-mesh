@@ -34,7 +34,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix typo in controller error message [#3704](https://github.com/chaos-mesh/chaos-mesh/pull/3704)
 - Fix panic when logging, log kvs as pair [#3716](https://github.com/chaos-mesh/chaos-mesh/pull/3716)
 - Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
-- Ignore some events and set default time period of cleaning finished chaos to 10 minutes to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
+- Ignore `ScheduleSkipRemoveHistory` events to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
 - Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
 
 ### Security
