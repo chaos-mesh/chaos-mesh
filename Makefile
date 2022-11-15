@@ -229,7 +229,7 @@ docker-push-e2e:
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG}"
 
 # the version of dns server should keep consistent with helm
-DNS_SERVER_VERSION ?= v0.2.3
+DNS_SERVER_VERSION ?= v0.2.4
 docker-push-dns-server:
 	docker pull ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION}
 	docker tag ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION} "${IMAGE_REGISTRY_PREFIX}chaos-mesh/coredns:${DNS_SERVER_VERSION}"
