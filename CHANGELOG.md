@@ -26,7 +26,16 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+<<<<<<< HEAD
 - Nothing
+=======
+- Remove the explicit use of pingcap/log [#3674](https://github.com/chaos-mesh/chaos-mesh/pull/3674)
+- Fix typo in controller error message [#3704](https://github.com/chaos-mesh/chaos-mesh/pull/3704)
+- Fix panic when logging, log kvs as pair [#3716](https://github.com/chaos-mesh/chaos-mesh/pull/3716)
+- Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
+- Ignore `ScheduleSkipRemoveHistory` events to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+>>>>>>> fc1349d66 ( Ignore `ScheduleSkipRemoveHistory` events (#3767))
 
 ### Security
 
@@ -114,6 +123,95 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+<<<<<<< HEAD
+=======
+- Fix NetworkChaos fail with @ifXX in the device [#3605](https://github.com/chaos-mesh/chaos-mesh/pull/3605)
+- Fix BlockChaos can't show Chinese name. [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
+- Fix "sidecar config" e2e test cases run failed in some scenario.[#3564](https://github.com/chaos-mesh/chaos-mesh/pull/3564)
+- Fix Integration test with bumping kubectl version. [#3589](https://github.com/chaos-mesh/chaos-mesh/pull/3589)
+
+### Security
+
+- Nothing
+
+## [2.3.3] - 2022-11-07
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Remove `limit` action of `BlockChaos` in the dashboard [#3655](https://github.com/chaos-mesh/chaos-mesh/pull/3655)
+- Sync PhysicalMachineChaos to API client and forms [#3660](https://github.com/chaos-mesh/chaos-mesh/pull/3660)
+- Fix timechaos not injected into the child process [#3729](https://github.com/chaos-mesh/chaos-mesh/pull/3729)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+
+### Security
+
+- Nothing
+
+
+## [2.3.2] - 2022-09-20
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Use int64 to restore latency for BlockChaos [#3638](https://github.com/chaos-mesh/chaos-mesh/pull/3638)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix: update helm chart annotation artifacthub.io/prerelease to false [#3626](https://github.com/chaos-mesh/chaos-mesh/pull/3626)
+
+### Security
+
+- Nothing
+
+## [2.3.1] - 2022-09-02
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+>>>>>>> fc1349d66 ( Ignore `ScheduleSkipRemoveHistory` events (#3767))
 - Protect chaos available namespace and filter namespaces if needed [#3473](https://github.com/chaos-mesh/chaos-mesh/pull/3473)
 - Respect flag `enableProfiling` and do not register profiler endpoints when it's false [#3474](https://github.com/chaos-mesh/chaos-mesh/pull/3474)
 - Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
