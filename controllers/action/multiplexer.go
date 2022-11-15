@@ -35,26 +35,30 @@ var _ impltypes.ChaosImpl = (*Multiplexer)(nil)
 // Multiplexer could combine ChaosImpl implementations into one, and route them by Action in the ChaosSpec.
 // Field impl should be a struct which contains several fields with struct tag "action", each field should be an implementation of ChaosImpl.
 // For example:
-//   type tempStruct struct {
-//     Impl1 impltypes.ChaosImpl `action:"action1"`
-//     Impl2 impltypes.ChaosImpl `action:"action2"`
-//   }
+//
+//	type tempStruct struct {
+//	  Impl1 impltypes.ChaosImpl `action:"action1"`
+//	  Impl2 impltypes.ChaosImpl `action:"action2"`
+//	}
+//
 // is valid to be the field in Multiplexer.
 //
 // Because we use reflect fo iterate fields in tempStruct, so fields in tempStruct should be public/exported.
 //
 // When some Chaos like:
-//   type SomeChaos struct {
-//     ***
-//     Spec SomeChaosSpec `json:"spec"`
-//     ***
-//   }
-//   type SomeChaosSpec struct {
-//     ***
-//     // available actions: action1, action2
-//     Action string `json:"action"`
-//     ***
-//   }
+//
+//	type SomeChaos struct {
+//	  ***
+//	  Spec SomeChaosSpec `json:"spec"`
+//	  ***
+//	}
+//	type SomeChaosSpec struct {
+//	  ***
+//	  // available actions: action1, action2
+//	  Action string `json:"action"`
+//	  ***
+//	}
+//
 // is created, the corresponding ChaosImpl(s) for each action will be invoked by struct tag.
 type Multiplexer struct {
 	impl interface{}
