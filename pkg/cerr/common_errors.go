@@ -54,7 +54,7 @@ func NotInit[in any]() *errHelper {
 }
 
 func NotFound(name string) *errHelper {
-	return &errHelper{errors.Errorf("%s not found.", name)}
+	return &errHelper{errors.Errorf("%s not found", name)}
 }
 
 func (h *errHelper) WrapInput(in any) *errHelper {
