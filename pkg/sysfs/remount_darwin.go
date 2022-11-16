@@ -20,5 +20,5 @@ import (
 )
 
 func RemountWithOption(options ...func(uintptr) uintptr) error {
-	return errors.New("Remount is not supported on darwin for now.")
+	return errors.New("remount is not supported on darwin for now")
 }
