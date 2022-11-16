@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Ignore `ScheduleSkipRemoveHistory` events to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
 
 ### Security
 
