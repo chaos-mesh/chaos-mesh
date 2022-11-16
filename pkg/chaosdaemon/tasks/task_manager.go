@@ -63,9 +63,11 @@ type TaskExecutor interface {
 // A task base on a target marked with its IsID.
 // We assume task should implement Injectable.
 // We use TaskConfig.Data which implement TaskExecutor to:
+//
 //	Sum task configs on same IsID into one.
-// 	Create task.
-// 	Assign or update task.
+//	Create task.
+//	Assign or update task.
+//
 // SO if developers wants to use functions in TaskManager ,
 // their imported TaskConfig need to implement interface TaskExecutor.
 // If developers wants to recover task successfully,
