@@ -21,7 +21,7 @@ require (
 	github.com/containerd/containerd v1.5.10
 	github.com/docker/docker v20.10.12+incompatible
 	github.com/ethereum/go-ethereum v1.10.2
-	github.com/fatih/color v1.9.0
+	github.com/fatih/color v1.13.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.8.1
@@ -66,13 +66,8 @@ require (
 	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
-<<<<<<< HEAD
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
-=======
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
->>>>>>> 191c9aeae (fix(ci): resolve part of verify warnings and upgrade revive (#3776))
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8
 	golang.org/x/tools v0.1.12
@@ -104,11 +99,7 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
-<<<<<<< HEAD
-	github.com/BurntSushi/toml v0.3.1 // indirect
-=======
 	github.com/BurntSushi/toml v1.2.0 // indirect
->>>>>>> 191c9aeae (fix(ci): resolve part of verify warnings and upgrade revive (#3776))
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd // indirect
 	github.com/Microsoft/go-winio v0.5.0 // indirect
@@ -185,17 +176,12 @@ require (
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
-<<<<<<< HEAD
-	github.com/mgechev/dots v0.0.0-20190921121421-c36f7dcfbb81 // indirect
-=======
 	github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517 // indirect
-	github.com/mitchellh/copystructure v1.2.0 // indirect
->>>>>>> 191c9aeae (fix(ci): resolve part of verify warnings and upgrade revive (#3776))
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
@@ -226,12 +212,7 @@ require (
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
-<<<<<<< HEAD
-	github.com/stretchr/objx v0.2.0 // indirect
-=======
-	github.com/spf13/cast v1.4.1 // indirect
 	github.com/stretchr/objx v0.4.0 // indirect
->>>>>>> 191c9aeae (fix(ci): resolve part of verify warnings and upgrade revive (#3776))
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
