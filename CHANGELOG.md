@@ -38,6 +38,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
 - Ignore `ScheduleSkipRemoveHistory` events to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
 - Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+- Enable mode when creating PhysicalMachineChaos with addresses in UI [#3797](https://github.com/chaos-mesh/chaos-mesh/pull/3797)
 
 ### Security
 
