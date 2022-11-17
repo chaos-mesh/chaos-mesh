@@ -21,22 +21,22 @@ export default class LocalStorage {
   static ls = window.localStorage
 
   static get(key: string) {
-    return LocalStorage.ls.getItem(PREFIX + key)
+    return this.ls.getItem(PREFIX + key)
   }
 
   static getObj(key: string) {
-    return JSON.parse(LocalStorage.get(key) ?? '{}')
+    return JSON.parse(this.get(key) ?? '{}')
   }
 
   static set(key: string, val: string) {
-    LocalStorage.ls.setItem(PREFIX + key, val)
+    this.ls.setItem(PREFIX + key, val)
   }
 
   static setObj(key: string, obj: any) {
-    LocalStorage.set(key, JSON.stringify(obj))
+    this.set(key, JSON.stringify(obj))
   }
 
   static remove(key: string) {
-    LocalStorage.ls.removeItem(PREFIX + key)
+    this.ls.removeItem(PREFIX + key)
   }
 }
