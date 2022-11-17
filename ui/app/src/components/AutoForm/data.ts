@@ -19,7 +19,7 @@ import _ from 'lodash'
 export const podPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
 export const scopeInitialValues = ({ hasSelector }: { hasSelector: boolean }) => ({
-  ...(!hasSelector && {
+  ...(hasSelector && {
     selector: {
       namespaces: [],
       labelSelectors: [],
