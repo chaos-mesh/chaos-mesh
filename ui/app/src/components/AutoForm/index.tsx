@@ -81,6 +81,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
       scopeInitialValues({ hasSelector: kind === 'PhysicalMachineChaos' && !useNewPhysicalMachine ? false : true })),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
+  const hasSelector = !!initialValues.selector
   const [form, setForm] = useState<AtomFormData[]>([])
   const [scheduled, setScheduled] = useState(false)
 
@@ -342,7 +343,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                   <Typography variant="h6">
                     <T id="newE.steps.scope" />
                   </Typography>
-                  {useNewPhysicalMachine ? (
+                  {hasSelector ? (
                     <Scope
                       env={kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'}
                       kind={kind}
