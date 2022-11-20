@@ -233,6 +233,8 @@ message ApplyHttpChaosRequest {
   int64 startTime = 5;
   bool enterNS = 6;
   string instance_uid = 7;
+
+  string tls = 8;
 }
 
 message ApplyHttpChaosResponse {

@@ -644,6 +644,10 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 type PodHttpChaosSpec  @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSpec") {
     # rules are a list of injection rule for http request.
     rules: [PodHttpChaosRule!]!
+
+	# tls is the tls config,
+	# will be override if there are multiple HTTPChaos experiments are applied
+    tls: PodHttpChaosTLS
 }
 
 # PodHttpChaosStatus defines the actual state of PodHttpChaos.
@@ -656,6 +660,25 @@ type PodHttpChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1
 
     failedMessage: String
     observedGeneration: Int
+}
+
+# PodHttpChaosTLS contains the tls config for HTTPChaos
+type PodHttpChaosTLS @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosTLS") {
+	# secretName represents the name of required secret resource
+	secretName: String!
+
+	# secretNamespace represents the namespace of required secret resource,
+	# should be the same with deployment/chaos-controller-manager in most cases
+	secretNamespace: String!
+
+	# certName represents the data name of cert file in secret, `tls.crt` for example
+	certName: String!
+
+	# keyName represents the data name of key file in secret, `tls.key` for example
+	keyName: String!
+
+	# caName represents the data name of ca file in secret, `ca.crt` for example
+	caName: String
 }
 
 # PodHttpChaosRule defines the injection rule for http.

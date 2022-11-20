@@ -82,6 +82,7 @@ func newServer(dataDir string) *server {
 	s.mux.HandleFunc("/dns", s.dnsTest)
 	s.mux.HandleFunc("/stress", s.stressCondition)
 	s.mux.HandleFunc("/http", s.httpEcho)
+	s.mux.HandleFunc("/setup_https", s.SetupHTTPSServer)
 	return s
 }
 
@@ -313,6 +314,41 @@ func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
 	_, err := io.Copy(w, r.Body)
 	if err != nil {
 		http.Error(w, "fail to copy body between request and response", http.StatusInternalServerError)
+		return
+	}
+}
+
+type TLSServerKeys struct {
+	Cert []byte `json:"cert"`
+	Key  []byte `json:"key"`
+}
+
+func (s *server) SetupHTTPSServer(w http.ResponseWriter, r *http.Request) {
+	var body TLSServerKeys
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = os.WriteFile("/tmp/server.crt", body.Cert, 0644)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = os.WriteFile("/tmp/server.key", body.Key, 0644)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	srv := &server{
+		mux: http.NewServeMux(),
+	}
+	srv.mux.HandleFunc("/ping", pong)
+
+	go func() {
+		panic(http.ListenAndServeTLS("0.0.0.0:8081", "/tmp/server.crt", "/tmp/server.key", srv.mux))
+	}()
+	if err != nil {
 		return
 	}
 }

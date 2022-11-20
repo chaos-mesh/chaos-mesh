@@ -22,6 +22,18 @@ import (
 type Config struct {
 	ProxyPorts []uint32               `json:"proxy_ports,omitempty"`
 	Rules      []PodHttpChaosBaseRule `json:"rules"`
+	TLS        *TLSConfig             `json:"tls,omitempty"`
+}
+
+type TLSConfig struct {
+	CertFile TLSConfigItem  `json:"cert_file,omitempty"`
+	KeyFile  TLSConfigItem  `json:"key_file,omitempty"`
+	CAFile   *TLSConfigItem `json:"ca_file,omitempty"`
+}
+
+type TLSConfigItem struct {
+	Type  string `json:"type"`
+	Value []byte `json:"value"`
 }
 
 // PodHttpChaosBaseRule defines the injection rule without source and port.
