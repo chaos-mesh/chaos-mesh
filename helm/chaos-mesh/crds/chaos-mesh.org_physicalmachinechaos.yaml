@@ -866,6 +866,10 @@ spec:
                     description: The path of `redis-server` command-line tool
                     type: boolean
                 type: object
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select physical machines that are
                   used to inject chaos action.

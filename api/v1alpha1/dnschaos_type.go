@@ -79,6 +79,10 @@ type DNSChaosSpec struct {
 	// 		will take effect on "google.com", "github.com" and "chaos-mesh.org"
 	// +optional
 	DomainNamePatterns []string `json:"patterns,omitempty"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // DNSChaosStatus defines the observed state of DNSChaos

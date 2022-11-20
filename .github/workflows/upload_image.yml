@@ -182,7 +182,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: "1.18"
+          go-version: "1.19.3"
 
       - name: Install bom
         run: go install sigs.k8s.io/bom/cmd/bom@latest
