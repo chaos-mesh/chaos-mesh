@@ -108,11 +108,14 @@ type Stressors struct {
 }
 
 // Normalize the stressors to comply with stress-ng
-func (in *Stressors) Normalize() (string, string, error) {
-	cpuStressors := ""
-	memoryStressors := ""
+func (in *Stressors) Normalize() (cpuStressors string, memoryStressors string, err error) {
+	cpuStressors = ""
+	memoryStressors = ""
+	err = nil
+
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
 		memoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
+
 		if len(in.MemoryStressor.Size) != 0 {
 			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 		}
@@ -129,6 +132,7 @@ func (in *Stressors) Normalize() (string, string, error) {
 		// More details see: https://github.com/chaos-mesh/chaos-mesh/issues/3100
 		cpuStressors += " --cpu-load-slice 10 --cpu-method sqrt"
 		cpuStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
+
 		if in.CPUStressor.Load != nil {
 			cpuStressors += fmt.Sprintf(" --cpu-load %d",
 				*in.CPUStressor.Load)
@@ -140,7 +144,8 @@ func (in *Stressors) Normalize() (string, string, error) {
 			}
 		}
 	}
-	return cpuStressors, memoryStressors, nil
+
+	return
 }
 
 // Stressor defines common configurations of a stressor

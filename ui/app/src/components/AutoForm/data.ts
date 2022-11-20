@@ -18,18 +18,20 @@ import _ from 'lodash'
 
 export const podPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
-export const scopeInitialValues = {
-  selector: {
-    namespaces: [],
-    labelSelectors: [],
-    annotationSelectors: [],
-    podPhaseSelectors: [],
-    pods: [],
-    physicalMachines: [],
-  },
+export const scopeInitialValues = ({ hasSelector }: { hasSelector: boolean }) => ({
+  ...(hasSelector && {
+    selector: {
+      namespaces: [],
+      labelSelectors: [],
+      annotationSelectors: [],
+      podPhaseSelectors: [],
+      pods: [],
+      physicalMachines: [],
+    },
+  }),
   mode: 'all',
   value: undefined,
-}
+})
 
 export interface Schedule {
   schedule: string

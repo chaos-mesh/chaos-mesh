@@ -36,9 +36,9 @@ func NewDefaultZapLogger() (logr.Logger, error) {
 	return logger, nil
 }
 
-//NewZapLoggerWithWriter creates a new logger with io.writer
-//The provided encoder presets NewDevelopmentEncoderConfig used by NewDevelopmentConfig do not enable function name logging.
-//To enable function name, a non-empty value for config.EncoderConfig.FunctionKey.
+// NewZapLoggerWithWriter creates a new logger with io.writer
+// The provided encoder presets NewDevelopmentEncoderConfig used by NewDevelopmentConfig do not enable function name logging.
+// To enable function name, a non-empty value for config.EncoderConfig.FunctionKey.
 func NewZapLoggerWithWriter(out io.Writer) logr.Logger {
 	bWriter := out
 	config := zap.NewDevelopmentConfig()
