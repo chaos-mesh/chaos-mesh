@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package remotechaos
 
 import (
@@ -108,9 +109,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if err != nil {
 				if apierrors.IsNotFound(err) {
 					return nil
-				} else {
-					return err
 				}
+				return err
 			}
 		}
 		return nil

@@ -82,10 +82,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 
 			return ctrl.Result{}, nil
-		} else {
-			// TODO: handle this error
-			r.logger.Error(err, "unable to get local chaos")
 		}
+
+		// TODO: handle this error
+		r.logger.Error(err, "unable to get local chaos")
 		return ctrl.Result{}, nil
 	}
 
