@@ -213,7 +213,7 @@ type RemoteChaosPredicate struct {
 func (RemoteChaosPredicate) Create(e event.CreateEvent) bool {
 	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
 	if !ok {
-		return false
+		return true
 	}
 
 	if obj.GetRemoteCluster() == "" {
@@ -226,7 +226,7 @@ func (RemoteChaosPredicate) Create(e event.CreateEvent) bool {
 func (RemoteChaosPredicate) Update(e event.UpdateEvent) bool {
 	obj, ok := e.ObjectNew.DeepCopyObject().(v1alpha1.RemoteObject)
 	if !ok {
-		return false
+		return true
 	}
 
 	if obj.GetRemoteCluster() == "" {
@@ -239,7 +239,7 @@ func (RemoteChaosPredicate) Update(e event.UpdateEvent) bool {
 func (RemoteChaosPredicate) Delete(e event.DeleteEvent) bool {
 	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
 	if !ok {
-		return false
+		return true
 	}
 
 	if obj.GetRemoteCluster() == "" {
@@ -252,7 +252,7 @@ func (RemoteChaosPredicate) Delete(e event.DeleteEvent) bool {
 func (RemoteChaosPredicate) Generic(e event.GenericEvent) bool {
 	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
 	if !ok {
-		return false
+		return true
 	}
 
 	if obj.GetRemoteCluster() == "" {
