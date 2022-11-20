@@ -30,6 +30,7 @@ import { useStoreSelector } from 'store'
 import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
 import { SpecialTemplateType } from 'components/NewWorkflowNext/utils/convert'
 import Scope from 'components/Scope'
+import Mode from 'components/Scope/Mode'
 import { T } from 'components/T'
 
 import { concatKindAction } from 'lib/utils'
@@ -69,19 +70,18 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
 
   const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
   const noScope =
-    kind === SpecialTemplateType.Suspend ||
-    kind === SpecialTemplateType.Serial ||
-    kind === SpecialTemplateType.Parallel ||
-    (kind === 'PhysicalMachineChaos' && !useNewPhysicalMachine)
+    kind === SpecialTemplateType.Suspend || kind === SpecialTemplateType.Serial || kind === SpecialTemplateType.Parallel
 
   const [initialValues, setInitialValues] = useState<FormikValues>({
     id,
     kind,
     action,
-    ...(kind === 'NetworkChaos' && { target: scopeInitialValues }),
-    ...(!noScope && scopeInitialValues),
+    ...(kind === 'NetworkChaos' && { target: scopeInitialValues({ hasSelector: true }) }),
+    ...(!noScope &&
+      scopeInitialValues({ hasSelector: kind === 'PhysicalMachineChaos' && !useNewPhysicalMachine ? false : true })),
     ...(belong === Belong.Workflow && { ...workflowNodeInfoInitialValues, templateType: kind }),
   })
+  const hasSelector = !!initialValues.selector
   const [form, setForm] = useState<AtomFormData[]>([])
   const [scheduled, setScheduled] = useState(false)
 
@@ -343,12 +343,14 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                   <Typography variant="h6">
                     <T id="newE.steps.scope" />
                   </Typography>
-                  {useNewPhysicalMachine && (
+                  {hasSelector ? (
                     <Scope
                       env={kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'}
                       kind={kind}
                       namespaces={namespaces}
                     />
+                  ) : (
+                    <Mode scope="selector" modeScope="" />
                   )}
                   <Divider />
                   <Box>

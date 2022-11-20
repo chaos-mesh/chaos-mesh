@@ -55,7 +55,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	err := r.Get(ctx, req.NamespacedName, schedule)
 	if err != nil {
 		if !k8sError.IsNotFound(err) {
-			r.Log.Error(err, "unable to get chaos")
+			r.Log.Error(err, "unable to get schedule chaos")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -81,6 +81,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	})
 
 	exceededHistory := len(metaItems) - schedule.Spec.HistoryLimit
+
 	requeuAfter := time.Duration(0)
 	if exceededHistory > 0 {
 		for _, obj := range metaItems[0:exceededHistory] {
@@ -93,10 +94,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 						if requeuAfter == 0 || requeuAfter > untilStop {
 							requeuAfter = untilStop
 						}
-
-						r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
-							RunningName: innerObj.GetName(),
-						})
 						continue
 					}
 
@@ -110,9 +107,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 						finished := controllers.WorkflowConditionEqualsTo(workflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue)
 
 						if !finished {
-							r.Recorder.Event(schedule, recorder.ScheduleSkipRemoveHistory{
-								RunningName: workflow.Name,
-							})
 							continue
 						}
 					}
