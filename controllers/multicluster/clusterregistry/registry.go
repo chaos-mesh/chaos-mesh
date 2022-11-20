@@ -20,7 +20,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -33,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaosmonitor"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 

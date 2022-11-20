@@ -19,12 +19,13 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type Reconciler struct {

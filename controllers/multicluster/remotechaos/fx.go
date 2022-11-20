@@ -21,9 +21,8 @@ import (
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
