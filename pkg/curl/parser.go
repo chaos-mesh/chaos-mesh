@@ -90,7 +90,10 @@ func IsValidRenderedTask(template *v1alpha1.Template) bool {
 	return template.Type == v1alpha1.TypeTask && strings.HasSuffix(template.Task.Container.Name, nameSuffix)
 }
 
-func parseHeader(headerKV string) (string, string) {
-	substring := strings.SplitN(headerKV, ":", 2)
-	return strings.TrimSpace(substring[0]), strings.TrimSpace(substring[1])
+func parseHeader(headerKV string) (key, value string) {
+	kv := strings.SplitN(headerKV, ":", 2)
+
+	key = strings.TrimSpace(kv[0])
+	value = strings.TrimSpace(kv[1])
+	return
 }

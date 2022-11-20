@@ -68,6 +68,10 @@ spec:
                 description: Endpoint indicates the endpoint of the aws server. Just
                   used it in test now.
                 type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret.
                 type: string

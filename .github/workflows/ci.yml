@@ -4,7 +4,7 @@
 # detect changes in go and ui related files, and then run the corresponding sub-jobs
 # based on the changes.
 #
-# Please note that due to the GitHub required checks, the `go` and `ui` jobs are
+# Please note that due to the GitHub required checks, the `go` and `ui` jobs
 # also need to run to report the status. So here we need to define an additional
 # "skip" file to ensure that the status is reported. For details, please refer to:
 #
@@ -42,8 +42,7 @@ jobs:
             ui:
               - 'ui/yarn.lock'
               - '**.js'
-              - '**.ts'
-              - '**.tsx'
+              - '**.ts?(x)'
   go:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}

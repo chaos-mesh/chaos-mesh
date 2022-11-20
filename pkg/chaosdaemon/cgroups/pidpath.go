@@ -16,8 +16,13 @@
 package cgroups
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/containerd/cgroups"
 	"github.com/pkg/errors"
@@ -57,4 +62,42 @@ func PidPath(pid int) cgroups.Path {
 
 		return root, nil
 	}
+}
+
+func V2PidGroupPath(pid int) (string, error) {
+	// escape the CGroup Namespace, resolve https://github.com/chaos-mesh/chaos-mesh/pull/2928#issuecomment-1049465242
+	// nsenter -C -t 1 cat /proc/$pid/cgroup
+	command := exec.Command("nsenter", "-C", "-t", "1", "cat", fmt.Sprintf("/proc/%d/cgroup", pid))
+	var buffer bytes.Buffer
+	command.Stdout = &buffer
+
+	err := command.Run()
+	if err != nil {
+		return "", errors.Wrapf(err, "get cgroup path of pid %d", pid)
+	}
+	return parseCgroupFromReader(&buffer)
+}
+
+// parseCgroupFromReader is copied from github.com/containerd/cgroups/v2/utils.go
+func parseCgroupFromReader(r io.Reader) (string, error) {
+	var (
+		s = bufio.NewScanner(r)
+	)
+	for s.Scan() {
+		var (
+			text  = s.Text()
+			parts = strings.SplitN(text, ":", 3)
+		)
+		if len(parts) < 3 {
+			return "", fmt.Errorf("invalid cgroup entry: %q", text)
+		}
+		// text is like "0::/user.slice/user-1001.slice/session-1.scope"
+		if parts[0] == "0" && parts[1] == "" {
+			return parts[2], nil
+		}
+	}
+	if err := s.Err(); err != nil {
+		return "", err
+	}
+	return "", fmt.Errorf("cgroup path not found")
 }

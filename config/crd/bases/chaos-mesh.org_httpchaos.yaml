@@ -113,6 +113,10 @@ spec:
                 description: Port represents the target port to be proxy of.
                 format: int32
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               replace:
                 description: Replace is a rule to replace some contents in target.
                 properties:
