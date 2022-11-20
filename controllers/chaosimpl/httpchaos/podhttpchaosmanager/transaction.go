@@ -60,6 +60,8 @@ func (a *Append) Apply(chaos *v1alpha1.PodHttpChaos) error {
 	switch item := a.Item.(type) {
 	case v1alpha1.PodHttpChaosRule:
 		chaos.Spec.Rules = append(chaos.Spec.Rules, item)
+	case *v1alpha1.PodHttpChaosTLS:
+		chaos.Spec.TLS = item
 	default:
 		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
@@ -81,10 +83,14 @@ func (t *PodHttpTransaction) Append(item interface{}) error {
 		t.Steps = append(t.Steps, &Append{
 			Item: item,
 		})
-		return nil
+	case *v1alpha1.PodHttpChaosTLS:
+		t.Steps = append(t.Steps, &Append{
+			Item: item,
+		})
 	default:
 		return errors.Wrapf(utils.ErrUnknownType, "type: %T", item)
 	}
+	return nil
 }
 
 // Apply runs every step on the chaos
