@@ -6952,13 +6952,14 @@ paths:
     get:
       description: list all events for Workflow and related WorkflowNode.
       parameters:
-      - description: The namespace of the object
-        in: query
-        name: namespace
-        type: string
       - description: The UID of the Workflow
         in: path
         name: uid
+        required: true
+        type: string
+      - description: The namespace of the object
+        in: query
+        name: namespace
         type: string
       - description: The max length of events list
         in: query
