@@ -21,6 +21,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
+	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotecluster"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
@@ -46,6 +47,7 @@ var Module = fx.Options(
 	fx.Invoke(wfcontrollers.BootstrapWorkflowControllers),
 	fx.Invoke(statuscheck.Bootstrap),
 	fx.Invoke(remotecluster.Bootstrap),
+	fx.Invoke(remotechaos.Bootstrap),
 
 	schedule.Module,
 	chaosimpl.AllImpl)

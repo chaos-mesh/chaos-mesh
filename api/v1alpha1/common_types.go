@@ -177,3 +177,9 @@ type WebhookObject interface {
 	webhook.Validator
 	webhook.Defaulter
 }
+
+// +kubebuilder:object:generate=false
+type RemoteObject interface {
+	StatefulObject
+	GetRemoteCluster() string
+}

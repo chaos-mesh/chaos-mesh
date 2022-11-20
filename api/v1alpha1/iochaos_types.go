@@ -100,6 +100,10 @@ type IOChaosSpec struct {
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // IOChaosStatus defines the observed state of IOChaos

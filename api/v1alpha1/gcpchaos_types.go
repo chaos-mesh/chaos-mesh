@@ -69,6 +69,10 @@ type GCPChaosSpec struct {
 	SecretName *string `json:"secretName,omitempty"`
 
 	GCPSelector `json:",inline"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 type GCPSelector struct {

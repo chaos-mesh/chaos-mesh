@@ -48,6 +48,10 @@ type KernelChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // FailKernRequest defines the injection conditions

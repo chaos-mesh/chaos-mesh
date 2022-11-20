@@ -94,6 +94,10 @@ type AzureSelector struct {
 	// SecretName defines the name of kubernetes secret. It is used for Azure credentials.
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 func (obj *AzureChaos) GetSelectorSpecs() map[string]interface{} {
