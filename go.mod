@@ -102,7 +102,7 @@ require (
 	github.com/BurntSushi/toml v1.2.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd // indirect
-	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/Microsoft/hcsshim v0.8.23 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/alecthomas/units v0.0.0-20210927113745-59d0afb8317a // indirect
@@ -115,12 +115,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5 // indirect
 	github.com/chavacava/garif v0.0.0-20220630083739-93517212f375 // indirect
-<<<<<<< HEAD
-	github.com/cilium/ebpf v0.7.0 // indirect
-	github.com/containerd/continuity v0.1.0 // indirect
-=======
 	github.com/containerd/continuity v0.2.2 // indirect
->>>>>>> e26351d64 (feat(stresschaos): support cgroup v2 for docker and cri-o (#3698))
 	github.com/containerd/fifo v1.0.0 // indirect
 	github.com/containerd/ttrpc v1.1.0 // indirect
 	github.com/containerd/typeurl v1.0.2 // indirect
