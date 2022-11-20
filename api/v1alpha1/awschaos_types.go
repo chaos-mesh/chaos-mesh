@@ -68,6 +68,10 @@ type AWSChaosSpec struct {
 	SecretName *string `json:"secretName,omitempty" webhook:",nilable"`
 
 	AWSSelector `json:",inline"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // AWSChaosStatus represents the status of an AWSChaos

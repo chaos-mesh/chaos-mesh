@@ -35,6 +35,10 @@ type JVMChaosSpec struct {
 	// JVMParameter represents the detail about jvm chaos action definition
 	// +optional
 	JVMParameter `json:",inline"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // JVMChaosAction represents the chaos action about jvm

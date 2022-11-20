@@ -99,6 +99,10 @@ type PhysicalMachineChaosSpec struct {
 	// Duration represents the duration of the chaos action
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // PhysicalMachineChaosStatus defines the observed state of PhysicalMachineChaos

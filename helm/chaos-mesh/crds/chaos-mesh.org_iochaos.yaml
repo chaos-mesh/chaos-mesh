@@ -194,6 +194,10 @@ spec:
                 description: 'Percent defines the percentage of injection errors and
                   provides a number from 0-100. default: 100.'
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select pods that are used to inject
                   chaos action.

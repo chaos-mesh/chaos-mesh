@@ -31,7 +31,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotepodreconciler"
+	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaosmonitor"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
@@ -179,9 +180,10 @@ func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 			provider.NewManager,
 			provider.NewScheme,
 		),
+		fx.Option(types.ChaosObjects),
 		// more reconcilers can be listed here to add themselves to the
 		// controller manager
-		remotepodreconciler.Module,
+		remotechaosmonitor.Module,
 		fx.Populate(&remoteClient),
 		fx.Invoke(run),
 	)

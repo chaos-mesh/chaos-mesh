@@ -3076,6 +3076,11 @@ definitions:
           +ui:form:ignore
           +optional
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       secretName:
         description: |-
           SecretName defines the name of kubernetes secret.
@@ -3154,6 +3159,11 @@ definitions:
           Needed in disk-detach.
           +optional
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       resourceGroupName:
         description: ResourceGroupName defines the name of ResourceGroup
         type: string
@@ -3235,6 +3245,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -3428,6 +3443,11 @@ definitions:
         items:
           type: string
         type: array
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -3667,6 +3687,11 @@ definitions:
       project:
         description: Project defines the ID of gcp project.
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       secretName:
         description: |-
           SecretName defines the name of kubernetes secret. It is used for GCP credentials.
@@ -3750,6 +3775,11 @@ definitions:
       port:
         description: Port represents the target port to be proxy of.
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       replace:
         $ref: '#/definitions/v1alpha1.PodHttpChaosReplaceActions'
         description: |-
@@ -3944,6 +3974,11 @@ definitions:
           +optional
           +kubebuilder:default=100
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -4041,6 +4076,11 @@ definitions:
           +optional
           the port of agent server, default 9277
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       ruleData:
         description: |-
           +optional
@@ -4271,6 +4311,11 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -4433,6 +4478,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -4919,6 +4969,11 @@ definitions:
         description: |-
           +ui:form:when=action=='redis-stop'
           +optional
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
         description: |-
@@ -5037,6 +5092,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -5806,6 +5866,11 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -5991,6 +6056,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
