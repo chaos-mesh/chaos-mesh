@@ -17,6 +17,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Add new CI "Manually Sign Container Images" to sign existing container images [#3708](https://github.com/chaos-mesh/chaos-mesh/pull/3708)
 - Install and uninstall chaos mesh in remote cluster through `RemoteCluster` resource [#3414](https://github.com/chaos-mesh/chaos-mesh/pull/3414)
 - MultiCluster: support inject / recover on remote cluster [#3453](https://github.com/chaos-mesh/chaos-mesh/pull/3453)
+- Add TLS support for HTTPChaos [#3549](https://github.com/chaos-mesh/chaos-mesh/pull/3549)
 
 ### Changed
 
@@ -50,7 +51,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
-- Add TLS support for HTTPChaos [#3549](https://github.com/chaos-mesh/chaos-mesh/pull/3549)
 
 ### Changed
 
