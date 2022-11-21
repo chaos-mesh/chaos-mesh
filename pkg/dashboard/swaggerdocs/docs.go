@@ -5597,6 +5597,10 @@ const docTemplate = `{
                     "description": "Target is the object to be selected and injected.\n+kubebuilder:validation:Enum=Request;Response",
                     "type": "string"
                 },
+                "tls": {
+                    "description": "TLS is the tls config,\nwill override PodHttpChaos if there are multiple HTTPChaos experiments are applied\n+optional",
+                    "$ref": "#/definitions/v1alpha1.PodHttpChaosTLS"
+                },
                 "value": {
                     "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
@@ -6916,6 +6920,31 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "v1alpha1.PodHttpChaosTLS": {
+            "type": "object",
+            "properties": {
+                "caName": {
+                    "description": "CAName represents the data name of ca file in secret, ` + "`" + `ca.crt` + "`" + ` for example\n+optional",
+                    "type": "string"
+                },
+                "certName": {
+                    "description": "CertName represents the data name of cert file in secret, ` + "`" + `tls.crt` + "`" + ` for example",
+                    "type": "string"
+                },
+                "keyName": {
+                    "description": "KeyName represents the data name of key file in secret, ` + "`" + `tls.key` + "`" + ` for example",
+                    "type": "string"
+                },
+                "secretName": {
+                    "description": "SecretName represents the name of required secret resource",
+                    "type": "string"
+                },
+                "secretNamespace": {
+                    "description": "SecretNamespace represents the namespace of required secret resource",
+                    "type": "string"
                 }
             }
         },
