@@ -29,17 +29,6 @@ export default class LocalStorage {
   }
 
   static set(key: string, val: string) {
-<<<<<<< HEAD
-    return LocalStorage.ls.setItem(PREFIX + key, val)
-  }
-
-  static setObj(key: string, obj: any) {
-    return LocalStorage.set(key, JSON.stringify(obj))
-  }
-
-  static remove(key: string) {
-    return LocalStorage.ls.removeItem(PREFIX + key)
-=======
     this.ls.setItem(PREFIX + key, val)
   }
 
@@ -49,6 +38,5 @@ export default class LocalStorage {
 
   static remove(key: string) {
     this.ls.removeItem(PREFIX + key)
->>>>>>> d62eeb433 (fix: enable mode when creating PhysicalMachineChaos with addresses (#3797))
   }
 }
