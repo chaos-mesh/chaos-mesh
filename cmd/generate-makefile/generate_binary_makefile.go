@@ -86,14 +86,14 @@ func renderBinaryGeneratedMk() error {
 // recipes is the list of recipes to generate, edit here to build new binaries.
 var recipes = []binaryRecipeOptions{
 	{
-		TargetName:        "chaos-controller-manager",
+		TargetName:        "images/chaos-mesh/bin/chaos-controller-manager",
 		SourcePath:        "cmd/chaos-controller-manager/main.go",
 		OutputPath:        "images/chaos-mesh/bin/chaos-controller-manager",
 		UseCGO:            false,
 		DependencyTargets: nil,
 		Comment:           "Build binary chaos-controller-manager",
 	}, {
-		TargetName: "chaos-daemon",
+		TargetName: "images/chaos-daemon/bin/chaos-daemon",
 		SourcePath: "cmd/chaos-daemon/main.go",
 		OutputPath: "images/chaos-daemon/bin/chaos-daemon",
 		UseCGO:     true,
@@ -103,7 +103,7 @@ var recipes = []binaryRecipeOptions{
 		},
 		Comment: "Build binary chaos-daemon",
 	}, {
-		TargetName: "chaos-dashboard",
+		TargetName: "images/chaos-dashboard/bin/chaos-dashboard",
 		SourcePath: "cmd/chaos-dashboard/main.go",
 		OutputPath: "images/chaos-dashboard/bin/chaos-dashboard",
 		UseCGO:     true,
@@ -112,9 +112,9 @@ var recipes = []binaryRecipeOptions{
 		},
 		Comment: "Build binary chaos-dashboard",
 	}, {
-		TargetName:        "cdh",
+		TargetName:        "images/chaos-daemon/bin/cdh",
 		SourcePath:        "cmd/chaos-daemon-helper/main.go",
-		OutputPath:        "images/chaos-daemon/bin/chaos-daemon-helper",
+		OutputPath:        "images/chaos-daemon/bin/cdh",
 		UseCGO:            true,
 		DependencyTargets: nil,
 		Comment:           "Build binary chaos-daemon-helper",

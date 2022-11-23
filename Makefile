@@ -77,13 +77,21 @@ include binary.generated.mk container-image.generated.mk
 
 export CLEAN_TARGETS :=
 
+.PHONY: generate-makefile
+generate-makefile: ## Generate makefile
+	@$(GO) run ./cmd/generate-makefile
+
 # The help will print out all targets with their descriptions organized bellow their categories. The categories are represented by `##@` and the target descriptions by `##`.
 # The awk commands is responsible to read the entire set of makefiles included in this invocation, looking for lines of the file as xyz: ## something, and then pretty-format the target and help. Then, if there's a line with ##@ something, that gets pretty-printed as a category.
 # More info over the usage of ANSI control characters for terminal formatting: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
 # More info over awk command: http://linuxcommand.org/lc3_adv_awk.php
+#
+# Notice that we have a little modification on the awk command to support slash in the recipe name:
+# origin: /^[a-zA-Z_0-9-]+:.*?##/
+# modified /^[a-zA-Z_0-9\/-]+:.*?##/
 .PHONY: help
-help:  ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+help: generate-makefile ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9\/-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 all: yaml image ## Build all CRD yaml manifests and components container images
 
@@ -177,7 +185,7 @@ enter-devenv: images/dev-env/.dockerbuilt
 	@bash
 
 images/chaos-daemon/bin/pause: SHELL:=$(RUN_IN_BUILD_SHELL)
-images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
+images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt ## Build binary pause
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
 .PHONY: pkg/time/fakeclock/fake_clock_gettime.o
