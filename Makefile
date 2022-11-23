@@ -1,3 +1,12 @@
+# If you update this file, please follow
+# https://suva.sh/posts/well-documented-makefiles
+
+## --------------------------------------
+## General
+## --------------------------------------
+
+.DEFAULT_GOAL:=help
+
 # Set DEBUGGER=1 to build debug symbols
 export LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 export IMAGE_REGISTRY ?= ghcr.io
@@ -62,9 +71,21 @@ RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
-CLEAN_TARGETS :=
+# include generated makefiles.
+# this sub makefiles depends on RUN_IN_DEV_SHELL and RUN_IN_BUILD_SHELL, so it should be included after them.
+include binary.generated.mk container-image.generated.mk
 
-all: yaml image
+export CLEAN_TARGETS :=
+
+# The help will print out all targets with their descriptions organized bellow their categories. The categories are represented by `##@` and the target descriptions by `##`.
+# The awk commands is responsible to read the entire set of makefiles included in this invocation, looking for lines of the file as xyz: ## something, and then pretty-format the target and help. Then, if there's a line with ##@ something, that gets pretty-printed as a category.
+# More info over the usage of ANSI control characters for terminal formatting: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+# More info over awk command: http://linuxcommand.org/lc3_adv_awk.php
+.PHONY: help
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+all: yaml image ## Build all CRD yaml manifests and components container images
 
 test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
@@ -80,7 +101,7 @@ ifeq (${UI},1)
 	pnpm install --frozen-lockfile
 endif
 
-ui: pnpm_install_dependencies
+ui: pnpm_install_dependencies ## Build the UI of Chaos Dashboard
 ifeq (${UI},1)
 	cd ui &&\
 	pnpm build
@@ -90,8 +111,8 @@ endif
 watchmaker: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
-# Build chaosctl
-chaosctl:
+
+chaosctl: ## Build chaosctl
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
 # Build schedule-migration
@@ -114,7 +135,8 @@ NAMESPACE ?= chaos-mesh
 install: manifests
 	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY};
 
-clean:
+.PHONY: clean
+clean: clean-binary
 	rm -rf $(CLEAN_TARGETS)
 
 SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
@@ -135,7 +157,7 @@ GO_TARGET_PHONY :=
 define COMPILE_GO_TEMPLATE
 
 $(1): SHELL:=$(RUN_IN_BUILD_SHELL)
-$(1): $(4) image-build-env
+$(1): $(4) image-build-env ## Build $(4)
 ifeq ($(3),1)
 	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 else
@@ -158,6 +180,7 @@ images/chaos-daemon/bin/pause: SHELL:=$(RUN_IN_BUILD_SHELL)
 images/chaos-daemon/bin/pause: hack/pause.c images/build-env/.dockerbuilt
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
+.PHONY: pkg/time/fakeclock/fake_clock_gettime.o
 pkg/time/fakeclock/fake_clock_gettime.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_clock_gettime.o: pkg/time/fakeclock/fake_clock_gettime.c images/build-env/.dockerbuilt
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
@@ -166,11 +189,6 @@ pkg/time/fakeclock/fake_gettimeofday.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c images/build-env/.dockerbuilt
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
-
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon-helper/main.go,1))
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
 prepare-install: all docker-push docker-push-dns-server
 
