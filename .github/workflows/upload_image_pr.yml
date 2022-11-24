@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-for-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: ${{ github.event.issue.pull_request && startsWith( github.event.comment.body, '/build-image') }}
     steps:
       - uses: actions/checkout@master
