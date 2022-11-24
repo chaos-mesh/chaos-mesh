@@ -11,7 +11,7 @@ permissions: read-all
 
 jobs:
   skip-changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
@@ -39,7 +39,7 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - run: echo "Not required to run go jobs."
   ui:
@@ -51,6 +51,6 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - run: echo "Not required to run ui jobs."
