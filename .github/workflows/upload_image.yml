@@ -21,7 +21,7 @@ jobs:
           [chaos-daemon, chaos-mesh, chaos-dashboard, chaos-kernel, chaos-dlv]
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -83,7 +83,7 @@ jobs:
 
   upload-manifest:
     needs: build-specific-architecture
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
@@ -130,7 +130,7 @@ jobs:
       - build-specific-architecture
       - upload-manifest
     if: needs.build-specific-architecture.outputs.image_tag != 'latest'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       contents: write # Need to upload files to the related release.
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
@@ -171,7 +171,7 @@ jobs:
   sbom:
     needs: build-specific-architecture
     if: needs.build-specific-architecture.outputs.image_tag != 'latest'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       contents: write # Need to upload files to the related release.
     env:
