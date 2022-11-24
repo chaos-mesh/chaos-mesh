@@ -23,7 +23,7 @@ permissions: read-all
 jobs:
   # JOB to run change detection
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     # Set job outputs to values from filter step
     outputs:
       go: ${{ steps.filter.outputs.go }}
@@ -54,7 +54,7 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v2
 
@@ -110,7 +110,7 @@ jobs:
           - build
           - test
         # node-version: ["14"] # TODO: add nodejs-16?
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-20.04"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
