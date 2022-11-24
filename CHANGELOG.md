@@ -32,6 +32,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Remove not needed file crd-v1beta1.yaml [#3807](https://github.com/chaos-mesh/chaos-mesh/pull/3807)
 
+- Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
+
 ### Fixed
 
 - Remove the explicit use of pingcap/log [#3674](https://github.com/chaos-mesh/chaos-mesh/pull/3674)
