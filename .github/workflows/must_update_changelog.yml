@@ -20,7 +20,7 @@ permissions: read-all
 jobs:
   must-update-changelog:
     name: "Must Update CHANGELOG"
-    runs-on: "ubuntu-latest"
+    runs-on: "ubuntu-20.04"
     env:
       LABEL_EXISTS: ${{ contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
     steps:
