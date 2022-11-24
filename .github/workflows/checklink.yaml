@@ -10,7 +10,7 @@ on:
 
 jobs:
   markdown-link-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@master
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
