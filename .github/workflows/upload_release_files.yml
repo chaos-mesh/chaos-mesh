@@ -10,7 +10,7 @@ permissions: read-all
 jobs:
   run:
     name: Upload
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: "Must Triggered by Tag v<version>"
         run: |
