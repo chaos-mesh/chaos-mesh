@@ -11,11 +11,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Bump go to v1.19.3 [#3770](https://github.com/chaos-mesh/chaos-mesh/pull/3770)
-- Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
 
 ### Changed
 
-- Nothing
+- Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
 
 ### Removed
 
