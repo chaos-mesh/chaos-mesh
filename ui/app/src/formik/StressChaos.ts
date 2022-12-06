@@ -14,6 +14,12 @@ export const actions = [],
     },
     {
       field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
+      field: 'text',
       label: 'stressngStressors',
       value: '',
       helperText:

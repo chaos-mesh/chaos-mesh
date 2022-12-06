@@ -1425,6 +1425,12 @@ export const actions = [
       when: "action=='redis-stop'",
     },
     {
+      field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
       field: 'ref',
       label: 'stress-cpu',
       children: [

@@ -169,6 +169,12 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       when: "action=='loss'",
     },
     {
+      field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
       field: 'ref',
       label: 'target',
       children: [

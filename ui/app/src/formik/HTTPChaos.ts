@@ -83,6 +83,12 @@ export const actions = [],
       helperText: 'Port represents the target port to be proxy of.',
     },
     {
+      field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
       field: 'ref',
       label: 'replace',
       children: [
@@ -145,5 +151,41 @@ export const actions = [],
       label: 'target',
       value: '',
       helperText: 'Target is the object to be selected and injected.',
+    },
+    {
+      field: 'ref',
+      label: 'tls',
+      children: [
+        {
+          field: 'text',
+          label: 'caName',
+          value: '',
+          helperText: 'Optional. CAName represents the data name of ca file in secret, `ca.crt` for example',
+        },
+        {
+          field: 'text',
+          label: 'certName',
+          value: '',
+          helperText: 'CertName represents the data name of cert file in secret, `tls.crt` for example',
+        },
+        {
+          field: 'text',
+          label: 'keyName',
+          value: '',
+          helperText: 'KeyName represents the data name of key file in secret, `tls.key` for example',
+        },
+        {
+          field: 'text',
+          label: 'secretName',
+          value: '',
+          helperText: 'SecretName represents the name of required secret resource',
+        },
+        {
+          field: 'text',
+          label: 'secretNamespace',
+          value: '',
+          helperText: 'SecretNamespace represents the namespace of required secret resource',
+        },
+      ],
     },
   ]

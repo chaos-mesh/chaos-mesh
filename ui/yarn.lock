@@ -12868,10 +12868,10 @@ ora@^5.4.1:
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
 
-orval@^6.10.2:
-  version "6.10.2"
-  resolved "https://registry.yarnpkg.com/orval/-/orval-6.10.2.tgz#d077b4a2939696a6de8607bb67140109697afe3c"
-  integrity sha512-0PcbjpFbaHzBCTUaFz9a9N2rFcNa9wO94XFPTJZQxsczclMfg3uImE1BbaNFf0ItAUWZNEzveadQJTk/863G/g==
+orval@6.10.3:
+  version "6.10.3"
+  resolved "https://registry.yarnpkg.com/orval/-/orval-6.10.3.tgz#19efcc8a967a3303d0feb438021b31f893dc7cb5"
+  integrity sha512-gct7wGGacGIj3cRKqfioRK2/TRDAK11LbpghRgTMeNWWF+JBCyZGA8H9ehhfdCOuhXIb4me61aNphiusrlz7jQ==
   dependencies:
     "@apidevtools/swagger-parser" "^10.1.0"
     acorn "^8.8.0"

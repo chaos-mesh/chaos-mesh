@@ -38,10 +38,10 @@ export function typeTextToFieldType(type) {
       return 'label'
     case 'number[]':
       return 'numbers'
-    case '{ [key: string]: string }':
+    case '{[key: string]: string}':
       return 'text-text'
     case 'string[][]':
-    case '{ [key: string]: string[] }':
+    case '{[key: string]: string[]}':
       return 'text-label'
     default:
       throw new Error(`Unsupported type: ${type}`)
@@ -66,8 +66,8 @@ export function typeTextToInitialValue(type) {
     case 'number[]':
       return factory.createArrayLiteralExpression()
     case 'string[][]':
-    case '{ [key: string]: string }':
-    case '{ [key: string]: string[] }':
+    case '{[key: string]: string}':
+    case '{[key: string]: string[]}':
       return factory.createObjectLiteralExpression()
     default:
       throw new Error(`Unsupported type: ${type}`)
