@@ -72,6 +72,11 @@ func (in *AWSChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *AWSChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *AWSChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -207,6 +212,11 @@ func (in *AzureChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *AzureChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *AzureChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -346,6 +356,11 @@ func (in *BlockChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *BlockChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *BlockChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -479,6 +494,11 @@ func (in *DNSChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *DNSChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -610,6 +630,11 @@ func (in *GCPChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *GCPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *GCPChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -749,6 +774,11 @@ func (in *HTTPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *HTTPChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -880,6 +910,11 @@ func (in *IOChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *IOChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *IOChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1015,6 +1050,11 @@ func (in *JVMChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *JVMChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -1146,6 +1186,11 @@ func (in *KernelChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *KernelChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *KernelChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1281,6 +1326,11 @@ func (in *NetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *NetworkChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -1412,6 +1462,11 @@ func (in *PhysicalMachineChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *PhysicalMachineChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *PhysicalMachineChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1584,6 +1639,11 @@ func (in *PodChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *PodChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *PodChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1909,6 +1969,11 @@ func (in *StressChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *StressChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *StressChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -2040,6 +2105,11 @@ func (in *TimeChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *TimeChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *TimeChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.

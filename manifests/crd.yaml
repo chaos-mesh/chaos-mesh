@@ -66,6 +66,10 @@ spec:
                 description: Endpoint indicates the endpoint of the aws server. Just
                   used it in test now.
                 type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret.
                 type: string
@@ -237,6 +241,10 @@ spec:
                 description: LUN indicates the Logical Unit Number of the data disk.
                   Needed in disk-detach.
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               resourceGroupName:
                 description: ResourceGroupName defines the name of ResourceGroup
                 type: string
@@ -432,6 +440,10 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -722,6 +734,10 @@ spec:
                 items:
                   type: string
                 type: array
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select pods that are used to inject
                   chaos action.
@@ -988,6 +1004,10 @@ spec:
               project:
                 description: Project defines the ID of gcp project.
                 type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret. It
                   is used for GCP credentials.
@@ -1216,6 +1236,10 @@ spec:
                 description: Port represents the target port to be proxy of.
                 format: int32
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               replace:
                 description: Replace is a rule to replace some contents in target.
                 properties:
@@ -1357,6 +1381,36 @@ spec:
                 - Request
                 - Response
                 type: string
+              tls:
+                description: TLS is the tls config, will override PodHttpChaos if
+                  there are multiple HTTPChaos experiments are applied
+                properties:
+                  caName:
+                    description: CAName represents the data name of ca file in secret,
+                      `ca.crt` for example
+                    type: string
+                  certName:
+                    description: CertName represents the data name of cert file in
+                      secret, `tls.crt` for example
+                    type: string
+                  keyName:
+                    description: KeyName represents the data name of key file in secret,
+                      `tls.key` for example
+                    type: string
+                  secretName:
+                    description: SecretName represents the name of required secret
+                      resource
+                    type: string
+                  secretNamespace:
+                    description: SecretNamespace represents the namespace of required
+                      secret resource
+                    type: string
+                required:
+                - certName
+                - keyName
+                - secretName
+                - secretNamespace
+                type: object
               value:
                 description: Value is required when the mode is set to `FixedMode`
                   / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
@@ -1665,6 +1719,10 @@ spec:
                 description: 'Percent defines the percentage of injection errors and
                   provides a number from 0-100. default: 100.'
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select pods that are used to inject
                   chaos action.
@@ -1988,6 +2046,10 @@ spec:
                 description: the port of agent server, default 9277
                 format: int32
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               ruleData:
                 description: the byteman rule's data for action 'ruleData'
                 type: string
@@ -2324,6 +2386,10 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -2706,6 +2772,10 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -3902,6 +3972,10 @@ spec:
                     description: The path of `redis-server` command-line tool
                     type: boolean
                 type: object
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select physical machines that are
                   used to inject chaos action.
@@ -4260,6 +4334,10 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject
@@ -4645,6 +4723,36 @@ spec:
                   - target
                   type: object
                 type: array
+              tls:
+                description: TLS is the tls config, will be override if there are
+                  multiple HTTPChaos experiments are applied
+                properties:
+                  caName:
+                    description: CAName represents the data name of ca file in secret,
+                      `ca.crt` for example
+                    type: string
+                  certName:
+                    description: CertName represents the data name of cert file in
+                      secret, `tls.crt` for example
+                    type: string
+                  keyName:
+                    description: KeyName represents the data name of key file in secret,
+                      `tls.key` for example
+                    type: string
+                  secretName:
+                    description: SecretName represents the name of required secret
+                      resource
+                    type: string
+                  secretNamespace:
+                    description: SecretNamespace represents the namespace of required
+                      secret resource
+                    type: string
+                required:
+                - certName
+                - keyName
+                - secretName
+                - secretNamespace
+                type: object
             type: object
           status:
             description: PodHttpChaosStatus defines the actual state of PodHttpChaos.
@@ -5319,6 +5427,10 @@ spec:
                     description: Endpoint indicates the endpoint of the aws server.
                       Just used it in test now.
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
                     type: string
@@ -5355,6 +5467,10 @@ spec:
                     description: LUN indicates the Logical Unit Number of the data
                       disk. Needed in disk-detach.
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   resourceGroupName:
                     description: ResourceGroupName defines the name of ResourceGroup
                     type: string
@@ -5413,6 +5529,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -5567,6 +5687,10 @@ spec:
                     items:
                       type: string
                     type: array
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -5697,6 +5821,10 @@ spec:
                   project:
                     description: Project defines the ID of gcp project.
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
                       It is used for GCP credentials.
@@ -5791,6 +5919,10 @@ spec:
                     description: Port represents the target port to be proxy of.
                     format: int32
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   replace:
                     description: Replace is a rule to replace some contents in target.
                     properties:
@@ -5935,6 +6067,36 @@ spec:
                     - Request
                     - Response
                     type: string
+                  tls:
+                    description: TLS is the tls config, will override PodHttpChaos
+                      if there are multiple HTTPChaos experiments are applied
+                    properties:
+                      caName:
+                        description: CAName represents the data name of ca file in
+                          secret, `ca.crt` for example
+                        type: string
+                      certName:
+                        description: CertName represents the data name of cert file
+                          in secret, `tls.crt` for example
+                        type: string
+                      keyName:
+                        description: KeyName represents the data name of key file
+                          in secret, `tls.key` for example
+                        type: string
+                      secretName:
+                        description: SecretName represents the name of required secret
+                          resource
+                        type: string
+                      secretNamespace:
+                        description: SecretNamespace represents the namespace of required
+                          secret resource
+                        type: string
+                    required:
+                    - certName
+                    - keyName
+                    - secretName
+                    - secretNamespace
+                    type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -6103,6 +6265,10 @@ spec:
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -6287,6 +6453,10 @@ spec:
                     description: the port of agent server, default 9277
                     format: int32
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   ruleData:
                     description: the byteman rule's data for action 'ruleData'
                     type: string
@@ -6494,6 +6664,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -6741,6 +6915,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -7804,6 +7982,10 @@ spec:
                         description: The path of `redis-server` command-line tool
                         type: boolean
                     type: object
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select physical machines that
                       are used to inject chaos action.
@@ -7980,6 +8162,10 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -8113,6 +8299,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -8318,6 +8508,10 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -8476,6 +8670,10 @@ spec:
                               description: Endpoint indicates the endpoint of the
                                 aws server. Just used it in test now.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret.
@@ -8514,6 +8712,10 @@ spec:
                               description: LUN indicates the Logical Unit Number of
                                 the data disk. Needed in disk-detach.
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             resourceGroupName:
                               description: ResourceGroupName defines the name of ResourceGroup
                               type: string
@@ -8577,6 +8779,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -8767,6 +8973,10 @@ spec:
                               items:
                                 type: string
                               type: array
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -8907,6 +9117,10 @@ spec:
                             project:
                               description: Project defines the ID of gcp project.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret. It is used for GCP credentials.
@@ -9005,6 +9219,10 @@ spec:
                                 of.
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             replace:
                               description: Replace is a rule to replace some contents
                                 in target.
@@ -9160,6 +9378,36 @@ spec:
                               - Request
                               - Response
                               type: string
+                            tls:
+                              description: TLS is the tls config, will override PodHttpChaos
+                                if there are multiple HTTPChaos experiments are applied
+                              properties:
+                                caName:
+                                  description: CAName represents the data name of
+                                    ca file in secret, `ca.crt` for example
+                                  type: string
+                                certName:
+                                  description: CertName represents the data name of
+                                    cert file in secret, `tls.crt` for example
+                                  type: string
+                                keyName:
+                                  description: KeyName represents the data name of
+                                    key file in secret, `tls.key` for example
+                                  type: string
+                                secretName:
+                                  description: SecretName represents the name of required
+                                    secret resource
+                                  type: string
+                                secretNamespace:
+                                  description: SecretNamespace represents the namespace
+                                    of required secret resource
+                                  type: string
+                              required:
+                              - certName
+                              - keyName
+                              - secretName
+                              - secretNamespace
+                              type: object
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -9336,6 +9584,10 @@ spec:
                                 errors and provides a number from 0-100. default:
                                 100.'
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -9533,6 +9785,10 @@ spec:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             ruleData:
                               description: the byteman rule's data for action 'ruleData'
                               type: string
@@ -9758,6 +10014,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -10026,6 +10286,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -11157,6 +11421,10 @@ spec:
                                     tool
                                   type: boolean
                               type: object
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select physical machines
                                 that are used to inject chaos action.
@@ -11343,6 +11611,10 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -11491,6 +11763,10 @@ spec:
                                   description: Endpoint indicates the endpoint of
                                     the aws server. Just used it in test now.
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
                                     secret.
@@ -11529,6 +11805,10 @@ spec:
                                   description: LUN indicates the Logical Unit Number
                                     of the data disk. Needed in disk-detach.
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 resourceGroupName:
                                   description: ResourceGroupName defines the name
                                     of ResourceGroup
@@ -11594,6 +11874,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -11766,6 +12050,10 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -11910,6 +12198,10 @@ spec:
                                 project:
                                   description: Project defines the ID of gcp project.
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
                                     secret. It is used for GCP credentials.
@@ -12012,6 +12304,10 @@ spec:
                                     be proxy of.
                                   format: int32
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 replace:
                                   description: Replace is a rule to replace some contents
                                     in target.
@@ -12171,6 +12467,37 @@ spec:
                                   - Request
                                   - Response
                                   type: string
+                                tls:
+                                  description: TLS is the tls config, will override
+                                    PodHttpChaos if there are multiple HTTPChaos experiments
+                                    are applied
+                                  properties:
+                                    caName:
+                                      description: CAName represents the data name
+                                        of ca file in secret, `ca.crt` for example
+                                      type: string
+                                    certName:
+                                      description: CertName represents the data name
+                                        of cert file in secret, `tls.crt` for example
+                                      type: string
+                                    keyName:
+                                      description: KeyName represents the data name
+                                        of key file in secret, `tls.key` for example
+                                      type: string
+                                    secretName:
+                                      description: SecretName represents the name
+                                        of required secret resource
+                                      type: string
+                                    secretNamespace:
+                                      description: SecretNamespace represents the
+                                        namespace of required secret resource
+                                      type: string
+                                  required:
+                                  - certName
+                                  - keyName
+                                  - secretName
+                                  - secretNamespace
+                                  type: object
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -12349,6 +12676,10 @@ spec:
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -12552,6 +12883,10 @@ spec:
                                   description: the port of agent server, default 9277
                                   format: int32
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 ruleData:
                                   description: the byteman rule's data for action
                                     'ruleData'
@@ -12786,6 +13121,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -13059,6 +13398,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -14227,6 +14570,10 @@ spec:
                                         tool
                                       type: boolean
                                   type: object
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select physical
                                     machines that are used to inject chaos action.
@@ -14422,6 +14769,10 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -14569,6 +14920,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -14796,6 +15151,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -15054,6 +15413,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -18378,6 +18741,10 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -18852,6 +19219,10 @@ spec:
                 - fixed-percent
                 - random-max-percent
                 type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select pods that are used to inject
                   chaos action.
@@ -19207,6 +19578,10 @@ spec:
                 - fixed-percent
                 - random-max-percent
                 type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               selector:
                 description: Selector is used to select pods that are used to inject
                   chaos action.
@@ -19485,6 +19860,10 @@ spec:
                     description: Endpoint indicates the endpoint of the aws server.
                       Just used it in test now.
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
                     type: string
@@ -19521,6 +19900,10 @@ spec:
                     description: LUN indicates the Logical Unit Number of the data
                       disk. Needed in disk-detach.
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   resourceGroupName:
                     description: ResourceGroupName defines the name of ResourceGroup
                     type: string
@@ -19579,6 +19962,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -19751,6 +20138,10 @@ spec:
                     items:
                       type: string
                     type: array
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -19881,6 +20272,10 @@ spec:
                   project:
                     description: Project defines the ID of gcp project.
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   secretName:
                     description: SecretName defines the name of kubernetes secret.
                       It is used for GCP credentials.
@@ -19972,6 +20367,10 @@ spec:
                     description: Port represents the target port to be proxy of.
                     format: int32
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   replace:
                     description: Replace is a rule to replace some contents in target.
                     properties:
@@ -20116,6 +20515,36 @@ spec:
                     - Request
                     - Response
                     type: string
+                  tls:
+                    description: TLS is the tls config, will override PodHttpChaos
+                      if there are multiple HTTPChaos experiments are applied
+                    properties:
+                      caName:
+                        description: CAName represents the data name of ca file in
+                          secret, `ca.crt` for example
+                        type: string
+                      certName:
+                        description: CertName represents the data name of cert file
+                          in secret, `tls.crt` for example
+                        type: string
+                      keyName:
+                        description: KeyName represents the data name of key file
+                          in secret, `tls.key` for example
+                        type: string
+                      secretName:
+                        description: SecretName represents the name of required secret
+                          resource
+                        type: string
+                      secretNamespace:
+                        description: SecretNamespace represents the namespace of required
+                          secret resource
+                        type: string
+                    required:
+                    - certName
+                    - keyName
+                    - secretName
+                    - secretNamespace
+                    type: object
                   value:
                     description: Value is required when the mode is set to `FixedMode`
                       / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -20284,6 +20713,10 @@ spec:
                     description: 'Percent defines the percentage of injection errors
                       and provides a number from 0-100. default: 100.'
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -20468,6 +20901,10 @@ spec:
                     description: the port of agent server, default 9277
                     format: int32
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   ruleData:
                     description: the byteman rule's data for action 'ruleData'
                     type: string
@@ -20675,6 +21112,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -20922,6 +21363,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -21985,6 +22430,10 @@ spec:
                         description: The path of `redis-server` command-line tool
                         type: boolean
                     type: object
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select physical machines that
                       are used to inject chaos action.
@@ -22161,6 +22610,10 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -22299,6 +22752,10 @@ spec:
                         description: Endpoint indicates the endpoint of the aws server.
                           Just used it in test now.
                         type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
                         type: string
@@ -22336,6 +22793,10 @@ spec:
                         description: LUN indicates the Logical Unit Number of the
                           data disk. Needed in disk-detach.
                         type: integer
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       resourceGroupName:
                         description: ResourceGroupName defines the name of ResourceGroup
                         type: string
@@ -22396,6 +22857,10 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -22555,6 +23020,10 @@ spec:
                         items:
                           type: string
                         type: array
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -22690,6 +23159,10 @@ spec:
                       project:
                         description: Project defines the ID of gcp project.
                         type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       secretName:
                         description: SecretName defines the name of kubernetes secret.
                           It is used for GCP credentials.
@@ -22786,6 +23259,10 @@ spec:
                         description: Port represents the target port to be proxy of.
                         format: int32
                         type: integer
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       replace:
                         description: Replace is a rule to replace some contents in
                           target.
@@ -22935,6 +23412,36 @@ spec:
                         - Request
                         - Response
                         type: string
+                      tls:
+                        description: TLS is the tls config, will override PodHttpChaos
+                          if there are multiple HTTPChaos experiments are applied
+                        properties:
+                          caName:
+                            description: CAName represents the data name of ca file
+                              in secret, `ca.crt` for example
+                            type: string
+                          certName:
+                            description: CertName represents the data name of cert
+                              file in secret, `tls.crt` for example
+                            type: string
+                          keyName:
+                            description: KeyName represents the data name of key file
+                              in secret, `tls.key` for example
+                            type: string
+                          secretName:
+                            description: SecretName represents the name of required
+                              secret resource
+                            type: string
+                          secretNamespace:
+                            description: SecretNamespace represents the namespace
+                              of required secret resource
+                            type: string
+                        required:
+                        - certName
+                        - keyName
+                        - secretName
+                        - secretNamespace
+                        type: object
                       value:
                         description: Value is required when the mode is set to `FixedMode`
                           / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -23106,6 +23613,10 @@ spec:
                         description: 'Percent defines the percentage of injection
                           errors and provides a number from 0-100. default: 100.'
                         type: integer
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -23295,6 +23806,10 @@ spec:
                         description: the port of agent server, default 9277
                         format: int32
                         type: integer
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       ruleData:
                         description: the byteman rule's data for action 'ruleData'
                         type: string
@@ -23509,6 +24024,10 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -23762,6 +24281,10 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -24841,6 +25364,10 @@ spec:
                             description: The path of `redis-server` command-line tool
                             type: boolean
                         type: object
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       selector:
                         description: Selector is used to select physical machines
                           that are used to inject chaos action.
@@ -25020,6 +25547,10 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -25157,6 +25688,10 @@ spec:
                         - fixed
                         - fixed-percent
                         - random-max-percent
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
                         type: string
                       selector:
                         description: Selector is used to select pods that are used
@@ -25366,6 +25901,10 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
                       selector:
                         description: Selector is used to select pods that are used
                           to inject chaos action.
@@ -25526,6 +26065,10 @@ spec:
                                   description: Endpoint indicates the endpoint of
                                     the aws server. Just used it in test now.
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
                                     secret.
@@ -25564,6 +26107,10 @@ spec:
                                   description: LUN indicates the Logical Unit Number
                                     of the data disk. Needed in disk-detach.
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 resourceGroupName:
                                   description: ResourceGroupName defines the name
                                     of ResourceGroup
@@ -25629,6 +26176,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -25826,6 +26377,10 @@ spec:
                                   items:
                                     type: string
                                   type: array
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -25970,6 +26525,10 @@ spec:
                                 project:
                                   description: Project defines the ID of gcp project.
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 secretName:
                                   description: SecretName defines the name of kubernetes
                                     secret. It is used for GCP credentials.
@@ -26069,6 +26628,10 @@ spec:
                                     be proxy of.
                                   format: int32
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 replace:
                                   description: Replace is a rule to replace some contents
                                     in target.
@@ -26228,6 +26791,37 @@ spec:
                                   - Request
                                   - Response
                                   type: string
+                                tls:
+                                  description: TLS is the tls config, will override
+                                    PodHttpChaos if there are multiple HTTPChaos experiments
+                                    are applied
+                                  properties:
+                                    caName:
+                                      description: CAName represents the data name
+                                        of ca file in secret, `ca.crt` for example
+                                      type: string
+                                    certName:
+                                      description: CertName represents the data name
+                                        of cert file in secret, `tls.crt` for example
+                                      type: string
+                                    keyName:
+                                      description: KeyName represents the data name
+                                        of key file in secret, `tls.key` for example
+                                      type: string
+                                    secretName:
+                                      description: SecretName represents the name
+                                        of required secret resource
+                                      type: string
+                                    secretNamespace:
+                                      description: SecretNamespace represents the
+                                        namespace of required secret resource
+                                      type: string
+                                  required:
+                                  - certName
+                                  - keyName
+                                  - secretName
+                                  - secretNamespace
+                                  type: object
                                 value:
                                   description: Value is required when the mode is
                                     set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -26406,6 +27000,10 @@ spec:
                                     injection errors and provides a number from 0-100.
                                     default: 100.'
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -26609,6 +27207,10 @@ spec:
                                   description: the port of agent server, default 9277
                                   format: int32
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 ruleData:
                                   description: the byteman rule's data for action
                                     'ruleData'
@@ -26843,6 +27445,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -27118,6 +27724,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -28286,6 +28896,10 @@ spec:
                                         tool
                                       type: boolean
                                   type: object
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select physical
                                     machines that are used to inject chaos action.
@@ -28481,6 +29095,10 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -28635,6 +29253,10 @@ spec:
                                       description: Endpoint indicates the endpoint
                                         of the aws server. Just used it in test now.
                                       type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     secretName:
                                       description: SecretName defines the name of
                                         kubernetes secret.
@@ -28673,6 +29295,10 @@ spec:
                                       description: LUN indicates the Logical Unit
                                         Number of the data disk. Needed in disk-detach.
                                       type: integer
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     resourceGroupName:
                                       description: ResourceGroupName defines the name
                                         of ResourceGroup
@@ -28738,6 +29364,10 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -28915,6 +29545,10 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     selector:
                                       description: Selector is used to select pods
                                         that are used to inject chaos action.
@@ -29065,6 +29699,10 @@ spec:
                                     project:
                                       description: Project defines the ID of gcp project.
                                       type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     secretName:
                                       description: SecretName defines the name of
                                         kubernetes secret. It is used for GCP credentials.
@@ -29170,6 +29808,10 @@ spec:
                                         to be proxy of.
                                       format: int32
                                       type: integer
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     replace:
                                       description: Replace is a rule to replace some
                                         contents in target.
@@ -29336,6 +29978,40 @@ spec:
                                       - Request
                                       - Response
                                       type: string
+                                    tls:
+                                      description: TLS is the tls config, will override
+                                        PodHttpChaos if there are multiple HTTPChaos
+                                        experiments are applied
+                                      properties:
+                                        caName:
+                                          description: CAName represents the data
+                                            name of ca file in secret, `ca.crt` for
+                                            example
+                                          type: string
+                                        certName:
+                                          description: CertName represents the data
+                                            name of cert file in secret, `tls.crt`
+                                            for example
+                                          type: string
+                                        keyName:
+                                          description: KeyName represents the data
+                                            name of key file in secret, `tls.key`
+                                            for example
+                                          type: string
+                                        secretName:
+                                          description: SecretName represents the name
+                                            of required secret resource
+                                          type: string
+                                        secretNamespace:
+                                          description: SecretNamespace represents
+                                            the namespace of required secret resource
+                                          type: string
+                                      required:
+                                      - certName
+                                      - keyName
+                                      - secretName
+                                      - secretNamespace
+                                      type: object
                                     value:
                                       description: Value is required when the mode
                                         is set to `FixedMode` / `FixedPercentMode`
@@ -29518,6 +30194,10 @@ spec:
                                         of injection errors and provides a number
                                         from 0-100. default: 100.'
                                       type: integer
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     selector:
                                       description: Selector is used to select pods
                                         that are used to inject chaos action.
@@ -29728,6 +30408,10 @@ spec:
                                         9277
                                       format: int32
                                       type: integer
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     ruleData:
                                       description: the byteman rule's data for action
                                         'ruleData'
@@ -29972,6 +30656,10 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -30253,6 +30941,10 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -31455,6 +32147,10 @@ spec:
                                             command-line tool
                                           type: boolean
                                       type: object
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     selector:
                                       description: Selector is used to select physical
                                         machines that are used to inject chaos action.
@@ -31657,6 +32353,10 @@ spec:
                                       - fixed-percent
                                       - random-max-percent
                                       type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
                                     selector:
                                       description: Selector is used to select pods
                                         that are used to inject chaos action.
@@ -31809,6 +32509,10 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -32043,6 +32747,10 @@ spec:
                                       - fixed
                                       - fixed-percent
                                       - random-max-percent
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
                                       type: string
                                     selector:
                                       description: Selector is used to select pods
@@ -32311,6 +33019,10 @@ spec:
                                   - fixed
                                   - fixed-percent
                                   - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
                                   type: string
                                 selector:
                                   description: Selector is used to select pods that
@@ -35829,6 +36541,10 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.
@@ -36088,6 +36804,10 @@ spec:
                     - fixed
                     - fixed-percent
                     - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
                     type: string
                   selector:
                     description: Selector is used to select pods that are used to
@@ -39083,6 +39803,10 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -39381,6 +40105,10 @@ spec:
                           description: Endpoint indicates the endpoint of the aws
                             server. Just used it in test now.
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
                           type: string
@@ -39418,6 +40146,10 @@ spec:
                           description: LUN indicates the Logical Unit Number of the
                             data disk. Needed in disk-detach.
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         resourceGroupName:
                           description: ResourceGroupName defines the name of ResourceGroup
                           type: string
@@ -39479,6 +40211,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -39661,6 +40397,10 @@ spec:
                           items:
                             type: string
                           type: array
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -39797,6 +40537,10 @@ spec:
                         project:
                           description: Project defines the ID of gcp project.
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
                             It is used for GCP credentials.
@@ -39892,6 +40636,10 @@ spec:
                             of.
                           format: int32
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         replace:
                           description: Replace is a rule to replace some contents
                             in target.
@@ -40042,6 +40790,36 @@ spec:
                           - Request
                           - Response
                           type: string
+                        tls:
+                          description: TLS is the tls config, will override PodHttpChaos
+                            if there are multiple HTTPChaos experiments are applied
+                          properties:
+                            caName:
+                              description: CAName represents the data name of ca file
+                                in secret, `ca.crt` for example
+                              type: string
+                            certName:
+                              description: CertName represents the data name of cert
+                                file in secret, `tls.crt` for example
+                              type: string
+                            keyName:
+                              description: KeyName represents the data name of key
+                                file in secret, `tls.key` for example
+                              type: string
+                            secretName:
+                              description: SecretName represents the name of required
+                                secret resource
+                              type: string
+                            secretNamespace:
+                              description: SecretNamespace represents the namespace
+                                of required secret resource
+                              type: string
+                          required:
+                          - certName
+                          - keyName
+                          - secretName
+                          - secretNamespace
+                          type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
                             / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -40213,6 +40991,10 @@ spec:
                           description: 'Percent defines the percentage of injection
                             errors and provides a number from 0-100. default: 100.'
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -40403,6 +41185,10 @@ spec:
                           description: the port of agent server, default 9277
                           format: int32
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         ruleData:
                           description: the byteman rule's data for action 'ruleData'
                           type: string
@@ -40619,6 +41405,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -40877,6 +41667,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -41982,6 +42776,10 @@ spec:
                                 tool
                               type: boolean
                           type: object
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select physical machines
                             that are used to inject chaos action.
@@ -42163,6 +42961,10 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -42307,6 +43109,10 @@ spec:
                               description: Endpoint indicates the endpoint of the
                                 aws server. Just used it in test now.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret.
@@ -42345,6 +43151,10 @@ spec:
                               description: LUN indicates the Logical Unit Number of
                                 the data disk. Needed in disk-detach.
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             resourceGroupName:
                               description: ResourceGroupName defines the name of ResourceGroup
                               type: string
@@ -42408,6 +43218,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -42574,6 +43388,10 @@ spec:
                               items:
                                 type: string
                               type: array
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -42714,6 +43532,10 @@ spec:
                             project:
                               description: Project defines the ID of gcp project.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret. It is used for GCP credentials.
@@ -42815,6 +43637,10 @@ spec:
                                 of.
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             replace:
                               description: Replace is a rule to replace some contents
                                 in target.
@@ -42970,6 +43796,36 @@ spec:
                               - Request
                               - Response
                               type: string
+                            tls:
+                              description: TLS is the tls config, will override PodHttpChaos
+                                if there are multiple HTTPChaos experiments are applied
+                              properties:
+                                caName:
+                                  description: CAName represents the data name of
+                                    ca file in secret, `ca.crt` for example
+                                  type: string
+                                certName:
+                                  description: CertName represents the data name of
+                                    cert file in secret, `tls.crt` for example
+                                  type: string
+                                keyName:
+                                  description: KeyName represents the data name of
+                                    key file in secret, `tls.key` for example
+                                  type: string
+                                secretName:
+                                  description: SecretName represents the name of required
+                                    secret resource
+                                  type: string
+                                secretNamespace:
+                                  description: SecretNamespace represents the namespace
+                                    of required secret resource
+                                  type: string
+                              required:
+                              - certName
+                              - keyName
+                              - secretName
+                              - secretNamespace
+                              type: object
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -43146,6 +44002,10 @@ spec:
                                 errors and provides a number from 0-100. default:
                                 100.'
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -43343,6 +44203,10 @@ spec:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             ruleData:
                               description: the byteman rule's data for action 'ruleData'
                               type: string
@@ -43568,6 +44432,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -43834,6 +44702,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -44965,6 +45837,10 @@ spec:
                                     tool
                                   type: boolean
                               type: object
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select physical machines
                                 that are used to inject chaos action.
@@ -45151,6 +46027,10 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -45294,6 +46174,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -45514,6 +46398,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -45766,6 +46654,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -48945,6 +49837,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used

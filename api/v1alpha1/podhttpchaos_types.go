@@ -22,6 +22,11 @@ type PodHttpChaosSpec struct {
 	// Rules are a list of injection rule for http request.
 	// +optional
 	Rules []PodHttpChaosRule `json:"rules,omitempty"`
+
+	// TLS is the tls config,
+	// will be override if there are multiple HTTPChaos experiments are applied
+	// +optional
+	TLS *PodHttpChaosTLS `json:"tls,omitempty"`
 }
 
 // PodHttpChaosStatus defines the actual state of PodHttpChaos.
@@ -180,6 +185,25 @@ const (
 	// PodHttpResponse represents injecting chaos for http response
 	PodHttpResponse PodHttpChaosTarget = "Response"
 )
+
+// PodHttpChaosTLS contains the tls config for HTTPChaos
+type PodHttpChaosTLS struct {
+	// SecretName represents the name of required secret resource
+	SecretName string `json:"secretName"`
+
+	// SecretNamespace represents the namespace of required secret resource
+	SecretNamespace string `json:"secretNamespace"`
+
+	// CertName represents the data name of cert file in secret, `tls.crt` for example
+	CertName string `json:"certName"`
+
+	// KeyName represents the data name of key file in secret, `tls.key` for example
+	KeyName string `json:"keyName"`
+
+	// CAName represents the data name of ca file in secret, `ca.crt` for example
+	// +optional
+	CAName *string `json:"caName,omitempty"`
+}
 
 // +kubebuilder:object:root=true
 

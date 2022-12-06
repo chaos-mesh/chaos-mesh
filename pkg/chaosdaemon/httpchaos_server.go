@@ -132,6 +132,14 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		Rules:      rules,
 	}
 
+	if len(in.Tls) != 0 {
+		httpChaosSpec.TLS = new(tproxyconfig.TLSConfig)
+		err = json.Unmarshal([]byte(in.Tls), httpChaosSpec.TLS)
+		if err != nil {
+			return nil, errors.Wrap(err, "unmarshal tls config")
+		}
+	}
+
 	config, err := json.Marshal(&httpChaosSpec)
 	if err != nil {
 		return nil, err

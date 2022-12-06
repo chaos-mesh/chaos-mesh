@@ -514,6 +514,7 @@ type ComplexityRoot struct {
 
 	PodHttpChaosSpec struct {
 		Rules func(childComplexity int) int
+		TLS   func(childComplexity int) int
 	}
 
 	PodHttpChaosStatus struct {
@@ -521,6 +522,14 @@ type ComplexityRoot struct {
 		ObservedGeneration func(childComplexity int) int
 		Pid                func(childComplexity int) int
 		StartTime          func(childComplexity int) int
+	}
+
+	PodHttpChaosTLS struct {
+		CAName          func(childComplexity int) int
+		CertName        func(childComplexity int) int
+		KeyName         func(childComplexity int) int
+		SecretName      func(childComplexity int) int
+		SecretNamespace func(childComplexity int) int
 	}
 
 	PodIOChaos struct {
@@ -3121,6 +3130,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PodHttpChaosSpec.Rules(childComplexity), true
 
+	case "PodHttpChaosSpec.tls":
+		if e.complexity.PodHttpChaosSpec.TLS == nil {
+			break
+		}
+
+		return e.complexity.PodHttpChaosSpec.TLS(childComplexity), true
+
 	case "PodHttpChaosStatus.failedMessage":
 		if e.complexity.PodHttpChaosStatus.FailedMessage == nil {
 			break
@@ -3148,6 +3164,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PodHttpChaosStatus.StartTime(childComplexity), true
+
+	case "PodHttpChaosTLS.caName":
+		if e.complexity.PodHttpChaosTLS.CAName == nil {
+			break
+		}
+
+		return e.complexity.PodHttpChaosTLS.CAName(childComplexity), true
+
+	case "PodHttpChaosTLS.certName":
+		if e.complexity.PodHttpChaosTLS.CertName == nil {
+			break
+		}
+
+		return e.complexity.PodHttpChaosTLS.CertName(childComplexity), true
+
+	case "PodHttpChaosTLS.keyName":
+		if e.complexity.PodHttpChaosTLS.KeyName == nil {
+			break
+		}
+
+		return e.complexity.PodHttpChaosTLS.KeyName(childComplexity), true
+
+	case "PodHttpChaosTLS.secretName":
+		if e.complexity.PodHttpChaosTLS.SecretName == nil {
+			break
+		}
+
+		return e.complexity.PodHttpChaosTLS.SecretName(childComplexity), true
+
+	case "PodHttpChaosTLS.secretNamespace":
+		if e.complexity.PodHttpChaosTLS.SecretNamespace == nil {
+			break
+		}
+
+		return e.complexity.PodHttpChaosTLS.SecretNamespace(childComplexity), true
 
 	case "PodIOChaos.apiVersion":
 		if e.complexity.PodIOChaos.APIVersion == nil {
@@ -4894,6 +4945,10 @@ type PodHTTPChaos @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 type PodHttpChaosSpec  @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosSpec") {
     # rules are a list of injection rule for http request.
     rules: [PodHttpChaosRule!]!
+
+	# tls is the tls config,
+	# will be override if there are multiple HTTPChaos experiments are applied
+    tls: PodHttpChaosTLS
 }
 
 # PodHttpChaosStatus defines the actual state of PodHttpChaos.
@@ -4906,6 +4961,25 @@ type PodHttpChaosStatus @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1
 
     failedMessage: String
     observedGeneration: Int
+}
+
+# PodHttpChaosTLS contains the tls config for HTTPChaos
+type PodHttpChaosTLS @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.PodHttpChaosTLS") {
+	# secretName represents the name of required secret resource
+	secretName: String!
+
+	# secretNamespace represents the namespace of required secret resource,
+	# should be the same with deployment/chaos-controller-manager in most cases
+	secretNamespace: String!
+
+	# certName represents the data name of cert file in secret, ` + "`" + `tls.crt` + "`" + ` for example
+	certName: String!
+
+	# keyName represents the data name of key file in secret, ` + "`" + `tls.key` + "`" + ` for example
+	keyName: String!
+
+	# caName represents the data name of ca file in secret, ` + "`" + `ca.crt` + "`" + ` for example
+	caName: String
 }
 
 # PodHttpChaosRule defines the injection rule for http.
@@ -15561,6 +15635,38 @@ func (ec *executionContext) _PodHttpChaosSpec_rules(ctx context.Context, field g
 	return ec.marshalNPodHttpChaosRule2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosRuleᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _PodHttpChaosSpec_tls(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TLS, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.PodHttpChaosTLS)
+	fc.Result = res
+	return ec.marshalOPodHttpChaosTLS2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosTLS(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _PodHttpChaosStatus_pid(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosStatus) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -15687,6 +15793,178 @@ func (ec *executionContext) _PodHttpChaosStatus_observedGeneration(ctx context.C
 	res := resTmp.(int64)
 	fc.Result = res
 	return ec.marshalOInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosTLS_secretName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosTLS) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosTLS",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SecretName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosTLS_secretNamespace(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosTLS) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosTLS",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SecretNamespace, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosTLS_certName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosTLS) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosTLS",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CertName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosTLS_keyName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosTLS) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosTLS",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.KeyName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _PodHttpChaosTLS_caName(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodHttpChaosTLS) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "PodHttpChaosTLS",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CAName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodIOChaos_kind(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaos) (ret graphql.Marshaler) {
@@ -26288,6 +26566,13 @@ func (ec *executionContext) _PodHttpChaosSpec(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "tls":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosSpec_tls(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -26333,6 +26618,74 @@ func (ec *executionContext) _PodHttpChaosStatus(ctx context.Context, sel ast.Sel
 		case "observedGeneration":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._PodHttpChaosStatus_observedGeneration(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var podHttpChaosTLSImplementors = []string{"PodHttpChaosTLS"}
+
+func (ec *executionContext) _PodHttpChaosTLS(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.PodHttpChaosTLS) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, podHttpChaosTLSImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodHttpChaosTLS")
+		case "secretName":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosTLS_secretName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "secretNamespace":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosTLS_secretNamespace(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "certName":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosTLS_certName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "keyName":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosTLS_keyName(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "caName":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._PodHttpChaosTLS_caName(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -30647,6 +31000,13 @@ func (ec *executionContext) marshalOPodHttpChaosReplaceActions2ᚖgithubᚗcom�
 		return graphql.Null
 	}
 	return ec._PodHttpChaosReplaceActions(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPodHttpChaosTLS2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodHttpChaosTLS(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.PodHttpChaosTLS) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PodHttpChaosTLS(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOPodIOChaos2ᚕᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐPodIOChaosᚄ(ctx context.Context, sel ast.SelectionSet, v []*v1alpha1.PodIOChaos) graphql.Marshaler {

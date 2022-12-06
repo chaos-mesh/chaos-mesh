@@ -14,7 +14,12 @@
  * limitations under the License.
  *
  */
-import { Badge, Box, Button, Divider, Grow, Typography } from '@mui/material'
+import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
+import TabUnstyled from '@mui/base/TabUnstyled'
+import TabsListUnstyled from '@mui/base/TabsListUnstyled'
+import TabsUnstyled from '@mui/base/TabsUnstyled'
+import { Badge, Box, Button, Grow, Typography } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import _ from 'lodash'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactFlowInstance } from 'react-flow-renderer'
@@ -34,6 +39,53 @@ import PhysicalNodesElements from './Elements/PhysicalNodes'
 import SubmitWorkflow from './SubmitWorkflow'
 import Whiteboard from './Whiteboard'
 import { flowToWorkflow } from './utils/convert'
+
+const Tabs = styled(TabsUnstyled)`
+  display: flex;
+  flex-direction: column;
+`
+const TabsList = styled(TabsListUnstyled)`
+  display: flex;
+  height: 36px;
+`
+const Tab = styled(TabUnstyled)(
+  ({ theme }) => `
+  flex: 1;
+  padding: 8px 12px;
+  background-color: transparent;
+  color: ${theme.palette.onSurfaceVariant.main};
+  font-family: "Roboto";
+  font-weight: 500;
+  border: 1px solid ${theme.palette.outline.main};
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover,
+  &.Mui-selected {
+    background-color: ${theme.palette.secondaryContainer.main};
+    color: ${theme.palette.onSecondaryContainer.main};
+  }
+
+  &:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+  }
+
+  &:not(:first-child) {
+    margin-left: -1px;
+  }
+
+  &:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+  `
+)
+const TabPanel = styled(TabPanelUnstyled)`
+  flex-grow: 1;
+  flex-basis: 0;
+  overflow-y: auto;
+`
 
 export default function NewWorkflow() {
   const [openSubmitDialog, setOpenSubmitDialog] = useState(false)
@@ -89,7 +141,7 @@ export default function NewWorkflow() {
             </Space>
           </Box>
           <Paper sx={{ display: 'flex', flex: 1 }}>
-            <Space sx={{ width: 256, pr: 4, borderRight: (theme) => `1px solid ${theme.palette.divider}` }}>
+            <Space sx={{ width: 300, pr: 4, borderRight: (theme) => `1px solid ${theme.palette.divider}` }}>
               <Typography variant="h6" component="div" fontWeight="bold">
                 Elements
               </Typography>
@@ -108,25 +160,25 @@ export default function NewWorkflow() {
                 </Typography>
               </Box>
               <FunctionalNodesElements onElementClick={handleClickElement} />
+
               <Box>
-                <Typography fontWeight="medium">Kubernetes</Typography>
+                <Typography fontWeight="medium">Chaos Nodes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>
-                  Drag or click items below into the board to create a Chaos in Kubernetes.
+                  Drag or click items below into the board to create a Chaos node.
                 </Typography>
               </Box>
-              <Box sx={{ height: 450, overflowY: 'auto' }}>
-                <KubernetesElements onElementClick={handleClickElement} />
-              </Box>
-              <Divider />
-              <Box>
-                <Typography fontWeight="medium">Physical Nodes</Typography>
-                <Typography variant="body2" color="secondary" fontSize={12}>
-                  Drag or click items below into the board to create a Chaos in Physical Nodes.
-                </Typography>
-              </Box>
-              <Box sx={{ height: 450, overflowY: 'auto' }}>
-                <PhysicalNodesElements onElementClick={handleClickElement} />
-              </Box>
+              <Tabs sx={{ flex: 1 }} defaultValue={0}>
+                <TabsList sx={{ mb: 3 }}>
+                  <Tab>Kubernetes</Tab>
+                  <Tab>Hosts</Tab>
+                </TabsList>
+                <TabPanel value={0}>
+                  <KubernetesElements onElementClick={handleClickElement} />
+                </TabPanel>
+                <TabPanel value={1}>
+                  <PhysicalNodesElements onElementClick={handleClickElement} />
+                </TabPanel>
+              </Tabs>
             </Space>
             <Space sx={{ flex: 1, px: 4 }}>
               <Typography variant="h6" component="div" fontWeight="bold">

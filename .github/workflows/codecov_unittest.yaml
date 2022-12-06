@@ -18,7 +18,7 @@ permissions: read-all
 jobs:
   unitTestAndCodeCoverage:
     name: "Unit Test And Code Coverage"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3

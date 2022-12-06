@@ -3076,6 +3076,11 @@ definitions:
           +ui:form:ignore
           +optional
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       secretName:
         description: |-
           SecretName defines the name of kubernetes secret.
@@ -3154,6 +3159,11 @@ definitions:
           Needed in disk-detach.
           +optional
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       resourceGroupName:
         description: ResourceGroupName defines the name of ResourceGroup
         type: string
@@ -3235,6 +3245,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -3428,6 +3443,11 @@ definitions:
         items:
           type: string
         type: array
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -3667,6 +3687,11 @@ definitions:
       project:
         description: Project defines the ID of gcp project.
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       secretName:
         description: |-
           SecretName defines the name of kubernetes secret. It is used for GCP credentials.
@@ -3750,6 +3775,11 @@ definitions:
       port:
         description: Port represents the target port to be proxy of.
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       replace:
         $ref: '#/definitions/v1alpha1.PodHttpChaosReplaceActions'
         description: |-
@@ -3780,6 +3810,12 @@ definitions:
           Target is the object to be selected and injected.
           +kubebuilder:validation:Enum=Request;Response
         type: string
+      tls:
+        $ref: '#/definitions/v1alpha1.PodHttpChaosTLS'
+        description: |-
+          TLS is the tls config,
+          will override PodHttpChaos if there are multiple HTTPChaos experiments are applied
+          +optional
       value:
         description: |-
           Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -3944,6 +3980,11 @@ definitions:
           +optional
           +kubebuilder:default=100
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -4041,6 +4082,11 @@ definitions:
           +optional
           the port of agent server, default 9277
         type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       ruleData:
         description: |-
           +optional
@@ -4271,6 +4317,11 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -4433,6 +4484,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -4919,6 +4975,11 @@ definitions:
         description: |-
           +ui:form:when=action=='redis-stop'
           +optional
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PhysicalMachineSelectorSpec'
         description: |-
@@ -5038,6 +5099,11 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -5129,6 +5195,28 @@ definitions:
           For example, with value `{ "foo": "unknown" }`, the `/?foo=bar` will be altered to `/?foo=unknown`,
           +optional
         type: object
+    type: object
+  v1alpha1.PodHttpChaosTLS:
+    properties:
+      caName:
+        description: |-
+          CAName represents the data name of ca file in secret, `ca.crt` for example
+          +optional
+        type: string
+      certName:
+        description: CertName represents the data name of cert file in secret, `tls.crt`
+          for example
+        type: string
+      keyName:
+        description: KeyName represents the data name of key file in secret, `tls.key`
+          for example
+        type: string
+      secretName:
+        description: SecretName represents the name of required secret resource
+        type: string
+      secretNamespace:
+        description: SecretNamespace represents the namespace of required secret resource
+        type: string
     type: object
   v1alpha1.PodSelector:
     properties:
@@ -5806,6 +5894,11 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
         description: Selector is used to select pods that are used to inject chaos
@@ -5991,6 +6084,11 @@ definitions:
           Mode defines the mode to run chaos action.
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
