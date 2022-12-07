@@ -20,6 +20,7 @@ import { eval as expEval, parse } from 'expression-eval'
 import { Form, Formik, FormikProps, getIn } from 'formik'
 import type { FormikConfig, FormikValues } from 'formik'
 import _ from 'lodash'
+import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { Fragment, useEffect, useState } from 'react'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
@@ -85,7 +86,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
   const [form, setForm] = useState<AtomFormData[]>([])
   const [scheduled, setScheduled] = useState(false)
 
-  const { namespaces } = useStoreSelector((state) => state.experiments)
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces()
 
   useEffect(() => {
     function formToRecords(form: AtomFormData[]) {
@@ -327,7 +328,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                   <Scope
                     env="k8s"
                     kind={kind}
-                    namespaces={namespaces}
+                    namespaces={namespaces!}
                     scope="target.selector"
                     modeScope="target"
                     previewTitle={<T id="newE.target.network.target.podsPreview" />}
@@ -347,7 +348,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                     <Scope
                       env={kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'}
                       kind={kind}
-                      namespaces={namespaces}
+                      namespaces={namespaces!}
                     />
                   ) : (
                     <Mode scope="selector" modeScope="" />

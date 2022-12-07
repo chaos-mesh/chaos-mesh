@@ -29,6 +29,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import * as auth from 'api/auth'
+import { Stale } from 'api/queryUtils'
 import Cookies from 'js-cookie'
 import { useGetCommonConfig } from 'openapi'
 import { useEffect, useState } from 'react'
@@ -41,7 +42,7 @@ import Loading from '@ui/mui-extends/esm/Loading'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { setAlertOpen, setConfig, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlertOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 
 import Helmet from 'components/Helmet'
 import { TokenFormValues } from 'components/Token'
@@ -133,12 +134,11 @@ const TopContainer = () => {
 
   const { isLoading: loading } = useGetCommonConfig({
     query: {
+      staleTime: Stale.DAY,
       onSuccess(data) {
         if (data.security_mode) {
           setAuth()
         }
-
-        dispatch(setConfig(data))
       },
     },
   })

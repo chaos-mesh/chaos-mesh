@@ -16,14 +16,14 @@
  */
 import { Autocomplete, TextField } from '@mui/material'
 import * as auth from 'api/auth'
-import { useEffect } from 'react'
+import { Stale } from 'api/queryUtils'
+import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import Paper from '@ui/mui-extends/esm/Paper'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { getNamespaces } from 'slices/experiments'
 import { setNameSpace } from 'slices/globalStatus'
 
 import i18n from 'components/T'
@@ -32,13 +32,14 @@ const Namespace = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
-  const { namespace } = useStoreSelector((state) => state.globalStatus)
-  const { namespaces } = useStoreSelector((state) => state.experiments)
-  const dispatch = useStoreDispatch()
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      staleTime: Stale.DAY,
+    },
+  })
 
-  useEffect(() => {
-    dispatch(getNamespaces())
-  }, [dispatch])
+  const { namespace } = useStoreSelector((state) => state.globalStatus)
+  const dispatch = useStoreDispatch()
 
   const handleSelectGlobalNamespace = (_: any, newVal: any) => {
     const ns = newVal
@@ -55,7 +56,7 @@ const Namespace = () => {
       className="tutorial-namespace"
       sx={{ minWidth: 180 }}
       value={namespace}
-      options={['All', ...namespaces]}
+      options={['All', ...(namespaces || [])]}
       onChange={handleSelectGlobalNamespace}
       disableClearable={true}
       renderInput={(params) => <TextField {...params} size="small" label={i18n('common.chooseNamespace')} />}

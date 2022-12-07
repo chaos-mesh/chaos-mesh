@@ -19,13 +19,13 @@ import { makeStyles } from '@mui/styles'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
-import { useGetCommonRbacConfig } from 'openapi'
+import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from 'openapi'
 import { useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { useStoreDispatch } from 'store'
 
 import { setAlert } from 'slices/globalStatus'
 
@@ -53,7 +53,6 @@ const RBACGenerator = () => {
 
   const intl = useIntl()
 
-  const { namespaces } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   const [params, setParams] = useState(initialValues)
@@ -62,6 +61,11 @@ const RBACGenerator = () => {
   const [generateToken, setGenerateToken] = useState('')
   const containerRef = useRef(null)
 
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      placeholderData: [],
+    },
+  })
   useGetCommonRbacConfig(params, {
     query: {
       onSuccess(data) {
@@ -116,7 +120,7 @@ const RBACGenerator = () => {
                   helperText={i18n('common.chooseNamespace')}
                   disabled={clustered}
                 >
-                  {namespaces.map((n) => (
+                  {namespaces!.map((n) => (
                     <MenuItem key={n} value={n}>
                       {n}
                     </MenuItem>

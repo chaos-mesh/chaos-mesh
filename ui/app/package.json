@@ -13,7 +13,7 @@
     "@mui/x-data-grid": "5.17.1",
     "@nivo/core": "^0.74.0",
     "@nivo/pie": "^0.74.0",
-    "@reactour/tour": "^2.3.0",
+    "@reactour/tour": "^3.1.6",
     "@reduxjs/toolkit": "^1.7.1",
     "@tanstack/react-query": "^4.14.1",
     "ace-builds": "^1.4.12",
@@ -74,6 +74,7 @@
     ]
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^4.19.1",
     "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",

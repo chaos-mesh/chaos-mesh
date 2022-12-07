@@ -22,7 +22,7 @@ import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
 import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from 'openapi'
 import { CoreWorkflowDetail } from 'openapi/index.schemas'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
 
