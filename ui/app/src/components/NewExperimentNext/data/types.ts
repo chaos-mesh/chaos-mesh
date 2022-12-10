@@ -46,12 +46,18 @@ export interface Definition {
   spec?: Spec
 }
 
+const containerNamesHelperText = ({ optional }: { optional: boolean }) => {
+  const text =
+    "Type and end with Enter to generate the container names. If it's empty, the first container will be injected."
+
+  return optional ? `Optional. ${text}` : text
+}
+
 const containerNames = {
   field: 'label' as FieldType,
   label: 'Container names',
   value: [],
-  helperText:
-    "Optional. Type and end with Enter to generate the container names. If it's empty, the first container will be injected.",
+  helperText: containerNamesHelperText({ optional: true }),
 }
 
 const awsCommon: Spec = {
@@ -747,7 +753,10 @@ const data: Record<Kind, Definition> = {
         key: 'container-kill',
         spec: {
           action: 'container-kill' as any,
-          containerNames,
+          containerNames: {
+            ...containerNames,
+            helperText: containerNamesHelperText({ optional: false }),
+          },
         },
       },
     ],
