@@ -28,8 +28,6 @@ import (
 // log is for logging in this package.
 var schedulelog = logf.Log.WithName("schedule-resource")
 
-// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-schedule,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=schedule,verbs=create;update,versions=v1alpha1,name=mschedule.kb.io
-
 var _ webhook.Defaulter = &Schedule{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
@@ -43,8 +41,6 @@ func (in *ConcurrencyPolicy) Default() {
 		*in = ForbidConcurrent
 	}
 }
-
-// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-schedule,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=schedule,versions=v1alpha1,name=vschedule.kb.io
 
 var _ webhook.Validator = &Schedule{}
 

@@ -10,11 +10,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
 
 ### Changed
 
-- Nothing
+- Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
+
 
 ### Deprecated
 
@@ -22,7 +22,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Removed
 
-- Nothing
+- Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
+
 
 ### Fixed
 
@@ -31,6 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Security
 
 - Nothing
+
 
 ## [2.4.3] - 2022-11-20
 
