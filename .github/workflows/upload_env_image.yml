@@ -11,14 +11,10 @@ on:
 
 jobs:
   build-specific-architecture:
-<<<<<<< HEAD
-    runs-on: ubuntu-latest
-=======
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
     runs-on: ubuntu-20.04
->>>>>>> f7cb8ebaf (Change ubuntu version from latest to 20.04 (#3817))
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -75,14 +71,10 @@ jobs:
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-$ARCH
 
   upload-manifest:
-<<<<<<< HEAD
-    runs-on: ubuntu-latest
-=======
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
     runs-on: ubuntu-20.04
->>>>>>> f7cb8ebaf (Change ubuntu version from latest to 20.04 (#3817))
     strategy:
       matrix:
         image: [dev, build]
