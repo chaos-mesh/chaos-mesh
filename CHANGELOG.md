@@ -15,10 +15,15 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
+<<<<<<< HEAD
 
 ### Deprecated
 
 - Nothing
+=======
+- Switch views between k8s and hosts nodes [#3830](https://github.com/chaos-mesh/chaos-mesh/pull/3830)
+- Upgrade byteman-helper to v4.0.20 [#3863](https://github.com/chaos-mesh/chaos-mesh/pull/3863)
+>>>>>>> 386291e73 (Update byteman-helper to v4.0.20-0.12 (#3863))
 
 ### Removed
 
