@@ -21,7 +21,7 @@ spec:
   action: network-delay
   mode: one
   selector:
-    # set the physicalMachine object name directly
+    # set the PhysicalMachine object name directly
     physicalMachines:
       default: # Namespace of PhysicalMachine object
         - physical-machine-example # Name of PhysicalMachine object
