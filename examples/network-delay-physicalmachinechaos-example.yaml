@@ -22,8 +22,8 @@ spec:
   mode: one
   selector:
     physicalMachines:
-      'default':
-        - physical-machine-example
+      'default': # Namespace of PhysicalMachine object
+        - physical-machine-example # Name of PhysicalMachine object
   network-delay:
     device: ens33
     ip-address: 140.82.112.3

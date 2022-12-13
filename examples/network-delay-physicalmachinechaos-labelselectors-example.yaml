@@ -21,6 +21,7 @@ spec:
   action: network-delay
   mode: one
   selector:
+    # use label selectors to select PhysicalMachine objects.
     namespaces:
       - default
     labelSelectors:
