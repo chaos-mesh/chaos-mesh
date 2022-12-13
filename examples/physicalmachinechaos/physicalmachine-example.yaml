@@ -13,20 +13,12 @@
 # limitations under the License.
 #
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PhysicalMachineChaos
+kind: PhysicalMachine
 metadata:
-  name: physical-network-delay
-  namespace: chaos-mesh
+  name: physical-machine-example
+  labels:
+    region: region-a
+    arch: amd64
 spec:
-  action: network-delay
-  mode: one
-  selector:
-    # set the physicalMachine object name directly
-    physicalMachines:
-      'default': # Namespace of PhysicalMachine object
-        - physical-machine-example # Name of PhysicalMachine object
-  network-delay:
-    device: ens33
-    ip-address: 140.82.112.3
-    latency: 1000ms
-  duration: '10m'
+  # set the address of chaosd server
+  address: http://123.123.123.123:31767
