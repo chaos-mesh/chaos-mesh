@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
-
+- New CI for finding merge conflicts [#3871](https://github.com/chaos-mesh/chaos-mesh/pull/3871)
 
 ### Deprecated
 
