@@ -1584,7 +1584,7 @@ spec:
           - name: METRICS_PORT
             value: "10080"
           - name: WEBHOOK_PORT
-            value: "9443"
+            value: "10250"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -1643,7 +1643,7 @@ spec:
             readOnly: true
         ports:
           - name: webhook
-            containerPort: 9443
+            containerPort: 10250
           - name: http
             containerPort: 10080
           - name: pprof
