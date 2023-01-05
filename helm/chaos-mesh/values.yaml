@@ -81,8 +81,12 @@ controllerManager:
 
   # The keys within the "env" map are mounted as environment variables on the pod.
   env:
-    # WEBHOOK_PORT is configured the port for chaos-controller-manager provides webhooks
-    WEBHOOK_PORT: 9443
+    # WEBHOOK_PORT is configured the port for chaos-controller-manager provides webhooks.
+    # In GKE private clusters, by default kubernetes apiservers are allowed to
+    # talk to the cluster nodes only on 443 and 10250. so configuring
+    # WEBHOOK_PORT: 10250, will work out of the box without needing to add firewall
+    # rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000
+    WEBHOOK_PORT: 10250
     # METRICS_PORT is configured the port for chaos-controller-manager exposing prometheus metrics
     METRICS_PORT: 10080
   # If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` could be injected

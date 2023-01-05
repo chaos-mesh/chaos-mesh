@@ -19,9 +19,9 @@ ENV RUST_BACKTRACE 1
 ARG TARGET_PLATFORM=amd64
 
 # install byteman and set env
-RUN curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.18-0.9.tar.gz -o /usr/local/byteman.tar.gz
+RUN curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.20-0.12.tar.gz -o /usr/local/byteman.tar.gz
 RUN tar xvf /usr/local/byteman.tar.gz -C /usr/local
-RUN mv /usr/local/byteman-chaos-mesh-download-v4.0.18-0.9 /usr/local/byteman
+RUN mv /usr/local/byteman-chaos-mesh-download-v4.0.20-0.12 /usr/local/byteman
 RUN rm /usr/local/byteman.tar.gz
 
 ENV BYTEMAN_HOME /usr/local/byteman
