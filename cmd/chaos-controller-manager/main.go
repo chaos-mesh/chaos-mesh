@@ -212,14 +212,7 @@ func Run(params RunParams) error {
 	}
 
 	go watchConfig(configWatcher, conf, controllerRuntimeSignalHandler.Done())
-	hookServer.Register("/inject-v1-pod", &webhook.Admission{
-		Handler: &apiWebhook.PodInjector{
-			Config:        conf,
-			ControllerCfg: ccfg.ControllerCfg,
-			Metrics:       metricsCollector,
-			Logger:        params.Logger.WithName("pod-injector"),
-		}},
-	)
+
 	hookServer.Register("/validate-auth", &webhook.Admission{
 		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace,

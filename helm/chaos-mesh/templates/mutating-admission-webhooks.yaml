@@ -36,33 +36,6 @@ metadata:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
   {{- end }}
 webhooks:
-  - name: {{ template "chaos-mesh.webhook" . }}
-    {{- if $supportTimeoutSeconds }}
-    timeoutSeconds: {{ $timeoutSeconds }}
-    {{- if eq $webhookApiVersion "admissionregistration.k8s.io/v1" }}
-    sideEffects: None
-    admissionReviewVersions: ["v1", "v1beta1"]
-    {{- end }}
-    {{- end }}
-    clientConfig:
-      {{- if $certManagerEnabled }}
-      caBundle: Cg==
-      {{- else }}
-      caBundle: {{ ternary (b64enc $caCert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
-      {{- end }}
-      service:
-        name: {{ template "chaos-mesh.svc" . }}
-        namespace: {{ .Release.Namespace | quote }}
-        path: "/inject-v1-pod"
-    rules:
-      - operations: [ "CREATE" ]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        admission-webhook: enabled
-    failurePolicy: {{ .Values.webhook.FailurePolicy }}
   {{- range $crd := .Values.webhook.CRDS }}
   - clientConfig:
       {{- if $certManagerEnabled }}
