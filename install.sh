@@ -1873,25 +1873,6 @@ metadata:
     app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: admission-webhook
 webhooks:
-  - name: admission-webhook.chaos-mesh.org
-    timeoutSeconds: 5
-    sideEffects: None
-    admissionReviewVersions: ["v1", "v1beta1"]
-    clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-mesh"
-        path: "/inject-v1-pod"
-    rules:
-      - operations: [ "CREATE" ]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        admission-webhook: enabled
-    failurePolicy: Fail
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
