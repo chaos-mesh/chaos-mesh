@@ -21,16 +21,13 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
-	"golang.org/x/time/rate"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -48,8 +45,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/pkg/webhook"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 var (
@@ -127,7 +122,6 @@ type RunParams struct {
 func Run(params RunParams) error {
 	mgr := params.Mgr
 	authCli := params.AuthCli
-	metricsCollector := params.MetricsCollector
 
 	var err error
 	for _, obj := range params.Objs {
@@ -178,7 +172,6 @@ func Run(params RunParams) error {
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = ccfg.ControllerCfg.CertsDir
-	conf := config.NewConfigWatcherConf()
 
 	controllerRuntimeSignalHandler := ctrl.SetupSignalHandler()
 
@@ -201,18 +194,6 @@ func Run(params RunParams) error {
 		}()
 	}
 
-	if err = ccfg.ControllerCfg.WatcherConfig.Verify(); err != nil {
-		setupLog.Error(err, "invalid environment configuration")
-		os.Exit(1)
-	}
-	configWatcher, err := watcher.New(*ccfg.ControllerCfg.WatcherConfig, metricsCollector)
-	if err != nil {
-		setupLog.Error(err, "unable to create config watcher")
-		os.Exit(1)
-	}
-
-	go watchConfig(configWatcher, conf, controllerRuntimeSignalHandler.Done())
-
 	hookServer.Register("/validate-auth", &webhook.Admission{
 		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace,
@@ -228,77 +209,4 @@ func Run(params RunParams) error {
 	}
 
 	return nil
-}
-
-func setupWatchQueue(stopCh <-chan struct{}, configWatcher *watcher.K8sConfigMapWatcher) workqueue.Interface {
-	// watch for reconciliation signals, and grab configmaps, then update the running configuration
-	// for the server
-	sigChan := make(chan interface{}, 10)
-
-	queue := workqueue.NewRateLimitingQueue(&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.5), 1)})
-
-	go func() {
-		for {
-			select {
-			case <-stopCh:
-				queue.ShutDown()
-				return
-			case <-sigChan:
-				queue.AddRateLimited(struct{}{})
-			}
-		}
-	}()
-
-	go func() {
-		for {
-			setupLog.Info("Launching watcher for ConfigMaps")
-			if err := configWatcher.Watch(sigChan, stopCh); err != nil {
-				switch err {
-				case watcher.ErrWatchChannelClosed:
-					// known issue: https://github.com/kubernetes/client-go/issues/334
-					setupLog.Info("watcher channel has closed, restart watcher")
-				default:
-					setupLog.Error(err, "unable to watch new ConfigMaps")
-					os.Exit(1)
-				}
-			}
-
-			select {
-			case <-stopCh:
-				close(sigChan)
-				return
-			default:
-				// sleep 2 seconds to prevent excessive log due to infinite restart
-				time.Sleep(2 * time.Second)
-			}
-		}
-	}()
-
-	return queue
-}
-
-func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config, stopCh <-chan struct{}) {
-	queue := setupWatchQueue(stopCh, configWatcher)
-
-	for {
-		item, shutdown := queue.Get()
-		if shutdown {
-			break
-		}
-		func() {
-			defer queue.Done(item)
-
-			setupLog.Info("Triggering ConfigMap reconciliation")
-			updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
-			if err != nil {
-				setupLog.Error(err, "unable to get ConfigMaps")
-				return
-			}
-
-			setupLog.Info("Updating server with newly loaded configurations",
-				"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-			cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
-			setupLog.Info("Configuration replaced")
-		}()
-	}
 }

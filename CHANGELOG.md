@@ -8,8 +8,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
-- Remove the unused inject-v1-pod webhook. [#3885](https://github.com/chaos-mesh/chaos-mesh/pull/3885)
-
 ### Added
 
 - Bump go to v1.19.3 [#3770](https://github.com/chaos-mesh/chaos-mesh/pull/3770)
@@ -27,6 +25,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Remove no needed file crd-v1beta1.yaml [#3807](https://github.com/chaos-mesh/chaos-mesh/pull/3807)
 - Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
+- Remove the unused inject-v1-pod webhook. [#3885](https://github.com/chaos-mesh/chaos-mesh/pull/3885)
 
 ### Fixed
 
