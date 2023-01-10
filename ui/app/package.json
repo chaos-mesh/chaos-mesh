@@ -31,7 +31,7 @@
     "js-file-download": "^0.4.12",
     "js-yaml": "^4.0.0",
     "lodash": "^4.17.21",
-    "luxon": "^1.25.0",
+    "luxon": "^1.28.1",
     "re-resizable": "^6.9.9",
     "react": "^17.0.1",
     "react-ace": "^9.2.1",
