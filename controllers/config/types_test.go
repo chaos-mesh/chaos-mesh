@@ -23,7 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 func TestValidations(t *testing.T) {
@@ -47,51 +46,8 @@ var _ = Describe("Namespace-scoped Chaos", func() {
 				{
 					name: "target namespace should not be empty with namespaced scope",
 					config: config.ChaosControllerConfig{
-						WatcherConfig: &watcher.Config{
-							ClusterScoped:     false,
-							TemplateNamespace: "",
-							TargetNamespace:   "",
-							TemplateLabels:    nil,
-							ConfigLabels:      nil,
-						},
 						ClusterScoped:   false,
 						TargetNamespace: "",
-					},
-					expectValid: false,
-				},
-				{
-					name: "Watcher Config is always required",
-					config: config.ChaosControllerConfig{
-						WatcherConfig:   nil,
-						ClusterScoped:   true,
-						TargetNamespace: "",
-					},
-					expectValid: false,
-				},
-				{
-					name: "clusterScope should keep constant",
-					config: config.ChaosControllerConfig{
-						WatcherConfig: &watcher.Config{
-							ClusterScoped:     false,
-							TemplateNamespace: "",
-							TargetNamespace:   "",
-							TemplateLabels:    nil,
-							ConfigLabels:      nil,
-						},
-						ClusterScoped:   true,
-						TargetNamespace: "",
-					},
-					expectValid: false,
-				},
-				{
-					name: "ns should keep constant",
-					config: config.ChaosControllerConfig{
-						WatcherConfig: &watcher.Config{
-							ClusterScoped:   false,
-							TargetNamespace: "ns1",
-						},
-						ClusterScoped:   false,
-						TargetNamespace: "ns2",
 					},
 					expectValid: false,
 				},
