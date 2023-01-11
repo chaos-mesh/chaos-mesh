@@ -19,6 +19,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - New CI for finding merge conflicts [#3850](https://github.com/chaos-mesh/chaos-mesh/pull/3850)
 - Upgrade byteman-helper to v4.0.20 [#3863](https://github.com/chaos-mesh/chaos-mesh/pull/3863)
 - Helm: change default webhook port to [#10250](https://github.com/chaos-mesh/chaos-mesh/pull/3877)
+- Upgrade base image for chaos-mesh to alpine:3.17 [#3893](https://github.com/chaos-mesh/chaos-mesh/pull/3893)
 
 ### Removed
 
