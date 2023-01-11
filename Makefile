@@ -19,9 +19,6 @@ export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
 export PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 
-export IMAGE_E2E_HELPER_PROJECT ?= chaos-mesh
-export IMAGE_CHAOS_MESH_E2E_PROJECT ?= chaos-mesh
-
 ROOT=$(shell pwd)
 
 export IMAGE_BUILD_ENV_BUILD ?= 0
@@ -131,7 +128,7 @@ schedule-migration.tar.gz: schedule-migration
 	rm ./schedule-migration
 
 .PHONY: clean
-clean: clean-binary
+clean: clean-binary clean-image-built
 	rm -rf $(CLEAN_TARGETS)
 
 SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
@@ -197,31 +194,6 @@ e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
 	cd e2e-test && $(GO) test -c  -o ./image/e2e/bin/e2e.test ./e2e
 
 e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Build e2e test binary
-
-# $(1): the name of the image
-# $(2): the path of the Dockerfile build directory
-# $(3): the dependency of the image
-define IMAGE_TEMPLATE
-CLEAN_TARGETS += $(2)/.dockerbuilt
-
-image-$(1): $(2)/.dockerbuilt
-
-$(2)/.dockerbuilt:SHELL=bash
-$(2)/.dockerbuilt:$(3) $(2)/Dockerfile
-	$(ROOT)/build/build_image.py $(1) $(2)
-	touch $(2)/.dockerbuilt
-endef
-
-$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause images/chaos-daemon/bin/cdh))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
-$(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
-$(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
-$(eval $(call IMAGE_TEMPLATE,dev-env,images/dev-env))
-$(eval $(call IMAGE_TEMPLATE,e2e-helper,e2e-test/cmd/e2e_helper))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e,e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh e2e-build))
-$(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
-$(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
-$(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv))
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt

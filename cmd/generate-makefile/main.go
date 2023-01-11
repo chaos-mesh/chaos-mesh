@@ -26,7 +26,3 @@ func main() {
 		panic(err)
 	}
 }
-
-func renderContainerImageGeneratedMk() error {
-	return nil
-}
