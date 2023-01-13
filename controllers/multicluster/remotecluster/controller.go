@@ -31,13 +31,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/clusterregistry"
 	"github.com/chaos-mesh/chaos-mesh/pkg/helm"
 )
 
 const remoteClusterControllerFinalizer = "chaos-mesh/remotecluster-controllers"
 const chaosMeshReleaseName = "chaos-mesh"
-const chaosMeshReleaseVersion = "2.4.1"
 
 type Reconciler struct {
 	Log      logr.Logger
@@ -142,7 +142,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		newObj.Finalizers = obj.Finalizers
 		setRemoteClusterCondition(&newObj, v1alpha1.RemoteClusterConditionInstalled, corev1.ConditionTrue, "")
 		// TODO: do auto config migration
-		newObj.Status.CurrentVersion = chaosMeshReleaseVersion
+		newObj.Status.CurrentVersion = obj.Spec.Version
 		return r.Client.Update(ctx, &newObj)
 	})
 	if err != nil {
@@ -189,7 +189,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 	_, err = helmClient.GetRelease(obj.Spec.Namespace, chaosMeshReleaseName)
 	if err != nil {
 		if errors.Is(err, driver.ErrReleaseNotFound) {
-			chart, err := helm.FetchChaosMeshChart(ctx, chaosMeshReleaseVersion)
+			chart, err := helm.FetchChaosMeshChart(ctx, obj.Spec.Version, config.ControllerCfg.LocalHelmChartPath)
 			if err != nil {
 				return err
 			}

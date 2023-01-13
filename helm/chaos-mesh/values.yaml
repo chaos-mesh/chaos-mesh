@@ -139,6 +139,13 @@ controllerManager:
     retryPeriod: 2s
   # chaosdSecurityMode is enabled for mTLS connection between chaos-controller-manager and chaosd
   chaosdSecurityMode: true
+  # multi cluster install offline helm chart path
+  localHelmChart:
+    enabled: true
+    volume:
+      hostPath:
+        path: /data/helm
+        type: DirectoryOrCreate
 
 chaosDaemon:
   # image would be constructed by <registry>/<repository>:<tag>
