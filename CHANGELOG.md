@@ -14,6 +14,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.5.1] - 2023-01-13
+
+### Added
+
+- Nothing
+
+### Changed
+
 - Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
 - New CI for finding merge conflicts [#3870](https://github.com/chaos-mesh/chaos-mesh/pull/3870)
 - Upgrade byteman-helper to v4.0.20 [#3865](https://github.com/chaos-mesh/chaos-mesh/pull/3865)
