@@ -29,6 +29,7 @@ jobs:
             **.md
             ui/**
             .github/workflows/checklink.yaml
+            .github/checklink_config.json
             .github/workflows/ci.yml
             .github/workflows/ci_skip.yml
             .github/workflows/codecov_unittest.yaml
