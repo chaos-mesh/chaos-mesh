@@ -20,7 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 )
@@ -28,9 +27,7 @@ import (
 func TestValidations(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Namespace scoped",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Namespace scoped")
 }
 
 var _ = Describe("Namespace-scoped Chaos", func() {

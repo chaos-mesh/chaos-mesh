@@ -30,7 +30,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -55,9 +54,7 @@ var setupLog = ctrl.Log.WithName("setup")
 func TestSchedule(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Schedule suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Schedule suit")
 }
 
 var _ = BeforeSuite(func() {

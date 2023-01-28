@@ -29,7 +29,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -49,9 +48,7 @@ var setupLog = ctrl.Log.WithName("setup")
 func TestWorkflow(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"workflow suite",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "workflow suite")
 }
 
 var _ = BeforeSuite(func() {

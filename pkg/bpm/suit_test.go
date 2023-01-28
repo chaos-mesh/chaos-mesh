@@ -20,13 +20,10 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
 
 func TestSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Background Process Manager Suite",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Background Process Manager Suite")
 }
