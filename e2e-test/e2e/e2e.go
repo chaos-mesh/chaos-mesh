@@ -29,7 +29,6 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2ekubectl "k8s.io/kubernetes/test/e2e/framework/kubectl"
-	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	utilnet "k8s.io/utils/net"
 
@@ -67,11 +66,11 @@ func setupSuite() {
 				"local-path-storage",
 			})
 		if err != nil {
-			e2elog.Failf("Error deleting orphaned namespaces: %v", err)
+			framework.Failf("Error deleting orphaned namespaces: %v", err)
 		}
 		klog.Infof("Waiting for deletion of the following namespaces: %v", deleted)
 		if err := framework.WaitForNamespacesDeleted(c, deleted, namespaceCleanupTimeout); err != nil {
-			e2elog.Failf("Failed to delete orphaned namespaces %v: %v", deleted, err)
+			framework.Failf("Failed to delete orphaned namespaces %v: %v", deleted, err)
 		}
 	}
 
@@ -96,22 +95,22 @@ func setupSuite() {
 	// number equal to the number of allowed not-ready nodes).
 	if err := e2epod.WaitForPodsRunningReady(c, metav1.NamespaceSystem, int32(framework.TestContext.MinStartupPods), int32(framework.TestContext.AllowedNotReadyNodes), podStartupTimeout, map[string]string{}); err != nil {
 		framework.DumpAllNamespaceInfo(c, metav1.NamespaceSystem)
-		e2ekubectl.LogFailedContainers(c, metav1.NamespaceSystem, e2elog.Logf)
-		e2elog.Failf("Error waiting for all pods to be running and ready: %v", err)
+		e2ekubectl.LogFailedContainers(c, metav1.NamespaceSystem, framework.Logf)
+		framework.Failf("Error waiting for all pods to be running and ready: %v", err)
 	}
 
 	//if err := framework.WaitForDaemonSets(c, metav1.NamespaceSystem, int32(framework.TestContext.AllowedNotReadyNodes), framework.TestContext.SystemDaemonsetStartupTimeout); err != nil {
-	//	e2elog.Logf("WARNING: Waiting for all daemonsets to be ready failed: %v", err)
+	//	framework.Logf("WARNING: Waiting for all daemonsets to be ready failed: %v", err)
 	//}
 
 	dc := c.DiscoveryClient
 
 	serverVersion, serverErr := dc.ServerVersion()
 	if serverErr != nil {
-		e2elog.Logf("Unexpected server error retrieving version: %v", serverErr)
+		framework.Logf("Unexpected server error retrieving version: %v", serverErr)
 	}
 	if serverVersion != nil {
-		e2elog.Logf("kube-apiserver version: %s", serverVersion.GitVersion)
+		framework.Logf("kube-apiserver version: %s", serverVersion.GitVersion)
 	}
 }
 
@@ -151,7 +150,7 @@ func setupSuitePerGinkgoNode() {
 		klog.Fatal("Error loading client: ", err)
 	}
 	framework.TestContext.IPFamily = getDefaultClusterIPFamily(c)
-	e2elog.Logf("Cluster IP family: %s", framework.TestContext.IPFamily)
+	framework.Logf("Cluster IP family: %s", framework.TestContext.IPFamily)
 }
 
 // getDefaultClusterIPFamily obtains the default IP family of the cluster
@@ -163,7 +162,7 @@ func getDefaultClusterIPFamily(c kubernetes.Interface) string {
 	// Get the ClusterIP of the kubernetes service created in the default namespace
 	svc, err := c.CoreV1().Services(metav1.NamespaceDefault).Get(context.TODO(), "kubernetes", metav1.GetOptions{})
 	if err != nil {
-		e2elog.Failf("Failed to get kubernetes service ClusterIP: %v", err)
+		framework.Failf("Failed to get kubernetes service ClusterIP: %v", err)
 	}
 
 	if utilnet.IsIPv6String(svc.Spec.ClusterIP) {
