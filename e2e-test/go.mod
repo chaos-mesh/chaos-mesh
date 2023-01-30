@@ -6,7 +6,7 @@ require (
 	github.com/chaos-mesh/chaos-mesh v0.0.0-00010101000000-000000000000
 	github.com/chaos-mesh/chaos-mesh/api v0.0.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.25.0
+	github.com/onsi/gomega v1.26.0
 	github.com/pkg/errors v0.9.1
 	k8s.io/api v0.26.1
 	k8s.io/apiextensions-apiserver v0.26.1
@@ -14,8 +14,9 @@ require (
 	k8s.io/cli-runtime v0.26.1
 	k8s.io/client-go v0.26.1
 	k8s.io/component-base v0.26.1
-	k8s.io/klog/v2 v2.80.1
+	k8s.io/klog/v2 v2.90.0
 	k8s.io/kube-aggregator v0.26.1
+	k8s.io/kubelet v0.26.1
 	k8s.io/kubernetes v1.26.1
 	k8s.io/pod-security-admission v0.26.1
 	k8s.io/utils v0.0.0-20230115233650-391b47cb4029
@@ -74,7 +75,7 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
-	github.com/onsi/ginkgo/v2 v2.7.0 // indirect
+	github.com/onsi/ginkgo/v2 v2.7.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
@@ -99,6 +100,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
@@ -129,5 +131,4 @@ require (
 replace (
 	github.com/chaos-mesh/chaos-mesh => ../
 	github.com/chaos-mesh/chaos-mesh/api => ../api
-	vbom.ml/util => github.com/fvbommel/util v0.0.2
 )

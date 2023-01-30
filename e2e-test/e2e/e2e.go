@@ -27,8 +27,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
+	_ "k8s.io/kubelet"
 	"k8s.io/kubernetes/test/e2e/framework"
+	e2edebug "k8s.io/kubernetes/test/e2e/framework/debug"
 	e2ekubectl "k8s.io/kubernetes/test/e2e/framework/kubectl"
+	e2enode "k8s.io/kubernetes/test/e2e/framework/node"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	utilnet "k8s.io/utils/net"
 
@@ -77,7 +80,7 @@ func setupSuite() {
 	// In large clusters we may get to this point but still have a bunch
 	// of nodes without Routes created. Since this would make a node
 	// unschedulable, we need to wait until all of them are schedulable.
-	framework.ExpectNoError(framework.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))
+	framework.ExpectNoError(e2enode.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))
 
 	//// If NumNodes is not specified then auto-detect how many are scheduleable and not tainted
 	//if framework.TestContext.CloudConfig.NumNodes == framework.DefaultNumNodes {
@@ -94,7 +97,7 @@ func setupSuite() {
 	// wasting the whole run), we allow for some not-ready pods (with the
 	// number equal to the number of allowed not-ready nodes).
 	if err := e2epod.WaitForPodsRunningReady(c, metav1.NamespaceSystem, int32(framework.TestContext.MinStartupPods), int32(framework.TestContext.AllowedNotReadyNodes), podStartupTimeout, map[string]string{}); err != nil {
-		framework.DumpAllNamespaceInfo(c, metav1.NamespaceSystem)
+		e2edebug.DumpAllNamespaceInfo(c, metav1.NamespaceSystem)
 		e2ekubectl.LogFailedContainers(c, metav1.NamespaceSystem, framework.Logf)
 		framework.Failf("Error waiting for all pods to be running and ready: %v", err)
 	}
