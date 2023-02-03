@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -51,7 +52,7 @@ func TestWorkflow(t *testing.T) {
 	RunSpecs(t, "workflow suite")
 }
 
-var _ = BeforeSuite(func() {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -97,7 +98,7 @@ var _ = BeforeSuite(func() {
 	}
 	Expect(err).ToNot(HaveOccurred())
 
-}, 60)
+}, NodeTimeout(60*time.Second))
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
