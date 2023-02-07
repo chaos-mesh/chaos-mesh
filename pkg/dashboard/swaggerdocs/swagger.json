@@ -5096,7 +5096,6 @@
                 },
                 "diskChaos": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskChaosSpec"
                 },
                 "dnsChaos": {
@@ -5283,10 +5282,11 @@
                     }
                 },
                 "duration": {
-                    "description": "Duration represents the duration of the chaos action",
+                    "description": "Duration represents the duration of the chaos action.",
                     "type": "string"
                 },
                 "fill_by_fallocate": {
+                    "description": "Fill disk by fallocate instead of dd\n+kubebuilder:default=true",
                     "type": "boolean"
                 },
                 "loop_execution": {
@@ -5298,20 +5298,27 @@
                     "type": "string"
                 },
                 "path": {
+                    "description": "'path' specifies the location to fill data in.\nIf path not provided, a temp file will be generated and deleted immediately after data filled in or allocated.\n+optional",
                     "type": "string"
                 },
                 "percent": {
+                    "description": "'percent' how many percent data of disk will fill in the file path.",
                     "type": "string"
                 },
                 "process_num": {
+                    "description": "'process-num' specifies the number of process work on reading, only 1-255 is valid value.",
                     "type": "integer"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
                 },
                 "selector": {
                     "description": "Selector is used to select pods that are used to inject chaos action.",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
                 },
                 "size": {
+                    "description": "'size' specifies how many units of data will fill in the file path.\n'unit' specifies the unit of data, support c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024,\nGB=1000*1000*1000, G=1024*1024*1024 BYTESexample : 1M | 512kB\nOne of percent and size must not be empty when action is `fill`.\n+optional",
                     "type": "string"
                 },
                 "space_lock_size": {
@@ -7348,7 +7355,6 @@
                 },
                 "diskChaos": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskChaosSpec"
                 },
                 "dnsChaos": {
@@ -7658,7 +7664,6 @@
                 },
                 "diskChaos": {
                     "description": "+optional",
-                    "type": "object",
                     "$ref": "#/definitions/v1alpha1.DiskChaosSpec"
                 },
                 "dnsChaos": {

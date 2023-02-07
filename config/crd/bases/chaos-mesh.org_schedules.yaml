@@ -333,6 +333,10 @@ spec:
                     description: '''process-num'' specifies the number of process
                       work on reading, only 1-255 is valid value.'
                     type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
                   selector:
                     description: Selector is used to select pods that are used to
                       inject chaos action.
@@ -3779,6 +3783,10 @@ spec:
                               description: '''process-num'' specifies the number of
                                 process work on reading, only 1-255 is valid value.'
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -7030,6 +7038,10 @@ spec:
                                     of process work on reading, only 1-255 is valid
                                     value.'
                                   type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
                                 selector:
                                   description: Selector is used to select pods that
                                     are used to inject chaos action.

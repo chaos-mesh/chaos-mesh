@@ -80,6 +80,10 @@ type DiskChaosSpec struct {
 
 	// Duration represents the duration of the chaos action.
 	Duration *string `json:"duration,omitempty"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 type DiskChaosStatus struct {
