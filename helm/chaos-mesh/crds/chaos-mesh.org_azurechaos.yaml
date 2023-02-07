@@ -62,6 +62,10 @@ spec:
                 description: LUN indicates the Logical Unit Number of the data disk.
                   Needed in disk-detach.
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               resourceGroupName:
                 description: ResourceGroupName defines the name of ResourceGroup
                 type: string

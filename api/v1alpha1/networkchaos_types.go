@@ -37,7 +37,7 @@ type NetworkChaos struct {
 
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
-	Status NetworkChaosStatus `json:"status"`
+	Status NetworkChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithCustomStatus = (*NetworkChaos)(nil)
@@ -124,6 +124,10 @@ type NetworkChaosSpec struct {
 	// ExternalTargets represents network targets outside k8s
 	// +optional
 	ExternalTargets []string `json:"externalTargets,omitempty"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // NetworkChaosStatus defines the observed state of NetworkChaos

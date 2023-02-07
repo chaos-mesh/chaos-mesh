@@ -35,6 +35,10 @@ type JVMChaosSpec struct {
 	// JVMParameter represents the detail about jvm chaos action definition
 	// +optional
 	JVMParameter `json:",inline"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // JVMChaosAction represents the chaos action about jvm
@@ -132,8 +136,9 @@ type JVMStressCfgSpec struct {
 // JVMMySQLSpec is the specification of MySQL fault injection in JVM
 // only when SQL match the Database, Table and SQLType, JVMChaos mesh will inject fault
 // for examle:
-//   SQL is "select * from test.t1",
-//   only when ((Database == "test" || Database == "") && (Table == "t1" || Table == "") && (SQLType == "select" || SQLType == "")) is true, JVMChaos will inject fault
+//
+//	SQL is "select * from test.t1",
+//	only when ((Database == "test" || Database == "") && (Table == "t1" || Table == "") && (SQLType == "select" || SQLType == "")) is true, JVMChaos will inject fault
 type JVMMySQLSpec struct {
 	// the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now
 	MySQLConnectorVersion string `json:"mysqlConnectorVersion,omitempty"`

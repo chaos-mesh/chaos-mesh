@@ -33,11 +33,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-// StatusResponse defines a common status struct.
-type StatusResponse struct {
-	Status string `json:"status"`
-}
-
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/workflows")
 	endpoint.GET("", s.listWorkflows)
@@ -66,10 +61,10 @@ func NewService(conf *config.ChaosDashboardConfig, store core.WorkflowStore, log
 // @Tags workflows
 // @Produce json
 // @Param request body curl.RequestForm true "Origin HTTP Request"
-// @Router /workflows/render-task/http [post]
 // @Success 200 {object} v1alpha1.Template
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
+// @Router /workflows/render-task/http [post]
 func (it *Service) renderHTTPTask(c *gin.Context) {
 	requestBody := curl.RequestForm{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
@@ -284,7 +279,7 @@ func (it *Service) createWorkflow(c *gin.Context) {
 // @Tags workflows
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} StatusResponse
+// @Success 200 {object} utils.Response
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -314,7 +309,7 @@ func (it *Service) deleteWorkflow(c *gin.Context) {
 		utils.SetAPImachineryError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+	c.JSON(http.StatusOK, utils.ResponseSuccess)
 }
 
 // @Summary Update a workflow.

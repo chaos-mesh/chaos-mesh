@@ -41,13 +41,17 @@ var _ InnerObject = (*KernelChaos)(nil)
 
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
-	PodSelector `json:",inline"`
+	ContainerSelector `json:",inline"`
 
 	// FailKernRequest defines the request of kernel injection
 	FailKernRequest FailKernRequest `json:"failKernRequest"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // FailKernRequest defines the injection conditions

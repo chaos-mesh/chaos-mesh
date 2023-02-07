@@ -23,6 +23,7 @@ import (
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/recover"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 var managerNamespace, managerSvc string
@@ -47,16 +48,12 @@ Interacting with chaos mesh
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	rootLogger, flushFunc, err := cm.NewStderrLogger()
+	rootLogger, err := log.NewDefaultZapLogger()
 	if err != nil {
 		cm.PrettyPrint("failed to initialize logger: ", 0, cm.Red)
 		cm.PrettyPrint(err.Error(), 1, cm.Red)
 		os.Exit(1)
 	}
-	if flushFunc != nil {
-		defer flushFunc()
-	}
-	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
 
 	rootCmd.PersistentFlags().StringVarP(&managerNamespace, "manager-namespace", "N", "chaos-mesh", "the namespace chaos-controller-manager in")
 	rootCmd.PersistentFlags().StringVarP(&managerSvc, "manager-svc", "s", "chaos-mesh-controller-manager", "the service to chaos-controller-manager")

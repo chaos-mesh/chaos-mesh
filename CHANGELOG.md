@@ -10,26 +10,288 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Bump go to v1.19.3 [#3770](https://github.com/chaos-mesh/chaos-mesh/pull/3770)
+- Add Disk Chaos API [#3387](https://github.com/chaos-mesh/chaos-mesh/pull/3387)
+
+### Changed
+
+- Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
+- Switch views between k8s and hosts nodes [#3830](https://github.com/chaos-mesh/chaos-mesh/pull/3830)
+- New CI for finding merge conflicts [#3850](https://github.com/chaos-mesh/chaos-mesh/pull/3850)
+- Upgrade byteman-helper to v4.0.20 [#3863](https://github.com/chaos-mesh/chaos-mesh/pull/3863)
+- Helm: change default webhook port to [#10250](https://github.com/chaos-mesh/chaos-mesh/pull/3877)
+- Upgrade base image for chaos-mesh to alpine:3.17 [#3893](https://github.com/chaos-mesh/chaos-mesh/pull/3893)
+- Slow down releasing the latest version #[3900](https://github.com/chaos-mesh/chaos-mesh/pull/3900)
+
+### Removed
+
+- Remove no needed file crd-v1beta1.yaml [#3807](https://github.com/chaos-mesh/chaos-mesh/pull/3807)
+- Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
+- Remove the unused inject-v1-pod webhook. [#3885](https://github.com/chaos-mesh/chaos-mesh/pull/3885)
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.5.0] - 2022-11-22
+
+### Added
+
+- Add `controller.securityContext` and `dashboard.securityContext` to Helm chart [#3603](https://github.com/chaos-mesh/chaos-mesh/pull/3603)
+- Add `RemoteCluster` resource type [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
+- Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
+- Add features about integration with helm to install Chaos Mesh in remote cluster [#3384](https://github.com/chaos-mesh/chaos-mesh/pull/3384)
+- Add new CI "Manually Sign Container Images" to sign existing container images [#3708](https://github.com/chaos-mesh/chaos-mesh/pull/3708)
+- Install and uninstall chaos mesh in remote cluster through `RemoteCluster` resource [#3414](https://github.com/chaos-mesh/chaos-mesh/pull/3414)
+- MultiCluster: support inject / recover on remote cluster [#3453](https://github.com/chaos-mesh/chaos-mesh/pull/3453)
+- Add TLS support for HTTPChaos [#3549](https://github.com/chaos-mesh/chaos-mesh/pull/3549)
+
+### Changed
+
+- Use the next generation `New Workflow` UI by default [#3718](https://github.com/chaos-mesh/chaos-mesh/pull/3718)
+- StressChaos: Support cgroup v2 for docker and crio [#3698](https://github.com/chaos-mesh/chaos-mesh/pull/3698)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Remove the explicit use of pingcap/log [#3674](https://github.com/chaos-mesh/chaos-mesh/pull/3674)
+- Fix typo in controller error message [#3704](https://github.com/chaos-mesh/chaos-mesh/pull/3704)
+- Fix panic when logging, log kvs as pair [#3716](https://github.com/chaos-mesh/chaos-mesh/pull/3716)
+- Fix timechaos not injected into the child process [#3725](https://github.com/chaos-mesh/chaos-mesh/pull/3725)
+- Ignore `ScheduleSkipRemoveHistory` events to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+- Enable mode when creating PhysicalMachineChaos with addresses in UI [#3797](https://github.com/chaos-mesh/chaos-mesh/pull/3797)
+
+### Security
+
+- Sign images and generate sbom when uploading images in CI [#3766](https://github.com/chaos-mesh/chaos-mesh/pull/3766)
+
+## [2.4.2] - 2022-11-07
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix timechaos not injected into the child process [#3730](https://github.com/chaos-mesh/chaos-mesh/pull/3730)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+
+### Security
+
+- Nothing
+
+## [2.4.1] - 2022-09-27
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix: mark 2.4.1 not as pre-release version[#3679](https://github.com/chaos-mesh/chaos-mesh/pull/3679)
+
+### Security
+
+- Nothing
+
+## [2.4.0] - 2022-09-23
+
+### Added
+
+- Add support for `PhysicalMachine` in UI [#3624](https://github.com/chaos-mesh/chaos-mesh/pull/3624)
+
+### Changed
+
+- Replace io/ioutil package with os package. [#3539](https://github.com/chaos-mesh/chaos-mesh/pull/3539)
+- Refine logging in pkg/dashboard/apiserver/event, moved package level variable log into struct Service as a field. [#3528](https://github.com/chaos-mesh/chaos-mesh/pull/3528)
+- Refine logging in pkg/dashboard/apiserver/auth/gcp, moved package level variable log into struct Service as a field [#3527](https://github.com/chaos-mesh/chaos-mesh/pull/3527)
+- Change e2e config settings to append "pause image" args. [#3567](https://github.com/chaos-mesh/chaos-mesh/pull/3567)
+- Update display of disabled scope in UI [#3621](https://github.com/chaos-mesh/chaos-mesh/pull/3621)
+- Make the Scope render conditionally [#3622](https://github.com/chaos-mesh/chaos-mesh/pull/3622)
+- Refine logging, remove the usage of klog in chaosctl [#3628](https://github.com/chaos-mesh/chaos-mesh/pull/3628)
+- Dashboard: Fix rbac.yaml for token generation verbs/resources [#3370](https://github.com/chaos-mesh/chaos-mesh/pull/3370)
+- Refine logging, remove the usage of klog in event recorder [#3629](https://github.com/chaos-mesh/chaos-mesh/pull/3629)
+- Use int64 to restore latency for BlockChaos [#3638](https://github.com/chaos-mesh/chaos-mesh/pull/3638)
+- Remove CRD v1beta1 support [#3630](https://github.com/chaos-mesh/chaos-mesh/pull/3630)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix NetworkChaos fail with @ifXX in the device [#3605](https://github.com/chaos-mesh/chaos-mesh/pull/3605)
+- Fix BlockChaos can't show Chinese name. [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Add `omitempty` JSON tag to optional fields of the CRD objects. [#3531](https://github.com/chaos-mesh/chaos-mesh/pull/3531)
+- Fix "sidecar config" e2e test cases run failed in some scenario.[#3564](https://github.com/chaos-mesh/chaos-mesh/pull/3564)
+- Fix Integration test with bumping kubectl version. [#3589](https://github.com/chaos-mesh/chaos-mesh/pull/3589)
+
+### Security
+
+- Nothing
+
+## [2.3.3] - 2022-11-07
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Remove `limit` action of `BlockChaos` in the dashboard [#3655](https://github.com/chaos-mesh/chaos-mesh/pull/3655)
+- Sync PhysicalMachineChaos to API client and forms [#3660](https://github.com/chaos-mesh/chaos-mesh/pull/3660)
+- Fix timechaos not injected into the child process [#3729](https://github.com/chaos-mesh/chaos-mesh/pull/3729)
+- Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
+
+### Security
+
+- Nothing
+
+
+## [2.3.2] - 2022-09-20
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Use int64 to restore latency for BlockChaos [#3638](https://github.com/chaos-mesh/chaos-mesh/pull/3638)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix: update helm chart annotation artifacthub.io/prerelease to false [#3626](https://github.com/chaos-mesh/chaos-mesh/pull/3626)
+
+### Security
+
+- Nothing
+
+## [2.3.1] - 2022-09-02
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Protect chaos available namespace and filter namespaces if needed [#3473](https://github.com/chaos-mesh/chaos-mesh/pull/3473)
+- Respect flag `enableProfiling` and do not register profiler endpoints when it's false [#3474](https://github.com/chaos-mesh/chaos-mesh/pull/3474)
+- Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
+- Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
+- Fix IOChaos `containerNames` field in UI [#3533](https://github.com/chaos-mesh/chaos-mesh/pull/3533)
+- Fix BlockChaos can't show Chinese name. [#3536](https://github.com/chaos-mesh/chaos-mesh/pull/3536)
+- Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
+- Fix generate token failed on chaos dashboard [#3595](https://github.com/chaos-mesh/chaos-mesh/pull/3595)
+
+### Security
+
+- Nothing
+
+## [2.3.0] - 2022-07-29
+
+### Added
+
 - Add more status for record [#3170](https://github.com/chaos-mesh/chaos-mesh/pull/3170)
 - Add `chaosDaemon.updateStrategy` to Helm chart to allow configuring `DaemonSetUpdateStrategy` for chaos-daemon [#3108](https://github.com/chaos-mesh/chaos-mesh/pull/3108)
 - Add AArch64 support for TimeChaos [#3088](https://github.com/chaos-mesh/chaos-mesh/pull/3088)
 - Add integration test and link test on arm [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
 - Add `spec.privateKey.rotationPolicy` to Certificates, to comply with requirements in cert-manager 1.8 [#3325](https://github.com/chaos-mesh/chaos-mesh/pull/3325)
+- Add `clusterregistry` package to help developers to develop multi-cluster reconciler [#3342](https://github.com/chaos-mesh/chaos-mesh/pull/3342)
 - Support `Suspend` in next generation `New Workflow`'s UI [#3254](https://github.com/chaos-mesh/chaos-mesh/pull/3254)
 - Add helm annotations for Artifact Hub [#3355](https://github.com/chaos-mesh/chaos-mesh/pull/3355)
-- Add Disk Chaos API [#3387](https://github.com/chaos-mesh/chaos-mesh/pull/3387)
 
 ### Changed
 
 - Helm charts: update validate-auth to chaos-mesh-validation-auth [#3193](https://github.com/chaos-mesh/chaos-mesh/pull/3193)
+- Helm charts: support latest api version of dashboard ingress [#3066](https://github.com/chaos-mesh/chaos-mesh/pull/3066)
 - Update shell script to support shellchecks [#3230](https://github.com/chaos-mesh/chaos-mesh/pull/3230)
 - CI: build dev-env and build-env for e2e tests if required [#3264](https://github.com/chaos-mesh/chaos-mesh/pull/3264)
 - CI: version unrelated manifests [#3293](https://github.com/chaos-mesh/chaos-mesh/pull/3293)
 - Bump chaos-tproxy to v0.4.6 [#3272](https://github.com/chaos-mesh/chaos-mesh/pull/3272)
 - Helm charts: using 0.0.0 as version and appVersion [#3311](https://github.com/chaos-mesh/chaos-mesh/pull/3311)
 - Add a comment to the flag size of memory stress in the dashboard [#3359](https://github.com/chaos-mesh/chaos-mesh/pull/3359)
-- Refine logging in pkg/dashboard/store, removed global the log [#3143] (https://github.com/chaos-mesh/chaos-mesh/pull/3143)
+- Refine logging in pkg/dashboard/store, removed global the log [#3143](https://github.com/chaos-mesh/chaos-mesh/pull/3143)
 - Renamed namespace from chaos-testing to chaos-mesh [#3353](https://github.com/chaos-mesh/chaos-mesh/pull/3353)
+- Use ContainerSelector in kernel chaos [#3395](https://github.com/chaos-mesh/chaos-mesh/pull/3395)
+- Make possible to have more than one dns chaos server [#3381](https://github.com/chaos-mesh/chaos-mesh/pull/3381)
+- Helm charts: Relax allowedHostPaths in chaos-daemon PSP [#3350](https://github.com/chaos-mesh/chaos-mesh/pull/3350)
+- Run build image ci on self-hosted machine [#3429](https://github.com/chaos-mesh/chaos-mesh/pull/3429)
+- Simplified logic and add test case about finalizers. [#3422](https://github.com/chaos-mesh/chaos-mesh/pull/3422)
+- Update API requests with OpenAPI generated client [#2926](https://github.com/chaos-mesh/chaos-mesh/pull/2926)
+- Implement some missing methods in ctrl server [#3462](https://github.com/chaos-mesh/chaos-mesh/pull/3462)
+- Use `net.Interfaces()` to implement `getAllInterfaces()` [#3484](https://github.com/chaos-mesh/chaos-mesh/pull/3484)
 
 ### Deprecated
 
@@ -40,8 +302,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Removed extra import of common pkg in chaosctl/cmd/logs.go
 - Removed unused local function from statuscheck/manager.go [#3228](https://github.com/chaos-mesh/chaos-mesh/pull/3228)
 - Removed ui build and test for arm64 [#3305](https://github.com/chaos-mesh/chaos-mesh/pull/3305)
+- Remove sed need (SC2001) [#3248](https://github.com/chaos-mesh/chaos-mesh/pull/3248)
 - Removed not used clientset in cmd/chaos-controller-manager/main.go [#3334](https://github.com/chaos-mesh/chaos-mesh/pull/3334)
 - Removed not used globalCacheReader in cmd/chaos-controller-manager/provider/controller.go [#3343](https://github.com/chaos-mesh/chaos-mesh/pull/3343)
+- Removed unsupported action comments of blockchaos [#3435](https://github.com/chaos-mesh/chaos-mesh/pull/3435)
 
 ### Fixed
 
@@ -51,10 +315,83 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Adapt install.sh for kubectl/kubernetes cluster greater than 1.24 [#3177](https://github.com/chaos-mesh/chaos-mesh/pull/3177)
 - SC2166: Use || or && rather than -o or -a [#3235](https://github.com/chaos-mesh/chaos-mesh/pull/3235)
 - SC2206: Use quote to prevent word splitting/globbing [#3234](https://github.com/chaos-mesh/chaos-mesh/pull/3234)
-- Fix make check does not respect the env-images.yaml [#3210] (https://github.com/chaos-mesh/chaos-mesh/pull/3210)
+- Fix make check does not respect the env-images.yaml [#3210] (<https://github.com/chaos-mesh/chaos-mesh/pull/3210>)
 - SC2004: Remove unnecessary $ on arithmetic variables [#3247](https://github.com/chaos-mesh/chaos-mesh/pull/3247)
 - PhysicalMachineChaos: update stress options type [#3347](https://github.com/chaos-mesh/chaos-mesh/pull/3347)
+- PhysicalMachineChaos: remove validate for IP and host for delay, loss, duplicate, corruption [#3483](https://github.com/chaos-mesh/chaos-mesh/pull/3483)
+- StressChaos: run `pause` before `choom` [#3405](https://github.com/chaos-mesh/chaos-mesh/pull/3405)
+- JVMChaos: update the error message that can be ignored [#3415](https://github.com/chaos-mesh/chaos-mesh/pull/3415)
+- Fix Workflow Validating Webhook Panic [#3413](https://github.com/chaos-mesh/chaos-mesh/pull/3413)
+- Overwrite $IMAGE_BUILD_ENV_TAG with $IMAGE_TAG-$ARCH in `upload_env_image.yml` github action [#3444](https://github.com/chaos-mesh/chaos-mesh/pull/3444)
+- Add a judgement of `enterNS` in `getAllInterfaces()` [#3459](https://github.com/chaos-mesh/chaos-mesh/pull/3459)
+- Fix JVMChaos loading missing jar file for injection [#3491](https://github.com/chaos-mesh/chaos-mesh/pull/3491)
 
+### Security
+
+- Nothing
+
+## [2.2.3] - 2022-08-04
+
+### Added
+
+- Add `QPS` and `Burst` for Chaos Dashboard Configuration [#3476](https://github.com/chaos-mesh/chaos-mesh/pull/3476)
+
+### Changed
+
+- Implement some missing methods in ctrl server [#3470](https://github.com/chaos-mesh/chaos-mesh/pull/3470)
+
+### Deprecated
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Protect chaos available namespace and filter namespaces if needed [#3473](https://github.com/chaos-mesh/chaos-mesh/pull/3473)
+- Respect flag `enableProfiling` and do not register profiler endpoints when it's false [#3474](https://github.com/chaos-mesh/chaos-mesh/pull/3474)
+- Fix the blank screen after creating chaos experiment with "By YAML" [#3489](https://github.com/chaos-mesh/chaos-mesh/pull/3489)
+- Update hint text about the manual token generating process for Kubernetes 1.24+ [#3505](https://github.com/chaos-mesh/chaos-mesh/pull/3505)
+
+### Security
+
+- Nothing
+
+## [2.2.2] - 2022-07-07
+
+### Changed
+
+- Bump chaos-tproxy to v0.5.1 [#3426](https://github.com/chaos-mesh/chaos-mesh/pull/3426)
+- Run build image ci on self-hosted machine [#3429](https://github.com/chaos-mesh/chaos-mesh/pull/3429)
+
+## [2.2.1] - 2022-06-29
+
+### Added
+
+- JVMChaos: support inject fault into MySQL client [#3189](https://github.com/chaos-mesh/chaos-mesh/pull/3189)
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- PhysicalMachineChaos: update stress options type [#3354](https://github.com/chaos-mesh/chaos-mesh/pull/3354)
+- StressChaos: run `pause` before `choom` [#3405](https://github.com/chaos-mesh/chaos-mesh/pull/3405)
 
 ### Security
 
@@ -143,6 +480,78 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix Github Action `upload-image` [#2935](https://github.com/chaos-mesh/chaos-mesh/pull/2935)
 - Fix JVMChaos to handle the situation that the container which holds the JVM rules has been deleted [#2981](https://github.com/chaos-mesh/chaos-mesh/pull/2981)
 - Fix typo in comments for Chaos API [#3109](https://github.com/chaos-mesh/chaos-mesh/pull/3109)
+
+### Security
+
+- Nothing
+
+## [v2.1.8] - 2022-08-30
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix recover bug when setting force recover to true [#3578](https://github.com/chaos-mesh/chaos-mesh/pull/3578)
+- Uniformly use Enter to add item in LabelField [#3580](https://github.com/chaos-mesh/chaos-mesh/pull/3580)
+
+## [2.1.7] - 2022-07-29
+
+### Added
+
+- Add `QPS` and `Burst` for Chaos Dashboard Configuration [#3476](https://github.com/chaos-mesh/chaos-mesh/pull/3476)
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+## [2.1.6] - 2022-07-22
+
+### Added
+
+- Add e2e build image cache [#3097](https://github.com/chaos-mesh/chaos-mesh/pull/3151)
+- PhysicalMachineChaos: add recover command in process [#3468](https://github.com/chaos-mesh/chaos-mesh/pull/3468)
+
+### Changed
+
+- Must update CHANGELOG [#3181](https://github.com/chaos-mesh/chaos-mesh/pull/3181)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Fix: find the correct pid by CommName [#3336](https://github.com/chaos-mesh/chaos-mesh/pull/3336)
 
 ### Security
 

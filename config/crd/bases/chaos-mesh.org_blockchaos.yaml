@@ -46,9 +46,8 @@ spec:
             properties:
               action:
                 description: 'Action defines the specific block chaos action. Supported
-                  action: limit / delay'
+                  action: delay'
                 enum:
-                - limit
                 - delay
                 type: string
               containerNames:
@@ -71,9 +70,6 @@ spec:
               duration:
                 description: Duration represents the duration of the chaos action.
                 type: string
-              iops:
-                description: IOPS defines the limit of IO frequency.
-                type: integer
               mode:
                 description: 'Mode defines the mode to run chaos action. Supported
                   mode: one / all / fixed / fixed-percent / random-max-percent'
@@ -83,6 +79,10 @@ spec:
                 - fixed
                 - fixed-percent
                 - random-max-percent
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
                 type: string
               selector:
                 description: Selector is used to select pods that are used to inject

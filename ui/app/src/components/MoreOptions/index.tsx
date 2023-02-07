@@ -14,31 +14,23 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button } from '@mui/material'
-
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
-import Space from '@ui/mui-extends/esm/Space'
-import { T } from 'components/T'
+import { Box, Button } from '@mui/material'
 import { useState } from 'react'
+
+import Space from '@ui/mui-extends/esm/Space'
+
+import { T } from 'components/T'
 
 interface MoreOptionsProps {
   isOpen?: boolean
   beforeOpen?: () => void
   afterClose?: () => void
   title?: string | JSX.Element
-  disabled?: boolean
 }
 
-const MoreOptions: React.FC<MoreOptionsProps> = ({
-  isOpen = false,
-  beforeOpen,
-  afterClose,
-  title,
-  disabled,
-  children,
-}) => {
+const MoreOptions: React.FC<MoreOptionsProps> = ({ isOpen = false, beforeOpen, afterClose, title, children }) => {
   const [open, _setOpen] = useState(isOpen)
 
   const setOpen = () => {
@@ -54,12 +46,7 @@ const MoreOptions: React.FC<MoreOptionsProps> = ({
   return (
     <Space>
       <Box textAlign="right">
-        <Button
-          color="primary"
-          startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-          onClick={setOpen}
-          disabled={disabled}
-        >
+        <Button color="primary" startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />} onClick={setOpen}>
           {title ? title : <T id="common.moreOptions" />}
         </Button>
       </Box>

@@ -26,9 +26,9 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 4000
-    targetPort: 4000
-    nodePort: 30400
+    - port: 4000
+      targetPort: 4000
+      nodePort: 30400
   selector:
     app: tidb
 ---
@@ -49,5 +49,9 @@ spec:
         app: tidb
     spec:
       containers:
-      - image: pingcap/tidb:v6.0.0
-        name: tidb
+        - image: pingcap/tidb:v6.0.0
+          name: tidb
+          env:
+            # uber-go/automaxprocs does NOT work with cgroup github in action, would let tidb panic
+            - name: GOMAXPROCS
+              value: "8"

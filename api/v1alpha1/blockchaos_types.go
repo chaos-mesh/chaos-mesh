@@ -34,20 +34,15 @@ type BlockChaos struct {
 type BlockChaosAction string
 
 const (
-	BlockLimit BlockChaosAction = "limit"
 	BlockDelay BlockChaosAction = "delay"
 )
 
 // BlockChaosSpec is the content of the specification for a BlockChaos
 type BlockChaosSpec struct {
 	// Action defines the specific block chaos action.
-	// Supported action: limit / delay
-	// +kubebuilder:validation:Enum=limit;delay
+	// Supported action: delay
+	// +kubebuilder:validation:Enum=delay
 	Action BlockChaosAction `json:"action"`
-
-	// IOPS defines the limit of IO frequency.
-	// +optional
-	IOPS int `json:"iops,omitempty"`
 
 	// Delay defines the delay distribution.
 	// +optional
@@ -58,6 +53,10 @@ type BlockChaosSpec struct {
 	// Duration represents the duration of the chaos action.
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // BlockDelaySpec describes the block delay specification

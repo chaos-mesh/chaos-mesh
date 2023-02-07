@@ -241,11 +241,7 @@ main() {
     fi
 
     if [ "${crd}" == "" ]; then
-        if kubectl api-versions | grep -q -w apiextensions.k8s.io/v1 ; then
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
-        else
-            crd="https://mirrors.chaos-mesh.org/${cm_version}/crd-v1beta1.yaml"
-        fi
+        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
@@ -583,7 +579,7 @@ install_kind() {
     err_msg=$(kind version 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(kind version | awk '{print $2}' | sed s/v//g)
-        target_version=$(echo "${kind_version}" | sed s/v//g)
+        target_version=${kind_version//v}
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
         else
@@ -1152,7 +1148,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "services", "endpoints" ]
+    resources: [ "services", "endpoints", "secrets" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
@@ -1161,6 +1157,9 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
+  - apiGroups: [ "coordination.k8s.io" ]
+    resources: [ "leases" ]
+    verbs: [ "*" ]
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
@@ -1207,6 +1206,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-daemon
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "31766"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1239,6 +1241,9 @@ metadata:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: chaos-dashboard
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "2334"
 spec:
   selector:
     app.kubernetes.io/name: chaos-mesh
@@ -1275,6 +1280,9 @@ kind: Service
 metadata:
   namespace: "chaos-mesh"
   name: chaos-mesh-controller-manager
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "10080"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1388,7 +1396,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath:
+          hostPath: 
             path: ${socketDir}
         - name: sys-path
           hostPath:
@@ -1440,6 +1448,8 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
       annotations:
     spec:
+      securityContext:
+            {}
       serviceAccountName: chaos-dashboard
       containers:
         - name: chaos-dashboard
@@ -1495,6 +1505,8 @@ spec:
               value: "false"
             - name: ROOT_URL
               value: "http://localhost:2333"
+            - name: ENABLE_PROFILING
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1553,6 +1565,8 @@ spec:
       annotations:
         rollme: "install.sh"
     spec:
+      securityContext:
+            {}
       hostNetwork: ${host_network}
       serviceAccountName: chaos-controller-manager
       containers:
@@ -1570,7 +1584,7 @@ spec:
           - name: METRICS_PORT
             value: "10080"
           - name: WEBHOOK_PORT
-            value: "9443"
+            value: "10250"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -1629,7 +1643,7 @@ spec:
             readOnly: true
         ports:
           - name: webhook
-            containerPort: 9443
+            containerPort: 10250
           - name: http
             containerPort: 10080
           - name: pprof
@@ -1859,25 +1873,6 @@ metadata:
     app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: admission-webhook
 webhooks:
-  - name: admission-webhook.chaos-mesh.org
-    timeoutSeconds: 5
-    sideEffects: None
-    admissionReviewVersions: ["v1", "v1beta1"]
-    clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-mesh"
-        path: "/inject-v1-pod"
-    rules:
-      - operations: [ "CREATE" ]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        admission-webhook: enabled
-    failurePolicy: Fail
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -2256,6 +2251,27 @@ webhooks:
           - UPDATE
         resources:
           - statuschecks
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-mesh"
+        path: /mutate-chaos-mesh-org-v1alpha1-remotecluster
+    failurePolicy: Fail
+    name: mremotecluster.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - remotecluster
 ---
 # Source: chaos-mesh/templates/validating-admission-webhooks.yaml
 # Copyright 2022 Chaos Mesh Authors.
@@ -2661,6 +2677,27 @@ webhooks:
           - UPDATE
         resources:
           - statuschecks
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-mesh"
+        path: /validate-chaos-mesh-org-v1alpha1-remotecluster
+    failurePolicy: Fail
+    name: vremotecluster.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - remotecluster
 ---
 # Source: chaos-mesh/templates/validating-admission-webhooks.yaml
 apiVersion: admissionregistration.k8s.io/v1

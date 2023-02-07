@@ -14,9 +14,7 @@
  * limitations under the License.
  *
  */
-
 import { OutlinedInput as MuiOutlinedInput, OutlinedInputProps } from '@mui/material'
-
 import { forwardRef } from 'react'
 
 const OutlinedInput = forwardRef(({ sx, ...rest }: OutlinedInputProps, ref) => (

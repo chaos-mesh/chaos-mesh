@@ -56,7 +56,7 @@ func NewScheme() *runtime.Scheme {
 }
 
 // NewOption returns the manager.Options for build the controller-runtime Manager
-func NewOption(logger logr.Logger) *ctrl.Options {
+func NewOption(logger logr.Logger, scheme *runtime.Scheme) *ctrl.Options {
 	setupLog := logger.WithName("setup")
 
 	leaderElectionNamespace := config.ControllerCfg.Namespace
@@ -69,7 +69,7 @@ func NewOption(logger logr.Logger) *ctrl.Options {
 		MetricsBindAddress:         net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
 		LeaderElectionNamespace:    leaderElectionNamespace,
-		LeaderElectionResourceLock: "configmaps",
+		LeaderElectionResourceLock: "configmapsleases",
 		LeaderElectionID:           "chaos-mesh",
 		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
 		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,

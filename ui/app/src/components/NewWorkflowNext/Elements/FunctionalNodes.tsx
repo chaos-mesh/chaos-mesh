@@ -16,12 +16,27 @@
  */
 import Space from '@ui/mui-extends/esm/Space'
 
+import { SpecialTemplateType } from '../utils/convert'
 import DraggableBareNode from './DraggableBareNode'
 import { ElementTypes, ElementsProps } from './types'
 
 export default function FunctionalNodes({ onElementClick }: ElementsProps) {
   return (
     <Space>
+      <DraggableBareNode
+        elementType={SpecialTemplateType.Serial}
+        kind={SpecialTemplateType.Serial}
+        onNodeClick={onElementClick}
+      >
+        Serial
+      </DraggableBareNode>
+      <DraggableBareNode
+        elementType={SpecialTemplateType.Parallel}
+        kind={SpecialTemplateType.Parallel}
+        onNodeClick={onElementClick}
+      >
+        Parallel
+      </DraggableBareNode>
       <DraggableBareNode elementType={ElementTypes.Suspend} kind="Suspend" onNodeClick={onElementClick}>
         Suspend
       </DraggableBareNode>

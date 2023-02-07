@@ -1,8 +1,31 @@
 name: Integration Test
+
 on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - "**.md"
+      # Not available for frontend code for now.
+      - "ui/**"
+      - .github/workflows/checklink.yaml
+      - .github/checklink_config.json
+      - .github/workflows/ci.yml
+      - .github/workflows/ci_skip.yml
+      - .github/workflows/codecov_unittest.yaml
+      - .github/workflows/e2e_test.yml
+      - .github/workflows/e2e_test_upload_cache.yml
+      - .github/workflows/license_checker.yml
+      - .github/workflows/must_update_changelog.yml
+      - .github/workflows/release_helm_chart.yml
+      - .github/workflows/stale.yml
+      - .github/workflows/upload_env_image.yml
+      - .github/workflows/upload_image.yml
+      - .github/workflows/upload_image_pr.yml
+      - .github/workflows/upload_latest_files.yml
+      - .github/workflows/upload_release_files.yml
+
+permissions: read-all
 
 jobs:
   run:
@@ -11,9 +34,9 @@ jobs:
       fail-fast: false
       matrix:
         arch: [amd64, arm64]
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
         with:
           # Must use at least depth 2!
           fetch-depth: 2
@@ -26,9 +49,6 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v2.1
-
-      - name: Setup Kubectl
-        uses: azure/setup-kubectl@v2.0
 
       - name: Magic Kind DNS Fix
         if: ${{ matrix.arch == 'arm64' }}
@@ -43,7 +63,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.18'
+          go-version: "1.19.3"
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -92,8 +112,14 @@ jobs:
         run: |
           bash test/integration_test/run.sh
 
-      - name: post run - print k8s info
+      - name: post run - dump kubernetes cluster info
         if: always()
         run: |
-          kubectl describe pods
-          kubectl describe pods -n chaos-mesh
+          kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
+      - name: post run - upload kubernetes cluster info dump
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
+          path: cluster-info-dump
+          retention-days: 7

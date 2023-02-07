@@ -14,7 +14,12 @@ header:
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
+    - '**/*.crt'
+    - '**/*.key'
+    - '**/*.ext'
+    - '**/*.csr'
     - '.github/workflows/*'
+    - '.github/ISSUE_TEMPLATE/config.yml'
     - '.github/.licenserc.yaml'
     - 'Makefile'
     - 'PROJECT'
@@ -28,8 +33,7 @@ header:
     - 'pkg/chaoskernel/pb/bpfki.proto'
     - 'test/integration_test/utils/check_contains'
     # skip auto-generated files
-    - 'manifests/crd-v1beta1.yaml'
-    - 'manifests/crd.yaml'
+    - 'manifests/**'
     - 'helm/chaos-mesh/crds/*'
     - 'config/**'
     - '**/*_gen.go'
@@ -66,5 +70,7 @@ header:
     - 'ui/packages/mui-extends/.storybook/**'
     - 'ui/packages/mui-extends/stories/**'
     - 'ui/packages/mui-extends/test/storyshots.test.js'
+    - 'ui/yarn.lock'
     # codecov configuration file
-    - codecov.yml
+    - 'codecov.yml'
+    - '.gitkeep'

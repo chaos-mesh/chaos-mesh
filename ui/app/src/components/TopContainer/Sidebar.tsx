@@ -14,7 +14,14 @@
  * limitations under the License.
  *
  */
-
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
+import ScheduleIcon from '@mui/icons-material/Schedule'
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
+import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined'
 import {
   Box,
   CSSObject,
@@ -26,22 +33,16 @@ import {
   ListItemText as MuiListItemText,
 } from '@mui/material'
 import { Theme, styled } from '@mui/material/styles'
-
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
-import ScheduleIcon from '@mui/icons-material/Schedule'
-import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
-import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined'
-import i18n from 'components/T'
-import logo from 'images/logo.svg'
-import logoMini from 'images/logo-mini.svg'
-import logoMiniWhite from 'images/logo-mini-white.svg'
-import logoWhite from 'images/logo-white.svg'
+
 import { useStoreSelector } from 'store'
+
+import i18n from 'components/T'
+
+import logoMiniWhite from 'images/logo-mini-white.svg'
+import logoMini from 'images/logo-mini.svg'
+import logoWhite from 'images/logo-white.svg'
+import logo from 'images/logo.svg'
 
 export const openedWidth = 256
 export const closedWidth = 64

@@ -14,17 +14,16 @@
  * limitations under the License.
  *
  */
-
-import { appPath, ignores } from './constants.js'
-import { getUIFormEnum, isUIFormIgnore } from './utils.js'
-
+import fs from 'fs'
+import yaml from 'js-yaml'
 import _get from 'lodash.get'
 import _set from 'lodash.set'
-import fs from 'fs'
-import { nodeToField } from './factory.js'
 import sig from 'signale'
 import ts from 'typescript'
-import yaml from 'js-yaml'
+
+import { appPath, ignores } from './constants.js'
+import { nodeToField } from './factory.js'
+import { getUIFormEnum, isUIFormIgnore } from './utils.js'
 
 const { factory } = ts
 
@@ -218,28 +217,9 @@ export function swaggerRefToAllOf(source) {
     '["v1alpha1.NetworkChaosSpec"].properties.duplicate',
     '["v1alpha1.NetworkChaosSpec"].properties.loss',
     '["v1alpha1.PodHttpChaosPatchActions"].properties.body',
-    ...[
-      'clock',
-      'disk-fill',
-      'disk-read-payload',
-      'disk-write-payload',
-      'jvm-exception',
-      'jvm-gc',
-      'jvm-latency',
-      'jvm-return',
-      'jvm-rule-data',
-      'jvm-stress',
-      'network-bandwidth',
-      'network-corrupt',
-      'network-delay',
-      'network-dns',
-      'network-duplicate',
-      'network-loss',
-      'network-partition',
-      'process',
-      'stress-cpu',
-      'stress-mem',
-    ].map((s) => '["v1alpha1.PhysicalMachineChaosSpec"].properties.' + s),
+    ...Object.keys(_get(swagger, 'definitions["v1alpha1.PhysicalMachineChaosSpec"].properties'))
+      .filter((key) => !['action', 'address', 'duration', 'mode', 'selector', 'value'].includes(key))
+      .map((s) => '["v1alpha1.PhysicalMachineChaosSpec"].properties.' + s),
   ].map((s) => 'definitions' + s)
 
   properties.forEach((property) => {

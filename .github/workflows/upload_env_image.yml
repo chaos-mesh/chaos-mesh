@@ -1,17 +1,23 @@
 name: Upload Env Images
+
 on:
   workflow_dispatch: {}
   push:
     paths:
-      - 'images/build-env/Dockerfile'
-      - 'images/dev-env/Dockerfile'
+      - "images/build-env/Dockerfile"
+      - "images/dev-env/Dockerfile"
     branches:
       - master
       - release-*
 
+permissions: read-all
+
 jobs:
   build-specific-architecture:
-    runs-on: ubuntu-latest
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         arch: [amd64, arm64]
@@ -19,7 +25,7 @@ jobs:
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v3
 
       - name: Extract Image Tag
         shell: bash
@@ -45,11 +51,17 @@ jobs:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
           export IMAGE_${IMAGE^^}_ENV_BUILD=1
+          export IMAGE_${IMAGE^^}_ENV_TAG=$IMAGE_TAG-$ARCH
 
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
           # ${VAR,,} convert VAR to lower case
-          make -B IMAGE_BUILD_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} IMAGE_DEV_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} TARGET_PLATFORM=$ARCH IMAGE_TAG=$IMAGE_TAG-$ARCH image-$IMAGE-env
+          make -B \
+            IMAGE_BUILD_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            IMAGE_DEV_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
+            TARGET_PLATFORM=$ARCH \
+            IMAGE_TAG=$IMAGE_TAG-$ARCH \
+            image-$IMAGE-env
 
       - name: Upload Chaos Mesh Env
         env:
@@ -62,7 +74,10 @@ jobs:
           docker push ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/$IMAGE-env:$IMAGE_TAG-$ARCH
 
   upload-manifest:
-    runs-on: ubuntu-latest
+    permissions:
+      # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
+      packages: write
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         image: [dev, build]

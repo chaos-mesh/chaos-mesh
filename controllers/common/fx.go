@@ -143,7 +143,7 @@ func Bootstrap(params Params) error {
 		})
 
 		pipe.AddSteps(params.Steps...)
-		builder = builder.WithEventFilter(predicate.Or(predicaters...))
+		builder = builder.WithEventFilter(predicate.And(predicate.Or(predicaters...), RemoteChaosPredicate{}))
 		err := builder.Complete(pipe)
 		if err != nil {
 			return err
@@ -204,4 +204,60 @@ func (StatusRecordEventsChangePredicate) Update(e event.UpdateEvent) bool {
 		statusOld.Experiment.Records[i].Events = nil
 	}
 	return !reflect.DeepEqual(objNew, objOld)
+}
+
+type RemoteChaosPredicate struct {
+	predicate.Funcs
+}
+
+func (RemoteChaosPredicate) Create(e event.CreateEvent) bool {
+	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return true
+	}
+
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
+}
+
+func (RemoteChaosPredicate) Update(e event.UpdateEvent) bool {
+	obj, ok := e.ObjectNew.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return true
+	}
+
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
+}
+
+func (RemoteChaosPredicate) Delete(e event.DeleteEvent) bool {
+	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return true
+	}
+
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
+}
+
+func (RemoteChaosPredicate) Generic(e event.GenericEvent) bool {
+	obj, ok := e.Object.DeepCopyObject().(v1alpha1.RemoteObject)
+	if !ok {
+		return true
+	}
+
+	if obj.GetRemoteCluster() == "" {
+		return true
+	}
+
+	return false
 }

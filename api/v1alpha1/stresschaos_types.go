@@ -37,7 +37,7 @@ type StressChaos struct {
 
 	// +optional
 	// Most recently observed status of the time chaos experiment
-	Status StressChaosStatus `json:"status"`
+	Status StressChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithCustomStatus = (*StressChaos)(nil)
@@ -66,6 +66,10 @@ type StressChaosSpec struct {
 	// Duration represents the duration of the chaos action
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // StressChaosStatus defines the observed state of StressChaos
@@ -80,16 +84,16 @@ type StressChaosStatus struct {
 type StressInstance struct {
 	// UID is the stress-ng identifier
 	// +optional
-	UID string `json:"uid"`
+	UID string `json:"uid,omitempty"`
 	// MemoryUID is the memStress identifier
 	// +optional
-	MemoryUID string `json:"memoryUid"`
+	MemoryUID string `json:"memoryUid,omitempty"`
 	// StartTime specifies when the stress-ng starts
 	// +optional
-	StartTime *metav1.Time `json:"startTime"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 	// MemoryStartTime specifies when the memStress starts
 	// +optional
-	MemoryStartTime *metav1.Time `json:"memoryStartTime"`
+	MemoryStartTime *metav1.Time `json:"memoryStartTime,omitempty"`
 }
 
 // Stressors defines plenty of stressors supported to stress system components out.
@@ -104,11 +108,14 @@ type Stressors struct {
 }
 
 // Normalize the stressors to comply with stress-ng
-func (in *Stressors) Normalize() (string, string, error) {
-	cpuStressors := ""
-	memoryStressors := ""
+func (in *Stressors) Normalize() (cpuStressors string, memoryStressors string, err error) {
+	cpuStressors = ""
+	memoryStressors = ""
+	err = nil
+
 	if in.MemoryStressor != nil && in.MemoryStressor.Workers != 0 {
 		memoryStressors += fmt.Sprintf(" --workers %d", in.MemoryStressor.Workers)
+
 		if len(in.MemoryStressor.Size) != 0 {
 			memoryStressors += fmt.Sprintf(" --size %s", in.MemoryStressor.Size)
 		}
@@ -125,6 +132,7 @@ func (in *Stressors) Normalize() (string, string, error) {
 		// More details see: https://github.com/chaos-mesh/chaos-mesh/issues/3100
 		cpuStressors += " --cpu-load-slice 10 --cpu-method sqrt"
 		cpuStressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
+
 		if in.CPUStressor.Load != nil {
 			cpuStressors += fmt.Sprintf(" --cpu-load %d",
 				*in.CPUStressor.Load)
@@ -136,7 +144,8 @@ func (in *Stressors) Normalize() (string, string, error) {
 			}
 		}
 	}
-	return cpuStressors, memoryStressors, nil
+
+	return
 }
 
 // Stressor defines common configurations of a stressor

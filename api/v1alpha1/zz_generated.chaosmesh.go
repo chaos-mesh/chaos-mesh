@@ -72,6 +72,11 @@ func (in *AWSChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *AWSChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *AWSChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -209,6 +214,11 @@ func (in *AzureChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *AzureChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *AzureChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -344,6 +354,11 @@ func (in *BlockChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *BlockChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *BlockChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -612,6 +627,11 @@ func (in *DNSChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *DNSChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -743,6 +763,11 @@ func (in *GCPChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *GCPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *GCPChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -882,6 +907,11 @@ func (in *HTTPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *HTTPChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -1013,6 +1043,11 @@ func (in *IOChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *IOChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *IOChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1148,6 +1183,11 @@ func (in *JVMChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *JVMChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -1279,6 +1319,11 @@ func (in *KernelChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *KernelChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *KernelChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1414,6 +1459,11 @@ func (in *NetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *NetworkChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)
@@ -1545,6 +1595,11 @@ func (in *PhysicalMachineChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *PhysicalMachineChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *PhysicalMachineChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1717,6 +1772,11 @@ func (in *PodChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *PodChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *PodChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -1927,6 +1987,45 @@ func (in *PodNetworkChaos) Default() {
 	gw.Default(in)
 }
 
+const KindRemoteCluster = "RemoteCluster"
+
+var RemoteClusterWebhookLog = logf.Log.WithName("RemoteCluster-resource")
+
+func (in *RemoteCluster) ValidateCreate() error {
+	RemoteClusterWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *RemoteCluster) ValidateUpdate(old runtime.Object) error {
+	RemoteClusterWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*RemoteCluster).Spec) {
+		return ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *RemoteCluster) ValidateDelete() error {
+	RemoteClusterWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+var _ webhook.Validator = &RemoteCluster{}
+
+func (in *RemoteCluster) Validate() error {
+	errs := gw.Validate(in)
+	return gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &RemoteCluster{}
+
+func (in *RemoteCluster) Default() {
+	gw.Default(in)
+}
+
 const KindStatusCheck = "StatusCheck"
 
 var StatusCheckWebhookLog = logf.Log.WithName("StatusCheck-resource")
@@ -2001,6 +2100,11 @@ func (in *StressChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *StressChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *StressChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -2134,6 +2238,11 @@ func (in *TimeChaosSpec) GetDuration() (*time.Duration, error) {
 // GetStatus returns the status
 func (in *TimeChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *TimeChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
 }
 
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
@@ -2319,6 +2428,8 @@ func init() {
 	SchemeBuilder.Register(&PodIOChaos{}, &PodIOChaosList{})
 
 	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
+
+	SchemeBuilder.Register(&RemoteCluster{}, &RemoteClusterList{})
 
 	SchemeBuilder.Register(&StatusCheck{}, &StatusCheckList{})
 

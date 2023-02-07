@@ -14,19 +14,22 @@
  * limitations under the License.
  *
  */
-
-import { Box, Button } from '@mui/material'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import Cookies from 'js-cookie'
 import GoogleIcon from '@mui/icons-material/Google'
-import LS from 'lib/localStorage'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
+import { Box, Button } from '@mui/material'
+import Cookies from 'js-cookie'
 import _ from 'lodash'
-import i18n from 'components/T'
-import { setConfirm } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+
+import PaperTop from '@ui/mui-extends/esm/PaperTop'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setConfirm } from 'slices/globalStatus'
+
+import i18n from 'components/T'
+
+import LS from 'lib/localStorage'
 
 const Token = () => {
   const navigate = useNavigate()

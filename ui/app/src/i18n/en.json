@@ -34,19 +34,18 @@
   },
   "newE": {
     "title": "New experiment",
-    "titleStep1": "Experiment Type",
+    "titleStep1": "Inject into",
     "titleStep2": "Experiment Info",
     "steps": {
       "basic": "Metadata",
       "scope": "Scope",
-      "scopeDisabled": " (No need to fill in)",
       "run": "Run"
     },
     "loadFrom": "Load from",
     "byYAML": "By YAML",
     "byYAMLDesc": "Create an experiment or schedule by filling in or uploading YAML",
     "basic": {
-      "nameHelper": "The experiment name",
+      "nameHelper": "Fill the experiment name.",
       "namespaceHelper": "Select the namespace"
     },
     "scope": {
@@ -58,10 +57,12 @@
       "modeHelper": "Specifies the mode of the experiment.",
       "modeValue": "Mode Value",
       "modeValueHelper": "Please fill the mode value",
-      "targetPods": "Target Pods",
       "targetPodsPreview": "Preview of Pods to be injected",
       "targetPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope.",
-      "noPodsFound": "No pods found"
+      "noPodsFound": "No Pods found.",
+      "targetPhysicalMachinesPreview": "Preview of physical machines to be injected",
+      "targetPhysicalMachinesPreviewHelper": "Checking or unchecking physical machines to further limit the scope.",
+      "noPhysicalMachinesFound": "No physical machines found."
     },
     "target": {
       "kind": "Kind",
@@ -94,8 +95,7 @@
         "title": "Network Attack",
         "target": {
           "title": "Target",
-          "podsPreview": "Target Pods Preview",
-          "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
+          "podsPreview": "Target Pods Preview"
         }
       },
       "http": {
@@ -145,11 +145,11 @@
       "http": "HTTP Request",
       "number": "Number",
       "child": "Child task",
-      "nameHelper": "The task name",
-      "nameValidation": "The task name is required",
+      "nameHelper": "Fill the node name.",
+      "nameValidation": "The node name is required.",
       "deadline": "Deadline",
-      "deadlineHelper": "The task will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
-      "deadlineValidation": "The task deadline is required",
+      "deadlineHelper": "The node will end within the deadline. Supported formats of the deadline are: ms / s / m / h.",
+      "deadlineValidation": "The node deadline is required.",
       "container": {
         "title": "Container",
         "nameHelper": "The container name",
@@ -260,6 +260,10 @@
       "title": "Allow kube-system namespace",
       "choose": "The kube-system namespace is allowed to be selected in the scope when creating an experiment."
     },
+    "useNewPhysicalMachineCRD": {
+      "title": "Use new PhysicalMachine CRD",
+      "choose": "When creating PhysicalMachineChaos, retrieve the available PhysicalMachines instead of providing the address field."
+    },
     "useNextWorkflowInterface": {
       "title": "Use the next generation of workflow interface",
       "choose": "Over the past period of time, we have refactored the interface related to workflows. Now you can create workflows more easily in the form of the flowchart. (Note: This improvement is still under active development and the interface is still subject to change until it is stable.)"
@@ -284,7 +288,9 @@
       "generatorHelper": "👇 Generate different tokens by choosing different namespaces and roles.",
       "generatorHelper2": "1. After choosing, save below content as rbac.yaml.",
       "generatorHelper3": "2. Then run the following command:",
-      "generatorHelper4": "3. Finally, get the token:",
+      "generatorHelperGetTokenHeader": "3. Get the token",
+      "generatorHelperGetTokenCase1": "If you are using Kubernetes 1.24+, you need to create the token manually:",
+      "generatorHelperGetTokenCase2": "Else the token is generated automatically, you can view it with:",
       "clustered": "Cluster scoped",
       "role": "Role",
       "roleHelper": "Choose role",
@@ -335,7 +341,7 @@
     "durationHelper": "Supported formats of the duration are: ms / s / m / h.",
     "edit": "Edit",
     "ip": "IP address",
-    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair",
+    "isKVHelperText": "Type key:value and end with Enter to generate a key/value pair.",
     "logout": "Logout",
     "logoutDesc": "You need to re-enter the token after logging out",
     "multiOptions": "Support mutiple options",
@@ -349,6 +355,7 @@
     "seconds": "s",
     "selectAll": "Select all",
     "start": "Start",
+    "state": "State",
     "status": "Status",
     "submit": "Submit",
     "timeline": "Timeline",
@@ -396,6 +403,6 @@
   },
   "physic": {
     "address": "Address",
-    "addressHelper": "Type and end with Enter to add one or more chaosd addresses"
+    "addressHelper": "Type and end with Enter to add one or more chaosd addresses."
   }
 }

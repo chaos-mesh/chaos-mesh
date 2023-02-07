@@ -56,6 +56,8 @@ imagePullSecrets: []
 # - name: secretName
 
 controllerManager:
+  # securityContext if needed
+  securityContext: {}
   # running chaos-controller-manager on host network
   hostNetwork: false
   # Allow testing on `hostNetwork` pods. This is Dangerous. Please run only as temporary solution.
@@ -79,8 +81,12 @@ controllerManager:
 
   # The keys within the "env" map are mounted as environment variables on the pod.
   env:
-    # WEBHOOK_PORT is configured the port for chaos-controller-manager provides webhooks
-    WEBHOOK_PORT: 9443
+    # WEBHOOK_PORT is configured the port for chaos-controller-manager provides webhooks.
+    # In GKE private clusters, by default kubernetes apiservers are allowed to
+    # talk to the cluster nodes only on 443 and 10250. so configuring
+    # WEBHOOK_PORT: 10250, will work out of the box without needing to add firewall
+    # rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000
+    WEBHOOK_PORT: 10250
     # METRICS_PORT is configured the port for chaos-controller-manager exposing prometheus metrics
     METRICS_PORT: 10080
   # If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` could be injected
@@ -232,6 +238,8 @@ dashboard:
   create: true
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
+  # securityContext if needed
+  securityContext: {}
   # running chaos-dashboard on host network
   hostNetwork: false
   # replicas of chaos-dashboard
@@ -361,7 +369,6 @@ dashboard:
     ## Most likely this will be just one host, but in the event more hosts are needed, this is an array
     hosts:
       - name: dashboard.local
-        paths: ["/"]
 
         ## Set this to true in order to enable TLS on the ingress record
         tls: false
@@ -375,6 +382,15 @@ dashboard:
 
         ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
         tlsSecret: dashboard.local-tls
+
+    # Paths that map requests to chaos dashboard
+    paths: ["/"]
+
+    # Override apiVersion of ingress rendered by this helm chart
+    apiVersionOverrides: ""
+
+    # Defines which ingress controller will implement the resource
+    ingressClassName: ""
 
 dnsServer:
   # Enable DNS Server which required by DNSChaos
@@ -397,6 +413,8 @@ dnsServer:
   name: chaos-mesh-dns-server
   # grpc port for chaos-dns-server
   grpcPort: 9288
+  # Number of replicas
+  replicas: 1
   # CPU/Memory resource requests/limits for chaos-dns-server pod
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -494,6 +512,7 @@ webhook:
     - physicalmachinechaos
     - physicalmachine
     - statuscheck
+    - remotecluster
 
 bpfki:
   # Enable chaos-kernel

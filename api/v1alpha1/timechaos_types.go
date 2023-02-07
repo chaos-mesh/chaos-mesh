@@ -33,7 +33,7 @@ type TimeChaos struct {
 
 	// +optional
 	// Most recently observed status of the time chaos experiment
-	Status TimeChaosStatus `json:"status"`
+	Status TimeChaosStatus `json:"status,omitempty"`
 }
 
 var _ InnerObjectWithSelector = (*TimeChaos)(nil)
@@ -56,6 +56,10 @@ type TimeChaosSpec struct {
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration,omitempty"`
+
+	// RemoteCluster represents the remote cluster where the chaos will be deployed
+	// +optional
+	RemoteCluster string `json:"remoteCluster,omitempty"`
 }
 
 // TimeChaosStatus defines the observed state of TimeChaos

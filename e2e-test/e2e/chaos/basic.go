@@ -33,6 +33,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/pod-security-admission/api"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -54,6 +55,7 @@ import (
 
 var _ = ginkgo.Describe("[Basic]", func() {
 	f := framework.NewDefaultFramework("chaos-mesh")
+	f.NamespacePodSecurityEnforceLevel = api.LevelPrivileged
 	var ns string
 	var fwCancel context.CancelFunc
 	var fw portforward.PortForward
@@ -153,6 +155,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[Pause]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
 			})
+
+			ginkgo.It("[Child Process]", func() {
+				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
+			})
 		})
 	})
 
@@ -236,6 +242,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		var (
 			err      error
 			port     uint16
+			tlsPort  uint16
 			pfCancel context.CancelFunc
 			client   httpchaostestcases.HTTPE2EClient
 		)
@@ -247,7 +254,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, servicePort := range svc.Spec.Ports {
 				if servicePort.Name == "http" {
 					port = uint16(servicePort.NodePort)
-					break
+					continue
+				}
+				if servicePort.Name == "https" {
+					tlsPort = uint16(servicePort.NodePort)
+					continue
 				}
 			}
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
@@ -320,6 +331,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 			ginkgo.It("[Pause]", func() {
 				httpchaostestcases.TestcaseHttpPatchPauseAndUnPause(ns, cli, client, port)
+			})
+		})
+
+		// http chaos case in [HTTPPatch] context
+		ginkgo.Context("[HTTP TLS]", func() {
+			ginkgo.It("[Schedule]", func() {
+				httpchaostestcases.TestcaseHttpTLSThenRecover(ns, kubeCli, cli, client, port, tlsPort)
 			})
 		})
 	})

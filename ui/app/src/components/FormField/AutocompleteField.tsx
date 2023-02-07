@@ -27,7 +27,7 @@ export interface AutocompleteFieldProps extends MuiExtendsAutocompleteFieldProps
 
 const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ name, multiple, options, ...props }) => {
   const { values, setFieldValue } = useFormikContext()
-  const value = getIn(values, name)
+  const value = getIn(values, name) || []
 
   const onChange = (_: any, newVal: string | string[] | null, reason: string) => {
     if (reason === 'clear') {

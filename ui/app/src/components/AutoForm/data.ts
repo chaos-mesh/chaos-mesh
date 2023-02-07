@@ -14,24 +14,33 @@
  * limitations under the License.
  *
  */
-
 import _ from 'lodash'
 
 export const podPhases = ['Pending', 'Running', 'Succeeded', 'Failed', 'Unknown']
 
-export const scopeInitialValues = {
-  selector: {
-    namespaces: [],
-    labelSelectors: [],
-    annotationSelectors: [],
-    podPhaseSelectors: [],
-    pods: [],
-  },
+export const scopeInitialValues = ({ hasSelector }: { hasSelector: boolean }) => ({
+  ...(hasSelector && {
+    selector: {
+      namespaces: [],
+      labelSelectors: [],
+      annotationSelectors: [],
+      podPhaseSelectors: [],
+      pods: [],
+      physicalMachines: [],
+    },
+  }),
   mode: 'all',
   value: undefined,
+})
+
+export interface Schedule {
+  schedule: string
+  historyLimit?: number
+  concurrencyPolicy?: 'Forbid' | 'Allow'
+  startingDeadlineSeconds?: number
 }
 
-export const scheduleInitialValues = {
+export const scheduleInitialValues: Schedule = {
   schedule: '',
   historyLimit: 1,
   concurrencyPolicy: 'Forbid',

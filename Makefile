@@ -8,6 +8,7 @@ IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
 export IMAGE_TAG ?= latest
 export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
+export PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 
 # todo: rename the project/repository of e2e-helper to chaos-mesh
 export IMAGE_E2E_HELPER_PROJECT ?= pingcap
@@ -169,6 +170,7 @@ pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c i
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon-helper/main.go,1))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
@@ -178,7 +180,7 @@ prepare-e2e: e2e-image docker-push-e2e
 
 GINKGO_FLAGS ?=
 e2e: e2e-build
-	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
 
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
@@ -206,7 +208,7 @@ $(2)/.dockerbuilt:$(3) $(2)/Dockerfile
 	touch $(2)/.dockerbuilt
 endef
 
-$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause))
+$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause images/chaos-daemon/bin/cdh))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
 $(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
@@ -253,15 +255,7 @@ manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
 manifests/crd.yaml: config images/dev-env/.dockerbuilt
 	kustomize build config/default > manifests/crd.yaml
 
-manifests/crd-v1beta1.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
-manifests/crd-v1beta1.yaml: config images/dev-env/.dockerbuilt
-	mkdir -p ./output
-	cp -Tr ./config ./output/config-v1beta1
-	cd ./api ;\
-		controller-gen "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1" rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../output/config-v1beta1/crd/bases ;
-	kustomize build output/config-v1beta1/default > manifests/crd-v1beta1.yaml
-
-yaml: manifests/crd.yaml manifests/crd-v1beta1.yaml
+yaml: manifests/crd.yaml
 
 config: SHELL:=$(RUN_IN_DEV_SHELL)
 config: images/dev-env/.dockerbuilt
@@ -355,9 +349,9 @@ install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
 install.sh: images/dev-env/.dockerbuilt
 	./hack/update_install_script.sh
 
-swagger_spec:SHELL:=$(RUN_IN_DEV_SHELL)
+swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
 
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config \

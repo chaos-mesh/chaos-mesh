@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import type { TextFieldProps as MuiTextFieldProps, OutlinedInputProps } from '@mui/material'
 
 import FormControl from '../FormControl'

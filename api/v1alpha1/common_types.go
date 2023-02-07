@@ -52,7 +52,7 @@ type ChaosCondition struct {
 	Type   ChaosConditionType     `json:"type"`
 	Status corev1.ConditionStatus `json:"status"`
 	// +optional
-	Reason string `json:"reason"`
+	Reason string `json:"reason,omitempty"`
 }
 
 type DesiredPhase string
@@ -176,4 +176,10 @@ type InnerObjectWithSelector interface {
 type WebhookObject interface {
 	webhook.Validator
 	webhook.Defaulter
+}
+
+// +kubebuilder:object:generate=false
+type RemoteObject interface {
+	StatefulObject
+	GetRemoteCluster() string
 }
