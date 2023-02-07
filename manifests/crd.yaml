@@ -5662,11 +5662,14 @@ spec:
                       type: string
                     type: array
                   duration:
-                    description: Duration represents the duration of the chaos action
+                    description: Duration represents the duration of the chaos action.
                     type: string
                   fill_by_fallocate:
+                    default: true
+                    description: Fill disk by fallocate instead of dd
                     type: boolean
                   loop_execution:
+                    description: Not implement.
                     type: boolean
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
@@ -5679,10 +5682,17 @@ spec:
                     - random-max-percent
                     type: string
                   path:
+                    description: '''path'' specifies the location to fill data in.
+                      If path not provided, a temp file will be generated and deleted
+                      immediately after data filled in or allocated.'
                     type: string
                   percent:
+                    description: '''percent'' how many percent data of disk will fill
+                      in the file path.'
                     type: string
                   process_num:
+                    description: '''process-num'' specifies the number of process
+                      work on reading, only 1-255 is valid value.'
                     type: integer
                   selector:
                     description: Selector is used to select pods that are used to
@@ -5775,8 +5785,15 @@ spec:
                         type: object
                     type: object
                   size:
+                    description: '''size'' specifies how many units of data will fill
+                      in the file path. ''unit'' specifies the unit of data, support
+                      c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024,
+                      GB=1000*1000*1000, G=1024*1024*1024 BYTESexample : 1M | 512kB
+                      One of percent and size must not be empty when action is `fill`.'
                     type: string
                   space_lock_size:
+                    description: SpaceLockSize keeps a part of disk space before disk
+                      chaos execute and delete at first when we recover the disk chaos.
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
@@ -9089,11 +9106,14 @@ spec:
                               type: array
                             duration:
                               description: Duration represents the duration of the
-                                chaos action
+                                chaos action.
                               type: string
                             fill_by_fallocate:
+                              default: true
+                              description: Fill disk by fallocate instead of dd
                               type: boolean
                             loop_execution:
+                              description: Not implement.
                               type: boolean
                             mode:
                               description: 'Mode defines the mode to run chaos action.
@@ -9107,10 +9127,18 @@ spec:
                               - random-max-percent
                               type: string
                             path:
+                              description: '''path'' specifies the location to fill
+                                data in. If path not provided, a temp file will be
+                                generated and deleted immediately after data filled
+                                in or allocated.'
                               type: string
                             percent:
+                              description: '''percent'' how many percent data of disk
+                                will fill in the file path.'
                               type: string
                             process_num:
+                              description: '''process-num'' specifies the number of
+                                process work on reading, only 1-255 is valid value.'
                               type: integer
                             selector:
                               description: Selector is used to select pods that are
@@ -9209,8 +9237,17 @@ spec:
                                   type: object
                               type: object
                             size:
+                              description: '''size'' specifies how many units of data
+                                will fill in the file path. ''unit'' specifies the
+                                unit of data, support c=1, w=2, b=512, kB=1000, K=1024,
+                                MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024
+                                BYTESexample : 1M | 512kB One of percent and size
+                                must not be empty when action is `fill`.'
                               type: string
                             space_lock_size:
+                              description: SpaceLockSize keeps a part of disk space
+                                before disk chaos execute and delete at first when
+                                we recover the disk chaos.
                               type: string
                             value:
                               description: Value is required when the mode is set
@@ -12319,11 +12356,14 @@ spec:
                                   type: array
                                 duration:
                                   description: Duration represents the duration of
-                                    the chaos action
+                                    the chaos action.
                                   type: string
                                 fill_by_fallocate:
+                                  default: true
+                                  description: Fill disk by fallocate instead of dd
                                   type: boolean
                                 loop_execution:
+                                  description: Not implement.
                                   type: boolean
                                 mode:
                                   description: 'Mode defines the mode to run chaos
@@ -12337,10 +12377,19 @@ spec:
                                   - random-max-percent
                                   type: string
                                 path:
+                                  description: '''path'' specifies the location to
+                                    fill data in. If path not provided, a temp file
+                                    will be generated and deleted immediately after
+                                    data filled in or allocated.'
                                   type: string
                                 percent:
+                                  description: '''percent'' how many percent data
+                                    of disk will fill in the file path.'
                                   type: string
                                 process_num:
+                                  description: '''process-num'' specifies the number
+                                    of process work on reading, only 1-255 is valid
+                                    value.'
                                   type: integer
                                 selector:
                                   description: Selector is used to select pods that
@@ -12443,8 +12492,18 @@ spec:
                                       type: object
                                   type: object
                                 size:
+                                  description: '''size'' specifies how many units
+                                    of data will fill in the file path. ''unit'' specifies
+                                    the unit of data, support c=1, w=2, b=512, kB=1000,
+                                    K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000,
+                                    G=1024*1024*1024 BYTESexample : 1M | 512kB One
+                                    of percent and size must not be empty when action
+                                    is `fill`.'
                                   type: string
                                 space_lock_size:
+                                  description: SpaceLockSize keeps a part of disk
+                                    space before disk chaos execute and delete at
+                                    first when we recover the disk chaos.
                                   type: string
                                 value:
                                   description: Value is required when the mode is
@@ -20572,11 +20631,14 @@ spec:
                       type: string
                     type: array
                   duration:
-                    description: Duration represents the duration of the chaos action
+                    description: Duration represents the duration of the chaos action.
                     type: string
                   fill_by_fallocate:
+                    default: true
+                    description: Fill disk by fallocate instead of dd
                     type: boolean
                   loop_execution:
+                    description: Not implement.
                     type: boolean
                   mode:
                     description: 'Mode defines the mode to run chaos action. Supported
@@ -20589,10 +20651,17 @@ spec:
                     - random-max-percent
                     type: string
                   path:
+                    description: '''path'' specifies the location to fill data in.
+                      If path not provided, a temp file will be generated and deleted
+                      immediately after data filled in or allocated.'
                     type: string
                   percent:
+                    description: '''percent'' how many percent data of disk will fill
+                      in the file path.'
                     type: string
                   process_num:
+                    description: '''process-num'' specifies the number of process
+                      work on reading, only 1-255 is valid value.'
                     type: integer
                   selector:
                     description: Selector is used to select pods that are used to
@@ -20685,8 +20754,15 @@ spec:
                         type: object
                     type: object
                   size:
+                    description: '''size'' specifies how many units of data will fill
+                      in the file path. ''unit'' specifies the unit of data, support
+                      c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024,
+                      GB=1000*1000*1000, G=1024*1024*1024 BYTESexample : 1M | 512kB
+                      One of percent and size must not be empty when action is `fill`.'
                     type: string
                   space_lock_size:
+                    description: SpaceLockSize keeps a part of disk space before disk
+                      chaos execute and delete at first when we recover the disk chaos.
                     type: string
                   value:
                     description: Value is required when the mode is set to `FixedMode`
@@ -23598,11 +23674,14 @@ spec:
                         type: array
                       duration:
                         description: Duration represents the duration of the chaos
-                          action
+                          action.
                         type: string
                       fill_by_fallocate:
+                        default: true
+                        description: Fill disk by fallocate instead of dd
                         type: boolean
                       loop_execution:
+                        description: Not implement.
                         type: boolean
                       mode:
                         description: 'Mode defines the mode to run chaos action. Supported
@@ -23615,10 +23694,17 @@ spec:
                         - random-max-percent
                         type: string
                       path:
+                        description: '''path'' specifies the location to fill data
+                          in. If path not provided, a temp file will be generated
+                          and deleted immediately after data filled in or allocated.'
                         type: string
                       percent:
+                        description: '''percent'' how many percent data of disk will
+                          fill in the file path.'
                         type: string
                       process_num:
+                        description: '''process-num'' specifies the number of process
+                          work on reading, only 1-255 is valid value.'
                         type: integer
                       selector:
                         description: Selector is used to select pods that are used
@@ -23713,8 +23799,17 @@ spec:
                             type: object
                         type: object
                       size:
+                        description: '''size'' specifies how many units of data will
+                          fill in the file path. ''unit'' specifies the unit of data,
+                          support c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000,
+                          M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTESexample
+                          : 1M | 512kB One of percent and size must not be empty when
+                          action is `fill`.'
                         type: string
                       space_lock_size:
+                        description: SpaceLockSize keeps a part of disk space before
+                          disk chaos execute and delete at first when we recover the
+                          disk chaos.
                         type: string
                       value:
                         description: Value is required when the mode is set to `FixedMode`
@@ -27099,11 +27194,14 @@ spec:
                                   type: array
                                 duration:
                                   description: Duration represents the duration of
-                                    the chaos action
+                                    the chaos action.
                                   type: string
                                 fill_by_fallocate:
+                                  default: true
+                                  description: Fill disk by fallocate instead of dd
                                   type: boolean
                                 loop_execution:
+                                  description: Not implement.
                                   type: boolean
                                 mode:
                                   description: 'Mode defines the mode to run chaos
@@ -27117,10 +27215,19 @@ spec:
                                   - random-max-percent
                                   type: string
                                 path:
+                                  description: '''path'' specifies the location to
+                                    fill data in. If path not provided, a temp file
+                                    will be generated and deleted immediately after
+                                    data filled in or allocated.'
                                   type: string
                                 percent:
+                                  description: '''percent'' how many percent data
+                                    of disk will fill in the file path.'
                                   type: string
                                 process_num:
+                                  description: '''process-num'' specifies the number
+                                    of process work on reading, only 1-255 is valid
+                                    value.'
                                   type: integer
                                 selector:
                                   description: Selector is used to select pods that
@@ -27223,8 +27330,18 @@ spec:
                                       type: object
                                   type: object
                                 size:
+                                  description: '''size'' specifies how many units
+                                    of data will fill in the file path. ''unit'' specifies
+                                    the unit of data, support c=1, w=2, b=512, kB=1000,
+                                    K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000,
+                                    G=1024*1024*1024 BYTESexample : 1M | 512kB One
+                                    of percent and size must not be empty when action
+                                    is `fill`.'
                                   type: string
                                 space_lock_size:
+                                  description: SpaceLockSize keeps a part of disk
+                                    space before disk chaos execute and delete at
+                                    first when we recover the disk chaos.
                                   type: string
                                 value:
                                   description: Value is required when the mode is
@@ -30426,11 +30543,15 @@ spec:
                                       type: array
                                     duration:
                                       description: Duration represents the duration
-                                        of the chaos action
+                                        of the chaos action.
                                       type: string
                                     fill_by_fallocate:
+                                      default: true
+                                      description: Fill disk by fallocate instead
+                                        of dd
                                       type: boolean
                                     loop_execution:
+                                      description: Not implement.
                                       type: boolean
                                     mode:
                                       description: 'Mode defines the mode to run chaos
@@ -30444,10 +30565,19 @@ spec:
                                       - random-max-percent
                                       type: string
                                     path:
+                                      description: '''path'' specifies the location
+                                        to fill data in. If path not provided, a temp
+                                        file will be generated and deleted immediately
+                                        after data filled in or allocated.'
                                       type: string
                                     percent:
+                                      description: '''percent'' how many percent data
+                                        of disk will fill in the file path.'
                                       type: string
                                     process_num:
+                                      description: '''process-num'' specifies the
+                                        number of process work on reading, only 1-255
+                                        is valid value.'
                                       type: integer
                                     selector:
                                       description: Selector is used to select pods
@@ -30554,8 +30684,18 @@ spec:
                                           type: object
                                       type: object
                                     size:
+                                      description: '''size'' specifies how many units
+                                        of data will fill in the file path. ''unit''
+                                        specifies the unit of data, support c=1, w=2,
+                                        b=512, kB=1000, K=1024, MB=1000*1000, M=1024*1024,
+                                        GB=1000*1000*1000, G=1024*1024*1024 BYTESexample
+                                        : 1M | 512kB One of percent and size must
+                                        not be empty when action is `fill`.'
                                       type: string
                                     space_lock_size:
+                                      description: SpaceLockSize keeps a part of disk
+                                        space before disk chaos execute and delete
+                                        at first when we recover the disk chaos.
                                       type: string
                                     value:
                                       description: Value is required when the mode
@@ -41447,11 +41587,14 @@ spec:
                           type: array
                         duration:
                           description: Duration represents the duration of the chaos
-                            action
+                            action.
                           type: string
                         fill_by_fallocate:
+                          default: true
+                          description: Fill disk by fallocate instead of dd
                           type: boolean
                         loop_execution:
+                          description: Not implement.
                           type: boolean
                         mode:
                           description: 'Mode defines the mode to run chaos action.
@@ -41464,10 +41607,17 @@ spec:
                           - random-max-percent
                           type: string
                         path:
+                          description: '''path'' specifies the location to fill data
+                            in. If path not provided, a temp file will be generated
+                            and deleted immediately after data filled in or allocated.'
                           type: string
                         percent:
+                          description: '''percent'' how many percent data of disk
+                            will fill in the file path.'
                           type: string
                         process_num:
+                          description: '''process-num'' specifies the number of process
+                            work on reading, only 1-255 is valid value.'
                           type: integer
                         selector:
                           description: Selector is used to select pods that are used
@@ -41563,8 +41713,17 @@ spec:
                               type: object
                           type: object
                         size:
+                          description: '''size'' specifies how many units of data
+                            will fill in the file path. ''unit'' specifies the unit
+                            of data, support c=1, w=2, b=512, kB=1000, K=1024, MB=1000*1000,
+                            M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTESexample
+                            : 1M | 512kB One of percent and size must not be empty
+                            when action is `fill`.'
                           type: string
                         space_lock_size:
+                          description: SpaceLockSize keeps a part of disk space before
+                            disk chaos execute and delete at first when we recover
+                            the disk chaos.
                           type: string
                         value:
                           description: Value is required when the mode is set to `FixedMode`
@@ -44585,11 +44744,14 @@ spec:
                               type: array
                             duration:
                               description: Duration represents the duration of the
-                                chaos action
+                                chaos action.
                               type: string
                             fill_by_fallocate:
+                              default: true
+                              description: Fill disk by fallocate instead of dd
                               type: boolean
                             loop_execution:
+                              description: Not implement.
                               type: boolean
                             mode:
                               description: 'Mode defines the mode to run chaos action.
@@ -44603,10 +44765,18 @@ spec:
                               - random-max-percent
                               type: string
                             path:
+                              description: '''path'' specifies the location to fill
+                                data in. If path not provided, a temp file will be
+                                generated and deleted immediately after data filled
+                                in or allocated.'
                               type: string
                             percent:
+                              description: '''percent'' how many percent data of disk
+                                will fill in the file path.'
                               type: string
                             process_num:
+                              description: '''process-num'' specifies the number of
+                                process work on reading, only 1-255 is valid value.'
                               type: integer
                             selector:
                               description: Selector is used to select pods that are
@@ -44705,8 +44875,17 @@ spec:
                                   type: object
                               type: object
                             size:
+                              description: '''size'' specifies how many units of data
+                                will fill in the file path. ''unit'' specifies the
+                                unit of data, support c=1, w=2, b=512, kB=1000, K=1024,
+                                MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024
+                                BYTESexample : 1M | 512kB One of percent and size
+                                must not be empty when action is `fill`.'
                               type: string
                             space_lock_size:
+                              description: SpaceLockSize keeps a part of disk space
+                                before disk chaos execute and delete at first when
+                                we recover the disk chaos.
                               type: string
                             value:
                               description: Value is required when the mode is set
