@@ -504,6 +504,7 @@ webhook:
     - azurechaos
     - gcpchaos
     - dnschaos
+    - diskchaos
     - jvmchaos
     - schedule
     - workflow
