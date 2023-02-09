@@ -42,6 +42,7 @@ kubectl apply -f ./cluster-manager.yaml
 kubectl apply -f ./cluster-viewer.yaml
 kubectl apply -f ./busybox-manager.yaml
 kubectl apply -f ./busybox-viewer.yaml
+kubectl get crd
 
 CLUSTER_MANAGER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
