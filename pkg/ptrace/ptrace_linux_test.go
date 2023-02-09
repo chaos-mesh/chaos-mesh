@@ -25,9 +25,8 @@ import (
 	"time"
 	"unsafe"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
@@ -36,9 +35,7 @@ import (
 func TestPTrace(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"PTrace Suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "PTrace Suit")
 }
 
 var _ = BeforeSuite(func(done Done) {

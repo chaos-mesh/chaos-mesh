@@ -46,7 +46,7 @@ func (c *UpdatedClient) objectKey(key client.ObjectKey, obj client.Object) (stri
 	return gvk.String() + "/" + key.String(), nil
 }
 
-func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+func (c *UpdatedClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
 	err := c.client.Get(ctx, key, obj)
 	if err != nil {
 		return err
@@ -148,6 +148,10 @@ func (c *UpdatedClient) RESTMapper() meta.RESTMapper {
 	return c.client.RESTMapper()
 }
 
+func (c *UpdatedClient) SubResource(subResource string) client.SubResourceClient {
+	return c.client.SubResource(subResource)
+}
+
 func (c *UpdatedClient) Status() client.StatusWriter {
 	return &UpdatedStatusWriter{
 		statusWriter: c.client.Status(),
@@ -160,7 +164,11 @@ type UpdatedStatusWriter struct {
 	client       *UpdatedClient
 }
 
-func (c *UpdatedStatusWriter) Update(ctx context.Context, obj client.Object, opts ...client.UpdateOption) error {
+func (c *UpdatedStatusWriter) Create(ctx context.Context, obj client.Object, subResource client.Object, opts ...client.SubResourceCreateOption) error {
+	return c.statusWriter.Create(ctx, obj, subResource, opts...)
+}
+
+func (c *UpdatedStatusWriter) Update(ctx context.Context, obj client.Object, opts ...client.SubResourceUpdateOption) error {
 	err := c.statusWriter.Update(ctx, obj, opts...)
 	if err != nil {
 		return err
@@ -174,6 +182,6 @@ func (c *UpdatedStatusWriter) Update(ctx context.Context, obj client.Object, opt
 	return nil
 }
 
-func (c *UpdatedStatusWriter) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.PatchOption) error {
+func (c *UpdatedStatusWriter) Patch(ctx context.Context, obj client.Object, patch client.Patch, opts ...client.SubResourcePatchOption) error {
 	return c.statusWriter.Patch(ctx, obj, patch, opts...)
 }

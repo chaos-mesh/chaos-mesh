@@ -10859,13 +10859,13 @@ spec:
                                   type: string
                                 ports:
                                   description: List of ports to expose from the container.
-                                    Exposing a port here gives the system additional
-                                    information about the network connections a container
-                                    uses, but is primarily informational. Not specifying
-                                    a port here DOES NOT prevent that port from being
-                                    exposed. Any port which is listening on the default
-                                    "0.0.0.0" address inside a container will be accessible
-                                    from the network. Cannot be updated.
+                                    Not specifying a port here DOES NOT prevent that
+                                    port from being exposed. Any port which is listening
+                                    on the default "0.0.0.0" address inside a container
+                                    will be accessible from the network. Modifying
+                                    this array with strategic merge patch may corrupt
+                                    the data. For more information See https://github.com/kubernetes/kubernetes/issues/108255.
+                                    Cannot be updated.
                                   items:
                                     description: ContainerPort represents a network
                                       port in a single container.
@@ -11076,6 +11076,30 @@ spec:
                                   description: 'Compute Resources required by this
                                     container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                   properties:
+                                    claims:
+                                      description: "Claims lists the names of resources,
+                                        defined in spec.resourceClaims, that are used
+                                        by this container. \n This is an alpha field
+                                        and requires enabling the DynamicResourceAllocation
+                                        feature gate. \n This field is immutable."
+                                      items:
+                                        description: ResourceClaim references one
+                                          entry in PodSpec.ResourceClaims.
+                                        properties:
+                                          name:
+                                            description: Name must match the name
+                                              of one entry in pod.spec.resourceClaims
+                                              of the Pod where this field is used.
+                                              It makes that resource available inside
+                                              a container.
+                                            type: string
+                                        required:
+                                        - name
+                                        type: object
+                                      type: array
+                                      x-kubernetes-list-map-keys:
+                                      - name
+                                      x-kubernetes-list-type: map
                                     limits:
                                       additionalProperties:
                                         anyOf:
@@ -12128,11 +12152,15 @@ spec:
                                                   controller can support the specified
                                                   data source, it will create a new
                                                   volume based on the contents of
-                                                  the specified data source. If the
-                                                  AnyVolumeDataSource feature gate
-                                                  is enabled, this field will always
-                                                  have the same contents as the DataSourceRef
-                                                  field.'
+                                                  the specified data source. When
+                                                  the AnyVolumeDataSource feature
+                                                  gate is enabled, dataSource contents
+                                                  will be copied to dataSourceRef,
+                                                  and dataSourceRef contents will
+                                                  be copied to dataSource when dataSourceRef.namespace
+                                                  is not specified. If the namespace
+                                                  is specified, then dataSourceRef
+                                                  will not be copied to dataSource.'
                                                 properties:
                                                   apiGroup:
                                                     description: APIGroup is the group
@@ -12160,35 +12188,44 @@ spec:
                                                   the object from which to populate
                                                   the volume with data, if a non-empty
                                                   volume is desired. This may be any
-                                                  local object from a non-empty API
-                                                  group (non core object) or a PersistentVolumeClaim
+                                                  object from a non-empty API group
+                                                  (non core object) or a PersistentVolumeClaim
                                                   object. When this field is specified,
                                                   volume binding will only succeed
                                                   if the type of the specified object
                                                   matches some installed volume populator
                                                   or dynamic provisioner. This field
                                                   will replace the functionality of
-                                                  the DataSource field and as such
+                                                  the dataSource field and as such
                                                   if both fields are non-empty, they
                                                   must have the same value. For backwards
-                                                  compatibility, both fields (DataSource
-                                                  and DataSourceRef) will be set to
-                                                  the same value automatically if
-                                                  one of them is empty and the other
-                                                  is non-empty. There are two important
-                                                  differences between DataSource and
-                                                  DataSourceRef: * While DataSource
+                                                  compatibility, when namespace isn''t
+                                                  specified in dataSourceRef, both
+                                                  fields (dataSource and dataSourceRef)
+                                                  will be set to the same value automatically
+                                                  if one of them is empty and the
+                                                  other is non-empty. When namespace
+                                                  is specified in dataSourceRef, dataSource
+                                                  isn''t set to the same value and
+                                                  must be empty. There are three important
+                                                  differences between dataSource and
+                                                  dataSourceRef: * While dataSource
                                                   only allows two specific types of
-                                                  objects, DataSourceRef   allows
+                                                  objects, dataSourceRef   allows
                                                   any non-core object, as well as
                                                   PersistentVolumeClaim objects. *
-                                                  While DataSource ignores disallowed
-                                                  values (dropping them), DataSourceRef   preserves
+                                                  While dataSource ignores disallowed
+                                                  values (dropping them), dataSourceRef   preserves
                                                   all values, and generates an error
                                                   if a disallowed value is   specified.
-                                                  (Beta) Using this field requires
-                                                  the AnyVolumeDataSource feature
-                                                  gate to be enabled.'
+                                                  * While dataSource only allows local
+                                                  objects, dataSourceRef allows objects   in
+                                                  any namespaces. (Beta) Using this
+                                                  field requires the AnyVolumeDataSource
+                                                  feature gate to be enabled. (Alpha)
+                                                  Using the namespace field of dataSourceRef
+                                                  requires the CrossNamespaceVolumeDataSource
+                                                  feature gate to be enabled.'
                                                 properties:
                                                   apiGroup:
                                                     description: APIGroup is the group
@@ -12207,6 +12244,19 @@ spec:
                                                     description: Name is the name
                                                       of resource being referenced
                                                     type: string
+                                                  namespace:
+                                                    description: Namespace is the
+                                                      namespace of resource being
+                                                      referenced Note that when a
+                                                      namespace is specified, a gateway.networking.k8s.io/ReferenceGrant
+                                                      object is required in the referent
+                                                      namespace to allow that namespace's
+                                                      owner to accept the reference.
+                                                      See the ReferenceGrant documentation
+                                                      for details. (Alpha) This field
+                                                      requires the CrossNamespaceVolumeDataSource
+                                                      feature gate to be enabled.
+                                                    type: string
                                                 required:
                                                 - kind
                                                 - name
@@ -12222,6 +12272,35 @@ spec:
                                                   recorded in the status field of
                                                   the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                                 properties:
+                                                  claims:
+                                                    description: "Claims lists the
+                                                      names of resources, defined
+                                                      in spec.resourceClaims, that
+                                                      are used by this container.
+                                                      \n This is an alpha field and
+                                                      requires enabling the DynamicResourceAllocation
+                                                      feature gate. \n This field
+                                                      is immutable."
+                                                    items:
+                                                      description: ResourceClaim references
+                                                        one entry in PodSpec.ResourceClaims.
+                                                      properties:
+                                                        name:
+                                                          description: Name must match
+                                                            the name of one entry
+                                                            in pod.spec.resourceClaims
+                                                            of the Pod where this
+                                                            field is used. It makes
+                                                            that resource available
+                                                            inside a container.
+                                                          type: string
+                                                      required:
+                                                      - name
+                                                      type: object
+                                                    type: array
+                                                    x-kubernetes-list-map-keys:
+                                                    - name
+                                                    x-kubernetes-list-type: map
                                                   limits:
                                                     additionalProperties:
                                                       anyOf:
@@ -13520,31 +13599,31 @@ spec:
             properties:
               active:
                 items:
-                  description: 'ObjectReference contains enough information to let
+                  description: "ObjectReference contains enough information to let
                     you inspect or modify the referred object. --- New uses of this
                     type are discouraged because of difficulty describing its usage
                     when embedded in APIs.  1. Ignored fields.  It includes many fields
                     which are not generally honored.  For instance, ResourceVersion
                     and FieldPath are both very rarely valid in actual usage.  2.
                     Invalid usage help.  It is impossible to add specific help for
-                    individual usage.  In most embedded usages, there are particular     restrictions
-                    like, "must refer only to types A and B" or "UID not honored"
-                    or "name must be restricted".     Those cannot be well described
-                    when embedded.  3. Inconsistent validation.  Because the usages
-                    are different, the validation rules are different by usage, which
-                    makes it hard for users to predict what will happen.  4. The fields
-                    are both imprecise and overly precise.  Kind is not a precise
-                    mapping to a URL. This can produce ambiguity     during interpretation
-                    and require a REST mapping.  In most cases, the dependency is
-                    on the group,resource tuple     and the version of the actual
-                    struct is irrelevant.  5. We cannot easily change it.  Because
-                    this type is embedded in many locations, updates to this type     will
-                    affect numerous schemas.  Don''t make new APIs embed an underspecified
-                    API type they do not control. Instead of using this type, create
-                    a locally provided and used type that is well-focused on your
-                    reference. For example, ServiceReferences for admission registration:
-                    https://github.com/kubernetes/api/blob/release-1.17/admissionregistration/v1/types.go#L533
-                    .'
+                    individual usage.  In most embedded usages, there are particular
+                    \    restrictions like, \"must refer only to types A and B\" or
+                    \"UID not honored\" or \"name must be restricted\".     Those
+                    cannot be well described when embedded.  3. Inconsistent validation.
+                    \ Because the usages are different, the validation rules are different
+                    by usage, which makes it hard for users to predict what will happen.
+                    \ 4. The fields are both imprecise and overly precise.  Kind is
+                    not a precise mapping to a URL. This can produce ambiguity     during
+                    interpretation and require a REST mapping.  In most cases, the
+                    dependency is on the group,resource tuple     and the version
+                    of the actual struct is irrelevant.  5. We cannot easily change
+                    it.  Because this type is embedded in many locations, updates
+                    to this type     will affect numerous schemas.  Don't make new
+                    APIs embed an underspecified API type they do not control. \n
+                    Instead of using this type, create a locally provided and used
+                    type that is well-focused on your reference. For example, ServiceReferences
+                    for admission registration: https://github.com/kubernetes/api/blob/release-1.17/admissionregistration/v1/types.go#L533
+                    ."
                   properties:
                     apiVersion:
                       description: API version of the referent.

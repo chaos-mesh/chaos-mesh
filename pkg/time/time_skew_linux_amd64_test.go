@@ -19,9 +19,8 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/tasks"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
@@ -34,9 +33,7 @@ import (
 func TestModifyTime(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Time Suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Time Suit")
 }
 
 var _ = BeforeSuite(func(done Done) {

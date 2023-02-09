@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -32,9 +31,7 @@ import (
 func TestContainerdClient(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Contianerd Container Client Test Suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Containerd Container Client Test Suit")
 }
 
 var _ = Describe("containerd client", func() {
