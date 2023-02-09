@@ -612,8 +612,10 @@ install_chaos_mesh() {
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
     echo "show0 ${crd}"
+    grep "diskChaos" "${crd}"
     gen_crd_manifests "${crd}" | kubectl create --validate=false -f - || exit 1
     echo "show1 ${crd}"
+    grep "diskChaos" "${crd}"
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
 }
 
