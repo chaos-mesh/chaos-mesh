@@ -141,7 +141,7 @@ controllerManager:
   chaosdSecurityMode: true
   # multi cluster install offline helm chart path
   localHelmChart:
-    enabled: true
+    enabled: false
     volume:
       hostPath:
         path: /data/helm

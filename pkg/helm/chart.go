@@ -30,10 +30,20 @@ import (
 const ChaosMeshHelmRepo = "https://charts.chaos-mesh.org"
 
 func FetchChaosMeshChart(ctx context.Context, version, local string) (*chart.Chart, error) {
-	tgzPath, err := GetChaosMeshChartTgzPath(ctx, version, local)
-	if err != nil {
-		return nil, err
+	var (
+		tgzPath string
+		err     error
+	)
+	if local != "" {
+		if tgzPath, err = GetChaosMeshChartTgzPath(ctx, version, local); err != nil {
+			return nil, err
+		}
+	} else {
+		if tgzPath, err = DownloadChaosMeshChartTgz(ctx, version); err != nil {
+			return nil, err
+		}
 	}
+
 	requestedChart, err := loader.Load(tgzPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "load helm chart from %s", tgzPath)
@@ -49,7 +59,7 @@ func GetChaosMeshChartTgzPath(ctx context.Context, version, local string) (strin
 	}
 
 	if _, err := os.Stat(tgzPath); err != nil {
-		return DownloadChaosMeshChartTgz(ctx, version)
+		return "", err
 	}
 	return tgzPath, nil
 }
