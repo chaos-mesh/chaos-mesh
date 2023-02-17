@@ -16,6 +16,7 @@
 package physicalmachine
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"crypto/x509"
@@ -40,6 +41,8 @@ type PhysicalMachineInitOptions struct {
 	sshUser            string
 	sshPort            int
 	sshPrivateKeyFile  string
+	sshPassword        bool
+	sshKnowHost        bool
 	chaosdPort         int
 	outputPath         string
 	namespace          string
@@ -74,6 +77,8 @@ Examples:
 	initCmd.PersistentFlags().StringVar(&initOption.remoteIP, "ip", "", "ip of the remote physical machine")
 	initCmd.PersistentFlags().StringVar(&initOption.sshUser, "ssh-user", "root", "username for ssh connection")
 	initCmd.PersistentFlags().StringVar(&initOption.sshPrivateKeyFile, "ssh-key", filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa"), "private key filepath for ssh connection")
+	initCmd.PersistentFlags().BoolVar(&initOption.sshPassword, "ssh-password", false, "use password for ssh connection")
+	initCmd.PersistentFlags().BoolVar(&initOption.sshKnowHost, "ssh-knowhost", false, "check know host key")
 	initCmd.PersistentFlags().IntVar(&initOption.sshPort, "ssh-port", 22, "port of ssh connection")
 	initCmd.PersistentFlags().IntVar(&initOption.chaosdPort, "chaosd-port", 31768, "port of the remote chaosd server listen")
 	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/pki", "path to save generated certs")
@@ -117,8 +122,11 @@ func (o *PhysicalMachineInitOptions) Run(args []string) error {
 	if err != nil {
 		return err
 	}
-
-	sshTunnel, err := NewSshTunnel(o.remoteIP, strconv.Itoa(o.sshPort), o.sshUser, o.sshPrivateKeyFile)
+	sshConfig, err := getSshTunnelConfig(o.sshUser, o.sshPrivateKeyFile, o.sshPassword, o.sshKnowHost)
+	if err != nil {
+		return err
+	}
+	sshTunnel, err := NewSshTunnel(o.remoteIP, strconv.Itoa(o.sshPort), sshConfig)
 	if err != nil {
 		return err
 	}
@@ -168,9 +176,9 @@ func writeCertAndKeyToRemote(sshTunnel *SshTunnel, pkiPath, pkiName string, cert
 	if err := writeCertToRemote(sshTunnel, pkiPath, pkiName, cert); err != nil {
 		return err
 	}
-	return sshTunnel.SFTP(pathForKey(pkiPath, pkiName), keyBytes)
+	return sshTunnel.SFTP(pathForKey(pkiPath, pkiName), bytes.NewReader(keyBytes))
 }
 
 func writeCertToRemote(sshTunnel *SshTunnel, pkiPath, pkiName string, cert *x509.Certificate) error {
-	return sshTunnel.SFTP(pathForCert(pkiPath, pkiName), EncodeCertPEM(cert))
+	return sshTunnel.SFTP(pathForCert(pkiPath, pkiName), bytes.NewReader(EncodeCertPEM(cert)))
 }

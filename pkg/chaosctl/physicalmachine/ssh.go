@@ -16,7 +16,9 @@
 package physicalmachine
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -37,40 +39,58 @@ type SshTunnel struct {
 	client *ssh.Client
 }
 
-func NewSshTunnel(ip, port string, user, privateKeyFile string) (*SshTunnel, error) {
-	hostKeyCallback, err := knownhosts.New(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"))
+func readPassword() (string, error) {
+	fmt.Printf("please input the password: \n")
+	password, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
-		return nil, err
+		return "", errors.Wrap(err, "read ssh password failed")
 	}
-	config := ssh.ClientConfig{
-		Timeout: 5 * time.Minute,
-		User:    user,
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeysCallback(func() ([]ssh.Signer, error) {
-				key, err := os.ReadFile(privateKeyFile)
-				if err != nil {
-					return nil, errors.Wrap(err, "ssh key file read failed")
-				}
+	return string(password), nil
+}
 
-				signer, err := ssh.ParsePrivateKey(key)
-				if err != nil {
-					return nil, errors.Wrap(err, "ssh key signer failed")
-				}
-				return []ssh.Signer{signer}, nil
-			}),
-			ssh.PasswordCallback(func() (secret string, err error) {
-				fmt.Printf("please input the password: ")
-				password, err := term.ReadPassword(int(syscall.Stdin))
-				if err != nil {
-					return "", errors.Wrap(err, "read ssh password failed")
-				}
-				return string(password), nil
-			}),
-		},
-		HostKeyCallback: hostKeyCallback,
+func getSshTunnelConfig(user, privateKeyFile string, usePassword, knowhost bool) (*ssh.ClientConfig, error) {
+	config := &ssh.ClientConfig{
+		Timeout:         5 * time.Minute,
+		User:            user,
+		Auth:            []ssh.AuthMethod{},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
+	if knowhost {
+		hostKeyCallback, err := knownhosts.New(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"))
+		if err != nil {
+			return nil, err
+		}
+		config.HostKeyCallback = hostKeyCallback
+	}
+	if usePassword {
+		password, err := readPassword()
+		if err != nil {
+			return nil, err
+		}
+		passwordCallBack := ssh.PasswordCallback(func() (secret string, err error) {
+			return password, nil
+		})
+		config.Auth = append(config.Auth, passwordCallBack)
+	} else {
+		keyCallBack := ssh.PublicKeysCallback(func() ([]ssh.Signer, error) {
+			key, err := os.ReadFile(privateKeyFile)
+			if err != nil {
+				return nil, errors.Wrap(err, "ssh key file read failed")
+			}
+			signer, err := ssh.ParsePrivateKey(key)
+			if err != nil {
+				return nil, errors.Wrap(err, "ssh key signer failed")
+			}
+			return []ssh.Signer{signer}, nil
+		})
+		config.Auth = append(config.Auth, keyCallBack)
+	}
+	return config, nil
+}
+
+func NewSshTunnel(ip, port string, config *ssh.ClientConfig) (*SshTunnel, error) {
 	return &SshTunnel{
-		config: &config,
+		config: config,
 		host:   ip,
 		port:   port,
 	}, nil
@@ -92,7 +112,7 @@ func (s *SshTunnel) Close() error {
 	return s.client.Close()
 }
 
-func (s *SshTunnel) SFTP(filename string, data []byte) error {
+func (s *SshTunnel) SFTP(filename string, r io.Reader) error {
 	if s.client == nil {
 		return errors.New("tunnel is not opened")
 	}
@@ -114,8 +134,32 @@ func (s *SshTunnel) SFTP(filename string, data []byte) error {
 	}
 	defer f.Close()
 
-	if _, err := f.Write(data); err != nil {
-		return errors.Wrapf(err, "write file %s failed", filename)
+	buf := make([]byte, 1024)
+	for {
+		if n, _ := r.Read(buf); n == 0 {
+			break
+		}
+		if _, err := f.Write(buf); err != nil {
+			return errors.Wrapf(err, "write file %s failed", filename)
+		}
+	}
+	return nil
+}
+
+func (s *SshTunnel) Exec(cmd string) error {
+	if s.client == nil {
+		return errors.New("tunnel is not opened")
+	}
+	session, err := s.client.NewSession()
+	if err != nil {
+		return errors.Wrap(err, "create cmd  session failed")
+	}
+	defer session.Close()
+
+	var output bytes.Buffer
+	session.Stdout = &output
+	if err := session.Run(cmd); err != nil {
+		return errors.Wrapf(err, "exec cmd %s failed", cmd)
 	}
 	return nil
 }

@@ -45,9 +45,21 @@ func NewPhysicalMachineCommand() (*cobra.Command, error) {
 		return nil, err
 	}
 
+	deployCmd, err := physicalmachine.NewPhysicalMachineDeployCmd()
+	if err != nil {
+		return nil, err
+	}
+
+	template, err := physicalmachine.NewPhysicalMachineTemplateCmd()
+	if err != nil {
+		return nil, err
+	}
+
 	physicalMachineCmd.AddCommand(initCmd)
 	physicalMachineCmd.AddCommand(generateCmd)
 	physicalMachineCmd.AddCommand(createCmd)
+	physicalMachineCmd.AddCommand(deployCmd)
+	physicalMachineCmd.AddCommand(template)
 
 	return physicalMachineCmd, nil
 }
