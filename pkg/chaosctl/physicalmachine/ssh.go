@@ -48,20 +48,23 @@ func readPassword() (string, error) {
 	return string(password), nil
 }
 
-func getSshTunnelConfig(user, privateKeyFile string, usePassword, knowhost bool) (*ssh.ClientConfig, error) {
+func getSshTunnelConfig(user, privateKeyFile string, usePassword, ignoreKnowHost bool) (*ssh.ClientConfig, error) {
+
 	config := &ssh.ClientConfig{
-		Timeout:         5 * time.Minute,
-		User:            user,
-		Auth:            []ssh.AuthMethod{},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout: 5 * time.Minute,
+		User:    user,
+		Auth:    []ssh.AuthMethod{},
 	}
-	if knowhost {
+	if ignoreKnowHost {
+		config.HostKeyCallback = ssh.InsecureIgnoreHostKey()
+	} else {
 		hostKeyCallback, err := knownhosts.New(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"))
 		if err != nil {
 			return nil, err
 		}
 		config.HostKeyCallback = hostKeyCallback
 	}
+
 	if usePassword {
 		password, err := readPassword()
 		if err != nil {

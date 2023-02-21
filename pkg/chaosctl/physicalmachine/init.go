@@ -42,7 +42,7 @@ type PhysicalMachineInitOptions struct {
 	sshPort            int
 	sshPrivateKeyFile  string
 	sshPassword        bool
-	sshKnowHost        bool
+	ignoreKnowHost     bool
 	chaosdPort         int
 	outputPath         string
 	namespace          string
@@ -78,7 +78,7 @@ Examples:
 	initCmd.PersistentFlags().StringVar(&initOption.sshUser, "ssh-user", "root", "username for ssh connection")
 	initCmd.PersistentFlags().StringVar(&initOption.sshPrivateKeyFile, "ssh-key", filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa"), "private key filepath for ssh connection")
 	initCmd.PersistentFlags().BoolVar(&initOption.sshPassword, "ssh-password", false, "use password for ssh connection")
-	initCmd.PersistentFlags().BoolVar(&initOption.sshKnowHost, "ssh-knowhost", false, "check know host key")
+	initCmd.PersistentFlags().BoolVar(&initOption.ignoreKnowHost, "ignore-knowhost", false, "ignore check know host")
 	initCmd.PersistentFlags().IntVar(&initOption.sshPort, "ssh-port", 22, "port of ssh connection")
 	initCmd.PersistentFlags().IntVar(&initOption.chaosdPort, "chaosd-port", 31768, "port of the remote chaosd server listen")
 	initCmd.PersistentFlags().StringVar(&initOption.outputPath, "path", "/etc/chaosd/pki", "path to save generated certs")
@@ -122,7 +122,7 @@ func (o *PhysicalMachineInitOptions) Run(args []string) error {
 	if err != nil {
 		return err
 	}
-	sshConfig, err := getSshTunnelConfig(o.sshUser, o.sshPrivateKeyFile, o.sshPassword, o.sshKnowHost)
+	sshConfig, err := getSshTunnelConfig(o.sshUser, o.sshPrivateKeyFile, o.sshPassword, o.ignoreKnowHost)
 	if err != nil {
 		return err
 	}

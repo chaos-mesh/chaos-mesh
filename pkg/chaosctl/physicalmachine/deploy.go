@@ -17,7 +17,7 @@ type PhysicalMachineDeployOptions struct {
 	sshUser           string
 	sshPassword       bool
 	sshPrivateKeyFile string
-	sshKnowHost       bool
+	ignoreKnowHost    bool
 }
 
 func NewPhysicalMachineDeployCmd() (*cobra.Command, error) {
@@ -45,7 +45,7 @@ Examples:
 	deployCmd.PersistentFlags().StringVarP(&deployOption.sshUser, "user", "u", "root", "username for ssh connection")
 	deployCmd.PersistentFlags().StringVarP(&deployOption.sshPrivateKeyFile, "key", "k", filepath.Join(os.Getenv("HOME"), ".ssh", "id_rsa"), "private key filepath for ssh connection")
 	deployCmd.PersistentFlags().BoolVarP(&deployOption.sshPassword, "password", "p", false, "password for ssh connection")
-	deployCmd.PersistentFlags().BoolVarP(&deployOption.sshKnowHost, "knowhost", "c", false, "check know host key")
+	deployCmd.PersistentFlags().BoolVarP(&deployOption.ignoreKnowHost, "ignore-knowhost", "i", false, "ignore check know host")
 	return deployCmd, nil
 }
 
@@ -70,7 +70,7 @@ func (o *PhysicalMachineDeployOptions) Run(args []string) error {
 		return errors.New("physical machine list is empty")
 	}
 
-	sshConfig, err := getSshTunnelConfig(o.sshUser, o.sshPrivateKeyFile, o.sshPassword, o.sshKnowHost)
+	sshConfig, err := getSshTunnelConfig(o.sshUser, o.sshPrivateKeyFile, o.sshPassword, o.ignoreKnowHost)
 	if err != nil {
 		return err
 	}
