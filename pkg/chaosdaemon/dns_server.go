@@ -68,7 +68,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 
 		// add chaos dns server to the first line of /etc/resolv.conf
 		// Note: can not replace the /etc/resolv.conf like `mv temp resolv.conf`, will execute with error `Device or resource busy`
-		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s temp && sed -i 's/.*nameserver.*/nameserver %s/' temp && cat temp > %s", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).SetContext(ctx)
+		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s /etc/temp && sed -i 's/.*nameserver.*/nameserver %s/' /etc/temp && cat /etc/temp > %s && rm /etc/temp", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).SetContext(ctx)
 		if req.EnterNS {
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
 		}
