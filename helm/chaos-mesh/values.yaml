@@ -398,7 +398,7 @@ dnsServer:
   # Name of serviceaccount for chaos-dns-server.
   serviceAccount: chaos-dns-server
   # Image of DNS Server
-  image: pingcap/coredns:v0.2.1
+  image: pingcap/coredns:v0.2.4
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server
