@@ -23,6 +23,7 @@ importers:
       '@emotion/react': ^11.7.0
       '@emotion/styled': ^11.3.0
       '@loadable/component': ^5.14.1
+      '@mui/base': 5.0.0-alpha.120
       '@mui/icons-material': ^5.10.16
       '@mui/lab': 5.0.0-alpha.122
       '@mui/material': ^5.10.16
@@ -96,6 +97,7 @@ importers:
       '@emotion/react': 11.10.6_h7fc2el62uaa77gho3xhys6ola
       '@emotion/styled': 11.10.6_7hisdke2c3hq4r3q5z4dcdhmzi
       '@loadable/component': 5.15.3_react@17.0.2
+      '@mui/base': 5.0.0-alpha.120_zsjcj4gvi24ks76nprapl4hsmq
       '@mui/icons-material': 5.11.11_egfqb6ct27nizmb7q4idufxyty
       '@mui/lab': 5.0.0-alpha.122_gill4zayhd4atmzk6b46h2j7uq
       '@mui/material': 5.11.12_okmdg45agjnois7npz2g5lj5ue
