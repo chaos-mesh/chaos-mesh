@@ -27,7 +27,7 @@ import Schedule from 'pages/Schedules/Single'
 import Settings from 'pages/Settings'
 import Workflows from 'pages/Workflows'
 import Workflow from 'pages/Workflows/Single'
-import { RouteProps } from 'react-router'
+import { RouteProps } from 'react-router-dom'
 
 import NewWorkflow from 'components/NewWorkflow'
 import NewWorkflowNext from 'components/NewWorkflowNext'
