@@ -31,6 +31,7 @@ import { setAlert } from 'slices/globalStatus'
 
 import { SelectField } from 'components/FormField'
 import i18n from 'components/T'
+import { Stale } from 'api/queryUtils'
 
 const useStyles = makeStyles((theme) => ({
   pre: {
@@ -63,7 +64,8 @@ const RBACGenerator = () => {
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
-      placeholderData: [],
+      enabled: false,
+      staleTime: Stale.DAY,
     },
   })
   useGetCommonRbacConfig(params, {

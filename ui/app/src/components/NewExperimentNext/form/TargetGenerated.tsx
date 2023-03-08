@@ -33,6 +33,7 @@ import i18n from 'components/T'
 
 import basicData from '../data/basic'
 import { Kind, Spec } from '../data/types'
+import { Stale } from 'api/queryUtils'
 
 interface TargetGeneratedProps {
   env: Env
@@ -47,7 +48,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
-      placeholderData: [],
+      enabled: false,
+      staleTime: Stale.DAY,
     },
   })
 

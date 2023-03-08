@@ -50,6 +50,7 @@ const Settings = () => {
 
   const { data: config } = useGetCommonConfig({
     query: {
+      enabled: false,
       staleTime: Stale.DAY,
     },
   })

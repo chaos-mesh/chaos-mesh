@@ -16,7 +16,6 @@
  */
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
-import { useCustomGetCommonConfig } from 'api/queries'
 import { Stale } from 'api/queryUtils'
 import { useGetCommonConfig } from 'openapi'
 import { useEffect, useState } from 'react'
@@ -37,7 +36,12 @@ interface AuthProps {
 const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const navigate = useNavigate()
 
-  const { data: config } = useCustomGetCommonConfig()
+  const { data: config } = useGetCommonConfig({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   const [tokenGenOpen, setTokenGenOpen] = useState(false)
 

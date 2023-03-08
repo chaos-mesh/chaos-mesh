@@ -39,6 +39,7 @@ import i18n from 'components/T'
 
 import basicData, { schema as basicSchema } from './data/basic'
 import Scheduler from './form/Scheduler'
+import { Stale } from 'api/queryUtils'
 
 interface Step2Props {
   inWorkflow?: boolean
@@ -66,7 +67,12 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   )
   const [init, setInit] = useState(originalInit)
 
-  const { data: namespaces } = useGetCommonChaosAvailableNamespaces()
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   useEffect(() => {
     if (!_.isEmpty(basic)) {

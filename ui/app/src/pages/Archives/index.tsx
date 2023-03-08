@@ -85,15 +85,15 @@ export default function Archives() {
   const isBatchEmpty = batchLength === 0
 
   const { isLoading: loading1, refetch: refetchWorkflows } = useGetArchivesWorkflows(undefined, {
-    query: { enabled: kind !== 'workflow', onSuccess: setArchives },
+    query: { enabled: kind === 'workflow', onSuccess: setArchives },
   })
   const { isLoading: loading2, refetch: refetchSchedules } = useGetArchivesSchedules(undefined, {
-    query: { enabled: kind !== 'schedule', onSuccess: setArchives },
+    query: { enabled: kind === 'schedule', onSuccess: setArchives },
   })
   const { isLoading: loading3, refetch: refetchExperiments } = useGetArchives(undefined, {
-    query: { enabled: kind !== 'experiment', onSuccess: setArchives },
+    query: { enabled: kind === 'experiment', onSuccess: setArchives },
   })
-  const loading = loading1 || loading2 || loading3
+  const loading = kind === 'workflow' ? loading1 : kind === 'schedule' ? loading2 : loading3
   function refetchByKind() {
     switch (kind) {
       case 'workflow':

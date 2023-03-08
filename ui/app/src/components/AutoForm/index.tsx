@@ -40,6 +40,7 @@ import Info from './Info'
 import Schedule from './Schedule'
 import { removeScheduleValues, scheduleInitialValues, scopeInitialValues, workflowNodeInfoInitialValues } from './data'
 import { chooseSchemaByBelong } from './validation'
+import { Stale } from 'api/queryUtils'
 
 export enum Belong {
   Experiment = 'Experiment',
@@ -86,7 +87,12 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
   const [form, setForm] = useState<AtomFormData[]>([])
   const [scheduled, setScheduled] = useState(false)
 
-  const { data: namespaces } = useGetCommonChaosAvailableNamespaces()
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   useEffect(() => {
     function formToRecords(form: AtomFormData[]) {

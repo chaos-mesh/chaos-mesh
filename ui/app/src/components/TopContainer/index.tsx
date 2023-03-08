@@ -28,7 +28,7 @@ import {
   useTheme,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import * as auth from 'api/auth'
+import { applyAPIAuthentication, applyNSParam } from 'api/interceptors'
 import { Stale } from 'api/queryUtils'
 import Cookies from 'js-cookie'
 import { useGetCommonConfig } from 'openapi'
@@ -89,6 +89,7 @@ const TopContainer = () => {
     LS.set('mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
+  const [loading, setLoading] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
 
   /**
@@ -106,7 +107,7 @@ const TopContainer = () => {
         expiry,
       }
 
-      auth.token(token as any)
+      applyAPIAuthentication(token as any)
       dispatch(setTokenName('gcp'))
 
       return
@@ -119,7 +120,7 @@ const TopContainer = () => {
     if (token && tokenName) {
       const tokens: TokenFormValues[] = JSON.parse(token)
 
-      auth.token(tokens.find(({ name }) => name === tokenName)!.token)
+      applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
       dispatch(setTokens(tokens))
       dispatch(setTokenName(tokenName))
     } else {
@@ -127,18 +128,20 @@ const TopContainer = () => {
     }
 
     if (globalNamespace) {
-      auth.namespace(globalNamespace)
+      applyNSParam(globalNamespace)
       dispatch(setNameSpace(globalNamespace))
     }
   }
 
-  const { isLoading: loading } = useGetCommonConfig({
+  useGetCommonConfig({
     query: {
       staleTime: Stale.DAY,
       onSuccess(data) {
         if (data.security_mode) {
           setAuth()
         }
+
+        setLoading(false)
       },
     },
   })
@@ -163,7 +166,7 @@ const TopContainer = () => {
           <Navbar openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} />
           <Divider />
 
-          <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 8 }}>
+          <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 6 }}>
             {loading ? (
               <Loading />
             ) : (

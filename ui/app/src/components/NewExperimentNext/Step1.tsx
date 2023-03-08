@@ -108,6 +108,7 @@ const Step1 = () => {
 
   const { data: config } = useGetCommonConfig({
     query: {
+      enabled: false,
       staleTime: Stale.DAY,
     },
   })

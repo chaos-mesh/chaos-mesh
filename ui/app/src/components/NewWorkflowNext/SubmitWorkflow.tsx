@@ -34,6 +34,7 @@ import { resetWorkflow } from 'slices/workflows'
 import { SelectField, Submit, TextField } from 'components/FormField'
 import FormikEffect from 'components/FormikEffect'
 import { T } from 'components/T'
+import { Stale } from 'api/queryUtils'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -89,7 +90,8 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
-      placeholderData: [],
+      enabled: false,
+      staleTime: Stale.DAY,
     },
   })
   const { mutateAsync } = usePostWorkflows()

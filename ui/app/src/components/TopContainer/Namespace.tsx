@@ -15,7 +15,7 @@
  *
  */
 import { Autocomplete, TextField } from '@mui/material'
-import * as auth from 'api/auth'
+import { applyNSParam } from 'api/interceptors'
 import { Stale } from 'api/queryUtils'
 import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -44,7 +44,7 @@ const Namespace = () => {
   const handleSelectGlobalNamespace = (_: any, newVal: any) => {
     const ns = newVal
 
-    auth.namespace(ns)
+    applyNSParam(ns)
     dispatch(setNameSpace(ns))
 
     navigate('/namespaceSetted', { replace: true })

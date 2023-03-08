@@ -59,6 +59,7 @@ import { validateDeadline, validateName } from 'lib/formikhelpers'
 import { constructWorkflow } from 'lib/formikhelpers'
 
 import Add from './Add'
+import { Stale } from 'api/queryUtils'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -112,7 +113,8 @@ const NewWorkflow = () => {
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
-      placeholderData: [],
+      enabled: false,
+      staleTime: Stale.DAY,
     },
   })
   const { mutateAsync } = usePostWorkflows()

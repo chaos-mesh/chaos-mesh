@@ -25,6 +25,7 @@ import { T } from 'components/T'
 
 import { Belong } from '.'
 import { isInstant } from './validation'
+import { Stale } from 'api/queryUtils'
 
 interface InfoProps {
   belong: Belong
@@ -35,7 +36,12 @@ interface InfoProps {
 export default function Info({ belong, kind, action }: InfoProps) {
   const { errors, touched } = useFormikContext()
 
-  const { data: namespaces } = useGetCommonChaosAvailableNamespaces()
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   return (
     <>

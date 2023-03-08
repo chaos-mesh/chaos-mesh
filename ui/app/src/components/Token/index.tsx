@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import * as auth from 'api/auth'
+import { applyAPIAuthentication, resetAPIAuthentication } from 'api/interceptors'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { getExperimentsState } from 'openapi'
 import { useIntl } from 'react-intl'
@@ -72,7 +72,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       return
     }
 
-    auth.token(values.token)
+    applyAPIAuthentication(values.token)
 
     function restSteps() {
       saveToken(values)
@@ -91,7 +91,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
         if (data && data.code === 'error.api.invalid_request' && data.message.includes('Unauthorized')) {
           setFieldError('token', 'Please check the validity of the token')
 
-          auth.resetToken()
+          resetAPIAuthentication()
 
           return
         }

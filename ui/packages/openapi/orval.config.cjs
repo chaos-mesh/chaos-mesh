@@ -26,6 +26,12 @@ module.exports = {
           path: '../../app/src/api/http.ts',
           name: 'customInstance',
         },
+        query: {
+          options: {
+            retry: 1,
+            retryDelay: 3000,
+          },
+        },
       },
     },
   },
