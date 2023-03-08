@@ -23,8 +23,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade byteman-helper to v4.0.20 [#3863](https://github.com/chaos-mesh/chaos-mesh/pull/3863)
 - Helm: change default webhook port to [#10250](https://github.com/chaos-mesh/chaos-mesh/pull/3877)
 - Upgrade base image for chaos-mesh to alpine:3.17 [#3893](https://github.com/chaos-mesh/chaos-mesh/pull/3893)
-- Slow down releasing the latest version [#3900](https://github.com/chaos-mesh/chaos-mesh/pull/3900)
-- Update chaos-coredns version to v0.2.4 [#3947](https://github.com/chaos-mesh/chaos-mesh/pull/3947)
+- Slow down releasing the latest version #[3900](https://github.com/chaos-mesh/chaos-mesh/pull/3900)
 
 ### Removed
 
