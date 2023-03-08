@@ -17,7 +17,6 @@ RUN apt-get update && \
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
-RUN npm config set unsafe-perm true
 RUN npm install pnpm -g
 
 ARG TARGET_PLATFORM=amd64
