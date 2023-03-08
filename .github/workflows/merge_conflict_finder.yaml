@@ -1,0 +1,21 @@
+name: Merge Conflict Finder
+on:
+  push:
+    branches:
+      - master
+      - release-*
+  pull_request:
+    branches:
+      - master
+      - release-*
+
+jobs:
+  merge_conflict_job:
+    runs-on: ubuntu-latest
+    name: Find merge conflicts
+    steps:
+      # Checkout the source code so there are some files to look at.
+      - uses: actions/checkout@v2
+      # Run the actual merge conflict finder
+      - name: Merge Conflict finder
+        uses: olivernybroe/action-conflict-finder@v4.0

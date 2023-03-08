@@ -65,6 +65,10 @@ spec:
               project:
                 description: Project defines the ID of gcp project.
                 type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               secretName:
                 description: SecretName defines the name of kubernetes secret. It
                   is used for GCP credentials.

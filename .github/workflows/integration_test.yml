@@ -9,6 +9,7 @@ on:
       # Not available for frontend code for now.
       - "ui/**"
       - .github/workflows/checklink.yaml
+      - .github/checklink_config.json
       - .github/workflows/ci.yml
       - .github/workflows/ci_skip.yml
       - .github/workflows/codecov_unittest.yaml
@@ -33,7 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [amd64, arm64]
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-latest", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -62,7 +63,7 @@ jobs:
 
       - uses: actions/setup-go@v2
         with:
-          go-version: "1.18"
+          go-version: "1.19.3"
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:

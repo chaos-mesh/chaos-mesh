@@ -550,7 +550,7 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
         className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
       >
         <legend
-          className="css-hdw1oc"
+          className="css-ihdtdm"
         >
           <span
             className="notranslate"
@@ -647,7 +647,7 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
         className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
       >
         <legend
-          className="css-hdw1oc"
+          className="css-ihdtdm"
         >
           <span
             className="notranslate"
@@ -749,7 +749,7 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
         className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
       >
         <legend
-          className="css-hdw1oc"
+          className="css-ihdtdm"
         >
           <span
             className="notranslate"
@@ -776,7 +776,7 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -834,7 +834,7 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
   >
     <span
       aria-disabled={true}
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -891,7 +891,7 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-wuturk-MuiFormControlLabel-root"
   >
     <span
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -949,7 +949,7 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -1045,7 +1045,7 @@ exports[`Storyshots Form/SelectField Default 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1115,7 +1115,7 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1189,7 +1189,7 @@ exports[`Storyshots Form/SelectField Error 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1263,7 +1263,7 @@ exports[`Storyshots Form/SelectField Label And Helper Text 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1306,7 +1306,7 @@ exports[`Storyshots Form/TextField Default 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1349,7 +1349,7 @@ exports[`Storyshots Form/TextField Disabled 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1397,7 +1397,7 @@ exports[`Storyshots Form/TextField Error 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1448,7 +1448,7 @@ exports[`Storyshots Form/TextField Group 1`] = `
         className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
       >
         <legend
-          className="css-hdw1oc"
+          className="css-ihdtdm"
         >
           <span
             className="notranslate"
@@ -1493,7 +1493,7 @@ exports[`Storyshots Form/TextField Group 1`] = `
         className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
       >
         <legend
-          className="css-hdw1oc"
+          className="css-ihdtdm"
         >
           <span
             className="notranslate"
@@ -1571,7 +1571,7 @@ exports[`Storyshots Form/TextField Has Input Adornment 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"
@@ -1614,7 +1614,7 @@ exports[`Storyshots Form/TextField Label And Helper Text 1`] = `
       className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
     >
       <legend
-        className="css-hdw1oc"
+        className="css-ihdtdm"
       >
         <span
           className="notranslate"

@@ -13,50 +13,52 @@
 // limitations under the License.
 //
 
-package provider
+package schedule
 
 import (
 	"context"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/fx"
-	k8sScheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	"k8s.io/kubectl/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test/manager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/schedule/utils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
 var app *fx.App
-var cfg *rest.Config
 var k8sClient client.Client
-var mgr ctrl.Manager
+var lister *utils.ActiveLister
+var config *rest.Config
 var testEnv *envtest.Environment
 var setupLog = ctrl.Log.WithName("setup")
 
-func TestProvider(t *testing.T) {
+func TestSchedule(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Provider suit",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "Schedule suit")
 }
 
-var _ = BeforeSuite(func() {
+var _ = BeforeSuite(func(ctx SpecContext) {
 	logf.SetLogger(log.NewZapLoggerWithWriter(GinkgoWriter))
 	By("bootstrapping test environment")
 	t := true
@@ -70,43 +72,39 @@ var _ = BeforeSuite(func() {
 		}
 	}
 
-	err := v1alpha1.SchemeBuilder.AddToScheme(k8sScheme.Scheme)
+	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	cfg, err = testEnv.Start()
+	config, err = testEnv.Start()
 	Expect(err).ToNot(HaveOccurred())
-	Expect(cfg).ToNot(BeNil())
+	Expect(config).ToNot(BeNil())
+
+	k8sClient, err = client.New(config, client.Options{Scheme: scheme.Scheme})
+	Expect(err).ToNot(HaveOccurred())
+	Expect(k8sClient).ToNot(BeNil())
 
 	rootLogger, err := log.NewDefaultZapLogger()
 	Expect(err).ToNot(HaveOccurred())
 
 	app = fx.New(
 		fx.Options(
-			fx.Supply(cfg),
 			fx.Supply(rootLogger),
-			fx.Provide(
-				NewOption,
-				NewClient,
-				manager.NewTestManager,
-				NewAuthCli,
-				NewScheme,
-			),
+			test.Module,
+			fx.Supply(config),
+			Module,
+			types.ChaosObjects,
 		),
-		fx.Populate(&k8sClient),
-		fx.Populate(&mgr),
 		fx.Invoke(Run),
 	)
 	startCtx, cancel := context.WithTimeout(context.Background(), app.StartTimeout())
 	defer cancel()
-	Expect(err).ToNot(HaveOccurred())
-	Expect(k8sClient).ToNot(BeNil())
 
 	if err := app.Start(startCtx); err != nil {
 		setupLog.Error(err, "fail to start manager")
 	}
 	Expect(err).ToNot(HaveOccurred())
 
-}, 60)
+}, NodeTimeout(60*time.Second))
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
@@ -123,11 +121,19 @@ var _ = AfterSuite(func() {
 type RunParams struct {
 	fx.In
 
-	Mgr    ctrl.Manager
-	Logger logr.Logger
-	Client client.Client
+	Mgr             ctrl.Manager
+	Logger          logr.Logger
+	RecorderBuilder *recorder.RecorderBuilder
+
+	Controllers []types.Controller `group:"controller"`
+	Objs        []types.Object     `group:"objs"`
 }
 
 func Run(params RunParams) error {
+	lister = utils.NewActiveLister(k8sClient, params.Logger)
+	err := controllers.BootstrapWorkflowControllers(params.Mgr, params.Logger, params.RecorderBuilder)
+	if err != nil {
+		return err
+	}
 	return nil
 }

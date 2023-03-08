@@ -12,6 +12,7 @@ on:
       # Not available for frontend code for now.
       - "ui/**"
       - .github/workflows/checklink.yaml
+      - .github/checklink_config.json
       - .github/workflows/ci.yml
       - .github/workflows/ci_skip.yml
       - .github/workflows/codecov_unittest.yaml
@@ -30,7 +31,7 @@ permissions: read-all
 
 jobs:
   build-image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: checkout codes
         uses: actions/checkout@v2
@@ -50,7 +51,7 @@ jobs:
           key: e2e-image-build-cache-${{ runner.os }}
 
   build-e2e-binary:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: checkout codes
         uses: actions/checkout@v2

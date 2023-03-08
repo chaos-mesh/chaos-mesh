@@ -78,6 +78,11 @@ func (in *{{.Type}}) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetRemoteCluster returns the remoteCluster
+func (in *{{.Type}}) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
 // GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
 func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
 	spec, err := json.Marshal(in.Spec)

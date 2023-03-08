@@ -115,6 +115,10 @@ spec:
                 description: the port of agent server, default 9277
                 format: int32
                 type: integer
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
               ruleData:
                 description: the byteman rule's data for action 'ruleData'
                 type: string

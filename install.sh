@@ -631,7 +631,9 @@ vercomp () {
         return 0
     fi
     local IFS=.
-    local i ver1=("$1") ver2=("$2")
+    local i ver1 ver2
+    read -ra ver1 <<< "$1"
+    read -ra ver2 <<< "$2"
     # fill empty fields in ver1 with zeros
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
     do
@@ -1148,7 +1150,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "services", "endpoints" ]
+    resources: [ "services", "endpoints", "secrets" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
@@ -1160,9 +1162,9 @@ rules:
   - apiGroups: [ "coordination.k8s.io" ]
     resources: [ "leases" ]
     verbs: [ "*" ]
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["*"]
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
@@ -1584,7 +1586,7 @@ spec:
           - name: METRICS_PORT
             value: "10080"
           - name: WEBHOOK_PORT
-            value: "9443"
+            value: "10250"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
@@ -1643,7 +1645,7 @@ spec:
             readOnly: true
         ports:
           - name: webhook
-            containerPort: 9443
+            containerPort: 10250
           - name: http
             containerPort: 10080
           - name: pprof
@@ -1873,25 +1875,6 @@ metadata:
     app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: admission-webhook
 webhooks:
-  - name: admission-webhook.chaos-mesh.org
-    timeoutSeconds: 5
-    sideEffects: None
-    admissionReviewVersions: ["v1", "v1beta1"]
-    clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-mesh"
-        path: "/inject-v1-pod"
-    rules:
-      - operations: [ "CREATE" ]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        admission-webhook: enabled
-    failurePolicy: Fail
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

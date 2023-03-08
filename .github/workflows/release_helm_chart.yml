@@ -9,7 +9,7 @@ permissions: read-all
 
 jobs:
   release-chart:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: "Must Triggered by Tag chart-<version>"
         run: |

@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -242,6 +242,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		var (
 			err      error
 			port     uint16
+			tlsPort  uint16
 			pfCancel context.CancelFunc
 			client   httpchaostestcases.HTTPE2EClient
 		)
@@ -253,7 +254,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			for _, servicePort := range svc.Spec.Ports {
 				if servicePort.Name == "http" {
 					port = uint16(servicePort.NodePort)
-					break
+					continue
+				}
+				if servicePort.Name == "https" {
+					tlsPort = uint16(servicePort.NodePort)
+					continue
 				}
 			}
 			nd := fixture.NewHTTPTestDeployment("http-test", ns)
@@ -326,6 +331,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 			ginkgo.It("[Pause]", func() {
 				httpchaostestcases.TestcaseHttpPatchPauseAndUnPause(ns, cli, client, port)
+			})
+		})
+
+		// http chaos case in [HTTPPatch] context
+		ginkgo.Context("[HTTP TLS]", func() {
+			ginkgo.It("[Schedule]", func() {
+				httpchaostestcases.TestcaseHttpTLSThenRecover(ns, kubeCli, cli, client, port, tlsPort)
 			})
 		})
 	})

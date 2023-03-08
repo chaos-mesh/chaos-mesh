@@ -78,6 +78,10 @@ spec:
                           description: Endpoint indicates the endpoint of the aws
                             server. Just used it in test now.
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
                           type: string
@@ -115,6 +119,10 @@ spec:
                           description: LUN indicates the Logical Unit Number of the
                             data disk. Needed in disk-detach.
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         resourceGroupName:
                           description: ResourceGroupName defines the name of ResourceGroup
                           type: string
@@ -176,6 +184,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -358,6 +370,10 @@ spec:
                           items:
                             type: string
                           type: array
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -494,6 +510,10 @@ spec:
                         project:
                           description: Project defines the ID of gcp project.
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         secretName:
                           description: SecretName defines the name of kubernetes secret.
                             It is used for GCP credentials.
@@ -589,6 +609,10 @@ spec:
                             of.
                           format: int32
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         replace:
                           description: Replace is a rule to replace some contents
                             in target.
@@ -739,6 +763,36 @@ spec:
                           - Request
                           - Response
                           type: string
+                        tls:
+                          description: TLS is the tls config, will override PodHttpChaos
+                            if there are multiple HTTPChaos experiments are applied
+                          properties:
+                            caName:
+                              description: CAName represents the data name of ca file
+                                in secret, `ca.crt` for example
+                              type: string
+                            certName:
+                              description: CertName represents the data name of cert
+                                file in secret, `tls.crt` for example
+                              type: string
+                            keyName:
+                              description: KeyName represents the data name of key
+                                file in secret, `tls.key` for example
+                              type: string
+                            secretName:
+                              description: SecretName represents the name of required
+                                secret resource
+                              type: string
+                            secretNamespace:
+                              description: SecretNamespace represents the namespace
+                                of required secret resource
+                              type: string
+                          required:
+                          - certName
+                          - keyName
+                          - secretName
+                          - secretNamespace
+                          type: object
                         value:
                           description: Value is required when the mode is set to `FixedMode`
                             / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
@@ -910,6 +964,10 @@ spec:
                           description: 'Percent defines the percentage of injection
                             errors and provides a number from 0-100. default: 100.'
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -1100,6 +1158,10 @@ spec:
                           description: the port of agent server, default 9277
                           format: int32
                           type: integer
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         ruleData:
                           description: the byteman rule's data for action 'ruleData'
                           type: string
@@ -1316,6 +1378,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -1574,6 +1640,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -2679,6 +2749,10 @@ spec:
                                 tool
                               type: boolean
                           type: object
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select physical machines
                             that are used to inject chaos action.
@@ -2860,6 +2934,10 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
                         selector:
                           description: Selector is used to select pods that are used
                             to inject chaos action.
@@ -3004,6 +3082,10 @@ spec:
                               description: Endpoint indicates the endpoint of the
                                 aws server. Just used it in test now.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret.
@@ -3042,6 +3124,10 @@ spec:
                               description: LUN indicates the Logical Unit Number of
                                 the data disk. Needed in disk-detach.
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             resourceGroupName:
                               description: ResourceGroupName defines the name of ResourceGroup
                               type: string
@@ -3105,6 +3191,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -3271,6 +3361,10 @@ spec:
                               items:
                                 type: string
                               type: array
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -3411,6 +3505,10 @@ spec:
                             project:
                               description: Project defines the ID of gcp project.
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             secretName:
                               description: SecretName defines the name of kubernetes
                                 secret. It is used for GCP credentials.
@@ -3512,6 +3610,10 @@ spec:
                                 of.
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             replace:
                               description: Replace is a rule to replace some contents
                                 in target.
@@ -3667,6 +3769,36 @@ spec:
                               - Request
                               - Response
                               type: string
+                            tls:
+                              description: TLS is the tls config, will override PodHttpChaos
+                                if there are multiple HTTPChaos experiments are applied
+                              properties:
+                                caName:
+                                  description: CAName represents the data name of
+                                    ca file in secret, `ca.crt` for example
+                                  type: string
+                                certName:
+                                  description: CertName represents the data name of
+                                    cert file in secret, `tls.crt` for example
+                                  type: string
+                                keyName:
+                                  description: KeyName represents the data name of
+                                    key file in secret, `tls.key` for example
+                                  type: string
+                                secretName:
+                                  description: SecretName represents the name of required
+                                    secret resource
+                                  type: string
+                                secretNamespace:
+                                  description: SecretNamespace represents the namespace
+                                    of required secret resource
+                                  type: string
+                              required:
+                              - certName
+                              - keyName
+                              - secretName
+                              - secretNamespace
+                              type: object
                             value:
                               description: Value is required when the mode is set
                                 to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
@@ -3843,6 +3975,10 @@ spec:
                                 errors and provides a number from 0-100. default:
                                 100.'
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -4040,6 +4176,10 @@ spec:
                               description: the port of agent server, default 9277
                               format: int32
                               type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             ruleData:
                               description: the byteman rule's data for action 'ruleData'
                               type: string
@@ -4265,6 +4405,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -4531,6 +4675,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -5662,6 +5810,10 @@ spec:
                                     tool
                                   type: boolean
                               type: object
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select physical machines
                                 that are used to inject chaos action.
@@ -5848,6 +6000,10 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
                             selector:
                               description: Selector is used to select pods that are
                                 used to inject chaos action.
@@ -5991,6 +6147,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -6211,6 +6371,10 @@ spec:
                               - fixed
                               - fixed-percent
                               - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
                               type: string
                             selector:
                               description: Selector is used to select pods that are
@@ -6463,6 +6627,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used
@@ -7233,13 +7401,13 @@ spec:
                               type: string
                             ports:
                               description: List of ports to expose from the container.
-                                Exposing a port here gives the system additional information
-                                about the network connections a container uses, but
-                                is primarily informational. Not specifying a port
-                                here DOES NOT prevent that port from being exposed.
-                                Any port which is listening on the default "0.0.0.0"
-                                address inside a container will be accessible from
-                                the network. Cannot be updated.
+                                Not specifying a port here DOES NOT prevent that port
+                                from being exposed. Any port which is listening on
+                                the default "0.0.0.0" address inside a container will
+                                be accessible from the network. Modifying this array
+                                with strategic merge patch may corrupt the data. For
+                                more information See https://github.com/kubernetes/kubernetes/issues/108255.
+                                Cannot be updated.
                               items:
                                 description: ContainerPort represents a network port
                                   in a single container.
@@ -7442,6 +7610,29 @@ spec:
                               description: 'Compute Resources required by this container.
                                 Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                               properties:
+                                claims:
+                                  description: "Claims lists the names of resources,
+                                    defined in spec.resourceClaims, that are used
+                                    by this container. \n This is an alpha field and
+                                    requires enabling the DynamicResourceAllocation
+                                    feature gate. \n This field is immutable."
+                                  items:
+                                    description: ResourceClaim references one entry
+                                      in PodSpec.ResourceClaims.
+                                    properties:
+                                      name:
+                                        description: Name must match the name of one
+                                          entry in pod.spec.resourceClaims of the
+                                          Pod where this field is used. It makes that
+                                          resource available inside a container.
+                                        type: string
+                                    required:
+                                    - name
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-map-keys:
+                                  - name
+                                  x-kubernetes-list-type: map
                                 limits:
                                   additionalProperties:
                                     anyOf:
@@ -8447,10 +8638,14 @@ spec:
                                               can support the specified data source,
                                               it will create a new volume based on
                                               the contents of the specified data source.
-                                              If the AnyVolumeDataSource feature gate
-                                              is enabled, this field will always have
-                                              the same contents as the DataSourceRef
-                                              field.'
+                                              When the AnyVolumeDataSource feature
+                                              gate is enabled, dataSource contents
+                                              will be copied to dataSourceRef, and
+                                              dataSourceRef contents will be copied
+                                              to dataSource when dataSourceRef.namespace
+                                              is not specified. If the namespace is
+                                              specified, then dataSourceRef will not
+                                              be copied to dataSource.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -8476,32 +8671,41 @@ spec:
                                             description: 'dataSourceRef specifies
                                               the object from which to populate the
                                               volume with data, if a non-empty volume
-                                              is desired. This may be any local object
-                                              from a non-empty API group (non core
-                                              object) or a PersistentVolumeClaim object.
-                                              When this field is specified, volume
-                                              binding will only succeed if the type
-                                              of the specified object matches some
-                                              installed volume populator or dynamic
-                                              provisioner. This field will replace
-                                              the functionality of the DataSource
-                                              field and as such if both fields are
-                                              non-empty, they must have the same value.
-                                              For backwards compatibility, both fields
-                                              (DataSource and DataSourceRef) will
-                                              be set to the same value automatically
+                                              is desired. This may be any object from
+                                              a non-empty API group (non core object)
+                                              or a PersistentVolumeClaim object. When
+                                              this field is specified, volume binding
+                                              will only succeed if the type of the
+                                              specified object matches some installed
+                                              volume populator or dynamic provisioner.
+                                              This field will replace the functionality
+                                              of the dataSource field and as such
+                                              if both fields are non-empty, they must
+                                              have the same value. For backwards compatibility,
+                                              when namespace isn''t specified in dataSourceRef,
+                                              both fields (dataSource and dataSourceRef)
+                                              will be set to the same value automatically
                                               if one of them is empty and the other
-                                              is non-empty. There are two important
-                                              differences between DataSource and DataSourceRef:
-                                              * While DataSource only allows two specific
-                                              types of objects, DataSourceRef   allows
+                                              is non-empty. When namespace is specified
+                                              in dataSourceRef, dataSource isn''t
+                                              set to the same value and must be empty.
+                                              There are three important differences
+                                              between dataSource and dataSourceRef:
+                                              * While dataSource only allows two specific
+                                              types of objects, dataSourceRef   allows
                                               any non-core object, as well as PersistentVolumeClaim
-                                              objects. * While DataSource ignores
-                                              disallowed values (dropping them), DataSourceRef   preserves
+                                              objects. * While dataSource ignores
+                                              disallowed values (dropping them), dataSourceRef   preserves
                                               all values, and generates an error if
-                                              a disallowed value is   specified. (Beta)
-                                              Using this field requires the AnyVolumeDataSource
-                                              feature gate to be enabled.'
+                                              a disallowed value is   specified. *
+                                              While dataSource only allows local objects,
+                                              dataSourceRef allows objects   in any
+                                              namespaces. (Beta) Using this field
+                                              requires the AnyVolumeDataSource feature
+                                              gate to be enabled. (Alpha) Using the
+                                              namespace field of dataSourceRef requires
+                                              the CrossNamespaceVolumeDataSource feature
+                                              gate to be enabled.'
                                             properties:
                                               apiGroup:
                                                 description: APIGroup is the group
@@ -8519,6 +8723,19 @@ spec:
                                                 description: Name is the name of resource
                                                   being referenced
                                                 type: string
+                                              namespace:
+                                                description: Namespace is the namespace
+                                                  of resource being referenced Note
+                                                  that when a namespace is specified,
+                                                  a gateway.networking.k8s.io/ReferenceGrant
+                                                  object is required in the referent
+                                                  namespace to allow that namespace's
+                                                  owner to accept the reference. See
+                                                  the ReferenceGrant documentation
+                                                  for details. (Alpha) This field
+                                                  requires the CrossNamespaceVolumeDataSource
+                                                  feature gate to be enabled.
+                                                type: string
                                             required:
                                             - kind
                                             - name
@@ -8534,6 +8751,31 @@ spec:
                                               in the status field of the claim. More
                                               info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources'
                                             properties:
+                                              claims:
+                                                description: "Claims lists the names
+                                                  of resources, defined in spec.resourceClaims,
+                                                  that are used by this container.
+                                                  \n This is an alpha field and requires
+                                                  enabling the DynamicResourceAllocation
+                                                  feature gate. \n This field is immutable."
+                                                items:
+                                                  description: ResourceClaim references
+                                                    one entry in PodSpec.ResourceClaims.
+                                                  properties:
+                                                    name:
+                                                      description: Name must match
+                                                        the name of one entry in pod.spec.resourceClaims
+                                                        of the Pod where this field
+                                                        is used. It makes that resource
+                                                        available inside a container.
+                                                      type: string
+                                                  required:
+                                                  - name
+                                                  type: object
+                                                type: array
+                                                x-kubernetes-list-map-keys:
+                                                - name
+                                                x-kubernetes-list-type: map
                                               limits:
                                                 additionalProperties:
                                                   anyOf:
@@ -9642,6 +9884,10 @@ spec:
                           - fixed
                           - fixed-percent
                           - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
                           type: string
                         selector:
                           description: Selector is used to select pods that are used

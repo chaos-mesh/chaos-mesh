@@ -32,25 +32,29 @@ const ExecTag = "exec"
 // SubCommandTag stands for the sub command in common command.
 // We can use it in struct fields as a tag.
 // Just like MatchExtension below
-// type Iptables Struct {
-// 	Exec
-//	MatchExtension Match `sub_command:""`
-// }
 //
-// type Match Struct {
-// 	Exec
-//	Port string `para:"-p"`
-// }
+//	type Iptables Struct {
+//		Exec
+//		MatchExtension Match `sub_command:""`
+//	}
+//
+//	type Match Struct {
+//		Exec
+//		Port string `para:"-p"`
+//	}
+//
 // Field with SubcommandTag needs to be a struct with Exec.
 const SubCommandTag = "sub_command"
 
 // ParaTag stands for parameters in command.
 // We can use it in struct fields as a tag.
 // Just like Port below
-// type Iptables Struct {
-// 	Exec
-//	Port string `para:"-p"`
-// }
+//
+//	type Iptables Struct {
+//		Exec
+//		Port string `para:"-p"`
+//	}
+//
 // If the field is not string type or []string type , it will bring an error.
 // If the tag value like "-p" is empty string ,
 // the para will just add the field value into the command just as some single value parameter in command.
@@ -61,10 +65,11 @@ const ParaTag = "para"
 // We need to inherit it in the struct of command.
 // User must add ExecTag as the tag of Exec field.
 // Example:
-// type Iptables struct {
-//	Exec           `exec:"iptables"`
-//	Tables         string `para:"-t"`
-// }
+//
+//	type Iptables struct {
+//		Exec           `exec:"iptables"`
+//		Tables         string `para:"-t"`
+//	}
 type Exec struct {
 	active bool
 }
