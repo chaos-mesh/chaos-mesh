@@ -18,7 +18,6 @@ import { Box, BoxProps } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { PropertyAccessor } from '@nivo/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
-import { schemeTableau10 } from 'd3-scale-chromatic'
 import { useGetExperimentsState } from 'openapi'
 import { StatusAllChaosStatus } from 'openapi/index.schemas'
 import { useState } from 'react'
@@ -74,7 +73,6 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
         <ResponsivePie
           data={state}
           margin={{ top: 15, bottom: 60 }}
-          colors={schemeTableau10 as any}
           innerRadius={0.75}
           padAngle={0.25}
           cornerRadius={4}

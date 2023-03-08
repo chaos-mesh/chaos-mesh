@@ -631,7 +631,9 @@ vercomp () {
         return 0
     fi
     local IFS=.
-    local i ver1=("$1") ver2=("$2")
+    local i ver1 ver2
+    read -ra ver1 <<< "$1"
+    read -ra ver2 <<< "$2"
     # fill empty fields in ver1 with zeros
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
     do
@@ -1873,25 +1875,6 @@ metadata:
     app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: admission-webhook
 webhooks:
-  - name: admission-webhook.chaos-mesh.org
-    timeoutSeconds: 5
-    sideEffects: None
-    admissionReviewVersions: ["v1", "v1beta1"]
-    clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: "chaos-mesh"
-        path: "/inject-v1-pod"
-    rules:
-      - operations: [ "CREATE" ]
-        apiGroups: [""]
-        apiVersions: ["v1"]
-        resources: ["pods"]
-    namespaceSelector:
-      matchLabels:
-        admission-webhook: enabled
-    failurePolicy: Fail
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
