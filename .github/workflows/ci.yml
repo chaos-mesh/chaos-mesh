@@ -40,7 +40,7 @@ jobs:
               - '**.go'
               - 'helm/**'
             ui:
-              - 'ui/yarn.lock'
+              - 'ui/pnpm-lock.yaml'
               - '**.js'
               - '**.ts?(x)'
   go:
@@ -109,32 +109,33 @@ jobs:
         job:
           - build
           - test
-        # node-version: ["14"] # TODO: add nodejs-16?
-    runs-on: "ubuntu-20.04"
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
         with:
-          node-version: 14
-          cache: "yarn"
-          cache-dependency-path: "ui/yarn.lock"
+          version: 7
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "pnpm"
+          cache-dependency-path: "ui/pnpm-lock.yaml"
 
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
-      - name: Cache app build
+      - name: Cache app/build
         if: ${{ matrix.job == 'build' }}
         uses: actions/cache@v2
         with:
           path: ./ui/app/build
-          key: ${{ runner.os }}-yarn-${{ hashFiles('ui/yarn.lock') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-pnpm-
 
-      - name: Try build
+      - name: Build app
         if: ${{ matrix.job == 'build' }}
-        run: yarn build
+        run: pnpm build
 
-      - name: Run UT
+      - name: Run tests
         if: ${{ matrix.job == 'test' }}
-        run: yarn test
+        run: pnpm test
