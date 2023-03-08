@@ -4,6 +4,7 @@ header:
     copyright-owner: Chaos Mesh Authors.
   paths-ignore:
     - '.gitignore'
+    - '.gitkeep'
     - '.dockerignore'
     - '.editorconfig'
     - '.lift.toml'
@@ -53,10 +54,12 @@ header:
     # Dockerfiles
     - '**/Dockerfile'
     # UI
+    - 'ui/pnpm-workspace.yaml'
+    - 'ui/pnpm-lock.yaml'
     - 'ui/.husky/**'
     - 'ui/.prettierignore'
     - 'ui/.prettierrc'
-    - 'ui/.yarnclean'
+    - 'ui/app/public/index.html'
     - 'ui/app/src/api/zz_generated.frontend.chaos-mesh.ts'
     - 'ui/app/src/formik/**'
     - 'ui/app/src/openapi/**'
@@ -70,7 +73,5 @@ header:
     - 'ui/packages/mui-extends/.storybook/**'
     - 'ui/packages/mui-extends/stories/**'
     - 'ui/packages/mui-extends/test/storyshots.test.js'
-    - 'ui/yarn.lock'
     # codecov configuration file
     - 'codecov.yml'
-    - '.gitkeep'

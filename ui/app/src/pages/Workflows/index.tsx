@@ -19,7 +19,7 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import ReplayIcon from '@mui/icons-material/Replay'
 import { Box, Button, Grow, Typography } from '@mui/material'
 import type { ButtonProps } from '@mui/material'
-import type { GridColumns, GridRowParams } from '@mui/x-data-grid'
+import type { GridColDef, GridRenderCellParams, GridRowParams } from '@mui/x-data-grid'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import api from 'api'
 import _ from 'lodash'
@@ -177,17 +177,17 @@ const Workflows = () => {
 
   const jumpToSingleWorkflow = ({ row }: GridRowParams) => navigate(`/workflows/${row.uid}`)
 
-  const columns: GridColumns = [
+  const columns: GridColDef[] = [
     {
       field: 'status',
       headerName: 'Status',
       width: 150,
-      renderCell: ({ value }) => <StatusLabel status={value} />,
+      renderCell: ({ value }: GridRenderCellParams) => <StatusLabel status={value} />,
     },
     {
       field: 'name',
       headerName: 'Name',
-      renderCell: ({ value }) => <Typography variant="body2">{_.truncate(value)}</Typography>,
+      renderCell: ({ value }: GridRenderCellParams) => <Typography variant="body2">{_.truncate(value)}</Typography>,
     },
     { field: 'time', headerName: 'Time' },
     {
@@ -196,7 +196,7 @@ const Workflows = () => {
       headerName: 'Operations',
       align: 'left',
       width: 150,
-      getActions: ({ row }) => [
+      getActions: ({ row }: GridRowParams) => [
         <GridActionsCellItem icon={<RemoveCircleOutlineIcon />} label="Archive" onClick={handleDelete(row)} />,
         ...(row.status === 'finished'
           ? [<GridActionsCellItem icon={<ReplayIcon />} label="Re-run" onClick={handleReRun(row.uid)} />]
