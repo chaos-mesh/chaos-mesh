@@ -26,7 +26,7 @@ We will use the `codegen` command to accomplish this task.
 
 ## Codegen
 
-Run `yarn workspace @ui/openapi codegen -h` to see the usage of codegen:
+Run `pnpm -F @ui/openapi codegen -h` to see the usage of codegen:
 
 ```console
 codegen.js [command]
