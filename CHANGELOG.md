@@ -24,6 +24,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade base image for chaos-mesh to alpine:3.17 [#3893](https://github.com/chaos-mesh/chaos-mesh/pull/3893)
 - Slow down releasing the latest version [#3900](https://github.com/chaos-mesh/chaos-mesh/pull/3900)
 - Change the package manager from `yarn` to `pnpm`. [#3965](https://github.com/chaos-mesh/chaos-mesh/pull/3965)
+- Use DNS CoreDNS image url on ghcr.io [#3488](https://github.com/chaos-mesh/chaos-mesh/pull/3488)
 
 ### Removed
 
@@ -146,7 +147,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Change e2e config settings to append "pause image" args. [#3567](https://github.com/chaos-mesh/chaos-mesh/pull/3567)
 - Update display of disabled scope in UI [#3621](https://github.com/chaos-mesh/chaos-mesh/pull/3621)
 - Make the Scope render conditionally [#3622](https://github.com/chaos-mesh/chaos-mesh/pull/3622)
-- Use DNS CoreDNS image url on ghcr.io [#3488](https://github.com/chaos-mesh/chaos-mesh/pull/3488)
 - Refine logging, remove the usage of klog in chaosctl [#3628](https://github.com/chaos-mesh/chaos-mesh/pull/3628)
 - Dashboard: Fix rbac.yaml for token generation verbs/resources [#3370](https://github.com/chaos-mesh/chaos-mesh/pull/3370)
 - Refine logging, remove the usage of klog in event recorder [#3629](https://github.com/chaos-mesh/chaos-mesh/pull/3629)
