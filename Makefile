@@ -10,7 +10,6 @@ export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
 export PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 
-# todo: rename the project/repository of e2e-helper to chaos-mesh
 export IMAGE_E2E_HELPER_PROJECT ?= chaos-mesh
 export IMAGE_CHAOS_MESH_E2E_PROJECT ?= chaos-mesh
 
