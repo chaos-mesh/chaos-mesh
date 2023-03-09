@@ -85,9 +85,9 @@ function e2e::image_load() {
         docker pull ghcr.io/chaos-mesh/chaos-coredns:latest
         docker pull nginx:latest
         docker pull gcr.io/google-containers/pause:latest
-        $KIND_BIN load docker-image --name $CLUSTER ghcr.io/chaos-mesh/chaos-coredns:latest --nodes $(hack::join ',' ${nodes[@]})
-        $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
-        $KIND_BIN load docker-image --name $CLUSTER gcr.io/google-containers/pause:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name "$CLUSTER" ghcr.io/chaos-mesh/chaos-coredns:latest --nodes "$(hack::join ',' ${nodes[@]})"
+        $KIND_BIN load docker-image --name "$CLUSTER" nginx:latest --nodes "$(hack::join ',' ${nodes[@]})"
+        $KIND_BIN load docker-image --name "$CLUSTER" gcr.io/google-containers/pause:latest --nodes "$(hack::join ',' ${nodes[@]})"
     fi
 }
 
