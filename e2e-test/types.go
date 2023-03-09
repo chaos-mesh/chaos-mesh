@@ -75,7 +75,7 @@ func NewDefaultOperatorConfig() OperatorConfig {
 		},
 		Daemon: DaemonConfig{
 			ImageRegistry:   "ghcr.io",
-			ImageRepository: "chaos-daemon/chaos-daemon",
+			ImageRepository: "chaos-mesh/chaos-daemon",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 			Runtime:         "containerd",
