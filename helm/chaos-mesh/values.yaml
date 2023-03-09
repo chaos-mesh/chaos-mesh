@@ -91,6 +91,7 @@ controllerManager:
     METRICS_PORT: 10080
   # If enabled, only pods in the namespace annotated with `"chaos-mesh.org/inject": "enabled"` could be injected
   enableFilterNamespace: false
+  enableFilterPod: false
   # targetNamespace only works with clusterScoped is false(namespace scoped mode).
   # It means namespace which will be injected chaos
   targetNamespace: chaos-mesh

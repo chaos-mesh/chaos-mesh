@@ -34,6 +34,7 @@ import (
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
 	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
@@ -160,7 +161,12 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, generic.Option{
+		ClusterScoped:         s.conf.ClusterScoped,
+		TargetNamespace:       s.conf.TargetNamespace,
+		EnableFilterNamespace: s.conf.EnableFilterNamespace,
+		EnableFilterPod:       s.conf.EnableFilterPod,
+	})
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
@@ -285,7 +291,12 @@ func (s *Service) getLabels(c *gin.Context) {
 	selector.Namespaces = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, generic.Option{
+		ClusterScoped:         s.conf.ClusterScoped,
+		TargetNamespace:       s.conf.TargetNamespace,
+		EnableFilterNamespace: s.conf.EnableFilterNamespace,
+		EnableFilterPod:       s.conf.EnableFilterPod,
+	})
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
@@ -336,7 +347,12 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	selector.Namespaces = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filteredPods, err := pod.SelectPods(ctx, kubeCli, nil, selector, generic.Option{
+		ClusterScoped:         s.conf.ClusterScoped,
+		TargetNamespace:       s.conf.TargetNamespace,
+		EnableFilterNamespace: s.conf.EnableFilterNamespace,
+		EnableFilterPod:       s.conf.EnableFilterPod,
+	})
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))

@@ -73,11 +73,7 @@ func New(spec v1alpha1.GenericSelectorSpec, option generic.Option) (generic.Sele
 	}
 
 	return &namespaceSelector{
-		Option: generic.Option{
-			ClusterScoped:         option.ClusterScoped,
-			TargetNamespace:       option.TargetNamespace,
-			EnableFilterNamespace: option.EnableFilterNamespace,
-		},
+		Option:     option,
 		namespaces: spec.Namespaces,
 	}, nil
 }

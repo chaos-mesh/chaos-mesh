@@ -45,7 +45,7 @@ func (c *Container) Id() string {
 }
 
 func (impl *SelectImpl) Select(ctx context.Context, cs *v1alpha1.ContainerSelector) ([]*Container, error) {
-	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &cs.PodSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
+	pods, err := pod.SelectAndFilterPods(ctx, impl.c, impl.r, &cs.PodSelector, impl.Option)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +93,7 @@ func New(params Params) *SelectImpl {
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
+			EnableFilterPod:       config.ControllerCfg.EnableFilterPod,
 		},
 	}
 }

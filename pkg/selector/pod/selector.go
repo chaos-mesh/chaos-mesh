@@ -62,7 +62,7 @@ func (impl *SelectImpl) Select(ctx context.Context, ps *v1alpha1.PodSelector) ([
 		return []*Pod{}, nil
 	}
 
-	pods, err := SelectAndFilterPods(ctx, impl.c, impl.r, ps, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
+	pods, err := SelectAndFilterPods(ctx, impl.c, impl.r, ps, impl.Option)
 	if err != nil {
 		return nil, err
 	}
@@ -92,13 +92,14 @@ func New(params Params) *SelectImpl {
 			ClusterScoped:         config.ControllerCfg.ClusterScoped,
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
+			EnableFilterPod:       config.ControllerCfg.EnableFilterPod,
 		},
 	}
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and SelectorMode
 // Deprecated: use pod.SelectImpl as instead
-func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, option generic.Option) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -110,7 +111,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	mode := spec.Mode
 	value := spec.Value
 
-	pods, err := SelectPods(ctx, c, r, selector, clusterScoped, targetNamespace, enableFilterNamespace)
+	pods, err := SelectPods(ctx, c, r, selector, option)
 	if err != nil {
 		return nil, err
 	}
@@ -132,27 +133,22 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.PodSelectorSpec, option generic.Option) ([]v1.Pod, error) {
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
-		return selectSpecifiedPods(ctx, c, selector, clusterScoped, targetNamespace, enableFilterNamespace)
+		return selectSpecifiedPods(ctx, c, selector, option)
 	}
 
 	selectorRegistry := newSelectorRegistry(ctx, c, selector)
-	selectorChain, err := registry.Parse(selectorRegistry, selector.GenericSelectorSpec, generic.Option{
-		ClusterScoped:         clusterScoped,
-		TargetNamespace:       targetNamespace,
-		EnableFilterNamespace: enableFilterNamespace,
-	})
+	selectorChain, err := registry.Parse(selectorRegistry, selector.GenericSelectorSpec, option)
 	if err != nil {
 		return nil, err
 	}
 
-	return listPods(ctx, c, r, selector, selectorChain, enableFilterNamespace)
+	return listPods(ctx, c, r, selector, selectorChain, option.EnableFilterNamespace, option.EnableFilterPod)
 }
 
-func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec,
-	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1.Pod, error) {
+func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.PodSelectorSpec, option generic.Option) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	namespaceCheck := make(map[string]bool)
 	logger, err := log.NewDefaultZapLogger()
@@ -160,14 +156,14 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 		return pods, errors.Wrap(err, "failed to create logger")
 	}
 	for ns, names := range spec.Pods {
-		if !clusterScoped {
-			if targetNamespace != ns {
+		if !option.ClusterScoped {
+			if option.TargetNamespace != ns {
 				log.L().WithName("pod-selector").Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 				continue
 			}
 		}
 
-		if enableFilterNamespace {
+		if option.EnableFilterNamespace {
 			allow, ok := namespaceCheck[ns]
 			if !ok {
 				allow = genericnamespace.CheckNamespace(ctx, c, ns, logger)
@@ -184,6 +180,10 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 				Name:      name,
 			}, &pod)
 			if err == nil {
+				if option.EnableFilterPod && !genericannotation.CheckAnnotation(pod) {
+					log.L().WithName("pod-selector").Info("skip pod because there are no related annotations", "pod", pod.Name)
+					continue
+				}
 				pods = append(pods, pod)
 				continue
 			}
@@ -202,7 +202,7 @@ func selectSpecifiedPods(ctx context.Context, c client.Client, spec v1alpha1.Pod
 //revive:enable:flag-parameter
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
-func CheckPodMeetSelector(ctx context.Context, c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) (bool, error) {
+func CheckPodMeetSelector(ctx context.Context, c client.Client, pod v1.Pod, selector v1alpha1.PodSelectorSpec, clusterScoped bool, targetNamespace string, enableFilterNamespace, enableFilterPod bool) (bool, error) {
 	if len(selector.Pods) > 0 {
 		meet := false
 		for ns, names := range selector.Pods {
@@ -227,6 +227,7 @@ func CheckPodMeetSelector(ctx context.Context, c client.Client, pod v1.Pod, sele
 		ClusterScoped:         clusterScoped,
 		TargetNamespace:       targetNamespace,
 		EnableFilterNamespace: enableFilterNamespace,
+		EnableFilterPod:       enableFilterPod,
 	})
 	if err != nil {
 		return false, err
@@ -251,7 +252,7 @@ func newSelectorRegistry(ctx context.Context, c client.Client, spec v1alpha1.Pod
 }
 
 func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.PodSelectorSpec,
-	selectorChain generic.SelectorChain, enableFilterNamespace bool) ([]v1.Pod, error) {
+	selectorChain generic.SelectorChain, enableFilterNamespace, enableFilterPod bool) ([]v1.Pod, error) {
 	var pods []v1.Pod
 	namespaceCheck := make(map[string]bool)
 	logger, err := log.NewDefaultZapLogger()
@@ -273,7 +274,6 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 							continue
 						}
 					}
-
 					opts.Namespace = namespace
 					if err := listFunc(ctx, &podList, &opts); err != nil {
 						return err
@@ -296,6 +296,9 @@ func listPods(ctx context.Context, c client.Client, r client.Reader, spec v1alph
 	for _, pod := range pods {
 		pod := pod
 		if selectorChain.Match(&pod) {
+			if enableFilterPod && !genericannotation.CheckAnnotation(pod) {
+				continue
+			}
 			filterPods = append(filterPods, pod)
 		}
 	}

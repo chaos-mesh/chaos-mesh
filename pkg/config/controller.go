@@ -81,6 +81,9 @@ type ChaosControllerConfig struct {
 	// EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 	// annotated with `chaos-mesh.org/inject=enabled` will be injected
 	EnableFilterNamespace bool `envconfig:"ENABLE_FILTER_NAMESPACE" default:"false"`
+	// EnableFilterPod will filter pod with annotation. Only the pods
+	// annotated with `chaos-mesh.org/inject=enabled` will be injected
+	EnableFilterPod bool `envconfig:"ENABLE_FILTER_POD" default:"false"`
 	// CertsDir is the directory for storing certs key file and cert file
 	CertsDir string `envconfig:"CERTS_DIR" default:"/etc/webhook/certs"`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator

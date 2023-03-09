@@ -27,6 +27,7 @@ type Option struct {
 	ClusterScoped         bool
 	TargetNamespace       string
 	EnableFilterNamespace bool
+	EnableFilterPod       bool
 }
 
 type ListFunc func(ctx context.Context, list client.ObjectList, opts ...client.ListOption) error

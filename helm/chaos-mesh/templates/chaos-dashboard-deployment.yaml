@@ -77,6 +77,8 @@ spec:
               value: {{ .Values.controllerManager.targetNamespace | quote }}
             - name: ENABLE_FILTER_NAMESPACE
               value: "{{ .Values.controllerManager.enableFilterNamespace }}"
+            - name: ENABLE_FILTER_POD
+              value: "{{ .Values.controllerManager.enableFilterPod }}"
             - name: SECURITY_MODE
               value: "{{ .Values.dashboard.securityMode }}"
             - name: GCP_SECURITY_MODE

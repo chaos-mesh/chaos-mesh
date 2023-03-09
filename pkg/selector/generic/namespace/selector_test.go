@@ -39,6 +39,7 @@ func TestMatch(t *testing.T) {
 		ClusterScoped:         true,
 		TargetNamespace:       "",
 		EnableFilterNamespace: false,
+		EnableFilterPod:       false,
 	}
 
 	n2Selector, err := New(v1alpha1.GenericSelectorSpec{Namespaces: []string{"n2"}}, option)

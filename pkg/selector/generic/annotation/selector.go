@@ -16,6 +16,7 @@
 package annotation
 
 import (
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -52,4 +53,11 @@ func New(spec v1alpha1.GenericSelectorSpec, _ generic.Option) (generic.Selector,
 		return nil, err
 	}
 	return &annotationSelector{Selector: s}, nil
+}
+
+func CheckAnnotation(pod v1.Pod) bool {
+	if pod.Annotations[generic.InjectAnnotationKey] == "enabled" {
+		return true
+	}
+	return false
 }

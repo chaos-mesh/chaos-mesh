@@ -98,6 +98,8 @@ spec:
             value: "app.kubernetes.io/component:webhook"
           - name: ENABLE_FILTER_NAMESPACE
             value: "{{ .Values.controllerManager.enableFilterNamespace }}"
+          - name: ENABLE_FILTER_POD
+            value: "{{ .Values.controllerManager.enableFilterPod }}"
           {{- if .Values.enableProfiling }}
           - name: PPROF_ADDR
             value: ":10081"
