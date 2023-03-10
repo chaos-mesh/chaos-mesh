@@ -322,7 +322,6 @@ fi
 export PROVIDER
 export CLUSTER
 export KUBECONFIG
-export E2E_IMAGE=${IMAGE_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
 export IMAGE_REGISTRY=${IMAGE_REGISTRY}
 export IMAGE_TAG=${IMAGE_TAG}
 export PATH=$OUTPUT_BIN:$PATH
