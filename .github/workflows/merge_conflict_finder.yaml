@@ -1,4 +1,5 @@
 name: Merge Conflict Finder
+
 on:
   push:
     branches:
@@ -8,6 +9,8 @@ on:
     branches:
       - master
       - release-*
+
+permissions: read-all
 
 jobs:
   merge_conflict_job:
