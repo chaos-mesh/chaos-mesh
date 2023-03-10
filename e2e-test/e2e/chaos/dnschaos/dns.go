@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package networkchaos
+package dnschaos
 
 import (
 	"context"

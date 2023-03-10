@@ -73,7 +73,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.tolerations` |  Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.affinity` |  Map of chaos-daemon node/pod affinities | `{}` |
 | `chaosDaemon.updateStrategy` | Specify DaemonSetUpdateStrategy for chaos-daemon | `{}` |
-| `dashboard.create` | Enable chaos-dashboard | `false` |
+| `dashboard.create` | Enable chaos-dashboard | `true` |
 | `dashboard.rootUrl` | Specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL. | `http://localhost:2333` |
 | `dashboard.securityContext` | Pod securityContext if needed | `{}` |
 | `dashboard.hostNetwork` | Running chaos-dashboard on host network | `false` |
@@ -125,9 +125,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.ingress.paths`                     | Paths that map requests to chaos dashboard                    | `["/"]` |
 | `dashboard.ingress.apiVersionOverrides`       | Override apiVersion of ingress rendered by this helm chart    | ``      |
 | `dashboard.ingress.ingressClassName`          | Defines which ingress controller will implement the resource  | ``      |
-| `dnsServer.create` | Enable DNS Server which required by DNSChaos | `false` |
+| `dnsServer.create` | Enable DNS Server which required by DNSChaos | `true` |
 | `dnsServer.serviceAccount` | Name of serviceaccount for chaos-dns-server. | `chaos-dns-server` |
-| `dnsServer.image` | Image of DNS Server | `pingcap/coredns:v0.2.1` |
+| `dnsServer.image` | Image of DNS Server | `ghcr.io/chaos-mesh/chaos-coredns:v0.2.6` |
 | `dnsServer.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `dnsServer.priorityClassName` | Customized priorityClassName for chaos-dns-server | `` |
 | `dnsServer.nodeSelector` | Node labels for chaos-dns-server pod assignment | `` |
@@ -158,10 +158,10 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `bpfki.create` | Enable chaos-kernel | `false` |
 | `bpfki.image.registry` | Override global registry, empty value means using the global images.registry | `` |
 | `bpfki.image.repository` | Repository part for image of chaos-kernel | `chaos-mesh/chaos-kernel` |
-| `bpfki.image.tag` | Override global tag, empty value means using the global images.tag | `` |
+| `bpfki.image.tag` | Override global tag, empty value means using the global images.tag | ``  |
 | `bpfki.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `bpfki.grpcPort` | The port which grpc server listens on | `50051` |
-| `bpfki.resources` | CPU/Memory resource requests/limits for chaos-kernel container | {}}` |
+| `bpfki.resources` | CPU/Memory resource requests/limits for chaos-kernel container | `{}` |
 | `chaosDlv.enable` | Create sidecar remote debugging container | `false` |
 | `chaosDlv.image.registry` | Override global registry, empty value means using the global images.registry | `false` |
 | `chaosDlv.repository` | Repository part for image of chaos-dlv | `chaos-mesh/chaos-dlv` |
@@ -172,9 +172,9 @@ Specify each parameter using the `--set key=value[,key=value]` argument to `helm
 
 ```console
 # helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh --set dashboard.create=true
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-mesh
 # helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dashboard.create=true
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-mesh
 ```
 
 The above command enable the Chaos Dashboard.
