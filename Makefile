@@ -112,7 +112,7 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-mesh
 # Install CRDs into a cluster
 install: manifests
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY};
 
 clean:
 	rm -rf $(CLEAN_TARGETS)

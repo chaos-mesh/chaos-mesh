@@ -203,7 +203,7 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set dnsServer.create=true --set dashboard.create=true --set images.tag=latest
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
