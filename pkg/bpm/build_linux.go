@@ -41,12 +41,6 @@ func (b *CommandBuilder) Build(ctx context.Context) *ManagedCommand {
 		cmd = nsexecPath
 	}
 
-	if len(b.noPathNsOptions) > 0 {
-		for _, option := range b.noPathNsOptions {
-			args = append([]string{"-" + noPathNsArgMap[option.Typ], option.Value}, args...)
-		}
-	}
-
 	if b.localMnt {
 		args = append([]string{"-l"}, args...)
 	}

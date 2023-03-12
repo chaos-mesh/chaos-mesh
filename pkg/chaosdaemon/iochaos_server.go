@@ -116,7 +116,6 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	err = retry.Do(func() error {
 		_, retryErr := transport.RoundTrip(req)
 		if retryErr != nil {
-			log.Error(retryErr, "transport RoundTrip http://psedo-host/update")
 			return errors.Wrap(retryErr, "transport RoundTrip http://psedo-host/update")
 		}
 		return nil
@@ -124,8 +123,7 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		retry.Attempts(2))
 
 	if err != nil {
-		log.Error(err, "applyIOChaos update io retry Do")
-		return nil, err
+		return nil, errors.Wrap(err, "applyIOChaos update io retry Do")
 	}
 
 	req, err = http.NewRequest(http.MethodPut, "http://psedo-host/get_status", bytes.NewReader([]byte("ping")))
@@ -136,12 +134,10 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 	err = retry.Do(func() error {
 		resp, retryErr := transport.RoundTrip(req)
 		if retryErr != nil {
-			log.Error(retryErr, "retry send http request, error")
 			return errors.Wrap(retryErr, "retry send http request")
 		}
 		body, retryErr := io.ReadAll(resp.Body)
 		if retryErr != nil || string(body) != "ok" {
-			log.Error(retryErr, "toda startup takes too long or an error occurs, error")
 			return errors.Wrap(retryErr, "toda startup takes too long or an error occurs")
 		}
 		return nil
@@ -149,7 +145,6 @@ func (s *DaemonServer) applyIOChaos(ctx context.Context, in *pb.ApplyIOChaosRequ
 		retry.Attempts(2))
 
 	if err != nil {
-		log.Error(err, "applyIOChaos get status io retry Do")
 		return nil, errors.Wrap(err, "send http request")
 	}
 

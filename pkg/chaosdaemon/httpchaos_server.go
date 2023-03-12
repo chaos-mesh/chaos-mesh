@@ -118,13 +118,11 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 	err = retry.Do(func() error {
 		resp, err = transport.RoundTrip(req)
 		if err != nil {
-			log.Error(err, "retry send http request")
 			return errors.Wrap(err, "retry send http request")
 		}
 
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
-			log.Error(err, "retry read response body")
 			return errors.Wrap(err, "retry read response body")
 		}
 		return nil
@@ -132,7 +130,6 @@ func (s *DaemonServer) applyHttpChaos(ctx context.Context, in *pb.ApplyHttpChaos
 		retry.Attempts(2))
 
 	if err != nil {
-		log.Error(err, "applyHttpChaos http retry Do")
 		return nil, errors.Wrap(err, "send http request")
 	}
 

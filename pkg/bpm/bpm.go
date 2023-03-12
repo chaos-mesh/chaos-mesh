@@ -34,7 +34,6 @@ import (
 )
 
 type NsType string
-type NoPathNsType string
 
 const (
 	MountNS NsType = "mnt"
@@ -45,11 +44,6 @@ const (
 	PidNS NsType = "pid"
 	// user namespace is not supported yet
 	// UserNS  NsType = "user"
-	CgroupNS NsType = "cgroup"
-)
-
-const (
-	KeepFdNS NoPathNsType = "keepFd"
 )
 
 var nsArgMap = map[NsType]string{
@@ -61,11 +55,6 @@ var nsArgMap = map[NsType]string{
 	PidNS: "p",
 	// user namespace is not supported by nsexec yet
 	// UserNS:  "U",
-	CgroupNS: "c",
-}
-
-var noPathNsArgMap = map[NoPathNsType]string{
-	KeepFdNS: "k",
 }
 
 const (
@@ -337,13 +326,12 @@ func (m *BackgroundProcessManager) getLoggerFromContext(ctx context.Context) log
 // DefaultProcessBuilder returns the default process builder
 func DefaultProcessBuilder(cmd string, args ...string) *CommandBuilder {
 	return &CommandBuilder{
-		cmd:             cmd,
-		args:            args,
-		nsOptions:       []nsOption{},
-		noPathNsOptions: []noPathNsOption{},
-		pause:           false,
-		identifier:      nil,
-		ctx:             context.Background(),
+		cmd:        cmd,
+		args:       args,
+		nsOptions:  []nsOption{},
+		pause:      false,
+		identifier: nil,
+		ctx:        context.Background(),
 	}
 }
 
@@ -353,8 +341,7 @@ type CommandBuilder struct {
 	args []string
 	env  []string
 
-	nsOptions       []nsOption
-	noPathNsOptions []noPathNsOption
+	nsOptions []nsOption
 
 	pause    bool
 	localMnt bool
@@ -393,21 +380,6 @@ func (b *CommandBuilder) SetNS(pid uint32, typ NsType) *CommandBuilder {
 // SetNSOpt sets the namespace of the process
 func (b *CommandBuilder) SetNSOpt(options []nsOption) *CommandBuilder {
 	b.nsOptions = append(b.nsOptions, options...)
-
-	return b
-}
-
-// SetNoPathNS sets the Common option of the process
-func (b *CommandBuilder) SetNoPathNS(value string, typ NoPathNsType) *CommandBuilder {
-	return b.SetNoPathNSOpt([]noPathNsOption{{
-		Typ:   typ,
-		Value: value,
-	}})
-}
-
-// SetNoPathNSOpt sets the Common option of the process
-func (b *CommandBuilder) SetNoPathNSOpt(options []noPathNsOption) *CommandBuilder {
-	b.noPathNsOptions = append(b.noPathNsOptions, options...)
 
 	return b
 }
@@ -487,11 +459,6 @@ func (b *CommandBuilder) getLoggerFromContext(ctx context.Context) logr.Logger {
 type nsOption struct {
 	Typ  NsType
 	Path string
-}
-
-type noPathNsOption struct {
-	Typ   NoPathNsType
-	Value string
 }
 
 // ManagedCommand is a process which can be managed by backgroundProcessManager
