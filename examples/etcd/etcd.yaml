@@ -32,7 +32,7 @@ spec:
       containers:
         - name: etcd
           imagePullPolicy: IfNotPresent
-          image: k8s.gcr.io/etcd:3.4.3-0
+          image: registry.k8s.io/etcd:3.4.3-0
           args:
             - /usr/local/bin/etcd
             - -name=etcd
