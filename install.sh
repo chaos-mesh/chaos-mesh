@@ -1435,6 +1435,11 @@ metadata:
     app.kubernetes.io/component: chaos-dashboard
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh
