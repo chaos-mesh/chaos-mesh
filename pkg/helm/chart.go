@@ -52,7 +52,7 @@ func FetchChaosMeshChart(ctx context.Context, version, local string) (*chart.Cha
 }
 
 func GetChaosMeshChartTgzPath(ctx context.Context, version, local string) (string, error) {
-	fileName := fmt.Sprintf("/chaos-mesh-%s.tgz", version)
+	fileName := fmt.Sprintf("chaos-mesh-%s.tgz", version)
 	tgzPath := fmt.Sprintf("%s/%s", os.TempDir(), fileName)
 	if local != "" {
 		tgzPath = fmt.Sprintf("%s/%s", local, fileName)
