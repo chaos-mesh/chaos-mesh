@@ -27,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Fix version comparison in install.sh [#3901](https://github.com/chaos-mesh/chaos-mesh/pull/3901)
+- Fix stuck dashboard updates when using ReadWriteOnce PVCs [#3876](https://github.com/chaos-mesh/chaos-mesh/issues/3876)
 
 ### Security
 
@@ -55,12 +56,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-<<<<<<< HEAD
 - Nothing
-=======
-- Fix version comparison in install.sh [#3901](https://github.com/chaos-mesh/chaos-mesh/pull/3901)
-- Fix stuck dashboard updates when using ReadWriteOnce PVCs [#3876](https://github.com/chaos-mesh/chaos-mesh/issues/3876)
->>>>>>> 2d1cea6fb (Dashboard rwo pvc restart (#3972))
 
 ### Security
 
@@ -146,8 +142,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Nothing
 
-<<<<<<< HEAD
-=======
 ## [2.3.3] - 2022-11-07
 
 ### Added
@@ -177,7 +171,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Nothing
 
->>>>>>> 2d1cea6fb (Dashboard rwo pvc restart (#3972))
 ## [2.3.2] - 2022-09-20
 
 ### Added
