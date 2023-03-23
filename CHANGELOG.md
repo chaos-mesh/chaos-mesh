@@ -31,6 +31,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
+- Bump go to v1.19.7 to fix CVE-2022-41723 [#3978](https://github.com/chaos-mesh/chaos-mesh/pull/3978)
+
 - Nothing
 
 ## [2.5.1] - 2023-01-13

@@ -25,7 +25,11 @@ RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
 
 ARG TARGET_PLATFORM=amd64
 
+<<<<<<< HEAD
 RUN curl -vvv https://dl.google.com/go/go1.18.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+=======
+RUN curl -vvv https://dl.google.com/go/go1.19.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+>>>>>>> e095adee6 (upgrade go version to 1.19.7 to fix CVE-2022-41723 (#3978))
 ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GO111MODULE=on
 ENV GOCACHE /tmp/go-build
