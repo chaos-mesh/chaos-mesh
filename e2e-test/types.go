@@ -69,19 +69,19 @@ func NewDefaultOperatorConfig() OperatorConfig {
 		Tag:         "e2e",
 		Manager: ManagerConfig{
 			ImageRegistry:   "ghcr.io",
-			ImageRepository: "pingcap/chaos-mesh",
+			ImageRepository: "chaos-mesh/chaos-mesh",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 		},
 		Daemon: DaemonConfig{
 			ImageRegistry:   "ghcr.io",
-			ImageRepository: "pingcap/chaos-daemon",
+			ImageRepository: "chaos-mesh/chaos-daemon",
 			ImageTag:        "latest",
 			ImagePullPolicy: imagePullPolicyIfNotPresent,
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
 		},
-		DNSImage: "pingcap/coredns:v0.2.0",
+		DNSImage: "ghcr.io/chaos-mesh/chaos-coredns:v0.2.6",
 	}
 }
 

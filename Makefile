@@ -10,9 +10,8 @@ export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
 export PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 
-# todo: rename the project/repository of e2e-helper to chaos-mesh
-export IMAGE_E2E_HELPER_PROJECT ?= pingcap
-export IMAGE_CHAOS_MESH_E2E_PROJECT ?= pingcap
+export IMAGE_E2E_HELPER_PROJECT ?= chaos-mesh
+export IMAGE_CHAOS_MESH_E2E_PROJECT ?= chaos-mesh
 
 ROOT=$(shell pwd)
 HELM_BIN=$(ROOT)/output/bin/helm
@@ -113,7 +112,7 @@ run: generate fmt vet manifests
 NAMESPACE ?= chaos-mesh
 # Install CRDs into a cluster
 install: manifests
-	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY} --set dnsServer.create=true --set dashboard.create=true;
+	$(HELM_BIN) upgrade --install chaos-mesh helm/chaos-mesh --namespace=${NAMESPACE} --set images.registry=${IMAGE_REGISTRY};
 
 clean:
 	rm -rf $(CLEAN_TARGETS)
@@ -179,7 +178,7 @@ prepare-e2e: e2e-image docker-push-e2e
 
 GINKGO_FLAGS ?=
 e2e: e2e-build
-	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
 
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
@@ -222,19 +221,20 @@ docker-push:
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-dashboard:${IMAGE_TAG}"
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-daemon:${IMAGE_TAG}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-kernel:${IMAGE_TAG}"
 
 docker-push-e2e:
-	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG}"
 
 # the version of dns server should keep consistent with helm
-DNS_SERVER_VERSION ?= v0.2.0
+DNS_SERVER_VERSION ?= v0.2.6
 docker-push-dns-server:
-	docker pull pingcap/coredns:${DNS_SERVER_VERSION}
-	docker tag pingcap/coredns:${DNS_SERVER_VERSION} "${IMAGE_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
-	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/coredns:${DNS_SERVER_VERSION}"
+	docker pull ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION}
+	docker tag ghcr.io/chaos-mesh/chaos-coredns:${DNS_SERVER_VERSION} "${IMAGE_REGISTRY_PREFIX}chaos-mesh/coredns:${DNS_SERVER_VERSION}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/coredns:${DNS_SERVER_VERSION}"
 
 docker-push-chaos-kernel:
-	docker push "${IMAGE_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
+	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-kernel:${IMAGE_TAG}"
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
