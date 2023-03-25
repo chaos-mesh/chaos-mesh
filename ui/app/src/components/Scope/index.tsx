@@ -82,7 +82,6 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
   const annotationKVs = useMemo(() => objToArrBySep(annotations!, kvSeparator), [annotations])
 
   const { data: pods, mutate: postPods } = usePostCommonPods()
-  console.log(pods)
   const { data: physicalMachines, mutate: postPhysicalMachines } = usePostCommonPhysicalmachines()
 
   const targets = env === 'k8s' ? pods : physicalMachines

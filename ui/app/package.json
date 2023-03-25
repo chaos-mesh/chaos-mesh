@@ -76,6 +76,7 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@tanstack/react-query-devtools": "^4.19.1",
     "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/react": "^12.1.5",
@@ -100,6 +101,7 @@
     "@types/yup": "^0.29.11",
     "cross-env": "^7.0.3",
     "http-proxy-middleware": "^2.0.1",
+    "msw": "^1.2.1",
     "redux-logger": "^3.0.6",
     "source-map-explorer": "^2.5.2"
   },

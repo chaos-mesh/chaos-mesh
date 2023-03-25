@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 module.exports = {
   openapi: {
     input: './swagger.yaml',
@@ -32,7 +33,12 @@ module.exports = {
             retryDelay: 3000,
           },
         },
+        mock: {
+          delay: 0,
+          required: true,
+        },
       },
+      mock: true,
     },
   },
 }
