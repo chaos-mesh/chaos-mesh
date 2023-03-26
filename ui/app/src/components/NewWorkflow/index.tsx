@@ -34,6 +34,7 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
+import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
@@ -59,7 +60,6 @@ import { validateDeadline, validateName } from 'lib/formikhelpers'
 import { constructWorkflow } from 'lib/formikhelpers'
 
 import Add from './Add'
-import { Stale } from 'api/queryUtils'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -189,7 +189,9 @@ const NewWorkflow = () => {
       console.debug('Debug workflow:', workflow)
     }
 
-    mutateAsync(yaml.load(workflow) as any)
+    mutateAsync({
+      data: yaml.load(workflow) as any,
+    })
       .then(() => {
         dispatch(resetWorkflow())
 

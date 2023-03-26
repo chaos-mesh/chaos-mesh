@@ -16,6 +16,7 @@
  */
 import loadable from '@loadable/component'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
+import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
@@ -34,7 +35,6 @@ import { resetWorkflow } from 'slices/workflows'
 import { SelectField, Submit, TextField } from 'components/FormField'
 import FormikEffect from 'components/FormikEffect'
 import { T } from 'components/T'
-import { Stale } from 'api/queryUtils'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -105,7 +105,9 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
       return
     }
 
-    mutateAsync(payload)
+    mutateAsync({
+      data: payload,
+    })
       .then(() => {
         dispatch(resetWorkflow())
 
