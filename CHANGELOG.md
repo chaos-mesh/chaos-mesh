@@ -31,6 +31,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
+<<<<<<< HEAD
 - Nothing
 
 ## [2.5.1] - 2023-01-13
@@ -59,6 +60,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Nothing
 
 ### Security
+=======
+- Bump go to v1.19.7 to fix CVE-2022-41723 [#3978](https://github.com/chaos-mesh/chaos-mesh/pull/3978) [#3981](https://github.com/chaos-mesh/chaos-mesh/pull/3981)
+>>>>>>> d26b75138 (upgrade go version to v1.19.7 in CI environment (#3981))
 
 - Nothing
 
