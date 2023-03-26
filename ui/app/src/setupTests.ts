@@ -20,7 +20,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 
-import { server } from './mocks/server.js'
+import { server } from './__mocks__/server.js'
 
 // Establish API mocking before all tests.
 beforeAll(() => server.listen())
