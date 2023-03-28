@@ -16,23 +16,20 @@
 package config
 
 import (
-	"time"
-
 	"github.com/kelseyhightower/envconfig"
-	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 )
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard
 type ChaosDashboardConfig struct {
-	ListenHost           string            `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
-	ListenPort           int               `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
-	MetricHost           string            `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
-	MetricPort           int               `envconfig:"METRIC_PORT" default:"2334" json:"-"`
-	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
-	Database             *DatabaseConfig   `json:"-"`
-	PersistTTL           *PersistTTLConfig `json:"-"`
+	ListenHost           string                                 `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
+	ListenPort           int                                    `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
+	MetricHost           string                                 `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
+	MetricPort           int                                    `envconfig:"METRIC_PORT" default:"2334" json:"-"`
+	EnableLeaderElection bool                                   `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
+	Database             *DatabaseConfig                        `json:"-"`
+	PersistTTL           *ttlcontroller.TTLConfigWithStringTime `json:"-"`
 	// ClusterScoped means control Chaos Object in cluster level(all namespace).
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true" json:"cluster_mode"`
 	// TargetNamespace is the target namespace to injecting chaos.
@@ -62,15 +59,6 @@ type ChaosDashboardConfig struct {
 	Burst int `envconfig:"BURST" default:"300"`
 }
 
-// PersistTTLConfig defines the configuration of ttl
-type PersistTTLConfig struct {
-	SyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
-	Event      string `envconfig:"TTL_EVENT"         default:"168h"` // one week
-	Experiment string `envconfig:"TTL_EXPERIMENT"    default:"336h"` // two weeks
-	Schedule   string `envconfig:"TTL_SCHEDULE"      default:"336h"` // two weeks
-	Workflow   string `envconfig:"TTL_WORKFLOW"      default:"336h"` // two weeks
-}
-
 // DatabaseConfig defines the configuration for databases
 type DatabaseConfig struct {
 	Driver     string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
@@ -82,40 +70,4 @@ func GetChaosDashboardEnv() (*ChaosDashboardConfig, error) {
 	cfg := ChaosDashboardConfig{}
 	err := envconfig.Process("", &cfg)
 	return &cfg, err
-}
-
-// ParsePersistTTLConfig parse PersistTTLConfig to persistTTLConfigParsed.
-func ParsePersistTTLConfig(config *PersistTTLConfig) (*ttlcontroller.TTLConfig, error) {
-	syncPeriod, err := time.ParseDuration(config.SyncPeriod)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration sync period")
-	}
-
-	event, err := time.ParseDuration(config.Event)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for event")
-	}
-
-	experiment, err := time.ParseDuration(config.Experiment)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
-	}
-
-	schedule, err := time.ParseDuration(config.Schedule)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
-	}
-
-	workflow, err := time.ParseDuration(config.Workflow)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
-	}
-
-	return &ttlcontroller.TTLConfig{
-		DatabaseTTLResyncPeriod: syncPeriod,
-		EventTTL:                event,
-		ArchiveTTL:              experiment,
-		ScheduleTTL:             schedule,
-		WorkflowTTL:             workflow,
-	}, nil
 }

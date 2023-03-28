@@ -18,7 +18,7 @@ package template
 import (
 	"github.com/go-logr/logr"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 )
 
 func Bootstrap(conf *config.ChaosDashboardConfig, logger logr.Logger) *Service {

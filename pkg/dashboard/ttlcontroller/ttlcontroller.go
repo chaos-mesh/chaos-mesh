@@ -13,50 +13,99 @@
 // limitations under the License.
 //
 
+// Package ttlcontroller provides a TTL (time to live) mechanism to clear old objects
+// in the database.
 package ttlcontroller
 
 import (
 	"context"
+
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-// Controller defines the database ttl controller
 type Controller struct {
 	logger     logr.Logger
-	experiment core.ExperimentStore
 	event      core.EventStore
+	experiment core.ExperimentStore
 	schedule   core.ScheduleStore
 	workflow   core.WorkflowStore
 	ttlconfig  *TTLConfig
 }
 
-// TTLConfig defines the ttl
+// TTLConfig defines all the TTL-related configurations.
 type TTLConfig struct {
-	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database
-	DatabaseTTLResyncPeriod time.Duration
-	// EventTTL defines the ttl of events
+	// ResyncPeriod defines the period of cleaning data.
+	ResyncPeriod time.Duration
+
+	// TTL of events.
 	EventTTL time.Duration
-	// ArchiveTTL defines the ttl of archives
-	ArchiveTTL time.Duration
-	// ScheduleTTL defines the ttl of schedule
+	// TTL of experiments.
+	ExperimentTTL time.Duration
+	// TTL of schedules.
 	ScheduleTTL time.Duration
-	// WorkflowTTL defines the ttl of workflow
+	// TTL of workflows.
 	WorkflowTTL time.Duration
+}
+
+// TTLConfigWithStringTime defines all the TTL-related configurations with string type time.
+type TTLConfigWithStringTime struct {
+	ResyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
+
+	EventTTL      string `envconfig:"TTL_EVENT"         default:"168h"` // one week
+	ExperimentTTL string `envconfig:"TTL_EXPERIMENT"    default:"336h"` // two weeks
+	ScheduleTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
+	WorkflowTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
+}
+
+func (config *TTLConfigWithStringTime) parse() (*TTLConfig, error) {
+	syncPeriod, err := time.ParseDuration(config.ResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration sync period")
+	}
+
+	event, err := time.ParseDuration(config.EventTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for event")
+	}
+
+	experiment, err := time.ParseDuration(config.ExperimentTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
+	}
+
+	schedule, err := time.ParseDuration(config.ScheduleTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
+	}
+
+	workflow, err := time.ParseDuration(config.WorkflowTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
+	}
+
+	return &TTLConfig{
+		ResyncPeriod:  syncPeriod,
+		EventTTL:      event,
+		ExperimentTTL: experiment,
+		ScheduleTTL:   schedule,
+		WorkflowTTL:   workflow,
+	}, nil
 }
 
 // NewController returns a new database ttl controller
 func NewController(
-	experiment core.ExperimentStore,
 	event core.EventStore,
+	experiment core.ExperimentStore,
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
-	ttlc *TTLConfig,
+	ttlconfig *TTLConfig,
 	logger logr.Logger,
 ) *Controller {
 	return &Controller{
@@ -64,7 +113,7 @@ func NewController(
 		event:      event,
 		schedule:   schedule,
 		workflow:   workflow,
-		ttlconfig:  ttlc,
+		ttlconfig:  ttlconfig,
 		logger:     logger,
 	}
 }
@@ -75,7 +124,7 @@ func Register(ctx context.Context, c *Controller) {
 
 	c.logger.Info("Starting database TTL controller")
 
-	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, ctx.Done())
+	go wait.Until(c.runWorker, c.ttlconfig.ResyncPeriod, ctx.Done())
 }
 
 // runWorker is a long-running function that will be called in order to delete the events, archives, schedule, and workflow.
@@ -85,7 +134,7 @@ func (c *Controller) runWorker() {
 	ctx := context.Background()
 
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
-	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
+	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ExperimentTTL)
 	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
 	c.workflow.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
 }
