@@ -21,7 +21,7 @@ RUN npm install pnpm -g
 
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -vvv https://dl.google.com/go/go1.19.3.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl -vvv https://dl.google.com/go/go1.19.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GO111MODULE=on
 ENV GOCACHE /tmp/go-build
