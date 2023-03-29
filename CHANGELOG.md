@@ -37,6 +37,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Fix version comparison in install.sh [#3901](https://github.com/chaos-mesh/chaos-mesh/pull/3901)
 - Fix stuck dashboard updates when using ReadWriteOnce PVCs [#3876](https://github.com/chaos-mesh/chaos-mesh/issues/3876)
+- Make `IN_DOCKER=1` env variable effective in build [#3986](https://github.com/chaos-mesh/chaos-mesh/pull/3986)
 
 ### Security
 
@@ -77,7 +78,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Ignore `ScheduleSkipRemoveHistory` events to fix the memory of controller-manager keep increasing [#3761](https://github.com/chaos-mesh/chaos-mesh/issues/3761)
 - Update `is mandatory` to true in a swagger comment [#3743](https://github.com/chaos-mesh/chaos-mesh/pull/3743)
 - Enable mode when creating PhysicalMachineChaos with addresses in UI [#3797](https://github.com/chaos-mesh/chaos-mesh/pull/3797)
-- Make `IN_DOCKER` env variable effective in build [#3986](https://github.com/chaos-mesh/chaos-mesh/pull/3986)
 
 ### Security
 
