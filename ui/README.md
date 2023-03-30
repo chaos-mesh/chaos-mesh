@@ -99,7 +99,8 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
   Run chaos-dashboard server in your terminal:
 
   ```sh
-  cd .. && go run cmd/chaos-dashboard/main.go
+  cd ..
+  go run cmd/chaos-dashboard/main.go
   ```
 
 #### Start
@@ -134,7 +135,7 @@ to build them.
 We provide [storybook](https://storybook.js.org/) for previewing the components, you can run:
 
 ```sh
-pnpm -F @ui/mui-extends build && \
+pnpm -F @ui/mui-extends build
 pnpm -F @ui/mui-extends storybook
 ```
 
