@@ -20,10 +20,14 @@ import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import Alert from '@mui/lab/Alert'
 import { Box, Button, Grid, Grow } from '@mui/material'
-import api from 'api'
 import yaml from 'js-yaml'
-import { CoreEvent, TypesExperimentDetail } from 'openapi'
-import { useEffect, useState } from 'react'
+import {
+  useDeleteExperimentsUid,
+  useGetEvents,
+  useGetExperimentsUid,
+  usePutExperimentsPauseUid,
+  usePutExperimentsStartUid,
+} from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -51,46 +55,19 @@ export default function Single() {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<TypesExperimentDetail>()
-  const [events, setEvents] = useState<CoreEvent[]>([])
-
-  const fetchExperiment = () => {
-    api.experiments
-      .experimentsUidGet({
-        uid: uuid!,
-      })
-      .then(({ data }) => setSingle(data))
-      .catch(console.error)
-  }
-
-  useEffect(() => {
-    fetchExperiment()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const fetchEvents = () => {
-      api.events
-        .eventsGet({ objectId: uuid, limit: 999 })
-        .then(({ data }) => setEvents(data))
-        .catch(console.error)
-        .finally(() => {
-          setLoading(false)
-        })
-    }
-
-    if (single) {
-      fetchEvents()
-    }
-  }, [uuid, single])
+  const { data: experiment, isLoading: isLoading1, refetch } = useGetExperimentsUid(uuid!)
+  const { data: events, isLoading: isLoading2 } = useGetEvents({ object_id: uuid, limit: 999 })
+  const loading = isLoading1 || isLoading2
+  const { mutateAsync: deleteExperiments } = useDeleteExperimentsUid()
+  const { mutateAsync: pauseExperiments } = usePutExperimentsPauseUid()
+  const { mutateAsync: startExperiments } = usePutExperimentsStartUid()
 
   const handleSelect = (action: string) => () => {
     switch (action) {
       case 'archive':
         dispatch(
           setConfirm({
-            title: `${i18n('archives.single', intl)} ${single!.name}`,
+            title: `${i18n('archives.single', intl)} ${experiment!.name}`,
             description: i18n('experiments.deleteDesc', intl),
             handle: handleAction('archive'),
           })
@@ -100,7 +77,7 @@ export default function Single() {
       case 'pause':
         dispatch(
           setConfirm({
-            title: `${i18n('common.pause', intl)} ${single!.name}`,
+            title: `${i18n('common.pause', intl)} ${experiment!.name}`,
             description: i18n('experiments.pauseDesc', intl),
             handle: handleAction('pause'),
           })
@@ -110,7 +87,7 @@ export default function Single() {
       case 'start':
         dispatch(
           setConfirm({
-            title: `${i18n('common.start', intl)} ${single!.name}`,
+            title: `${i18n('common.start', intl)} ${experiment!.name}`,
             description: i18n('experiments.startDesc', intl),
             handle: handleAction('start'),
           })
@@ -121,27 +98,27 @@ export default function Single() {
   }
 
   const handleAction = (action: string) => () => {
-    let actionFunc: any
+    let actionFunc
 
     switch (action) {
       case 'archive':
-        actionFunc = api.experiments.experimentsUidDelete
+        actionFunc = deleteExperiments
 
         break
       case 'pause':
-        actionFunc = api.experiments.experimentsPauseUidPut
+        actionFunc = pauseExperiments
 
         break
       case 'start':
-        actionFunc = api.experiments.experimentsStartUidPut
+        actionFunc = startExperiments
 
         break
       default:
-        actionFunc = null
+        break
     }
 
     if (actionFunc) {
-      actionFunc({ uid: uuid })
+      actionFunc({ uid: uuid! })
         .then(() => {
           dispatch(
             setAlert({
@@ -155,7 +132,7 @@ export default function Single() {
           }
 
           if (action === 'pause' || action === 'start') {
-            setTimeout(fetchExperiment, 300)
+            refetch()
           }
         })
         .catch(console.error)
@@ -166,7 +143,7 @@ export default function Single() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {single && <Helmet title={`Experiment ${single.name}`} />}
+          {experiment && <Helmet title={`Experiment ${experiment.name}`} />}
           <Space spacing={6}>
             <Space direction="row">
               <Button
@@ -177,7 +154,7 @@ export default function Single() {
               >
                 {i18n('archives.single')}
               </Button>
-              {single?.status === 'paused' ? (
+              {experiment?.status === 'paused' ? (
                 <Button
                   variant="outlined"
                   size="small"
@@ -186,7 +163,7 @@ export default function Single() {
                 >
                   {i18n('common.start')}
                 </Button>
-              ) : single?.status !== 'finished' ? (
+              ) : experiment?.status !== 'finished' ? (
                 <Button
                   variant="outlined"
                   size="small"
@@ -198,30 +175,30 @@ export default function Single() {
               ) : null}
             </Space>
 
-            {single?.failed_message && (
+            {experiment?.failed_message && (
               <Alert severity="error">
-                An error occurred: <b>{single.failed_message}</b>
+                An error occurred: <b>{experiment.failed_message}</b>
               </Alert>
             )}
 
-            <Paper>{single && <ObjectConfiguration config={single} />}</Paper>
+            <Paper>{experiment && <ObjectConfiguration config={experiment} />}</Paper>
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
                   <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                   <Box flex={1} overflow="scroll">
-                    <EventsTimeline events={events} />
+                    {events && <EventsTimeline events={events} />}
                   </Box>
                 </Paper>
               </Grid>
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>
-                  {single && (
+                  {experiment && (
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
+                        <YAMLEditor name={experiment.name} data={yaml.dump(experiment.kube_object)} download />
                       </Box>
                     </Space>
                   )}

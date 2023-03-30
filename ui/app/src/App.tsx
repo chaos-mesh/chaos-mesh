@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import type { FC } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -26,6 +28,8 @@ import TopContainer from 'components/TopContainer'
 import IntlProvider from './IntlProvider'
 import ThemeProvider from './ThemeProvider'
 
+const queryClient = new QueryClient()
+
 interface AppProps {
   forTesting?: boolean
 }
@@ -36,11 +40,14 @@ const App: FC<AppProps> = ({ forTesting, children }) => {
 
   return (
     <StoreProvider store={store}>
-      <ThemeProvider>
-        <IntlProvider>
-          {!forTesting ? <RealWorldOnlyProviders>{rendered}</RealWorldOnlyProviders> : rendered}
-        </IntlProvider>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <IntlProvider>
+            {!forTesting ? <RealWorldOnlyProviders>{rendered}</RealWorldOnlyProviders> : rendered}
+          </IntlProvider>
+        </ThemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </StoreProvider>
   )
 }

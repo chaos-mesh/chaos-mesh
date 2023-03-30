@@ -86,10 +86,10 @@ export function genForms(source) {
 
     // 2. find the corresponding spec
     //
-    // all specs will follow the format of `V1alpha1XXXChaosSpec`
+    // All specs will follow the format of `V1alpha1XXXChaosSpec`.
     const spec = interfaces.find((node) => node.name.escapedText === `V1alpha1${child}Spec`)
 
-    spec.members.forEach((node) => {
+    spec.forEachChild((node) => {
       switch (node.kind) {
         case ts.SyntaxKind.PropertySignature:
           /** @type {string} */
@@ -99,7 +99,7 @@ export function genForms(source) {
           }
 
           /** @type {string} */
-          const comment = node.jsDoc[0].comment ?? '' // prevent error when comment is undefined
+          const comment = (node.jsDoc && node.jsDoc[0].comment) ?? '' // prevent error when comment is undefined
           // ignore specifc fields
           if (isUIFormIgnore(comment)) {
             break

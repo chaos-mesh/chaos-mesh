@@ -26,6 +26,12 @@ export const actions = ['ec2-stop', 'ec2-restart', 'detach-volume'],
     },
     {
       field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
+      field: 'text',
       label: 'secretName',
       value: '',
       helperText: 'Optional. SecretName defines the name of kubernetes secret.',

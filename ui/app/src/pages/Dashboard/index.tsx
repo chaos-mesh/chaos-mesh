@@ -22,9 +22,7 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { TourProvider } from '@reactour/tour'
-import api from 'api'
-import { CoreEvent, CoreWorkflowMeta, TypesExperiment, TypesSchedule } from 'openapi'
-import { useEffect, useState } from 'react'
+import { useGetEvents, useGetExperiments, useGetSchedules, useGetWorkflows } from 'openapi'
 import type { ReactChild } from 'react'
 
 import Paper from '@ui/mui-extends/esm/Paper'
@@ -38,7 +36,11 @@ import Predefined from './Predefined'
 import TotalStatus from './TotalStatus'
 import Welcome from './Welcome'
 
-const NumPanel: React.FC<{ title: ReactChild; num: number; background: ReactChild }> = ({ title, num, background }) => (
+const NumPanel: React.FC<{ title: ReactChild; num?: number; background: ReactChild }> = ({
+  title,
+  num,
+  background,
+}) => (
   <Paper sx={{ overflow: 'hidden' }}>
     <PaperTop title={title} />
     <Box mt={6}>
@@ -53,43 +55,6 @@ const NumPanel: React.FC<{ title: ReactChild; num: number; background: ReactChil
 )
 
 export default function Dashboard() {
-  const [data, setData] = useState<{
-    workflows: CoreWorkflowMeta[]
-    schedules: TypesSchedule[]
-    experiments: TypesExperiment[]
-    events: CoreEvent[]
-  }>({
-    workflows: [],
-    schedules: [],
-    experiments: [],
-    events: [],
-  })
-
-  useEffect(() => {
-    const fetchExperiments = api.experiments.experimentsGet()
-    const fetchSchedules = api.schedules.schedulesGet()
-    const fetchWorkflows = api.workflows.workflowsGet()
-    const fetchEvents = api.events.eventsGet({ limit: 216 })
-    const fetchAll = () => {
-      Promise.all([fetchSchedules, fetchWorkflows, fetchExperiments, fetchEvents])
-        .then((data) =>
-          setData({
-            schedules: data[0].data,
-            workflows: data[1].data,
-            experiments: data[2].data,
-            events: data[3].data,
-          })
-        )
-        .catch(console.error)
-    }
-
-    fetchAll()
-
-    const id = setInterval(fetchAll, 12000)
-
-    return () => clearInterval(id)
-  }, [])
-
   const theme = useTheme()
   const steps = [
     {
@@ -146,6 +111,11 @@ export default function Dashboard() {
     },
   ]
 
+  const { data: experiments } = useGetExperiments()
+  const { data: schedules } = useGetSchedules()
+  const { data: workflows } = useGetWorkflows()
+  const { data: events } = useGetEvents()
+
   return (
     <TourProvider
       steps={steps}
@@ -175,21 +145,21 @@ export default function Dashboard() {
             <Grid item xs={4}>
               <NumPanel
                 title={i18n('experiments.title')}
-                num={data.experiments.length}
+                num={experiments?.length}
                 background={<ScienceOutlinedIcon color="primary" style={{ fontSize: '3em' }} />}
               />
             </Grid>
             <Grid item xs={4}>
               <NumPanel
                 title={i18n('schedules.title')}
-                num={data.schedules.length}
+                num={schedules?.length}
                 background={<ScheduleIcon color="primary" style={{ fontSize: '3em' }} />}
               />
             </Grid>
             <Grid item xs={4}>
               <NumPanel
                 title={i18n('workflows.title')}
-                num={data.workflows.length}
+                num={workflows?.length}
                 background={<AccountTreeOutlinedIcon color="primary" style={{ fontSize: '3em' }} />}
               />
             </Grid>
@@ -209,7 +179,7 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('common.timeline')} boxProps={{ mb: 3 }} />
-                <EventsChart events={data.events} position="relative" height={300} />
+                {events && <EventsChart events={events} position="relative" height={300} />}
               </Paper>
             </Grid>
           </Grid>
@@ -218,13 +188,13 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('dashboard.totalStatus')} boxProps={{ sx: { mb: 3 } }} />
-                <TotalStatus position="relative" height={data.experiments.length > 0 ? 300 : '100%'} />
+                {experiments && <TotalStatus position="relative" height={experiments.length > 0 ? 300 : '100%'} />}
               </Paper>
             </Grid>
             <Grid item xs={12}>
               <Paper>
                 <PaperTop title={i18n('dashboard.recent')} boxProps={{ mb: 3 }} />
-                <EventsTimeline events={data.events.slice(0, 6)} />
+                {events && <EventsTimeline events={events.slice(0, 6)} />}
               </Paper>
             </Grid>
           </Grid>

@@ -17,6 +17,10 @@
     "prettier": "^2.8.4",
     "rimraf": "^3.0.2"
   },
+  "resolutions": {
+    "@types/react": "17.0.52",
+    "@types/react-dom": "17.0.18"
+  },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
   }
