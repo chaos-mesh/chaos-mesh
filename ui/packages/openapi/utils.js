@@ -67,7 +67,7 @@ const UI_FORM_WHEN = /\+ui:form:when=(.+)\s/
 export function getUIFormWhen(s) {
   const matched = s.match(UI_FORM_WHEN)
 
-  return matched ? matched[1].replace(/\\/g, '') : false
+  return matched ? matched[1].replace(/\n/g, ' ') : false
 }
 
 const UI_FORM_IGNORE = /\+ui:form:ignore\s/
@@ -84,20 +84,18 @@ export function isUIFormIgnore(s) {
 }
 
 /**
- * Remove markers(+ui:form..., +kubebuilder+..., +optional..., etc.) from jsdoc comment.
+ * Remove markers(+ui:form..., +kubebuilder..., +optional..., etc.) from comments.
  *
  * @export
  * @param {string} s
  */
 export function cleanMarkers(s) {
-  s = s.replace(UI_FORM_WHEN, '')
-  s = s.replace(/\+kubebuilder\S+\s/, '')
+  s = s.replace(UI_FORM_WHEN, '').replace(/\+kubebuilder\S+\s?/g, '')
 
   const reOptional = /\+optional/
   if (reOptional.test(s)) {
     s = 'Optional. ' + s.replace(reOptional, '')
-    s = s.replace(/\+kubebuilder.+$/, '') // assuming a separate marker remains
   }
 
-  return s.replace(/\\/g, '').trim()
+  return s.replace(/\n/g, ' ').trim()
 }

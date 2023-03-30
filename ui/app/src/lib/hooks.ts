@@ -30,25 +30,3 @@ export function usePrevious<T>(value: T) {
 export function useQuery() {
   return new URLSearchParams(useLocation().search)
 }
-
-export function useIntervalFetch(fetch: (intervalID: number) => void, timeout: number = 6000) {
-  useEffect(() => {
-    let id = 0
-    let max = 0
-
-    id = window.setInterval(() => {
-      // Exit when the maximum number of times limit is reached.
-      if (max === 20) {
-        clearInterval(id)
-      }
-
-      fetch(id)
-      max++
-    }, timeout)
-
-    fetch(id)
-
-    return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-}

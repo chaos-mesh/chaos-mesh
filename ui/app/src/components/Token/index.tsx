@@ -14,16 +14,20 @@
  * limitations under the License.
  *
  */
-
+import { applyAPIAuthentication, resetAPIAuthentication } from 'api/interceptors'
 import { Form, Formik, FormikHelpers } from 'formik'
-import { Submit, TextField } from 'components/FormField'
-import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { getExperimentsState } from 'openapi'
+import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
-import api from 'api'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
+
+import { Submit, TextField } from 'components/FormField'
 import i18n from 'components/T'
-import { useIntl } from 'react-intl'
+
 import { validateName } from 'lib/formikhelpers'
 
 function validateToken(value: string) {
@@ -68,7 +72,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       return
     }
 
-    api.auth.token(values.token)
+    applyAPIAuthentication(values.token)
 
     function restSteps() {
       saveToken(values)
@@ -79,8 +83,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
     }
 
     // Test the validity of the token in advance
-    api.experiments
-      .experimentsStateGet()
+    getExperimentsState()
       .then(restSteps)
       .catch((error) => {
         const data = error.response?.data
@@ -88,7 +91,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
         if (data && data.code === 'error.api.invalid_request' && data.message.includes('Unauthorized')) {
           setFieldError('token', 'Please check the validity of the token')
 
-          api.auth.resetToken()
+          resetAPIAuthentication()
 
           return
         }

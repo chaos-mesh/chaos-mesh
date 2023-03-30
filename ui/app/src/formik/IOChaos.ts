@@ -189,6 +189,12 @@ export const actions = ['latency', 'fault', 'attrOverride', 'mistake'],
     },
     {
       field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
+      field: 'text',
       label: 'volumePath',
       value: '',
       helperText: 'VolumePath represents the mount path of injected volume',
