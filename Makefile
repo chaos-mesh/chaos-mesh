@@ -140,7 +140,7 @@ boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
 boilerplate-fix: images/dev-env/.dockerbuilt
 	$(SKYWALKING_EYES_HEADER) fix
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv) ## Build all container images
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv) ## Build container images for Chaos Mesh components (chaos-controller-manager, chaos-daemon, chaos-dashboard)
 
 e2e-image: image-e2e-helper ## Build e2e test helper image
 
