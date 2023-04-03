@@ -66,8 +66,7 @@ def main():
 
     args = cmd_parser.parse_args()
 
-    if os.getenv("IN_DOCKER") == "1":
-        # TODO: check whether the target env is same with current env
+    if os.path.exists("/.dockerenv"):
         print("bash")
         sys.exit(0)
 
@@ -78,7 +77,6 @@ def main():
         cmd += ["-it"]
 
     cwd = os.getcwd()
-    cmd += ["--env", "IN_DOCKER=1"]
     cmd += ["--volume", f"{cwd}:{cwd}"]
     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 
