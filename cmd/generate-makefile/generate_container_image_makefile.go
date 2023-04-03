@@ -3,9 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"text/template"
+
+	"github.com/pkg/errors"
 )
 
 // containerImageGeneratedMkTemplate is the template for the file container-image.generated.mk, use containerImageGeneratedMkOptions as the context.
@@ -26,10 +27,10 @@ clean-image-built:
 
 // containerImageGeneratedMkTemplate is the template for one target, use containerImageRecipeOptions as the context.
 const containerImageRecipeTemplate = `.PHONY: image-{{ .ImageName }}
-image-{{ .ImageName }}: {{ StringsJoin .DependencyTargets " " }} {{ .SourcePath }}/.dockerbuilt ## {{ .Comment }}
+image-{{ .ImageName }}:{{ .SourcePath }}/.dockerbuilt ## {{ .Comment }}
 
 {{ .SourcePath }}/.dockerbuilt: SHELL=bash
-{{ .SourcePath }}/.dockerbuilt: {{ .SourcePath }}/Dockerfile
+{{ .SourcePath }}/.dockerbuilt: {{ StringsJoin .DependencyTargets " " }} {{ .SourcePath }}/Dockerfile
 	$(ROOT)/build/build_image.py {{ .ImageName }} {{ .SourcePath }}
 	touch {{ .SourcePath }}/.dockerbuilt
 
