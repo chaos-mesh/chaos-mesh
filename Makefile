@@ -9,7 +9,6 @@
 
 # Set DEBUGGER=1 to build debug symbols
 export LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
-export IMAGE_REGISTRY ?= ghcr.io
 
 export IMAGE_TAG ?= latest
 export IMAGE_BUILD ?= 1
