@@ -18,10 +18,10 @@ import loadable from '@loadable/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import api from 'api'
 import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
-import { CoreEvent, CoreWorkflowDetail } from 'openapi'
+import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from 'openapi'
+import { CoreWorkflowDetail } from 'openapi/index.schemas'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -40,7 +40,6 @@ import NodeConfiguration from 'components/ObjectConfiguration/Node'
 import i18n from 'components/T'
 
 import { constructWorkflowTopology } from 'lib/cytoscape'
-import { useIntervalFetch } from 'lib/hooks'
 
 const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
@@ -60,6 +59,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+function transformWorkflow(data: CoreWorkflowDetail) {
+  // TODO: remove noise in API
+  data.kube_object!.metadata!.annotations &&
+    delete data.kube_object!.metadata!.annotations['kubectl.kubernetes.io/last-applied-configuration']
+
+  return data
+}
+
 const Single = () => {
   const classes = useStyles()
   const intl = useIntl()
@@ -69,70 +76,42 @@ const Single = () => {
 
   const dispatch = useStoreDispatch()
 
-  const [single, setSingle] = useState<CoreWorkflowDetail>()
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
-  const modalTitle = selected === 'workflow' ? single?.name : selected === 'node' ? data.name : ''
   const [configOpen, setConfigOpen] = useState(false)
   const topologyRef = useRef<any>(null)
 
-  const [events, setEvents] = useState<CoreEvent[]>([])
-
-  const fetchWorkflowSingle = (intervalID?: number) =>
-    api.workflows
-      .workflowsUidGet({
-        uid: uuid!,
-      })
-      .then(({ data }) => {
-        // TODO: remove noise in API
-        data.kube_object!.metadata!.annotations &&
-          delete data.kube_object!.metadata!.annotations['kubectl.kubernetes.io/last-applied-configuration']
-
-        setSingle(data)
-
-        // Clear interval after workflow succeed
-        if (data.status === 'finished') {
-          clearInterval(intervalID)
-        }
-      })
-      .catch(console.error)
-
-  useIntervalFetch(fetchWorkflowSingle)
+  const { data: workflow } = useGetWorkflowsUid(uuid!, {
+    query: {
+      select: transformWorkflow,
+    },
+  })
+  const modalTitle = selected === 'workflow' ? workflow?.name : selected === 'node' ? data.name : ''
+  const { data: events } = useGetEventsWorkflowUid(uuid!, { limit: 999 })
+  const { mutateAsync: deleteWorkflows } = useDeleteWorkflowsUid()
 
   useEffect(() => {
-    if (single) {
+    if (workflow) {
       const topology = topologyRef.current!
 
       if (typeof topology === 'function') {
-        topology(single)
+        topology(workflow)
 
         return
       }
 
-      const { updateElements } = constructWorkflowTopology(topologyRef.current!, single as any, theme, handleNodeClick)
+      const { updateElements } = constructWorkflowTopology(
+        topologyRef.current!,
+        workflow as any,
+        theme,
+        handleNodeClick
+      )
 
       topologyRef.current = updateElements
     }
 
-    const fetchEvents = () => {
-      api.events
-        .eventsWorkflowUidGet({
-          uid: uuid!,
-          limit: 999,
-        })
-        .then(({ data }) => setEvents(data))
-        .catch(console.error)
-        .finally(() => {
-          // setLoading(false)
-        })
-    }
-
-    if (single) {
-      fetchEvents()
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [single])
+  }, [workflow])
 
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
@@ -140,19 +119,19 @@ const Single = () => {
   const handleSelect = (selected: Confirm) => () => dispatch(setConfirm(selected))
 
   const handleAction = (action: string) => () => {
-    let actionFunc: any
+    let actionFunc
 
     switch (action) {
       case 'archive':
-        actionFunc = api.workflows.workflowsUidDelete
+        actionFunc = deleteWorkflows
 
         break
       default:
-        actionFunc = null
+        break
     }
 
     if (actionFunc) {
-      actionFunc({ uid: uuid })
+      actionFunc({ uid: uuid! })
         .then(() => {
           dispatch(
             setAlert({
@@ -172,7 +151,7 @@ const Single = () => {
   const handleNodeClick: EventHandler = (e) => {
     const node = e.target
     const { template: nodeTemplate } = node.data()
-    const template = (single?.kube_object!.spec as any).templates.find((t: any) => t.name === nodeTemplate)
+    const template = (workflow?.kube_object!.spec as any).templates.find((t: any) => t.name === nodeTemplate)
 
     setData(template)
     setSelected('node')
@@ -184,7 +163,7 @@ const Single = () => {
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
         <div style={{ height: '100%' }}>
-          {single && <Helmet title={`Workflow ${single.name}`} />}
+          {workflow && <Helmet title={`Workflow ${workflow.name}`} />}
           <Space spacing={6} className={classes.root}>
             <Space direction="row">
               <Button
@@ -192,7 +171,7 @@ const Single = () => {
                 size="small"
                 startIcon={<ArchiveOutlinedIcon />}
                 onClick={handleSelect({
-                  title: `${i18n('archives.single', intl)} ${single?.name}`,
+                  title: `${i18n('archives.single', intl)} ${workflow?.name}`,
                   description: i18n('workflows.deleteDesc', intl),
                   handle: handleAction('archive'),
                 })}
@@ -210,22 +189,22 @@ const Single = () => {
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
                   <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                   <Box flex={1} overflow="scroll">
-                    <EventsTimeline events={events} />
+                    {events && <EventsTimeline events={events} />}
                   </Box>
                 </Paper>
               </Grid>
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>
-                  {single && (
+                  {workflow && (
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
                         <YAMLEditor
-                          name={single.name}
+                          name={workflow.name}
                           data={yaml.dump({
                             apiVersion: 'chaos-mesh.org/v1alpha1',
                             kind: 'Workflow',
-                            ...single.kube_object,
+                            ...workflow.kube_object,
                           })}
                           download
                         />
@@ -245,7 +224,7 @@ const Single = () => {
             className={classes.configPaper}
             sx={{ width: selected === 'workflow' ? '50vw' : selected === 'node' ? '70vw' : '50vw' }}
           >
-            {single && configOpen && (
+            {workflow && configOpen && (
               <Space display="flex" flexDirection="column" height="100%">
                 <PaperTop title={modalTitle} boxProps={{ p: 4.5, pb: 0 }} />
                 <Box display="flex" flex={1}>

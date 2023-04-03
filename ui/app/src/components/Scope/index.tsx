@@ -16,21 +16,14 @@
  */
 import { MenuItem, Typography } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
+import { useGetCommonAnnotations, useGetCommonLabels, usePostCommonPhysicalmachines, usePostCommonPods } from 'openapi'
 import { useEffect, useMemo } from 'react'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { useStoreSelector } from 'store'
 
-import {
-  Env,
-  clearPods,
-  getAnnotations,
-  getCommonPods,
-  getLabels,
-  getNetworkTargetPods,
-  getPhysicalMachines,
-} from 'slices/experiments'
+import { Env } from 'slices/experiments'
 
 import { podPhases } from 'components/AutoForm/data'
 import { AutocompleteField, SelectField } from 'components/FormField'
@@ -59,25 +52,39 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
     annotationSelectors: currentAnnotations,
   } = getIn(values, scope)
 
-  const { settings, experiments } = useStoreSelector((state) => state)
+  const { settings } = useStoreSelector((state) => state)
   const { enableKubeSystemNS } = settings
-  const { labels, annotations, pods: storePods, networkTargetPods, physicalMachines } = experiments
-  const isTargetField = scope.startsWith('target')
-  const pods = !isTargetField ? storePods : networkTargetPods
-  const getPods = !isTargetField ? getCommonPods : getNetworkTargetPods
-  const targets = env === 'k8s' ? pods : physicalMachines
-  const getTargets = env === 'k8s' ? getPods : getPhysicalMachines // Get different targets according to the env.
-  const dispatch = useStoreDispatch()
 
-  const kvSeparator = ': '
-  const labelKVs = useMemo(() => objToArrBySep(labels, kvSeparator), [labels])
-  const annotationKVs = useMemo(() => objToArrBySep(annotations, kvSeparator), [annotations])
-
-  useEffect(() => {
-    return () => {
-      dispatch(clearPods())
+  const { data: labels } = useGetCommonLabels(
+    {
+      podNamespaceList: currentNamespaces.join(','),
+    },
+    {
+      query: {
+        enabled: currentNamespaces.length > 0,
+        initialData: {},
+      },
     }
-  }, [dispatch])
+  )
+  const { data: annotations } = useGetCommonAnnotations(
+    {
+      podNamespaceList: currentNamespaces.join(','),
+    },
+    {
+      query: {
+        enabled: currentNamespaces.length > 0,
+        initialData: {},
+      },
+    }
+  )
+  const kvSeparator = ': '
+  const labelKVs = useMemo(() => objToArrBySep(labels!, kvSeparator), [labels])
+  const annotationKVs = useMemo(() => objToArrBySep(annotations!, kvSeparator), [annotations])
+
+  const { data: pods, mutate: postPods } = usePostCommonPods()
+  const { data: physicalMachines, mutate: postPhysicalMachines } = usePostCommonPhysicalmachines()
+
+  const targets = env === 'k8s' ? pods : physicalMachines
 
   useEffect(() => {
     // Set namespaces automatically when `targetNamespace` is set because there is only one namespace.
@@ -92,23 +99,27 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
   }, [namespaces, scope, setFieldValue])
 
   useEffect(() => {
-    if (currentNamespaces.length) {
-      dispatch(getLabels(currentNamespaces))
-      dispatch(getAnnotations(currentNamespaces))
-    }
-  }, [dispatch, currentNamespaces])
-
-  useEffect(() => {
-    if (currentNamespaces.length) {
-      dispatch(
-        getTargets({
-          namespaces: currentNamespaces,
-          labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
-          annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
+    if (currentNamespaces.length > 0) {
+      // Get different targets according to the env.
+      if (env === 'k8s') {
+        postPods({
+          data: {
+            namespaces: currentNamespaces,
+            labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
+            annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
+          },
         })
-      )
+      } else {
+        postPhysicalMachines({
+          data: {
+            namespaces: currentNamespaces,
+            labelSelectors: arrToObjBySep(currentLabels, kvSeparator),
+            annotationSelectors: arrToObjBySep(currentAnnotations, kvSeparator),
+          },
+        })
+      }
     }
-  }, [dispatch, getTargets, currentNamespaces, currentLabels, currentAnnotations])
+  }, [currentNamespaces, currentLabels, currentAnnotations, env, postPods, postPhysicalMachines])
 
   return (
     <Space>
@@ -173,7 +184,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         </Typography>
       </div>
 
-      {targets.length > 0 ? (
+      {targets ? (
         <TargetsTable env={env} scope={scope} data={targets} />
       ) : (
         <Typography variant="body2" fontWeight="medium">

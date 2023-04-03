@@ -15,7 +15,7 @@
  *
  */
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import { TypesPod } from 'openapi'
+import { TypesPod } from 'openapi/index.schemas'
 
 import PaperContainer from '@ui/mui-extends/esm/PaperContainer'
 

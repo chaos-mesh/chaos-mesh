@@ -16,7 +16,9 @@
  */
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
+import { Stale } from 'api/queryUtils'
 import messages from 'i18n/messages'
+import { useGetCommonConfig } from 'openapi'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
@@ -43,9 +45,15 @@ import Token from './Token'
 
 const Settings = () => {
   const state = useStoreSelector((state) => state)
-  const { securityMode, version } = state.globalStatus
   const { debugMode, enableKubeSystemNS, useNewPhysicalMachine, useNextWorkflowInterface, theme, lang } = state.settings
   const dispatch = useStoreDispatch()
+
+  const { data: config } = useGetCommonConfig({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   const handleChangeDebugMode = () => dispatch(setDebugMode(!debugMode))
   const handleChangeEnableKubeSystemNS = () => dispatch(setEnableKubeSystemNS(!enableKubeSystemNS))
@@ -59,7 +67,7 @@ const Settings = () => {
       <div style={{ height: '100%' }}>
         <Space>
           <PaperTop title={<T id="settings.title" />} h1 divider />
-          {securityMode && <Token />}
+          {config?.security_mode && <Token />}
           <PaperTop title={<T id="experiments.title" />} />
           <Checkbox
             label={<T id="settings.debugMode.title" />}
@@ -144,7 +152,7 @@ const Settings = () => {
           <Box>
             <img src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" style={{ width: 192 }} />
             <Typography variant="body2" color="textSecondary">
-              Git Version: {version}
+              Git Version: {config?.version}
             </Typography>
           </Box>
         </Space>

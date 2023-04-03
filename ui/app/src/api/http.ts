@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 
 import store from 'store'
 
@@ -27,7 +27,7 @@ interface ErrorData {
   full_text: string
 }
 
-const http = axios.create()
+const http = axios.create({ baseURL: '/api' })
 
 http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
   const data = error.response?.data
@@ -65,5 +65,11 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
 
   return Promise.reject(error)
 })
+
+export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
+  const promise = http(config).then(({ data }) => data)
+
+  return promise
+}
 
 export default http
