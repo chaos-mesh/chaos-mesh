@@ -28,6 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade DNS CoreDNS image url to ghcr.io [#3488](https://github.com/chaos-mesh/chaos-mesh/pull/3488)
 - Upgrade OS image for chaos-daemon container image [#3905](https://github.com/chaos-mesh/chaos-mesh/pull/3905)
 - Replace openapi-generator with Orval and React Query [#3748](https://github.com/chaos-mesh/chaos-mesh/pull/3748)
+- Cleanup makefile and provide `make help` [#3888](https://github.com/chaos-mesh/chaos-mesh/pull/3888)
 - Remove `IN_DOCKER` environment variable in `Makefile` [#3992](https://github.com/chaos-mesh/chaos-mesh/pull/3992)
 
 ### Removed
