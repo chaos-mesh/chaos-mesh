@@ -11,11 +11,7 @@
 export LDFLAGS := $(if $(LDFLAGS),$(LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 export IMAGE_REGISTRY ?= ghcr.io
 
-# SET IMAGE_REGISTRY to change the docker registry
-IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
-
 export IMAGE_TAG ?= latest
-export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
 
 ROOT=$(shell pwd)
@@ -50,12 +46,9 @@ ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
 endif
 
-BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REGISTRY=$(IMAGE_DEV_ENV_REGISTRY) \
-	IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
-	IMAGE_BUILD_ENV_PROJECT=$(IMAGE_BUILD_ENV_PROJECT) IMAGE_BUILD_ENV_REGISTRY=$(IMAGE_BUILD_ENV_REGISTRY) \
+BASIC_IMAGE_ENV= IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) \
-	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PROJECT=$(IMAGE_PROJECT) IMAGE_REGISTRY=$(IMAGE_REGISTRY) \
-	TARGET_PLATFORM=$(TARGET_PLATFORM) \
+	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
 RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
@@ -209,7 +202,7 @@ endif
 GINKGO_FLAGS ?=
 PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 e2e: e2e-build ## Run e2e tests in current kubernetes cluster
-	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
 
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
