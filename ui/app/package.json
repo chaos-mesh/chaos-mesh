@@ -16,9 +16,9 @@
     "@nivo/pie": "^0.80.0",
     "@reactour/tour": "^3.3.0",
     "@reduxjs/toolkit": "^1.7.1",
+    "@tanstack/react-query": "^4.28.0",
     "@ui/mui-extends": "workspace:*",
     "ace-builds": "^1.4.12",
-    "auto-bind": "^5.0.1",
     "axios": "^0.24.0",
     "clsx": "^1.1.1",
     "copy-text-to-clipboard": "^3.0.1",
@@ -76,6 +76,8 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@tanstack/react-query-devtools": "^4.28.0",
     "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^13.5.0",
@@ -99,6 +101,7 @@
     "@types/yup": "^0.29.11",
     "cross-env": "^7.0.3",
     "http-proxy-middleware": "^2.0.1",
+    "msw": "^1.2.1",
     "redux-logger": "^3.0.6",
     "source-map-explorer": "^2.5.2"
   },

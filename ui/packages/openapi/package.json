@@ -6,7 +6,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "codegen": "node --experimental-json-modules ./codegen.js",
+    "codegen": "node ./codegen.js",
     "test": "jest"
   },
   "dependencies": {
@@ -21,8 +21,8 @@
   "devDependencies": {
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
-    "@openapitools/openapi-generator-cli": "^2.4.25",
     "babel-jest": "^27.4.5",
-    "jest": "^27.4.3"
+    "jest": "^27.4.3",
+    "orval": "6.12.1"
   }
 }

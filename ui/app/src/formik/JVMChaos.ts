@@ -83,6 +83,12 @@ export const actions = ['latency', 'return', 'exception', 'stress', 'gc', 'ruleD
     },
     {
       field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
+      field: 'text',
       label: 'ruleData',
       value: '',
       helperText: "Optional.  the byteman rule's data for action 'ruleData'",

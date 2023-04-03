@@ -48,7 +48,7 @@ export const actions = [],
           label: 'failtype',
           value: 0,
           helperText:
-            "FailType indicates what to fail, can be set to '0' / '1' / '2' If `0`, indicates slab to fail (should_failslab) If `1`, indicates alloc_page to fail (should_fail_alloc_page) If `2`, indicates bio to fail (should_fail_bio) You can read:   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt to learn more +kubebuilder:validation:Minimum=0",
+            "FailType indicates what to fail, can be set to '0' / '1' / '2' If `0`, indicates slab to fail (should_failslab) If `1`, indicates alloc_page to fail (should_fail_alloc_page) If `2`, indicates bio to fail (should_fail_bio) You can read: 1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html 2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt to learn more",
         },
         {
           field: 'label',
@@ -61,15 +61,20 @@ export const actions = [],
           field: 'number',
           label: 'probability',
           value: 0,
-          helperText:
-            'Probability indicates the fails with probability. If you want 1%, please set this field with 1. +kubebuilder:validation:Maximum=100',
+          helperText: 'Probability indicates the fails with probability. If you want 1%, please set this field with 1.',
         },
         {
           field: 'number',
           label: 'times',
           value: 0,
-          helperText: 'Times indicates the max times of fails. +kubebuilder:validation:Minimum=0',
+          helperText: 'Times indicates the max times of fails.',
         },
       ],
+    },
+    {
+      field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
     },
   ]

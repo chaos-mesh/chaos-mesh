@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
+import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 
 type Keyword = 'namespace' | 'ns' | 'kind'
 

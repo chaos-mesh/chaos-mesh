@@ -16,9 +16,10 @@
  */
 import loadable from '@loadable/component'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import api from 'api'
+import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
@@ -85,9 +86,15 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     })
   }, [workflowBasic])
 
-  const state = useStoreSelector((state) => state)
-  const { namespaces } = state.experiments
   const dispatch = useStoreDispatch()
+
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
+  const { mutateAsync } = usePostWorkflows()
 
   const submitWorkflow = () => {
     const payload: any = yaml.load(data)
@@ -98,8 +105,9 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
       return
     }
 
-    api.workflows
-      .workflowsPost({ request: payload })
+    mutateAsync({
+      data: payload,
+    })
       .then(() => {
         dispatch(resetWorkflow())
 
@@ -149,7 +157,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
                       }
                       error={errors.namespace && touched.namespace ? true : false}
                     >
-                      {namespaces.map((n) => (
+                      {namespaces!.map((n) => (
                         <MenuItem key={n} value={n}>
                           {n}
                         </MenuItem>
