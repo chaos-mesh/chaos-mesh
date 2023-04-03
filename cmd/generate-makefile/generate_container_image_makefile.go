@@ -146,11 +146,6 @@ var containerImageRecipes = []containerImageRecipeOptions{
 		DependencyTargets: nil,
 		Comment:           "Build container image for chaos-kernel, ghcr.io/chaos-mesh/chaos-kernel:latest",
 	}, {
-		ImageName:         "chaos-jvm",
-		SourcePath:        "images/chaos-jvm",
-		DependencyTargets: nil,
-		Comment:           "(Deprecated) Build container image for chaos-jvm",
-	}, {
 		ImageName:         "chaos-dlv",
 		SourcePath:        "images/chaos-dlv",
 		DependencyTargets: nil,
