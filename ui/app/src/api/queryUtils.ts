@@ -14,20 +14,6 @@
  * limitations under the License.
  *
  */
-import { render, screen } from 'test-utils'
-
-import i18n, { T } from '.'
-
-describe('i18n() and <T />', () => {
-  test('displays `k8s.title` with i18n()', async () => {
-    render(<div>{i18n('k8s.title')}</div>)
-
-    expect(screen.getByText('Kubernetes')).toBeInTheDocument()
-  })
-
-  test('displays `k8s.title` with <T />', async () => {
-    render(<T id="k8s.title" />)
-
-    expect(screen.getByText('Kubernetes')).toBeInTheDocument()
-  })
-})
+export enum Stale {
+  DAY = 86400 * 1000,
+}

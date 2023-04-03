@@ -19,10 +19,14 @@ import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, Button, Grid, Grow } from '@mui/material'
-import api from 'api'
 import yaml from 'js-yaml'
-import { CoreEvent, TypesScheduleDetail } from 'openapi'
-import { useEffect, useState } from 'react'
+import {
+  useDeleteSchedulesUid,
+  useGetEvents,
+  useGetSchedulesUid,
+  usePutSchedulesPauseUid,
+  usePutSchedulesStartUid,
+} from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -50,46 +54,19 @@ const Single = () => {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<TypesScheduleDetail>()
-  const [events, setEvents] = useState<CoreEvent[]>([])
-
-  const fetchSchedule = () => {
-    api.schedules
-      .schedulesUidGet({
-        uid: uuid!,
-      })
-      .then(({ data }) => setSingle(data))
-      .catch(console.error)
-  }
-
-  useEffect(() => {
-    fetchSchedule()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const fetchEvents = () => {
-      api.events
-        .eventsGet({ objectId: uuid, limit: 999 })
-        .then(({ data }) => setEvents(data))
-        .catch(console.error)
-        .finally(() => {
-          setLoading(false)
-        })
-    }
-
-    if (single) {
-      fetchEvents()
-    }
-  }, [uuid, single])
+  const { data: schedule, isLoading: isLoading1, refetch } = useGetSchedulesUid(uuid!)
+  const { data: events, isLoading: isLoading2 } = useGetEvents({ object_id: uuid, limit: 999 })
+  const loading = isLoading1 || isLoading2
+  const { mutateAsync: deleteSchedules } = useDeleteSchedulesUid()
+  const { mutateAsync: pauseSchedules } = usePutSchedulesPauseUid()
+  const { mutateAsync: startSchedules } = usePutSchedulesStartUid()
 
   const handleSelect = (action: string) => () => {
     switch (action) {
       case 'archive':
         dispatch(
           setConfirm({
-            title: `${i18n('archives.single', intl)} ${single!.name}`,
+            title: `${i18n('archives.single', intl)} ${schedule!.name}`,
             description: i18n('experiments.deleteDesc', intl),
             handle: handleAction('archive'),
           })
@@ -99,7 +76,7 @@ const Single = () => {
       case 'pause':
         dispatch(
           setConfirm({
-            title: `${i18n('common.pause', intl)} ${single!.name}`,
+            title: `${i18n('common.pause', intl)} ${schedule!.name}`,
             description: i18n('experiments.pauseDesc', intl),
             handle: handleAction('pause'),
           })
@@ -109,7 +86,7 @@ const Single = () => {
       case 'start':
         dispatch(
           setConfirm({
-            title: `${i18n('common.start', intl)} ${single!.name}`,
+            title: `${i18n('common.start', intl)} ${schedule!.name}`,
             description: i18n('experiments.startDesc', intl),
             handle: handleAction('start'),
           })
@@ -120,27 +97,27 @@ const Single = () => {
   }
 
   const handleAction = (action: string) => () => {
-    let actionFunc: any
+    let actionFunc
 
     switch (action) {
       case 'archive':
-        actionFunc = api.schedules.schedulesUidDelete
+        actionFunc = deleteSchedules
 
         break
       case 'pause':
-        actionFunc = api.schedules.schedulesPauseUidPut
+        actionFunc = pauseSchedules
 
         break
       case 'start':
-        actionFunc = api.schedules.schedulesStartUidPut
+        actionFunc = startSchedules
 
         break
       default:
-        actionFunc = null
+        break
     }
 
     if (actionFunc) {
-      actionFunc({ uid: uuid })
+      actionFunc({ uid: uuid! })
         .then(() => {
           dispatch(
             setAlert({
@@ -154,7 +131,7 @@ const Single = () => {
           }
 
           if (action === 'pause' || action === 'start') {
-            setTimeout(fetchSchedule, 300)
+            refetch()
           }
         })
         .catch(console.error)
@@ -165,7 +142,7 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {single && <Helmet title={`Schedule ${single.name}`} />}
+          {schedule && <Helmet title={`Schedule ${schedule.name}`} />}
           <Space spacing={6}>
             <Space direction="row">
               <Button
@@ -176,7 +153,7 @@ const Single = () => {
               >
                 {i18n('archives.single')}
               </Button>
-              {single?.status === 'paused' ? (
+              {schedule?.status === 'paused' ? (
                 <Button
                   variant="outlined"
                   size="small"
@@ -185,7 +162,7 @@ const Single = () => {
                 >
                   {i18n('common.start')}
                 </Button>
-              ) : single?.status !== 'finished' ? (
+              ) : schedule?.status !== 'finished' ? (
                 <Button
                   variant="outlined"
                   size="small"
@@ -197,24 +174,24 @@ const Single = () => {
               ) : null}
             </Space>
 
-            <Paper>{single && <ObjectConfiguration config={single} inSchedule />}</Paper>
+            <Paper>{schedule && <ObjectConfiguration config={schedule} inSchedule />}</Paper>
 
             <Grid container>
               <Grid item xs={12} lg={6} sx={{ pr: 3 }}>
                 <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
                   <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                   <Box flex={1} overflow="scroll">
-                    <EventsTimeline events={events} />
+                    {events && <EventsTimeline events={events} />}
                   </Box>
                 </Paper>
               </Grid>
               <Grid item xs={12} lg={6} sx={{ pl: 3 }}>
                 <Paper sx={{ height: 600, p: 0 }}>
-                  {single && (
+                  {schedule && (
                     <Space display="flex" flexDirection="column" height="100%">
                       <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
                       <Box flex={1}>
-                        <YAMLEditor name={single.name} data={yaml.dump(single.kube_object)} download />
+                        <YAMLEditor name={schedule.name} data={yaml.dump(schedule.kube_object)} download />
                       </Box>
                     </Space>
                   )}

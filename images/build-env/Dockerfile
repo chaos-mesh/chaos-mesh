@@ -14,18 +14,14 @@ RUN apt-get update && \
     apt-get install build-essential curl git pkg-config libfuse-dev fuse -y && \
     rm -rf /var/lib/apt/lists/*
 
-# require nodejs >= 12
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
-RUN npm config set unsafe-perm true
-RUN npm install yarn -g
-
-RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
+RUN npm install pnpm -g
 
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -vvv https://dl.google.com/go/go1.19.3.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl -vvv https://dl.google.com/go/go1.19.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GO111MODULE=on
 ENV GOCACHE /tmp/go-build

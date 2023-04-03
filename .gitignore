@@ -23,8 +23,6 @@ core.sqlite
 /_tools/
 
 node_modules
-# FIXME: comment this line temporarily to get e2e_test.yml working.
-# /yarn.lock
 
 output/
 _artifacts/

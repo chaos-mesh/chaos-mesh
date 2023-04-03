@@ -28,7 +28,7 @@ type Config struct {
 	DaemonTag            string
 	E2EImage             string
 	PauseImage           string
-	ChaosDNSImage        string
+	ChaosCoreDNSImage    string
 	InstallChaosMesh     bool
 	EnableDashboard      bool
 }
@@ -40,14 +40,14 @@ func NewDefaultConfig() *Config {
 		ManifestDir:          "/manifests",
 		Tag:                  "e2e",
 		ManagerImageRegistry: "ghcr.io",
-		ManagerImage:         "pingcap/chaos-mesh",
+		ManagerImage:         "chaos-mesh/chaos-mesh",
 		ManagerTag:           "latest",
 		DaemonImageRegistry:  "ghcr.io",
-		DaemonImage:          "pingcap/chaos-daemon",
+		DaemonImage:          "chaos-mesh/chaos-daemon",
 		DaemonTag:            "latest",
-		E2EImage:             "ghcr.io/pingcap/e2e-helper:latest",
+		E2EImage:             "ghcr.io/chaos-mesh/e2e-helper:latest",
+		ChaosCoreDNSImage:    "ghcr.io/chaos-mesh/chaos-coredns:latest",
 		PauseImage:           "gcr.io/google-containers/pause:latest",
-		ChaosDNSImage:        "ghcr.io/pingcap/chaos-dns:latest",
 		InstallChaosMesh:     false,
 		EnableDashboard:      false,
 	}

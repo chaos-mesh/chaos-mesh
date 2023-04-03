@@ -14,24 +14,31 @@
  * limitations under the License.
  *
  */
-import { Box, Card, Divider, Typography } from '@mui/material'
-import { Env, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
-import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
-import { iconByKind, transByKind } from 'lib/byKind'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
 import CheckIcon from '@mui/icons-material/Check'
-import Kernel from './form/Kernel'
-import Paper from '@ui/mui-extends/esm/Paper'
 import RadioButtonCheckedOutlinedIcon from '@mui/icons-material/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined'
+import UndoIcon from '@mui/icons-material/Undo'
+import { Box, Card, Divider, Typography } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import { Stale } from 'api/queryUtils'
+import clsx from 'clsx'
+import { useGetCommonConfig } from 'openapi'
 import React from 'react'
+
+import Paper from '@ui/mui-extends/esm/Paper'
+
+import { useStoreDispatch, useStoreSelector } from 'store'
+
+import { Env, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
+
+import i18n from 'components/T'
+
+import { iconByKind, transByKind } from 'lib/byKind'
+
+import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
+import Kernel from './form/Kernel'
 import Stress from './form/Stress'
 import TargetGenerated from './form/TargetGenerated'
-import UndoIcon from '@mui/icons-material/Undo'
-import clsx from 'clsx'
-import i18n from 'components/T'
-import { makeStyles } from '@mui/styles'
 
 const useStyles = makeStyles((theme) => {
   const cardActive = {
@@ -92,7 +99,6 @@ const Step1 = () => {
   const classes = useStyles()
 
   const state = useStoreSelector((state) => state)
-  const { dnsServerCreate } = state.globalStatus
   const {
     env,
     kindAction: [kind, action],
@@ -100,9 +106,16 @@ const Step1 = () => {
   } = state.experiments
   const dispatch = useStoreDispatch()
 
+  const { data: config } = useGetCommonConfig({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
+
   const typesData = env === 'k8s' ? _typesData : dataPhysic
   let typesDataEntries = Object.entries(typesData) as [Kind, Definition][]
-  if (!dnsServerCreate) {
+  if (!config?.dns_server_create) {
     typesDataEntries = typesDataEntries.filter((d) => d[0] !== 'DNSChaos')
   }
 

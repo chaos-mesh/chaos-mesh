@@ -14,17 +14,19 @@
  * limitations under the License.
  *
  */
+import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
+import { Stale } from 'api/queryUtils'
+import { useGetCommonConfig } from 'openapi'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import GoogleIcon from '@mui/icons-material/Google'
-import RBACGenerator from 'components/RBACGenerator'
 import Space from '@ui/mui-extends/esm/Space'
-import Token from 'components/Token'
+
+import RBACGenerator from 'components/RBACGenerator'
 import i18n from 'components/T'
-import { useNavigate } from 'react-router-dom'
-import { useStoreSelector } from 'store'
+import Token from 'components/Token'
 
 interface AuthProps {
   open: boolean
@@ -34,7 +36,12 @@ interface AuthProps {
 const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const navigate = useNavigate()
 
-  const { gcpSecurityMode } = useStoreSelector((state) => state.globalStatus)
+  const { data: config } = useGetCommonConfig({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   const [tokenGenOpen, setTokenGenOpen] = useState(false)
 
@@ -65,7 +72,7 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
         </Typography>
         <Token onSubmitCallback={handleSubmitCallback} />
       </Space>
-      {gcpSecurityMode && (
+      {config?.gcp_security_mode && (
         <>
           <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>
             {i18n('settings.addToken.or')}

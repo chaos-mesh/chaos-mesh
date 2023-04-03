@@ -20,6 +20,7 @@ import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import _ from 'lodash'
+import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { useEffect, useMemo, useState } from 'react'
 
 import Paper from '@ui/mui-extends/esm/Paper'
@@ -38,6 +39,7 @@ import i18n from 'components/T'
 
 import basicData, { schema as basicSchema } from './data/basic'
 import Scheduler from './form/Scheduler'
+import { Stale } from 'api/queryUtils'
 
 interface Step2Props {
   inWorkflow?: boolean
@@ -45,7 +47,7 @@ interface Step2Props {
 }
 
 const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const { namespaces, step2, env, kindAction, basic } = useStoreSelector((state) => state.experiments)
+  const { step2, env, kindAction, basic } = useStoreSelector((state) => state.experiments)
   const [kind] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const schema = basicSchema({ env, scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
@@ -64,6 +66,13 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
     [inSchedule]
   )
   const [init, setInit] = useState(originalInit)
+
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   useEffect(() => {
     if (!_.isEmpty(basic)) {
@@ -124,7 +133,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                 <Grid item xs={6}>
                   <Space>
                     <Typography fontWeight={500}>{i18n('newE.steps.scope')}</Typography>
-                    {namespaces.length ? (
+                    {namespaces ? (
                       <Scope env={env} kind={kind} namespaces={namespaces} scope="spec.selector" modeScope="spec" />
                     ) : (
                       <SkeletonN n={6} />
@@ -160,7 +169,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
                     )}
                     {inSchedule && <ScheduleSpecificFields errors={errors} touched={touched} />}
                     <MoreOptions>
-                      {namespaces.length && (
+                      {namespaces && (
                         <SelectField
                           name="metadata.namespace"
                           label={i18n('k8s.namespace')}

@@ -1,7 +1,7 @@
 {
   "name": "@ui/mui-extends",
   "version": "0.0.0",
-  "description": "Mui extends used in dashboard UI",
+  "description": "Mui extends used in dashboard UI.",
   "private": true,
   "files": [
     "esm"
@@ -33,6 +33,7 @@
     "@storybook/addon-storyshots": "^6.4.19",
     "@storybook/react": "^6.4.19",
     "@storybook/testing-library": "^0.0.9",
+    "@types/react": "^17.0.37",
     "babel-jest": "^27.5.1",
     "babel-loader": "^8.2.3",
     "jest": "^27.5.1",

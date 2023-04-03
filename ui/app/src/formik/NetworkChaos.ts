@@ -13,15 +13,13 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           field: 'number',
           label: 'buffer',
           value: 0,
-          helperText:
-            'Buffer is the maximum amount of bytes that tokens can be available for instantaneously. +kubebuilder:validation:Minimum=1',
+          helperText: 'Buffer is the maximum amount of bytes that tokens can be available for instantaneously.',
         },
         {
           field: 'number',
           label: 'limit',
           value: 0,
-          helperText:
-            'Limit is the number of bytes that can be queued waiting for tokens to become available. +kubebuilder:validation:Minimum=1',
+          helperText: 'Limit is the number of bytes that can be queued waiting for tokens to become available.',
         },
         {
           field: 'number',
@@ -171,6 +169,12 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
       when: "action=='loss'",
     },
     {
+      field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
+    {
       field: 'ref',
       label: 'target',
       children: [
@@ -179,7 +183,7 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           label: 'mode',
           value: '',
           helperText:
-            'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent',
+            'Mode defines the mode to run chaos action. Supported mode: one / all / fixed / fixed-percent / random-max-percent',
         },
         {
           field: 'ref',

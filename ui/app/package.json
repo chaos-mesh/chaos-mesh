@@ -6,17 +6,19 @@
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.3.0",
     "@loadable/component": "^5.14.1",
+    "@mui/base": "5.0.0-alpha.120",
     "@mui/icons-material": "^5.10.16",
-    "@mui/lab": "5.0.0-alpha.98",
+    "@mui/lab": "5.0.0-alpha.122",
     "@mui/material": "^5.10.16",
     "@mui/styles": "^5.10.16",
-    "@mui/x-data-grid": "5.17.1",
-    "@nivo/core": "^0.74.0",
-    "@nivo/pie": "^0.74.0",
-    "@reactour/tour": "^2.3.0",
+    "@mui/x-data-grid": "6.0.0",
+    "@nivo/core": "^0.80.0",
+    "@nivo/pie": "^0.80.0",
+    "@reactour/tour": "^3.3.0",
     "@reduxjs/toolkit": "^1.7.1",
+    "@tanstack/react-query": "^4.28.0",
+    "@ui/mui-extends": "workspace:*",
     "ace-builds": "^1.4.12",
-    "auto-bind": "^5.0.1",
     "axios": "^0.24.0",
     "clsx": "^1.1.1",
     "copy-text-to-clipboard": "^3.0.1",
@@ -43,7 +45,7 @@
     "react-intl": "^5.22.0",
     "react-redux": "^7.2.2",
     "react-router-dom": "^6.0.2",
-    "react-scripts": "5.0.0",
+    "react-scripts": "5.0.1",
     "react-window": "^1.8.6",
     "redux": "^4.0.5",
     "typescript": "~4.5.2",
@@ -74,8 +76,10 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@tanstack/react-query-devtools": "^4.28.0",
     "@testing-library/jest-dom": "^5.15.1",
-    "@testing-library/react": "^12.1.2",
+    "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^13.5.0",
     "@types/cytoscape": "^3.14.12",
     "@types/d3": "^6.3.0",
@@ -92,18 +96,19 @@
     "@types/react-redux": "^7.1.15",
     "@types/react-router-dom": "^5.1.7",
     "@types/react-window": "^1.8.2",
-    "@types/reactour": "^1.17.1",
+    "@types/testing-library__jest-dom": "^5.14.5",
     "@types/uuid": "^8.3.4",
     "@types/yup": "^0.29.11",
     "cross-env": "^7.0.3",
     "http-proxy-middleware": "^2.0.1",
+    "msw": "^1.2.1",
     "redux-logger": "^3.0.6",
     "source-map-explorer": "^2.5.2"
   },
   "jest": {
     "resetMocks": false,
     "transformIgnorePatterns": [
-      "node_modules/(?!auto-bind)"
+      "node_modules/.pnpm/(?!auto-bind)"
     ]
   }
 }
