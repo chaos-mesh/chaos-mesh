@@ -17,7 +17,6 @@ IMAGE_REGISTRY_PREFIX := $(if $(IMAGE_REGISTRY),$(IMAGE_REGISTRY)/,)
 export IMAGE_TAG ?= latest
 export IMAGE_PROJECT ?= chaos-mesh
 export IMAGE_BUILD ?= 1
-export PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 
 ROOT=$(shell pwd)
 
@@ -70,10 +69,6 @@ include binary.generated.mk container-image.generated.mk
 
 export CLEAN_TARGETS :=
 
-.PHONY: generate-makefile
-generate-makefile: ## Generate makefile
-	@$(GO) run ./cmd/generate-makefile
-
 # The help will print out all targets with their descriptions organized bellow their categories. The categories are represented by `##@` and the target descriptions by `##`.
 # The awk commands is responsible to read the entire set of makefiles included in this invocation, looking for lines of the file as xyz: ## something, and then pretty-format the target and help. Then, if there's a line with ##@ something, that gets pretty-printed as a category.
 # More info over the usage of ANSI control characters for terminal formatting: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
@@ -81,12 +76,149 @@ generate-makefile: ## Generate makefile
 #
 # Notice that we have a little modification on the awk command to support slash in the recipe name:
 # origin: /^[a-zA-Z_0-9-]+:.*?##/
-# modified /^[a-zA-Z_0-9\/-]+:.*?##/
+# modified /^[a-zA-Z_0-9\/\.-]+:.*?##/
 .PHONY: help
-help: generate-makefile ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9\/-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+help: ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9\/\.-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-all: yaml image ## Build all CRD yaml manifests and components container images
+##@ Code generation
+
+config: SHELL:=$(RUN_IN_DEV_SHELL)
+config: images/dev-env/.dockerbuilt ## Generate CRD manifests with controller-gen
+	cd ./api ;\
+		controller-gen crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../config/crd/bases ;\
+		controller-gen crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../helm/chaos-mesh/crds ;
+
+chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
+chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
+	bin/chaos-builder
+
+generate: manifests/crd.yaml generate-ctrl swagger_spec generate-deepcopy chaos-build ## Generate codes for codebase, including CRD manifests, chaosctl GraphQL code generation, chaos mesh controller code generation, deepcopy, swager spec.
+
+generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy ## Generate GraphQL schema for chaosctl
+	$(GO) generate ./pkg/ctrl/server
+
+.PHONY: generate-makefile
+generate-makefile: ## Generate makefile (binary.generated.mk, container-image.generated.mk)
+	@$(GO) run ./cmd/generate-makefile
+
+generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
+generate-deepcopy: images/dev-env/.dockerbuilt chaos-build ## Generate deepcopy files for CRD Kind with controller-gen
+	cd ./api ;\
+		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
+
+install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
+install.sh: images/dev-env/.dockerbuilt ## Generate install.sh
+	./hack/update_install_script.sh
+
+manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
+manifests/crd.yaml: config images/dev-env/.dockerbuilt ## Generate the combined CRD manifests
+	kustomize build config/default > manifests/crd.yaml
+
+proto: SHELL:=$(RUN_IN_DEV_SHELL)
+proto: images/dev-env/.dockerbuilt ## Generate .go files from .proto files
+	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
+		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
+	done
+
+swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
+swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for frontend
+	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
+
+##@ Linters, formatters and others
+
+check: generate manifests/crd.yaml vet boilerplate lint tidy install.sh fmt ## Run prerequisite checks for PR
+
+SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
+boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
+boilerplate: images/dev-env/.dockerbuilt
+	$(SKYWALKING_EYES_HEADER) check
+
+boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
+boilerplate-fix: images/dev-env/.dockerbuilt ## Fix boilerplate
+	$(SKYWALKING_EYES_HEADER) fix
+
+fmt: SHELL:=$(RUN_IN_DEV_SHELL)
+fmt: groupimports images/dev-env/.dockerbuilt ## Reformat go files with gofmt and goimports
+	$(CGO) fmt $$($(PACKAGE_LIST))
+
+gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
+gosec-scan: images/dev-env/.dockerbuilt
+	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
+
+groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
+groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
+		-d $$'\n' -n 10 goimports -combine -w -l -local github.com/chaos-mesh/chaos-mesh
+
+lint: SHELL:=$(RUN_IN_DEV_SHELL)
+lint: images/dev-env/.dockerbuilt ## Lint go files with revive
+	revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+
+tidy: SHELL:=$(RUN_IN_DEV_SHELL)
+tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
+	@echo "go mod tidy"
+	GO111MODULE=on go mod tidy
+	git diff -U --exit-code go.mod go.sum
+	cd api; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+
+vet: SHELL:=$(RUN_IN_DEV_SHELL)
+vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
+	$(CGOENV) go vet ./...
+
+##@ Common used building targets
+
+all: manifests/crd.yaml image ## Build all CRD yaml manifests and components container images
+
+chaosctl: ## Build chaosctl
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
+
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv) ## Build container images for Chaos Mesh components (chaos-controller-manager, chaos-daemon, chaos-dashboard)
+
+ui: pnpm_install_dependencies ## Build the frontend UI of Chaos Dashboard
+ifeq (${UI},1)
+	cd ui &&\
+	pnpm build
+	hack/embed_ui_assets.sh
+endif
+
+##@ Cleanup
+
+.PHONY: clean
+clean: clean-binary clean-image-built ## Cleanup artifacts
+	rm -rf $(CLEAN_TARGETS)
+
+##@ Tests
+
+CLEAN_TARGETS += cover.out cover.out.tmp
+
+coverage: SHELL:=$(RUN_IN_DEV_SHELL)
+coverage: images/dev-env/.dockerbuilt ## Generate coverage report
+ifeq ("$(CI)", "1")
+	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
+else
+	mkdir -p cover
+	gocov convert cover.out > cover.json
+	gocov-xml < cover.json > cover.xml
+	gocov-html < cover.json > cover/index.html
+endif
+
+GINKGO_FLAGS ?=
+PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
+e2e: e2e-build ## Run e2e tests in current kubernetes cluster
+	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
+
+test: SHELL:=$(RUN_IN_DEV_SHELL)
+test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
+	make failpoint-enable
+	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
+	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+	make failpoint-disable
+
+##@ Advanced building targets
 
 test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
@@ -102,19 +234,8 @@ ifeq (${UI},1)
 	pnpm install --frozen-lockfile
 endif
 
-ui: pnpm_install_dependencies ## Build the frontend UI of Chaos Dashboard
-ifeq (${UI},1)
-	cd ui &&\
-	pnpm build
-	hack/embed_ui_assets.sh
-endif
-
 watchmaker: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
-
-
-chaosctl: ## Build chaosctl
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
 # Build schedule-migration
 schedule-migration:
@@ -127,24 +248,7 @@ schedule-migration.tar.gz: schedule-migration
 	rm ./migrate.sh
 	rm ./schedule-migration
 
-.PHONY: clean
-clean: clean-binary clean-image-built
-	rm -rf $(CLEAN_TARGETS)
-
-SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
-boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate: images/dev-env/.dockerbuilt
-	$(SKYWALKING_EYES_HEADER) check
-
-boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate-fix: images/dev-env/.dockerbuilt
-	$(SKYWALKING_EYES_HEADER) fix
-
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv) ## Build container images for Chaos Mesh components (chaos-controller-manager, chaos-daemon, chaos-dashboard)
-
 e2e-image: image-e2e-helper ## Build e2e test helper image
-
-GO_TARGET_PHONY :=
 
 enter-buildenv: SHELL:=$(shell $(BASIC_IMAGE_ENV) $(ROOT)/build/get_env_shell.py --interactive build-env)
 enter-buildenv: image-build-env
@@ -168,9 +272,6 @@ pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c i
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
-GINKGO_FLAGS ?=
-e2e: e2e-build ## Run e2e tests
-	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ${IMAGE_REGISTRY_PREFIX}chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
 
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
@@ -199,35 +300,6 @@ bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
 
-chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
-chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt
-	bin/chaos-builder
-
-proto: SHELL:=$(RUN_IN_DEV_SHELL)
-proto: images/dev-env/.dockerbuilt
-	for dir in pkg/chaosdaemon pkg/chaoskernel ; do\
-		protoc -I $$dir/pb $$dir/pb/*.proto -I /usr/local/include --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
-	done
-
-manifests/crd.yaml: SHELL:=$(RUN_IN_DEV_SHELL)
-manifests/crd.yaml: config images/dev-env/.dockerbuilt
-	kustomize build config/default > manifests/crd.yaml
-
-yaml: manifests/crd.yaml
-
-# no version conversion
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1"
-
-config: SHELL:=$(RUN_IN_DEV_SHELL)
-config: images/dev-env/.dockerbuilt ## Generate CRD manifests with controller-gen
-	cd ./api ;\
-		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../config/crd/bases ;\
-		controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../helm/chaos-mesh/crds ;
-
-lint: SHELL:=$(RUN_IN_DEV_SHELL)
-lint: images/dev-env/.dockerbuilt ## Lint go files with revive
-	revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
-
 failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
@@ -236,78 +308,9 @@ failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
 
-groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
-groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -combine -w -l -local github.com/chaos-mesh/chaos-mesh
-
-fmt: SHELL:=$(RUN_IN_DEV_SHELL)
-fmt: groupimports images/dev-env/.dockerbuilt ## Reformat go files with gofmt and goimports
-	$(CGO) fmt $$($(PACKAGE_LIST))
-
-vet: SHELL:=$(RUN_IN_DEV_SHELL)
-vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
-	$(CGOENV) go vet ./...
-
-tidy: SHELL:=$(RUN_IN_DEV_SHELL)
-tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
-	@echo "go mod tidy"
-	GO111MODULE=on go mod tidy
-	git diff -U --exit-code go.mod go.sum
-	cd api; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-
-generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy ## Generate GraphQL schema for chaosctl
-	$(GO) generate ./pkg/ctrl/server
-
-generate-deepcopy: SHELL:=$(RUN_IN_DEV_SHELL)
-generate-deepcopy: images/dev-env/.dockerbuilt chaos-build ## Generate deepcopy files for CRD Kind with controller-gen
-	cd ./api ;\
-		controller-gen object:headerFile=../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
-
-generate: manifests/crd.yaml generate-ctrl swagger_spec generate-deepcopy chaos-build ## Generate codes for all required code generations, including CRD manifests, chaosctl GraphQL code generation, chaos mesh controller code generation, deepcopy, swager spec.
-
-check: generate yaml vet boilerplate lint tidy install.sh fmt ## Run all the checks
-
-
-# Run tests
-CLEAN_TARGETS += cover.out cover.out.tmp
-
-test: SHELL:=$(RUN_IN_DEV_SHELL)
-test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
-	make failpoint-enable
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
-	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
-	make failpoint-disable
-
-gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
-gosec-scan: images/dev-env/.dockerbuilt
-	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
-
-coverage: SHELL:=$(RUN_IN_DEV_SHELL)
-coverage: images/dev-env/.dockerbuilt ## Generate coverage report
-ifeq ("$(CI)", "1")
-	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
-else
-	mkdir -p cover
-	gocov convert cover.out > cover.json
-	gocov-xml < cover.json > cover.xml
-	gocov-html < cover.json > cover/index.html
-endif
-
-install.sh: SHELL:=$(RUN_IN_DEV_SHELL)
-install.sh: images/dev-env/.dockerbuilt ## Generate install.sh
-	./hack/update_install_script.sh
-
-swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
-swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for frontend
-	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
-
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config \
-	install.sh $(GO_TARGET_PHONY) \
+	install.sh \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
 	failpoint-enable failpoint-disable swagger_spec \
