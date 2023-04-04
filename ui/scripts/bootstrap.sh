@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Don't run this script directly, use `yarn bootstrap` to exec it.
+# Don't run this script directly, use `pnpm bootstrap` to exec it.
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -29,9 +29,9 @@ done
 
 # step1
 if [[ ! -d node_modules ]]; then
-  echo "No node_modules found. Install by yarn:"
+  echo "No node_modules found. Install by pnpm:"
 
-  yarn
+  pnpm i
 else
   echo "Already install dependencies."
 fi
@@ -39,7 +39,7 @@ fi
 # step2
 echo "Build packages..."
 
-yarn workspace @ui/mui-extends build
+pnpm -F @ui/mui-extends build
 
 # step3
 CHAOS_DASHBOARD_BIN=../images/chaos-dashboard/bin

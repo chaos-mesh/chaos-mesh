@@ -885,6 +885,33 @@ metadata:
     app.kubernetes.io/version: ${VERSION_TAG##v}
     app.kubernetes.io/component: controller-manager
 ---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: "chaos-mesh"
+  name: chaos-dns-server
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
 # Copyright 2021 Chaos Mesh Authors.
 #
@@ -916,6 +943,55 @@ data:
   ca.crt: "${CA_BUNDLE}"
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
+---
+# Source: chaos-mesh/templates/dns-configmap.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dns-server-config
+  namespace: "chaos-mesh"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: chaos-dns-server
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        ready
+        k8s_dns_chaos cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+            grpcport 9288
+        }
+        forward . /etc/resolv.conf {
+            max_concurrent 1000
+        }
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
 # ClusterRole for chaos-dashboard at cluster scope
@@ -1050,6 +1126,50 @@ rules:
       - subjectaccessreviews
     verbs: [ "create" ]
 ---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+# roles
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dns-server-target-namespace
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
+---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dns-server-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+rules:
+  - apiGroups: [ "" ]
+    resources:
+      - namespaces
+      - services
+      - endpoints
+      - pods
+    verbs: [ "get", "list", "watch" ]
+---
 # Source: chaos-mesh/templates/chaos-dashboard-rbac.yaml
 # ClusterRoleBinding for chaos-dashboard at cluster scope
 kind: ClusterRoleBinding
@@ -1136,6 +1256,48 @@ subjects:
     name: chaos-controller-manager
     namespace: "chaos-mesh"
 ---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+# bindings cluster level
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dns-server-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh-chaos-dns-server-cluster-level
+subjects:
+  - kind: ServiceAccount
+    name: chaos-dns-server
+    namespace: "chaos-mesh"
+---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dns-server-target-namespace
+  namespace: 
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh-chaos-dns-server-target-namespace
+subjects:
+  - kind: ServiceAccount
+    name: chaos-dns-server
+    namespace: "chaos-mesh"
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1166,6 +1328,23 @@ rules:
     resources: [ "configmaps" ]
     verbs: [ "*" ]
 ---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dns-server-control-plane
+  namespace: "chaos-mesh"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get", "list" ]
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
 kind: RoleBinding
@@ -1186,6 +1365,28 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
+    namespace: "chaos-mesh"
+---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+# binding for control plane namespace
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: chaos-mesh-chaos-dns-server-control-plane
+  namespace: "chaos-mesh"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: chaos-mesh-chaos-dns-server-control-plane
+subjects:
+  - kind: ServiceAccount
+    name: chaos-dns-server
     namespace: "chaos-mesh"
 ---
 # Source: chaos-mesh/templates/chaos-daemon-service.yaml
@@ -1315,6 +1516,54 @@ spec:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 ---
+# Source: chaos-mesh/templates/dns-service.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: chaos-mesh-dns-server
+  namespace: "chaos-mesh"
+  annotations:
+    prometheus.io/port: "9153"
+    prometheus.io/scrape: "true"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: dns-server
+spec:
+  selector:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dns-server
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+  - name: metrics
+    port: 9153
+    protocol: TCP
+  - name: grpc
+    port: 9288
+    protocol: TCP
+---
 # Source: chaos-mesh/templates/chaos-daemon-daemonset.yaml
 # Copyright 2021 Chaos Mesh Authors.
 #
@@ -1435,6 +1684,11 @@ metadata:
     app.kubernetes.io/component: chaos-dashboard
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: chaos-mesh
@@ -1504,7 +1758,7 @@ spec:
             - name: GCP_CLIENT_SECRET
               value: ""
             - name: DNS_SERVER_CREATE
-              value: "false"
+              value: "true"
             - name: ROOT_URL
               value: "http://localhost:2333"
             - name: ENABLE_PROFILING
@@ -1657,6 +1911,123 @@ spec:
           secret:
             secretName: chaos-mesh-webhook-certs
 ---
+# Source: chaos-mesh/templates/dns-deployment.yaml
+# Copyright 2021 Chaos Mesh Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaos-dns-server
+  namespace: "chaos-mesh"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/part-of: chaos-mesh
+    app.kubernetes.io/version: ${VERSION_TAG##v}
+    app.kubernetes.io/component: chaos-dns-server
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/instance: chaos-mesh
+      app.kubernetes.io/component: chaos-dns-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/part-of: chaos-mesh
+        app.kubernetes.io/version: ${VERSION_TAG##v}
+        app.kubernetes.io/component: chaos-dns-server
+    spec:
+      serviceAccountName: chaos-dns-server
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: k8s-app
+                    operator: In
+                    values: ["chaos-dns"]
+              topologyKey: kubernetes.io/hostname
+      priorityClassName: 
+      containers:
+      - name: chaos-dns-server
+        image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits: {}
+          requests:
+            cpu: 100m
+            memory: 70Mi
+        args: [ "-conf", "/etc/chaos-dns/Corefile" ]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/chaos-dns
+          readOnly: true
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 9153
+          name: metrics
+          protocol: TCP
+        - containerPort: 9288
+          name: grpc
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8181
+            scheme: HTTP
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - all
+          readOnlyRootFilesystem: true
+      dnsPolicy: Default
+      volumes:
+        - name: config-volume
+          configMap:
+            name: dns-server-config
+            items:
+            - key: Corefile
+              path: Corefile
+---
 # Source: chaos-mesh/templates/cert-manager-certs.yaml
 # Copyright 2022 Chaos Mesh Authors.
 #
@@ -1690,70 +2061,6 @@ spec:
 #
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-pvc.yaml
-# Copyright 2021 Chaos Mesh Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
----
-# Source: chaos-mesh/templates/dns-configmap.yaml
-# Copyright 2021 Chaos Mesh Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
----
-# Source: chaos-mesh/templates/dns-deployment.yaml
-# Copyright 2021 Chaos Mesh Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
----
-# Source: chaos-mesh/templates/dns-rbac.yaml
-# Copyright 2021 Chaos Mesh Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
----
-# Source: chaos-mesh/templates/dns-service.yaml
 # Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

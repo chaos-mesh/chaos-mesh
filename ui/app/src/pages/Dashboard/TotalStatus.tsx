@@ -24,7 +24,6 @@ import { PropertyAccessor } from '@nivo/core'
 import { StatusAllChaosStatus } from 'openapi'
 import api from 'api'
 import i18n from 'components/T'
-import { schemeTableau10 } from 'd3-scale-chromatic'
 import { useIntl } from 'react-intl'
 import { useTheme } from '@mui/material/styles'
 
@@ -84,7 +83,6 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
         <ResponsivePie
           data={s}
           margin={{ top: 15, bottom: 60 }}
-          colors={schemeTableau10 as any}
           innerRadius={0.75}
           padAngle={0.25}
           cornerRadius={4}

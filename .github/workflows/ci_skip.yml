@@ -26,7 +26,7 @@ jobs:
               - '**.go'
               - 'helm/**'
             ui:
-              - 'ui/yarn.lock'
+              - 'ui/pnpm-lock.yaml'
               - '**.js'
               - '**.ts?(x)'
   go:
