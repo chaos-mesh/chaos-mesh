@@ -55,7 +55,7 @@ ui
 │   │   ├── lib
 │   │   ├── pages - place all landing pages
 │   │   ├── reducers
-│   │   ├── slices - [Redux Tookit createSlice](https://redux-toolkit.js.org/api/createSlice)
+│   │   ├── slices
 ├── packages
 │   ├── mui-extends
 ```
@@ -66,7 +66,7 @@ One is **app**, which describe the whole UI interface, and the other is **packag
 
 #### Prepare
 
-If you haven't installed the nodejs and golang environment, checkout [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
+If you don't have the nodejs and golang environments installed, see [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
 
 And we use [pnpm](https://pnpm.io/) as the dependency management. Please also install it.
 
@@ -75,14 +75,10 @@ And we use [pnpm](https://pnpm.io/) as the dependency management. Please also in
 Into the `ui` folder, run:
 
 ```sh
-pnpm bootstrap
+pnpm i
 ```
 
 This command will install all deps the UI needed.
-
-> Note:
->
-> It will also build the API server binary by default, please add `--compact` if you don't want it.
 
 Then, you need to provide an API server as a proxy, it will pass into an env var which named: `REACT_APP_API_URL`. There are three ways to get it:
 
@@ -100,12 +96,12 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
 
 - **From local dashboard server**
 
-  There have two ways to run chaos-dashboard server in your terminal:
+  Run chaos-dashboard server in your terminal:
 
-  - `cd .. && go run cmd/chaos-dashboard/main.go`
-  - `cd .. && ./images/chaos-dashboard/bin/chaos-dashboard` (Already build in `pnpm bootstrap`)
-
-  One is real-time, the other needs to be compiled before use. The compiled bundles an extra Swagger docs into the binary file.
+  ```sh
+  cd ..
+  go run cmd/chaos-dashboard/main.go
+  ```
 
 #### Start
 
@@ -139,7 +135,7 @@ to build them.
 We provide [storybook](https://storybook.js.org/) for previewing the components, you can run:
 
 ```sh
-pnpm -F @ui/mui-extends build && \
+pnpm -F @ui/mui-extends build
 pnpm -F @ui/mui-extends storybook
 ```
 
