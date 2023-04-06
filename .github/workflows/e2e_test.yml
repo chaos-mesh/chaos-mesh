@@ -198,8 +198,11 @@ jobs:
           minikube image load ./output/saved-images/chaos-mesh.tgz
           minikube image load ./output/saved-images/e2e-helper.tgz
 
-      - name: Setup helm
-        uses: azure/setup-helm@v2.1
+      - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
+        run: chmod 600 ~/.kube/config
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
       - name: Install Chaos Mesh
         run: |
