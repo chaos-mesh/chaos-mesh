@@ -90,10 +90,6 @@ endif
 watchmaker: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
-# Build chaosctl
-chaosctl:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
-
 # Build schedule-migration
 schedule-migration:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
@@ -167,10 +163,26 @@ pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c i
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
+# Build chaos-daedmon locally
+local/chaos-daemon: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
+	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
+
+# Build chaos-controller-manager locally
+local/chaos-controller-manager:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/chaos-controller-manager/main.go
+
+# Build chaos-dashboard locally
+local/chaos-dashboard:
+	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/main.go
+
+# Build chaosctl locally
+chaosctl:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/main.go
+
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon-helper/main.go,1))
-$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
 
 prepare-install: all docker-push docker-push-dns-server
 
@@ -356,7 +368,7 @@ swagger_spec: images/dev-env/.dockerbuilt
 	docker-push lint generate config \
 	install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
-	dashboard dashboard-server-frontend gosec-scan \
+	gosec-scan \
 	failpoint-enable failpoint-disable swagger_spec \
 	e2e-test/image/e2e/bin/e2e.test \
 	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
