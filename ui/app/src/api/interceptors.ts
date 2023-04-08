@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import http from './http'
 
 let tokenInterceptorId: number
@@ -24,7 +23,7 @@ interface GCPToken {
   expiry: string
 }
 
-export const token = (token: string | GCPToken) => {
+export const applyAPIAuthentication = (token: string | GCPToken) => {
   if (tokenInterceptorId !== undefined) {
     http.interceptors.request.eject(tokenInterceptorId)
   }
@@ -55,11 +54,11 @@ export const token = (token: string | GCPToken) => {
   })
 }
 
-export const resetToken = () => http.interceptors.request.eject(tokenInterceptorId)
+export const resetAPIAuthentication = () => http.interceptors.request.eject(tokenInterceptorId)
 
 let nsInterceptorId: number
 
-export const namespace = (ns: string) => {
+export const applyNSParam = (ns: string) => {
   if (nsInterceptorId !== undefined) {
     http.interceptors.request.eject(nsInterceptorId)
   }

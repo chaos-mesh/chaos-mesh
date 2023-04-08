@@ -55,7 +55,7 @@ ui
 │   │   ├── lib
 │   │   ├── pages - place all landing pages
 │   │   ├── reducers
-│   │   ├── slices - [Redux Tookit createSlice](https://redux-toolkit.js.org/api/createSlice)
+│   │   ├── slices
 ├── packages
 │   ├── mui-extends
 ```
@@ -66,23 +66,19 @@ One is **app**, which describe the whole UI interface, and the other is **packag
 
 #### Prepare
 
-If you haven't installed the nodejs and golang environment, checkout [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
+If you don't have the nodejs and golang environments installed, see [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
 
-And we use [Yarn 1](https://classic.yarnpkg.com/en/) as the dependency management. Maybe we will migrate to Yarn 2 in the future, but not now.
+And we use [pnpm](https://pnpm.io/) as the dependency management. Please also install it.
 
 #### Install deps
 
 Into the `ui` folder, run:
 
 ```sh
-yarn bootstrap
+pnpm i
 ```
 
 This command will install all deps the UI needed.
-
-> Note:
->
-> It will also build the API server binary by default, please add `--compact` if you don't want it.
 
 Then, you need to provide an API server as a proxy, it will pass into an env var which named: `REACT_APP_API_URL`. There are three ways to get it:
 
@@ -100,12 +96,12 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
 
 - **From local dashboard server**
 
-  There have two ways to run chaos-dashboard server in your terminal:
+  Run chaos-dashboard server in your terminal:
 
-  - `cd .. && go run cmd/chaos-dashboard/main.go`
-  - `cd .. && ./images/chaos-dashboard/bin/chaos-dashboard` (Already build in `yarn bootstrap`)
-
-  One is real-time, the other needs to be compiled before use. The compiled bundles an extra Swagger docs into the binary file.
+  ```sh
+  cd ..
+  go run cmd/chaos-dashboard/main.go
+  ```
 
 #### Start
 
@@ -113,13 +109,13 @@ We already place a one-step script to start the UI:
 
 ```sh
 # cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start
-yarn workspace @ui/app start:default
+pnpm -F @ui/app start:default
 ```
 
 Or if you want to specify the `API_URL`:
 
 ```sh
-REACT_APP_API_URL=xxx BROWSER=none yarn workspace @ui/app start
+REACT_APP_API_URL=xxx BROWSER=none pnpm -F @ui/app start
 ```
 
 Then open <http://localhost:3000> to view it in the browser.
@@ -131,7 +127,7 @@ Then open <http://localhost:3000> to view it in the browser.
 This package extends many of mui's components for use in the UI. It will use `tsc` to compile the code, simply run:
 
 ```sh
-yarn workspace @ui/mui-extends build
+pnpm -F @ui/mui-extends build
 ```
 
 to build them.
@@ -139,8 +135,8 @@ to build them.
 We provide [storybook](https://storybook.js.org/) for previewing the components, you can run:
 
 ```sh
-yarn workspace @ui/mui-extends build && \
-yarn workspace @ui/mui-extends storybook
+pnpm -F @ui/mui-extends build
+pnpm -F @ui/mui-extends storybook
 ```
 
 to open it.

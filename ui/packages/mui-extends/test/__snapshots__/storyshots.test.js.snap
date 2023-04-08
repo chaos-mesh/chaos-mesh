@@ -478,7 +478,7 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
 >
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1ypcskt-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1rwxdiw-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -495,7 +495,6 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
         autoCapitalize="none"
         autoComplete="off"
         className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
-        disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
         onChange={[Function]}
@@ -575,7 +574,7 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
   </label>
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1ypcskt-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1rwxdiw-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -592,7 +591,6 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
         autoCapitalize="none"
         autoComplete="off"
         className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
-        disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
         onChange={[Function]}
@@ -677,7 +675,7 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
   </label>
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1ypcskt-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1rwxdiw-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -694,7 +692,6 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
         autoCapitalize="none"
         autoComplete="off"
         className="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-19qh8xo-MuiInputBase-input-MuiOutlinedInput-input"
-        disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
         onChange={[Function]}
@@ -797,6 +794,7 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
         disabled={false}
         name="spec.abort"
         onChange={[Function]}
+        required={false}
         type="checkbox"
       />
       <svg
@@ -855,6 +853,7 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
         disabled={true}
         name="spec.abort"
         onChange={[Function]}
+        required={false}
         type="checkbox"
       />
       <svg
@@ -913,6 +912,7 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
         disabled={false}
         name="spec.abort"
         onChange={[Function]}
+        required={false}
         type="checkbox"
       />
       <svg
@@ -971,6 +971,7 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
         disabled={false}
         name="spec.abort"
         onChange={[Function]}
+        required={false}
         type="checkbox"
       />
       <svg
@@ -1417,7 +1418,7 @@ exports[`Storyshots Form/TextField Error 1`] = `
 
 exports[`Storyshots Form/TextField Group 1`] = `
 <div
-  className="css-b55nah-MuiStack-root"
+  className="MuiStack-root css-b55nah-MuiStack-root"
 >
   <div
     className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"

@@ -25,5 +25,4 @@ export_env_variables = [
     "LDFLAGS",
     "CRATES_MIRROR",
     "GO_BUILD_CACHE",
-    "YARN_BUILD_CACHE",
 ]

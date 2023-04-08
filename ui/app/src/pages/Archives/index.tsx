@@ -22,10 +22,25 @@ import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
 import Tab from '@mui/material/Tab'
-import api from 'api'
 import _ from 'lodash'
-import { TypesArchive } from 'openapi'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  useDeleteArchives,
+  useDeleteArchivesSchedules,
+  useDeleteArchivesSchedulesUid,
+  useDeleteArchivesUid,
+  useDeleteArchivesWorkflows,
+  useDeleteArchivesWorkflowsUid,
+  useGetArchives,
+  useGetArchivesSchedules,
+  useGetArchivesWorkflows,
+} from 'openapi'
+import {
+  DeleteArchivesWorkflowsParams,
+  DeleteExperimentsParams,
+  DeleteSchedulesParams,
+  TypesArchive,
+} from 'openapi/index.schemas'
+import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
@@ -64,36 +79,41 @@ export default function Archives() {
   const dispatch = useStoreDispatch()
 
   const [panel, setPanel] = useState<PanelType>(kind as PanelType)
-  const [loading, setLoading] = useState(true)
   const [archives, setArchives] = useState<TypesArchive[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const fetchArchives = useCallback(() => {
-    let request
+  const { isLoading: loading1, refetch: refetchWorkflows } = useGetArchivesWorkflows(undefined, {
+    query: { enabled: kind === 'workflow', onSuccess: setArchives },
+  })
+  const { isLoading: loading2, refetch: refetchSchedules } = useGetArchivesSchedules(undefined, {
+    query: { enabled: kind === 'schedule', onSuccess: setArchives },
+  })
+  const { isLoading: loading3, refetch: refetchExperiments } = useGetArchives(undefined, {
+    query: { enabled: kind === 'experiment', onSuccess: setArchives },
+  })
+  const loading = kind === 'workflow' ? loading1 : kind === 'schedule' ? loading2 : loading3
+  function refetchByKind() {
     switch (kind) {
       case 'workflow':
-        request = api.archives.archivesWorkflowsGet
+        refetchWorkflows()
+
         break
       case 'schedule':
-        request = api.archives.archivesSchedulesGet
+        refetchSchedules()
+
         break
-      case 'experiment':
       default:
-        request = api.archives.archivesGet
-        break
+        refetchExperiments()
     }
-
-    request()
-      .then(({ data }) => {
-        setArchives(data)
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [kind])
-
-  useEffect(fetchArchives, [fetchArchives])
+  }
+  const { mutateAsync: deleteWorkflows } = useDeleteArchivesWorkflows()
+  const { mutateAsync: deleteSchedules } = useDeleteArchivesSchedules()
+  const { mutateAsync: deleteExperiments } = useDeleteArchives()
+  const { mutateAsync: deleteWorkflowsByUUID } = useDeleteArchivesWorkflowsUid()
+  const { mutateAsync: deleteSchedulesByUUID } = useDeleteArchivesSchedulesUid()
+  const { mutateAsync: deleteExperimentsByUUID } = useDeleteArchivesUid()
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
@@ -106,44 +126,49 @@ export default function Archives() {
     )
 
   const handleAction = (action: string, uuid?: uuid) => () => {
-    let actionFunc: any
-    let arg: any
+    let actionFunc
+    let arg:
+      | { uid: string }
+      | { params: DeleteArchivesWorkflowsParams | DeleteExperimentsParams | DeleteSchedulesParams }
+      | undefined
 
     switch (action) {
       case 'delete':
         switch (kind) {
           case 'workflow':
-            actionFunc = api.archives.archivesWorkflowsUidDelete
+            actionFunc = deleteWorkflowsByUUID
             break
           case 'schedule':
-            actionFunc = api.archives.archivesSchedulesUidDelete
+            actionFunc = deleteSchedulesByUUID
             break
           case 'experiment':
           default:
-            actionFunc = api.archives.archivesUidDelete
+            actionFunc = deleteExperimentsByUUID
             break
         }
-        arg = { uid: uuid }
+        arg = { uid: uuid! }
 
         break
       case 'deleteMulti':
         action = 'delete'
         switch (kind) {
           case 'workflow':
-            actionFunc = api.archives.archivesWorkflowsDelete
+            actionFunc = deleteWorkflows
             break
           case 'schedule':
-            actionFunc = api.archives.archivesSchedulesDelete
+            actionFunc = deleteSchedules
             break
           case 'experiment':
           default:
-            actionFunc = api.archives.archivesDelete
+            actionFunc = deleteExperiments
             break
         }
         arg = {
-          uids: Object.keys(batch)
-            .filter((d) => batch[d] === true)
-            .join(','),
+          params: {
+            uids: Object.keys(batch)
+              .filter((d) => batch[d] === true)
+              .join(','),
+          },
         }
         setBatch({})
 
@@ -151,7 +176,7 @@ export default function Archives() {
     }
 
     if (actionFunc) {
-      actionFunc(arg)
+      actionFunc(arg as any)
         .then(() => {
           dispatch(
             setAlert({
@@ -160,7 +185,7 @@ export default function Archives() {
             })
           )
 
-          fetchArchives()
+          refetchByKind()
         })
         .catch(console.error)
     }

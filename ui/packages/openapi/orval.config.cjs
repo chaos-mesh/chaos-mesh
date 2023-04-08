@@ -14,20 +14,31 @@
  * limitations under the License.
  *
  */
-import { render, screen } from 'test-utils'
 
-import i18n, { T } from '.'
-
-describe('i18n() and <T />', () => {
-  test('displays `k8s.title` with i18n()', async () => {
-    render(<div>{i18n('k8s.title')}</div>)
-
-    expect(screen.getByText('Kubernetes')).toBeInTheDocument()
-  })
-
-  test('displays `k8s.title` with <T />', async () => {
-    render(<T id="k8s.title" />)
-
-    expect(screen.getByText('Kubernetes')).toBeInTheDocument()
-  })
-})
+module.exports = {
+  openapi: {
+    input: './swagger.yaml',
+    output: {
+      mode: 'split',
+      target: '../../app/src/openapi/index.ts',
+      client: 'react-query',
+      override: {
+        mutator: {
+          path: '../../app/src/api/http.ts',
+          name: 'customInstance',
+        },
+        query: {
+          options: {
+            retry: 1,
+            retryDelay: 3000,
+          },
+        },
+        mock: {
+          delay: 0,
+          required: true,
+        },
+      },
+      mock: true,
+    },
+  },
+}

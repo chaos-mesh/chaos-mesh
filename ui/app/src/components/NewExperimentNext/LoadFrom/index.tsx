@@ -15,8 +15,17 @@
  *
  */
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
-import api from 'api'
-import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
+import {
+  useGetArchives,
+  useGetArchivesSchedules,
+  useGetArchivesSchedulesUid,
+  useGetArchivesUid,
+  useGetExperiments,
+  useGetExperimentsUid,
+  useGetSchedules,
+  useGetSchedulesUid,
+} from 'openapi'
+import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from 'openapi/index.schemas'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -45,51 +54,80 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<{
-    experiments: TypesExperiment[]
-    archives: TypesArchive[]
-    schedules: TypesSchedule[]
-  }>({
-    experiments: [],
-    archives: [],
-    schedules: [],
-  })
+  const [scheduleUUID, setScheduleUUID] = useState('')
+  const [experimentUUID, setExperimentUUID] = useState('')
+  const [archiveUUID, setArchiveUUID] = useState('')
+  const [scheduleArchiveUUID, setScheduleArchiveUUID] = useState('')
   const [predefined, setPredefined] = useState<PreDefinedValue[]>([])
   const [radio, setRadio] = useState('')
 
+  const { data: experiments, isLoading: loading1 } = useGetExperiments()
+  const { data: schedules, isLoading: loading2 } = useGetSchedules(undefined, { query: { enabled: inSchedule } })
+  const { data: archives, isLoading: loading3 } = (inSchedule ? useGetArchivesSchedules : useGetArchives)()
+  const loading = loading1 || loading2 || loading3
+  function afterLoad(data: TypesScheduleDetail | TypesExperimentDetail | TypesArchiveDetail) {
+    callback && callback(data.kube_object)
+
+    dispatch(
+      setAlert({
+        type: 'success',
+        message: i18n('confirm.success.load', intl),
+      })
+    )
+  }
+  useGetSchedulesUid(scheduleUUID, {
+    query: {
+      enabled: !!scheduleUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setScheduleUUID('')
+      },
+    },
+  })
+  useGetExperimentsUid(experimentUUID, {
+    query: {
+      enabled: !!experimentUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setExperimentUUID('')
+      },
+    },
+  })
+  useGetArchivesSchedulesUid(scheduleArchiveUUID, {
+    query: {
+      enabled: !!scheduleArchiveUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setScheduleArchiveUUID('')
+      },
+    },
+  })
+  useGetArchivesUid(archiveUUID, {
+    query: {
+      enabled: !!archiveUUID,
+      onSuccess(data) {
+        afterLoad(data)
+
+        setArchiveUUID('')
+      },
+    },
+  })
+
   useEffect(() => {
-    const fetchExperiments = api.experiments.experimentsGet
-    const fetchArchives = inSchedule ? api.archives.archivesSchedulesGet : api.archives.archivesGet
-    const promises: Promise<any>[] = [fetchExperiments(), fetchArchives()]
-
-    if (inSchedule) {
-      promises.push(api.schedules.schedulesGet())
-    }
-
-    const fetchAll = async () => {
-      try {
-        const data = await Promise.all(promises)
-
-        setData({
-          experiments: data[0].data,
-          archives: data[1].data,
-          schedules: data[2] ? data[2].data : [],
-        })
-      } catch (error) {
-        console.error(error)
-      }
-
+    const fetchPredefined = async () => {
       let _predefined = await (await getDB()).getAll('predefined')
+
       if (!inSchedule) {
         _predefined = _predefined.filter((d) => d.kind !== 'Schedule')
       }
-      setPredefined(_predefined)
 
-      setLoading(false)
+      setPredefined(_predefined)
     }
 
-    fetchAll()
+    fetchPredefined()
   }, [inSchedule, inWorkflow])
 
   const onRadioChange = (e: any) => {
@@ -110,35 +148,26 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
       return
     }
 
-    let apiRequest
     switch (type) {
       case 's':
-        apiRequest = api.schedules.schedulesUidGet
+        setScheduleUUID(uuid)
+
         break
       case 'e':
-        apiRequest = api.experiments.experimentsUidGet
+        setExperimentUUID(uuid)
+
         break
       case 'a':
-        apiRequest = inSchedule ? api.archives.archivesSchedulesUidGet : api.archives.archivesUidGet
+        if (inSchedule) {
+          setScheduleArchiveUUID(uuid)
+        } else {
+          setArchiveUUID(uuid)
+        }
+
         break
     }
 
     setRadio(e.target.value)
-
-    if (apiRequest) {
-      apiRequest({ uid: uuid })
-        .then(({ data }) => {
-          callback && callback(data.kube_object)
-
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n('confirm.success.load', intl),
-            })
-          )
-        })
-        .catch(console.error)
-    }
   }
 
   return (
@@ -151,9 +180,9 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
               {loading ? (
                 <SkeletonN n={3} />
-              ) : data.schedules.length > 0 ? (
+              ) : schedules && schedules.length > 0 ? (
                 <Box display="flex" flexWrap="wrap">
-                  {data.schedules.map((d) => (
+                  {schedules.map((d) => (
                     <FormControlLabel
                       key={d.uid}
                       value={`s+${d.uid}`}
@@ -178,9 +207,9 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
               {loading ? (
                 <SkeletonN n={3} />
-              ) : data.experiments.length > 0 ? (
+              ) : experiments && experiments.length > 0 ? (
                 <Box display="flex" flexWrap="wrap">
-                  {data.experiments.map((d) => (
+                  {experiments.map((d) => (
                     <FormControlLabel
                       key={d.uid}
                       value={`e+${d.uid}`}
@@ -203,9 +232,9 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
 
           {loading ? (
             <SkeletonN n={3} />
-          ) : data.archives.length > 0 ? (
+          ) : archives && archives.length > 0 ? (
             <Box display="flex" flexWrap="wrap">
-              {data.archives.map((d) => (
+              {archives.map((d) => (
                 <FormControlLabel
                   key={d.uid}
                   value={`a+${d.uid}`}

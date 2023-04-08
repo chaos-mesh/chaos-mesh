@@ -14,19 +14,17 @@
  * limitations under the License.
  *
  */
-
 import { Box, BoxProps } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { PropertyAccessor } from '@nivo/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
-import { useEffect, useState } from 'react'
+import { useGetExperimentsState } from 'openapi'
+import { StatusAllChaosStatus } from 'openapi/index.schemas'
+import { useState } from 'react'
+import { useIntl } from 'react-intl'
 
 import NotFound from 'components/NotFound'
-import { PropertyAccessor } from '@nivo/core'
-import { StatusAllChaosStatus } from 'openapi'
-import api from 'api'
 import i18n from 'components/T'
-import { schemeTableau10 } from 'd3-scale-chromatic'
-import { useIntl } from 'react-intl'
-import { useTheme } from '@mui/material/styles'
 
 interface SingleData {
   id: keyof StatusAllChaosStatus
@@ -38,7 +36,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
   const intl = useIntl()
   const theme = useTheme()
 
-  const [s, setS] = useState<SingleData[]>([])
+  const [state, setState] = useState<SingleData[]>([])
 
   const arcLinkLabel: PropertyAccessor<ComputedDatum<SingleData>, string> = (d) =>
     d.value + ' ' + i18n(`status.${d.id}`, intl)
@@ -55,36 +53,26 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
     </Box>
   )
 
-  useEffect(() => {
-    const fetchState = () => {
-      api.experiments
-        .experimentsStateGet()
-        .then((resp) =>
-          setS(
-            (Object.entries(resp.data) as [keyof StatusAllChaosStatus, number][]).map(([k, v]) => ({
-              id: k,
-              label: i18n(`status.${k}`, intl),
-              value: v === 0 ? 0.01 : v,
-            }))
-          )
+  useGetExperimentsState(undefined, {
+    query: {
+      onSuccess(data) {
+        setState(
+          (Object.entries(data) as [keyof StatusAllChaosStatus, number][]).map(([k, v]) => ({
+            id: k,
+            label: i18n(`status.${k}`, intl),
+            value: v === 0 ? 0.01 : v,
+          }))
         )
-        .catch(console.error)
-    }
-
-    fetchState()
-
-    const id = setInterval(fetchState, 12000)
-
-    return () => clearInterval(id)
-  }, [intl])
+      },
+    },
+  })
 
   return (
     <Box {...props}>
-      {s.some((d) => d.value >= 1) ? (
+      {state.some((d) => d.value >= 1) ? (
         <ResponsivePie
-          data={s}
+          data={state}
           margin={{ top: 15, bottom: 60 }}
-          colors={schemeTableau10 as any}
           innerRadius={0.75}
           padAngle={0.25}
           cornerRadius={4}

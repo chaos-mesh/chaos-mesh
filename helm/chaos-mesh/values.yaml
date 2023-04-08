@@ -394,11 +394,11 @@ dashboard:
 
 dnsServer:
   # Enable DNS Server which required by DNSChaos
-  create: false
+  create: true
   # Name of serviceaccount for chaos-dns-server.
   serviceAccount: chaos-dns-server
   # Image of DNS Server
-  image: pingcap/coredns:v0.2.1
+  image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server

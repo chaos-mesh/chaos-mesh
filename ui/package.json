@@ -1,27 +1,25 @@
 {
-  "name": "@ui/root",
   "version": "0.0.0",
-  "description": "The official, comprehensive Chaos Mesh dashboard user interface",
+  "description": "The official, comprehensive Chaos Mesh dashboard user interface.",
   "author": "Yue Yang <g1enyy0ung@gmail.com>",
   "private": true,
-  "workspaces": [
-    "app",
-    "packages/*"
-  ],
   "scripts": {
-    "bootstrap": "./scripts/bootstrap.sh",
-    "build": "yarn workspace @ui/mui-extends build && yarn workspace @ui/app build",
-    "test": "yarn workspace @ui/mui-extends build && yarn workspace @ui/mui-extends test && yarn workspace @ui/openapi test && yarn workspace @ui/app test",
+    "build": "pnpm -F @ui/mui-extends build && pnpm -F @ui/app build",
+    "test": "pnpm -F @ui/mui-extends build && pnpm -F @ui/mui-extends test && pnpm -F @ui/openapi test && pnpm -F @ui/app test",
     "prepare": "cd ..; is-ci || husky install ./ui/.husky",
     "clean": "rimraf app/node_modules && rimraf packages/**/node_modules && rimraf node_modules"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
-    "husky": "^7.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "husky": "^8.0.3",
     "is-ci": "^3.0.1",
-    "lint-staged": "^12.1.2",
-    "prettier": "^2.5.0",
+    "lint-staged": "^13.1.2",
+    "prettier": "^2.8.4",
     "rimraf": "^3.0.2"
+  },
+  "resolutions": {
+    "@types/react": "17.0.52",
+    "@types/react-dom": "17.0.18"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"

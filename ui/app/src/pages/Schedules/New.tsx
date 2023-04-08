@@ -14,16 +14,18 @@
  * limitations under the License.
  *
  */
-
 import { Grid } from '@mui/material'
-import NewExperiment from 'components/NewExperimentNext'
-import api from 'api'
-import i18n from 'components/T'
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
+import { usePostSchedules } from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+
 import { useStoreDispatch } from 'store'
+
+import { resetNewExperiment } from 'slices/experiments'
+import { setAlert } from 'slices/globalStatus'
+
+import NewExperiment from 'components/NewExperimentNext'
+import i18n from 'components/T'
 
 const New = () => {
   const navigate = useNavigate()
@@ -31,9 +33,10 @@ const New = () => {
 
   const dispatch = useStoreDispatch()
 
+  const { mutateAsync } = usePostSchedules()
+
   const onSubmit = (parsedValues: any) => {
-    api.schedules
-      .schedulesPost({ schedule: parsedValues })
+    mutateAsync({ data: parsedValues })
       .then(() => {
         dispatch(
           setAlert({

@@ -14,67 +14,13 @@
  * limitations under the License.
  *
  */
-import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import api from 'api'
-import { TypesPhysicalMachine, V1alpha1PhysicalMachineSelectorSpec, V1alpha1PodSelectorSpec } from 'openapi'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 import { Kind } from 'components/NewExperimentNext/data/types'
-
-export const getNamespaces = createAsyncThunk(
-  'common/chaos-available-namespaces',
-  async () => (await api.common.commonChaosAvailableNamespacesGet()).data
-)
-export const getLabels = createAsyncThunk(
-  'common/labels',
-  async (podNamespaceList: string[]) =>
-    (
-      await api.common.commonLabelsGet({
-        podNamespaceList: podNamespaceList.join(','),
-      })
-    ).data
-)
-export const getAnnotations = createAsyncThunk(
-  'common/annotations',
-  async (podNamespaceList: string[]) =>
-    (
-      await api.common.commonAnnotationsGet({
-        podNamespaceList: podNamespaceList.join(','),
-      })
-    ).data
-)
-export const getCommonPods = createAsyncThunk(
-  'common/pods',
-  async (data: V1alpha1PodSelectorSpec) =>
-    (
-      await api.common.commonPodsPost({
-        request: data,
-      })
-    ).data
-)
-export const getNetworkTargetPods = createAsyncThunk(
-  'network/target/pods',
-  async (data: V1alpha1PodSelectorSpec) =>
-    (
-      await api.common.commonPodsPost({
-        request: data,
-      })
-    ).data
-)
-export const getPhysicalMachines = createAsyncThunk(
-  'common/physical-machines',
-  async (data: V1alpha1PhysicalMachineSelectorSpec) =>
-    (await api.common.commonPhysicalmachinesPost({ request: data })).data
-)
 
 export type Env = 'k8s' | 'physic'
 
 const initialState: {
-  namespaces: string[]
-  labels: Record<string, string[]>
-  annotations: Record<string, string[]>
-  pods: any[]
-  networkTargetPods: any[]
-  physicalMachines: TypesPhysicalMachine[]
   fromExternal: boolean
   step1: boolean
   step2: boolean
@@ -83,14 +29,6 @@ const initialState: {
   spec: any
   basic: any
 } = {
-  // Selector related.
-  namespaces: [],
-  labels: {},
-  annotations: {},
-  pods: [],
-  networkTargetPods: [],
-  physicalMachines: [],
-  // Creating experiments related.
   fromExternal: false,
   step1: false,
   step2: false,
@@ -104,13 +42,6 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
-    clearPods(state) {
-      state.pods = []
-      state.networkTargetPods = []
-    },
-    clearNetworkTargetPods(state) {
-      state.networkTargetPods = []
-    },
     setStep1(state, action: PayloadAction<boolean>) {
       state.step1 = action.payload
     },
@@ -139,8 +70,6 @@ const experimentsSlice = createSlice({
       state.basic = basic
     },
     resetNewExperiment(state) {
-      state.pods = []
-      state.networkTargetPods = []
       state.fromExternal = false
       state.step1 = false
       state.step2 = false
@@ -149,31 +78,9 @@ const experimentsSlice = createSlice({
       state.basic = {}
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(getNamespaces.fulfilled, (state, action) => {
-      state.namespaces = action.payload
-    })
-    builder.addCase(getLabels.fulfilled, (state, action) => {
-      state.labels = action.payload
-    })
-    builder.addCase(getAnnotations.fulfilled, (state, action) => {
-      state.annotations = action.payload
-    })
-    builder.addCase(getCommonPods.fulfilled, (state, action) => {
-      state.pods = action.payload
-    })
-    builder.addCase(getNetworkTargetPods.fulfilled, (state, action) => {
-      state.networkTargetPods = action.payload
-    })
-    builder.addCase(getPhysicalMachines.fulfilled, (state, action) => {
-      state.physicalMachines = action.payload
-    })
-  },
 })
 
 export const {
-  clearPods,
-  clearNetworkTargetPods,
   setStep1,
   setStep2,
   setEnv,

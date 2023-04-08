@@ -16,16 +16,16 @@
  */
 import ts from 'typescript'
 
-import { isHTTTPChaosPatchHeadersOrQueries, typeTextToFieldType, typeTextToInitialValue } from './factory.js'
-import { visitFilter } from './utils.js'
+import { typeTextToFieldType, typeTextToInitialValue } from './factory.js'
 
 describe('openapi => factory', () => {
   test('typeTextToFieldType', () => {
     expect(typeTextToFieldType('string')).toBe('text')
-    expect(typeTextToFieldType('Array<string>')).toBe('label')
-    expect(typeTextToFieldType('Array<number>')).toBe('numbers')
+    expect(typeTextToFieldType('string[]')).toBe('label')
+    expect(typeTextToFieldType('number[]')).toBe('numbers')
     expect(typeTextToFieldType('{ [key: string]: string }')).toBe('text-text')
-    expect(typeTextToFieldType('{ [key: string]: Array<string> }')).toBe('text-label')
+    expect(typeTextToFieldType('string[][]')).toBe('text-label')
+    expect(typeTextToFieldType('{ [key: string]: string[] }')).toBe('text-label')
     expect(typeTextToFieldType('number')).toBe('number')
     expect(typeTextToFieldType('boolean')).toBe('select')
     expect(() => typeTextToFieldType('unknown')).toThrowError()
@@ -33,24 +33,13 @@ describe('openapi => factory', () => {
 
   test('typeTextToInitialValue', () => {
     expect(typeTextToInitialValue('string').text).toBe('')
-    expect(typeTextToInitialValue('Array<string>').elements).toBeInstanceOf(Array)
-    expect(typeTextToInitialValue('Array<number>').elements).toBeInstanceOf(Array)
+    expect(typeTextToInitialValue('string[]').elements).toBeInstanceOf(Array)
+    expect(typeTextToInitialValue('number[]').elements).toBeInstanceOf(Array)
+    expect(typeTextToInitialValue('string[][]').properties.length).toBe(0)
     expect(typeTextToInitialValue('{ [key: string]: string }').properties.length).toBe(0)
+    expect(typeTextToInitialValue('{ [key: string]: string[] }').properties.length).toBe(0)
     expect(typeTextToInitialValue('number').text).toBe('0')
     expect(typeTextToInitialValue('boolean').kind).toBe(ts.SyntaxKind.FalseKeyword)
     expect(() => typeTextToInitialValue('other')).toThrowError()
-  })
-
-  test('isHTTTPChaosPatchHeadersOrQueries finds headers and queries', () => {
-    const text = `export interface V1alpha1PodHttpChaosPatchActions {
-      headers?: Array<Array<string>>
-      queries?: Array<Array<string>>
-    }`
-    const sourceFile = ts.createSourceFile('tmp', text, ts.ScriptTarget.ES2015, true)
-    const nodes = visitFilter(sourceFile, [], ts.isPropertySignature)
-
-    nodes.forEach((node) => {
-      expect(isHTTTPChaosPatchHeadersOrQueries(node)).toBe(true)
-    })
   })
 })

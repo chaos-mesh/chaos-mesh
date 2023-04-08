@@ -78,7 +78,7 @@ func BuildOperatorActionAndCfg(cfg *Config) (OperatorAction, *OperatorConfig, er
 	ocfg.Daemon.ImageRegistry = cfg.DaemonImageRegistry
 	ocfg.Daemon.ImageRepository = cfg.DaemonImage
 	ocfg.Daemon.ImageTag = cfg.DaemonTag
-	ocfg.DNSImage = cfg.ChaosDNSImage
+	ocfg.DNSImage = cfg.ChaosCoreDNSImage
 	ocfg.EnableDashboard = cfg.EnableDashboard
 
 	return oa, &ocfg, nil

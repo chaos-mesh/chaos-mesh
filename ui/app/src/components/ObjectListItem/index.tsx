@@ -20,7 +20,7 @@ import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, IconButton, Typography } from '@mui/material'
 import _ from 'lodash'
-import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
+import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 

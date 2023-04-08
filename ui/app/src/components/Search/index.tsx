@@ -29,9 +29,16 @@ import {
   Typography,
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import api from 'api'
 import _ from 'lodash'
-import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi'
+import {
+  getArchives,
+  getArchivesSchedules,
+  getArchivesWorkflows,
+  getExperiments,
+  getSchedules,
+  getWorkflows,
+} from 'openapi'
+import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -84,16 +91,16 @@ const Search: React.FC = () => {
         setOpen(true)
 
         const [workflows, schedules, experiments, archives, archivedWorkflows, archivedSchedules] = [
-          (await api.workflows.workflowsGet()).data.map((d) => ({
+          (await getWorkflows()).map((d) => ({
             ...d,
             is: 'workflow' as 'workflow',
             kind: 'Workflow',
           })),
-          (await api.schedules.schedulesGet()).data.map((d) => ({ ...d, is: 'schedule' })),
-          (await api.experiments.experimentsGet()).data.map((d) => ({ ...d, is: 'experiment' })),
-          (await api.archives.archivesGet()).data.map((d) => ({ ...d, is: 'archive' })),
-          (await api.archives.archivesWorkflowsGet()).data.map((d) => ({ ...d, is: 'archive' })),
-          (await api.archives.archivesSchedulesGet()).data.map((d) => ({ ...d, is: 'archive' })),
+          (await getSchedules()).map((d) => ({ ...d, is: 'schedule' })),
+          (await getExperiments()).map((d) => ({ ...d, is: 'experiment' })),
+          (await getArchives()).map((d) => ({ ...d, is: 'archive' })),
+          (await getArchivesWorkflows()).map((d) => ({ ...d, is: 'archive' })),
+          (await getArchivesSchedules()).map((d) => ({ ...d, is: 'archive' })),
         ]
 
         const result = search(

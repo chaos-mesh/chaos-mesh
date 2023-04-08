@@ -17,8 +17,7 @@
 import { MenuItem } from '@mui/material'
 import { useFormikContext } from 'formik'
 import { getIn } from 'formik'
-
-import { useStoreSelector } from 'store'
+import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import MoreOptions from 'components/MoreOptions'
@@ -26,6 +25,7 @@ import { T } from 'components/T'
 
 import { Belong } from '.'
 import { isInstant } from './validation'
+import { Stale } from 'api/queryUtils'
 
 interface InfoProps {
   belong: Belong
@@ -36,7 +36,12 @@ interface InfoProps {
 export default function Info({ belong, kind, action }: InfoProps) {
   const { errors, touched } = useFormikContext()
 
-  const { namespaces } = useStoreSelector((state) => state.experiments)
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   return (
     <>
@@ -56,7 +61,7 @@ export default function Info({ belong, kind, action }: InfoProps) {
             error={getIn(errors, 'metadata.name') && getIn(touched, 'metadata.name')}
           />
           <MoreOptions>
-            {namespaces.length && (
+            {namespaces && (
               <SelectField
                 name="metadata.namespace"
                 label={<T id="k8s.namespace" />}

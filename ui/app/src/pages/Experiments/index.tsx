@@ -20,9 +20,15 @@ import CloseIcon from '@mui/icons-material/Close'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
-import api from 'api'
 import _ from 'lodash'
-import { TypesExperiment } from 'openapi'
+import {
+  useDeleteExperiments,
+  useDeleteExperimentsUid,
+  useGetExperiments,
+  usePutExperimentsPauseUid,
+  usePutExperimentsStartUid,
+} from 'openapi'
+import { DeleteExperimentsParams } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -40,7 +46,6 @@ import ObjectListItem from 'components/ObjectListItem'
 import i18n from 'components/T'
 
 import { transByKind } from 'lib/byKind'
-import { useIntervalFetch } from 'lib/hooks'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -57,27 +62,15 @@ export default function Experiments() {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(true)
-  const [experiments, setExperiments] = useState<TypesExperiment[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const fetchExperiments = (intervalID?: number) => {
-    api.experiments
-      .experimentsGet()
-      .then(({ data }) => {
-        setExperiments(data)
-
-        if (data.every((d) => d.status === 'finished' || d.status === 'paused')) {
-          clearInterval(intervalID)
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
-
-  useIntervalFetch(fetchExperiments)
+  const { data: experiments, isLoading: loading, refetch } = useGetExperiments()
+  const { mutateAsync: deleteExperimentsByUUID } = useDeleteExperimentsUid()
+  const { mutateAsync: deleteExperiments } = useDeleteExperiments()
+  const { mutateAsync: pauseExperiments } = usePutExperimentsPauseUid()
+  const { mutateAsync: startExperiments } = usePutExperimentsStartUid()
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
@@ -90,36 +83,36 @@ export default function Experiments() {
     )
 
   const handleAction = (action: string, uuid?: uuid) => () => {
-    let actionFunc: any
-    let arg: any
+    let actionFunc
+    let arg: { uid: string } | { params: DeleteExperimentsParams } | undefined
 
     switch (action) {
       case 'archive':
-        actionFunc = api.experiments.experimentsUidDelete
-        arg = { uid: uuid }
+        actionFunc = deleteExperimentsByUUID
+        arg = { uid: uuid! }
 
         break
       case 'archiveMulti':
         action = 'archive'
-        actionFunc = api.experiments.experimentsDelete
-        arg = { uids: Object.keys(batch).join(',') }
+        actionFunc = deleteExperiments
+        arg = { params: { uids: Object.keys(batch).join(',') } }
         setBatch({})
 
         break
       case 'pause':
-        actionFunc = api.experiments.experimentsPauseUidPut
-        arg = { uid: uuid }
+        actionFunc = pauseExperiments
+        arg = { uid: uuid! }
 
         break
       case 'start':
-        actionFunc = api.experiments.experimentsStartUidPut
-        arg = { uid: uuid }
+        actionFunc = startExperiments
+        arg = { uid: uuid! }
 
         break
     }
 
     if (actionFunc) {
-      actionFunc(arg)
+      actionFunc(arg as any)
         .then(() => {
           dispatch(
             setAlert({
@@ -128,18 +121,18 @@ export default function Experiments() {
             })
           )
 
-          setTimeout(fetchExperiments, 300)
+          refetch()
         })
         .catch(console.error)
     }
   }
 
-  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [experiments[0].uid!]: true } : {})
+  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [experiments![0].uid!]: true } : {})
 
   const handleBatchSelectAll = () =>
     setBatch(
-      batchLength <= experiments.length
-        ? experiments.reduce<Record<uuid, boolean>>((acc, d) => {
+      batchLength <= experiments!.length
+        ? experiments!.reduce<Record<uuid, boolean>>((acc, d) => {
             acc[d.uid!] = true
 
             return acc
@@ -187,7 +180,7 @@ export default function Experiments() {
           variant="outlined"
           startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}
           onClick={handleBatchSelect}
-          disabled={experiments.length === 0}
+          disabled={experiments?.length === 0}
         >
           {i18n(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
         </Button>
@@ -208,7 +201,8 @@ export default function Experiments() {
         )}
       </Space>
 
-      {experiments.length > 0 &&
+      {experiments &&
+        experiments.length > 0 &&
         Object.entries(_.groupBy(experiments, 'kind')).map(([kind, experimentsByKind]) => (
           <Box key={kind} mb={6}>
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
@@ -224,7 +218,7 @@ export default function Experiments() {
           </Box>
         ))}
 
-      {!loading && experiments.length === 0 && (
+      {!loading && experiments?.length === 0 && (
         <NotFound illustrated textAlign="center">
           <Typography>{i18n('experiments.notFound')}</Typography>
         </NotFound>

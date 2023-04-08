@@ -16,7 +16,7 @@
  */
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { Box, Typography } from '@mui/material'
-import api from 'api'
+import { usePostExperiments } from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
@@ -48,6 +48,8 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
   const { debugMode, useNewPhysicalMachine } = state.settings
   const dispatch = useStoreDispatch()
 
+  const { mutateAsync } = usePostExperiments()
+
   const submitExperiment = () => {
     const parsedValues = parseSubmit(
       env,
@@ -70,10 +72,9 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
       if (onSubmit) {
         onSubmit(parsedValues)
       } else {
-        api.experiments
-          .experimentsPost({
-            chaos: parsedValues,
-          })
+        mutateAsync({
+          data: parsedValues,
+        })
           .then(() => {
             dispatch(
               setAlert({

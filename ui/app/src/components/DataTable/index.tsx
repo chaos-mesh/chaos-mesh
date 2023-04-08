@@ -25,13 +25,9 @@ export default function DataTable({ columns, sx, ...rest }: DataGridProps) {
         ...d,
         flex: d.width ? undefined : 1,
         headerAlign: d.headerAlign || 'left',
-        ...(d.renderCell || d.type === 'actions'
-          ? {}
-          : {
-              renderCell: (params: GridRenderCellParams<string>) => (
-                <Typography variant="body2">{params.value}</Typography>
-              ),
-            }),
+        ...((d.renderCell || d.type === 'actions') && {
+          renderCell: ({ value }: GridRenderCellParams) => <Typography variant="body2">{value}</Typography>,
+        }),
       }))}
       sx={{
         color: 'onSurfaceVariant.main',

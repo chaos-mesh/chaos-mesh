@@ -19,4 +19,10 @@ export const actions = ['pod-kill', 'pod-failure', 'container-kill'],
       helperText:
         'Optional. GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted. Value must be non-negative integer. The default value is zero that indicates delete immediately.',
     },
+    {
+      field: 'text',
+      label: 'remoteCluster',
+      value: '',
+      helperText: 'Optional. RemoteCluster represents the remote cluster where the chaos will be deployed',
+    },
   ]

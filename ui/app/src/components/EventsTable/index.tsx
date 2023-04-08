@@ -32,7 +32,7 @@ import {
   TableSortLabel,
 } from '@mui/material'
 import _ from 'lodash'
-import { CoreEvent as Event } from 'openapi'
+import { CoreEvent as Event } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -60,7 +60,7 @@ function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy
 
 type Order = 'asc' | 'desc'
 
-function getComparator<T>(order: Order, orderBy: string): (a: T, b: T) => number {
+function getComparator<T extends Record<string, any>>(order: Order, orderBy: string): (a: T, b: T) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy)

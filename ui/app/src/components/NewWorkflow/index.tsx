@@ -34,10 +34,11 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
-import api from 'api'
+import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -98,7 +99,6 @@ const NewWorkflow = () => {
   const navigate = useNavigate()
 
   const state = useStoreSelector((state) => state)
-  const { namespaces } = state.experiments
   const { templates } = state.workflows
   const dispatch = useStoreDispatch()
 
@@ -110,6 +110,14 @@ const NewWorkflow = () => {
     deadline: '',
   })
   const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
+  const { mutateAsync } = usePostWorkflows()
 
   useEffect(() => {
     return () => {
@@ -181,10 +189,9 @@ const NewWorkflow = () => {
       console.debug('Debug workflow:', workflow)
     }
 
-    api.workflows
-      .workflowsPost({
-        request: yaml.load(workflow) as any,
-      })
+    mutateAsync({
+      data: yaml.load(workflow) as any,
+    })
       .then(() => {
         dispatch(resetWorkflow())
 
@@ -268,7 +275,7 @@ const NewWorkflow = () => {
                   label={i18n('k8s.namespace')}
                   helperText={i18n('newE.basic.namespaceHelper')}
                 >
-                  {namespaces.map((n) => (
+                  {namespaces!.map((n) => (
                     <MenuItem key={n} value={n}>
                       {n}
                     </MenuItem>
