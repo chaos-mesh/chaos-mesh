@@ -314,7 +314,7 @@ generate-deepcopy: images/dev-env/.dockerbuilt chaos-build
 
 generate: generate-ctrl swagger_spec generate-deepcopy chaos-build
 
-check: generate yaml vet boilerplate lint tidy install.sh fmt
+check: generate yaml boilerplate tidy fmt vet lint install.sh
 
 CLEAN_TARGETS+=e2e-test/image/e2e/bin/ginkgo
 e2e-test/image/e2e/bin/ginkgo: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -359,11 +359,12 @@ swagger_spec: SHELL:=$(RUN_IN_DEV_SHELL)
 swagger_spec: images/dev-env/.dockerbuilt
 	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
 
-.PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config \
-	install.sh $(GO_TARGET_PHONY) \
+.PHONY: all image clean test install manifests manifests/crd.yaml \
+	boilerplate tidy groupimports fmt vet lint install.sh \
+	config \
+	generate generate-deepcopy swagger_spec \
+	$(GO_TARGET_PHONY) \
 	gosec-scan \
-	failpoint-enable failpoint-disable swagger_spec \
+	failpoint-enable failpoint-disable \
 	e2e-test/image/e2e/bin/e2e.test \
-	proto bin/chaos-builder schedule-migration enter-buildenv enter-devenv \
-	manifests/crd.yaml generate-deepcopy boilerplate boilerplate-fix
+	proto bin/chaos-builder enter-buildenv enter-devenv
