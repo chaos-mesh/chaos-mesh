@@ -36,8 +36,8 @@ jobs:
 
       - name: Build binary
         run: |
-          make chaosctl
-          make schedule-migration
+          make local/chaosctl
+          make local/schedule-migration
 
       - name: Upload files
         run: |

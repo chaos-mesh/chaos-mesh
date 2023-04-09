@@ -5,7 +5,7 @@ Chaostl is a tool (currently) used to print debug info. Maintainers would make u
 ## How to build
 ```shell
 cd $CHAOSMESH_DIR
-make chaosctl
+make local/chaosctl
 ./bin/chaosctl --help # to see if build succeeds.
 ```
 Chaoctl supports shell autocompletion, which could save you some typing. Do `./bin/chaosctl completion -h` for detail.
@@ -35,7 +35,7 @@ Chaoctl supports shell autocompletion, which could save you some typing. Do `./b
 ```
 
 ## Detail of `debug`
-An example output structure of `debug` would be like: 
+An example output structure of `debug` would be like:
 ```
 CHAOSNAME
 PODNAME (which the chaos would take effect on)

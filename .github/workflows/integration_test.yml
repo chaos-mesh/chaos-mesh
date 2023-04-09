@@ -98,9 +98,9 @@ jobs:
           kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-mesh
           sleep 5
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
-      - name: Make chaosctl
+      - name: Build chaosctl
         run: |
-          make chaosctl
+          make local/chaosctl
       - name: Install localstack && aws client
         run: |
           helm repo add localstack-repo http://helm.localstack.cloud

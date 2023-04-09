@@ -19,22 +19,13 @@ HELM_BIN=$(ROOT)/output/bin/helm
 export IMAGE_BUILD_ENV_BUILD ?= 0
 export IMAGE_DEV_ENV_BUILD ?= 0
 
-# Every branch should have its own image tag for build-env and dev-env
-# using := with ifeq instead of ?= for performance issue
-ifeq ($(IMAGE_BUILD_ENV_TAG),)
-export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
-endif
-ifeq ($(IMAGE_DEV_ENV_TAG),)
-export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
-endif
-
-export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
-GOENV  	:= CGO_ENABLED=0
-CGOENV 	:= CGO_ENABLED=1
-GO     	:= $(GOENV) go
-CGO    	:= $(CGOENV) go
-GOTEST 	:= USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-SHELL  	:= bash
+export GOPROXY := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
+GOENV  := CGO_ENABLED=0
+CGOENV := CGO_ENABLED=1
+GO     := $(GOENV) go
+CGO    := $(CGOENV) go
+GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="$(NO_PROXY),testhost" go test
+SHELL  := bash
 
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") $$(cd api && go list ./... && cd ../)
 
@@ -49,11 +40,17 @@ ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
 endif
 
-BASIC_IMAGE_ENV=IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) IMAGE_DEV_ENV_REGISTRY=$(IMAGE_DEV_ENV_REGISTRY) \
-	IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
-	IMAGE_BUILD_ENV_PROJECT=$(IMAGE_BUILD_ENV_PROJECT) IMAGE_BUILD_ENV_REGISTRY=$(IMAGE_BUILD_ENV_REGISTRY) \
-	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) \
-	IMAGE_TAG=$(IMAGE_TAG) IMAGE_PROJECT=$(IMAGE_PROJECT) IMAGE_REGISTRY=$(IMAGE_REGISTRY) \
+ifeq (,$(findstring local/,$(MAKECMDGOALS)))
+BASIC_IMAGE_ENV=\
+	IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) \
+	IMAGE_DEV_ENV_REGISTRY=$(IMAGE_DEV_ENV_REGISTRY) \
+	IMAGE_DEV_ENV_TAG=$(if $(IMAGE_DEV_ENV_TAG),$(IMAGE_DEV_ENV_TAG),$(shell ./hack/env-image-tag.sh dev-env)) \
+	IMAGE_BUILD_ENV_PROJECT=$(IMAGE_BUILD_ENV_PROJECT) \
+	IMAGE_BUILD_ENV_REGISTRY=$(IMAGE_BUILD_ENV_REGISTRY) \
+	IMAGE_BUILD_ENV_TAG=$(if $(IMAGE_BUILD_ENV_TAG),$(IMAGE_BUILD_ENV_TAG),$(shell ./hack/env-image-tag.sh build-env)) \
+	IMAGE_PROJECT=$(IMAGE_PROJECT) \
+	IMAGE_REGISTRY=$(IMAGE_REGISTRY) \
+	IMAGE_TAG=$(IMAGE_TAG) \
 	TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
@@ -61,15 +58,39 @@ RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
+endif
 
 CLEAN_TARGETS :=
 
 all: yaml image
 
-test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
+# Build chaos-controller-manager locally
+local/chaos-controller-manager:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/chaos-controller-manager/main.go
 
-timer:
+# Build chaos-dashboard locally
+local/chaos-dashboard:
+	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/main.go
+
+# Build chaosctl locally
+local/chaosctl:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/main.go
+
+local/timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
+
+# Build schedule-migration locally
+local/schedule-migration:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
+
+local/schedule-migration.tar.gz: local/schedule-migration
+	cp ./bin/schedule-migration ./schedule-migration
+	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
+	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
+	rm ./migrate.sh
+	rm ./schedule-migration
+
+test-utils: local/timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
 multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
@@ -89,17 +110,6 @@ endif
 
 watchmaker: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
-
-# Build schedule-migration
-schedule-migration:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
-
-schedule-migration.tar.gz: schedule-migration
-	cp ./bin/schedule-migration ./schedule-migration
-	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
-	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
-	rm ./migrate.sh
-	rm ./schedule-migration
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -122,20 +132,19 @@ boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
 boilerplate-fix: images/dev-env/.dockerbuilt
 	$(SKYWALKING_EYES_HEADER) fix
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER), image-chaos-dlv)
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard $(if $(DEBUGGER),image-chaos-dlv)
 
 e2e-image: image-e2e-helper
 
 GO_TARGET_PHONY :=
 
 define COMPILE_GO_TEMPLATE
-
 $(1): SHELL:=$(RUN_IN_BUILD_SHELL)
 $(1): $(4) image-build-env
 ifeq ($(3),1)
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "$(BUILD_TAGS)" -o $(1) $(2)
 else
-	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "$(BUILD_TAGS)" -o $(1) $(2)
 endif
 
 GO_TARGET_PHONY += $(1)
@@ -163,26 +172,12 @@ pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c i
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
-# Build chaos-daedmon locally
-local/chaos-daemon: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
-	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
-
-# Build chaos-controller-manager locally
-local/chaos-controller-manager:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/chaos-controller-manager/main.go
-
-# Build chaos-dashboard locally
-local/chaos-dashboard:
-	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/main.go
-
-# Build chaosctl locally
-chaosctl:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/main.go
-
+ifeq (,$(findstring local/,$(MAKECMDGOALS)))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1,pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/cdh,./cmd/chaos-daemon-helper/main.go,1))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui))
+endif
 
 prepare-install: all docker-push docker-push-dns-server
 
@@ -212,12 +207,13 @@ CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
 
-$(2)/.dockerbuilt:SHELL=bash
-$(2)/.dockerbuilt:$(3) $(2)/Dockerfile
+$(2)/.dockerbuilt: SHELL=bash
+$(2)/.dockerbuilt: $(3) $(2)/Dockerfile
 	$(ROOT)/build/build_image.py $(1) $(2)
 	touch $(2)/.dockerbuilt
 endef
 
+ifeq (,$(findstring local/,$(MAKECMDGOALS)))
 $(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon,images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause images/chaos-daemon/bin/cdh))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
@@ -228,6 +224,7 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,e2e-test/image/e2e,e2e-test/image/e2
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 $(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
 $(eval $(call IMAGE_TEMPLATE,chaos-dlv,images/chaos-dlv))
+endif
 
 docker-push:
 	docker push "${IMAGE_REGISTRY_PREFIX}chaos-mesh/chaos-mesh:${IMAGE_TAG}"
@@ -250,7 +247,7 @@ docker-push-chaos-kernel:
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
+	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
 
 chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt
@@ -297,16 +294,14 @@ fmt: groupimports images/dev-env/.dockerbuilt
 
 vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt
-	$(CGOENV) go vet ./...
+	$(CGO) vet ./...
 
 tidy: SHELL:=$(RUN_IN_DEV_SHELL)
 tidy: images/dev-env/.dockerbuilt
-	@echo "go mod tidy"
-	GO111MODULE=on go mod tidy
-	git diff -U --exit-code go.mod go.sum
-	cd api; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	GO111MODULE=on go mod tidy; git diff -U1 --exit-code go.mod go.sum
+	cd api; GO111MODULE=on go mod tidy; git diff -U1 --exit-code go.mod go.sum
+	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U1 --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U1 --exit-code go.mod go.sum
 
 generate-ctrl: SHELL:=$(RUN_IN_DEV_SHELL)
 generate-ctrl: images/dev-env/.dockerbuilt generate-deepcopy
@@ -337,7 +332,7 @@ CLEAN_TARGETS += cover.out cover.out.tmp
 
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: failpoint-enable generate manifests test-utils images/dev-env/.dockerbuilt
-	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
+	$(CGOENV) $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	make failpoint-disable
 
@@ -367,9 +362,8 @@ swagger_spec: images/dev-env/.dockerbuilt
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate config \
 	install.sh $(GO_TARGET_PHONY) \
-	manager chaosfs chaosdaemon chaos-dashboard \
 	gosec-scan \
 	failpoint-enable failpoint-disable swagger_spec \
 	e2e-test/image/e2e/bin/e2e.test \
-	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
+	proto bin/chaos-builder schedule-migration enter-buildenv enter-devenv \
 	manifests/crd.yaml generate-deepcopy boilerplate boilerplate-fix

@@ -47,8 +47,8 @@ jobs:
 
       - name: Build binary
         run: |
-          make chaosctl
-          make schedule-migration.tar.gz
+          make local/chaosctl
+          make local/schedule-migration.tar.gz
 
       - name: Update install.sh with Certain Version
         run: |
