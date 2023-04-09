@@ -41,13 +41,22 @@ ifeq ($(UI),1)
 endif
 
 ifeq (,$(findstring local/,$(MAKECMDGOALS)))
+# Each branch should have its own image tag for build-env and dev-env
+# Use := with ifeq instead of ?= for performance issues
+ifeq ($(IMAGE_BUILD_ENV_TAG),)
+export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+endif
+ifeq ($(IMAGE_DEV_ENV_TAG),)
+export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+endif
+
 BASIC_IMAGE_ENV=\
 	IMAGE_DEV_ENV_PROJECT=$(IMAGE_DEV_ENV_PROJECT) \
 	IMAGE_DEV_ENV_REGISTRY=$(IMAGE_DEV_ENV_REGISTRY) \
-	IMAGE_DEV_ENV_TAG=$(if $(IMAGE_DEV_ENV_TAG),$(IMAGE_DEV_ENV_TAG),$(shell ./hack/env-image-tag.sh dev-env)) \
+	IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_BUILD_ENV_PROJECT=$(IMAGE_BUILD_ENV_PROJECT) \
 	IMAGE_BUILD_ENV_REGISTRY=$(IMAGE_BUILD_ENV_REGISTRY) \
-	IMAGE_BUILD_ENV_TAG=$(if $(IMAGE_BUILD_ENV_TAG),$(IMAGE_BUILD_ENV_TAG),$(shell ./hack/env-image-tag.sh build-env)) \
+	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) \
 	IMAGE_PROJECT=$(IMAGE_PROJECT) \
 	IMAGE_REGISTRY=$(IMAGE_REGISTRY) \
 	IMAGE_TAG=$(IMAGE_TAG) \
