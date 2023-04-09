@@ -42,7 +42,7 @@ endif
 
 ifeq (,$(findstring local/,$(MAKECMDGOALS)))
 # Each branch should have its own image tag for build-env and dev-env
-# Use := with ifeq instead of ?= for performance issues
+# Use := with ifeq instead of = for performance issues (simply expanded)
 ifeq ($(IMAGE_BUILD_ENV_TAG),)
 export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
 endif
