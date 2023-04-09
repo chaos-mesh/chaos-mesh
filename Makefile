@@ -369,11 +369,11 @@ swagger_spec: images/dev-env/.dockerbuilt
 	swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
 
 .PHONY: all image clean test install manifests manifests/crd.yaml \
-	boilerplate tidy groupimports fmt vet lint install.sh \
-	config \
+	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \
+	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	$(GO_TARGET_PHONY) \
 	gosec-scan \
 	failpoint-enable failpoint-disable \
 	e2e-test/image/e2e/bin/e2e.test \
-	proto enter-buildenv enter-devenv
+	enter-buildenv enter-devenv
