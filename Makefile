@@ -40,6 +40,7 @@ ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
 endif
 
+# See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
 ifeq (,$(findstring local/,$(MAKECMDGOALS)))
 # Each branch should have its own image tag for build-env and dev-env
 # Use := with ifeq instead of = for performance issues (simply expanded)
