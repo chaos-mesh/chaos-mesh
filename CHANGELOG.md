@@ -29,6 +29,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade OS image for chaos-daemon container image [#3905](https://github.com/chaos-mesh/chaos-mesh/pull/3905)
 - Replace openapi-generator with Orval and React Query [#3748](https://github.com/chaos-mesh/chaos-mesh/pull/3748)
 - Remove `IN_DOCKER` environment variable in `Makefile` [#3992](https://github.com/chaos-mesh/chaos-mesh/pull/3992)
+- Build binaries locally with `local/` prefix targets in `Makefile`
 
 ### Removed
 
