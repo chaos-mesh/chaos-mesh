@@ -250,7 +250,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
 
 chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
-chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt
+chaos-build: images/dev-env/.dockerbuilt bin/chaos-builder
 	bin/chaos-builder
 
 proto: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -329,7 +329,6 @@ e2e-test/image/e2e/bin/e2e.test: images/dev-env/.dockerbuilt
 
 # Run tests
 CLEAN_TARGETS += cover.out cover.out.tmp
-
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: failpoint-enable generate manifests test-utils images/dev-env/.dockerbuilt
 	$(CGOENV) $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
@@ -362,9 +361,9 @@ swagger_spec: images/dev-env/.dockerbuilt
 .PHONY: all image clean test install manifests manifests/crd.yaml \
 	boilerplate tidy groupimports fmt vet lint install.sh \
 	config \
-	generate generate-deepcopy swagger_spec \
+	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	$(GO_TARGET_PHONY) \
 	gosec-scan \
 	failpoint-enable failpoint-disable \
 	e2e-test/image/e2e/bin/e2e.test \
-	proto bin/chaos-builder enter-buildenv enter-devenv
+	proto enter-buildenv enter-devenv
