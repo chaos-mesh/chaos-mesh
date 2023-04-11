@@ -21,10 +21,16 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Box, Button, Checkbox, styled } from '@mui/material'
 import { Typography } from '@mui/material'
-import api from 'api'
 import _ from 'lodash'
-import { TypesSchedule } from 'openapi'
-import { useEffect, useState } from 'react'
+import {
+  useDeleteSchedules,
+  useDeleteSchedulesUid,
+  useGetSchedules,
+  usePutSchedulesPauseUid,
+  usePutSchedulesStartUid,
+} from 'openapi'
+import { DeleteSchedulesParams } from 'openapi/index.schemas'
+import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
@@ -57,21 +63,15 @@ const Schedules = () => {
 
   const dispatch = useStoreDispatch()
 
-  const [loading, setLoading] = useState(true)
-  const [schedules, setSchedules] = useState<TypesSchedule[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const fetchSchedules = () => {
-    api.schedules
-      .schedulesGet()
-      .then(({ data }) => setSchedules(data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(fetchSchedules, [])
+  const { data: schedules, isLoading: loading, refetch } = useGetSchedules()
+  const { mutateAsync: deleteSchedulesByUUID } = useDeleteSchedulesUid()
+  const { mutateAsync: deleteSchedules } = useDeleteSchedules()
+  const { mutateAsync: pauseSchedules } = usePutSchedulesPauseUid()
+  const { mutateAsync: startSchedules } = usePutSchedulesStartUid()
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
@@ -84,36 +84,38 @@ const Schedules = () => {
     )
 
   const handleAction = (action: string, uuid?: uuid) => () => {
-    let actionFunc: any
-    let arg: any
+    let actionFunc
+    let arg: { uid: string } | { params: DeleteSchedulesParams } | undefined
 
     switch (action) {
       case 'archive':
-        actionFunc = api.schedules.schedulesUidDelete
-        arg = { uid: uuid }
+        actionFunc = deleteSchedulesByUUID
+        arg = { uid: uuid! }
 
         break
       case 'archiveMulti':
         action = 'archive'
-        actionFunc = api.schedules.schedulesDelete
-        arg = { uids: Object.keys(batch).join(',') }
+        actionFunc = deleteSchedules
+        arg = { params: { uids: Object.keys(batch).join(',') } }
         setBatch({})
 
         break
       case 'pause':
-        actionFunc = api.schedules.schedulesPauseUidPut
-        arg = { uid: uuid }
+        actionFunc = pauseSchedules
+        arg = { uid: uuid! }
 
         break
       case 'start':
-        actionFunc = api.schedules.schedulesStartUidPut
-        arg = { uid: uuid }
+        actionFunc = startSchedules
+        arg = { uid: uuid! }
 
+        break
+      default:
         break
     }
 
     if (actionFunc) {
-      actionFunc(arg)
+      actionFunc(arg as any)
         .then(() => {
           dispatch(
             setAlert({
@@ -122,18 +124,18 @@ const Schedules = () => {
             })
           )
 
-          setTimeout(fetchSchedules, 300)
+          refetch()
         })
         .catch(console.error)
     }
   }
 
-  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [schedules[0].uid!]: true } : {})
+  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [schedules![0].uid!]: true } : {})
 
   const handleBatchSelectAll = () =>
     setBatch(
-      batchLength <= schedules.length
-        ? schedules.reduce<Record<uuid, boolean>>((acc, d) => {
+      batchLength <= schedules!.length
+        ? schedules!.reduce<Record<uuid, boolean>>((acc, d) => {
             acc[d.uid!] = true
 
             return acc
@@ -181,7 +183,7 @@ const Schedules = () => {
           variant="outlined"
           startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}
           onClick={handleBatchSelect}
-          disabled={schedules.length === 0}
+          disabled={schedules?.length === 0}
         >
           {i18n(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
         </Button>
@@ -197,7 +199,8 @@ const Schedules = () => {
         )}
       </Space>
 
-      {schedules.length > 0 &&
+      {schedules &&
+        schedules.length > 0 &&
         Object.entries(_.groupBy(schedules, 'kind')).map(([type, schedulesByType]) => (
           <Box key={type} mb={6}>
             <Typography variant="overline">{transByKind(type as any)}</Typography>
@@ -213,7 +216,7 @@ const Schedules = () => {
           </Box>
         ))}
 
-      {!loading && schedules.length === 0 && (
+      {!loading && schedules?.length === 0 && (
         <NotFound illustrated textAlign="center">
           <Typography>{i18n('schedules.notFound')}</Typography>
         </NotFound>

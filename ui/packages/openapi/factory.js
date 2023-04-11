@@ -34,13 +34,16 @@ export function typeTextToFieldType(type) {
       return 'number'
     case 'boolean':
       return 'select'
-    case 'Array<string>':
+    case 'string[]':
       return 'label'
-    case 'Array<number>':
+    case 'number[]':
       return 'numbers'
+    case '{[key: string]: string}':
     case '{ [key: string]: string }':
       return 'text-text'
-    case '{ [key: string]: Array<string> }':
+    case 'string[][]':
+    case '{[key: string]: string[]}':
+    case '{ [key: string]: string[] }':
       return 'text-label'
     default:
       throw new Error(`Unsupported type: ${type}`)
@@ -61,11 +64,14 @@ export function typeTextToInitialValue(type) {
       return factory.createNumericLiteral(0)
     case 'boolean':
       return factory.createFalse()
-    case 'Array<string>':
-    case 'Array<number>':
+    case 'string[]':
+    case 'number[]':
       return factory.createArrayLiteralExpression()
+    case 'string[][]':
+    case '{[key: string]: string}':
     case '{ [key: string]: string }':
-    case '{ [key: string]: Array<string> }':
+    case '{[key: string]: string[]}':
+    case '{ [key: string]: string[] }':
       return factory.createObjectLiteralExpression()
     default:
       throw new Error(`Unsupported type: ${type}`)
@@ -83,7 +89,7 @@ function isArrayLiteral(type, sourceFile) {
   /** @type {string} */
   const typeText = type.getText(sourceFile)
 
-  return typeText.startsWith('Array<')
+  return typeText.endsWith('[]')
 }
 
 /**
@@ -99,8 +105,8 @@ function isArrayLiteral(type, sourceFile) {
  * @return {ts.ObjectLiteralExpression}
  */
 export function nodeToField(identifier, type, comment, objs, sourceFile, checker) {
-  // handle TypeReference
-  if (type.kind === ts.SyntaxKind.TypeReference && !isArrayLiteral(type, sourceFile)) {
+  // Handle TypeReference.
+  if (type.kind === ts.SyntaxKind.TypeReference) {
     return typeReferenceToObjectLiteralExpression(identifier, type, comment, objs, sourceFile, checker)
   }
 
@@ -130,52 +136,37 @@ function typeReferenceToObjectLiteralExpression(
 ) {
   const type = checker.getTypeAtLocation(typeRef)
   const when = getUIFormWhen(comment)
-  const members = type.symbol.members
 
-  members.forEach((val) => {
+  type.symbol.members.forEach((val) => {
     const { escapedName, valueDeclaration: declaration } = val
+    if (escapedName === '__index') {
+      return
+    }
 
-    const comment = declaration.jsDoc[0].comment ?? ''
+    const comment = (declaration.jsDoc && declaration.jsDoc[0].comment) ?? ''
     if (isUIFormIgnore(comment)) {
       return
     }
 
     if (ts.isTypeReferenceNode(declaration.type)) {
-      if (isHTTTPChaosPatchHeadersOrQueries(declaration)) {
-        objs.push(
-          factory.createObjectLiteralExpression(
-            _genBaseFieldElements(escapedName, '{ [key: string]: Array<string> }', comment),
-            true
-          )
-        )
+      objs.push(typeReferenceToObjectLiteralExpression(escapedName, declaration.type, comment, [], sourceFile, checker))
 
-        return
-      }
+      return
+    }
 
-      // handle non-primritive array
-      if (
-        declaration.type.typeName.escapedText === 'Array' &&
-        declaration.type.typeArguments[0].kind === ts.SyntaxKind.TypeReference
-      ) {
-        objs.push(
-          typeReferenceToObjectLiteralExpression(
-            escapedName,
-            declaration.type.typeArguments[0],
-            comment,
-            [],
-            sourceFile,
-            checker,
-            { multiple: true }
-          )
+    // Handle non-primritive array, e.g. `V1alpha1Frame[]`.
+    if (ts.isArrayTypeNode(declaration.type) && ts.isTypeReferenceNode(declaration.type.elementType)) {
+      objs.push(
+        typeReferenceToObjectLiteralExpression(
+          escapedName,
+          declaration.type.elementType,
+          comment,
+          [],
+          sourceFile,
+          checker,
+          { multiple: true }
         )
-      } else if (isArrayLiteral(declaration.type, sourceFile)) {
-        // handle literal array
-        objs.push(_nodeToField(escapedName, declaration.type, comment, sourceFile))
-      } else {
-        objs.push(
-          typeReferenceToObjectLiteralExpression(escapedName, declaration.type, comment, [], sourceFile, checker)
-        )
-      }
+      )
 
       return
     }
@@ -183,7 +174,12 @@ function typeReferenceToObjectLiteralExpression(
     objs.push(_nodeToField(escapedName, declaration.type, comment, sourceFile))
   })
 
-  // create ref field
+  // Indicate that the type is a type alias.
+  if (type.aliasSymbol) {
+    return _nodeToField(identifier, type.aliasSymbol.declarations[0].type, comment, sourceFile)
+  }
+
+  // Create a ref field.
   //
   // {
   //   field: 'ref',
@@ -228,10 +224,15 @@ function _nodeToField(identifier, type, comment, sourceFile) {
       ? [factory.createPropertyAssignment(factory.createIdentifier('when'), factory.createStringLiteral(when))]
       : []),
   ]
-  // {
-  //   ..._genBaseFieldElements(),
-  //   when?: '',
-  // }
+
+  /**
+   * The result will be like this:
+   *
+   * {
+   *   ..._genBaseFieldElements(),
+   *   when?: '',
+   * }
+   */
   return factory.createObjectLiteralExpression(properties, true)
 }
 
@@ -244,13 +245,17 @@ function _nodeToField(identifier, type, comment, sourceFile) {
  * @return {ts.PropertyAssignment[]}
  */
 function _genBaseFieldElements(identifier, typeText, comment) {
-  // {
-  //   field: '',
-  //   label: '',
-  //   value: '',
-  //   items: [],
-  //   helperText: '',
-  // }
+  /**
+   * The result will be like this:
+   *
+   * {
+   *   field: '',
+   *   label: '',
+   *   value: '',
+   *   items: [],
+   *   helperText: '',
+   * }
+   */
   return [
     factory.createPropertyAssignment(
       factory.createIdentifier('field'),
@@ -271,20 +276,4 @@ function _genBaseFieldElements(identifier, typeText, comment) {
       factory.createStringLiteral(cleanMarkers(comment))
     ),
   ]
-}
-
-/**
- * Find special identifiers `headers` and `queries` in HTTPChaos Patch.
- * The type of them is `Array<Array<string>>`.
- *
- * @export
- * @param {ts.Node} node
- */
-export function isHTTTPChaosPatchHeadersOrQueries(node) {
-  const identifier = node.name.escapedText
-
-  return (
-    node.parent.name.escapedText === 'V1alpha1PodHttpChaosPatchActions' &&
-    (identifier === 'headers' || identifier === 'queries')
-  )
 }

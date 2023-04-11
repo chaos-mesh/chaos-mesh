@@ -17,7 +17,7 @@
 import { Box, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import _ from 'lodash'
-import { CoreEvent as Event } from 'openapi'
+import { CoreEvent as Event } from 'openapi/index.schemas'
 import { renderToString } from 'react-dom/server'
 
 import { Theme } from 'slices/settings'

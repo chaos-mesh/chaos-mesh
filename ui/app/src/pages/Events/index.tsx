@@ -15,30 +15,16 @@
  *
  */
 import { Grow, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useGetEvents } from 'openapi'
 
-import { CoreEvent } from 'openapi'
-import EventsTable from 'components/EventsTable'
 import Loading from '@ui/mui-extends/esm/Loading'
+
+import EventsTable from 'components/EventsTable'
 import NotFound from 'components/NotFound'
-import api from 'api'
 import i18n from 'components/T'
 
 export default function Events() {
-  const [loading, setLoading] = useState(true)
-  const [events, setEvents] = useState<CoreEvent[]>([])
-
-  useEffect(() => {
-    const fetchEvents = () => {
-      api.events
-        .eventsGet()
-        .then(({ data }) => setEvents(data))
-        .catch(console.error)
-        .finally(() => setLoading(false))
-    }
-
-    fetchEvents()
-  }, [])
+  const { data: events, isLoading: loading } = useGetEvents()
 
   return (
     <>
@@ -50,7 +36,7 @@ export default function Events() {
         </Grow>
       )}
 
-      {!loading && events.length === 0 && (
+      {!loading && events?.length === 0 && (
         <NotFound illustrated textAlign="center">
           <Typography>{i18n('events.notFound')}</Typography>
         </NotFound>
