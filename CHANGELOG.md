@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Change the package manager from `yarn` to `pnpm`. [#3965](https://github.com/chaos-mesh/chaos-mesh/pull/3965)
 - Upgrade DNS CoreDNS image url to ghcr.io [#3488](https://github.com/chaos-mesh/chaos-mesh/pull/3488)
 - Upgrade OS image for chaos-daemon container image [#3905](https://github.com/chaos-mesh/chaos-mesh/pull/3905)
-- Refine TTL config of Chaos dashboard
+- Refine TTL config of Chaos dashboard [#4008](https://github.com/chaos-mesh/chaos-mesh/pull/4008)
 
 ### Removed
 
