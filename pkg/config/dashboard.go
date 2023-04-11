@@ -97,32 +97,32 @@ func (config *TTLConfigWithStringTime) Parse() (*TTLConfig, error) {
 		return nil, errors.Wrap(err, "parse configuration sync period")
 	}
 
-	event, err := time.ParseDuration(config.EventTTL)
+	eventTTL, err := time.ParseDuration(config.EventTTL)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse configuration TTL for event")
 	}
 
-	experiment, err := time.ParseDuration(config.ExperimentTTL)
+	experimentTTL, err := time.ParseDuration(config.ExperimentTTL)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
 	}
 
-	schedule, err := time.ParseDuration(config.ScheduleTTL)
+	scheduleTTL, err := time.ParseDuration(config.ScheduleTTL)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
 	}
 
-	workflow, err := time.ParseDuration(config.WorkflowTTL)
+	workflowTTL, err := time.ParseDuration(config.WorkflowTTL)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
 	}
 
 	return &TTLConfig{
 		ResyncPeriod:  syncPeriod,
-		EventTTL:      event,
-		ExperimentTTL: experiment,
-		ScheduleTTL:   schedule,
-		WorkflowTTL:   workflow,
+		EventTTL:      eventTTL,
+		ExperimentTTL: experimentTTL,
+		ScheduleTTL:   scheduleTTL,
+		WorkflowTTL:   workflowTTL,
 	}, nil
 }
 

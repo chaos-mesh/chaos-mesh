@@ -21,6 +21,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-func Bootstrap(experiment core.ExperimentStore, event core.EventStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *config.TTLConfig, logger logr.Logger) *Controller {
+func Bootstrap(event core.EventStore, experiment core.ExperimentStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *config.TTLConfig, logger logr.Logger) *Controller {
 	return NewController(event, experiment, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
 }
