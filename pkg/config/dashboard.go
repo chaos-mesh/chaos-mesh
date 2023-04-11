@@ -49,15 +49,15 @@ type ChaosDashboardConfig struct {
 	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 
 	// enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
-	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true"`
+	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true" json:"-"`
 
 	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
 	Version         string `json:"version"`
 
 	// The QPS config for kubernetes client
-	QPS float32 `envconfig:"QPS" default:"200"`
+	QPS float32 `envconfig:"QPS" default:"200" json:"-"`
 	// The Burst config for kubernetes client
-	Burst int `envconfig:"BURST" default:"300"`
+	Burst int `envconfig:"BURST" default:"300" json:"-"`
 }
 
 // DatabaseConfig defines the configuration for databases
