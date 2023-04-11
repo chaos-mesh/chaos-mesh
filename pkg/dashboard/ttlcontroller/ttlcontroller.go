@@ -20,13 +20,11 @@ package ttlcontroller
 import (
 	"context"
 
-	"time"
-
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
@@ -36,67 +34,7 @@ type Controller struct {
 	experiment core.ExperimentStore
 	schedule   core.ScheduleStore
 	workflow   core.WorkflowStore
-	ttlconfig  *TTLConfig
-}
-
-// TTLConfig defines all the TTL-related configurations.
-type TTLConfig struct {
-	// ResyncPeriod defines the period of cleaning data.
-	ResyncPeriod time.Duration
-
-	// TTL of events.
-	EventTTL time.Duration
-	// TTL of experiments.
-	ExperimentTTL time.Duration
-	// TTL of schedules.
-	ScheduleTTL time.Duration
-	// TTL of workflows.
-	WorkflowTTL time.Duration
-}
-
-// TTLConfigWithStringTime defines all the TTL-related configurations with string type time.
-type TTLConfigWithStringTime struct {
-	ResyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
-
-	EventTTL      string `envconfig:"TTL_EVENT"         default:"168h"` // one week
-	ExperimentTTL string `envconfig:"TTL_EXPERIMENT"    default:"336h"` // two weeks
-	ScheduleTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
-	WorkflowTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
-}
-
-func (config *TTLConfigWithStringTime) parse() (*TTLConfig, error) {
-	syncPeriod, err := time.ParseDuration(config.ResyncPeriod)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration sync period")
-	}
-
-	event, err := time.ParseDuration(config.EventTTL)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for event")
-	}
-
-	experiment, err := time.ParseDuration(config.ExperimentTTL)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
-	}
-
-	schedule, err := time.ParseDuration(config.ScheduleTTL)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
-	}
-
-	workflow, err := time.ParseDuration(config.WorkflowTTL)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
-	}
-
-	return &TTLConfig{
-		ResyncPeriod:  syncPeriod,
-		EventTTL:      event,
-		ExperimentTTL: experiment,
-		ScheduleTTL:   schedule,
-		WorkflowTTL:   workflow,
-	}, nil
+	ttlconfig  *config.TTLConfig
 }
 
 // NewController returns a new database ttl controller
@@ -105,7 +43,7 @@ func NewController(
 	experiment core.ExperimentStore,
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
-	ttlconfig *TTLConfig,
+	ttlconfig *config.TTLConfig,
 	logger logr.Logger,
 ) *Controller {
 	return &Controller{

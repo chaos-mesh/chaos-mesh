@@ -16,20 +16,21 @@
 package config
 
 import (
-	"github.com/kelseyhightower/envconfig"
+	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/pkg/errors"
 )
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard
 type ChaosDashboardConfig struct {
-	ListenHost           string                                 `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
-	ListenPort           int                                    `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
-	MetricHost           string                                 `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
-	MetricPort           int                                    `envconfig:"METRIC_PORT" default:"2334" json:"-"`
-	EnableLeaderElection bool                                   `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
-	Database             *DatabaseConfig                        `json:"-"`
-	PersistTTL           *ttlcontroller.TTLConfigWithStringTime `json:"-"`
+	ListenHost           string                   `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
+	ListenPort           int                      `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
+	MetricHost           string                   `envconfig:"METRIC_HOST" default:"0.0.0.0" json:"-"`
+	MetricPort           int                      `envconfig:"METRIC_PORT" default:"2334" json:"-"`
+	EnableLeaderElection bool                     `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
+	Database             *DatabaseConfig          `json:"-"`
+	PersistTTL           *TTLConfigWithStringTime `json:"-"`
 	// ClusterScoped means control Chaos Object in cluster level(all namespace).
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true" json:"cluster_mode"`
 	// TargetNamespace is the target namespace to injecting chaos.
@@ -63,6 +64,66 @@ type ChaosDashboardConfig struct {
 type DatabaseConfig struct {
 	Driver     string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
 	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"core.sqlite"`
+}
+
+// TTLConfig defines all the TTL-related configurations.
+type TTLConfig struct {
+	// ResyncPeriod defines the period of cleaning data.
+	ResyncPeriod time.Duration
+
+	// TTL of events.
+	EventTTL time.Duration
+	// TTL of experiments.
+	ExperimentTTL time.Duration
+	// TTL of schedules.
+	ScheduleTTL time.Duration
+	// TTL of workflows.
+	WorkflowTTL time.Duration
+}
+
+// TTLConfigWithStringTime defines all the TTL-related configurations with string type time.
+type TTLConfigWithStringTime struct {
+	ResyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
+
+	EventTTL      string `envconfig:"TTL_EVENT"         default:"168h"` // one week
+	ExperimentTTL string `envconfig:"TTL_EXPERIMENT"    default:"336h"` // two weeks
+	ScheduleTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
+	WorkflowTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
+}
+
+func (config *TTLConfigWithStringTime) Parse() (*TTLConfig, error) {
+	syncPeriod, err := time.ParseDuration(config.ResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration sync period")
+	}
+
+	event, err := time.ParseDuration(config.EventTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for event")
+	}
+
+	experiment, err := time.ParseDuration(config.ExperimentTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for experiment")
+	}
+
+	schedule, err := time.ParseDuration(config.ScheduleTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for schedule")
+	}
+
+	workflow, err := time.ParseDuration(config.WorkflowTTL)
+	if err != nil {
+		return nil, errors.Wrap(err, "parse configuration TTL for workflow")
+	}
+
+	return &TTLConfig{
+		ResyncPeriod:  syncPeriod,
+		EventTTL:      event,
+		ExperimentTTL: experiment,
+		ScheduleTTL:   schedule,
+		WorkflowTTL:   workflow,
+	}, nil
 }
 
 // GetChaosDashboardEnv gets all env variables related to dashboard.
