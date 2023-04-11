@@ -101,10 +101,7 @@ func newEngine(config *config.ChaosDashboardConfig) *gin.Engine {
 		r.GET("/favicon.ico", renderStatic)
 	} else {
 		r.GET("/", func(c *gin.Context) {
-			c.String(http.StatusOK, `Dashboard UI is not built.
-Please run UI=1 make.
-Run UI=1 make images/chaos-dashboard/bin/chaos-dashboard if you only want to build dashboard only.
-(Note: If you only want to build the binary in local, pass IN_DOCKER=1)`)
+			c.String(http.StatusOK, "Dashboard UI is not built.")
 		})
 	}
 

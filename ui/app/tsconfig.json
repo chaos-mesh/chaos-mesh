@@ -23,6 +23,9 @@
     "baseUrl": "src"
   },
   "include": [
-    "src"
+    "src/**/*.ts", "src/**/*.tsx", "src/**/*.js"
+  ],
+  "exclude": [
+    "src/openapi/index.msw.ts"
   ]
 }

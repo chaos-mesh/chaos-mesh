@@ -16,10 +16,10 @@
  */
 import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
-import api from 'api'
 import yaml from 'js-yaml'
-import { CoreEvent, TypesArchiveDetail } from 'openapi'
-import { useCallback, useEffect, useState } from 'react'
+import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from 'openapi'
+import { TypesArchiveDetail } from 'openapi/index.schemas'
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import Loading from '@ui/mui-extends/esm/Loading'
@@ -41,74 +41,35 @@ const Single = () => {
   const query = useQuery()
   let kind = query.get('kind') || 'experiment'
 
-  const [loading, setLoading] = useState(true)
-  const [single, setSingle] = useState<{ kind: string; data: TypesArchiveDetail | null }>({
-    kind,
-    data: null,
+  const [archive, setArchive] = useState<TypesArchiveDetail>()
+
+  const { isLoading: loading1 } = useGetArchivesWorkflowsUid(uuid!, {
+    query: { enabled: kind !== 'workflow', onSuccess: setArchive },
   })
-  const [events, setEvents] = useState<CoreEvent[]>([])
-
-  const fetchSingle = useCallback(() => {
-    let request
-    switch (kind) {
-      case 'workflow':
-        request = api.archives.archivesWorkflowsUidGet
-        break
-      case 'schedule':
-        request = api.archives.archivesSchedulesUidGet
-        break
-      case 'experiment':
-      default:
-        request = api.archives.archivesUidGet
-        break
-    }
-
-    request({
-      uid: uuid!,
-    })
-      .then(({ data }) => {
-        setSingle({ kind, data })
-      })
-      .catch(console.error)
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [uuid, kind])
-
-  useEffect(fetchSingle, [fetchSingle])
-
-  useEffect(() => {
-    if (kind === 'workflow') {
-      return
-    }
-
-    const fetchEvents = () => {
-      api.events
-        .eventsGet({
-          objectId: uuid,
-          limit: 999,
-        })
-        .then(({ data }) => setEvents(data))
-        .catch(console.error)
-        .finally(() => {
-          setLoading(false)
-        })
-    }
-
-    if (single) {
-      fetchEvents()
-    }
-  }, [uuid, kind, single])
+  const { isLoading: loading2 } = useGetArchivesSchedulesUid(uuid!, {
+    query: { enabled: kind !== 'schedule', onSuccess: setArchive },
+  })
+  const { isLoading: loading3 } = useGetArchivesUid(uuid!, {
+    query: { enabled: kind !== 'experiment', onSuccess: setArchive },
+  })
+  const { data: events, isLoading: loading4 } = useGetEvents(
+    {
+      object_id: uuid,
+      limit: 999,
+    },
+    { query: { enabled: kind !== 'workflow' } }
+  )
+  const loading = loading1 || loading2 || loading3 || loading4
 
   const YAML = () => (
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
-      {single.data && (
+      {archive && (
         <Space display="flex" flexDirection="column" height="100%">
           <PaperTop title={i18n('common.definition')} boxProps={{ p: 4.5, pb: 0 }} />
           <Box flex={1}>
             <YAMLEditor
-              name={single.data.name}
-              data={yaml.dump(single.data.kube_object)}
+              name={archive.name}
+              data={yaml.dump(archive.kube_object)}
               download
               aceProps={{ readOnly: true }}
             />
@@ -122,12 +83,12 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {single.data && <Helmet title={`Archive ${single.data.name}`} />}
+          {archive && <Helmet title={`Archive ${archive.name}`} />}
           {kind !== 'workflow' ? (
             <Space spacing={6}>
-              {single.kind === kind && single.data && (
+              {archive && (
                 <Paper>
-                  <ObjectConfiguration config={single.data} inSchedule={kind === 'schedule'} inArchive={true} />
+                  <ObjectConfiguration config={archive} inSchedule={kind === 'schedule'} inArchive={true} />
                 </Paper>
               )}
 
@@ -136,7 +97,7 @@ const Single = () => {
                   <Paper sx={{ display: 'flex', flexDirection: 'column', height: 600 }}>
                     <PaperTop title={i18n('events.title')} boxProps={{ mb: 3 }} />
                     <Box flex={1} overflow="scroll">
-                      <EventsTimeline events={events} />
+                      {events && <EventsTimeline events={events} />}
                     </Box>
                   </Paper>
                 </Grid>

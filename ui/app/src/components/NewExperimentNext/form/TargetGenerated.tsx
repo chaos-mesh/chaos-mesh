@@ -16,14 +16,15 @@
  */
 import { MenuItem } from '@mui/material'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
+import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { useEffect, useState } from 'react'
 import { ObjectSchema } from 'yup'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { useStoreSelector } from 'store'
 
-import { Env, clearNetworkTargetPods } from 'slices/experiments'
+import { Env } from 'slices/experiments'
 
 import { AutocompleteField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
 import MoreOptions from 'components/MoreOptions'
@@ -32,6 +33,7 @@ import i18n from 'components/T'
 
 import basicData from '../data/basic'
 import { Kind, Spec } from '../data/types'
+import { Stale } from 'api/queryUtils'
 
 interface TargetGeneratedProps {
   env: Env
@@ -42,8 +44,14 @@ interface TargetGeneratedProps {
 }
 
 const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, validationSchema, onSubmit }) => {
-  const { namespaces, spec } = useStoreSelector((state) => state.experiments)
-  const dispatch = useStoreDispatch()
+  const { spec } = useStoreSelector((state) => state.experiments)
+
+  const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
+    query: {
+      enabled: false,
+      staleTime: Stale.DAY,
+    },
+  })
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
     if (v instanceof Object && v.field) {
@@ -201,7 +209,6 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
         const afterTargetClose = () => {
           if (getIn(values, 'target')) {
             setFieldValue('target', undefined)
-            dispatch(clearNetworkTargetPods())
           }
         }
 
@@ -218,7 +225,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                   <Scope
                     env="k8s"
                     kind={kind}
-                    namespaces={namespaces}
+                    namespaces={namespaces!}
                     scope="target.selector"
                     modeScope="target"
                     previewTitle={i18n('newE.target.network.target.podsPreview')}
