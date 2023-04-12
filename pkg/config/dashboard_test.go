@@ -21,6 +21,38 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+func TestChaosDashboardConfig(t *testing.T) {
+	config := ChaosDashboardConfig{}
+	err := envconfig.Process("", &config)
+	if err != nil {
+		t.Error("Error parsing empty ChaosDashboardConfig")
+	}
+
+	if config.ListenHost != "0.0.0.0" {
+		t.Error("ListenHost is not set")
+	}
+
+	if config.ListenPort != 2333 {
+		t.Error("ListenPort is not set")
+	}
+
+	if config.ClusterScoped != true {
+		t.Error("ClusterScoped is not set")
+	}
+
+	if config.EnableFilterNamespace != false {
+		t.Error("EnableFilterNamespace is not set")
+	}
+
+	if config.SecurityMode != true {
+		t.Error("SecurityMode is not set")
+	}
+
+	if config.DNSServerCreate != true {
+		t.Error("DNSServerCreate is not set")
+	}
+}
+
 func TestTTLConfigWithStringTime(t *testing.T) {
 	config := TTLConfigWithStringTime{}
 	err := envconfig.Process("", &config)

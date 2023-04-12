@@ -51,7 +51,8 @@ type ChaosDashboardConfig struct {
 	// enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon
 	EnableProfiling bool `envconfig:"ENABLE_PROFILING" default:"true" json:"-"`
 
-	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
+	// After v2.5, the DNS server is created by default.
+	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"true" json:"dns_server_create"`
 	Version         string `json:"version"`
 
 	// The QPS config for kubernetes client
