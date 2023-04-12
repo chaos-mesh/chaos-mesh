@@ -2373,8 +2373,9 @@ const docTemplate = `{
                     "default": true
                 },
                 "dns_server_create": {
+                    "description": "After v2.5, the DNS server is created by default.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
                 "enableFilterNamespace": {
                     "description": "EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace\nannotated with ` + "`" + `chaos-mesh.org/inject=enabled` + "`" + ` will be injected.",

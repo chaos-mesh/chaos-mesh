@@ -8,7 +8,8 @@ definitions:
           namespace).
         type: boolean
       dns_server_create:
-        default: false
+        default: true
+        description: After v2.5, the DNS server is created by default.
         type: boolean
       enableFilterNamespace:
         default: false
