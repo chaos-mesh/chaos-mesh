@@ -25,7 +25,7 @@ func TestChaosDashboardConfig(t *testing.T) {
 	config := ChaosDashboardConfig{}
 	err := envconfig.Process("", &config)
 	if err != nil {
-		t.Error("Error parsing empty ChaosDashboardConfig")
+		t.Fatal("Error parsing empty ChaosDashboardConfig", err)
 	}
 
 	if config.ListenHost != "0.0.0.0" {
@@ -57,7 +57,7 @@ func TestTTLConfigWithStringTime(t *testing.T) {
 	config := TTLConfigWithStringTime{}
 	err := envconfig.Process("", &config)
 	if err != nil {
-		t.Error("Error parsing empty TTLConfigWithStringTime")
+		t.Fatal("Error parsing empty TTLConfigWithStringTime", err)
 	}
 
 	if config.ResyncPeriod != "12h" {
@@ -83,7 +83,7 @@ func TestTTLConfigWithStringTime(t *testing.T) {
 	parsed, err := config.Parse()
 
 	if err != nil {
-		t.Error("Error parsing config")
+		t.Fatal("Error parsing config", err)
 	}
 
 	if parsed.ResyncPeriod.Hours() != 12 {
