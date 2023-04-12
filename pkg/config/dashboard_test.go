@@ -15,15 +15,17 @@
 
 package config
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/kelseyhightower/envconfig"
+)
 
 func TestTTLConfigWithStringTime(t *testing.T) {
-	config := TTLConfigWithStringTime{
-		ResyncPeriod:  "12h",
-		EventTTL:      "168h",
-		ExperimentTTL: "168h",
-		ScheduleTTL:   "168h",
-		WorkflowTTL:   "168h",
+	config := TTLConfigWithStringTime{}
+	err := envconfig.Process("", &config)
+	if err != nil {
+		t.Error("Error parsing empty TTLConfigWithStringTime")
 	}
 
 	if config.ResyncPeriod != "12h" {
@@ -34,15 +36,15 @@ func TestTTLConfigWithStringTime(t *testing.T) {
 		t.Error("EventTTL is not set")
 	}
 
-	if config.ExperimentTTL != "168h" {
+	if config.ExperimentTTL != "336h" {
 		t.Error("ExperimentTTL is not set")
 	}
 
-	if config.ScheduleTTL != "168h" {
+	if config.ScheduleTTL != "336h" {
 		t.Error("ScheduleTTL is not set")
 	}
 
-	if config.WorkflowTTL != "168h" {
+	if config.WorkflowTTL != "336h" {
 		t.Error("WorkflowTTL is not set")
 	}
 
@@ -60,15 +62,15 @@ func TestTTLConfigWithStringTime(t *testing.T) {
 		t.Errorf("EventTTL is not 168h, but %v", parsed.EventTTL)
 	}
 
-	if parsed.ExperimentTTL.Hours() != 168 {
-		t.Errorf("ExperimentTTL is not 168h, but %v", parsed.ExperimentTTL)
+	if parsed.ExperimentTTL.Hours() != 336 {
+		t.Errorf("ExperimentTTL is not 336h, but %v", parsed.ExperimentTTL)
 	}
 
-	if parsed.ScheduleTTL.Hours() != 168 {
-		t.Errorf("ScheduleTTL is not 168h, but %v", parsed.ScheduleTTL)
+	if parsed.ScheduleTTL.Hours() != 336 {
+		t.Errorf("ScheduleTTL is not 336h, but %v", parsed.ScheduleTTL)
 	}
 
-	if parsed.WorkflowTTL.Hours() != 168 {
-		t.Errorf("WorkflowTTL is not 168h, but %v", parsed.WorkflowTTL)
+	if parsed.WorkflowTTL.Hours() != 336 {
+		t.Errorf("WorkflowTTL is not 336h, but %v", parsed.WorkflowTTL)
 	}
 }
