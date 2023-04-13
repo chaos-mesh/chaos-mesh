@@ -17,9 +17,10 @@ package ttlcontroller
 import (
 	"github.com/go-logr/logr"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-func Bootstrap(experiment core.ExperimentStore, event core.EventStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *TTLConfig, logger logr.Logger) *Controller {
-	return NewController(experiment, event, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
+func Bootstrap(event core.EventStore, experiment core.ExperimentStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *config.TTLConfig, logger logr.Logger) *Controller {
+	return NewController(event, experiment, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
 }

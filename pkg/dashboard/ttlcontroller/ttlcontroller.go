@@ -13,50 +13,37 @@
 // limitations under the License.
 //
 
+// Package ttlcontroller provides a TTL (time to live) mechanism to clear old objects
+// in the database.
 package ttlcontroller
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
-// Controller defines the database ttl controller
 type Controller struct {
 	logger     logr.Logger
-	experiment core.ExperimentStore
 	event      core.EventStore
+	experiment core.ExperimentStore
 	schedule   core.ScheduleStore
 	workflow   core.WorkflowStore
-	ttlconfig  *TTLConfig
-}
-
-// TTLConfig defines the ttl
-type TTLConfig struct {
-	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database
-	DatabaseTTLResyncPeriod time.Duration
-	// EventTTL defines the ttl of events
-	EventTTL time.Duration
-	// ArchiveTTL defines the ttl of archives
-	ArchiveTTL time.Duration
-	// ScheduleTTL defines the ttl of schedule
-	ScheduleTTL time.Duration
-	// WorkflowTTL defines the ttl of workflow
-	WorkflowTTL time.Duration
+	ttlconfig  *config.TTLConfig
 }
 
 // NewController returns a new database ttl controller
 func NewController(
-	experiment core.ExperimentStore,
 	event core.EventStore,
+	experiment core.ExperimentStore,
 	schedule core.ScheduleStore,
 	workflow core.WorkflowStore,
-	ttlc *TTLConfig,
+	ttlconfig *config.TTLConfig,
 	logger logr.Logger,
 ) *Controller {
 	return &Controller{
@@ -64,7 +51,7 @@ func NewController(
 		event:      event,
 		schedule:   schedule,
 		workflow:   workflow,
-		ttlconfig:  ttlc,
+		ttlconfig:  ttlconfig,
 		logger:     logger,
 	}
 }
@@ -75,7 +62,7 @@ func Register(ctx context.Context, c *Controller) {
 
 	c.logger.Info("Starting database TTL controller")
 
-	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, ctx.Done())
+	go wait.Until(c.runWorker, c.ttlconfig.ResyncPeriod, ctx.Done())
 }
 
 // runWorker is a long-running function that will be called in order to delete the events, archives, schedule, and workflow.
@@ -85,7 +72,7 @@ func (c *Controller) runWorker() {
 	ctx := context.Background()
 
 	_ = c.event.DeleteByDuration(ctx, c.ttlconfig.EventTTL)
-	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ArchiveTTL)
+	c.experiment.DeleteByFinishTime(ctx, c.ttlconfig.ExperimentTTL)
 	c.schedule.DeleteByFinishTime(ctx, c.ttlconfig.ScheduleTTL)
 	c.workflow.DeleteByFinishTime(ctx, c.ttlconfig.WorkflowTTL)
 }
