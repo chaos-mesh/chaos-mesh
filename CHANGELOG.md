@@ -14,6 +14,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.5.2] - 2023-04-13
+
+### Added
+
+- Nothing
+
+### Changed
+
 - Bump go to v1.19.3 [#3770](https://github.com/chaos-mesh/chaos-mesh/pull/3770)
 - Upgrade OS image for chaos-daemon container image [#3905](https://github.com/chaos-mesh/chaos-mesh/pull/3905)
 
