@@ -2,28 +2,20 @@ basePath: /api
 definitions:
   config.ChaosDashboardConfig:
     properties:
-      burst:
-        default: 300
-        description: The Burst config for kubernetes client
-        type: integer
       cluster_mode:
         default: true
         description: ClusterScoped means control Chaos Object in cluster level(all
           namespace).
         type: boolean
       dns_server_create:
-        default: false
+        default: true
+        description: After v2.5, the DNS server is created by default.
         type: boolean
       enableFilterNamespace:
         default: false
         description: |-
           EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
           annotated with `chaos-mesh.org/inject=enabled` will be injected.
-        type: boolean
-      enableProfiling:
-        default: true
-        description: enableProfiling is a flag to enable pprof in controller-manager
-          and chaos-daemon
         type: boolean
       gcp_security_mode:
         default: false
@@ -36,10 +28,6 @@ definitions:
       listen_port:
         default: 2333
         type: integer
-      qps:
-        default: 200
-        description: The QPS config for kubernetes client
-        type: number
       root_path:
         default: http://localhost:2333
         type: string
@@ -6428,7 +6416,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Chaos Mesh Dashboard API
-  version: "2.2"
+  version: "2.5"
 paths:
   /archives:
     delete:

@@ -23,7 +23,7 @@ import (
 	"go.uber.org/fx"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/experiment"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store/metrics"
