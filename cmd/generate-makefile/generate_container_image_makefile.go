@@ -127,7 +127,7 @@ var containerImageRecipes = []containerImageRecipeOptions{
 		ImageName:         "dev-env",
 		SourcePath:        "images/dev-env",
 		DependencyTargets: nil,
-		Comment:           "Build container image for build-env, ghcr.io/chaos-mesh/dev-env:latest",
+		Comment:           "Build container image for dev-env, ghcr.io/chaos-mesh/dev-env:latest",
 	}, {
 		ImageName:         "e2e-helper",
 		SourcePath:        "e2e-test/cmd/e2e_helper",

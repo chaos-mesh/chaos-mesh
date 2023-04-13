@@ -13,5 +13,5 @@
 // limitations under the License.
 //
 
-// Package main. generate-makefile would generating Makefile like binary.generated.mk, contains targets for building executable binaries.
+// This command line tool would generate Makefile like binary.generated.mk, contains targets for building executable binaries.
 package main
