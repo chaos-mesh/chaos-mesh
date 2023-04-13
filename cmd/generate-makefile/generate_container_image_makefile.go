@@ -43,7 +43,7 @@ clean-image-built:
 
 // containerImageGeneratedMkTemplate is the template for one target, use containerImageRecipeOptions as the context.
 const containerImageRecipeTemplate = `.PHONY: image-{{ .ImageName }}
-image-{{ .ImageName }}:{{ .SourcePath }}/.dockerbuilt ## {{ .Comment }}
+image-{{ .ImageName }}: {{ .SourcePath }}/.dockerbuilt ## {{ .Comment }}
 
 {{ .SourcePath }}/.dockerbuilt: SHELL=bash
 {{ .SourcePath }}/.dockerbuilt: {{ StringsJoin .DependencyTargets " " }} {{ .SourcePath }}/Dockerfile

@@ -6,7 +6,7 @@
 image-all: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-build-env image-dev-env image-e2e-helper image-chaos-mesh-e2e image-chaos-kernel image-chaos-dlv ## Build all container images
 
 .PHONY: image-chaos-daemon
-image-chaos-daemon:images/chaos-daemon/.dockerbuilt ## Build container image for chaos-daemon, ghcr.io/chaos-mesh/chaos-daemon:latest
+image-chaos-daemon: images/chaos-daemon/.dockerbuilt ## Build container image for chaos-daemon, ghcr.io/chaos-mesh/chaos-daemon:latest
 
 images/chaos-daemon/.dockerbuilt: SHELL=bash
 images/chaos-daemon/.dockerbuilt: images/chaos-daemon/bin/chaos-daemon images/chaos-daemon/bin/pause images/chaos-daemon/bin/cdh images/chaos-daemon/Dockerfile
@@ -14,7 +14,7 @@ images/chaos-daemon/.dockerbuilt: images/chaos-daemon/bin/chaos-daemon images/ch
 	touch images/chaos-daemon/.dockerbuilt
 
 .PHONY: image-chaos-mesh
-image-chaos-mesh:images/chaos-mesh/.dockerbuilt ## Build container image for chaos-mesh, ghcr.io/chaos-mesh/chaos-mesh:latest
+image-chaos-mesh: images/chaos-mesh/.dockerbuilt ## Build container image for chaos-mesh, ghcr.io/chaos-mesh/chaos-mesh:latest
 
 images/chaos-mesh/.dockerbuilt: SHELL=bash
 images/chaos-mesh/.dockerbuilt: images/chaos-mesh/bin/chaos-controller-manager images/chaos-mesh/Dockerfile
@@ -22,7 +22,7 @@ images/chaos-mesh/.dockerbuilt: images/chaos-mesh/bin/chaos-controller-manager i
 	touch images/chaos-mesh/.dockerbuilt
 
 .PHONY: image-chaos-dashboard
-image-chaos-dashboard:images/chaos-dashboard/.dockerbuilt ## Build container image for chaos-dashboard, ghcr.io/chaos-mesh/chaos-dashboard:latest
+image-chaos-dashboard: images/chaos-dashboard/.dockerbuilt ## Build container image for chaos-dashboard, ghcr.io/chaos-mesh/chaos-dashboard:latest
 
 images/chaos-dashboard/.dockerbuilt: SHELL=bash
 images/chaos-dashboard/.dockerbuilt: images/chaos-dashboard/bin/chaos-dashboard images/chaos-dashboard/Dockerfile
@@ -30,7 +30,7 @@ images/chaos-dashboard/.dockerbuilt: images/chaos-dashboard/bin/chaos-dashboard 
 	touch images/chaos-dashboard/.dockerbuilt
 
 .PHONY: image-build-env
-image-build-env:images/build-env/.dockerbuilt ## Build container image for build-env, ghcr.io/chaos-mesh/build-env:latest
+image-build-env: images/build-env/.dockerbuilt ## Build container image for build-env, ghcr.io/chaos-mesh/build-env:latest
 
 images/build-env/.dockerbuilt: SHELL=bash
 images/build-env/.dockerbuilt:  images/build-env/Dockerfile
@@ -38,7 +38,7 @@ images/build-env/.dockerbuilt:  images/build-env/Dockerfile
 	touch images/build-env/.dockerbuilt
 
 .PHONY: image-dev-env
-image-dev-env:images/dev-env/.dockerbuilt ## Build container image for build-env, ghcr.io/chaos-mesh/dev-env:latest
+image-dev-env: images/dev-env/.dockerbuilt ## Build container image for dev-env, ghcr.io/chaos-mesh/dev-env:latest
 
 images/dev-env/.dockerbuilt: SHELL=bash
 images/dev-env/.dockerbuilt:  images/dev-env/Dockerfile
@@ -46,7 +46,7 @@ images/dev-env/.dockerbuilt:  images/dev-env/Dockerfile
 	touch images/dev-env/.dockerbuilt
 
 .PHONY: image-e2e-helper
-image-e2e-helper:e2e-test/cmd/e2e_helper/.dockerbuilt ## Build container image for e2e-helper
+image-e2e-helper: e2e-test/cmd/e2e_helper/.dockerbuilt ## Build container image for e2e-helper
 
 e2e-test/cmd/e2e_helper/.dockerbuilt: SHELL=bash
 e2e-test/cmd/e2e_helper/.dockerbuilt:  e2e-test/cmd/e2e_helper/Dockerfile
@@ -54,7 +54,7 @@ e2e-test/cmd/e2e_helper/.dockerbuilt:  e2e-test/cmd/e2e_helper/Dockerfile
 	touch e2e-test/cmd/e2e_helper/.dockerbuilt
 
 .PHONY: image-chaos-mesh-e2e
-image-chaos-mesh-e2e:e2e-test/image/e2e/.dockerbuilt ## Build container image for running e2e tests
+image-chaos-mesh-e2e: e2e-test/image/e2e/.dockerbuilt ## Build container image for running e2e tests
 
 e2e-test/image/e2e/.dockerbuilt: SHELL=bash
 e2e-test/image/e2e/.dockerbuilt: e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh e2e-build e2e-test/image/e2e/Dockerfile
@@ -62,7 +62,7 @@ e2e-test/image/e2e/.dockerbuilt: e2e-test/image/e2e/manifests e2e-test/image/e2e
 	touch e2e-test/image/e2e/.dockerbuilt
 
 .PHONY: image-chaos-kernel
-image-chaos-kernel:images/chaos-kernel/.dockerbuilt ## Build container image for chaos-kernel, ghcr.io/chaos-mesh/chaos-kernel:latest
+image-chaos-kernel: images/chaos-kernel/.dockerbuilt ## Build container image for chaos-kernel, ghcr.io/chaos-mesh/chaos-kernel:latest
 
 images/chaos-kernel/.dockerbuilt: SHELL=bash
 images/chaos-kernel/.dockerbuilt:  images/chaos-kernel/Dockerfile
@@ -70,7 +70,7 @@ images/chaos-kernel/.dockerbuilt:  images/chaos-kernel/Dockerfile
 	touch images/chaos-kernel/.dockerbuilt
 
 .PHONY: image-chaos-dlv
-image-chaos-dlv:images/chaos-dlv/.dockerbuilt ## Build container image for chaos-dlv
+image-chaos-dlv: images/chaos-dlv/.dockerbuilt ## Build container image for chaos-dlv
 
 images/chaos-dlv/.dockerbuilt: SHELL=bash
 images/chaos-dlv/.dockerbuilt:  images/chaos-dlv/Dockerfile
