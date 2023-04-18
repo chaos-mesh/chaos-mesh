@@ -53,6 +53,7 @@ func MergeNetem(a, b *chaosdaemon.Netem) *chaosdaemon.Netem {
 		ReorderCorr:   maxf32(a.GetReorderCorr(), b.GetReorderCorr()),
 		Corrupt:       maxf32(a.GetCorrupt(), b.GetCorrupt()),
 		CorruptCorr:   maxf32(a.GetCorruptCorr(), b.GetCorruptCorr()),
+		Rate:          maxu64(a.GetRate(), b.GetRate()),
 	}
 }
 
@@ -65,4 +66,11 @@ func maxu32(a, b uint32) uint32 {
 
 func maxf32(a, b float32) float32 {
 	return float32(math.Max(float64(a), float64(b)))
+}
+
+func maxu64(a, b uint64) uint64 {
+	if a > b {
+		return a
+	}
+	return b
 }

@@ -303,6 +303,13 @@ func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 		}
 		emSpecs = append(emSpecs, em)
 	}
+	if spec.Bandwidth != nil {
+		em, err := netem.FromBandwidthToNetEm(spec.Bandwidth)
+		if err != nil {
+			return nil, err
+		}
+		emSpecs = append(emSpecs, em)
+	}
 	if len(emSpecs) == 0 {
 		return nil, errors.New(invalidNetemSpecMsg)
 	}

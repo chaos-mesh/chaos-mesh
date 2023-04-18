@@ -71,6 +71,7 @@ message Netem {
   float corrupt_corr = 13;
   TcHandle parent = 14;
   TcHandle handle = 15;
+  uint64 rate = 16;
 }
 
 message TbfRequest {
