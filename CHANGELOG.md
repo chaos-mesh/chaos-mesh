@@ -14,32 +14,16 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
-<<<<<<< HEAD
 - New CI for finding merge conflicts [#3871](https://github.com/chaos-mesh/chaos-mesh/pull/3871)
+- `pause` would return non zero exit code when the subcommand failed [#4018](https://github.com/chaos-mesh/chaos-mesh/pull/4018)
 
 ### Deprecated
 
 - Nothing
-=======
-- Switch views between k8s and hosts nodes [#3830](https://github.com/chaos-mesh/chaos-mesh/pull/3830)
-- New CI for finding merge conflicts [#3850](https://github.com/chaos-mesh/chaos-mesh/pull/3850)
-- Upgrade byteman-helper to v4.0.20 [#3863](https://github.com/chaos-mesh/chaos-mesh/pull/3863)
-- Helm: change default webhook port to [#10250](https://github.com/chaos-mesh/chaos-mesh/pull/3877)
-- Upgrade base image for chaos-mesh to alpine:3.17 [#3893](https://github.com/chaos-mesh/chaos-mesh/pull/3893)
-- Slow down releasing the latest version [#3900](https://github.com/chaos-mesh/chaos-mesh/pull/3900)
-- Change the package manager from `yarn` to `pnpm`. [#3965](https://github.com/chaos-mesh/chaos-mesh/pull/3965)
-- Upgrade DNS CoreDNS image url to ghcr.io [#3488](https://github.com/chaos-mesh/chaos-mesh/pull/3488)
-- Upgrade OS image for chaos-daemon container image [#3905](https://github.com/chaos-mesh/chaos-mesh/pull/3905)
-- Replace openapi-generator with Orval and React Query [#3748](https://github.com/chaos-mesh/chaos-mesh/pull/3748)
-- Remove `IN_DOCKER` environment variable in `Makefile` [#3992](https://github.com/chaos-mesh/chaos-mesh/pull/3992)
-- Refine TTL config of Chaos dashboard [#4008](https://github.com/chaos-mesh/chaos-mesh/pull/4008)
-- `pause` would return non zero exit code when the subcommand failed [#4018](https://github.com/chaos-mesh/chaos-mesh/pull/4018)
->>>>>>> 2e87858c1 (improve pause (#4018))
 
 ### Removed
 
 - Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
-
 
 ### Fixed
 
