@@ -29,7 +29,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/collector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/store"
@@ -39,7 +39,7 @@ import (
 )
 
 // @title Chaos Mesh Dashboard API
-// @version 2.2
+// @version 2.5
 // @description Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
 
 // @contact.name GitHub Issues
@@ -75,7 +75,7 @@ func main() {
 	}
 	dashboardConfig.Version = version.Get().GitVersion
 
-	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
+	persistTTLConfigParsed, err := dashboardConfig.PersistTTL.Parse()
 	if err != nil {
 		mainLog.Error(err, "invalid PersistTTLConfig")
 		os.Exit(1)
@@ -86,7 +86,7 @@ func main() {
 		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
 		fx.Supply(rootLogger),
 		fx.Provide(
-			func() (context.Context, *config.ChaosDashboardConfig, *ttlcontroller.TTLConfig) {
+			func() (context.Context, *config.ChaosDashboardConfig, *config.TTLConfig) {
 				return controllerRuntimeSignalHandlerContext, dashboardConfig, persistTTLConfigParsed
 			},
 			store.Bootstrap,

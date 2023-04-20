@@ -27,9 +27,8 @@ int main(int argc, char* argv[]) {
   pause();
 
   int ret = execvp(argv[1], &argv[1]);
-  if (ret == -1) {
+  if (ret != 0) {
     fprintf(stderr, "%s", strerror(errno));
-    return -1;
   }
-  return 0;
+  return ret;
 }

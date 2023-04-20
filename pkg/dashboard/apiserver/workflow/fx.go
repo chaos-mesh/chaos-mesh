@@ -18,7 +18,7 @@ package workflow
 import (
 	"github.com/go-logr/logr"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
 
