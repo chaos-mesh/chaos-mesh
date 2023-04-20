@@ -15,6 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
 - New CI for finding merge conflicts [#3871](https://github.com/chaos-mesh/chaos-mesh/pull/3871)
+- `pause` would return non zero exit code when the subcommand failed [#4018](https://github.com/chaos-mesh/chaos-mesh/pull/4018)
 
 ### Deprecated
 
@@ -23,7 +24,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Removed
 
 - Remove useless kubebuilder comment in webhook [#3816](https://github.com/chaos-mesh/chaos-mesh/pull/3816)
-
 
 ### Fixed
 
