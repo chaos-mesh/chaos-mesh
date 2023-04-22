@@ -107,7 +107,7 @@ fi
 
 if [ -z "$SKIP_IMAGE_BUILD" ]; then
     echo "info: building docker images"
-    IMAGE_REGISTRY_PREFIX=$IMAGE_REGISTRY_PREFIX IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
+    IMAGE_REGISTRY_PREFIX=$IMAGE_REGISTRY_PREFIX IMAGE_PROJECT=chaos-mesh IMAGE_TAG=$IMAGE_TAG UI=1 SWAGGER=1 make image
 else
     echo "info: skip building docker images"
 fi
