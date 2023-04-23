@@ -2367,29 +2367,20 @@ const docTemplate = `{
         "config.ChaosDashboardConfig": {
             "type": "object",
             "properties": {
-                "burst": {
-                    "description": "The Burst config for kubernetes client",
-                    "type": "integer",
-                    "default": 300
-                },
                 "cluster_mode": {
                     "description": "ClusterScoped means control Chaos Object in cluster level(all namespace).",
                     "type": "boolean",
                     "default": true
                 },
                 "dns_server_create": {
+                    "description": "After v2.5, the DNS server is created by default.",
                     "type": "boolean",
-                    "default": false
+                    "default": true
                 },
                 "enableFilterNamespace": {
                     "description": "EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace\nannotated with ` + "`" + `chaos-mesh.org/inject=enabled` + "`" + ` will be injected.",
                     "type": "boolean",
                     "default": false
-                },
-                "enableProfiling": {
-                    "description": "enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon",
-                    "type": "boolean",
-                    "default": true
                 },
                 "gcp_security_mode": {
                     "description": "GcpSecurityMode will use the gcloud authentication to login to GKE user",
@@ -2403,11 +2394,6 @@ const docTemplate = `{
                 "listen_port": {
                     "type": "integer",
                     "default": 2333
-                },
-                "qps": {
-                    "description": "The QPS config for kubernetes client",
-                    "type": "number",
-                    "default": 200
                 },
                 "root_path": {
                     "type": "string",
@@ -7923,7 +7909,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "2.2",
+	Version:          "2.5",
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
