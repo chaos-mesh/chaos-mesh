@@ -64,8 +64,6 @@ jobs:
         run: |
           make \
             IMAGE_TAG=latest \
-            IMAGE_PROJECT=chaos-mesh \
-            IMAGE_REGISTRY=ghcr.io \
             UI=1 \
             DOCKER_CACHE=1 \
             DOCKER_CACHE_DIR=$GITHUB_WORKSPACE/cache \

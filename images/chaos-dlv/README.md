@@ -6,7 +6,7 @@ is configured properly, you can use it to debug the process on remote machine.
 To deploy the `dlv` image, you need to compile the chaos-mesh with symbols:
 
 ```bash
-make IMAGE_REGISTRY="" DEBUGGER=1 image
+make DEBUGGER=1 image
 ```
 
 Then you need to install with the corresponding helm configuration to integrate
