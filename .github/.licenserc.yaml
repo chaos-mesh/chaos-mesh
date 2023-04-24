@@ -23,6 +23,7 @@ header:
     - '.github/ISSUE_TEMPLATE/config.yml'
     - '.github/.licenserc.yaml'
     - 'Makefile'
+    - '*.mk'
     - 'PROJECT'
     - 'LICENSE'
     # build cache in dev-env

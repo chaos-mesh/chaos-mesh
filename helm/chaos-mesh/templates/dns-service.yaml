@@ -31,9 +31,11 @@ spec:
   ports:
   - name: dns
     port: 53
+    targetPort: 5353
     protocol: UDP
   - name: dns-tcp
     port: 53
+    targetPort: 5353
     protocol: TCP
   - name: metrics
     port: 9153

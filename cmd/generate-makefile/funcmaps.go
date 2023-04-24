@@ -1,4 +1,4 @@
-// Copyright Chaos Mesh Authors.
+// Copyright 2023 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ttlcontroller
+package main
 
-import (
-	"github.com/go-logr/logr"
+import "strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
-)
+var defaultFuncMap = map[string]interface{}{"StringsJoin": StringsJoin}
 
-func Bootstrap(event core.EventStore, experiment core.ExperimentStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *config.TTLConfig, logger logr.Logger) *Controller {
-	return NewController(event, experiment, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
+func StringsJoin(s []string, sep string) string {
+	return strings.Join(s, sep)
 }

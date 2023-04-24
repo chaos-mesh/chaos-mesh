@@ -23,7 +23,7 @@ metadata:
     app.kubernetes.io/component: chaos-dns-server
 data:
   Corefile: |
-    .:53 {
+    .:5353 {
         errors
         health {
             lameduck 5s

@@ -972,7 +972,7 @@ metadata:
     app.kubernetes.io/component: chaos-dns-server
 data:
   Corefile: |
-    .:53 {
+    .:5353 {
         errors
         health {
             lameduck 5s
@@ -1553,9 +1553,11 @@ spec:
   ports:
   - name: dns
     port: 53
+    targetPort: 5353
     protocol: UDP
   - name: dns-tcp
     port: 53
+    targetPort: 5353
     protocol: TCP
   - name: metrics
     port: 9153
@@ -1985,10 +1987,10 @@ spec:
           mountPath: /etc/chaos-dns
           readOnly: true
         ports:
-        - containerPort: 53
+        - containerPort: 5353
           name: dns
           protocol: UDP
-        - containerPort: 53
+        - containerPort: 5353
           name: dns-tcp
           protocol: TCP
         - containerPort: 9153

@@ -1,4 +1,4 @@
-// Copyright Chaos Mesh Authors.
+// Copyright 2023 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
-package ttlcontroller
+package main
 
-import (
-	"github.com/go-logr/logr"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
-)
-
-func Bootstrap(event core.EventStore, experiment core.ExperimentStore, schedule core.ScheduleStore, workflow core.WorkflowStore, ttlc *config.TTLConfig, logger logr.Logger) *Controller {
-	return NewController(event, experiment, schedule, workflow, ttlc, logger.WithName("ttlcontroller"))
+func main() {
+	var err error
+	err = renderBinaryGeneratedMk()
+	if err != nil {
+		panic(err)
+	}
+	err = renderContainerImageGeneratedMk()
+	if err != nil {
+		panic(err)
+	}
 }
