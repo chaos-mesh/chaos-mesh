@@ -25,4 +25,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	err = renderLocalBinaryGeneratedMk()
+	if err != nil {
+		panic(err)
+	}
 }

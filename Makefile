@@ -60,11 +60,14 @@ RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
+# Include generated makefiles.
+# See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
 ifeq (,$(findstring local/,$(MAKECMDGOALS)))
-# include generated makefiles.
-# this sub makefiles depends on RUN_IN_DEV_SHELL and RUN_IN_BUILD_SHELL, so it should be included after them.
+# These sub makefiles depend on RUN_IN_DEV_SHELL and RUN_IN_BUILD_SHELL, so it should be included after them.
 include binary.generated.mk container-image.generated.mk
 endif
+
+include local-binary.generated.mk
 
 export CLEAN_TARGETS :=
 
@@ -218,14 +221,6 @@ test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit test
 	make failpoint-disable
 
 ##@ Advanced building targets
-
-# Build chaos-controller-manager locally
-local/chaos-controller-manager:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/chaos-controller-manager/main.go
-
-# Build chaos-dashboard locally
-local/chaos-dashboard:
-	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/main.go
 
 # Build chaosctl locally
 local/chaosctl:
