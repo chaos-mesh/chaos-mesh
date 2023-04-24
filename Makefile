@@ -36,18 +36,29 @@ ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
 endif
 
+# See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
+ifeq (,$(findstring local/,$(MAKECMDGOALS)))
+
+# Each branch should have its own image tag for build-env and dev-env
+# Use := with ifeq instead of = for performance issues (simply expanded)
+ifeq ($(IMAGE_BUILD_ENV_TAG),)
+export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+endif
+ifeq ($(IMAGE_DEV_ENV_TAG),)
+export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+endif
+
+endif
+
 BASIC_IMAGE_ENV= IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) \
 	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
-# See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
-ifeq (,$(findstring local/,$(MAKECMDGOALS)))
 RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
-endif
 
 ifeq (,$(findstring local/,$(MAKECMDGOALS)))
 # include generated makefiles.
