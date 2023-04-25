@@ -60,11 +60,13 @@ RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
-# Include generated makefiles.
 # See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
 ifeq (,$(findstring local/,$(MAKECMDGOALS)))
+
+# Include generated makefiles.
 # These sub makefiles depend on RUN_IN_DEV_SHELL and RUN_IN_BUILD_SHELL, so it should be included after them.
 include binary.generated.mk container-image.generated.mk
+
 endif
 
 include local-binary.generated.mk
@@ -222,10 +224,10 @@ test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit test
 
 ##@ Advanced building targets
 
+test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
+
 timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
-
-test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
 multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
