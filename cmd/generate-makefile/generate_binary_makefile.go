@@ -70,7 +70,7 @@ type binaryGeneratedMkOptions struct {
 	Content string
 }
 
-func renderBinaryGeneratedMk(name string, recipes []binaryRecipeOptions) error {
+func renderBinaryGeneratedMk(name string, fileTemplate string, binaryRecipeTemplate string, recipes []binaryRecipeOptions) error {
 	targetFile, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return errors.Wrap(err, "open file "+name)
@@ -81,18 +81,18 @@ func renderBinaryGeneratedMk(name string, recipes []binaryRecipeOptions) error {
 	}
 
 	var buffer bytes.Buffer
-	for _, recipe := range binaryRecipes {
+	for _, recipe := range recipes {
 		err := recipeTemplate.Execute(&buffer, recipe)
 		if err != nil {
 			return errors.Wrap(err, fmt.Sprintf("render recipe in "+name+", recipe: %s", recipe.TargetName))
 		}
 	}
-	binaryTemplate, err := template.New(name).Parse(binaryGeneratedMkTemplate)
+	binaryTemplate, err := template.New(name).Parse(fileTemplate)
 	if err != nil {
 		return errors.Wrap(err, "parse "+name+" template")
 	}
 	err = binaryTemplate.Execute(targetFile, binaryGeneratedMkOptions{
-		Recipes: binaryRecipes,
+		Recipes: recipes,
 		Content: buffer.String(),
 	})
 	if err != nil {

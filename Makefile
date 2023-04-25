@@ -222,21 +222,8 @@ test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit test
 
 ##@ Advanced building targets
 
-chaosctl:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/main.go
-
 timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
-
-schedule-migration:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
-
-schedule-migration.tar.gz: schedule-migration
-	cp ./bin/schedule-migration ./schedule-migration
-	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
-	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
-	rm ./migrate.sh
-	rm ./schedule-migration
 
 test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
