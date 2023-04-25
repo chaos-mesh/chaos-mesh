@@ -49,7 +49,7 @@ const localBinaryRecipeTemplate = `.PHONY: {{ .OutputPath }}
 
 `
 
-func renderLocalBinaryGeneratedMk() error {
+func renderLocalBinaryGeneratedMk(name string, recipes []binaryGeneratedMkOptions) error {
 	targetFile, err := os.OpenFile("local-binary.generated.mk", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return errors.Wrap(err, "open file local-binary.generated.mk")
