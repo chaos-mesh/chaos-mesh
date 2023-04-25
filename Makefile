@@ -312,7 +312,7 @@ failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
 
-.PHONY: all image clean test install manifests manifests/crd.yaml \
+.PHONY: all image clean test manifests manifests/crd.yaml \
 	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
