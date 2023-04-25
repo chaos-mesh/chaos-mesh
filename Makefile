@@ -222,25 +222,23 @@ test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit test
 
 ##@ Advanced building targets
 
-# Build chaosctl locally
-local/chaosctl:
+chaosctl:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/main.go
 
-local/timer:
+timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
 
-# Build schedule-migration locally
-local/schedule-migration:
+schedule-migration:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
 
-local/schedule-migration.tar.gz: local/schedule-migration
+schedule-migration.tar.gz: schedule-migration
 	cp ./bin/schedule-migration ./schedule-migration
 	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
 	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
 	rm ./migrate.sh
 	rm ./schedule-migration
 
-test-utils: local/timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
+test-utils: timer multithread_tracee pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 
 multithread_tracee: test/cmd/multithread_tracee/main.c
 	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee

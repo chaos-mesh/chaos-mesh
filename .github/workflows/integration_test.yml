@@ -103,7 +103,7 @@ jobs:
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
       - name: Build chaosctl
         run: |
-          make local/chaosctl
+          make chaosctl
       - name: Install localstack && aws client
         run: |
           helm repo add localstack-repo http://helm.localstack.cloud
