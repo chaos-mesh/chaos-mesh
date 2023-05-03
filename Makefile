@@ -18,22 +18,13 @@ ROOT=$(shell pwd)
 export IMAGE_BUILD_ENV_BUILD ?= 0
 export IMAGE_DEV_ENV_BUILD ?= 0
 
-# Every branch should have its own image tag for build-env and dev-env
-# using := with ifeq instead of ?= for performance issue
-ifeq ($(IMAGE_BUILD_ENV_TAG),)
-export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
-endif
-ifeq ($(IMAGE_DEV_ENV_TAG),)
-export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
-endif
-
-export GOPROXY  := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
-GOENV  	:= CGO_ENABLED=0
-CGOENV 	:= CGO_ENABLED=1
-GO     	:= $(GOENV) go
-CGO    	:= $(CGOENV) go
-GOTEST 	:= USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-SHELL  	:= bash
+export GOPROXY := $(if $(GOPROXY),$(GOPROXY),https://proxy.golang.org,direct)
+GOENV  := CGO_ENABLED=0
+CGOENV := CGO_ENABLED=1
+GO     := $(GOENV) go
+CGO    := $(CGOENV) go
+GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="$(NO_PROXY),testhost" go test
+SHELL  := bash
 
 PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") $$(cd api && go list ./... && cd ../)
 
@@ -43,6 +34,20 @@ BUILD_TAGS ?=
 
 ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
+endif
+
+# See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
+ifeq (,$(findstring local/,$(MAKECMDGOALS)))
+
+# Each branch should have its own image tag for build-env and dev-env
+# Use := with ifeq instead of = for performance issues (simply expanded)
+ifeq ($(IMAGE_BUILD_ENV_TAG),)
+export IMAGE_BUILD_ENV_TAG := $(shell ./hack/env-image-tag.sh build-env)
+endif
+ifeq ($(IMAGE_DEV_ENV_TAG),)
+export IMAGE_DEV_ENV_TAG := $(shell ./hack/env-image-tag.sh dev-env)
+endif
+
 endif
 
 BASIC_IMAGE_ENV= IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
@@ -55,9 +60,16 @@ RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
-# include generated makefiles.
-# this sub makefiles depends on RUN_IN_DEV_SHELL and RUN_IN_BUILD_SHELL, so it should be included after them.
+# See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
+ifeq (,$(findstring local/,$(MAKECMDGOALS)))
+
+# Include generated makefiles.
+# These sub makefiles depend on RUN_IN_DEV_SHELL and RUN_IN_BUILD_SHELL, so it should be included after them.
 include binary.generated.mk container-image.generated.mk
+
+endif
+
+include local-binary.generated.mk
 
 export CLEAN_TARGETS :=
 
@@ -300,12 +312,9 @@ failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
 	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
 
-.PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate config \
-	install.sh \
-	manager chaosfs chaosdaemon chaos-dashboard \
-	dashboard dashboard-server-frontend gosec-scan \
-	failpoint-enable failpoint-disable swagger_spec \
-	e2e-test/image/e2e/bin/e2e.test \
-	proto bin/chaos-builder go_build_cache_directory schedule-migration enter-buildenv enter-devenv \
-	manifests/crd.yaml generate-deepcopy boilerplate boilerplate-fix
+.PHONY: all image clean test manifests manifests/crd.yaml \
+	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \
+	config proto \
+	generate generate-deepcopy swagger_spec bin/chaos-builder \
+	gosec-scan \
+	failpoint-enable failpoint-disable \

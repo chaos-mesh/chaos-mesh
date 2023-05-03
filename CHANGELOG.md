@@ -33,6 +33,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove `IN_DOCKER` environment variable in `Makefile` [#3992](https://github.com/chaos-mesh/chaos-mesh/pull/3992)
 - Refine TTL config of Chaos dashboard [#4008](https://github.com/chaos-mesh/chaos-mesh/pull/4008)
 - `pause` would return non zero exit code when the subcommand failed [#4018](https://github.com/chaos-mesh/chaos-mesh/pull/4018)
+- Build binaries locally with `local/` prefix targets in `Makefile` [#4004](https://github.com/chaos-mesh/chaos-mesh/pull/4004)
 
 ### Removed
 
