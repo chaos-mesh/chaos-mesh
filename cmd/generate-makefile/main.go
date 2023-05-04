@@ -17,7 +17,21 @@ package main
 
 func main() {
 	var err error
-	err = renderBinaryGeneratedMk()
+	err = renderBinaryGeneratedMk(
+		"local-binary.generated.mk",
+		localBinaryGeneratedMkTemplate,
+		localBinaryRecipeTemplate,
+		localBinaryRecipes,
+	)
+	if err != nil {
+		panic(err)
+	}
+	err = renderBinaryGeneratedMk(
+		"binary.generated.mk",
+		binaryGeneratedMkTemplate,
+		binaryRecipeTemplate,
+		binaryRecipes,
+	)
 	if err != nil {
 		panic(err)
 	}
