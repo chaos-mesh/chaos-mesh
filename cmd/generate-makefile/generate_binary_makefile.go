@@ -70,33 +70,33 @@ type binaryGeneratedMkOptions struct {
 	Content string
 }
 
-func renderBinaryGeneratedMk() error {
-	targetFile, err := os.OpenFile("binary.generated.mk", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+func renderBinaryGeneratedMk(name string, fileTemplate string, binaryRecipeTemplate string, recipes []binaryRecipeOptions) error {
+	targetFile, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return errors.Wrap(err, "open file binary.generated.mk")
+		return errors.Wrap(err, "open file "+name)
 	}
-	recipeTemplate, err := template.New("binary.generated.mk recipe").Funcs(defaultFuncMap).Parse(binaryRecipeTemplate)
+	recipeTemplate, err := template.New(name + " recipe").Funcs(defaultFuncMap).Parse(binaryRecipeTemplate)
 	if err != nil {
-		return errors.Wrap(err, "parse binary.generated.mk recipe template")
+		return errors.Wrap(err, "parse "+name+" recipe template")
 	}
 
 	var buffer bytes.Buffer
-	for _, recipe := range binaryRecipes {
+	for _, recipe := range recipes {
 		err := recipeTemplate.Execute(&buffer, recipe)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("render recipe in binary.generated.mk, recipe: %s", recipe.TargetName))
+			return errors.Wrap(err, fmt.Sprintf("render recipe in "+name+", recipe: %s", recipe.TargetName))
 		}
 	}
-	binaryTemplate, err := template.New("binary.generated.mk").Parse(binaryGeneratedMkTemplate)
+	binaryTemplate, err := template.New(name).Parse(fileTemplate)
 	if err != nil {
-		return errors.Wrap(err, "parse binary.generated.mk template")
+		return errors.Wrap(err, "parse "+name+" template")
 	}
 	err = binaryTemplate.Execute(targetFile, binaryGeneratedMkOptions{
-		Recipes: binaryRecipes,
+		Recipes: recipes,
 		Content: buffer.String(),
 	})
 	if err != nil {
-		return errors.Wrap(err, "render binary.generated.mk")
+		return errors.Wrap(err, "render "+name)
 	}
 	return nil
 }
