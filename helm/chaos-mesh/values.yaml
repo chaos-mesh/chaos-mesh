@@ -173,6 +173,7 @@ chaosDaemon:
     add:
       - SYS_PTRACE
       - NET_ADMIN
+      - NET_RAW
       - MKNOD
       - SYS_CHROOT
       - SYS_ADMIN
