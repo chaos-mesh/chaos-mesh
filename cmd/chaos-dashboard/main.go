@@ -36,6 +36,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	fxlogr "github.com/chaos-mesh/fx-logr"
 )
 
 // @title Chaos Mesh Dashboard API
@@ -67,6 +68,7 @@ func main() {
 
 	ctrl.SetLogger(rootLogger)
 	mainLog := rootLogger.WithName("main")
+	fxLogger := rootLogger.WithName("fx")
 
 	dashboardConfig, err := config.GetChaosDashboardEnv()
 	if err != nil {
@@ -83,7 +85,7 @@ func main() {
 
 	controllerRuntimeSignalHandlerContext := ctrl.SetupSignalHandler()
 	app := fx.New(
-		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
+		fx.WithLogger(fxlogr.WithLogr(&fxLogger)),
 		fx.Supply(rootLogger),
 		fx.Provide(
 			func() (context.Context, *config.ChaosDashboardConfig, *config.TTLConfig) {

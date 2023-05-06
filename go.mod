@@ -18,6 +18,7 @@ require (
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/chaos-mesh/chaos-driver v0.2.1
 	github.com/chaos-mesh/chaos-mesh/api v0.0.0
+	github.com/chaos-mesh/fx-logr v0.0.0-20230506085228-a2ac4c5cd360
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.6.18
@@ -26,7 +27,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.8.1
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.3
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/golang/protobuf v1.5.2
@@ -56,13 +57,13 @@ require (
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.0
 	github.com/swaggo/swag v1.8.3
 	github.com/vektah/gqlparser/v2 v2.4.1
 	github.com/vishvananda/netlink v1.1.1-0.20210330154013-f5de75959ad5
-	go.uber.org/fx v1.17.1
+	go.uber.org/fx v1.19.2
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.5.0
 	golang.org/x/oauth2 v0.4.0
@@ -250,7 +251,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/dig v1.14.1 // indirect
+	go.uber.org/dig v1.16.1 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.7.0 // indirect

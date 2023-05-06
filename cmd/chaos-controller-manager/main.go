@@ -45,6 +45,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/pkg/webhook"
+	fxlogr "github.com/chaos-mesh/fx-logr"
 )
 
 var (
@@ -72,11 +73,12 @@ func main() {
 	}
 	log.ReplaceGlobals(rootLogger)
 	ctrl.SetLogger(rootLogger)
+	fxLogger := rootLogger.WithName("fx")
 
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
 	app := fx.New(
-		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
+		fx.WithLogger(fxlogr.WithLogr(&fxLogger)),
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),
