@@ -35,6 +35,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - `pause` would return non zero exit code when the subcommand failed [#4018](https://github.com/chaos-mesh/chaos-mesh/pull/4018)
 - Build binaries locally with `local/` prefix targets in `Makefile` [#4004](https://github.com/chaos-mesh/chaos-mesh/pull/4004)
 - Use kubectl cluster-info dump to enhance e2e profiling [#3759](https://github.com/chaos-mesh/chaos-mesh/pull/3759)
+- Refine logging in `pkg/selector/physicalmachine` [#4037](https://github.com/chaos-mesh/chaos-mesh/pull/4037)
 
 ### Removed
 
