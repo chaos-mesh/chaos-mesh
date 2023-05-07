@@ -24,6 +24,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -45,7 +46,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/pkg/webhook"
-	fxlogr "github.com/chaos-mesh/fx-logr"
 )
 
 var (

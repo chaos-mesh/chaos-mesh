@@ -20,6 +20,7 @@ import (
 	"os"
 	"sync"
 
+	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -33,7 +34,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaosmonitor"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	fxlogr "github.com/chaos-mesh/fx-logr"
 )
 
 type remoteCluster struct {

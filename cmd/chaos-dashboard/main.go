@@ -21,6 +21,7 @@ import (
 	stdlog "log"
 	"os"
 
+	fxlogr "github.com/chaos-mesh/fx-logr"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -36,7 +37,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-	fxlogr "github.com/chaos-mesh/fx-logr"
 )
 
 // @title Chaos Mesh Dashboard API
