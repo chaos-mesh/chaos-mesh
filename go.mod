@@ -18,7 +18,7 @@ require (
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/chaos-mesh/chaos-driver v0.2.1
 	github.com/chaos-mesh/chaos-mesh/api v0.0.0
-	github.com/chaos-mesh/fx-logr v0.0.0-20230506085228-a2ac4c5cd360
+	github.com/chaos-mesh/fx-logr v0.1.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.6.18
