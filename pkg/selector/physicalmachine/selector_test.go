@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
@@ -128,8 +129,10 @@ func TestSelectPhysicalMachines(t *testing.T) {
 		testCfgTargetNamespace = ""
 	)
 
+	logger, _ := log.NewDefaultZapLogger()
+
 	for _, tc := range tcs {
-		filtered, err := SelectPhysicalMachines(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false)
+		filtered, err := SelectPhysicalMachines(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, false, logger)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filtered)).To(Equal(len(tc.expected)), tc.name)
 	}
