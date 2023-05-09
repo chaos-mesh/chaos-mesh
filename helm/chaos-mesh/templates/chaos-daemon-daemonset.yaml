@@ -112,15 +112,7 @@ spec:
                 - SYS_PTRACE
             {{- else }}
             capabilities:
-              add:
-                - SYS_PTRACE
-                - NET_ADMIN
-                - MKNOD
-                - SYS_CHROOT
-                - SYS_ADMIN
-                - KILL
-                # CAP_IPC_LOCK is used to lock memory
-                - IPC_LOCK
+{{ toYaml .Values.chaosDaemon.capabilities | indent 14 }}
             {{- end }}
           volumeMounts:
             - name: socket-path
