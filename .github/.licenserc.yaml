@@ -76,3 +76,6 @@ header:
     - 'ui/packages/mui-extends/test/storyshots.test.js'
     # codecov configuration file
     - 'codecov.yml'
+    # OWNERS
+    - 'OWNERS'
+    - 'OWNERS_ALIASES'
