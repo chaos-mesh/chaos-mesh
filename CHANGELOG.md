@@ -37,6 +37,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Build binaries locally with `local/` prefix targets in `Makefile` [#4004](https://github.com/chaos-mesh/chaos-mesh/pull/4004)
 - Use kubectl cluster-info dump to enhance e2e profiling [#3759](https://github.com/chaos-mesh/chaos-mesh/pull/3759)
 - Upgrade fx event logger [#4036](https://github.com/chaos-mesh/chaos-mesh/pull/4036)
+- Refine logging in `pkg/selector/physicalmachine` [#4037](https://github.com/chaos-mesh/chaos-mesh/pull/4037)
 - Setup OWNERS and OWNERS_ALIASES [#4039](https://github.com/chaos-mesh/chaos-mesh/pull/4039)
 
 ### Removed
