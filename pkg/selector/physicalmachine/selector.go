@@ -18,16 +18,15 @@ package physicalmachine
 import (
 	"context"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	stdLog "github.com/chaos-mesh/chaos-mesh/pkg/log"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic"
 	genericannotation "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/annotation"
 	genericfield "github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/field"
@@ -36,13 +35,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/registry"
 )
 
-var log = ctrl.Log.WithName("physical-machine-selector")
-
 type SelectImpl struct {
 	c client.Client
 	r client.Reader
 
 	generic.Option
+	logger logr.Logger
 }
 
 type Params struct {
@@ -72,7 +70,7 @@ func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1a
 		return []*PhysicalMachine{}, nil
 	}
 
-	physicalMachines, err := SelectAndFilterPhysicalMachines(ctx, impl.c, impl.r, physicalMachineSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace)
+	physicalMachines, err := SelectAndFilterPhysicalMachines(ctx, impl.c, impl.r, physicalMachineSelector, impl.ClusterScoped, impl.TargetNamespace, impl.EnableFilterNamespace, impl.logger)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +82,7 @@ func (impl *SelectImpl) Select(ctx context.Context, physicalMachineSelector *v1a
 	return filtered, nil
 }
 
-func New(params Params) *SelectImpl {
+func New(params Params, logger logr.Logger) *SelectImpl {
 	return &SelectImpl{
 		params.Client,
 		params.Reader,
@@ -93,11 +91,12 @@ func New(params Params) *SelectImpl {
 			TargetNamespace:       config.ControllerCfg.TargetNamespace,
 			EnableFilterNamespace: config.ControllerCfg.EnableFilterNamespace,
 		},
+		logger.WithName("physical-machine-selector"),
 	}
 }
 
 // SelectAndFilterPhysicalMachines returns the list of physical machines that filtered by selector and SelectorMode
-func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PhysicalMachineSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]*PhysicalMachine, error) {
+func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PhysicalMachineSelector, clusterScoped bool, targetNamespace string, enableFilterNamespace bool, logger logr.Logger) ([]*PhysicalMachine, error) {
 	if len(spec.Address) > 0 {
 		var result []*PhysicalMachine
 		for _, address := range spec.Address {
@@ -108,7 +107,7 @@ func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r cli
 		return result, nil
 	}
 
-	physicalMachines, err := SelectPhysicalMachines(ctx, c, r, spec.Selector, clusterScoped, targetNamespace, enableFilterNamespace)
+	physicalMachines, err := SelectPhysicalMachines(ctx, c, r, spec.Selector, clusterScoped, targetNamespace, enableFilterNamespace, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -129,9 +128,9 @@ func SelectAndFilterPhysicalMachines(ctx context.Context, c client.Client, r cli
 
 func SelectPhysicalMachines(ctx context.Context, c client.Client, r client.Reader,
 	selector v1alpha1.PhysicalMachineSelectorSpec,
-	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1alpha1.PhysicalMachine, error) {
+	clusterScoped bool, targetNamespace string, enableFilterNamespace bool, logger logr.Logger) ([]v1alpha1.PhysicalMachine, error) {
 	if len(selector.PhysicalMachines) > 0 {
-		return selectSpecifiedPhysicalMachines(ctx, c, selector, clusterScoped, targetNamespace, enableFilterNamespace)
+		return selectSpecifiedPhysicalMachines(ctx, c, selector, clusterScoped, targetNamespace, enableFilterNamespace, logger)
 	}
 
 	selectorRegistry := newSelectorRegistry()
@@ -144,22 +143,19 @@ func SelectPhysicalMachines(ctx context.Context, c client.Client, r client.Reade
 		return nil, err
 	}
 
-	return listPhysicalMachines(ctx, c, r, selector, selectorChain, enableFilterNamespace)
+	return listPhysicalMachines(ctx, c, r, selector, selectorChain, enableFilterNamespace, logger)
 }
 
 func listPhysicalMachines(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.PhysicalMachineSelectorSpec,
-	selectorChain generic.SelectorChain, enableFilterNamespace bool) ([]v1alpha1.PhysicalMachine, error) {
+	selectorChain generic.SelectorChain, enableFilterNamespace bool, logger logr.Logger) ([]v1alpha1.PhysicalMachine, error) {
 	var physicalMachines []v1alpha1.PhysicalMachine
 	namespaceCheck := make(map[string]bool)
 
 	if err := selectorChain.ListObjects(c, r,
 		func(listFunc generic.ListFunc, opts client.ListOptions) error {
 			var pmList v1alpha1.PhysicalMachineList
+
 			if len(spec.Namespaces) > 0 {
-				logger, err := stdLog.NewDefaultZapLogger()
-				if err != nil {
-					return errors.Wrap(err, "failed to create logger")
-				}
 				for _, namespace := range spec.Namespaces {
 					if enableFilterNamespace {
 						allow, ok := namespaceCheck[namespace]
@@ -210,17 +206,14 @@ func newSelectorRegistry() registry.Registry {
 }
 
 func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec v1alpha1.PhysicalMachineSelectorSpec,
-	clusterScoped bool, targetNamespace string, enableFilterNamespace bool) ([]v1alpha1.PhysicalMachine, error) {
+	clusterScoped bool, targetNamespace string, enableFilterNamespace bool, logger logr.Logger) ([]v1alpha1.PhysicalMachine, error) {
 	var physicalMachines []v1alpha1.PhysicalMachine
 	namespaceCheck := make(map[string]bool)
-	logger, err := stdLog.NewDefaultZapLogger()
-	if err != nil {
-		return physicalMachines, errors.Wrap(err, "failed to create logger")
-	}
+
 	for ns, names := range spec.PhysicalMachines {
 		if !clusterScoped {
 			if targetNamespace != ns {
-				log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
+				logger.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 				continue
 			}
 		}
@@ -246,7 +239,7 @@ func selectSpecifiedPhysicalMachines(ctx context.Context, c client.Client, spec 
 			}
 
 			if apierrors.IsNotFound(err) {
-				log.Error(err, "PhysicalMachine is not found", "namespace", ns, "physical machine name", name)
+				logger.Error(err, "PhysicalMachine is not found", "namespace", ns, "physical machine name", name)
 				continue
 			}
 
