@@ -24,6 +24,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"go.uber.org/fx"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -72,11 +73,12 @@ func main() {
 	}
 	log.ReplaceGlobals(rootLogger)
 	ctrl.SetLogger(rootLogger)
+	fxLogger := rootLogger.WithName("fx")
 
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
 	app := fx.New(
-		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
+		fx.WithLogger(fxlogr.WithLogr(&fxLogger)),
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(rootLogger),
 		fx.Provide(metrics.NewChaosControllerManagerMetricsCollector),

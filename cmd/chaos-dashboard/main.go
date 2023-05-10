@@ -21,6 +21,7 @@ import (
 	stdlog "log"
 	"os"
 
+	fxlogr "github.com/chaos-mesh/fx-logr"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -67,6 +68,7 @@ func main() {
 
 	ctrl.SetLogger(rootLogger)
 	mainLog := rootLogger.WithName("main")
+	fxLogger := rootLogger.WithName("fx")
 
 	dashboardConfig, err := config.GetChaosDashboardEnv()
 	if err != nil {
@@ -83,7 +85,7 @@ func main() {
 
 	controllerRuntimeSignalHandlerContext := ctrl.SetupSignalHandler()
 	app := fx.New(
-		fx.Logger(log.NewLogrPrinter(rootLogger.WithName("fx"))),
+		fx.WithLogger(fxlogr.WithLogr(&fxLogger)),
 		fx.Supply(rootLogger),
 		fx.Provide(
 			func() (context.Context, *config.ChaosDashboardConfig, *config.TTLConfig) {
