@@ -20,6 +20,7 @@ import (
 	"os"
 	"sync"
 
+	fxlogr "github.com/chaos-mesh/fx-logr"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
@@ -33,7 +34,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/multicluster/remotechaosmonitor"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
-	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
 type remoteCluster struct {
@@ -158,10 +158,12 @@ func (r *RemoteClusterRegistry) Spawn(name string, config *rest.Config) error {
 		return errors.Wrapf(ErrAlreadyExist, "spawn cluster: %s", name)
 	}
 
+	remoteFxLogger := r.logger.WithName("remotecluster-fx-" + name)
+
 	localClient := r.client
 	var remoteClient client.Client
 	app := fx.New(
-		fx.Logger(log.NewLogrPrinter(r.logger.WithName("remotecluster-fx-"+name))),
+		fx.WithLogger(fxlogr.WithLogr(&remoteFxLogger)),
 		fx.Supply(controllermetrics.Registry),
 		fx.Supply(r.logger.WithName("remotecluster-"+name)),
 		fx.Supply(config),
