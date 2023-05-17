@@ -112,6 +112,8 @@ type ChaosControllerConfig struct {
 
 	EnabledControllers []string `envconfig:"ENABLED_CONTROLLERS" default:"*"`
 	EnabledWebhooks    []string `envconfig:"ENABLED_WEBHOOKS" default:"*"`
+
+	LocalHelmChartPath string `envconfig:"LOCAL_HELM_CHART_PATH" default:""`
 }
 
 // EnvironChaosController returns the settings from the environment.
