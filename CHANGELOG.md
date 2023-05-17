@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix using ContainerSelector in kernel chaos [#4050](https://github.com/chaos-mesh/chaos-mesh/pull/4050)
 
 ### Security
 
