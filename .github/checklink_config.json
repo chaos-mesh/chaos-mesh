@@ -17,6 +17,9 @@
     },
     {
       "pattern": "^https://www.tencent.com"
+    },
+    {
+      "pattern": "^https://twitter.com"
     }
   ],
   "aliveStatusCodes": [200, 403, 500, 502, 503]
