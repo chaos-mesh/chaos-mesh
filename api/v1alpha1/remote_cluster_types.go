@@ -40,6 +40,7 @@ type RemoteCluster struct {
 // RemoteClusterSpec defines the specification of a remote cluster
 type RemoteClusterSpec struct {
 	Namespace string `json:"namespace"`
+	Version   string `json:"version"`
 
 	KubeConfig RemoteClusterKubeConfig `json:"kubeConfig"`
 

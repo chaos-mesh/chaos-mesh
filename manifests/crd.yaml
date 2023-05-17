@@ -5322,9 +5322,12 @@ spec:
                 type: object
               namespace:
                 type: string
+              version:
+                type: string
             required:
             - kubeConfig
             - namespace
+            - version
             type: object
           status:
             properties:
