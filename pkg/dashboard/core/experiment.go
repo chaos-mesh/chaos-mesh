@@ -67,12 +67,12 @@ type Experiment struct {
 // ExperimentMeta defines the metadata of an experiment. Use in db.
 type ExperimentMeta struct {
 	gorm.Model
-	UID        string    `gorm:"index:uid" json:"uid"`
-	Kind       string    `json:"kind"`
-	Name       string    `json:"name"`
-	Namespace  string    `json:"namespace"`
-	Action     string    `json:"action"`
-	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
-	Archived   bool      `json:"archived"`
+	UID        string     `gorm:"index:uid" json:"uid"`
+	Kind       string     `json:"kind"`
+	Name       string     `json:"name"`
+	Namespace  string     `json:"namespace"`
+	Action     string     `json:"action"`
+	StartTime  time.Time  `json:"start_time"`
+	FinishTime *time.Time `json:"finish_time"`
+	Archived   bool       `json:"archived"`
 }

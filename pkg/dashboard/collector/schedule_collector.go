@@ -112,7 +112,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 
 	archive.StartTime = schedule.GetCreationTimestamp().Time
 	if schedule.GetDeletionTimestamp() != nil {
-		archive.FinishTime = schedule.GetDeletionTimestamp().Time
+		archive.FinishTime = &schedule.GetDeletionTimestamp().Time
 	}
 
 	data, err := json.Marshal(schedule)
