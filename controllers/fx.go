@@ -16,6 +16,7 @@
 package controllers
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/controllers/reinjection"
 	"go.uber.org/fx"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl"
@@ -48,6 +49,7 @@ var Module = fx.Options(
 	fx.Invoke(statuscheck.Bootstrap),
 	fx.Invoke(remotecluster.Bootstrap),
 	fx.Invoke(remotechaos.Bootstrap),
+	fx.Invoke(reinjection.Bootstrap),
 
 	schedule.Module,
 	chaosimpl.AllImpl)
