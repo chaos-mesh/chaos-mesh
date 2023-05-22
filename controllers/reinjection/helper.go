@@ -244,10 +244,11 @@ func storeDataWithLock(ctx context.Context, cli client.Client, podKey string, da
 		if err != nil {
 			return err
 		}
-		if len(data) == 0 {
+		mergeData := mergeMaps(data, existingData[podKey])
+		if len(mergeData) == 0 {
 			delete(existingData, podKey)
 		} else {
-			existingData[podKey] = data
+			existingData[podKey] = mergeData
 		}
 		serializedData, err := serializeData(existingData)
 		if err != nil {
@@ -305,4 +306,17 @@ func createPodToChaosConfigMap(ctx context.Context, cli client.Client) error {
 		return err
 	}
 	return nil
+}
+
+func mergeMaps(dataToUpdate, latestDate map[string]string) map[string]string {
+	mergedMap := make(map[string]string)
+	for key, value := range dataToUpdate {
+		mergedMap[key] = value
+	}
+
+	for key, value := range latestDate {
+		mergedMap[key] = value
+	}
+
+	return mergedMap
 }
