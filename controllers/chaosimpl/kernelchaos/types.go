@@ -17,6 +17,7 @@ package kernelchaos
 
 import (
 	"context"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -116,6 +117,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		Pid:       pid,
 		Callchain: callchain,
 	})
+	isMemoryFault := kernelChaos.Spec.FailKernRequest.FailType == 0 || kernelChaos.Spec.FailKernRequest.FailType == 1
+	if err != nil && isMemoryFault && strings.Contains(err.Error(), "rpc error: code = Internal desc = Error removing value: No such file or directory") {
+		// Inject memory fault in kernel may cause container restart and doesn't need to recover.
+		// The container ID will change, but the pod name will not. TODO check the container ID
+		impl.Log.Error(err, "KernelChaos target container probably restarted and doesn't need to recover")
+		return v1alpha1.NotInjected, nil
+	}
 	if err != nil {
 		err = errors.Wrapf(err, "Recover mm or bio error")
 		return v1alpha1.Injected, err
