@@ -13717,7 +13717,10 @@ spec:
                                                     properties:
                                                       name:
                                                         description: The header field
-                                                          name
+                                                          name. This will be canonicalized
+                                                          upon output, so case-variant
+                                                          names will be understood
+                                                          as the same header.
                                                         type: string
                                                       value:
                                                         description: The header field
@@ -13835,7 +13838,10 @@ spec:
                                                     properties:
                                                       name:
                                                         description: The header field
-                                                          name
+                                                          name. This will be canonicalized
+                                                          upon output, so case-variant
+                                                          names will be understood
+                                                          as the same header.
                                                         type: string
                                                       value:
                                                         description: The header field
@@ -13927,9 +13933,7 @@ spec:
                                           type: integer
                                         grpc:
                                           description: GRPC specifies an action involving
-                                            a GRPC port. This is a beta field and
-                                            requires enabling GRPCContainerProbe feature
-                                            gate.
+                                            a GRPC port.
                                           properties:
                                             port:
                                               description: Port number of the gRPC
@@ -13968,7 +13972,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -14163,9 +14170,7 @@ spec:
                                           type: integer
                                         grpc:
                                           description: GRPC specifies an action involving
-                                            a GRPC port. This is a beta field and
-                                            requires enabling GRPCContainerProbe feature
-                                            gate.
+                                            a GRPC port.
                                           properties:
                                             port:
                                               description: Port number of the gRPC
@@ -14204,7 +14209,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -14304,6 +14312,29 @@ spec:
                                           format: int32
                                           type: integer
                                       type: object
+                                    resizePolicy:
+                                      description: Resources resize policy for the
+                                        container.
+                                      items:
+                                        description: ContainerResizePolicy represents
+                                          resource resize policy for the container.
+                                        properties:
+                                          resourceName:
+                                            description: 'Name of the resource to
+                                              which this resource resize policy applies.
+                                              Supported values: cpu, memory.'
+                                            type: string
+                                          restartPolicy:
+                                            description: Restart policy to apply when
+                                              specified resource is resized. If not
+                                              specified, it defaults to NotRequired.
+                                            type: string
+                                        required:
+                                        - resourceName
+                                        - restartPolicy
+                                        type: object
+                                      type: array
+                                      x-kubernetes-list-type: atomic
                                     resources:
                                       description: 'Compute Resources required by
                                         this container. Cannot be updated. More info:
@@ -14315,7 +14346,8 @@ spec:
                                             that are used by this container. \n This
                                             is an alpha field and requires enabling
                                             the DynamicResourceAllocation feature
-                                            gate. \n This field is immutable."
+                                            gate. \n This field is immutable. It can
+                                            only be set for containers."
                                           items:
                                             description: ResourceClaim references
                                               one entry in PodSpec.ResourceClaims.
@@ -14357,7 +14389,8 @@ spec:
                                             If Requests is omitted for a container,
                                             it defaults to Limits if that is explicitly
                                             specified, otherwise to an implementation-defined
-                                            value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                            value. Requests cannot exceed Limits.
+                                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                           type: object
                                       type: object
                                     securityContext:
@@ -14610,9 +14643,7 @@ spec:
                                           type: integer
                                         grpc:
                                           description: GRPC specifies an action involving
-                                            a GRPC port. This is a beta field and
-                                            requires enabling GRPCContainerProbe feature
-                                            gate.
+                                            a GRPC port.
                                           properties:
                                             port:
                                               description: Port number of the gRPC
@@ -14651,7 +14682,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -15351,7 +15385,7 @@ spec:
                                               specified here and the sum of memory
                                               limits of all containers in a pod. The
                                               default is nil which means that the
-                                              limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
+                                              limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                                             pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                             x-kubernetes-int-or-string: true
                                         type: object
@@ -15584,7 +15618,8 @@ spec:
                                                           and requires enabling the
                                                           DynamicResourceAllocation
                                                           feature gate. \n This field
-                                                          is immutable."
+                                                          is immutable. It can only
+                                                          be set for containers."
                                                         items:
                                                           description: ResourceClaim
                                                             references one entry in
@@ -15633,7 +15668,8 @@ spec:
                                                           it defaults to Limits if
                                                           that is explicitly specified,
                                                           otherwise to an implementation-defined
-                                                          value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                                          value. Requests cannot exceed
+                                                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                                         type: object
                                                     type: object
                                                   selector:
@@ -17532,7 +17568,10 @@ spec:
                                         to be used in HTTP probes
                                       properties:
                                         name:
-                                          description: The header field name
+                                          description: The header field name. This
+                                            will be canonicalized upon output, so
+                                            case-variant names will be understood
+                                            as the same header.
                                           type: string
                                         value:
                                           description: The header field value
@@ -17631,7 +17670,10 @@ spec:
                                         to be used in HTTP probes
                                       properties:
                                         name:
-                                          description: The header field name
+                                          description: The header field name. This
+                                            will be canonicalized upon output, so
+                                            case-variant names will be understood
+                                            as the same header.
                                           type: string
                                         value:
                                           description: The header field value
@@ -17712,8 +17754,7 @@ spec:
                             type: integer
                           grpc:
                             description: GRPC specifies an action involving a GRPC
-                              port. This is a beta field and requires enabling GRPCContainerProbe
-                              feature gate.
+                              port.
                             properties:
                               port:
                                 description: Port number of the gRPC service. Number
@@ -17745,7 +17786,9 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name
+                                      description: The header field name. This will
+                                        be canonicalized upon output, so case-variant
+                                        names will be understood as the same header.
                                       type: string
                                     value:
                                       description: The header field value
@@ -17917,8 +17960,7 @@ spec:
                             type: integer
                           grpc:
                             description: GRPC specifies an action involving a GRPC
-                              port. This is a beta field and requires enabling GRPCContainerProbe
-                              feature gate.
+                              port.
                             properties:
                               port:
                                 description: Port number of the gRPC service. Number
@@ -17950,7 +17992,9 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name
+                                      description: The header field name. This will
+                                        be canonicalized upon output, so case-variant
+                                        names will be understood as the same header.
                                       type: string
                                     value:
                                       description: The header field value
@@ -18040,6 +18084,27 @@ spec:
                             format: int32
                             type: integer
                         type: object
+                      resizePolicy:
+                        description: Resources resize policy for the container.
+                        items:
+                          description: ContainerResizePolicy represents resource resize
+                            policy for the container.
+                          properties:
+                            resourceName:
+                              description: 'Name of the resource to which this resource
+                                resize policy applies. Supported values: cpu, memory.'
+                              type: string
+                            restartPolicy:
+                              description: Restart policy to apply when specified
+                                resource is resized. If not specified, it defaults
+                                to NotRequired.
+                              type: string
+                          required:
+                          - resourceName
+                          - restartPolicy
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
                       resources:
                         description: 'Compute Resources required by this container.
                           Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
@@ -18049,7 +18114,7 @@ spec:
                               in spec.resourceClaims, that are used by this container.
                               \n This is an alpha field and requires enabling the
                               DynamicResourceAllocation feature gate. \n This field
-                              is immutable."
+                              is immutable. It can only be set for containers."
                             items:
                               description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                               properties:
@@ -18087,7 +18152,7 @@ spec:
                               compute resources required. If Requests is omitted for
                               a container, it defaults to Limits if that is explicitly
                               specified, otherwise to an implementation-defined value.
-                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                              Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                             type: object
                         type: object
                       securityContext:
@@ -18301,8 +18366,7 @@ spec:
                             type: integer
                           grpc:
                             description: GRPC specifies an action involving a GRPC
-                              port. This is a beta field and requires enabling GRPCContainerProbe
-                              feature gate.
+                              port.
                             properties:
                               port:
                                 description: Port number of the gRPC service. Number
@@ -18334,7 +18398,9 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name
+                                      description: The header field name. This will
+                                        be canonicalized upon output, so case-variant
+                                        names will be understood as the same header.
                                       type: string
                                     value:
                                       description: The header field value
@@ -18933,7 +18999,7 @@ spec:
                                 value between the SizeLimit specified here and the
                                 sum of memory limits of all containers in a pod. The
                                 default is nil which means that the limit is undefined.
-                                More info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
+                                More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                               pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                               x-kubernetes-int-or-string: true
                           type: object
@@ -19117,7 +19183,8 @@ spec:
                                             that are used by this container. \n This
                                             is an alpha field and requires enabling
                                             the DynamicResourceAllocation feature
-                                            gate. \n This field is immutable."
+                                            gate. \n This field is immutable. It can
+                                            only be set for containers."
                                           items:
                                             description: ResourceClaim references
                                               one entry in PodSpec.ResourceClaims.
@@ -19159,7 +19226,8 @@ spec:
                                             If Requests is omitted for a container,
                                             it defaults to Limits if that is explicitly
                                             specified, otherwise to an implementation-defined
-                                            value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                            value. Requests cannot exceed Limits.
+                                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                           type: object
                                       type: object
                                     selector:

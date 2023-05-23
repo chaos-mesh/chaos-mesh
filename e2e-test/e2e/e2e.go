@@ -72,7 +72,7 @@ func setupSuite() {
 			framework.Failf("Error deleting orphaned namespaces: %v", err)
 		}
 		klog.Infof("Waiting for deletion of the following namespaces: %v", deleted)
-		if err := framework.WaitForNamespacesDeleted(c, deleted, namespaceCleanupTimeout); err != nil {
+		if err := framework.WaitForNamespacesDeleted(context.TODO(), c, deleted, namespaceCleanupTimeout); err != nil {
 			framework.Failf("Failed to delete orphaned namespaces %v: %v", deleted, err)
 		}
 	}
@@ -80,7 +80,7 @@ func setupSuite() {
 	// In large clusters we may get to this point but still have a bunch
 	// of nodes without Routes created. Since this would make a node
 	// unschedulable, we need to wait until all of them are schedulable.
-	framework.ExpectNoError(e2enode.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))
+	framework.ExpectNoError(e2enode.WaitForAllNodesSchedulable(context.Background(), c, framework.TestContext.NodeSchedulableTimeout))
 
 	//// If NumNodes is not specified then auto-detect how many are scheduleable and not tainted
 	//if framework.TestContext.CloudConfig.NumNodes == framework.DefaultNumNodes {
@@ -97,8 +97,8 @@ func setupSuite() {
 	// wasting the whole run), we allow for some not-ready pods (with the
 	// number equal to the number of allowed not-ready nodes).
 	if err := e2epod.WaitForPodsRunningReady(c, metav1.NamespaceSystem, int32(framework.TestContext.MinStartupPods), int32(framework.TestContext.AllowedNotReadyNodes), podStartupTimeout, map[string]string{}); err != nil {
-		e2edebug.DumpAllNamespaceInfo(c, metav1.NamespaceSystem)
-		e2ekubectl.LogFailedContainers(c, metav1.NamespaceSystem, framework.Logf)
+		e2edebug.DumpAllNamespaceInfo(context.TODO(), c, metav1.NamespaceSystem)
+		e2ekubectl.LogFailedContainers(context.TODO(), c, metav1.NamespaceSystem, framework.Logf)
 		framework.Failf("Error waiting for all pods to be running and ready: %v", err)
 	}
 

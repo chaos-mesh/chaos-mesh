@@ -87,7 +87,7 @@ func Bootstrap(params Params) error {
 				builder.Watches(&source.Kind{
 					Type: obj,
 				},
-					handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+					handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
 						reqs := []reconcile.Request{}
 						objName := k8sTypes.NamespacedName{
 							Namespace: obj.GetNamespace(),
