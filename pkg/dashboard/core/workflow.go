@@ -58,7 +58,7 @@ type WorkflowMeta struct {
 	Entry     string    `json:"entry"` // the entry node name
 	CreatedAt time.Time `json:"created_at"`
 	// FinishTime represents the time when the workflow was deleted from Kubernetes.
-	FinishTime time.Time `json:"finish_time"`
+	FinishTime *time.Time `json:"finish_time"`
 	// EndTime represents the time when the workflow completed all steps.
 	EndTime  string         `json:"end_time"`
 	Status   WorkflowStatus `json:"status,omitempty"`
@@ -261,7 +261,7 @@ func convertWorkflow(kubeWorkflow v1alpha1.Workflow) WorkflowMeta {
 	}
 
 	if kubeWorkflow.GetDeletionTimestamp() != nil {
-		result.FinishTime = kubeWorkflow.GetDeletionTimestamp().Time
+		result.FinishTime = &kubeWorkflow.GetDeletionTimestamp().Time
 	}
 
 	if wfcontrollers.WorkflowConditionEqualsTo(kubeWorkflow.Status, v1alpha1.WorkflowConditionAccomplished, corev1.ConditionTrue) {

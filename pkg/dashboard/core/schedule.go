@@ -64,12 +64,12 @@ type Schedule struct {
 // ScheduleMeta defines the metadata of a schedule instance. Use in db.
 type ScheduleMeta struct {
 	gorm.Model
-	UID        string    `gorm:"index:schedule_uid" json:"uid"`
-	Kind       string    `json:"kind"`
-	Name       string    `json:"name"`
-	Namespace  string    `json:"namespace"`
-	Action     string    `json:"action"`
-	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
-	Archived   bool      `json:"archived"`
+	UID        string     `gorm:"index:schedule_uid" json:"uid"`
+	Kind       string     `json:"kind"`
+	Name       string     `json:"name"`
+	Namespace  string     `json:"namespace"`
+	Action     string     `json:"action"`
+	StartTime  time.Time  `json:"start_time"`
+	FinishTime *time.Time `json:"finish_time"`
+	Archived   bool       `json:"archived"`
 }

@@ -63,7 +63,10 @@ type ChaosDashboardConfig struct {
 
 // DatabaseConfig defines the configuration for databases
 type DatabaseConfig struct {
-	Driver     string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
+	Driver string `envconfig:"DATABASE_DRIVER"     default:"sqlite3"`
+	// Datasource is the connection string for database.
+	// For sqlite3, it is the path of the database file.
+	// For mysql, it is the DSN (https://github.com/go-sql-driver/mysql#dsn-data-source-name).
 	Datasource string `envconfig:"DATABASE_DATASOURCE" default:"core.sqlite"`
 }
 
