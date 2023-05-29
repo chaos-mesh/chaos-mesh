@@ -17,7 +17,9 @@ package remotecluster
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -209,7 +211,12 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 
 	values := make(map[string]interface{})
 	if obj.Spec.ConfigOverride != nil {
-		err = json.Unmarshal(obj.Spec.ConfigOverride, &values)
+		configStr := strings.Trim(string(obj.Spec.ConfigOverride), "\"")
+		configByte, err := base64.StdEncoding.DecodeString(configStr)
+		if err != nil {
+			return "", err
+		}
+		err = json.Unmarshal(configByte, &values)
 		if err != nil {
 			return "", err
 		}
