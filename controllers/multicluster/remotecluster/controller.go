@@ -79,6 +79,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
+		r.Log.Info("the target remote cluster has been up to date", "remote cluster", obj.Namespace+"/"+obj.Name)
+		return ctrl.Result{}, nil
+	}
+
+	r.Log.Info("remote cluster ", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
+
 	clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
 	if err != nil {
 		r.Log.Error(err, "fail to get clientConfig from secret")
@@ -135,6 +142,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{Requeue: true}, nil
 	}
 
+	observedGeneration := obj.ObjectMeta.Generation
 	err = retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		var newObj v1alpha1.RemoteCluster
 		r.Client.Get(ctx, req.NamespacedName, &newObj)
@@ -146,6 +154,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return err
 		}
 		newObj.Status.CurrentVersion = currentVersion
+		newObj.Status.ObservedGeneration = observedGeneration
 		err = r.Client.Status().Update(ctx, &newObj)
 		return err
 	})
@@ -189,26 +198,31 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 	if err != nil {
 		return "", err
 	}
-	release, err := helmClient.GetRelease(obj.Spec.Namespace, chaosMeshReleaseName)
+	release, releaseErr := helmClient.GetRelease(obj.Spec.Namespace, chaosMeshReleaseName)
+	if releaseErr != nil && !errors.Is(releaseErr, driver.ErrReleaseNotFound) {
+		return "", releaseErr
+	}
+	chart, err := helm.FetchChaosMeshChart(ctx, obj.Spec.Version, config.ControllerCfg.LocalHelmChartPath)
 	if err != nil {
-		if errors.Is(err, driver.ErrReleaseNotFound) {
-			chart, err := helm.FetchChaosMeshChart(ctx, obj.Spec.Version, config.ControllerCfg.LocalHelmChartPath)
-			if err != nil {
-				return "", err
-			}
+		return "", err
+	}
 
-			values := make(map[string]interface{})
-			if obj.Spec.ConfigOverride != nil {
-				err = json.Unmarshal(obj.Spec.ConfigOverride, &values)
-				if err != nil {
-					return "", err
-				}
-			}
-			release, err = helmClient.UpgradeOrInstall(obj.Spec.Namespace, chaosMeshReleaseName, chart, values)
-			if err != nil {
-				return "", err
-			}
-		} else {
+	values := make(map[string]interface{})
+	if obj.Spec.ConfigOverride != nil {
+		err = json.Unmarshal(obj.Spec.ConfigOverride, &values)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	if errors.Is(releaseErr, driver.ErrReleaseNotFound) {
+		release, err = helmClient.InstallRelease(obj.Spec.Namespace, chaosMeshReleaseName, chart, values)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		release, err = helmClient.UpgradeRelease(obj.Spec.Namespace, chaosMeshReleaseName, chart, values)
+		if err != nil {
 			return "", err
 		}
 	}
