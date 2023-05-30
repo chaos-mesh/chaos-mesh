@@ -17,7 +17,7 @@
 
 # specify which tag of ghcr.io/chaos-mesh/build-env image should be used with the current branch
 build-env:
-  tag: "latest"
+  tag: "release-2.6"
 # specify which tag of ghcr.io/chaos-mesh/dev-env image should be used with the current branch
 dev-env:
-  tag: "latest"
+  tag: "release-2.6"
