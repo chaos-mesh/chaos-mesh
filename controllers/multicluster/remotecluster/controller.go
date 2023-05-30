@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -200,7 +201,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 	if err != nil {
 		return "", err
 	}
-	release, releaseErr := helmClient.GetRelease(obj.Spec.Namespace, chaosMeshReleaseName)
+	_, releaseErr := helmClient.GetRelease(obj.Spec.Namespace, chaosMeshReleaseName)
 	if releaseErr != nil && !errors.Is(releaseErr, driver.ErrReleaseNotFound) {
 		return "", releaseErr
 	}
@@ -221,7 +222,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 			return "", err
 		}
 	}
-
+	var release *release.Release
 	if errors.Is(releaseErr, driver.ErrReleaseNotFound) {
 		release, err = helmClient.InstallRelease(obj.Spec.Namespace, chaosMeshReleaseName, chart, values)
 		if err != nil {
