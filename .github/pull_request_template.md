@@ -25,28 +25,25 @@ Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new
 - [ ] This change also requires further updates to the [website](https://github.com/chaos-mesh/website) (e.g. docs)
 - [ ] This change also requires further updates to the `UI interface`
 - Need to **cheery-pick to release branches**
+  - [ ] release-2.6
   - [ ] release-2.5
-  - [ ] release-2.4
 
 ### Checklist
 
 CHANGELOG
 
-<!-- Must include at least one of them. -->
+> Must include at least one of them.
 
 - [ ] I have updated the `CHANGELOG.md`
 - [ ] I have labeled this PR with "no-need-update-changelog"
 
 Tests
 
-<!-- Must include at least one of them. -->
+> Must include at least one of them.
 
 - [ ] Unit test
 - [ ] E2E test
-- [ ] No code
-- [ ] Manual test (add steps below)
-
-<!-- > steps: -->
+- [ ] Manual test
 
 Side effects
 
