@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.6.0] - 2023-05-30
+
+### Added
+
 - Bump go to v1.19.3 [#3770](https://github.com/chaos-mesh/chaos-mesh/pull/3770)
 - Update k8s.io dependencies to v0.26.1 [#3902](https://github.com/chaos-mesh/chaos-mesh/pull/3902)
 - Update sigs.k8s.io/controller-runtime to v0.14.1 and sigs.k8s.io/controller-tools to v0.11.1 [#3902](https://github.com/chaos-mesh/chaos-mesh/pull/3902)
@@ -40,6 +66,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade fx event logger [#4036](https://github.com/chaos-mesh/chaos-mesh/pull/4036)
 - Refine logging in `pkg/selector/physicalmachine` [#4037](https://github.com/chaos-mesh/chaos-mesh/pull/4037)
 - Setup OWNERS and OWNERS_ALIASES [#4039](https://github.com/chaos-mesh/chaos-mesh/pull/4039)
+
+### Deprecated
+
+- Nothing
 
 ### Removed
 
