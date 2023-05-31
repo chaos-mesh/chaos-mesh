@@ -25,7 +25,7 @@ Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new
 - [ ] This change also requires further updates to the [website](https://github.com/chaos-mesh/website) (e.g. docs)
 - [ ] This change also requires further updates to the `UI interface`
 
-## Cherry-pick to release branches (Optional)
+## Cherry-pick to release branches (optional)
 
 > This PR should be cherry-picked to the following release branches:
 
