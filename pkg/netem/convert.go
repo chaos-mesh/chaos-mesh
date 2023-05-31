@@ -118,15 +118,10 @@ func FromCorrupt(in *v1alpha1.CorruptSpec) (*chaosdaemonpb.Netem, error) {
 	}, nil
 }
 
-// FromBandwidthToNetEm convert BandwidthSpec to netem
-func FromBandwidthToNetEm(in *v1alpha1.BandwidthSpec) (*chaosdaemonpb.Netem, error) {
-	rate, err := v1alpha1.ConvertUnitToBytes(in.Rate)
-	if err != nil {
-		return nil, err
-	}
-
+// FromRate convert RateSpec to netem
+func FromRate(in *v1alpha1.RateSpec) (*chaosdaemonpb.Netem, error) {
 	return &chaosdaemonpb.Netem{
-		Rate: rate * 8,
+		Rate: in.Rate,
 	}, nil
 }
 

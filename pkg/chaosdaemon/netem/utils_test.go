@@ -46,8 +46,8 @@ func TestMergeNetem(t *testing.T) {
 		},
 		{
 			&chaosdaemonpb.Netem{Time: 100},
-			&chaosdaemonpb.Netem{Rate: 8000},
-			&chaosdaemonpb.Netem{Time: 100, Rate: 8000},
+			&chaosdaemonpb.Netem{Rate: "800kbit"},
+			&chaosdaemonpb.Netem{Time: 100, Rate: "800kbit"},
 		},
 	}
 

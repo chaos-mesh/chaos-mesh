@@ -176,7 +176,7 @@ func Test_convertNetemToArgs(t *testing.T) {
 		args := convertNetemToArgs(&pb.Netem{
 			Time:   1000,
 			Jitter: 10000,
-			Rate:   8000,
+			Rate:   "8000bit",
 		})
 		g.Expect(args).To(Equal("delay 1000 10000 rate 8000bit"))
 	})
