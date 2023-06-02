@@ -66,7 +66,8 @@ type RemoteClusterStatus struct {
 
 	// Conditions represents the current condition of the remote cluster
 	// +optional
-	Conditions []RemoteClusterCondition `json:"conditions,omitempty"`
+	Conditions         []RemoteClusterCondition `json:"conditions,omitempty"`
+	ObservedGeneration int64                    `json:"observedGeneration,omitempty"`
 }
 
 type RemoteClusterConditionType string
