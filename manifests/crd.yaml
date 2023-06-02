@@ -5351,6 +5351,9 @@ spec:
                 type: array
               currentVersion:
                 type: string
+              observedGeneration:
+                format: int64
+                type: integer
             required:
             - currentVersion
             type: object
