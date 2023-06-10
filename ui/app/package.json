@@ -2,6 +2,15 @@
   "name": "@ui/app",
   "version": "0.0.0",
   "private": true,
+  "homepage": ".",
+  "scripts": {
+    "start": "react-scripts start",
+    "start:default": "cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "dependencies": {
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.3.0",
@@ -52,14 +61,6 @@
     "uuid": "^8.3.2",
     "yup": "^0.29.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "start:default": "cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -106,9 +107,6 @@
     "source-map-explorer": "^2.5.2"
   },
   "jest": {
-    "resetMocks": false,
-    "transformIgnorePatterns": [
-      "node_modules/.pnpm/(?!auto-bind)"
-    ]
+    "resetMocks": false
   }
 }
