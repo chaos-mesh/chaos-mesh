@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Set `replicas: 1` automatically when HA is not enabled
 
 ### Security
 
