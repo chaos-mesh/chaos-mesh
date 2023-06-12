@@ -16,9 +16,8 @@
 package v1alpha1
 
 import (
-	"encoding/json"
-
 	corev1 "k8s.io/api/core/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -45,7 +44,7 @@ type RemoteClusterSpec struct {
 	KubeConfig RemoteClusterKubeConfig `json:"kubeConfig"`
 
 	//+optional
-	ConfigOverride json.RawMessage `json:"configOverride,omitempty"`
+	ConfigOverride *apiextensionsv1.JSON `json:"configOverride,omitempty"`
 }
 
 // RemoteClusterKubeConfig refers to a secret by which we'll use to connect remote cluster

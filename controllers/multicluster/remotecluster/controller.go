@@ -17,9 +17,7 @@ package remotecluster
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
-	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -82,12 +80,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
+	r.Log.Info("remote cluster", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
+
 	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
 		r.Log.Info("the target remote cluster has been up to date", "remote cluster", obj.Namespace+"/"+obj.Name)
 		return ctrl.Result{}, nil
 	}
-
-	r.Log.Info("remote cluster ", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
 
 	clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
 	if err != nil {
@@ -212,12 +210,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 
 	values := make(map[string]interface{})
 	if obj.Spec.ConfigOverride != nil {
-		configStr := strings.Trim(string(obj.Spec.ConfigOverride), "\"")
-		configByte, err := base64.StdEncoding.DecodeString(configStr)
-		if err != nil {
-			return "", err
-		}
-		err = json.Unmarshal(configByte, &values)
+		err = json.Unmarshal(obj.Spec.ConfigOverride.Raw, &values)
 		if err != nil {
 			return "", err
 		}
