@@ -101,9 +101,9 @@ func (h *HelmClient) UpgradeRelease(namespace string, releaseName string, chart 
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
 	}
-	actionInstall := action.NewUpgrade(configurationWithNamespace)
-	actionInstall.Namespace = namespace
-	result, err := actionInstall.Run(releaseName, chart, values)
+	actionUpgrade := action.NewUpgrade(configurationWithNamespace)
+	actionUpgrade.Namespace = namespace
+	result, err := actionUpgrade.Run(releaseName, chart, values)
 	if err != nil {
 		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
 	}
