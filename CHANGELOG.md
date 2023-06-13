@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Set `replicas: 1` automatically when HA is not enabled [#4079](https://github.com/chaos-mesh/chaos-mesh/pull/4079)
 
 ### Security
 
