@@ -63,10 +63,6 @@ type AWSChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
-	// SecretName defines the name of kubernetes secret.
-	// +optional
-	SecretName *string `json:"secretName,omitempty" webhook:",nilable"`
-
 	AWSSelector `json:",inline"`
 
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
@@ -91,6 +87,10 @@ type AWSSelector struct {
 	// AWSRegion defines the region of aws.
 	AWSRegion string `json:"awsRegion"`
 
+	// SecretName defines the name of kubernetes secret.
+	// +optional
+	SecretName *string `json:"secretName,omitempty" webhook:",nilable"`
+
 	// Ec2Instance indicates the ID of the ec2 instance.
 	Ec2Instance string `json:"ec2Instance"`
 
@@ -105,6 +105,31 @@ type AWSSelector struct {
 	// +ui:form:when=action=='detach-volume'
 	// +optional
 	DeviceName *string `json:"deviceName,omitempty" webhook:"AWSDeviceName,nilable"`
+
+	// Filters defines the filters to pass to the AWS api to query the list of instances.
+	// Can be specified instead of Ec2Instance, in order to specify instances by tag or other attributes
+	// Any parameter supported by AWS DescribeInstances method can be used.
+	// For details see: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html
+	Filters []*AWSFilter `json:"filters,omitempty"`
+
+	// Mode defines the mode to run chaos action.
+	// Used only if Filters is specified.
+	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+	// +optional
+	Mode SelectorMode `json:"mode,omitempty"`
+
+	// Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+	// If `FixedMode`, provide an integer of pods to do chaos action.
+	// If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	// +optional
+	Value string `json:"value,omitempty"`
+}
+
+type AWSFilter struct {
+	Name   string   `json:"name"`
+	Values []string `json:"values"`
 }
 
 func (obj *AWSChaos) GetSelectorSpecs() map[string]interface{} {

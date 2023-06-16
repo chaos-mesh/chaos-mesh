@@ -30,6 +30,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	impltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	selector "github.com/chaos-mesh/chaos-mesh/pkg/selector/aws"
 )
 
 var _ impltypes.ChaosImpl = (*Impl)(nil)
@@ -43,7 +44,7 @@ type Impl struct {
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	awschaos := obj.(*v1alpha1.AWSChaos)
 
-	var selected v1alpha1.AWSSelector
+	var selected selector.Instance
 	err := json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal the selector")
@@ -84,7 +85,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	ec2client := ec2.NewFromConfig(cfg)
 
 	_, err = ec2client.StopInstances(context.TODO(), &ec2.StopInstancesInput{
-		InstanceIds: []string{selected.Ec2Instance},
+		InstanceIds: []string{selected.InstanceID},
 	})
 
 	if err != nil {
@@ -97,7 +98,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	awschaos := obj.(*v1alpha1.AWSChaos)
 
-	var selected v1alpha1.AWSSelector
+	var selected selector.Instance
 	err := json.Unmarshal([]byte(records[index].Id), &selected)
 	if err != nil {
 		impl.Log.Error(err, "fail to unmarshal the selector")
@@ -137,7 +138,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	ec2client := ec2.NewFromConfig(cfg)
 
 	_, err = ec2client.StartInstances(context.TODO(), &ec2.StartInstancesInput{
-		InstanceIds: []string{selected.Ec2Instance},
+		InstanceIds: []string{selected.InstanceID},
 	})
 
 	if err != nil {
