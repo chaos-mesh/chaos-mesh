@@ -1,9 +1,10 @@
 
 namePrefix: chaos-mesh-
 
-bases:
-- ../crd
 #- ../webhook
 # TODO: Use kustomize to generate webhook
 
-vars:
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../crd

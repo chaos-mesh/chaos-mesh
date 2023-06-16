@@ -26,10 +26,6 @@ OUTPUT_BIN=${OUTPUT}/bin
 KUBECTL_VERSION=1.22.2
 KUBECTL_BIN=$OUTPUT_BIN/kubectl
 HELM_BIN=$OUTPUT_BIN/helm
-#
-# Don't upgrade to 2.15.x/2.16.x until this issue
-# (https://github.com/helm/helm/issues/6361) has been fixed.
-#
 HELM_VERSION=3.6.1
 KIND_VERSION=${KIND_VERSION:-0.11.1}
 KIND_BIN=$OUTPUT_BIN/kind
@@ -148,7 +144,7 @@ function hack::ensure_kustomize() {
     fi
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o ${tmpfile} "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
+    curl --retry 10 -L -o ${tmpfile} "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
     tar -C $OUTPUT_BIN -zxf ${tmpfile}
     chmod +x $KUSTOMIZE_BIN
 }

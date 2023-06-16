@@ -7,15 +7,14 @@ import (
 	"io"
 	"strconv"
 
-	v1 "k8s.io/api/core/v1"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"k8s.io/api/core/v1"
 )
 
 type Cgroups struct {
 	Raw    string         `json:"raw"`
-	CPU    *CgroupsCPU    `json:"cpu"`
-	Memory *CgroupsMemory `json:"memory"`
+	CPU    *CgroupsCPU    `json:"cpu,omitempty"`
+	Memory *CgroupsMemory `json:"memory,omitempty"`
 }
 
 type CgroupsCPU struct {
@@ -39,47 +38,47 @@ type KillProcessResult struct {
 
 type MutablePod struct {
 	Pod           *v1.Pod              `json:"pod"`
-	KillProcesses []*KillProcessResult `json:"killProcesses"`
-	CleanTcs      []string             `json:"cleanTcs"`
-	CleanIptables []string             `json:"cleanIptables"`
+	KillProcesses []*KillProcessResult `json:"killProcesses,omitempty"`
+	CleanTcs      []string             `json:"cleanTcs,omitempty"`
+	CleanIptables []string             `json:"cleanIptables,omitempty"`
 }
 
 type Namespace struct {
 	Ns              string                      `json:"ns"`
-	Component       []*v1.Pod                   `json:"component"`
-	Pod             []*v1.Pod                   `json:"pod"`
-	Stresschaos     []*v1alpha1.StressChaos     `json:"stresschaos"`
-	Iochaos         []*v1alpha1.IOChaos         `json:"iochaos"`
-	Podiochaos      []*v1alpha1.PodIOChaos      `json:"podiochaos"`
-	Httpchaos       []*v1alpha1.HTTPChaos       `json:"httpchaos"`
-	Podhttpchaos    []*v1alpha1.PodHttpChaos    `json:"podhttpchaos"`
-	Networkchaos    []*v1alpha1.NetworkChaos    `json:"networkchaos"`
-	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos"`
+	Component       []*v1.Pod                   `json:"component,omitempty"`
+	Pod             []*v1.Pod                   `json:"pod,omitempty"`
+	Stresschaos     []*v1alpha1.StressChaos     `json:"stresschaos,omitempty"`
+	Iochaos         []*v1alpha1.IOChaos         `json:"iochaos,omitempty"`
+	Podiochaos      []*v1alpha1.PodIOChaos      `json:"podiochaos,omitempty"`
+	Httpchaos       []*v1alpha1.HTTPChaos       `json:"httpchaos,omitempty"`
+	Podhttpchaos    []*v1alpha1.PodHttpChaos    `json:"podhttpchaos,omitempty"`
+	Networkchaos    []*v1alpha1.NetworkChaos    `json:"networkchaos,omitempty"`
+	Podnetworkchaos []*v1alpha1.PodNetworkChaos `json:"podnetworkchaos,omitempty"`
 }
 
 type PodSelectorInput struct {
-	Namespaces          []string               `json:"namespaces"`
-	Nodes               []string               `json:"nodes"`
-	Pods                map[string]interface{} `json:"pods"`
-	NodeSelectors       map[string]interface{} `json:"nodeSelectors"`
-	FieldSelectors      map[string]interface{} `json:"fieldSelectors"`
-	LabelSelectors      map[string]interface{} `json:"labelSelectors"`
-	AnnotationSelectors map[string]interface{} `json:"annotationSelectors"`
-	PodPhaseSelectors   []string               `json:"podPhaseSelectors"`
+	Namespaces          []string               `json:"namespaces,omitempty"`
+	Nodes               []string               `json:"nodes,omitempty"`
+	Pods                map[string]interface{} `json:"pods,omitempty"`
+	NodeSelectors       map[string]interface{} `json:"nodeSelectors,omitempty"`
+	FieldSelectors      map[string]interface{} `json:"fieldSelectors,omitempty"`
+	LabelSelectors      map[string]interface{} `json:"labelSelectors,omitempty"`
+	AnnotationSelectors map[string]interface{} `json:"annotationSelectors,omitempty"`
+	PodPhaseSelectors   []string               `json:"podPhaseSelectors,omitempty"`
 }
 
 type PodStressChaos struct {
 	StressChaos   *v1alpha1.StressChaos `json:"stressChaos"`
 	Pod           *v1.Pod               `json:"pod"`
 	Cgroups       *Cgroups              `json:"cgroups"`
-	ProcessStress []*ProcessStress      `json:"processStress"`
+	ProcessStress []*ProcessStress      `json:"processStress,omitempty"`
 }
 
 type Process struct {
 	Pod     *v1.Pod `json:"pod"`
 	Pid     string  `json:"pid"`
 	Command string  `json:"command"`
-	Fds     []*Fd   `json:"fds"`
+	Fds     []*Fd   `json:"fds,omitempty"`
 }
 
 type ProcessStress struct {

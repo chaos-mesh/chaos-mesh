@@ -11,11 +11,11 @@ WORKDIR /go/src/github.com/YangKeao/tools
 RUN git clone https://github.com/YangKeao/tools.git -b v0.1.9-with-combine --depth 1 .
 RUN go install ./cmd/goimports
 
-RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
+RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.12.0
 RUN go install github.com/mgechev/revive@v1.2.4
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
-RUN go install github.com/99designs/gqlgen@v0.17.2
+RUN go install github.com/99designs/gqlgen@v0.17.33
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.0.0
 RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
@@ -63,11 +63,11 @@ COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
 # The `gqlgen` depends on the plugin in it
-COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.2 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.2
+COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.33 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.33
 
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
-RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
+RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 
 RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 
