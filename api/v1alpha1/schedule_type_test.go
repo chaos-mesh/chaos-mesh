@@ -71,7 +71,7 @@ var _ = Describe("Schedule", func() {
 					Type:              ScheduleTypePodChaos,
 				},
 				Status: ScheduleStatus{
-					LastScheduleTime: metav1.Time{time.Now()},
+					LastScheduleTime: metav1.Time{Time: time.Now()},
 				},
 			}
 

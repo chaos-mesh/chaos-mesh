@@ -50,7 +50,8 @@ var _ = Describe("kernelchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "",
 				},
@@ -63,7 +64,8 @@ var _ = Describe("kernelchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateUpdate(chaos)
+						_, err := chaos.ValidateUpdate(chaos)
+						return err
 					},
 					expect: "",
 				},
@@ -76,7 +78,8 @@ var _ = Describe("kernelchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *KernelChaos) error {
-						return chaos.ValidateDelete()
+						_, err := chaos.ValidateDelete()
+						return err
 					},
 					expect: "",
 				},

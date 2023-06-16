@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 const (
@@ -70,7 +71,7 @@ func IsStatusCheckTemplate(cm v1.ConfigMap) bool {
 		cm.Name == GenerateTemplateName(cm.Annotations[TemplateNameAnnotationKey])
 }
 
-func (in *StatusCheckTemplate) Validate() error {
+func (in *StatusCheckTemplate) Validate() (admission.Warnings, error) {
 	statusCheck := &StatusCheck{
 		Spec: in.StatusCheckSpec,
 	}

@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
@@ -35,23 +36,23 @@ var workflowlog = logf.Log.WithName("workflow-resource")
 
 var _ webhook.Validator = &Workflow{}
 
-func (in *Workflow) ValidateCreate() error {
+func (in *Workflow) ValidateCreate() (admission.Warnings, error) {
 	var allErrs field.ErrorList
 	specPath := field.NewPath("spec")
 	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), in.Spec.Entry, in.Spec.Templates)...)
 	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), in.Spec.Templates)...)
 	if len(allErrs) > 0 {
-		return errors.New(allErrs.ToAggregate().Error())
+		return nil, errors.New(allErrs.ToAggregate().Error())
 	}
-	return nil
+	return nil, nil
 }
 
-func (in *Workflow) ValidateUpdate(old runtime.Object) error {
+func (in *Workflow) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	return in.ValidateCreate()
 }
 
-func (in *Workflow) ValidateDelete() error {
-	return nil
+func (in *Workflow) ValidateDelete() (admission.Warnings, error) {
+	return nil, nil
 }
 
 func entryMustExists(path *field.Path, entry string, templates []Template) field.ErrorList {

@@ -65,7 +65,7 @@ var _ = Describe("physicalmachine_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				err := testCase.physicalMachine.ValidateCreate()
+				_, err := testCase.physicalMachine.ValidateCreate()
 				if len(testCase.err) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
