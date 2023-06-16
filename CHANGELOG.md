@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Update k8s.io dependencies [#4083](https://github.com/chaos-mesh/chaos-mesh/pull/4083)
 
 ### Deprecated
 
