@@ -160,7 +160,11 @@ type controlPlaneCacheReader struct {
 
 // NewControlPlaneCacheReader builds a client.Reader with cache for certain usage for control plane
 func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPlaneCacheReader, error) {
-	mapper, err := apiutil.NewDynamicRESTMapper(cfg)
+	httpClient, err := rest.HTTPClientFor(cfg)
+	if err != nil {
+		return controlPlaneCacheReader{}, err
+	}
+	mapper, err := apiutil.NewDynamicRESTMapper(cfg, httpClient)
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}
@@ -169,7 +173,7 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Resync: nil, Namespace: config.ControllerCfg.Namespace})
+	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Namespaces: []string{config.ControllerCfg.Namespace}})
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}
@@ -183,23 +187,17 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 		}
 	}()
 
-	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper})
-	if err != nil {
-		return controlPlaneCacheReader{}, err
-	}
-
-	cachedClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
-		CacheReader:       cacheReader,
-		Client:            c,
-		UncachedObjects:   nil,
-		CacheUnstructured: false,
-	})
+	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper, Cache: &client.CacheOptions{
+		Reader: cacheReader,
+		DisableFor: nil,
+		Unstructured: false,
+	}})
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}
 
 	return controlPlaneCacheReader{
-		Reader: cachedClient,
+		Reader: c,
 	}, nil
 }
 

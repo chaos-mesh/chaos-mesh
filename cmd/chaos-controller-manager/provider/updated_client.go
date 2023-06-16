@@ -23,6 +23,7 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -157,6 +158,14 @@ func (c *UpdatedClient) Status() client.StatusWriter {
 		statusWriter: c.client.Status(),
 		client:       c,
 	}
+}
+
+func (c *UpdatedClient) GroupVersionKindFor(obj runtime.Object) (schema.GroupVersionKind, error) {
+	return c.client.GroupVersionKindFor(obj)
+}
+
+func (c *UpdatedClient) IsObjectNamespaced(obj runtime.Object) (bool, error) {
+	return c.client.IsObjectNamespaced(obj)
 }
 
 type UpdatedStatusWriter struct {
