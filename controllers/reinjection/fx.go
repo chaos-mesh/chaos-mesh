@@ -2,20 +2,23 @@ package reinjection
 
 import (
 	"context"
+	"encoding/json"
+	"sync"
 
 	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
 	"github.com/go-logr/logr"
-	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/util/flowcontrol"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -26,53 +29,54 @@ type ControllerConfig struct {
 }
 
 var (
-	scheme               = runtime.NewScheme()
-	controllerConfigPath string
+	scheme = runtime.NewScheme()
 )
 
-const (
-	relationshipKey              = "relationship"
-	podToChaosConfigMapName      = "pod-to-chaos"
-	podToChaosConfigMapNamespace = "chaos-mesh"
-)
+func init() {
+	_ = clientgoscheme.AddToScheme(scheme)
+	// register chaosmesh api, os that we can watch chaosmesh cr
+	_ = chaosmeshapi.AddToScheme(scheme)
+}
+
+// the struct of this map is map[podKey][chaosKey]containerName
+var podToChaosInfoMap = sync.Map{}
 
 func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *chaosdaemon.ChaosDaemonClientBuilder) error {
-	if !config.ShouldSpawnController("reinjection") {
+	if !config.ShouldSpawnController(config.ReInjectControllerName) {
 		return nil
 	}
 
 	ctx := context.Background()
-	log.Info("start to load config")
-	controllerConfig := &ControllerConfig{ChaosKinds: []string{"StressChaos"}}
-	//if err := readConfigFile(controllerConfig, controllerConfigPath); err != nil {
-	//	log.Errorf("failed to read config file, err: %v", err)
-	//	return err
-	//}
-
-	log.Info("setting up manager")
-	cfg := ctrl.GetConfigOrDie()
-	cfg.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(300, 300)
-	mgr, err := manager.New(cfg, manager.Options{Scheme: scheme})
-	if err != nil {
-		log.Error(err, "unable to set up overall controller manager")
+	logger.Info("start to load config")
+	controllerConfig := &ControllerConfig{}
+	cli := mgr.GetClient()
+	namespacedName := types.NamespacedName{
+		Namespace: config.ControllerCfg.Namespace,
+		Name:      config.ControllerCfg.ReInjectControllerConfigMapName,
+	}
+	cm := &corev1.ConfigMap{}
+	if err := cli.Get(ctx, namespacedName, cm); err != nil {
+		return err
+	}
+	if err := json.Unmarshal([]byte(cm.Data["config"]), controllerConfig); err != nil {
+		logger.Error(err, "unable to unmarshal config")
 		return err
 	}
 
 	// Set up a new controller to reconcile ReplicaSets
-	log.Infof("Setting up controller to watch these kind of chaos %v", controllerConfig.ChaosKinds)
+	logger.Info("Setting up controller to watch these kind of chaos %v", controllerConfig.ChaosKinds)
 	c, err := controller.New("reinject-controller", mgr, controller.Options{
-		Reconciler: &reInjector{client: mgr.GetClient()},
+		Reconciler: &reInjector{client: cli, logger: logger},
 	})
 	if err != nil {
-		log.Error(err, "unable to set up individual controller")
+		logger.Error(err, "unable to set up individual controller")
 		return err
-
 	}
 
 	// Watch Pods and enqueue the Pod with restart count increased
 	if err := c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{},
-		buildPodPredicate(ctx, mgr.GetClient())); err != nil {
-		log.Error(err, "unable to watch Pods")
+		buildPodPredicate()); err != nil {
+		logger.Error(err, "unable to watch Pods")
 		return err
 	}
 
@@ -82,25 +86,33 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 	for _, chaosKindString := range controllerConfig.ChaosKinds {
 		chaosKind, exists := chaosmeshapi.AllKinds()[chaosKindString]
 		if !exists {
-			log.Infof("chaosKind %s not found", chaosKindString)
+			logger.Info("chaosKind not found", chaosKindString)
 			return err
 		}
 		chaos := chaosKind.SpawnObject()
 		if err := c.Watch(&source.Kind{Type: chaos}, &handler.EnqueueRequestForObject{},
-			buildChaosPredicate(ctx, mgr.GetClient(), chaosKindString)); err != nil {
-			log.Error(err, "unable to watch chaosKind %s", chaosKindString)
+			buildChaosPredicate(chaosKindString)); err != nil {
+			logger.Error(err, "unable to watch chaosKind", chaosKindString)
 			return err
 		}
 	}
 
-	if err := createPodToChaosConfigMap(ctx, mgr.GetClient()); err != nil {
-		log.Error(err, "unable to create podToChaosConfigMap")
+	err = mgr.Add(manager.RunnableFunc(func(ctx context.Context) error {
+		logger.Info("start to run the syncChaos")
+		if syncErr := syncChaos(mgr.GetClient(), controllerConfig); syncErr != nil {
+			logger.Error(err, "unable to sync chaos")
+		}
+		<-ctx.Done()
+		return nil
+	}))
+	if err != nil {
+		logger.Error(err, "unable to add runnable function")
 		return err
 	}
 
-	log.Info("starting manager")
+	logger.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "unable to run manager")
+		logger.Error(err, "unable to run manager")
 		return err
 	}
 	return nil

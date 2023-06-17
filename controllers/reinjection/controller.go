@@ -7,7 +7,7 @@ import (
 	"time"
 
 	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	log "github.com/sirupsen/logrus"
+	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -16,6 +16,7 @@ import (
 type reInjector struct {
 	// client can be used to retrieve objects from the APIServer.
 	client client.Client
+	logger logr.Logger
 }
 
 // Implement reconcile.Reconciler so the controller can reconcile objects
@@ -24,35 +25,34 @@ var _ reconcile.Reconciler = &reInjector{}
 // Reconcile will re-inject chaos in restart pods
 func (r *reInjector) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	podKey := fmt.Sprintf("%s/%s", request.Namespace, request.Name)
-	logger := log.WithField("pod", podKey)
 	// find the chaosKey in podToChaosInfoMap
-	chaosToContainerMap, err := readRelationship(ctx, r.client, podKey)
-	if err != nil || chaosToContainerMap == nil {
-		logger.Infof("pod %s not found in podToChaosInfoMap", podKey)
+	chaosToContainerMapValue, ok := podToChaosInfoMap.Load(podKey)
+	if !ok {
+		r.logger.Info("pod not found in podToChaosInfoMap", podKey)
 		return reconcile.Result{}, nil
 	}
 
+	chaosToContainerMap := chaosToContainerMapValue.(map[string]string)
 	for chaosKey, _ := range chaosToContainerMap {
-		if err := r.reInjectChaos(ctx, chaosKey, logger); err != nil {
-			logger.Errorf("reinject chaos %s failed, err: %s", chaosKey, err.Error())
+		if err := r.reInjectChaos(ctx, chaosKey, r.logger); err != nil {
+			r.logger.Error(err, "reinject chaos failed", chaosKey)
 			continue
 		}
 	}
 	return reconcile.Result{}, nil
 }
 
-func (r *reInjector) reInjectChaos(ctx context.Context, chaosKey string, logger *log.Entry) error {
-	reInjectLog := logger.WithField("chaosKey", chaosKey)
-	reInjectLog.Info("start to re-inject chaos")
+func (r *reInjector) reInjectChaos(ctx context.Context, chaosKey string, logger logr.Logger) error {
+	logger.Info("start to re-inject chaos")
 	chaosInfo, err := parseChaosKey(chaosKey)
 	if err != nil {
-		reInjectLog.Errorf("parse chaosKey %s failed, err: %s", chaosKey, err.Error())
+		logger.Error(err, "parse chaosKey failed", "chaosKey", chaosKey)
 		return err
 	}
 	kind, namespace, name := chaosInfo.Kind, chaosInfo.Namespace, chaosInfo.Name
 	chaosKind, exists := chaosmeshapi.AllKinds()[kind]
 	if !exists {
-		reInjectLog.Infof("chaosKind %s not found", kind)
+		logger.Info("chaosKind not found", kind)
 		return nil
 	}
 	chaos := chaosKind.SpawnObject()
@@ -61,7 +61,6 @@ func (r *reInjector) reInjectChaos(ctx context.Context, chaosKey string, logger 
 		return err
 	}
 
-	reInjectLog.Infof("start to pause chaos %s/%s", chaos.GetNamespace(), chaos.GetName())
 	if err = r.pauseChaos(ctx, chaos); err != nil {
 		return err
 	}
@@ -71,10 +70,8 @@ func (r *reInjector) reInjectChaos(ctx context.Context, chaosKey string, logger 
 	for {
 		select {
 		case <-timeoutTicker.C:
-			reInjectLog.Infof("timeout to pause chaos %s/%s", chaos.GetNamespace(), chaos.GetName())
 			return nil
 		case <-durationTicker.C:
-			reInjectLog.Infof("start to check chaos %s/%s", chaos.GetNamespace(), chaos.GetName())
 			if err = r.client.Get(ctx, namespacedName, chaos); err != nil {
 				return err
 			}
@@ -86,11 +83,10 @@ func (r *reInjector) reInjectChaos(ctx context.Context, chaosKey string, logger 
 				}
 			}
 			if allNotInjected {
-				reInjectLog.Infof("start to unpause chaos %s/%s", chaos.GetNamespace(), chaos.GetName())
 				if err = r.unPauseChaos(ctx, chaos); err != nil {
 					return err
 				}
-				reInjectLog.Infof("unpause chaos %s/%s successfully", chaos.GetNamespace(), chaos.GetName())
+				logger.Info("re-inject chaos successfully", "chaosKey", chaosKey)
 				return nil
 			}
 		}

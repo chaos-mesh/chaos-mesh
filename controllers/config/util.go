@@ -17,7 +17,15 @@ package config
 
 import "github.com/bxcodec/faker/support/slice"
 
+const (
+	ReInjectControllerName = "re-inject-controller"
+)
+
 func ShouldSpawnController(name string) bool {
+	if name == ReInjectControllerName {
+		return ControllerCfg.EnableReInjectController
+	}
+
 	if slice.Contains(ControllerCfg.EnabledControllers, "*") || slice.Contains(ControllerCfg.EnabledControllers, name) {
 		return true
 	}

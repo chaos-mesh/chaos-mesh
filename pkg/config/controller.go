@@ -114,6 +114,11 @@ type ChaosControllerConfig struct {
 	EnabledWebhooks    []string `envconfig:"ENABLED_WEBHOOKS" default:"*"`
 
 	LocalHelmChartPath string `envconfig:"LOCAL_HELM_CHART_PATH" default:""`
+
+	// EnableReInjectController is used for enable re-inject controller
+	EnableReInjectController bool `envconfig:"ENABLE_REINJECT_CONTROLLER" default:"false"`
+	// ReInjectControllerConfigMapName is the name of configmap which stores the config of re-inject controller
+	ReInjectControllerConfigMapName string `envconfig:"REINJECT_CONTROLLER_CONFIGMAP_NAME" default:"reinject-controller-config"`
 }
 
 // EnvironChaosController returns the settings from the environment.
