@@ -17,9 +17,7 @@ package reinjection
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -199,14 +197,6 @@ func parseRecordId(recordId string) (podKey, containerName string, err error) {
 		return recordId, "", nil
 	}
 	return "", "", fmt.Errorf("invalid record id %s", recordId)
-}
-
-func readConfigFile(config *ControllerConfig, path string) error {
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(contents, config)
 }
 
 func syncChaos(client client.Client, controllerConfig *ControllerConfig) error {
