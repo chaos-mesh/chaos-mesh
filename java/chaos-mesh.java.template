@@ -1,0 +1,3 @@
+//DEPS io.fabric8:kubernetes-client:$FABRIC8_VERSION
+//DEPS io.fabric8:generator-annotations:$FABRIC8_VERSION
+//SOURCES src/**.java
