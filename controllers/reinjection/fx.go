@@ -30,7 +30,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -89,7 +88,7 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 	}
 
 	// Watch Pods and enqueue the Pod with restart count increased
-	if err := c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{},
+	if err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{},
 		buildPodPredicate()); err != nil {
 		logger.Error(err, "unable to watch Pods")
 		return err
@@ -125,10 +124,5 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 		return err
 	}
 
-	logger.Info("starting manager")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		logger.Error(err, "unable to run manager")
-		return err
-	}
 	return nil
 }
