@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+{{- if .Values.reInjectController.enable }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: reinject-controller-config
+  name: {{ .Values.reInjectController.configMapName }}
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
@@ -25,3 +27,4 @@ data:
     {
       "chaosKinds": ["StressChaos"]
     }
+{{- end }}

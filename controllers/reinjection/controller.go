@@ -1,3 +1,18 @@
+// Copyright 2023 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package reinjection
 
 import (
@@ -6,11 +21,12 @@ import (
 	"fmt"
 	"time"
 
-	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type reInjector struct {
@@ -33,7 +49,7 @@ func (r *reInjector) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	chaosToContainerMap := chaosToContainerMapValue.(map[string]string)
-	for chaosKey, _ := range chaosToContainerMap {
+	for chaosKey := range chaosToContainerMap {
 		if err := r.reInjectChaos(ctx, chaosKey, r.logger); err != nil {
 			r.logger.Error(err, "reinject chaos failed", chaosKey)
 			continue

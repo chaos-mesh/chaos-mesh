@@ -1,3 +1,18 @@
+// Copyright 2023 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package reinjection
 
 import (
@@ -7,12 +22,12 @@ import (
 	"io/ioutil"
 	"strings"
 
-	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+
+	chaosmeshapi "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type chaosKeyInfo struct {
@@ -116,7 +131,6 @@ func addChaosToPodToChaosInfoMap(chaosKind string, chaos chaosmeshapi.StatefulOb
 	for _, record := range status.Experiment.Records {
 		podKey, containerName, err := parseRecordId(record.Id)
 		if err != nil {
-			log.Error(err, "failed to parse record id", "record id", record.Id, "chaos key", chaosKey)
 			continue
 		}
 		chaosToContainerMapValue, ok := podToChaosInfoMap.Load(podKey)
@@ -138,7 +152,6 @@ func removeChaosFromPodToChaosInfoMap(chaosKind string, chaos chaosmeshapi.State
 	for _, record := range status.Experiment.Records {
 		podKey, _, err := parseRecordId(record.Id)
 		if err != nil {
-			log.Error(err, "failed to parse record id", "record id", record.Id, "chaos key", chaosKey)
 			continue
 		}
 		chaosToContainerMapValue, ok := podToChaosInfoMap.Load(podKey)
@@ -175,10 +188,12 @@ func parseChaosKey(key string) (*chaosKeyInfo, error) {
 	}, nil
 }
 
-func parseRecordId(recordId string) (string, string, error) {
+func parseRecordId(recordId string) (podKey, containerName string, err error) {
 	parts := strings.Split(recordId, "/")
 	if len(parts) == 3 {
-		return fmt.Sprintf("%s/%s", parts[0], parts[1]), parts[2], nil
+		podKey = fmt.Sprintf("%s/%s", parts[0], parts[1])
+		containerName = parts[2]
+		return podKey, containerName, nil
 	}
 	if len(parts) == 2 {
 		return recordId, "", nil
@@ -198,12 +213,10 @@ func syncChaos(client client.Client, controllerConfig *ControllerConfig) error {
 	for _, chaosKindString := range controllerConfig.ChaosKinds {
 		chaosKind, exists := chaosmeshapi.AllKinds()[chaosKindString]
 		if !exists {
-			log.Errorf("chaosKind %s not found", chaosKindString)
 			continue
 		}
 		objects := chaosKind.SpawnList()
 		if err := client.List(context.Background(), objects); err != nil {
-			log.Errorf("failed to list chaos %s", chaosKindString)
 			return err
 		}
 
