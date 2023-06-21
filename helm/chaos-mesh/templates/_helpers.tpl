@@ -157,6 +157,11 @@ Define the webhook's name
 {{ .Values.chaosDlv.image.registry | default .Values.images.registry }}/{{ .Values.chaosDlv.image.repository }}:{{ .Values.chaosDlv.image.tag | default .Values.images.tag }}
 {{- end -}}
 
+{{/*Define the image for chaos-dns*/}}
+{{- define "chaos-dns.image" -}}
+{{ .Values.dnsServer.image.registry | default .Values.images.registry }}/{{ .Values.dnsServer.image.repository }}:{{ .Values.dnsServer.image.tag | default .Values.images.tag }}
+{{- end -}}
+
 {{/*Return the appropriate apiVersion for ingress*/}}
 {{- define "chaos-dashboard.ingress.apiVersion" -}}
 {{- if .Values.dashboard.ingress.apiVersionOverrides -}}
