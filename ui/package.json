@@ -4,6 +4,7 @@
   "author": "Yue Yang <g1enyy0ung@gmail.com>",
   "private": true,
   "scripts": {
+    "start": "pnpm -F @ui/app start:default",
     "build": "pnpm -F @ui/mui-extends build && pnpm -F @ui/app build",
     "test": "pnpm -F @ui/mui-extends build && pnpm -F @ui/mui-extends test && pnpm -F @ui/openapi test && pnpm -F @ui/app test",
     "prepare": "cd ..; is-ci || husky install ./ui/.husky",
