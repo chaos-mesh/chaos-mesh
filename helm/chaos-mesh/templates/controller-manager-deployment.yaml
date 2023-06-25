@@ -22,7 +22,11 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 spec:
+  {{- if not .Values.controllerManager.leaderElection.enabled }}
+  replicas: 1
+  {{- else }}
   replicas: {{ .Values.controllerManager.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "chaos-mesh.selectors" . | nindent 6 }}
