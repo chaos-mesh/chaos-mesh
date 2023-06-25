@@ -8,6 +8,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
+### Changed
+
+- Change awschaos/*/impl.go to use `aws_session_token` with static credentials provider so that users can perform awschaos using [temporary AWS credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html) [#4066](https://github.com/chaos-mesh/chaos-mesh/pull/4066)
+
 ### Added
 
 - Nothing
