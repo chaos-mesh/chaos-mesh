@@ -51,7 +51,7 @@ func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, arch
 	sches := make([]*core.ScheduleMeta, 0)
 	query, args := constructQueryArgs("", namespace, name, "")
 
-	if err := db.Where(query, args).Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 

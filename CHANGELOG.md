@@ -31,6 +31,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Set `replicas: 1` automatically when HA is not enabled [#4079](https://github.com/chaos-mesh/chaos-mesh/pull/4079)
+- Remove redundant where statements [#4084](https://github.com/chaos-mesh/chaos-mesh/pull/4084)
 
 ### Security
 

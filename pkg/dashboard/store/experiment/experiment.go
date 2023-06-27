@@ -53,7 +53,7 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name stri
 	experiments := make([]*core.ExperimentMeta, 0)
 	query, args := constructQueryArgs(kind, namespace, name, "")
 
-	if err := db.Where(query, args).Where(query, args).Where("archived = ?", archived).Find(&experiments).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args).Where("archived = ?", archived).Find(&experiments).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 
