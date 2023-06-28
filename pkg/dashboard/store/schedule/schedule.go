@@ -113,7 +113,7 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 	nowTime := time.Now()
 	for _, sch := range sches {
 		if sch.FinishTime == nil {
-			log.Error(nil, "finish time is nil when deleting schedule records, skip it", "schedule", sch)
+			log.Error(nil, "finish time is nil when deleting archived schedule records, skip it", "schedule", sch)
 			continue
 		}
 		if sch.FinishTime.Add(ttl).Before(nowTime) {
