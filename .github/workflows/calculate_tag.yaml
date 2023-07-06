@@ -20,7 +20,7 @@ on:
       f3_tag:
         description: "Additional tag to be prefixed to the latest upstream release tag"
         type: string
-        default: "${{ github.event.after }}"
+        default: "${{ github.sha }}"
 
 jobs:
   calculate-tag:
