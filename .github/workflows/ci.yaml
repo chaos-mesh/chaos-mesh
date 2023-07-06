@@ -81,7 +81,7 @@ jobs:
               repo: context.repo.repo,
               body: `### Created new release based on commit https://github.com/${{ github.repository }}/pull/${{ github.event.number }}/commits/${{github.sha}}
 
-              **Release tag**: v2.6.1-f3-c64ec-builder
+              **Release tag**: ${{ needs.calculate-tag.outputs.tag }}
 
               [**Link to release**](https://github.com/${{ github.repository }}/releases/tag/${{ needs.calculate-tag.outputs.tag }})`
             })
