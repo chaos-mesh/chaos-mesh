@@ -472,6 +472,24 @@ definitions:
           More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore
         type: string
     type: object
+  v1.Affinity:
+    properties:
+      nodeAffinity:
+        $ref: '#/definitions/v1.NodeAffinity'
+        description: |-
+          Describes node affinity scheduling rules for the pod.
+          +optional
+      podAffinity:
+        $ref: '#/definitions/v1.PodAffinity'
+        description: |-
+          Describes pod affinity scheduling rules (e.g. co-locate this pod in the same node, zone, etc. as some other pod(s)).
+          +optional
+      podAntiAffinity:
+        $ref: '#/definitions/v1.PodAntiAffinity'
+        description: |-
+          Describes pod anti-affinity scheduling rules (e.g. avoid putting this pod in the same node, zone, etc. as some other pod(s)).
+          +optional
+    type: object
   v1.AzureDiskVolumeSource:
     properties:
       cachingMode:
@@ -1710,6 +1728,80 @@ definitions:
           More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs
         type: string
     type: object
+  v1.NodeAffinity:
+    properties:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        description: |-
+          The scheduler will prefer to schedule pods to nodes that satisfy
+          the affinity expressions specified by this field, but it may choose
+          a node that violates one or more of the expressions. The node that is
+          most preferred is the one with the greatest sum of weights, i.e.
+          for each node that meets all of the scheduling requirements (resource
+          request, requiredDuringScheduling affinity expressions, etc.),
+          compute a sum by iterating through the elements of this field and adding
+          "weight" to the sum if the node matches the corresponding matchExpressions; the
+          node(s) with the highest sum are the most preferred.
+          +optional
+        items:
+          $ref: '#/definitions/v1.PreferredSchedulingTerm'
+        type: array
+      requiredDuringSchedulingIgnoredDuringExecution:
+        $ref: '#/definitions/v1.NodeSelector'
+        description: |-
+          If the affinity requirements specified by this field are not met at
+          scheduling time, the pod will not be scheduled onto the node.
+          If the affinity requirements specified by this field cease to be met
+          at some point during pod execution (e.g. due to an update), the system
+          may or may not try to eventually evict the pod from its node.
+          +optional
+    type: object
+  v1.NodeSelector:
+    properties:
+      nodeSelectorTerms:
+        description: Required. A list of node selector terms. The terms are ORed.
+        items:
+          $ref: '#/definitions/v1.NodeSelectorTerm'
+        type: array
+    type: object
+  v1.NodeSelectorRequirement:
+    properties:
+      key:
+        description: The label key that the selector applies to.
+        type: string
+      operator:
+        description: |-
+          Represents a key's relationship to a set of values.
+          Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+        type: string
+      values:
+        description: |-
+          An array of string values. If the operator is In or NotIn,
+          the values array must be non-empty. If the operator is Exists or DoesNotExist,
+          the values array must be empty. If the operator is Gt or Lt, the values
+          array must have a single element, which will be interpreted as an integer.
+          This array is replaced during a strategic merge patch.
+          +optional
+        items:
+          type: string
+        type: array
+    type: object
+  v1.NodeSelectorTerm:
+    properties:
+      matchExpressions:
+        description: |-
+          A list of node selector requirements by node's labels.
+          +optional
+        items:
+          $ref: '#/definitions/v1.NodeSelectorRequirement'
+        type: array
+      matchFields:
+        description: |-
+          A list of node selector requirements by node's fields.
+          +optional
+        items:
+          $ref: '#/definitions/v1.NodeSelectorRequirement'
+        type: array
+    type: object
   v1.ObjectFieldSelector:
     properties:
       apiVersion:
@@ -2108,6 +2200,207 @@ definitions:
         description: pdID is the ID that identifies Photon Controller persistent disk
         type: string
     type: object
+  v1.PodAffinity:
+    properties:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        description: |-
+          The scheduler will prefer to schedule pods to nodes that satisfy
+          the affinity expressions specified by this field, but it may choose
+          a node that violates one or more of the expressions. The node that is
+          most preferred is the one with the greatest sum of weights, i.e.
+          for each node that meets all of the scheduling requirements (resource
+          request, requiredDuringScheduling affinity expressions, etc.),
+          compute a sum by iterating through the elements of this field and adding
+          "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
+          node(s) with the highest sum are the most preferred.
+          +optional
+        items:
+          $ref: '#/definitions/v1.WeightedPodAffinityTerm'
+        type: array
+      requiredDuringSchedulingIgnoredDuringExecution:
+        description: |-
+          If the affinity requirements specified by this field are not met at
+          scheduling time, the pod will not be scheduled onto the node.
+          If the affinity requirements specified by this field cease to be met
+          at some point during pod execution (e.g. due to a pod label update), the
+          system may or may not try to eventually evict the pod from its node.
+          When there are multiple elements, the lists of nodes corresponding to each
+          podAffinityTerm are intersected, i.e. all terms must be satisfied.
+          +optional
+        items:
+          $ref: '#/definitions/v1.PodAffinityTerm'
+        type: array
+    type: object
+  v1.PodAffinityTerm:
+    properties:
+      labelSelector:
+        $ref: '#/definitions/v1.LabelSelector'
+        description: |-
+          A label query over a set of resources, in this case pods.
+          +optional
+      namespaceSelector:
+        $ref: '#/definitions/v1.LabelSelector'
+        description: |-
+          A label query over the set of namespaces that the term applies to.
+          The term is applied to the union of the namespaces selected by this field
+          and the ones listed in the namespaces field.
+          null selector and null or empty namespaces list means "this pod's namespace".
+          An empty selector ({}) matches all namespaces.
+          +optional
+      namespaces:
+        description: |-
+          namespaces specifies a static list of namespace names that the term applies to.
+          The term is applied to the union of the namespaces listed in this field
+          and the ones selected by namespaceSelector.
+          null or empty namespaces list and null namespaceSelector means "this pod's namespace".
+          +optional
+        items:
+          type: string
+        type: array
+      topologyKey:
+        description: |-
+          This pod should be co-located (affinity) or not co-located (anti-affinity) with the pods matching
+          the labelSelector in the specified namespaces, where co-located is defined as running on a node
+          whose value of the label with key topologyKey matches that of any node on which any of the
+          selected pods is running.
+          Empty topologyKey is not allowed.
+        type: string
+    type: object
+  v1.PodAntiAffinity:
+    properties:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        description: |-
+          The scheduler will prefer to schedule pods to nodes that satisfy
+          the anti-affinity expressions specified by this field, but it may choose
+          a node that violates one or more of the expressions. The node that is
+          most preferred is the one with the greatest sum of weights, i.e.
+          for each node that meets all of the scheduling requirements (resource
+          request, requiredDuringScheduling anti-affinity expressions, etc.),
+          compute a sum by iterating through the elements of this field and adding
+          "weight" to the sum if the node has pods which matches the corresponding podAffinityTerm; the
+          node(s) with the highest sum are the most preferred.
+          +optional
+        items:
+          $ref: '#/definitions/v1.WeightedPodAffinityTerm'
+        type: array
+      requiredDuringSchedulingIgnoredDuringExecution:
+        description: |-
+          If the anti-affinity requirements specified by this field are not met at
+          scheduling time, the pod will not be scheduled onto the node.
+          If the anti-affinity requirements specified by this field cease to be met
+          at some point during pod execution (e.g. due to a pod label update), the
+          system may or may not try to eventually evict the pod from its node.
+          When there are multiple elements, the lists of nodes corresponding to each
+          podAffinityTerm are intersected, i.e. all terms must be satisfied.
+          +optional
+        items:
+          $ref: '#/definitions/v1.PodAffinityTerm'
+        type: array
+    type: object
+  v1.PodSecurityContext:
+    properties:
+      fsGroup:
+        description: |-
+          A special supplemental group that applies to all containers in a pod.
+          Some volume types allow the Kubelet to change the ownership of that volume
+          to be owned by the pod:
+
+          1. The owning GID will be the FSGroup
+          2. The setgid bit is set (new files created in the volume will be owned by FSGroup)
+          3. The permission bits are OR'd with rw-rw----
+
+          If unset, the Kubelet will not modify the ownership and permissions of any volume.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+        type: integer
+      fsGroupChangePolicy:
+        description: |-
+          fsGroupChangePolicy defines behavior of changing ownership and permission of the volume
+          before being exposed inside Pod. This field will only apply to
+          volume types which support fsGroup based ownership(and permissions).
+          It will have no effect on ephemeral volume types such as: secret, configmaps
+          and emptydir.
+          Valid values are "OnRootMismatch" and "Always". If not specified, "Always" is used.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+        type: string
+      runAsGroup:
+        description: |-
+          The GID to run the entrypoint of the container process.
+          Uses runtime default if unset.
+          May also be set in SecurityContext.  If set in both SecurityContext and
+          PodSecurityContext, the value specified in SecurityContext takes precedence
+          for that container.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+        type: integer
+      runAsNonRoot:
+        description: |-
+          Indicates that the container must run as a non-root user.
+          If true, the Kubelet will validate the image at runtime to ensure that it
+          does not run as UID 0 (root) and fail to start the container if it does.
+          If unset or false, no such validation will be performed.
+          May also be set in SecurityContext.  If set in both SecurityContext and
+          PodSecurityContext, the value specified in SecurityContext takes precedence.
+          +optional
+        type: boolean
+      runAsUser:
+        description: |-
+          The UID to run the entrypoint of the container process.
+          Defaults to user specified in image metadata if unspecified.
+          May also be set in SecurityContext.  If set in both SecurityContext and
+          PodSecurityContext, the value specified in SecurityContext takes precedence
+          for that container.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+        type: integer
+      seLinuxOptions:
+        $ref: '#/definitions/v1.SELinuxOptions'
+        description: |-
+          The SELinux context to be applied to all containers.
+          If unspecified, the container runtime will allocate a random SELinux context for each
+          container.  May also be set in SecurityContext.  If set in
+          both SecurityContext and PodSecurityContext, the value specified in SecurityContext
+          takes precedence for that container.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+      seccompProfile:
+        $ref: '#/definitions/v1.SeccompProfile'
+        description: |-
+          The seccomp options to use by the containers in this pod.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+      supplementalGroups:
+        description: |-
+          A list of groups applied to the first process run in each container, in addition
+          to the container's primary GID, the fsGroup (if specified), and group memberships
+          defined in the container image for the uid of the container process. If unspecified,
+          no additional groups are added to any container. Note that group memberships
+          defined in the container image for the uid of the container process are still effective,
+          even if they are not included in this list.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+        items:
+          type: integer
+        type: array
+      sysctls:
+        description: |-
+          Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported
+          sysctls (by the container runtime) might fail to launch.
+          Note that this field cannot be set when spec.os.name is windows.
+          +optional
+        items:
+          $ref: '#/definitions/v1.Sysctl'
+        type: array
+      windowsOptions:
+        $ref: '#/definitions/v1.WindowsSecurityContextOptions'
+        description: |-
+          The Windows specific settings applied to all containers.
+          If unspecified, the options within a container's SecurityContext will be used.
+          If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.
+          Note that this field cannot be set when spec.os.name is linux.
+          +optional
+    type: object
   v1.PortworxVolumeSource:
     properties:
       fsType:
@@ -2125,6 +2418,16 @@ definitions:
       volumeID:
         description: volumeID uniquely identifies a Portworx volume
         type: string
+    type: object
+  v1.PreferredSchedulingTerm:
+    properties:
+      preference:
+        $ref: '#/definitions/v1.NodeSelectorTerm'
+        description: A node selector term, associated with the corresponding weight.
+      weight:
+        description: Weight associated with matching the corresponding nodeSelectorTerm,
+          in the range 1-100.
+        type: integer
     type: object
   v1.Probe:
     properties:
@@ -2733,6 +3036,15 @@ definitions:
           +optional
         type: string
     type: object
+  v1.Sysctl:
+    properties:
+      name:
+        description: Name of a property to set
+        type: string
+      value:
+        description: Value of a property to set
+        type: string
+    type: object
   v1.TCPSocketAction:
     properties:
       host:
@@ -2746,6 +3058,181 @@ definitions:
           Number or name of the port to access on the container.
           Number must be in the range 1 to 65535.
           Name must be an IANA_SVC_NAME.
+    type: object
+  v1.Toleration:
+    properties:
+      effect:
+        description: |-
+          Effect indicates the taint effect to match. Empty means match all taint effects.
+          When specified, allowed values are NoSchedule, PreferNoSchedule and NoExecute.
+          +optional
+        type: string
+      key:
+        description: |-
+          Key is the taint key that the toleration applies to. Empty means match all taint keys.
+          If the key is empty, operator must be Exists; this combination means to match all values and all keys.
+          +optional
+        type: string
+      operator:
+        description: |-
+          Operator represents a key's relationship to the value.
+          Valid operators are Exists and Equal. Defaults to Equal.
+          Exists is equivalent to wildcard for value, so that a pod can
+          tolerate all taints of a particular category.
+          +optional
+        type: string
+      tolerationSeconds:
+        description: |-
+          TolerationSeconds represents the period of time the toleration (which must be
+          of effect NoExecute, otherwise this field is ignored) tolerates the taint. By default,
+          it is not set, which means tolerate the taint forever (do not evict). Zero and
+          negative values will be treated as 0 (evict immediately) by the system.
+          +optional
+        type: integer
+      value:
+        description: |-
+          Value is the taint value the toleration matches to.
+          If the operator is Exists, the value should be empty, otherwise just a regular string.
+          +optional
+        type: string
+    type: object
+  v1.TopologySpreadConstraint:
+    properties:
+      labelSelector:
+        $ref: '#/definitions/v1.LabelSelector'
+        description: |-
+          LabelSelector is used to find matching pods.
+          Pods that match this label selector are counted to determine the number of pods
+          in their corresponding topology domain.
+          +optional
+      matchLabelKeys:
+        description: |-
+          MatchLabelKeys is a set of pod label keys to select the pods over which
+          spreading will be calculated. The keys are used to lookup values from the
+          incoming pod labels, those key-value labels are ANDed with labelSelector
+          to select the group of existing pods over which spreading will be calculated
+          for the incoming pod. The same key is forbidden to exist in both MatchLabelKeys and LabelSelector.
+          MatchLabelKeys cannot be set when LabelSelector isn't set.
+          Keys that don't exist in the incoming pod labels will
+          be ignored. A null or empty list means only match against labelSelector.
+
+          This is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).
+          +listType=atomic
+          +optional
+        items:
+          type: string
+        type: array
+      maxSkew:
+        description: |-
+          MaxSkew describes the degree to which pods may be unevenly distributed.
+          When `whenUnsatisfiable=DoNotSchedule`, it is the maximum permitted difference
+          between the number of matching pods in the target topology and the global minimum.
+          The global minimum is the minimum number of matching pods in an eligible domain
+          or zero if the number of eligible domains is less than MinDomains.
+          For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same
+          labelSelector spread as 2/2/1:
+          In this case, the global minimum is 1.
+          +-------+-------+-------+
+          | zone1 | zone2 | zone3 |
+          +-------+-------+-------+
+          |  P P  |  P P  |   P   |
+          +-------+-------+-------+
+          - if MaxSkew is 1, incoming pod can only be scheduled to zone3 to become 2/2/2;
+          scheduling it onto zone1(zone2) would make the ActualSkew(3-1) on zone1(zone2)
+          violate MaxSkew(1).
+          - if MaxSkew is 2, incoming pod can be scheduled onto any zone.
+          When `whenUnsatisfiable=ScheduleAnyway`, it is used to give higher precedence
+          to topologies that satisfy it.
+          It's a required field. Default value is 1 and 0 is not allowed.
+        type: integer
+      minDomains:
+        description: |-
+          MinDomains indicates a minimum number of eligible domains.
+          When the number of eligible domains with matching topology keys is less than minDomains,
+          Pod Topology Spread treats "global minimum" as 0, and then the calculation of Skew is performed.
+          And when the number of eligible domains with matching topology keys equals or greater than minDomains,
+          this value has no effect on scheduling.
+          As a result, when the number of eligible domains is less than minDomains,
+          scheduler won't schedule more than maxSkew Pods to those domains.
+          If value is nil, the constraint behaves as if MinDomains is equal to 1.
+          Valid values are integers greater than 0.
+          When value is not nil, WhenUnsatisfiable must be DoNotSchedule.
+
+          For example, in a 3-zone cluster, MaxSkew is set to 2, MinDomains is set to 5 and pods with the same
+          labelSelector spread as 2/2/2:
+          +-------+-------+-------+
+          | zone1 | zone2 | zone3 |
+          +-------+-------+-------+
+          |  P P  |  P P  |  P P  |
+          +-------+-------+-------+
+          The number of domains is less than 5(MinDomains), so "global minimum" is treated as 0.
+          In this situation, new pod with the same labelSelector cannot be scheduled,
+          because computed skew will be 3(3 - 0) if new Pod is scheduled to any of the three zones,
+          it will violate MaxSkew.
+
+          This is a beta field and requires the MinDomainsInPodTopologySpread feature gate to be enabled (enabled by default).
+          +optional
+        type: integer
+      nodeAffinityPolicy:
+        description: |-
+          NodeAffinityPolicy indicates how we will treat Pod's nodeAffinity/nodeSelector
+          when calculating pod topology spread skew. Options are:
+          - Honor: only nodes matching nodeAffinity/nodeSelector are included in the calculations.
+          - Ignore: nodeAffinity/nodeSelector are ignored. All nodes are included in the calculations.
+
+          If this value is nil, the behavior is equivalent to the Honor policy.
+          This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.
+          +optional
+        type: string
+      nodeTaintsPolicy:
+        description: |-
+          NodeTaintsPolicy indicates how we will treat node taints when calculating
+          pod topology spread skew. Options are:
+          - Honor: nodes without taints, along with tainted nodes for which the incoming pod
+          has a toleration, are included.
+          - Ignore: node taints are ignored. All nodes are included.
+
+          If this value is nil, the behavior is equivalent to the Ignore policy.
+          This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.
+          +optional
+        type: string
+      topologyKey:
+        description: |-
+          TopologyKey is the key of node labels. Nodes that have a label with this key
+          and identical values are considered to be in the same topology.
+          We consider each <key, value> as a "bucket", and try to put balanced number
+          of pods into each bucket.
+          We define a domain as a particular instance of a topology.
+          Also, we define an eligible domain as a domain whose nodes meet the requirements of
+          nodeAffinityPolicy and nodeTaintsPolicy.
+          e.g. If TopologyKey is "kubernetes.io/hostname", each Node is a domain of that topology.
+          And, if TopologyKey is "topology.kubernetes.io/zone", each zone is a domain of that topology.
+          It's a required field.
+        type: string
+      whenUnsatisfiable:
+        description: |-
+          WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy
+          the spread constraint.
+          - DoNotSchedule (default) tells the scheduler not to schedule it.
+          - ScheduleAnyway tells the scheduler to schedule the pod in any location,
+            but giving higher precedence to topologies that would help reduce the
+            skew.
+          A constraint is considered "Unsatisfiable" for an incoming pod
+          if and only if every possible node assignment for that pod would violate
+          "MaxSkew" on some topology.
+          For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same
+          labelSelector spread as 3/1/1:
+          +-------+-------+-------+
+          | zone1 | zone2 | zone3 |
+          +-------+-------+-------+
+          | P P P |   P   |   P   |
+          +-------+-------+-------+
+          If WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled
+          to zone2(zone3) to become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies
+          MaxSkew(1). In other words, the cluster can still be imbalanced, but scheduler
+          won't make it *more* imbalanced.
+          It's a required field.
+        type: string
     type: object
   v1.TypedLocalObjectReference:
     properties:
@@ -3082,6 +3569,18 @@ definitions:
       volumePath:
         description: volumePath is the path that identifies vSphere volume vmdk
         type: string
+    type: object
+  v1.WeightedPodAffinityTerm:
+    properties:
+      podAffinityTerm:
+        $ref: '#/definitions/v1.PodAffinityTerm'
+        description: Required. A pod affinity term, associated with the corresponding
+          weight.
+      weight:
+        description: |-
+          weight associated with matching the corresponding podAffinityTerm,
+          in the range 1-100.
+        type: integer
     type: object
   v1.WindowsSecurityContextOptions:
     properties:
@@ -6376,14 +6875,63 @@ definitions:
     type: object
   v1alpha1.Task:
     properties:
+      activeDeadlineSeconds:
+        description: +optional
+        type: integer
+      affinity:
+        $ref: '#/definitions/v1.Affinity'
+        description: +optional
+      automountServiceAccountToken:
+        description: +optional
+        type: boolean
       container:
         $ref: '#/definitions/v1.Container'
         description: Container is the main container image to run in the pod
+      imagePullSecrets:
+        description: |-
+          +optional
+          +patchMergeKey=name
+          +patchStrategy=merge
+        items:
+          $ref: '#/definitions/v1.LocalObjectReference'
+        type: array
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: |-
+          +optional
+          +mapType=atomic
+        type: object
+      securityContext:
+        $ref: '#/definitions/v1.PodSecurityContext'
+        description: +optional
+      serviceAccountName:
+        description: +optional
+        type: string
+      terminationGracePeriodSeconds:
+        description: +optional
+        type: integer
+      tolerations:
+        description: +optional
+        items:
+          $ref: '#/definitions/v1.Toleration'
+        type: array
+      topologySpreadConstraints:
+        description: |-
+          +optional
+          +patchMergeKey=topologyKey
+          +patchStrategy=merge
+          +listType=map
+          +listMapKey=topologyKey
+          +listMapKey=whenUnsatisfiable
+        items:
+          $ref: '#/definitions/v1.TopologySpreadConstraint'
+        type: array
       volumes:
         description: |-
-          Volumes is a list of volumes that can be mounted by containers in a template.
-          +patchStrategy=merge
+          +optional
           +patchMergeKey=name
+          +patchStrategy=merge,retainKeys
         items:
           $ref: '#/definitions/v1.Volume'
         type: array
