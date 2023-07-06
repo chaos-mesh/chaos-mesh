@@ -5145,6 +5145,10 @@ const docTemplate = `{
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
                 },
+                "deploymentChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.DeploymentChaosSpec"
+                },
                 "dnsChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.DNSChaosSpec"
@@ -5310,6 +5314,27 @@ const docTemplate = `{
                 "reorder": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.ReorderSpec"
+                }
+            }
+        },
+        "v1alpha1.DeploymentChaosSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name defines the name of the deployment.",
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Namespace defines the namespace of the deployment.",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
                 }
             }
         },
@@ -7331,6 +7356,10 @@ const docTemplate = `{
                     "description": "+optional\n+kubebuilder:default=Forbid\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
                 },
+                "deploymentChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.DeploymentChaosSpec"
+                },
                 "dnsChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.DNSChaosSpec"
@@ -7634,6 +7663,10 @@ const docTemplate = `{
                 "deadline": {
                     "description": "+optional",
                     "type": "string"
+                },
+                "deploymentChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.DeploymentChaosSpec"
                 },
                 "dnsChaos": {
                     "description": "+optional",
