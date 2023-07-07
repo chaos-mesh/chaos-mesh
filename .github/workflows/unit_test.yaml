@@ -12,7 +12,9 @@ jobs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
-      # For pull requests it's not necessary to checkout the code
+      - name: checkout codes
+        uses: actions/checkout@v2
+
       - uses: dorny/paths-filter@v2
         id: filter
         with:
