@@ -76,6 +76,7 @@ jobs:
 
       - name: Build e2e images
         env:
+          UI: 1
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
           GO_BUILD_CACHE: ${{github.workspace}}/cache
