@@ -25,9 +25,9 @@ jobs:
               - '**.go'
               - 'helm/**'
             ui:
-              - 'ui/pnpm-lock.yaml'
+              - 'ui/**'
               - '**.js'
-              - '**.ts?(x)'
+              - '**.ts'
   go:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
