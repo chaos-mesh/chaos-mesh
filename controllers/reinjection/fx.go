@@ -64,7 +64,7 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 	}
 
 	// Set up a new controller to reconcile ReplicaSets
-	logger.Info("Setting up controller to watch these kind of chaos %v", controllerConfig.ChaosKinds)
+	logger.Info("Setting up controller to watch these kind of chaos", "chaosKinds", controllerConfig.ChaosKinds)
 	c, err := controller.New("reinject-controller", mgr, controller.Options{
 		Reconciler: &reInjector{client: mgr.GetClient(), logger: logger},
 	})

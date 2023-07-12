@@ -44,7 +44,7 @@ func (r *reInjector) Reconcile(ctx context.Context, request reconcile.Request) (
 	// find the chaosKey in podToChaosInfoMap
 	chaosToContainerMapValue, ok := podToChaosInfoMap.Load(podKey)
 	if !ok {
-		r.logger.Info("pod not found in podToChaosInfoMap", podKey)
+		r.logger.Info("pod not found in podToChaosInfoMap", "podKey", podKey)
 		return reconcile.Result{}, nil
 	}
 
@@ -68,7 +68,7 @@ func (r *reInjector) reInjectChaos(ctx context.Context, chaosKey string, logger 
 	kind, namespace, name := chaosInfo.Kind, chaosInfo.Namespace, chaosInfo.Name
 	chaosKind, exists := chaosmeshapi.AllKinds()[kind]
 	if !exists {
-		logger.Info("chaosKind not found", kind)
+		logger.Info("chaosKind not found", "chaosKind", kind)
 		return nil
 	}
 	chaos := chaosKind.SpawnObject()
