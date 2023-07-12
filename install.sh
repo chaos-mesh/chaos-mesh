@@ -1282,7 +1282,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-dns-server-target-namespace
-  namespace: 
+  namespace:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1649,7 +1649,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: ${socketDir}
         - name: sys-path
           hostPath:
@@ -1971,7 +1971,7 @@ spec:
                     operator: In
                     values: ["chaos-dns"]
               topologyKey: kubernetes.io/hostname
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-dns-server
         image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
@@ -2144,22 +2144,6 @@ spec:
 ---
 # Source: chaos-mesh/templates/prometheus-service.yaml
 # Copyright 2021 Chaos Mesh Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
----
-# Source: chaos-mesh/templates/reinject-controller-config.yaml
-# Copyright 2023 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
