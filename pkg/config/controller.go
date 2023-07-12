@@ -117,8 +117,8 @@ type ChaosControllerConfig struct {
 
 	// EnableReInjectController is used for enable re-inject controller
 	EnableReInjectController bool `envconfig:"ENABLE_REINJECT_CONTROLLER" default:"false"`
-	// ReInjectControllerConfigMapName is the name of configmap which stores the config of re-inject controller
-	ReInjectControllerConfigMapName string `envconfig:"REINJECT_CONTROLLER_CONFIGMAP_NAME" default:"reinject-controller-config"`
+	// ReInjectChaosKinds identifies the chaos kinds which will be re-injected
+	ReInjectChaosKinds []string `envconfig:"REINJECT_CHAOS_KINDS" default:"StressChaos"`
 }
 
 // EnvironChaosController returns the settings from the environment.

@@ -17,13 +17,11 @@ package reinjection
 
 import (
 	"context"
-	"encoding/json"
 	"sync"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,27 +58,15 @@ func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, b *ch
 		return nil
 	}
 
-	ctx := context.Background()
 	logger.Info("start to load config")
-	controllerConfig := &ControllerConfig{}
-	cli := mgr.GetClient()
-	namespacedName := types.NamespacedName{
-		Namespace: config.ControllerCfg.Namespace,
-		Name:      config.ControllerCfg.ReInjectControllerConfigMapName,
-	}
-	cm := &corev1.ConfigMap{}
-	if err := cli.Get(ctx, namespacedName, cm); err != nil {
-		return err
-	}
-	if err := json.Unmarshal([]byte(cm.Data["config"]), controllerConfig); err != nil {
-		logger.Error(err, "unable to unmarshal config")
-		return err
+	controllerConfig := &ControllerConfig{
+		ChaosKinds: config.ControllerCfg.ReInjectChaosKinds,
 	}
 
 	// Set up a new controller to reconcile ReplicaSets
 	logger.Info("Setting up controller to watch these kind of chaos %v", controllerConfig.ChaosKinds)
 	c, err := controller.New("reinject-controller", mgr, controller.Options{
-		Reconciler: &reInjector{client: cli, logger: logger},
+		Reconciler: &reInjector{client: mgr.GetClient(), logger: logger},
 	})
 	if err != nil {
 		logger.Error(err, "unable to set up individual controller")
