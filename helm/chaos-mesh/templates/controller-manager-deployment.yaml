@@ -157,8 +157,8 @@ spec:
           {{- if .Values.reInjectController.enable }}
           - name: ENABLE_REINJECT_CONTROLLER
             value: {{ .Values.reInjectController.enable }}
-          - name: REINJECT_CONTROLLER_CONFIGMAP_NAME
-            value: {{ .Values.reInjectController.configMapName }}
+          - name: REINJECT_CHAOS_KINDS
+            value: {{ .Values.reInjectController.chaosKinds }}
           {{- end }}
         volumeMounts:
           - name: webhook-certs

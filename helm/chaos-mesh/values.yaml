@@ -563,4 +563,4 @@ chaosDlv:
 
 reInjectController:
   enable: false
-  configMapName: reinject-controller-config
+  chaosKinds: StressChaos
