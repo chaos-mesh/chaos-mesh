@@ -118,6 +118,14 @@ controllerManager:
   tolerations: []
   # Map of chaos-controller-manager node/pod affinities
   affinity: {}
+
+  # Pod Topology Spread Constraints
+  # ref https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: zone
+  #   whenUnsatisfiable: DoNotSchedule
+
   # Pod annotations of chaos-controller-manager
   podAnnotations: {}
   # A list of controllers to enable. "*" enables all controllers by default.
@@ -281,6 +289,14 @@ dashboard:
   tolerations: []
   # Map of chaos-dashboard node/pod affinities
   affinity: {}
+
+  # Pod Topology Spread Constraints
+  # ref https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: zone
+  #   whenUnsatisfiable: DoNotSchedule
+
   # Deployment chaos-dashboard annotations
   podAnnotations: {}
   # list of extra sidecar containers
