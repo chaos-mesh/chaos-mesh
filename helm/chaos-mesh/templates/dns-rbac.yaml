@@ -120,7 +120,7 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-chaos-dns-server-target-namespace
-  namespace: {{ .Values.dnsServer.targetNamespace | quote }}
+  namespace: {{ .Values.controllerManager.targetNamespace | quote }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: dns-server

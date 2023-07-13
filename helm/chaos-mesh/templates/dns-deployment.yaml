@@ -61,7 +61,9 @@ spec:
       nodeSelector:
 {{ toYaml . | indent 8 }}
       {{- end }}
-      priorityClassName: {{ .Values.dnsServer.priorityClassName}}
+{{- if .Values.dnsServer.priorityClassName }}
+      priorityClassName: {{ .Values.dnsServer.priorityClassName }}
+{{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
