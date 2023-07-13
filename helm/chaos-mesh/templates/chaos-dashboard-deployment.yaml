@@ -139,6 +139,10 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
       {{- end }}
+      {{- with .Values.dashboard.topologySpreadConstraints }}
+      topologySpreadConstraints:
+{{ toYaml . | indent 8 }}
+      {{- end }}
       volumes:
       - name: storage-volume
       {{- if .Values.dashboard.persistentVolume.enabled }}
