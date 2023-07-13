@@ -42,6 +42,7 @@ LOCALSTACK_SERVER="http:\/\/$NODE_IP\:$NODE_PORT"
 
 aws configure set aws_access_key_id test
 aws configure set aws_secret_access_key test
+aws configure set aws_session_token test
 aws configure set default.region us-east-1
 aws configure set default.output_format text
 

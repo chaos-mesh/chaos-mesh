@@ -22,7 +22,11 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
 spec:
+  {{- if not .Values.controllerManager.leaderElection.enabled }}
+  replicas: 1
+  {{- else }}
   replicas: {{ .Values.controllerManager.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "chaos-mesh.selectors" . | nindent 6 }}
@@ -138,6 +142,10 @@ spec:
           - name: POD_FAILURE_PAUSE_IMAGE
             value: {{ .Values.controllerManager.podChaos.podFailure.pauseImage }}
           {{- end }}
+          {{- if .Values.controllerManager.localHelmChart.enabled }}
+          - name: LOCAL_HELM_CHART_PATH
+            value: /data/helm
+          {{- end }}
           - name: ENABLE_LEADER_ELECTION
             value: {{ .Values.controllerManager.leaderElection.enabled | quote }}
           - name: LEADER_ELECT_LEASE_DURATION
@@ -158,6 +166,11 @@ spec:
           {{- if .Values.controllerManager.chaosdSecurityMode }}
           - name: chaosd-client-cert
             mountPath: /etc/chaosd/cert
+            readOnly: true
+          {{- end }}
+          {{- if .Values.controllerManager.localHelmChart.enabled }}
+          - name: chaos-local-helm-chart
+            mountPath: /data/helm
             readOnly: true
           {{- end }}
         ports:
@@ -201,6 +214,10 @@ spec:
         - name: chaosd-client-cert
           secret:
             secretName: {{ template "chaos-mesh.chaosd-client.certs" . }}
+        {{- end }}
+        {{- if .Values.controllerManager.localHelmChart.enabled }}
+        - name: chaos-local-helm-chart
+{{ toYaml  .Values.controllerManager.localHelmChart.volume | indent 10 }}
         {{- end }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:

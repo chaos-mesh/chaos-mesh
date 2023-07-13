@@ -57,8 +57,6 @@ jobs:
 
           # ${VAR,,} convert VAR to lower case
           make -B \
-            IMAGE_BUILD_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
-            IMAGE_DEV_ENV_PROJECT=${GITHUB_REPOSITORY_OWNER,,} \
             TARGET_PLATFORM=$ARCH \
             IMAGE_TAG=$IMAGE_TAG-$ARCH \
             image-$IMAGE-env

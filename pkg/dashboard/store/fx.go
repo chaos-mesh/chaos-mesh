@@ -20,7 +20,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
 
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 )
 
 func Bootstrap(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {

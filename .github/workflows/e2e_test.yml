@@ -198,8 +198,11 @@ jobs:
           minikube image load ./output/saved-images/chaos-mesh.tgz
           minikube image load ./output/saved-images/e2e-helper.tgz
 
-      - name: Setup helm
-        uses: azure/setup-helm@v2.1
+      - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
+        run: chmod 600 ~/.kube/config
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
 
       - name: Install Chaos Mesh
         run: |
@@ -216,13 +219,10 @@ jobs:
         env:
           PROFILE_DIRECTORY: ./output/chaos-mesh-profile
         run: |
-          mkdir -p $PROFILE_DIRECTORY/logs
-          mkdir -p $PROFILE_DIRECTORY/manifests/pods
-          mkdir -p $PROFILE_DIRECTORY/manifests/services
-          for item in $(kubectl -n chaos-mesh get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh logs $item > $PROFILE_DIRECTORY/logs/$item.log; done;
-          for item in $(kubectl -n chaos-mesh get pods --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get pod $item -oyaml > $PROFILE_DIRECTORY/manifests/pods/pod-$item.yaml; done;
-          for item in $(kubectl -n chaos-mesh get services --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get services $item -oyaml > $PROFILE_DIRECTORY/manifests/services/service-$item.yaml; done;
-          for item in $(kubectl -n chaos-mesh get endpoints --no-headers | awk '{print $1}'); do kubectl -n chaos-mesh get endpoints $item -oyaml > $PROFILE_DIRECTORY/manifests/services/endpoint-$item.yaml; done;
+          kubectl cluster-info dump --all-namespaces --output-directory $PROFILE_DIRECTORY/manifests -o yaml
+          kubectl get endpoints -A -o yaml > $PROFILE_DIRECTORY/manifests/endpoints.yaml
+          kubectl get secrets -A -o yaml > $PROFILE_DIRECTORY/manifests/secrets.yaml
+          kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
       - name: post run - upload Chaos Mesh profile info
         if: always()
         uses: actions/upload-artifact@v2

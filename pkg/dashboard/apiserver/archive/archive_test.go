@@ -33,7 +33,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -65,7 +65,7 @@ func (m *MockExperimentStore) ListMeta(ctx context.Context, kind, namespace, nam
 			Namespace:  "testNamespace",
 			Action:     "testAction",
 			StartTime:  time.Time{},
-			FinishTime: time.Time{},
+			FinishTime: &time.Time{},
 			Archived:   true,
 		}
 		res = append(res, expMeta)
@@ -90,7 +90,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: string(jsonStr),
@@ -106,7 +106,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: string(jsonStr),
@@ -122,7 +122,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: string(jsonStr),
@@ -138,7 +138,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: string(jsonStr),
@@ -154,7 +154,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: string(jsonStr),
@@ -170,7 +170,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: string(jsonStr),
@@ -184,7 +184,7 @@ func (m *MockExperimentStore) FindByUID(ctx context.Context, UID string) (*core.
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Experiment: "",
@@ -209,7 +209,7 @@ func (m *MockExperimentStore) FindMetaByUID(ctx context.Context, UID string) (*c
 			Namespace:  "testNamespace",
 			Action:     "testAction",
 			StartTime:  time.Time{},
-			FinishTime: time.Time{},
+			FinishTime: &time.Time{},
 			Archived:   true,
 		}
 	case "testErrRecordNotFound":
@@ -259,7 +259,7 @@ func (m *MockScheduleStore) ListMeta(ctx context.Context, namespace, name string
 			Namespace:  "testNamespace",
 			Action:     "testAction",
 			StartTime:  time.Time{},
-			FinishTime: time.Time{},
+			FinishTime: &time.Time{},
 			Archived:   true,
 		}
 		res = append(res, schMeta)
@@ -284,7 +284,7 @@ func (m *MockScheduleStore) FindByUID(ctx context.Context, UID string) (*core.Sc
 				Namespace:  "testNamespace",
 				Action:     "testAction",
 				StartTime:  time.Time{},
-				FinishTime: time.Time{},
+				FinishTime: &time.Time{},
 				Archived:   true,
 			},
 			Schedule: string(jsonStr),

@@ -31,7 +31,7 @@ func ExampleDownloadChaosMeshChartTgz() {
 }
 
 func ExampleFetchChaosMeshChart() {
-	chart, err := FetchChaosMeshChart(context.Background(), "2.2.0")
+	chart, err := FetchChaosMeshChart(context.Background(), "2.2.0", "")
 	if err != nil {
 		panic(err)
 	}

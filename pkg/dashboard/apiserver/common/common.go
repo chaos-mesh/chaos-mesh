@@ -25,13 +25,14 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config/dashboard"
+	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
@@ -108,16 +109,19 @@ type Service struct {
 	// this kubeCli use the local token, used for list namespace of the K8s cluster
 	kubeCli client.Client
 	conf    *config.ChaosDashboardConfig
+	logger  logr.Logger
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
 	kubeCli client.Client,
+	logger logr.Logger,
 ) *Service {
 	return &Service{
 		conf:    conf,
 		kubeCli: kubeCli,
+		logger:  logger.WithName("common-api"),
 	}
 }
 
@@ -441,7 +445,7 @@ func (s *Service) listPhysicalMachines(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace, s.logger)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
@@ -487,7 +491,7 @@ func (s *Service) getPhysicalMachineLabels(c *gin.Context) {
 	selector.Namespaces = nsList
 
 	ctx := context.TODO()
-	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace, s.logger)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
@@ -536,7 +540,7 @@ func (s *Service) getPhysicalMachineAnnotations(c *gin.Context) {
 	selector.Namespaces = nsList
 
 	ctx := context.TODO()
-	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace)
+	filtered, err := physicalmachine.SelectPhysicalMachines(ctx, kubeCli, nil, selector, s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.EnableFilterNamespace, s.logger)
 	if err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
