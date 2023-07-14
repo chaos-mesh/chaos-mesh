@@ -64,6 +64,8 @@ controllerManager:
   allowHostNetworkTesting: false
   # The serviceAccount for chaos-controller-manager
   serviceAccount: chaos-controller-manager
+  # ServiceAccount annotations for chaos-controller-manager
+  serviceAccountAnnotations: {}
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # Replicas for chaos-controller-manager
@@ -194,6 +196,8 @@ chaosDaemon:
   podAnnotations: {}
   # ServiceAccount name for chaos-daemon
   serviceAccount: chaos-daemon
+  # ServiceAccount annotations for chaos-daemon
+  serviceAccountAnnotations: {}
   # Specify PodSecurityPolicy(psp) on chaos-daemon pods
   podSecurityPolicy: false
   # runtime specifies which container runtime to use. Currently
