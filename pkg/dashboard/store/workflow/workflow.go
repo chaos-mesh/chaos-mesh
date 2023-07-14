@@ -20,9 +20,12 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
+
+var log = ctrl.Log.WithName("store/workflow")
 
 type WorkflowStore struct {
 	db *gorm.DB
@@ -115,6 +118,10 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 
 	nowTime := time.Now()
 	for _, wfl := range workflows {
+		if wfl.FinishTime == nil {
+			log.Error(nil, "workflow finish time is nil when deleting archived workflow reocrds, skip it", "workflow", wfl)
+			continue
+		}
 		if wfl.FinishTime.Add(ttl).Before(nowTime) {
 			if err := it.db.Where("uid = ?", wfl.UID).Unscoped().Delete(*it).Error; err != nil {
 				return err
@@ -128,7 +135,7 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 func (it *WorkflowStore) MarkAsArchived(ctx context.Context, namespace, name string) error {
 	if err := it.db.Model(core.WorkflowEntity{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true, "end_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now().Format(time.RFC3339)}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return err
 	}
 	return nil
