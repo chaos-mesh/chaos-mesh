@@ -31,6 +31,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
+| `controllerManager.serviceAccountAnnotations` | ServiceAccount annotations for chaos-controller-manager | `{}` |
 | `controllerManager.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `3` |
 | `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
@@ -65,6 +66,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
 | `chaosDaemon.serviceAccount`| ServiceAccount name for chaos-daemon | `chaos-daemon` |
+| `chaosDaemon.serviceAccountAnnotations` | ServiceAccount annotations for chaos-daemon | `{}` |
 | `chaosDaemon.podSecurityPolicy` | Specify PodSecurityPolicy(psp) on chaos-daemon pods | `false`|
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker, containerd and CRI-O. | `docker` |
 | `chaosDaemon.socketPath` | Specifiesthe path of container runtime socket on the host. | `/var/run/docker.sock` |
