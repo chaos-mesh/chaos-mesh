@@ -18,6 +18,10 @@ apiVersion: v1
 metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.controllerManager.serviceAccount }}
+  {{- with .Values.controllerManager.serviceAccountAnnotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
