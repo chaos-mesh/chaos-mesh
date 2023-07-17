@@ -17,7 +17,7 @@ require (
 	k8s.io/klog/v2 v2.90.0
 	k8s.io/kube-aggregator v0.26.1
 	k8s.io/kubelet v0.26.1
-	k8s.io/kubernetes v1.26.5
+	k8s.io/kubernetes v1.26.6
 	k8s.io/pod-security-admission v0.26.1
 	k8s.io/utils v0.0.0-20230115233650-391b47cb4029
 	sigs.k8s.io/controller-runtime v0.14.2
