@@ -27,7 +27,7 @@ interface ErrorData {
   full_text: string
 }
 
-const http = axios.create({ baseURL: '/api' })
+const http = axios.create({ baseURL: 'api' })
 
 http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
   const data = error.response?.data

@@ -161,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
       <Box display="flex" flexDirection="column" justifyContent="space-between" height="100%">
         <SidebarNav>
           {listItems.map(({ icon, text }) => (
-            <ListItemButton key={text} className={`tutorial-${text}`} component={NavLink} to={'/' + text}>
+            <ListItemButton key={text} className={`tutorial-${text}`} component={NavLink} to={text}>
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary={i18n(`${text}.title`)} />
             </ListItemButton>

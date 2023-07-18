@@ -33,9 +33,7 @@ import { Stale } from 'api/queryUtils'
 import Cookies from 'js-cookie'
 import { useGetCommonConfig } from 'openapi'
 import { useEffect, useState } from 'react'
-import { BrowserRouter as Router } from 'react-router-dom'
-import { Navigate, Route, Routes } from 'react-router-dom'
-import routes from 'routes'
+import { Outlet } from 'react-router-dom'
 
 import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
 import Loading from '@ui/mui-extends/esm/Loading'
@@ -44,7 +42,6 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { setAlertOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 
-import Helmet from 'components/Helmet'
 import { TokenFormValues } from 'components/Token'
 
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
@@ -158,7 +155,7 @@ const TopContainer = () => {
   }, [isTabletScreen])
 
   return (
-    <Router>
+    <>
       <CssBaseline />
       <Root open={openDrawer}>
         <Sidebar open={openDrawer} />
@@ -167,26 +164,7 @@ const TopContainer = () => {
           <Divider />
 
           <Container maxWidth="xl" disableGutters sx={{ flexGrow: 1, p: 6 }}>
-            {loading ? (
-              <Loading />
-            ) : (
-              <Routes>
-                <Route path="/" element={<Navigate replace to="/dashboard" />} />
-                {!authOpen &&
-                  routes.map(({ path, element, title }) => (
-                    <Route
-                      key={path}
-                      path={path}
-                      element={
-                        <>
-                          <Helmet title={title} />
-                          {element}
-                        </>
-                      }
-                    />
-                  ))}
-              </Routes>
-            )}
+            {loading ? <Loading /> : <Outlet />}
           </Container>
         </Box>
       </Root>
@@ -218,7 +196,7 @@ const TopContainer = () => {
           onConfirm={confirm.handle}
         />
       </Portal>
-    </Router>
+    </>
   )
 }
 
