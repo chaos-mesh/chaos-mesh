@@ -412,7 +412,7 @@ dnsServer:
     # repository part for image of chaos-dashboard
     repository: chaos-mesh/chaos-coredns
     # override global tag, empty value means using the global images.tag
-    tag: ""
+    tag: "v0.2.6"
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server
