@@ -272,17 +272,23 @@ var _ = Describe("networkchaos_webhook", func() {
 			}
 		})
 	})
-	Context("convertUnitToBytes", func() {
-		It("should convert number with unit successfully", func() {
-			n, err := ConvertUnitToBytes("  10   mbPs  ")
+	Context("isValidRateUnit", func() {
+		It("mbps unit, should convert number with unit successfully", func() {
+			isValid, err := isValidRateUnit("  10   mbPs  ")
 			Expect(err).Should(Succeed())
-			Expect(n).To(Equal(uint64(10 * 1024 * 1024)))
+			Expect(isValid).To(Equal(true))
+		})
+
+		It("kbit unit, should convert number with unit successfully", func() {
+			isValid, err := isValidRateUnit("  10   kbit  ")
+			Expect(err).Should(Succeed())
+			Expect(isValid).To(Equal(true))
 		})
 
 		It("should return error with invalid unit", func() {
-			n, err := ConvertUnitToBytes(" 10 cpbs")
+			isValid, err := isValidRateUnit(" 10 cpbs")
 			Expect(err).Should(HaveOccurred())
-			Expect(n).To(Equal(uint64(0)))
+			Expect(isValid).To(Equal(false))
 		})
 	})
 })
