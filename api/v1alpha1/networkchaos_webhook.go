@@ -54,7 +54,7 @@ type Rate string
 func (in *Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	// in cannot be nil
-	_, err := ConvertUnitToBytes(string(*in))
+	_, err := isValidRateUnit(string(*in))
 
 	if err != nil {
 		allErrs = append(allErrs,
@@ -64,31 +64,25 @@ func (in *Rate) Validate(root interface{}, path *field.Path) field.ErrorList {
 	return allErrs
 }
 
-func ConvertUnitToBytes(nu string) (uint64, error) {
+func isValidRateUnit(nu string) (bool, error) {
 	// normalize input
 	s := strings.ToLower(strings.TrimSpace(nu))
 
-	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
+	for _, u := range []string{"kbit", "mbit", "gbit", "tbit", "tbps", "gbps", "mbps", "kbps", "bps", "bit"} {
 		if strings.HasSuffix(s, u) {
 			ts := strings.TrimSuffix(s, u)
 			s := strings.TrimSpace(ts)
 
-			n, err := strconv.ParseUint(s, 10, 64)
-
+			_, err := strconv.ParseUint(s, 10, 64)
 			if err != nil {
-				return 0, err
+				return false, err
 			}
 
-			// convert unit to bytes
-			for j := 4 - i; j > 0; j-- {
-				n = n * 1024
-			}
-
-			return n, nil
+			return true, nil
 		}
 	}
 
-	return 0, errors.New("invalid unit")
+	return false, errors.New("invalid unit")
 }
 
 // ValidateTargets validates externalTargets and Targets

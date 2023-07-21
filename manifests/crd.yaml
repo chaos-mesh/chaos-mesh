@@ -2680,8 +2680,9 @@ spec:
                     minimum: 0
                     type: integer
                   rate:
-                    description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
-                      tbps unit. bps means bytes per second.
+                    description: Rate is the speed knob. Allows bit, kbit, mbit, gbit,
+                      tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per
+                      second.
                     type: string
                 required:
                 - buffer
@@ -5150,8 +5151,9 @@ spec:
                           minimum: 0
                           type: integer
                         rate:
-                          description: Rate is the speed knob. Allows bps, kbps, mbps,
-                            gbps, tbps unit. bps means bytes per second.
+                          description: Rate is the speed knob. Allows bit, kbit, mbit,
+                            gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                            bytes per second.
                           type: string
                       required:
                       - buffer
@@ -6825,8 +6827,9 @@ spec:
                         minimum: 0
                         type: integer
                       rate:
-                        description: Rate is the speed knob. Allows bps, kbps, mbps,
-                          gbps, tbps unit. bps means bytes per second.
+                        description: Rate is the speed knob. Allows bit, kbit, mbit,
+                          gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                          bytes per second.
                         type: string
                     required:
                     - buffer
@@ -10188,9 +10191,9 @@ spec:
                                   minimum: 0
                                   type: integer
                                 rate:
-                                  description: Rate is the speed knob. Allows bps,
-                                    kbps, mbps, gbps, tbps unit. bps means bytes per
-                                    second.
+                                  description: Rate is the speed knob. Allows bit,
+                                    kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps,
+                                    tbps unit. bps means bytes per second.
                                   type: string
                               required:
                               - buffer
@@ -13300,8 +13303,8 @@ spec:
                                       type: integer
                                     rate:
                                       description: Rate is the speed knob. Allows
-                                        bps, kbps, mbps, gbps, tbps unit. bps means
-                                        bytes per second.
+                                        bit, kbit, mbit, gbit, tbit, bps, kbps, mbps,
+                                        gbps, tbps unit. bps means bytes per second.
                                       type: string
                                   required:
                                   - buffer
@@ -21352,8 +21355,9 @@ spec:
                         minimum: 0
                         type: integer
                       rate:
-                        description: Rate is the speed knob. Allows bps, kbps, mbps,
-                          gbps, tbps unit. bps means bytes per second.
+                        description: Rate is the speed knob. Allows bit, kbit, mbit,
+                          gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                          bytes per second.
                         type: string
                     required:
                     - buffer
@@ -24268,8 +24272,9 @@ spec:
                             minimum: 0
                             type: integer
                           rate:
-                            description: Rate is the speed knob. Allows bps, kbps,
-                              mbps, gbps, tbps unit. bps means bytes per second.
+                            description: Rate is the speed knob. Allows bit, kbit,
+                              mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit.
+                              bps means bytes per second.
                             type: string
                         required:
                         - buffer
@@ -27705,8 +27710,8 @@ spec:
                                       type: integer
                                     rate:
                                       description: Rate is the speed knob. Allows
-                                        bps, kbps, mbps, gbps, tbps unit. bps means
-                                        bytes per second.
+                                        bit, kbit, mbit, gbit, tbit, bps, kbps, mbps,
+                                        gbps, tbps unit. bps means bytes per second.
                                       type: string
                                   required:
                                   - buffer
@@ -30921,8 +30926,9 @@ spec:
                                           type: integer
                                         rate:
                                           description: Rate is the speed knob. Allows
-                                            bps, kbps, mbps, gbps, tbps unit. bps
-                                            means bytes per second.
+                                            bit, kbit, mbit, gbit, tbit, bps, kbps,
+                                            mbps, gbps, tbps unit. bps means bytes
+                                            per second.
                                           type: string
                                       required:
                                       - buffer
@@ -41810,8 +41816,9 @@ spec:
                               minimum: 0
                               type: integer
                             rate:
-                              description: Rate is the speed knob. Allows bps, kbps,
-                                mbps, gbps, tbps unit. bps means bytes per second.
+                              description: Rate is the speed knob. Allows bit, kbit,
+                                mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit.
+                                bps means bytes per second.
                               type: string
                           required:
                           - buffer
@@ -44841,9 +44848,9 @@ spec:
                                   minimum: 0
                                   type: integer
                                 rate:
-                                  description: Rate is the speed knob. Allows bps,
-                                    kbps, mbps, gbps, tbps unit. bps means bytes per
-                                    second.
+                                  description: Rate is the speed knob. Allows bit,
+                                    kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps,
+                                    tbps unit. bps means bytes per second.
                                   type: string
                               required:
                               - buffer
