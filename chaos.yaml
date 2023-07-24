@@ -1,0 +1,15 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: K8SChaos
+metadata:
+  name: test-k8s-chaos
+spec:
+  duration: 5m
+  apiObjects:
+    value: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        namespace: chaos-mesh
+        name: test-cm
+      data:
+        key: value-123
