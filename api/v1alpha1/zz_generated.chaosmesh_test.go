@@ -655,6 +655,69 @@ func TestJVMChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestK8SChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &K8SChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestK8SChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &K8SChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestK8SChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &K8SChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestK8SChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &K8SChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestK8SChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &K8SChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestK8SChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &K8SChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestKernelChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

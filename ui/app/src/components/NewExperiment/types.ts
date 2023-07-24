@@ -168,6 +168,7 @@ export interface ExperimentType {
   HTTPChaos?: unknown
   IOChaos: IO
   JVMChaos?: unknown
+  K8SChaos?: unknown
   KernelChaos: Kernel
   NetworkChaos: Network
   PodChaos: Pod

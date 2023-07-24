@@ -3417,6 +3417,9 @@ definitions:
       jvmChaos:
         $ref: '#/definitions/v1alpha1.JVMChaosSpec'
         description: +optional
+      k8sChaos:
+        $ref: '#/definitions/v1alpha1.K8SChaosSpec'
+        description: +optional
       kernelChaos:
         $ref: '#/definitions/v1alpha1.KernelChaosSpec'
         description: +optional
@@ -4547,6 +4550,26 @@ definitions:
           +optional
           the port of agent server, default 9277
         type: integer
+    type: object
+  v1alpha1.K8SChaosAPIObjects:
+    properties:
+      value:
+        description: Literal string containing Kubernetes API resources
+        type: string
+    type: object
+  v1alpha1.K8SChaosSpec:
+    properties:
+      apiObjects:
+        $ref: '#/definitions/v1alpha1.K8SChaosAPIObjects'
+        description: +kubebuilder:validation:Required
+      duration:
+        description: Duration represents the duration of the chaos action
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
     type: object
   v1alpha1.KafkaFillSpec:
     properties:
@@ -5992,6 +6015,9 @@ definitions:
       jvmChaos:
         $ref: '#/definitions/v1alpha1.JVMChaosSpec'
         description: +optional
+      k8sChaos:
+        $ref: '#/definitions/v1alpha1.K8SChaosSpec'
+        description: +optional
       kernelChaos:
         $ref: '#/definitions/v1alpha1.KernelChaosSpec'
         description: +optional
@@ -6347,6 +6373,9 @@ definitions:
         description: +optional
       jvmChaos:
         $ref: '#/definitions/v1alpha1.JVMChaosSpec'
+        description: +optional
+      k8sChaos:
+        $ref: '#/definitions/v1alpha1.K8SChaosSpec'
         description: +optional
       kernelChaos:
         $ref: '#/definitions/v1alpha1.KernelChaosSpec'

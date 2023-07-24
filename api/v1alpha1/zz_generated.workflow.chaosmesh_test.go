@@ -103,6 +103,14 @@ func TestChaosKindMapShouldContainsJVMChaos(t *testing.T) {
 	_, ok := all.kinds[string(requiredType)]
 	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)
 }
+func TestChaosKindMapShouldContainsK8SChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+	var requiredType TemplateType
+	requiredType = TypeK8SChaos
+
+	_, ok := all.kinds[string(requiredType)]
+	g.Expect(ok).To(Equal(true), "all kinds map should contains this type", requiredType)
+}
 func TestChaosKindMapShouldContainsKernelChaos(t *testing.T) {
 	g := NewGomegaWithT(t)
 	var requiredType TemplateType

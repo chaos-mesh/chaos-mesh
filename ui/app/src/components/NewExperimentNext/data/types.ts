@@ -577,6 +577,7 @@ const data: Record<Kind, Definition> = {
       },
     ],
   },
+  K8SChaos: {},
   // Kernel Fault
   KernelChaos: {
     spec: {

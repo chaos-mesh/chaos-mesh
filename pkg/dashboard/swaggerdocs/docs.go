@@ -5177,6 +5177,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.JVMChaosSpec"
                 },
+                "k8sChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.K8SChaosSpec"
+                },
                 "kernelChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.KernelChaosSpec"
@@ -6250,6 +6254,32 @@ const docTemplate = `{
                 "port": {
                     "description": "+optional\nthe port of agent server, default 9277",
                     "type": "integer"
+                }
+            }
+        },
+        "v1alpha1.K8SChaosAPIObjects": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "Literal string containing Kubernetes API resources",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.K8SChaosSpec": {
+            "type": "object",
+            "properties": {
+                "apiObjects": {
+                    "description": "+kubebuilder:validation:Required",
+                    "$ref": "#/definitions/v1alpha1.K8SChaosAPIObjects"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
                 }
             }
         },
@@ -7595,6 +7625,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.JVMChaosSpec"
                 },
+                "k8sChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.K8SChaosSpec"
+                },
                 "kernelChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.KernelChaosSpec"
@@ -7902,6 +7936,10 @@ const docTemplate = `{
                 "jvmChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.JVMChaosSpec"
+                },
+                "k8sChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.K8SChaosSpec"
                 },
                 "kernelChaos": {
                     "description": "+optional",
