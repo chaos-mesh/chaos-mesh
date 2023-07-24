@@ -1151,6 +1151,144 @@ func (in *JVMChaos) Default() {
 	gw.Default(in)
 }
 
+const KindK8SChaos = "K8SChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *K8SChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *K8SChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *K8SChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *K8SChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *K8SChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *K8SChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *K8SChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// K8SChaosList contains a list of K8SChaos
+type K8SChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []K8SChaos `json:"items"`
+}
+
+func (in *K8SChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *K8SChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *K8SChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *K8SChaos) IsOneShot() bool {
+	return false
+}
+
+var K8SChaosWebhookLog = logf.Log.WithName("K8SChaos-resource")
+
+func (in *K8SChaos) ValidateCreate() (admission.Warnings, error) {
+	K8SChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *K8SChaos) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+	K8SChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*K8SChaos).Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *K8SChaos) ValidateDelete() (admission.Warnings, error) {
+	K8SChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil, nil
+}
+
+var _ webhook.Validator = &K8SChaos{}
+
+func (in *K8SChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &K8SChaos{}
+
+func (in *K8SChaos) Default() {
+	gw.Default(in)
+}
+
 const KindKernelChaos = "KernelChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -2258,6 +2396,12 @@ func init() {
 		list:  &JVMChaosList{},
 	})
 
+	SchemeBuilder.Register(&K8SChaos{}, &K8SChaosList{})
+	all.register(KindK8SChaos, &ChaosKind{
+		chaos: &K8SChaos{},
+		list:  &K8SChaosList{},
+	})
+
 	SchemeBuilder.Register(&KernelChaos{}, &KernelChaosList{})
 	all.register(KindKernelChaos, &ChaosKind{
 		chaos: &KernelChaos{},
@@ -2345,6 +2489,11 @@ func init() {
 	allScheduleItem.register(KindJVMChaos, &ChaosKind{
 		chaos: &JVMChaos{},
 		list:  &JVMChaosList{},
+	})
+
+	allScheduleItem.register(KindK8SChaos, &ChaosKind{
+		chaos: &K8SChaos{},
+		list:  &K8SChaosList{},
 	})
 
 	allScheduleItem.register(KindKernelChaos, &ChaosKind{
