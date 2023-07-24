@@ -32,6 +32,7 @@ const (
 	TypeHTTPChaos TemplateType = "HTTPChaos"
 	TypeIOChaos TemplateType = "IOChaos"
 	TypeJVMChaos TemplateType = "JVMChaos"
+	TypeK8SChaos TemplateType = "K8SChaos"
 	TypeKernelChaos TemplateType = "KernelChaos"
 	TypeNetworkChaos TemplateType = "NetworkChaos"
 	TypePhysicalMachineChaos TemplateType = "PhysicalMachineChaos"
@@ -51,6 +52,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeHTTPChaos,
 	TypeIOChaos,
 	TypeJVMChaos,
+	TypeK8SChaos,
 	TypeKernelChaos,
 	TypeNetworkChaos,
 	TypePhysicalMachineChaos,
@@ -77,6 +79,8 @@ type EmbedChaos struct {
 	IOChaos *IOChaosSpec `json:"ioChaos,omitempty"`
 	// +optional
 	JVMChaos *JVMChaosSpec `json:"jvmChaos,omitempty"`
+	// +optional
+	K8SChaos *K8SChaosSpec `json:"k8sChaos,omitempty"`
 	// +optional
 	KernelChaos *KernelChaosSpec `json:"kernelChaos,omitempty"`
 	// +optional
@@ -125,6 +129,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 	case TypeJVMChaos:
 		result := JVMChaos{}
 		result.Spec = *it.JVMChaos
+		return &result, nil
+	case TypeK8SChaos:
+		result := K8SChaos{}
+		result.Spec = *it.K8SChaos
 		return &result, nil
 	case TypeKernelChaos:
 		result := KernelChaos{}
@@ -182,6 +190,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *JVMChaos:
 		*it.JVMChaos = chaos.Spec
 		return nil
+	case *K8SChaos:
+		*it.K8SChaos = chaos.Spec
+		return nil
 	case *KernelChaos:
 		*it.KernelChaos = chaos.Spec
 		return nil
@@ -231,6 +242,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypeJVMChaos:
 		result := JVMChaosList{}
+		return &result, nil
+	case TypeK8SChaos:
+		result := K8SChaosList{}
 		return &result, nil
 	case TypeKernelChaos:
 		result := KernelChaosList{}
@@ -313,6 +327,14 @@ func (in *IOChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *JVMChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *K8SChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item
