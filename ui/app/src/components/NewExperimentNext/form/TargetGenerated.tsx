@@ -15,9 +15,10 @@
  *
  */
 import { MenuItem } from '@mui/material'
+import { Stale } from 'api/queryUtils'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
 import { useGetCommonChaosAvailableNamespaces } from 'openapi'
-import { useEffect, useState } from 'react'
+import { WheelEvent, useEffect, useState } from 'react'
 import { ObjectSchema } from 'yup'
 
 import Space from '@ui/mui-extends/esm/Space'
@@ -33,7 +34,13 @@ import i18n from 'components/T'
 
 import basicData from '../data/basic'
 import { Kind, Spec } from '../data/types'
-import { Stale } from 'api/queryUtils'
+
+const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
+  if (e.target instanceof HTMLInputElement) {
+    // Prevent the input value change
+    e.target.blur()
+  }
+}
 
 interface TargetGeneratedProps {
   env: Env
@@ -132,6 +139,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
           case 'number':
             return (
               <TextField
+                onWheel={preventScrollChangingNumberInput}
                 key={k}
                 type="number"
                 name={k}
