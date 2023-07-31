@@ -147,6 +147,11 @@ Define the webhook's name
 {{ .Values.dashboard.image.registry | default .Values.images.registry }}/{{ .Values.dashboard.image.repository }}:{{ .Values.dashboard.image.tag | default .Values.images.tag }}
 {{- end -}}
 
+{{/*Define the image for chaos-dns-server*/}}
+{{- define "chaos-dns-server.image" -}}
+{{ .Values.dnsServer.image.registry | default .Values.images.registry }}/{{ .Values.dnsServer.image.repository }}:{{ .Values.dnsServer.image.tag | default .Values.images.tag }}
+{{- end -}}
+
 {{/*Define the image for chaos-kernel*/}}
 {{- define "chaos-kernel.image" -}}
 {{ .Values.bpfki.image.registry | default .Values.images.registry }}/{{ .Values.bpfki.image.repository }}:{{ .Values.bpfki.image.tag | default .Values.images.tag }}
