@@ -8,9 +8,14 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
+### Changed
+
+- Change awschaos/*/impl.go to use `aws_session_token` with static credentials provider so that users can perform awschaos using [temporary AWS credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html) [#4066](https://github.com/chaos-mesh/chaos-mesh/pull/4066)
+
 ### Added
 
-- Nothing
+- Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
+- Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
 
 ### Changed
 
@@ -27,6 +32,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Set `replicas: 1` automatically when HA is not enabled [#4079](https://github.com/chaos-mesh/chaos-mesh/pull/4079)
+- Remove redundant where statements [#4084](https://github.com/chaos-mesh/chaos-mesh/pull/4084)
+- Fix dashboard panic when exec delete action by finish_time [#4100](https://github.com/chaos-mesh/chaos-mesh/pull/4100)
 
 ### Security
 

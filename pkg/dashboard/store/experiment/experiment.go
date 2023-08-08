@@ -53,7 +53,7 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name stri
 	experiments := make([]*core.ExperimentMeta, 0)
 	query, args := constructQueryArgs(kind, namespace, name, "")
 
-	if err := db.Where(query, args).Where(query, args).Where("archived = ?", archived).Find(&experiments).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args).Where("archived = ?", archived).Find(&experiments).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 
@@ -141,6 +141,10 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 
 	nowTime := time.Now()
 	for _, exp := range experiments {
+		if exp.FinishTime == nil {
+			log.Error(nil, "finish time is nil when deleting archived experiment records, skip it", "experiment", exp)
+			continue
+		}
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
 			if err := e.db.Table("experiments").Unscoped().Delete(*exp).Error; err != nil {
 				return err

@@ -66,7 +66,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		opts = append(opts, awscfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
 			string(secret.Data["aws_access_key_id"]),
 			string(secret.Data["aws_secret_access_key"]),
-			"",
+			string(secret.Data["aws_session_token"]),
 		)))
 	}
 	cfg, err := awscfg.LoadDefaultConfig(ctx, opts...)

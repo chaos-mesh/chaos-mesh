@@ -51,7 +51,7 @@ func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, arch
 	sches := make([]*core.ScheduleMeta, 0)
 	query, args := constructQueryArgs("", namespace, name, "")
 
-	if err := db.Where(query, args).Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 
@@ -112,6 +112,10 @@ func (e *ScheduleStore) DeleteByFinishTime(_ context.Context, ttl time.Duration)
 
 	nowTime := time.Now()
 	for _, sch := range sches {
+		if sch.FinishTime == nil {
+			log.Error(nil, "finish time is nil when deleting archived schedule records, skip it", "schedule", sch)
+			continue
+		}
 		if sch.FinishTime.Add(ttl).Before(nowTime) {
 			if err := e.db.Table("schedules").Unscoped().Delete(*sch).Error; err != nil {
 				return err
