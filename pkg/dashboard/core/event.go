@@ -64,5 +64,5 @@ type Event struct {
 	Kind      string    `json:"kind"`
 	Type      string    `json:"type"`
 	Reason    string    `json:"reason"`
-	Message   string    `json:"message"`
+	Message   string    `gorm:"type:text;size:32768" json:"message"`
 }
