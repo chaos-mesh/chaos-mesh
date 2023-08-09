@@ -67,7 +67,7 @@ spec:
       {{- end }}
       containers:
       - name: chaos-dns-server
-        image: {{ .Values.dnsServer.image }}
+        image: {{ template "chaos-dns.image" . }}
         imagePullPolicy: {{ .Values.dnsServer.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.dnsServer.resources | indent 10 }}
