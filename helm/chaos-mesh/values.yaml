@@ -413,7 +413,7 @@ dnsServer:
   image:
     # override global registry, empty value means using the global images.registry
     registry: ""
-    # repository part for image of chaos-dashboard
+    # repository part for image of chaos-dns-server
     repository: chaos-mesh/chaos-coredns
     # override global tag, empty value means using the global images.tag
     tag: "v0.2.6"
