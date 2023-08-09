@@ -409,8 +409,14 @@ dnsServer:
   create: true
   # Name of serviceaccount for chaos-dns-server.
   serviceAccount: chaos-dns-server
-  # Image of DNS Server
-  image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
+  # image would be constructed by <registry>/<repository>:<tag>
+  image:
+    # override global registry, empty value means using the global images.registry
+    registry: ""
+    # repository part for image of chaos-dashboard
+    repository: chaos-mesh/chaos-coredns
+    # override global tag, empty value means using the global images.tag
+    tag: "v0.2.6"
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Customized priorityClassName for chaos-dns-server
