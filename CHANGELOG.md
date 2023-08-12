@@ -8,11 +8,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
-### Changed
-
-- Change awschaos/*/impl.go to use `aws_session_token` with static credentials provider so that users can perform awschaos using [temporary AWS credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html) [#4066](https://github.com/chaos-mesh/chaos-mesh/pull/4066)
-- Enable consistency for ghcr.io registry [#4091](https://github.com/chaos-mesh/chaos-mesh/pull/4091) [#4134](https://github.com/chaos-mesh/chaos-mesh/pull/4134)
-
 ### Added
 
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
@@ -20,7 +15,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Change `awschaos/*/impl.go` to use `aws_session_token` with static credentials provider so that users can perform awschaos using [temporary AWS credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html) [#4066](https://github.com/chaos-mesh/chaos-mesh/pull/4066)
+- Enable consistency for ghcr.io registry [#4091](https://github.com/chaos-mesh/chaos-mesh/pull/4091) [#4134](https://github.com/chaos-mesh/chaos-mesh/pull/4134)
 
 ### Deprecated
 
