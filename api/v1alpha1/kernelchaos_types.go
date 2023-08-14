@@ -120,6 +120,6 @@ type KernelChaosStatus struct {
 
 func (obj *KernelChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
-		".": &obj.Spec.PodSelector,
+		".": &obj.Spec.ContainerSelector,
 	}
 }
