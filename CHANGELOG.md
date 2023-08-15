@@ -44,6 +44,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Set the database column type to text for 'Workflow/Experiment/Schedule' [#4151](https://github.com/chaos-mesh/chaos-mesh/pull/4151)
 - Change CoreDNS listen port from 53 to 5353 [#4022](https://github.com/chaos-mesh/chaos-mesh/pull/4022)
 - Bump go to v1.19.3 [#3770](https://github.com/chaos-mesh/chaos-mesh/pull/3770)
 - Change ubuntu version from latest to 20.04 [#3817](https://github.com/chaos-mesh/chaos-mesh/pull/3817)
