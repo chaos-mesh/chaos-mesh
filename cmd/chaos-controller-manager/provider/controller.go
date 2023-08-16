@@ -188,8 +188,8 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 	}()
 
 	c, err := client.New(cfg, client.Options{Scheme: scheme, Mapper: mapper, Cache: &client.CacheOptions{
-		Reader: cacheReader,
-		DisableFor: nil,
+		Reader:       cacheReader,
+		DisableFor:   nil,
 		Unstructured: false,
 	}})
 	if err != nil {
