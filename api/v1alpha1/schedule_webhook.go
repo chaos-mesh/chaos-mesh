@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -45,30 +46,30 @@ func (in *ConcurrencyPolicy) Default() {
 var _ webhook.Validator = &Schedule{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateCreate() error {
+func (in *Schedule) ValidateCreate() (admission.Warnings, error) {
 	schedulelog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateUpdate(old runtime.Object) error {
+func (in *Schedule) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	schedulelog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateDelete() error {
+func (in *Schedule) ValidateDelete() (admission.Warnings, error) {
 	schedulelog.Info("validate delete", "name", in.Name)
-	return nil
+	return nil, nil
 }
 
 // Validate validates chaos object
-func (in *Schedule) Validate() error {
+func (in *Schedule) Validate() ([]string, error) {
 	allErrs := in.Spec.Validate()
 	if len(allErrs) > 0 {
-		return errors.New(allErrs.ToAggregate().Error())
+		return nil, errors.New(allErrs.ToAggregate().Error())
 	}
-	return nil
+	return nil, nil
 }
 
 func (in *ScheduleSpec) Validate() field.ErrorList {
