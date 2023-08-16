@@ -79,48 +79,48 @@ func Bootstrap(params Params) error {
 		// when we only change the object.status.experiment.records[].events
 		predicaters := []predicate.Predicate{StatusRecordEventsChangePredicate{}}
 
-		eventHdlr := handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
-			reqs := []reconcile.Request{}
-			objName := k8sTypes.NamespacedName{
-				Namespace: obj.GetNamespace(),
-				Name:      obj.GetName(),
-			}
-
-			list := pair.ObjectList.DeepCopyList()
-			err := kubeclient.List(ctx, list)
-			if err != nil {
-				setupLog.Error(err, "fail to list object")
-			}
-
-			items := reflect.ValueOf(list).Elem().FieldByName("Items")
-			for i := 0; i < items.Len(); i++ {
-				item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
-				for _, record := range item.GetStatus().Experiment.Records {
-					namespacedName, err := controller.ParseNamespacedName(record.Id)
-					if err != nil {
-						setupLog.Error(err, "failed to parse record", "record", record.Id)
-						continue
-					}
-					if namespacedName == objName {
-						id := k8sTypes.NamespacedName{
-							Namespace: item.GetNamespace(),
-							Name:      item.GetName(),
-						}
-						setupLog.Info("mapping requests", "source", objName, "target", id)
-						reqs = append(reqs, reconcile.Request{
-							NamespacedName: id,
-						})
-					}
-				}
-			}
-			return reqs
-		})
-
 		// Add owning resources
 		if len(pair.Controlls) > 0 {
 			pair := pair
 			for _, obj := range pair.Controlls {
-				builder.Watches(obj, eventHdlr)
+				builder.Watches(obj,
+					handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
+						reqs := []reconcile.Request{}
+						objName := k8sTypes.NamespacedName{
+							Namespace: obj.GetNamespace(),
+							Name:      obj.GetName(),
+						}
+
+						list := pair.ObjectList.DeepCopyList()
+						err := kubeclient.List(context.TODO(), list)
+						if err != nil {
+							setupLog.Error(err, "fail to list object")
+						}
+
+						items := reflect.ValueOf(list).Elem().FieldByName("Items")
+						for i := 0; i < items.Len(); i++ {
+							item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
+							for _, record := range item.GetStatus().Experiment.Records {
+								namespacedName, err := controller.ParseNamespacedName(record.Id)
+								if err != nil {
+									setupLog.Error(err, "failed to parse record", "record", record.Id)
+									continue
+								}
+								if namespacedName == objName {
+									id := k8sTypes.NamespacedName{
+										Namespace: item.GetNamespace(),
+										Name:      item.GetName(),
+									}
+									setupLog.Info("mapping requests", "source", objName, "target", id)
+									reqs = append(reqs, reconcile.Request{
+										NamespacedName: id,
+									})
+								}
+							}
+						}
+						return reqs
+					}),
+				)
 			}
 			predicaters = append(predicaters, PickChildCRDPredicate{})
 		}
