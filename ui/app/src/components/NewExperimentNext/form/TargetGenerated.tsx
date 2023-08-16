@@ -35,13 +35,6 @@ import i18n from 'components/T'
 import basicData from '../data/basic'
 import { Kind, Spec } from '../data/types'
 
-// const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
-//   if (e.target instanceof HTMLInputElement) {
-//     // Prevent the input value change
-//     e.target.blur()
-//   }
-// }
-
 interface TargetGeneratedProps {
   env: Env
   kind?: Kind | ''
@@ -139,7 +132,6 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
           case 'number':
             return (
               <TextField
-                // onWheel={preventScrollChangingNumberInput}
                 key={k}
                 type="number"
                 name={k}

@@ -15,21 +15,22 @@
  *
  */
 import { Formik } from 'formik'
-import { act, fireEvent, render, screen, waitFor } from 'test-utils'
+import { act, fireEvent, render, screen } from 'test-utils'
 
 import TextField from './TextField'
 
+const handleSubmit = jest.fn()
+
 describe('TextField', () => {
   it('should prevent wheel on number field', async () => {
-    await act(async () => {
-      render(
-        <Formik initialValues={{}} onSubmit={(values, actions) => {}}>
-          <TextField type="number" name="myfield" inputProps={{ 'data-testid': 'input' }} />
-        </Formik>
-      )
-      screen.queryByTestId('input')?.focus()
-    })
-    await waitFor(() => expect(screen.queryByTestId('input')).toBeTruthy())
+    render(
+      <Formik initialValues={{}} onSubmit={handleSubmit}>
+        <TextField type="number" name="myfield" inputProps={{ 'data-testid': 'input' }} />
+      </Formik>
+    )
+    screen.queryByTestId('input')?.focus()
+
+    expect(screen.queryByTestId('input')).toBeTruthy()
 
     await act(async () => {
       fireEvent.wheel(screen.getByTestId('input'))
@@ -39,18 +40,19 @@ describe('TextField', () => {
   })
 
   it('should prevent wheel on non-number field', async () => {
-    await act(async () => {
-      render(
-        <Formik initialValues={{}} onSubmit={(values, actions) => {}}>
-          <TextField name="myfield" inputProps={{ 'data-testid': 'input' }} />
-        </Formik>
-      )
-      screen.queryByTestId('input')?.focus()
-    })
-    await waitFor(() => expect(screen.queryByTestId('input')).toBeTruthy())
+    render(
+      <Formik initialValues={{}} onSubmit={handleSubmit}>
+        <TextField name="myfield" inputProps={{ 'data-testid': 'input' }} />
+      </Formik>
+    )
+    screen.queryByTestId('input')?.focus()
+
+    expect(screen.queryByTestId('input')).toBeTruthy()
+
     await act(async () => {
       fireEvent.wheel(screen.getByTestId('input'))
     })
+
     expect(screen.getByTestId('input')).toHaveFocus()
   })
 })
