@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh
 
-go 1.19
+go 1.20
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
