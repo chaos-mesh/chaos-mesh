@@ -124,6 +124,9 @@ spec:
           - name: dlv
             containerPort: 8000
         {{- end }}
+        {{- with .Values.dashboard.extraContainers }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
         {{- with .Values.dashboard.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
