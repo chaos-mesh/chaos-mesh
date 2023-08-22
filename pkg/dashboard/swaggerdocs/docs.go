@@ -3692,7 +3692,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "description": "The header field name",
+                    "description": "The header field name.\nThis will be canonicalized upon output, so case-variant names will be understood as the same header.",
                     "type": "string"
                 },
                 "value": {
@@ -4319,7 +4319,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "claims": {
-                    "description": "Claims lists the names of resources, defined in spec.resourceClaims,\nthat are used by this container.\n\nThis is an alpha field and requires enabling the\nDynamicResourceAllocation feature gate.\n\nThis field is immutable.\n\n+listType=map\n+listMapKey=name\n+featureGate=DynamicResourceAllocation\n+optional",
+                    "description": "Claims lists the names of resources, defined in spec.resourceClaims,\nthat are used by this container.\n\nThis is an alpha field and requires enabling the\nDynamicResourceAllocation feature gate.\n\nThis field is immutable. It can only be set for containers.\n\n+listType=map\n+listMapKey=name\n+featureGate=DynamicResourceAllocation\n+optional",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/v1.ResourceClaim"
