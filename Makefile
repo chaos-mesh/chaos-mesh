@@ -162,12 +162,11 @@ lint: images/dev-env/.dockerbuilt ## Lint go files with revive
 
 tidy: SHELL:=$(RUN_IN_DEV_SHELL)
 tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
-	@echo "go mod tidy"
-	GO111MODULE=on go mod tidy
+	go mod tidy
 	git diff -U --exit-code go.mod go.sum
-	cd api; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd api; go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test; go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; go mod tidy; git diff -U --exit-code go.mod go.sum
 
 vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
