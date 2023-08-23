@@ -40,7 +40,7 @@ jobs:
           echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
 
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -108,7 +108,7 @@ jobs:
             --os linux --arch arm64
 
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -139,7 +139,7 @@ jobs:
         with:
           cosign-release: "v1.13.1"
       - name: Login to GitHub Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
