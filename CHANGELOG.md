@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.6.2] - 2023-08-22
+
+### Added
+
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
 
