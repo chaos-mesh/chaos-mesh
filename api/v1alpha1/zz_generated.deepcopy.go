@@ -21,10 +21,10 @@
 package v1alpha1
 
 import (
+	"encoding/json"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"net/http"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
 )
 
@@ -4147,8 +4147,8 @@ func (in *RemoteClusterSpec) DeepCopyInto(out *RemoteClusterSpec) {
 	out.KubeConfig = in.KubeConfig
 	if in.ConfigOverride != nil {
 		in, out := &in.ConfigOverride, &out.ConfigOverride
-		*out = new(apiextensionsv1.JSON)
-		(*in).DeepCopyInto(*out)
+		*out = make(json.RawMessage, len(*in))
+		copy(*out, *in)
 	}
 }
 

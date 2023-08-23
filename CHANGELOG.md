@@ -84,6 +84,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Set `replicas: 1` automatically when HA is not enabled [#4079](https://github.com/chaos-mesh/chaos-mesh/pull/4079)
 - Fix dashboard panic when exec delete action by finish_time [#4100](https://github.com/chaos-mesh/chaos-mesh/pull/4100)
+- Fix remote cluster cannot upgrade helm release [#4075](https://github.com/chaos-mesh/chaos-mesh/pull/4075)
 
 ### Security
 
@@ -138,7 +139,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix version comparison in install.sh [#3901](https://github.com/chaos-mesh/chaos-mesh/pull/3901)
 - Fix stuck dashboard updates when using ReadWriteOnce PVCs [#3876](https://github.com/chaos-mesh/chaos-mesh/issues/3876)
 - Fix MySQL NO_ZERO_IN_DATE by using `*time.Time` to represent finish time [#4056](https://github.com/chaos-mesh/chaos-mesh/pull/4056)
-- Fix remote cluster cannot upgrade helm release [#4075](https://github.com/chaos-mesh/chaos-mesh/pull/4075)
 
 ### Security
 
