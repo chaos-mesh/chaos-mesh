@@ -8,10 +8,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ## [Unreleased]
 
-### Changed
-
-- Change awschaos/*/impl.go to use `aws_session_token` with static credentials provider so that users can perform awschaos using [temporary AWS credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html) [#4066](https://github.com/chaos-mesh/chaos-mesh/pull/4066)
-
 ### Added
 
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
@@ -20,7 +16,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Change `awschaos/*/impl.go` to use `aws_session_token` with static credentials provider so that users can perform awschaos using [temporary AWS credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html) [#4066](https://github.com/chaos-mesh/chaos-mesh/pull/4066)
+- Enable consistency for ghcr.io registry [#4091](https://github.com/chaos-mesh/chaos-mesh/pull/4091) [#4134](https://github.com/chaos-mesh/chaos-mesh/pull/4134)
+- Prevent mousewheel scroll from changing numeric input values. [#4133](https://github.com/chaos-mesh/chaos-mesh/pull/4133)
+- Set the database column type to text for 'Workflow/Experiment/Schedule' [#4151](https://github.com/chaos-mesh/chaos-mesh/pull/4151)
+- Bump go to v1.20 [#4157](https://github.com/chaos-mesh/chaos-mesh/pull/4157)
 
 ### Deprecated
 

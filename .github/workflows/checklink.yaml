@@ -18,4 +18,5 @@ jobs:
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: "yes"
+          check-modified-files-only: 'yes'
           config-file: ".github/checklink_config.json"

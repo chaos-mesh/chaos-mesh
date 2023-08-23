@@ -2,24 +2,6 @@
   "ignorePatterns": [
     {
       "pattern": "^http://localhost"
-    },
-    {
-      "pattern": "^https://github.com"
-    },
-    {
-      "pattern": "^https://www.microsoft.com"
-    },
-    {
-      "pattern": "^http://techgenix.com"
-    },
-    {
-      "pattern": "^https://en.pingcap.com"
-    },
-    {
-      "pattern": "^https://www.tencent.com"
-    },
-    {
-      "pattern": "^https://twitter.com"
     }
   ],
   "aliveStatusCodes": [200, 403, 500, 502, 503]

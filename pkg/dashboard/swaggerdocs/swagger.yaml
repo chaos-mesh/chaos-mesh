@@ -1395,7 +1395,9 @@ definitions:
   v1.HTTPHeader:
     properties:
       name:
-        description: The header field name
+        description: |-
+          The header field name.
+          This will be canonicalized upon output, so case-variant names will be understood as the same header.
         type: string
       value:
         description: The header field value
@@ -2311,7 +2313,7 @@ definitions:
           This is an alpha field and requires enabling the
           DynamicResourceAllocation feature gate.
 
-          This field is immutable.
+          This field is immutable. It can only be set for containers.
 
           +listType=map
           +listMapKey=name

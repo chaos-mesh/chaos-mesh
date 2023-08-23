@@ -64,9 +64,10 @@ jobs:
       - uses: actions/setup-python@v2
         if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
 
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v4
         with:
-          go-version: "1.19.7"
+          check-latest: true
+          go-version-file: "go.mod"
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
