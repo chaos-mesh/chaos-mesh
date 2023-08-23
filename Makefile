@@ -301,7 +301,7 @@ e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Buil
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing

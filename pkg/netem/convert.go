@@ -124,14 +124,8 @@ func FromCorrupt(in *v1alpha1.CorruptSpec) (*chaosdaemonpb.Netem, error) {
 // for traffic control with the tc command.
 // http://man7.org/linux/man-pages/man8/tc-tbf.8.html
 func FromBandwidth(in *v1alpha1.BandwidthSpec) (*chaosdaemonpb.Tbf, error) {
-	rate, err := v1alpha1.ConvertUnitToBytes(in.Rate)
-
-	if err != nil {
-		return nil, err
-	}
-
 	tbf := &chaosdaemonpb.Tbf{
-		Rate:   rate,
+		Rate:   in.Rate,
 		Limit:  in.Limit,
 		Buffer: in.Buffer,
 	}
