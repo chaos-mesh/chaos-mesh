@@ -19,6 +19,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support configurable chaos-dns-server pod affinities[#4260](https://github.com/chaos-mesh/chaos-mesh/pull/4260)
 - Add experiment `name`, `namespace` and `kind` to "apply chaos" and "recover chaos" log messages [4278](https://github.com/chaos-mesh/chaos-mesh/pull/4278)
 - Support for watch remote chaos experiments to locally chaos  [#4188](https://github.com/chaos-mesh/chaos-mesh/pull/4188)
+- Support configuration of logging through helm chart / environment [#4249](https://github.com/chaos-mesh/chaos-mesh/pull/4249)
 
 ### Changed
 
