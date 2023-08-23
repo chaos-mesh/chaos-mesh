@@ -22,6 +22,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Prevent mousewheel scroll from changing numeric input values. [#4133](https://github.com/chaos-mesh/chaos-mesh/pull/4133)
 - Set the database column type to text for 'Workflow/Experiment/Schedule' [#4151](https://github.com/chaos-mesh/chaos-mesh/pull/4151)
 - Bump go to v1.20 [#4157](https://github.com/chaos-mesh/chaos-mesh/pull/4157)
+- Upgrade docker/login-action to v2 [#4167](https://github.com/chaos-mesh/chaos-mesh/pull/4167)
 
 ### Deprecated
 
