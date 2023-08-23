@@ -210,7 +210,7 @@ func (r *Reconciler) ensureHelmRelease(ctx context.Context, obj *v1alpha1.Remote
 
 	values := make(map[string]interface{})
 	if obj.Spec.ConfigOverride != nil {
-		err = json.Unmarshal(obj.Spec.ConfigOverride.Raw, &values)
+		err = json.Unmarshal(obj.Spec.ConfigOverride, &values)
 		if err != nil {
 			return "", err
 		}
