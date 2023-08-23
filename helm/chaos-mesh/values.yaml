@@ -283,6 +283,8 @@ dashboard:
   affinity: {}
   # Deployment chaos-dashboard annotations
   podAnnotations: {}
+  # list of extra sidecar containers
+  extraContainers: []
   service:
     # Service annotations for the dashboard
     annotations: {}
