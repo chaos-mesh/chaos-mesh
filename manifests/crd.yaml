@@ -2680,8 +2680,9 @@ spec:
                     minimum: 0
                     type: integer
                   rate:
-                    description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
-                      tbps unit. bps means bytes per second.
+                    description: Rate is the speed knob. Allows bit, kbit, mbit, gbit,
+                      tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per
+                      second.
                     type: string
                 required:
                 - buffer
@@ -5150,8 +5151,9 @@ spec:
                           minimum: 0
                           type: integer
                         rate:
-                          description: Rate is the speed knob. Allows bps, kbps, mbps,
-                            gbps, tbps unit. bps means bytes per second.
+                          description: Rate is the speed knob. Allows bit, kbit, mbit,
+                            gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                            bytes per second.
                           type: string
                       required:
                       - buffer
@@ -6825,8 +6827,9 @@ spec:
                         minimum: 0
                         type: integer
                       rate:
-                        description: Rate is the speed knob. Allows bps, kbps, mbps,
-                          gbps, tbps unit. bps means bytes per second.
+                        description: Rate is the speed knob. Allows bit, kbit, mbit,
+                          gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                          bytes per second.
                         type: string
                     required:
                     - buffer
@@ -10188,9 +10191,9 @@ spec:
                                   minimum: 0
                                   type: integer
                                 rate:
-                                  description: Rate is the speed knob. Allows bps,
-                                    kbps, mbps, gbps, tbps unit. bps means bytes per
-                                    second.
+                                  description: Rate is the speed knob. Allows bit,
+                                    kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps,
+                                    tbps unit. bps means bytes per second.
                                   type: string
                               required:
                               - buffer
@@ -13300,8 +13303,8 @@ spec:
                                       type: integer
                                     rate:
                                       description: Rate is the speed knob. Allows
-                                        bps, kbps, mbps, gbps, tbps unit. bps means
-                                        bytes per second.
+                                        bit, kbit, mbit, gbit, tbit, bps, kbps, mbps,
+                                        gbps, tbps unit. bps means bytes per second.
                                       type: string
                                   required:
                                   - buffer
@@ -15883,7 +15886,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -15996,7 +16002,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -16120,7 +16129,10 @@ spec:
                                               header to be used in HTTP probes
                                             properties:
                                               name:
-                                                description: The header field name
+                                                description: The header field name.
+                                                  This will be canonicalized upon
+                                                  output, so case-variant names will
+                                                  be understood as the same header.
                                                 type: string
                                               value:
                                                 description: The header field value
@@ -16340,7 +16352,10 @@ spec:
                                               header to be used in HTTP probes
                                             properties:
                                               name:
-                                                description: The header field name
+                                                description: The header field name.
+                                                  This will be canonicalized upon
+                                                  output, so case-variant names will
+                                                  be understood as the same header.
                                                 type: string
                                               value:
                                                 description: The header field value
@@ -16445,7 +16460,8 @@ spec:
                                         defined in spec.resourceClaims, that are used
                                         by this container. \n This is an alpha field
                                         and requires enabling the DynamicResourceAllocation
-                                        feature gate. \n This field is immutable."
+                                        feature gate. \n This field is immutable.
+                                        It can only be set for containers."
                                       items:
                                         description: ResourceClaim references one
                                           entry in PodSpec.ResourceClaims.
@@ -16761,7 +16777,10 @@ spec:
                                               header to be used in HTTP probes
                                             properties:
                                               name:
-                                                description: The header field name
+                                                description: The header field name.
+                                                  This will be canonicalized upon
+                                                  output, so case-variant names will
+                                                  be understood as the same header.
                                                 type: string
                                               value:
                                                 description: The header field value
@@ -17644,7 +17663,8 @@ spec:
                                                       \n This is an alpha field and
                                                       requires enabling the DynamicResourceAllocation
                                                       feature gate. \n This field
-                                                      is immutable."
+                                                      is immutable. It can only be
+                                                      set for containers."
                                                     items:
                                                       description: ResourceClaim references
                                                         one entry in PodSpec.ResourceClaims.
@@ -21352,8 +21372,9 @@ spec:
                         minimum: 0
                         type: integer
                       rate:
-                        description: Rate is the speed knob. Allows bps, kbps, mbps,
-                          gbps, tbps unit. bps means bytes per second.
+                        description: Rate is the speed knob. Allows bit, kbit, mbit,
+                          gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                          bytes per second.
                         type: string
                     required:
                     - buffer
@@ -24268,8 +24289,9 @@ spec:
                             minimum: 0
                             type: integer
                           rate:
-                            description: Rate is the speed knob. Allows bps, kbps,
-                              mbps, gbps, tbps unit. bps means bytes per second.
+                            description: Rate is the speed knob. Allows bit, kbit,
+                              mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit.
+                              bps means bytes per second.
                             type: string
                         required:
                         - buffer
@@ -27705,8 +27727,8 @@ spec:
                                       type: integer
                                     rate:
                                       description: Rate is the speed knob. Allows
-                                        bps, kbps, mbps, gbps, tbps unit. bps means
-                                        bytes per second.
+                                        bit, kbit, mbit, gbit, tbit, bps, kbps, mbps,
+                                        gbps, tbps unit. bps means bytes per second.
                                       type: string
                                   required:
                                   - buffer
@@ -30921,8 +30943,9 @@ spec:
                                           type: integer
                                         rate:
                                           description: Rate is the speed knob. Allows
-                                            bps, kbps, mbps, gbps, tbps unit. bps
-                                            means bytes per second.
+                                            bit, kbit, mbit, gbit, tbit, bps, kbps,
+                                            mbps, gbps, tbps unit. bps means bytes
+                                            per second.
                                           type: string
                                       required:
                                       - buffer
@@ -33587,7 +33610,10 @@ spec:
                                                     properties:
                                                       name:
                                                         description: The header field
-                                                          name
+                                                          name. This will be canonicalized
+                                                          upon output, so case-variant
+                                                          names will be understood
+                                                          as the same header.
                                                         type: string
                                                       value:
                                                         description: The header field
@@ -33705,7 +33731,10 @@ spec:
                                                     properties:
                                                       name:
                                                         description: The header field
-                                                          name
+                                                          name. This will be canonicalized
+                                                          upon output, so case-variant
+                                                          names will be understood
+                                                          as the same header.
                                                         type: string
                                                       value:
                                                         description: The header field
@@ -33838,7 +33867,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -34074,7 +34106,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -34185,7 +34220,8 @@ spec:
                                             that are used by this container. \n This
                                             is an alpha field and requires enabling
                                             the DynamicResourceAllocation feature
-                                            gate. \n This field is immutable."
+                                            gate. \n This field is immutable. It can
+                                            only be set for containers."
                                           items:
                                             description: ResourceClaim references
                                               one entry in PodSpec.ResourceClaims.
@@ -34521,7 +34557,10 @@ spec:
                                                 properties:
                                                   name:
                                                     description: The header field
-                                                      name
+                                                      name. This will be canonicalized
+                                                      upon output, so case-variant
+                                                      names will be understood as
+                                                      the same header.
                                                     type: string
                                                   value:
                                                     description: The header field
@@ -35454,7 +35493,8 @@ spec:
                                                           and requires enabling the
                                                           DynamicResourceAllocation
                                                           feature gate. \n This field
-                                                          is immutable."
+                                                          is immutable. It can only
+                                                          be set for containers."
                                                         items:
                                                           description: ResourceClaim
                                                             references one entry in
@@ -37402,7 +37442,10 @@ spec:
                                         to be used in HTTP probes
                                       properties:
                                         name:
-                                          description: The header field name
+                                          description: The header field name. This
+                                            will be canonicalized upon output, so
+                                            case-variant names will be understood
+                                            as the same header.
                                           type: string
                                         value:
                                           description: The header field value
@@ -37501,7 +37544,10 @@ spec:
                                         to be used in HTTP probes
                                       properties:
                                         name:
-                                          description: The header field name
+                                          description: The header field name. This
+                                            will be canonicalized upon output, so
+                                            case-variant names will be understood
+                                            as the same header.
                                           type: string
                                         value:
                                           description: The header field value
@@ -37615,7 +37661,9 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name
+                                      description: The header field name. This will
+                                        be canonicalized upon output, so case-variant
+                                        names will be understood as the same header.
                                       type: string
                                     value:
                                       description: The header field value
@@ -37820,7 +37868,9 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name
+                                      description: The header field name. This will
+                                        be canonicalized upon output, so case-variant
+                                        names will be understood as the same header.
                                       type: string
                                     value:
                                       description: The header field value
@@ -37919,7 +37969,7 @@ spec:
                               in spec.resourceClaims, that are used by this container.
                               \n This is an alpha field and requires enabling the
                               DynamicResourceAllocation feature gate. \n This field
-                              is immutable."
+                              is immutable. It can only be set for containers."
                             items:
                               description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                               properties:
@@ -38204,7 +38254,9 @@ spec:
                                     to be used in HTTP probes
                                   properties:
                                     name:
-                                      description: The header field name
+                                      description: The header field name. This will
+                                        be canonicalized upon output, so case-variant
+                                        names will be understood as the same header.
                                       type: string
                                     value:
                                       description: The header field value
@@ -38987,7 +39039,8 @@ spec:
                                             that are used by this container. \n This
                                             is an alpha field and requires enabling
                                             the DynamicResourceAllocation feature
-                                            gate. \n This field is immutable."
+                                            gate. \n This field is immutable. It can
+                                            only be set for containers."
                                           items:
                                             description: ResourceClaim references
                                               one entry in PodSpec.ResourceClaims.
@@ -41810,8 +41863,9 @@ spec:
                               minimum: 0
                               type: integer
                             rate:
-                              description: Rate is the speed knob. Allows bps, kbps,
-                                mbps, gbps, tbps unit. bps means bytes per second.
+                              description: Rate is the speed knob. Allows bit, kbit,
+                                mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit.
+                                bps means bytes per second.
                               type: string
                           required:
                           - buffer
@@ -44841,9 +44895,9 @@ spec:
                                   minimum: 0
                                   type: integer
                                 rate:
-                                  description: Rate is the speed knob. Allows bps,
-                                    kbps, mbps, gbps, tbps unit. bps means bytes per
-                                    second.
+                                  description: Rate is the speed knob. Allows bit,
+                                    kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps,
+                                    tbps unit. bps means bytes per second.
                                   type: string
                               required:
                               - buffer
@@ -47345,7 +47399,10 @@ spec:
                                               header to be used in HTTP probes
                                             properties:
                                               name:
-                                                description: The header field name
+                                                description: The header field name.
+                                                  This will be canonicalized upon
+                                                  output, so case-variant names will
+                                                  be understood as the same header.
                                                 type: string
                                               value:
                                                 description: The header field value
@@ -47449,7 +47506,10 @@ spec:
                                               header to be used in HTTP probes
                                             properties:
                                               name:
-                                                description: The header field name
+                                                description: The header field name.
+                                                  This will be canonicalized upon
+                                                  output, so case-variant names will
+                                                  be understood as the same header.
                                                 type: string
                                               value:
                                                 description: The header field value
@@ -47569,7 +47629,10 @@ spec:
                                           header to be used in HTTP probes
                                         properties:
                                           name:
-                                            description: The header field name
+                                            description: The header field name. This
+                                              will be canonicalized upon output, so
+                                              case-variant names will be understood
+                                              as the same header.
                                             type: string
                                           value:
                                             description: The header field value
@@ -47781,7 +47844,10 @@ spec:
                                           header to be used in HTTP probes
                                         properties:
                                           name:
-                                            description: The header field name
+                                            description: The header field name. This
+                                              will be canonicalized upon output, so
+                                              case-variant names will be understood
+                                              as the same header.
                                             type: string
                                           value:
                                             description: The header field value
@@ -47882,7 +47948,8 @@ spec:
                                     defined in spec.resourceClaims, that are used
                                     by this container. \n This is an alpha field and
                                     requires enabling the DynamicResourceAllocation
-                                    feature gate. \n This field is immutable."
+                                    feature gate. \n This field is immutable. It can
+                                    only be set for containers."
                                   items:
                                     description: ResourceClaim references one entry
                                       in PodSpec.ResourceClaims.
@@ -48182,7 +48249,10 @@ spec:
                                           header to be used in HTTP probes
                                         properties:
                                           name:
-                                            description: The header field name
+                                            description: The header field name. This
+                                              will be canonicalized upon output, so
+                                              case-variant names will be understood
+                                              as the same header.
                                             type: string
                                           value:
                                             description: The header field value
@@ -49024,7 +49094,8 @@ spec:
                                                   that are used by this container.
                                                   \n This is an alpha field and requires
                                                   enabling the DynamicResourceAllocation
-                                                  feature gate. \n This field is immutable."
+                                                  feature gate. \n This field is immutable.
+                                                  It can only be set for containers."
                                                 items:
                                                   description: ResourceClaim references
                                                     one entry in PodSpec.ResourceClaims.

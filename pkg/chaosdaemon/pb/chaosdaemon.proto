@@ -79,7 +79,7 @@ message TbfRequest {
 }
 
 message Tbf {
-  uint64 rate = 1;
+  string rate = 1;
   uint32 limit = 2;
   uint32 buffer = 3;
   uint64 peak_rate = 4;

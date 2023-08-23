@@ -1,8 +1,7 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.19 AS go_install
+FROM golang:1.20 AS go_install
 
-ENV GO111MODULE=on
 ENV GOPATH /go
 ENV CGO_ENABLED 0
 
@@ -67,7 +66,7 @@ COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.2 /go/pkg/m
 
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
-RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
+RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 
 RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 
@@ -80,7 +79,6 @@ RUN chmod -R 777 /.cache
 
 ENV GOCACHE /tmp/go-build
 ENV GOPATH /tmp/go
-ENV GO111MODULE=on
 ENV CGO_ENABLED 0
 
 LABEL org.opencontainers.image.source https://github.com/chaos-mesh/chaos-mesh

@@ -12,6 +12,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
+- Support more rate units for networkchaos [#4129](https://github.com/chaos-mesh/chaos-mesh/pull/4129)
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
 
 ### Changed
@@ -20,6 +21,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Enable consistency for ghcr.io registry [#4091](https://github.com/chaos-mesh/chaos-mesh/pull/4091) [#4134](https://github.com/chaos-mesh/chaos-mesh/pull/4134)
 - Prevent mousewheel scroll from changing numeric input values. [#4133](https://github.com/chaos-mesh/chaos-mesh/pull/4133)
 - Set the database column type to text for 'Workflow/Experiment/Schedule' [#4151](https://github.com/chaos-mesh/chaos-mesh/pull/4151)
+- Bump go to v1.20 [#4157](https://github.com/chaos-mesh/chaos-mesh/pull/4157)
 
 ### Deprecated
 
