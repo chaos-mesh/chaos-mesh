@@ -33,7 +33,7 @@ type RemoteCluster struct {
 
 	Spec RemoteClusterSpec `json:"spec,omitempty"`
 
-	//+optional
+	// +optional
 	Status RemoteClusterStatus `json:"status,omitempty"`
 }
 
@@ -44,7 +44,7 @@ type RemoteClusterSpec struct {
 
 	KubeConfig RemoteClusterKubeConfig `json:"kubeConfig"`
 
-	//+optional
+	// +optional
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Type=object
