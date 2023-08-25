@@ -32,7 +32,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	apiservertypes "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/types"
 	u "github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/generic/namespace"
@@ -229,7 +229,7 @@ func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
 		}
 		namespaces = make(sort.StringSlice, 0, len(nsList.Items))
 		for _, ns := range nsList.Items {
-			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(context.TODO(), s.kubeCli, ns.Name, u.Log) {
+			if s.conf.EnableFilterNamespace && !namespace.CheckNamespace(context.TODO(), s.kubeCli, ns.Name, s.logger) {
 				continue
 			}
 			namespaces = append(namespaces, ns.Name)

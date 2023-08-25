@@ -172,7 +172,7 @@ type CorruptSpec struct {
 
 // BandwidthSpec defines detail of bandwidth limit.
 type BandwidthSpec struct {
-	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+	// Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
 	Rate string `json:"rate" webhook:"Rate"`
 	// Limit is the number of bytes that can be queued waiting for tokens to become available.
 	// +kubebuilder:validation:Minimum=1

@@ -15,13 +15,24 @@
  *
  */
 import { FastField, Field, FieldValidator } from 'formik'
+import { WheelEvent } from 'react'
 
 import MuiExtendsTextField, { TextFieldProps } from '@ui/mui-extends/esm/TextField'
+
+const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
+  if (e.target instanceof HTMLInputElement) {
+    // Prevent the input value change
+    e.target.blur()
+  }
+}
 
 const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
   fast = false, // https://formik.org/docs/api/fastfield
   ...rest
 }) => {
+  if (rest.type === 'number') {
+    rest = { onWheel: preventScrollChangingNumberInput, ...rest }
+  }
   return fast ? <FastField {...rest} as={MuiExtendsTextField} /> : <Field {...rest} as={MuiExtendsTextField} />
 }
 

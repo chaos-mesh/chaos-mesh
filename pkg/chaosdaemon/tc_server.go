@@ -480,7 +480,7 @@ func convertNetemToArgs(netem *pb.Netem) string {
 }
 
 func convertTbfToArgs(tbf *pb.Tbf) string {
-	args := fmt.Sprintf("rate %d burst %d", tbf.Rate, tbf.Buffer)
+	args := fmt.Sprintf("rate %s burst %d", tbf.Rate, tbf.Buffer)
 	if tbf.Limit > 0 {
 		args = fmt.Sprintf("%s limit %d", args, tbf.Limit)
 	}

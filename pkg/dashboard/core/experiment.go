@@ -61,7 +61,7 @@ type ExperimentStore interface {
 // Experiment represents an experiment instance. Use in db.
 type Experiment struct {
 	ExperimentMeta
-	Experiment string `gorm:"size:4096"` // JSON string
+	Experiment string `gorm:"type:text;size:32768"` // JSON string
 }
 
 // ExperimentMeta defines the metadata of an experiment. Use in db.

@@ -26,7 +26,7 @@ CGO    := $(CGOENV) go
 GOTEST := USE_EXISTING_CLUSTER=false NO_PROXY="$(NO_PROXY),testhost" go test
 SHELL  := bash
 
-PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") $$(cd api && go list ./... && cd ../)
+PACKAGE_LIST := echo $$(go list -buildvcs=false ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") $$(cd api && go list -buildvcs=false ./... && cd ../)
 
 export GO_BUILD_CACHE ?= $(ROOT)/.cache/chaos-mesh
 
@@ -162,12 +162,11 @@ lint: images/dev-env/.dockerbuilt ## Lint go files with revive
 
 tidy: SHELL:=$(RUN_IN_DEV_SHELL)
 tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
-	@echo "go mod tidy"
-	GO111MODULE=on go mod tidy
+	go mod tidy
 	git diff -U --exit-code go.mod go.sum
-	cd api; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
-	cd e2e-test/cmd/e2e_helper; GO111MODULE=on go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd api; go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test; go mod tidy; git diff -U --exit-code go.mod go.sum
+	cd e2e-test/cmd/e2e_helper; go mod tidy; git diff -U --exit-code go.mod go.sum
 
 vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
@@ -302,7 +301,7 @@ e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Buil
 
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
 failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing
