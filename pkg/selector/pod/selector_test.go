@@ -35,22 +35,27 @@ func TestSelectPods(t *testing.T) {
 	objects, pods := GenerateNPods("p", 5, PodArg{Labels: map[string]string{"l1": "l1"}, Nodename: "az1-node1"})
 	objects2, pods2 := GenerateNPods("s", 2, PodArg{Namespace: "test-s", Labels: map[string]string{"l2": "l2"}, Nodename: "az2-node1"})
 
-	objects3, _ := GenerateNNodes("az1-node", 3, map[string]string{"disktype": "ssd", "zone": "az1"})
-	objects4, _ := GenerateNNodes("az2-node", 2, map[string]string{"disktype": "hdd", "zone": "az2"})
+	objects3, pods3 := GenerateNNodes("az1-node", 3, map[string]string{"disktype": "ssd", "zone": "az1"})
+	objects4, pods4 := GenerateNNodes("az2-node", 2, map[string]string{"disktype": "hdd", "zone": "az2"})
 
 	objects = append(objects, objects2...)
 	objects = append(objects, objects3...)
 	objects = append(objects, objects4...)
 
 	pods = append(pods, pods2...)
+	pods = append(pods, pods3...)
+	pods = append(pods, pods4...)
 
-	c := fake.NewClientBuilder().WithRuntimeObjects(objects...).Build()
+	c := fake.NewClientBuilder().
+		WithRuntimeObjects(objects...).
+		WithStatusSubresource(pods...).
+		Build()
 	var r client.Reader
 
 	type TestCase struct {
 		name         string
 		selector     v1alpha1.PodSelectorSpec
-		expectedPods []v1.Pod
+		expectedPods []client.Object
 	}
 
 	tcs := []TestCase{
@@ -62,7 +67,7 @@ func TestSelectPods(t *testing.T) {
 					"test-s":                {"s1"},
 				},
 			},
-			expectedPods: []v1.Pod{pods[3], pods[4], pods[6]},
+			expectedPods: []client.Object{pods[3], pods[4], pods[6]},
 		},
 		{
 			name: "filter labels pods",
@@ -71,7 +76,7 @@ func TestSelectPods(t *testing.T) {
 					LabelSelectors: map[string]string{"l2": "l2"},
 				},
 			},
-			expectedPods: []v1.Pod{pods[5], pods[6]},
+			expectedPods: []client.Object{pods[5], pods[6]},
 		},
 		{
 			name: "filter pods by label expressions",
@@ -86,7 +91,7 @@ func TestSelectPods(t *testing.T) {
 					},
 				},
 			},
-			expectedPods: []v1.Pod{pods[5], pods[6]},
+			expectedPods: []client.Object{pods[5], pods[6]},
 		},
 		{
 			name: "filter pods by label selectors and expression selectors",
@@ -112,7 +117,7 @@ func TestSelectPods(t *testing.T) {
 					LabelSelectors: map[string]string{"l2": "l2"},
 				},
 			},
-			expectedPods: []v1.Pod{pods[5], pods[6]},
+			expectedPods: []client.Object{pods[5], pods[6]},
 		},
 		{
 			name: "filter namespace and labels",
@@ -129,7 +134,7 @@ func TestSelectPods(t *testing.T) {
 			selector: v1alpha1.PodSelectorSpec{
 				Nodes: []string{"az1-node1"},
 			},
-			expectedPods: []v1.Pod{pods[0], pods[1], pods[2], pods[3], pods[4]},
+			expectedPods: []client.Object{pods[0], pods[1], pods[2], pods[3], pods[4]},
 		},
 		{
 			name: "filter node and labels",
@@ -146,7 +151,7 @@ func TestSelectPods(t *testing.T) {
 			selector: v1alpha1.PodSelectorSpec{
 				NodeSelectors: map[string]string{"disktype": "hdd"},
 			},
-			expectedPods: []v1.Pod{pods[5], pods[6]},
+			expectedPods: []client.Object{pods[5], pods[6]},
 		},
 		{
 			name: "filter pods by node and nodeSelector",
@@ -154,7 +159,7 @@ func TestSelectPods(t *testing.T) {
 				NodeSelectors: map[string]string{"zone": "az1"},
 				Nodes:         []string{"az2-node1"},
 			},
-			expectedPods: []v1.Pod{pods[0], pods[1], pods[2], pods[3], pods[4], pods[5], pods[6]},
+			expectedPods: []client.Object{pods[0], pods[1], pods[2], pods[3], pods[4], pods[5], pods[6]},
 		},
 	}
 

@@ -72,7 +72,7 @@ func TestHostNetworkOption(t *testing.T) {
 
 	for _, testCase := range testCases {
 
-		objs, _ := GenerateNPods("p", 1, PodArg{})
+		objs, pods := GenerateNPods("p", 1, PodArg{})
 
 		setHostNetwork(objs)
 
@@ -90,7 +90,11 @@ func TestHostNetworkOption(t *testing.T) {
 		}
 		objs = append(objs, chaos)
 
-		fakeClient := fake.NewClientBuilder().WithScheme(provider.NewScheme()).WithRuntimeObjects(objs...).Build()
+		fakeClient := fake.NewClientBuilder().
+			WithScheme(provider.NewScheme()).
+			WithRuntimeObjects(objs...).
+			WithStatusSubresource(pods...).
+			Build()
 
 		recorder := recorder.NewDebugRecorder()
 		h := &Reconciler{
