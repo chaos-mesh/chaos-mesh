@@ -46,7 +46,6 @@ func TestSelectPods(t *testing.T) {
 
 	c := fake.NewClientBuilder().
 		WithRuntimeObjects(objects...).
-		WithStatusSubresource(&v1alpha1.PodNetworkChaos{}).
 		Build()
 	var r client.Reader
 
