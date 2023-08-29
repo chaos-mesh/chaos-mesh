@@ -45,14 +45,14 @@ func TestSelectPhysicalMachines(t *testing.T) {
 	c := fake.NewClientBuilder().
 		WithScheme(scheme.Scheme).
 		WithRuntimeObjects(objects...).
-		WithStatusSubresource(physicalMachines...).
+		WithStatusSubresource(&v1alpha1.PodNetworkChaos{}).
 		Build()
 	var r client.Reader
 
 	type TestCase struct {
 		name     string
 		selector v1alpha1.PhysicalMachineSelectorSpec
-		expected []client.Object
+		expected []v1alpha1.PhysicalMachine
 	}
 
 	tcs := []TestCase{
@@ -64,7 +64,7 @@ func TestSelectPhysicalMachines(t *testing.T) {
 					"test-s":                {"s1"},
 				},
 			},
-			expected: []client.Object{physicalMachines[3], physicalMachines[4], physicalMachines[6]},
+			expected: []v1alpha1.PhysicalMachine{physicalMachines[3], physicalMachines[4], physicalMachines[6]},
 		},
 		{
 			name: "filter labels physical machines",
@@ -73,7 +73,7 @@ func TestSelectPhysicalMachines(t *testing.T) {
 					LabelSelectors: map[string]string{"l2": "l2"},
 				},
 			},
-			expected: []client.Object{physicalMachines[5], physicalMachines[6]},
+			expected: []v1alpha1.PhysicalMachine{physicalMachines[5], physicalMachines[6]},
 		},
 		{
 			name: "filter physicalMachines by label expressions",
@@ -88,7 +88,7 @@ func TestSelectPhysicalMachines(t *testing.T) {
 					},
 				},
 			},
-			expected: []client.Object{physicalMachines[5], physicalMachines[6]},
+			expected: []v1alpha1.PhysicalMachine{physicalMachines[5], physicalMachines[6]},
 		},
 		{
 			name: "filter physicalMachines by label selectors and expression selectors",
@@ -114,7 +114,7 @@ func TestSelectPhysicalMachines(t *testing.T) {
 					LabelSelectors: map[string]string{"l2": "l2"},
 				},
 			},
-			expected: []client.Object{physicalMachines[5], physicalMachines[6]},
+			expected: []v1alpha1.PhysicalMachine{physicalMachines[5], physicalMachines[6]},
 		},
 		{
 			name: "filter namespace and labels",

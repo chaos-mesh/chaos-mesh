@@ -21,7 +21,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -70,14 +69,14 @@ func GenerateNPods(
 	namePrefix string,
 	n int,
 	podArg PodArg,
-) ([]runtime.Object, []client.Object) {
+) ([]runtime.Object, []v1.Pod) {
 	var podObjects []runtime.Object
-	var pods []client.Object
+	var pods []v1.Pod
 	for i := 0; i < n; i++ {
 		podArg.Name = fmt.Sprintf("%s%d", namePrefix, i)
 		pod := NewPod(podArg)
 		podObjects = append(podObjects, &pod)
-		pods = append(pods, &pod)
+		pods = append(pods, pod)
 	}
 
 	return podObjects, pods
@@ -103,14 +102,14 @@ func GenerateNNodes(
 	namePrefix string,
 	n int,
 	label map[string]string,
-) ([]runtime.Object, []client.Object) {
+) ([]runtime.Object, []v1.Node) {
 	var nodeObjects []runtime.Object
-	var nodes []client.Object
+	var nodes []v1.Node
 
 	for i := 0; i < n; i++ {
 		node := NewNode(fmt.Sprintf("%s%d", namePrefix, i), label)
 		nodeObjects = append(nodeObjects, &node)
-		nodes = append(nodes, &node)
+		nodes = append(nodes, node)
 	}
 	return nodeObjects, nodes
 }
@@ -150,14 +149,14 @@ func GenerateNPhysicalMachines(
 	namePrefix string,
 	n int,
 	arg PhysicalMachineArg,
-) ([]runtime.Object, []client.Object) {
+) ([]runtime.Object, []v1alpha1.PhysicalMachine) {
 	var physicalMachineObjects []runtime.Object
-	var physicalMachines []client.Object
+	var physicalMachines []v1alpha1.PhysicalMachine
 	for i := 0; i < n; i++ {
 		arg.Name = fmt.Sprintf("%s%d", namePrefix, i)
 		physicalMachine := NewPhysicalMachine(arg)
 		physicalMachineObjects = append(physicalMachineObjects, &physicalMachine)
-		physicalMachines = append(physicalMachines, &physicalMachine)
+		physicalMachines = append(physicalMachines, physicalMachine)
 	}
 
 	return physicalMachineObjects, physicalMachines
