@@ -65,6 +65,7 @@ func NewOption(logger logr.Logger, scheme *runtime.Scheme) *ctrl.Options {
 	}
 	options := ctrl.Options{
 		// TODO: accept the schema from parameter instead of using scheme directly
+		CertDir:                    config.ControllerCfg.CertsDir,
 		Scheme:                     scheme,
 		MetricsBindAddress:         net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
