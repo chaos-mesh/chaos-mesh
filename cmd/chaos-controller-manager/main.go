@@ -172,9 +172,7 @@ func Run(params RunParams) error {
 	}
 
 	setupLog.Info("Setting up webhook server")
-	hookServer := webhook.NewServer(webhook.Options{
-		CertDir: ccfg.ControllerCfg.CertsDir,
-	})
+	hookServer := mgr.GetWebhookServer()
 
 	controllerRuntimeSignalHandler := ctrl.SetupSignalHandler()
 
