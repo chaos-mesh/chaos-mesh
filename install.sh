@@ -2584,6 +2584,27 @@ webhooks:
           - UPDATE
         resources:
           - remotecluster
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-mesh"
+        path: /mutate-chaos-mesh-org-v1alpha1-ciliumchaos
+    failurePolicy: Fail
+    name: mciliumchaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - ciliumchaos
 ---
 # Source: chaos-mesh/templates/validating-admission-webhooks.yaml
 # Copyright 2022 Chaos Mesh Authors.
@@ -3010,6 +3031,27 @@ webhooks:
           - UPDATE
         resources:
           - remotecluster
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-mesh"
+        path: /validate-chaos-mesh-org-v1alpha1-ciliumchaos
+    failurePolicy: Fail
+    name: vciliumchaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - ciliumchaos
 ---
 # Source: chaos-mesh/templates/validating-admission-webhooks.yaml
 apiVersion: admissionregistration.k8s.io/v1

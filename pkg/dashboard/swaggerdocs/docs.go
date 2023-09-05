@@ -5141,6 +5141,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
+                "ciliumChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.CiliumChaosSpec"
+                },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
@@ -5201,6 +5205,51 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.CiliumChaosSpec": {
+            "type": "object",
+            "properties": {
+                "ciliumPodSelector": {
+                    "description": "CiliumPodSelector provides a custom selector to find the cilium-agent pod for the node.\n\nIf not specified, it will default to selecting pods from the ` + "`" + `kube-system` + "`" + ` namespace with labels\n` + "`" + `app.kubernetes.io/name=cilium-agent` + "`" + ` and ` + "`" + `app.kubernetes.io/part-of=cilium` + "`" + ` (which are used by default by the cilium\nhelm chart)",
+                    "$ref": "#/definitions/v1alpha1.CiliumPodSelectorSpec"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.",
+                    "type": "string"
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
+                "selector": {
+                    "description": "Selector is used to select nodes into which to inject chaos.",
+                    "$ref": "#/definitions/v1alpha1.NodeSelectorSpec"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                }
+            }
+        },
+        "v1alpha1.CiliumPodSelectorSpec": {
+            "type": "object",
+            "properties": {
+                "labelSelectors": {
+                    "description": "Map of label selector expressions that can be used to select the cilium-agent pods..",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "namespace": {
+                    "description": "Namespace to restrict cilium-agent pod selection to\n+optional",
                     "type": "string"
                 }
             }
@@ -6557,6 +6606,18 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.NodeSelectorSpec": {
+            "type": "object",
+            "properties": {
+                "labelSelectors": {
+                    "description": "Map of string keys and values that can be used to select objects.\nA selector based on labels.\n+optional",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "v1alpha1.PMJVMMySQLSpec": {
             "type": "object",
             "properties": {
@@ -7327,6 +7388,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.BlockChaosSpec"
                 },
+                "ciliumChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.CiliumChaosSpec"
+                },
                 "concurrencyPolicy": {
                     "description": "+optional\n+kubebuilder:default=Forbid\n+kubebuilder:validation:Enum=Forbid;Allow",
                     "type": "string"
@@ -7623,6 +7688,10 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "ciliumChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.CiliumChaosSpec"
                 },
                 "conditionalBranches": {
                     "description": "ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.\n+optional",

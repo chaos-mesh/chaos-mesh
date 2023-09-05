@@ -638,6 +638,223 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
+  name: ciliumchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: CiliumChaos
+    listKind: CiliumChaosList
+    plural: ciliumchaos
+    singular: ciliumchaos
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CiliumChaos is the control script's spec.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a cilium chaos experiment
+            properties:
+              ciliumPodSelector:
+                description: "CiliumPodSelector provides a custom selector to find
+                  the cilium-agent pod for the node. \n If not specified, it will
+                  default to selecting pods from the `kube-system` namespace with
+                  labels `app.kubernetes.io/name=cilium-agent` and `app.kubernetes.io/part-of=cilium`
+                  (which are used by default by the cilium helm chart)"
+                properties:
+                  labelSelectors:
+                    additionalProperties:
+                      type: string
+                    description: Map of label selector expressions that can be used
+                      to select the cilium-agent pods..
+                    type: object
+                  namespace:
+                    description: Namespace to restrict cilium-agent pod selection
+                      to
+                    type: string
+                type: object
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              mode:
+                description: 'Mode defines the mode to run chaos action. Supported
+                  mode: one / all / fixed / fixed-percent / random-max-percent'
+                enum:
+                - one
+                - all
+                - fixed
+                - fixed-percent
+                - random-max-percent
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
+              selector:
+                description: Selector is used to select nodes into which to inject
+                  chaos.
+                properties:
+                  expressionSelectors:
+                    description: a slice of label selector expressions that can be
+                      used to select objects. A list of selectors based on set-based
+                      label expressions.
+                    items:
+                      description: A label selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: operator represents a key's relationship to
+                            a set of values. Valid operators are In, NotIn, Exists
+                            and DoesNotExist.
+                          type: string
+                        values:
+                          description: values is an array of string values. If the
+                            operator is In or NotIn, the values array must be non-empty.
+                            If the operator is Exists or DoesNotExist, the values
+                            array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  labelSelectors:
+                    additionalProperties:
+                      type: string
+                    description: Map of string keys and values that can be used to
+                      select objects. A selector based on labels.
+                    type: object
+                type: object
+              value:
+                description: Value is required when the mode is set to `FixedMode`
+                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
+                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
+                  a number from 0-100 to specify the percent of pods the server can
+                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
+                  0-100 to specify the max percent of pods to do chaos action
+                type: string
+            required:
+            - ciliumPodSelector
+            - duration
+            - mode
+            - selector
+            type: object
+          status:
+            description: Most recently observed status of the chaos experiment
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
+                        id:
+                          type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
+                        phase:
+                          type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - injectedCount
+                      - phase
+                      - recoveredCount
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
   name: dnschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -5526,6 +5743,103 @@ spec:
                 - selector
                 - volumeName
                 type: object
+              ciliumChaos:
+                description: CiliumChaosSpec defines the attributes that a user creates
+                  on a chaos experiment affecting cilium CNI.
+                properties:
+                  ciliumPodSelector:
+                    description: "CiliumPodSelector provides a custom selector to
+                      find the cilium-agent pod for the node. \n If not specified,
+                      it will default to selecting pods from the `kube-system` namespace
+                      with labels `app.kubernetes.io/name=cilium-agent` and `app.kubernetes.io/part-of=cilium`
+                      (which are used by default by the cilium helm chart)"
+                    properties:
+                      labelSelectors:
+                        additionalProperties:
+                          type: string
+                        description: Map of label selector expressions that can be
+                          used to select the cilium-agent pods..
+                        type: object
+                      namespace:
+                        description: Namespace to restrict cilium-agent pod selection
+                          to
+                        type: string
+                    type: object
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  mode:
+                    description: 'Mode defines the mode to run chaos action. Supported
+                      mode: one / all / fixed / fixed-percent / random-max-percent'
+                    enum:
+                    - one
+                    - all
+                    - fixed
+                    - fixed-percent
+                    - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  selector:
+                    description: Selector is used to select nodes into which to inject
+                      chaos.
+                    properties:
+                      expressionSelectors:
+                        description: a slice of label selector expressions that can
+                          be used to select objects. A list of selectors based on
+                          set-based label expressions.
+                        items:
+                          description: A label selector requirement is a selector
+                            that contains values, a key, and an operator that relates
+                            the key and values.
+                          properties:
+                            key:
+                              description: key is the label key that the selector
+                                applies to.
+                              type: string
+                            operator:
+                              description: operator represents a key's relationship
+                                to a set of values. Valid operators are In, NotIn,
+                                Exists and DoesNotExist.
+                              type: string
+                            values:
+                              description: values is an array of string values. If
+                                the operator is In or NotIn, the values array must
+                                be non-empty. If the operator is Exists or DoesNotExist,
+                                the values array must be empty. This array is replaced
+                                during a strategic merge patch.
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      labelSelectors:
+                        additionalProperties:
+                          type: string
+                        description: Map of string keys and values that can be used
+                          to select objects. A selector based on labels.
+                        type: object
+                    type: object
+                  value:
+                    description: Value is required when the mode is set to `FixedMode`
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                      provide a number from 0-100 to specify the percent of pods the
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                      a number from 0-100 to specify the max percent of pods to do
+                      chaos action
+                    type: string
+                required:
+                - ciliumPodSelector
+                - duration
+                - mode
+                - selector
+                type: object
               concurrencyPolicy:
                 default: Forbid
                 enum:
@@ -8789,6 +9103,110 @@ spec:
                           items:
                             type: string
                           type: array
+                        ciliumChaos:
+                          description: CiliumChaosSpec defines the attributes that
+                            a user creates on a chaos experiment affecting cilium
+                            CNI.
+                          properties:
+                            ciliumPodSelector:
+                              description: "CiliumPodSelector provides a custom selector
+                                to find the cilium-agent pod for the node. \n If not
+                                specified, it will default to selecting pods from
+                                the `kube-system` namespace with labels `app.kubernetes.io/name=cilium-agent`
+                                and `app.kubernetes.io/part-of=cilium` (which are
+                                used by default by the cilium helm chart)"
+                              properties:
+                                labelSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of label selector expressions that
+                                    can be used to select the cilium-agent pods..
+                                  type: object
+                                namespace:
+                                  description: Namespace to restrict cilium-agent
+                                    pod selection to
+                                  type: string
+                              type: object
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            mode:
+                              description: 'Mode defines the mode to run chaos action.
+                                Supported mode: one / all / fixed / fixed-percent
+                                / random-max-percent'
+                              enum:
+                              - one
+                              - all
+                              - fixed
+                              - fixed-percent
+                              - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            selector:
+                              description: Selector is used to select nodes into which
+                                to inject chaos.
+                              properties:
+                                expressionSelectors:
+                                  description: a slice of label selector expressions
+                                    that can be used to select objects. A list of
+                                    selectors based on set-based label expressions.
+                                  items:
+                                    description: A label selector requirement is a
+                                      selector that contains values, a key, and an
+                                      operator that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: key is the label key that the
+                                          selector applies to.
+                                        type: string
+                                      operator:
+                                        description: operator represents a key's relationship
+                                          to a set of values. Valid operators are
+                                          In, NotIn, Exists and DoesNotExist.
+                                        type: string
+                                      values:
+                                        description: values is an array of string
+                                          values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the
+                                          operator is Exists or DoesNotExist, the
+                                          values array must be empty. This array is
+                                          replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                labelSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of string keys and values that
+                                    can be used to select objects. A selector based
+                                    on labels.
+                                  type: object
+                              type: object
+                            value:
+                              description: Value is required when the mode is set
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                                If `FixedMode`, provide an integer of pods to do chaos
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
+                                a number from 0-100 to specify the max percent of
+                                pods to do chaos action
+                              type: string
+                          required:
+                          - ciliumPodSelector
+                          - duration
+                          - mode
+                          - selector
+                          type: object
                         conditionalBranches:
                           description: ConditionalBranches describes the conditional
                             branches of custom tasks. Only used when Type is TypeTask.
@@ -11879,6 +12297,115 @@ spec:
                               - mode
                               - selector
                               - volumeName
+                              type: object
+                            ciliumChaos:
+                              description: CiliumChaosSpec defines the attributes
+                                that a user creates on a chaos experiment affecting
+                                cilium CNI.
+                              properties:
+                                ciliumPodSelector:
+                                  description: "CiliumPodSelector provides a custom
+                                    selector to find the cilium-agent pod for the
+                                    node. \n If not specified, it will default to
+                                    selecting pods from the `kube-system` namespace
+                                    with labels `app.kubernetes.io/name=cilium-agent`
+                                    and `app.kubernetes.io/part-of=cilium` (which
+                                    are used by default by the cilium helm chart)"
+                                  properties:
+                                    labelSelectors:
+                                      additionalProperties:
+                                        type: string
+                                      description: Map of label selector expressions
+                                        that can be used to select the cilium-agent
+                                        pods..
+                                      type: object
+                                    namespace:
+                                      description: Namespace to restrict cilium-agent
+                                        pod selection to
+                                      type: string
+                                  type: object
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                mode:
+                                  description: 'Mode defines the mode to run chaos
+                                    action. Supported mode: one / all / fixed / fixed-percent
+                                    / random-max-percent'
+                                  enum:
+                                  - one
+                                  - all
+                                  - fixed
+                                  - fixed-percent
+                                  - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                selector:
+                                  description: Selector is used to select nodes into
+                                    which to inject chaos.
+                                  properties:
+                                    expressionSelectors:
+                                      description: a slice of label selector expressions
+                                        that can be used to select objects. A list
+                                        of selectors based on set-based label expressions.
+                                      items:
+                                        description: A label selector requirement
+                                          is a selector that contains values, a key,
+                                          and an operator that relates the key and
+                                          values.
+                                        properties:
+                                          key:
+                                            description: key is the label key that
+                                              the selector applies to.
+                                            type: string
+                                          operator:
+                                            description: operator represents a key's
+                                              relationship to a set of values. Valid
+                                              operators are In, NotIn, Exists and
+                                              DoesNotExist.
+                                            type: string
+                                          values:
+                                            description: values is an array of string
+                                              values. If the operator is In or NotIn,
+                                              the values array must be non-empty.
+                                              If the operator is Exists or DoesNotExist,
+                                              the values array must be empty. This
+                                              array is replaced during a strategic
+                                              merge patch.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - key
+                                        - operator
+                                        type: object
+                                      type: array
+                                    labelSelectors:
+                                      additionalProperties:
+                                        type: string
+                                      description: Map of string keys and values that
+                                        can be used to select objects. A selector
+                                        based on labels.
+                                      type: object
+                                  type: object
+                                value:
+                                  description: Value is required when the mode is
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                                    If `FixedMode`, provide an integer of pods to
+                                    do chaos action. If `FixedPercentMode`, provide
+                                    a number from 0-100 to specify the percent of
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                                    a number from 0-100 to specify the max percent
+                                    of pods to do chaos action
+                                  type: string
+                              required:
+                              - ciliumPodSelector
+                              - duration
+                              - mode
+                              - selector
                               type: object
                             concurrencyPolicy:
                               enum:
@@ -20088,6 +20615,103 @@ spec:
                 items:
                   type: string
                 type: array
+              ciliumChaos:
+                description: CiliumChaosSpec defines the attributes that a user creates
+                  on a chaos experiment affecting cilium CNI.
+                properties:
+                  ciliumPodSelector:
+                    description: "CiliumPodSelector provides a custom selector to
+                      find the cilium-agent pod for the node. \n If not specified,
+                      it will default to selecting pods from the `kube-system` namespace
+                      with labels `app.kubernetes.io/name=cilium-agent` and `app.kubernetes.io/part-of=cilium`
+                      (which are used by default by the cilium helm chart)"
+                    properties:
+                      labelSelectors:
+                        additionalProperties:
+                          type: string
+                        description: Map of label selector expressions that can be
+                          used to select the cilium-agent pods..
+                        type: object
+                      namespace:
+                        description: Namespace to restrict cilium-agent pod selection
+                          to
+                        type: string
+                    type: object
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  mode:
+                    description: 'Mode defines the mode to run chaos action. Supported
+                      mode: one / all / fixed / fixed-percent / random-max-percent'
+                    enum:
+                    - one
+                    - all
+                    - fixed
+                    - fixed-percent
+                    - random-max-percent
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  selector:
+                    description: Selector is used to select nodes into which to inject
+                      chaos.
+                    properties:
+                      expressionSelectors:
+                        description: a slice of label selector expressions that can
+                          be used to select objects. A list of selectors based on
+                          set-based label expressions.
+                        items:
+                          description: A label selector requirement is a selector
+                            that contains values, a key, and an operator that relates
+                            the key and values.
+                          properties:
+                            key:
+                              description: key is the label key that the selector
+                                applies to.
+                              type: string
+                            operator:
+                              description: operator represents a key's relationship
+                                to a set of values. Valid operators are In, NotIn,
+                                Exists and DoesNotExist.
+                              type: string
+                            values:
+                              description: values is an array of string values. If
+                                the operator is In or NotIn, the values array must
+                                be non-empty. If the operator is Exists or DoesNotExist,
+                                the values array must be empty. This array is replaced
+                                during a strategic merge patch.
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      labelSelectors:
+                        additionalProperties:
+                          type: string
+                        description: Map of string keys and values that can be used
+                          to select objects. A selector based on labels.
+                        type: object
+                    type: object
+                  value:
+                    description: Value is required when the mode is set to `FixedMode`
+                      / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                      provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                      provide a number from 0-100 to specify the percent of pods the
+                      server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                      a number from 0-100 to specify the max percent of pods to do
+                      chaos action
+                    type: string
+                required:
+                - ciliumPodSelector
+                - duration
+                - mode
+                - selector
+                type: object
               conditionalBranches:
                 items:
                   properties:
@@ -22981,6 +23605,106 @@ spec:
                     - mode
                     - selector
                     - volumeName
+                    type: object
+                  ciliumChaos:
+                    description: CiliumChaosSpec defines the attributes that a user
+                      creates on a chaos experiment affecting cilium CNI.
+                    properties:
+                      ciliumPodSelector:
+                        description: "CiliumPodSelector provides a custom selector
+                          to find the cilium-agent pod for the node. \n If not specified,
+                          it will default to selecting pods from the `kube-system`
+                          namespace with labels `app.kubernetes.io/name=cilium-agent`
+                          and `app.kubernetes.io/part-of=cilium` (which are used by
+                          default by the cilium helm chart)"
+                        properties:
+                          labelSelectors:
+                            additionalProperties:
+                              type: string
+                            description: Map of label selector expressions that can
+                              be used to select the cilium-agent pods..
+                            type: object
+                          namespace:
+                            description: Namespace to restrict cilium-agent pod selection
+                              to
+                            type: string
+                        type: object
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      mode:
+                        description: 'Mode defines the mode to run chaos action. Supported
+                          mode: one / all / fixed / fixed-percent / random-max-percent'
+                        enum:
+                        - one
+                        - all
+                        - fixed
+                        - fixed-percent
+                        - random-max-percent
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
+                      selector:
+                        description: Selector is used to select nodes into which to
+                          inject chaos.
+                        properties:
+                          expressionSelectors:
+                            description: a slice of label selector expressions that
+                              can be used to select objects. A list of selectors based
+                              on set-based label expressions.
+                            items:
+                              description: A label selector requirement is a selector
+                                that contains values, a key, and an operator that
+                                relates the key and values.
+                              properties:
+                                key:
+                                  description: key is the label key that the selector
+                                    applies to.
+                                  type: string
+                                operator:
+                                  description: operator represents a key's relationship
+                                    to a set of values. Valid operators are In, NotIn,
+                                    Exists and DoesNotExist.
+                                  type: string
+                                values:
+                                  description: values is an array of string values.
+                                    If the operator is In or NotIn, the values array
+                                    must be non-empty. If the operator is Exists or
+                                    DoesNotExist, the values array must be empty.
+                                    This array is replaced during a strategic merge
+                                    patch.
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          labelSelectors:
+                            additionalProperties:
+                              type: string
+                            description: Map of string keys and values that can be
+                              used to select objects. A selector based on labels.
+                            type: object
+                        type: object
+                      value:
+                        description: Value is required when the mode is set to `FixedMode`
+                          / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                          provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                          provide a number from 0-100 to specify the percent of pods
+                          the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                          a number from 0-100 to specify the max percent of pods to
+                          do chaos action
+                        type: string
+                    required:
+                    - ciliumPodSelector
+                    - duration
+                    - mode
+                    - selector
                     type: object
                   concurrencyPolicy:
                     default: Forbid
@@ -26314,6 +27038,115 @@ spec:
                               items:
                                 type: string
                               type: array
+                            ciliumChaos:
+                              description: CiliumChaosSpec defines the attributes
+                                that a user creates on a chaos experiment affecting
+                                cilium CNI.
+                              properties:
+                                ciliumPodSelector:
+                                  description: "CiliumPodSelector provides a custom
+                                    selector to find the cilium-agent pod for the
+                                    node. \n If not specified, it will default to
+                                    selecting pods from the `kube-system` namespace
+                                    with labels `app.kubernetes.io/name=cilium-agent`
+                                    and `app.kubernetes.io/part-of=cilium` (which
+                                    are used by default by the cilium helm chart)"
+                                  properties:
+                                    labelSelectors:
+                                      additionalProperties:
+                                        type: string
+                                      description: Map of label selector expressions
+                                        that can be used to select the cilium-agent
+                                        pods..
+                                      type: object
+                                    namespace:
+                                      description: Namespace to restrict cilium-agent
+                                        pod selection to
+                                      type: string
+                                  type: object
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                mode:
+                                  description: 'Mode defines the mode to run chaos
+                                    action. Supported mode: one / all / fixed / fixed-percent
+                                    / random-max-percent'
+                                  enum:
+                                  - one
+                                  - all
+                                  - fixed
+                                  - fixed-percent
+                                  - random-max-percent
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                selector:
+                                  description: Selector is used to select nodes into
+                                    which to inject chaos.
+                                  properties:
+                                    expressionSelectors:
+                                      description: a slice of label selector expressions
+                                        that can be used to select objects. A list
+                                        of selectors based on set-based label expressions.
+                                      items:
+                                        description: A label selector requirement
+                                          is a selector that contains values, a key,
+                                          and an operator that relates the key and
+                                          values.
+                                        properties:
+                                          key:
+                                            description: key is the label key that
+                                              the selector applies to.
+                                            type: string
+                                          operator:
+                                            description: operator represents a key's
+                                              relationship to a set of values. Valid
+                                              operators are In, NotIn, Exists and
+                                              DoesNotExist.
+                                            type: string
+                                          values:
+                                            description: values is an array of string
+                                              values. If the operator is In or NotIn,
+                                              the values array must be non-empty.
+                                              If the operator is Exists or DoesNotExist,
+                                              the values array must be empty. This
+                                              array is replaced during a strategic
+                                              merge patch.
+                                            items:
+                                              type: string
+                                            type: array
+                                        required:
+                                        - key
+                                        - operator
+                                        type: object
+                                      type: array
+                                    labelSelectors:
+                                      additionalProperties:
+                                        type: string
+                                      description: Map of string keys and values that
+                                        can be used to select objects. A selector
+                                        based on labels.
+                                      type: object
+                                  type: object
+                                value:
+                                  description: Value is required when the mode is
+                                    set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                                    If `FixedMode`, provide an integer of pods to
+                                    do chaos action. If `FixedPercentMode`, provide
+                                    a number from 0-100 to specify the percent of
+                                    pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                                    a number from 0-100 to specify the max percent
+                                    of pods to do chaos action
+                                  type: string
+                              required:
+                              - ciliumPodSelector
+                              - duration
+                              - mode
+                              - selector
+                              type: object
                             conditionalBranches:
                               description: ConditionalBranches describes the conditional
                                 branches of custom tasks. Only used when Type is TypeTask.
@@ -29497,6 +30330,118 @@ spec:
                                   - mode
                                   - selector
                                   - volumeName
+                                  type: object
+                                ciliumChaos:
+                                  description: CiliumChaosSpec defines the attributes
+                                    that a user creates on a chaos experiment affecting
+                                    cilium CNI.
+                                  properties:
+                                    ciliumPodSelector:
+                                      description: "CiliumPodSelector provides a custom
+                                        selector to find the cilium-agent pod for
+                                        the node. \n If not specified, it will default
+                                        to selecting pods from the `kube-system` namespace
+                                        with labels `app.kubernetes.io/name=cilium-agent`
+                                        and `app.kubernetes.io/part-of=cilium` (which
+                                        are used by default by the cilium helm chart)"
+                                      properties:
+                                        labelSelectors:
+                                          additionalProperties:
+                                            type: string
+                                          description: Map of label selector expressions
+                                            that can be used to select the cilium-agent
+                                            pods..
+                                          type: object
+                                        namespace:
+                                          description: Namespace to restrict cilium-agent
+                                            pod selection to
+                                          type: string
+                                      type: object
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    mode:
+                                      description: 'Mode defines the mode to run chaos
+                                        action. Supported mode: one / all / fixed
+                                        / fixed-percent / random-max-percent'
+                                      enum:
+                                      - one
+                                      - all
+                                      - fixed
+                                      - fixed-percent
+                                      - random-max-percent
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
+                                    selector:
+                                      description: Selector is used to select nodes
+                                        into which to inject chaos.
+                                      properties:
+                                        expressionSelectors:
+                                          description: a slice of label selector expressions
+                                            that can be used to select objects. A
+                                            list of selectors based on set-based label
+                                            expressions.
+                                          items:
+                                            description: A label selector requirement
+                                              is a selector that contains values,
+                                              a key, and an operator that relates
+                                              the key and values.
+                                            properties:
+                                              key:
+                                                description: key is the label key
+                                                  that the selector applies to.
+                                                type: string
+                                              operator:
+                                                description: operator represents a
+                                                  key's relationship to a set of values.
+                                                  Valid operators are In, NotIn, Exists
+                                                  and DoesNotExist.
+                                                type: string
+                                              values:
+                                                description: values is an array of
+                                                  string values. If the operator is
+                                                  In or NotIn, the values array must
+                                                  be non-empty. If the operator is
+                                                  Exists or DoesNotExist, the values
+                                                  array must be empty. This array
+                                                  is replaced during a strategic merge
+                                                  patch.
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        labelSelectors:
+                                          additionalProperties:
+                                            type: string
+                                          description: Map of string keys and values
+                                            that can be used to select objects. A
+                                            selector based on labels.
+                                          type: object
+                                      type: object
+                                    value:
+                                      description: Value is required when the mode
+                                        is set to `FixedMode` / `FixedPercentMode`
+                                        / `RandomMaxPercentMode`. If `FixedMode`,
+                                        provide an integer of pods to do chaos action.
+                                        If `FixedPercentMode`, provide a number from
+                                        0-100 to specify the percent of pods the server
+                                        can do chaos action. IF `RandomMaxPercentMode`,  provide
+                                        a number from 0-100 to specify the max percent
+                                        of pods to do chaos action
+                                      type: string
+                                  required:
+                                  - ciliumPodSelector
+                                  - duration
+                                  - mode
+                                  - selector
                                   type: object
                                 concurrencyPolicy:
                                   enum:
@@ -40641,6 +41586,106 @@ spec:
                       items:
                         type: string
                       type: array
+                    ciliumChaos:
+                      description: CiliumChaosSpec defines the attributes that a user
+                        creates on a chaos experiment affecting cilium CNI.
+                      properties:
+                        ciliumPodSelector:
+                          description: "CiliumPodSelector provides a custom selector
+                            to find the cilium-agent pod for the node. \n If not specified,
+                            it will default to selecting pods from the `kube-system`
+                            namespace with labels `app.kubernetes.io/name=cilium-agent`
+                            and `app.kubernetes.io/part-of=cilium` (which are used
+                            by default by the cilium helm chart)"
+                          properties:
+                            labelSelectors:
+                              additionalProperties:
+                                type: string
+                              description: Map of label selector expressions that
+                                can be used to select the cilium-agent pods..
+                              type: object
+                            namespace:
+                              description: Namespace to restrict cilium-agent pod
+                                selection to
+                              type: string
+                          type: object
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action.
+                          type: string
+                        mode:
+                          description: 'Mode defines the mode to run chaos action.
+                            Supported mode: one / all / fixed / fixed-percent / random-max-percent'
+                          enum:
+                          - one
+                          - all
+                          - fixed
+                          - fixed-percent
+                          - random-max-percent
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
+                        selector:
+                          description: Selector is used to select nodes into which
+                            to inject chaos.
+                          properties:
+                            expressionSelectors:
+                              description: a slice of label selector expressions that
+                                can be used to select objects. A list of selectors
+                                based on set-based label expressions.
+                              items:
+                                description: A label selector requirement is a selector
+                                  that contains values, a key, and an operator that
+                                  relates the key and values.
+                                properties:
+                                  key:
+                                    description: key is the label key that the selector
+                                      applies to.
+                                    type: string
+                                  operator:
+                                    description: operator represents a key's relationship
+                                      to a set of values. Valid operators are In,
+                                      NotIn, Exists and DoesNotExist.
+                                    type: string
+                                  values:
+                                    description: values is an array of string values.
+                                      If the operator is In or NotIn, the values array
+                                      must be non-empty. If the operator is Exists
+                                      or DoesNotExist, the values array must be empty.
+                                      This array is replaced during a strategic merge
+                                      patch.
+                                    items:
+                                      type: string
+                                    type: array
+                                required:
+                                - key
+                                - operator
+                                type: object
+                              type: array
+                            labelSelectors:
+                              additionalProperties:
+                                type: string
+                              description: Map of string keys and values that can
+                                be used to select objects. A selector based on labels.
+                              type: object
+                          type: object
+                        value:
+                          description: Value is required when the mode is set to `FixedMode`
+                            / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`,
+                            provide an integer of pods to do chaos action. If `FixedPercentMode`,
+                            provide a number from 0-100 to specify the percent of
+                            pods the server can do chaos action. IF `RandomMaxPercentMode`,  provide
+                            a number from 0-100 to specify the max percent of pods
+                            to do chaos action
+                          type: string
+                      required:
+                      - ciliumPodSelector
+                      - duration
+                      - mode
+                      - selector
+                      type: object
                     conditionalBranches:
                       description: ConditionalBranches describes the conditional branches
                         of custom tasks. Only used when Type is TypeTask.
@@ -43645,6 +44690,110 @@ spec:
                           - mode
                           - selector
                           - volumeName
+                          type: object
+                        ciliumChaos:
+                          description: CiliumChaosSpec defines the attributes that
+                            a user creates on a chaos experiment affecting cilium
+                            CNI.
+                          properties:
+                            ciliumPodSelector:
+                              description: "CiliumPodSelector provides a custom selector
+                                to find the cilium-agent pod for the node. \n If not
+                                specified, it will default to selecting pods from
+                                the `kube-system` namespace with labels `app.kubernetes.io/name=cilium-agent`
+                                and `app.kubernetes.io/part-of=cilium` (which are
+                                used by default by the cilium helm chart)"
+                              properties:
+                                labelSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of label selector expressions that
+                                    can be used to select the cilium-agent pods..
+                                  type: object
+                                namespace:
+                                  description: Namespace to restrict cilium-agent
+                                    pod selection to
+                                  type: string
+                              type: object
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            mode:
+                              description: 'Mode defines the mode to run chaos action.
+                                Supported mode: one / all / fixed / fixed-percent
+                                / random-max-percent'
+                              enum:
+                              - one
+                              - all
+                              - fixed
+                              - fixed-percent
+                              - random-max-percent
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            selector:
+                              description: Selector is used to select nodes into which
+                                to inject chaos.
+                              properties:
+                                expressionSelectors:
+                                  description: a slice of label selector expressions
+                                    that can be used to select objects. A list of
+                                    selectors based on set-based label expressions.
+                                  items:
+                                    description: A label selector requirement is a
+                                      selector that contains values, a key, and an
+                                      operator that relates the key and values.
+                                    properties:
+                                      key:
+                                        description: key is the label key that the
+                                          selector applies to.
+                                        type: string
+                                      operator:
+                                        description: operator represents a key's relationship
+                                          to a set of values. Valid operators are
+                                          In, NotIn, Exists and DoesNotExist.
+                                        type: string
+                                      values:
+                                        description: values is an array of string
+                                          values. If the operator is In or NotIn,
+                                          the values array must be non-empty. If the
+                                          operator is Exists or DoesNotExist, the
+                                          values array must be empty. This array is
+                                          replaced during a strategic merge patch.
+                                        items:
+                                          type: string
+                                        type: array
+                                    required:
+                                    - key
+                                    - operator
+                                    type: object
+                                  type: array
+                                labelSelectors:
+                                  additionalProperties:
+                                    type: string
+                                  description: Map of string keys and values that
+                                    can be used to select objects. A selector based
+                                    on labels.
+                                  type: object
+                              type: object
+                            value:
+                              description: Value is required when the mode is set
+                                to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                                If `FixedMode`, provide an integer of pods to do chaos
+                                action. If `FixedPercentMode`, provide a number from
+                                0-100 to specify the percent of pods the server can
+                                do chaos action. IF `RandomMaxPercentMode`,  provide
+                                a number from 0-100 to specify the max percent of
+                                pods to do chaos action
+                              type: string
+                          required:
+                          - ciliumPodSelector
+                          - duration
+                          - mode
+                          - selector
                           type: object
                         concurrencyPolicy:
                           enum:

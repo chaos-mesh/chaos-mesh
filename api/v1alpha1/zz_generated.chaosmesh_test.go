@@ -214,6 +214,69 @@ func TestBlockChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestCiliumChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CiliumChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestCiliumChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CiliumChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestCiliumChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CiliumChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestCiliumChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CiliumChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestCiliumChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &CiliumChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestCiliumChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CiliumChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestDNSChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

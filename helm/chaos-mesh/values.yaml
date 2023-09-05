@@ -545,6 +545,7 @@ webhook:
     - physicalmachine
     - statuscheck
     - remotecluster
+    - ciliumchaos
 
 bpfki:
   # Enable chaos-kernel

@@ -354,9 +354,9 @@ type CommandBuilder struct {
 	localMnt bool
 
 	identifier *string
-	stdin      io.ReadWriteCloser
-	stdout     io.ReadWriteCloser
-	stderr     io.ReadWriteCloser
+	stdin      io.Reader
+	stdout     io.Writer
+	stderr     io.Writer
 
 	oomScoreAdj int
 
@@ -422,21 +422,21 @@ func (b *CommandBuilder) SetContext(ctx context.Context) *CommandBuilder {
 }
 
 // SetStdin sets stdin for process
-func (b *CommandBuilder) SetStdin(stdin io.ReadWriteCloser) *CommandBuilder {
+func (b *CommandBuilder) SetStdin(stdin io.Reader) *CommandBuilder {
 	b.stdin = stdin
 
 	return b
 }
 
 // SetStdout sets stdout for process
-func (b *CommandBuilder) SetStdout(stdout io.ReadWriteCloser) *CommandBuilder {
+func (b *CommandBuilder) SetStdout(stdout io.Writer) *CommandBuilder {
 	b.stdout = stdout
 
 	return b
 }
 
 // SetStderr sets stderr for process
-func (b *CommandBuilder) SetStderr(stderr io.ReadWriteCloser) *CommandBuilder {
+func (b *CommandBuilder) SetStderr(stderr io.Writer) *CommandBuilder {
 	b.stderr = stderr
 
 	return b

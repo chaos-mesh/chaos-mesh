@@ -3386,6 +3386,9 @@ definitions:
       blockChaos:
         $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
+      ciliumChaos:
+        $ref: '#/definitions/v1alpha1.CiliumChaosSpec'
+        description: +optional
       concurrencyPolicy:
         description: |-
           +optional
@@ -3438,6 +3441,56 @@ definitions:
         $ref: '#/definitions/v1alpha1.TimeChaosSpec'
         description: +optional
       type:
+        type: string
+    type: object
+  v1alpha1.CiliumChaosSpec:
+    properties:
+      ciliumPodSelector:
+        $ref: '#/definitions/v1alpha1.CiliumPodSelectorSpec'
+        description: |-
+          CiliumPodSelector provides a custom selector to find the cilium-agent pod for the node.
+
+          If not specified, it will default to selecting pods from the `kube-system` namespace with labels
+          `app.kubernetes.io/name=cilium-agent` and `app.kubernetes.io/part-of=cilium` (which are used by default by the cilium
+          helm chart)
+      duration:
+        description: Duration represents the duration of the chaos action.
+        type: string
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.NodeSelectorSpec'
+        description: Selector is used to select nodes into which to inject chaos.
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+    type: object
+  v1alpha1.CiliumPodSelectorSpec:
+    properties:
+      labelSelectors:
+        additionalProperties:
+          type: string
+        description: Map of label selector expressions that can be used to select
+          the cilium-agent pods..
+        type: object
+      namespace:
+        description: |-
+          Namespace to restrict cilium-agent pod selection to
+          +optional
         type: string
     type: object
   v1alpha1.ClockSpec:
@@ -4784,6 +4837,17 @@ definitions:
         description: only impact egress traffic to these IP addresses
         type: string
     type: object
+  v1alpha1.NodeSelectorSpec:
+    properties:
+      labelSelectors:
+        additionalProperties:
+          type: string
+        description: |-
+          Map of string keys and values that can be used to select objects.
+          A selector based on labels.
+          +optional
+        type: object
+    type: object
   v1alpha1.PMJVMMySQLSpec:
     properties:
       database:
@@ -5699,6 +5763,9 @@ definitions:
       blockChaos:
         $ref: '#/definitions/v1alpha1.BlockChaosSpec'
         description: +optional
+      ciliumChaos:
+        $ref: '#/definitions/v1alpha1.CiliumChaosSpec'
+        description: +optional
       concurrencyPolicy:
         description: |-
           +optional
@@ -6050,6 +6117,9 @@ definitions:
         items:
           type: string
         type: array
+      ciliumChaos:
+        $ref: '#/definitions/v1alpha1.CiliumChaosSpec'
+        description: +optional
       conditionalBranches:
         description: |-
           ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
