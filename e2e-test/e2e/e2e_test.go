@@ -17,15 +17,12 @@ package e2e
 
 import (
 	"flag"
-	"fmt"
 	"math/rand"
 	"os"
-	"path"
 	"testing"
 	"time"
 
 	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/ginkgo/v2/reporters"
 	"github.com/onsi/gomega"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/tools/clientcmd"
@@ -73,13 +70,11 @@ func RunE2ETests(t *testing.T) {
 
 	gomega.RegisterFailHandler(framework.Fail)
 
-	// Run tests through the Ginkgo runner with output to console + JUnit for Jenkins
+	// Run tests through the Ginkgo runner with output to console
 	suite, _ := ginkgo.GinkgoConfiguration()
-	var r []ginkgo.Reporter
-	r = append(r, reporters.NewJUnitReporter(path.Join(framework.TestContext.ReportDir, fmt.Sprintf("junit_%v%02d.xml", framework.TestContext.ReportPrefix, suite.ParallelProcess))))
 	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, suite.ParallelProcess)
 
-	ginkgo.RunSpecsWithDefaultAndCustomReporters(t, "chaosmesh e2e suit", r)
+	ginkgo.RunSpecs(t, "chaosmesh e2e suit")
 }
 
 // we hack framework.RegisterClusterFlags to avoid redefine flag error
@@ -104,9 +99,6 @@ func hackRegisterClusterFlags(flags *flag.FlagSet) {
 	flags.StringVar(&framework.TestContext.ClusterDNSDomain, "dns-domain", "cluster.local", "The DNS Domain of the cluster.")
 
 	flags.IntVar(&framework.TestContext.MinStartupPods, "minStartupPods", 0, "The number of pods which we need to see in 'Running' state with a 'Ready' condition of true, before we try running tests. This is useful in any cluster which needs some base pod-based services running before it can be used.")
-	flags.DurationVar(&framework.TestContext.SystemPodsStartupTimeout, "system-pods-startup-timeout", 10*time.Minute, "Timeout for waiting for all system pods to be running before starting tests.")
-	flags.DurationVar(&framework.TestContext.NodeSchedulableTimeout, "node-schedulable-timeout", 30*time.Minute, "Timeout for waiting for all nodes to be schedulable.")
-	flags.DurationVar(&framework.TestContext.SystemDaemonsetStartupTimeout, "system-daemonsets-startup-timeout", 5*time.Minute, "Timeout for waiting for all system daemonsets to be ready.")
 	flags.StringVar(&framework.TestContext.EtcdUpgradeStorage, "etcd-upgrade-storage", "", "The storage version to upgrade to (either 'etcdv2' or 'etcdv3') if doing an etcd upgrade test.")
 	flags.StringVar(&framework.TestContext.EtcdUpgradeVersion, "etcd-upgrade-version", "", "The etcd binary version to upgrade to (e.g., '3.0.14', '2.3.7') if doing an etcd upgrade test.")
 	flags.StringVar(&framework.TestContext.GCEUpgradeScript, "gce-upgrade-script", "", "Script to use to upgrade a GCE cluster.")

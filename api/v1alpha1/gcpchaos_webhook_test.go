@@ -46,7 +46,8 @@ var _ = Describe("gcpchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *GCPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -59,7 +60,8 @@ var _ = Describe("gcpchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *GCPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},

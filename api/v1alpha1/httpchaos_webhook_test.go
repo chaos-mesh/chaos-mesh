@@ -52,7 +52,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "",
 				},
@@ -69,7 +70,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateUpdate(chaos)
+						_, err := chaos.ValidateUpdate(chaos)
+						return err
 					},
 					expect: "",
 				},
@@ -86,7 +88,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateDelete()
+						_, err := chaos.ValidateDelete()
+						return err
 					},
 					expect: "",
 				},
@@ -104,7 +107,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -125,7 +129,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -146,7 +151,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -167,7 +173,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -188,7 +195,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -209,7 +217,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -225,7 +234,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -242,7 +252,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -258,7 +269,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -275,7 +287,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -293,7 +306,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "ok",
 				},
@@ -311,7 +325,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "ok",
 				},
@@ -329,7 +344,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -349,7 +365,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "ok",
 				},
@@ -369,7 +386,8 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},

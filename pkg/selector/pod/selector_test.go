@@ -44,7 +44,9 @@ func TestSelectPods(t *testing.T) {
 
 	pods = append(pods, pods2...)
 
-	c := fake.NewClientBuilder().WithRuntimeObjects(objects...).Build()
+	c := fake.NewClientBuilder().
+		WithRuntimeObjects(objects...).
+		Build()
 	var r client.Reader
 
 	type TestCase struct {

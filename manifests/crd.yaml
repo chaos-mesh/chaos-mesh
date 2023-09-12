@@ -16094,8 +16094,7 @@ spec:
                                       type: integer
                                     grpc:
                                       description: GRPC specifies an action involving
-                                        a GRPC port. This is a beta field and requires
-                                        enabling GRPCContainerProbe feature gate.
+                                        a GRPC port.
                                       properties:
                                         port:
                                           description: Port number of the gRPC service.
@@ -16317,8 +16316,7 @@ spec:
                                       type: integer
                                     grpc:
                                       description: GRPC specifies an action involving
-                                        a GRPC port. This is a beta field and requires
-                                        enabling GRPCContainerProbe feature gate.
+                                        a GRPC port.
                                       properties:
                                         port:
                                           description: Port number of the gRPC service.
@@ -16451,6 +16449,28 @@ spec:
                                       format: int32
                                       type: integer
                                   type: object
+                                resizePolicy:
+                                  description: Resources resize policy for the container.
+                                  items:
+                                    description: ContainerResizePolicy represents
+                                      resource resize policy for the container.
+                                    properties:
+                                      resourceName:
+                                        description: 'Name of the resource to which
+                                          this resource resize policy applies. Supported
+                                          values: cpu, memory.'
+                                        type: string
+                                      restartPolicy:
+                                        description: Restart policy to apply when
+                                          specified resource is resized. If not specified,
+                                          it defaults to NotRequired.
+                                        type: string
+                                    required:
+                                    - resourceName
+                                    - restartPolicy
+                                    type: object
+                                  type: array
+                                  x-kubernetes-list-type: atomic
                                 resources:
                                   description: 'Compute Resources required by this
                                     container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
@@ -16501,10 +16521,34 @@ spec:
                                         amount of compute resources required. If Requests
                                         is omitted for a container, it defaults to
                                         Limits if that is explicitly specified, otherwise
-                                        to an implementation-defined value. More info:
-                                        https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                        to an implementation-defined value. Requests
+                                        cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                       type: object
                                   type: object
+                                restartPolicy:
+                                  description: 'RestartPolicy defines the restart
+                                    behavior of individual containers in a pod. This
+                                    field may only be set for init containers, and
+                                    the only allowed value is "Always". For non-init
+                                    containers or when this field is not specified,
+                                    the restart behavior is defined by the Pod''s
+                                    restart policy and the container type. Setting
+                                    the RestartPolicy as "Always" for the init container
+                                    will have the following effect: this init container
+                                    will be continually restarted on exit until all
+                                    regular containers have terminated. Once all regular
+                                    containers have completed, all init containers
+                                    with restartPolicy "Always" will be shut down.
+                                    This lifecycle differs from normal init containers
+                                    and is often referred to as a "sidecar" container.
+                                    Although this init container still starts in the
+                                    init container sequence, it does not wait for
+                                    the container to complete before proceeding to
+                                    the next init container. Instead, the next init
+                                    container starts immediately after this init container
+                                    is started, or after any startupProbe has successfully
+                                    completed.'
+                                  type: string
                                 securityContext:
                                   description: 'SecurityContext defines the security
                                     options the container should be run with. If set,
@@ -16640,8 +16684,9 @@ spec:
                                             should be used. The profile must be preconfigured
                                             on the node to work. Must be a descending
                                             path, relative to the kubelet's configured
-                                            seccomp profile location. Must only be
-                                            set if type is "Localhost".
+                                            seccomp profile location. Must be set
+                                            if type is "Localhost". Must NOT be set
+                                            for any other type.
                                           type: string
                                         type:
                                           description: "type indicates which kind
@@ -16678,18 +16723,12 @@ spec:
                                         hostProcess:
                                           description: HostProcess determines if a
                                             container should be run as a 'Host Process'
-                                            container. This field is alpha-level and
-                                            will only be honored by components that
-                                            enable the WindowsHostProcessContainers
-                                            feature flag. Setting this field without
-                                            the feature flag will result in errors
-                                            when validating the Pod. All of a Pod's
-                                            containers must have the same effective
-                                            HostProcess value (it is not allowed to
-                                            have a mix of HostProcess containers and
-                                            non-HostProcess containers).  In addition,
-                                            if HostProcess is true then HostNetwork
-                                            must also be set to true.
+                                            container. All of a Pod's containers must
+                                            have the same effective HostProcess value
+                                            (it is not allowed to have a mix of HostProcess
+                                            containers and non-HostProcess containers).
+                                            In addition, if HostProcess is true then
+                                            HostNetwork must also be set to true.
                                           type: boolean
                                         runAsUserName:
                                           description: The UserName in Windows to
@@ -16742,8 +16781,7 @@ spec:
                                       type: integer
                                     grpc:
                                       description: GRPC specifies an action involving
-                                        a GRPC port. This is a beta field and requires
-                                        enabling GRPCContainerProbe feature gate.
+                                        a GRPC port.
                                       properties:
                                         port:
                                           description: Port number of the gRPC service.
@@ -17449,7 +17487,7 @@ spec:
                                           and the sum of memory limits of all containers
                                           in a pod. The default is nil which means
                                           that the limit is undefined. More info:
-                                          http://kubernetes.io/docs/user-guide/volumes#emptydir'
+                                          https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                                         pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                         x-kubernetes-int-or-string: true
                                     type: object
@@ -17711,7 +17749,8 @@ spec:
                                                       it defaults to Limits if that
                                                       is explicitly specified, otherwise
                                                       to an implementation-defined
-                                                      value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                                      value. Requests cannot exceed
+                                                      Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                                     type: object
                                                 type: object
                                               selector:
@@ -33826,9 +33865,7 @@ spec:
                                           type: integer
                                         grpc:
                                           description: GRPC specifies an action involving
-                                            a GRPC port. This is a beta field and
-                                            requires enabling GRPCContainerProbe feature
-                                            gate.
+                                            a GRPC port.
                                           properties:
                                             port:
                                               description: Port number of the gRPC
@@ -34065,9 +34102,7 @@ spec:
                                           type: integer
                                         grpc:
                                           description: GRPC specifies an action involving
-                                            a GRPC port. This is a beta field and
-                                            requires enabling GRPCContainerProbe feature
-                                            gate.
+                                            a GRPC port.
                                           properties:
                                             port:
                                               description: Port number of the gRPC
@@ -34209,6 +34244,29 @@ spec:
                                           format: int32
                                           type: integer
                                       type: object
+                                    resizePolicy:
+                                      description: Resources resize policy for the
+                                        container.
+                                      items:
+                                        description: ContainerResizePolicy represents
+                                          resource resize policy for the container.
+                                        properties:
+                                          resourceName:
+                                            description: 'Name of the resource to
+                                              which this resource resize policy applies.
+                                              Supported values: cpu, memory.'
+                                            type: string
+                                          restartPolicy:
+                                            description: Restart policy to apply when
+                                              specified resource is resized. If not
+                                              specified, it defaults to NotRequired.
+                                            type: string
+                                        required:
+                                        - resourceName
+                                        - restartPolicy
+                                        type: object
+                                      type: array
+                                      x-kubernetes-list-type: atomic
                                     resources:
                                       description: 'Compute Resources required by
                                         this container. Cannot be updated. More info:
@@ -34263,9 +34321,35 @@ spec:
                                             If Requests is omitted for a container,
                                             it defaults to Limits if that is explicitly
                                             specified, otherwise to an implementation-defined
-                                            value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                            value. Requests cannot exceed Limits.
+                                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                           type: object
                                       type: object
+                                    restartPolicy:
+                                      description: 'RestartPolicy defines the restart
+                                        behavior of individual containers in a pod.
+                                        This field may only be set for init containers,
+                                        and the only allowed value is "Always". For
+                                        non-init containers or when this field is
+                                        not specified, the restart behavior is defined
+                                        by the Pod''s restart policy and the container
+                                        type. Setting the RestartPolicy as "Always"
+                                        for the init container will have the following
+                                        effect: this init container will be continually
+                                        restarted on exit until all regular containers
+                                        have terminated. Once all regular containers
+                                        have completed, all init containers with restartPolicy
+                                        "Always" will be shut down. This lifecycle
+                                        differs from normal init containers and is
+                                        often referred to as a "sidecar" container.
+                                        Although this init container still starts
+                                        in the init container sequence, it does not
+                                        wait for the container to complete before
+                                        proceeding to the next init container. Instead,
+                                        the next init container starts immediately
+                                        after this init container is started, or after
+                                        any startupProbe has successfully completed.'
+                                      type: string
                                     securityContext:
                                       description: 'SecurityContext defines the security
                                         options the container should be run with.
@@ -34408,8 +34492,9 @@ spec:
                                                 be preconfigured on the node to work.
                                                 Must be a descending path, relative
                                                 to the kubelet's configured seccomp
-                                                profile location. Must only be set
-                                                if type is "Localhost".
+                                                profile location. Must be set if type
+                                                is "Localhost". Must NOT be set for
+                                                any other type.
                                               type: string
                                             type:
                                               description: "type indicates which kind
@@ -34449,18 +34534,14 @@ spec:
                                             hostProcess:
                                               description: HostProcess determines
                                                 if a container should be run as a
-                                                'Host Process' container. This field
-                                                is alpha-level and will only be honored
-                                                by components that enable the WindowsHostProcessContainers
-                                                feature flag. Setting this field without
-                                                the feature flag will result in errors
-                                                when validating the Pod. All of a
+                                                'Host Process' container. All of a
                                                 Pod's containers must have the same
                                                 effective HostProcess value (it is
                                                 not allowed to have a mix of HostProcess
-                                                containers and non-HostProcess containers).  In
-                                                addition, if HostProcess is true then
-                                                HostNetwork must also be set to true.
+                                                containers and non-HostProcess containers).
+                                                In addition, if HostProcess is true
+                                                then HostNetwork must also be set
+                                                to true.
                                               type: boolean
                                             runAsUserName:
                                               description: The UserName in Windows
@@ -34516,9 +34597,7 @@ spec:
                                           type: integer
                                         grpc:
                                           description: GRPC specifies an action involving
-                                            a GRPC port. This is a beta field and
-                                            requires enabling GRPCContainerProbe feature
-                                            gate.
+                                            a GRPC port.
                                           properties:
                                             port:
                                               description: Port number of the gRPC
@@ -35260,7 +35339,7 @@ spec:
                                               specified here and the sum of memory
                                               limits of all containers in a pod. The
                                               default is nil which means that the
-                                              limit is undefined. More info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
+                                              limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                                             pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                             x-kubernetes-int-or-string: true
                                         type: object
@@ -35543,7 +35622,8 @@ spec:
                                                           it defaults to Limits if
                                                           that is explicitly specified,
                                                           otherwise to an implementation-defined
-                                                          value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                                          value. Requests cannot exceed
+                                                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                                         type: object
                                                     type: object
                                                   selector:
@@ -37628,8 +37708,7 @@ spec:
                             type: integer
                           grpc:
                             description: GRPC specifies an action involving a GRPC
-                              port. This is a beta field and requires enabling GRPCContainerProbe
-                              feature gate.
+                              port.
                             properties:
                               port:
                                 description: Port number of the gRPC service. Number
@@ -37835,8 +37914,7 @@ spec:
                             type: integer
                           grpc:
                             description: GRPC specifies an action involving a GRPC
-                              port. This is a beta field and requires enabling GRPCContainerProbe
-                              feature gate.
+                              port.
                             properties:
                               port:
                                 description: Port number of the gRPC service. Number
@@ -37960,6 +38038,27 @@ spec:
                             format: int32
                             type: integer
                         type: object
+                      resizePolicy:
+                        description: Resources resize policy for the container.
+                        items:
+                          description: ContainerResizePolicy represents resource resize
+                            policy for the container.
+                          properties:
+                            resourceName:
+                              description: 'Name of the resource to which this resource
+                                resize policy applies. Supported values: cpu, memory.'
+                              type: string
+                            restartPolicy:
+                              description: Restart policy to apply when specified
+                                resource is resized. If not specified, it defaults
+                                to NotRequired.
+                              type: string
+                          required:
+                          - resourceName
+                          - restartPolicy
+                          type: object
+                        type: array
+                        x-kubernetes-list-type: atomic
                       resources:
                         description: 'Compute Resources required by this container.
                           Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
@@ -38007,9 +38106,29 @@ spec:
                               compute resources required. If Requests is omitted for
                               a container, it defaults to Limits if that is explicitly
                               specified, otherwise to an implementation-defined value.
-                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                              Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                             type: object
                         type: object
+                      restartPolicy:
+                        description: 'RestartPolicy defines the restart behavior of
+                          individual containers in a pod. This field may only be set
+                          for init containers, and the only allowed value is "Always".
+                          For non-init containers or when this field is not specified,
+                          the restart behavior is defined by the Pod''s restart policy
+                          and the container type. Setting the RestartPolicy as "Always"
+                          for the init container will have the following effect: this
+                          init container will be continually restarted on exit until
+                          all regular containers have terminated. Once all regular
+                          containers have completed, all init containers with restartPolicy
+                          "Always" will be shut down. This lifecycle differs from
+                          normal init containers and is often referred to as a "sidecar"
+                          container. Although this init container still starts in
+                          the init container sequence, it does not wait for the container
+                          to complete before proceeding to the next init container.
+                          Instead, the next init container starts immediately after
+                          this init container is started, or after any startupProbe
+                          has successfully completed.'
+                        type: string
                       securityContext:
                         description: 'SecurityContext defines the security options
                           the container should be run with. If set, the fields of
@@ -38132,8 +38251,9 @@ spec:
                                   defined in a file on the node should be used. The
                                   profile must be preconfigured on the node to work.
                                   Must be a descending path, relative to the kubelet's
-                                  configured seccomp profile location. Must only be
-                                  set if type is "Localhost".
+                                  configured seccomp profile location. Must be set
+                                  if type is "Localhost". Must NOT be set for any
+                                  other type.
                                 type: string
                               type:
                                 description: "type indicates which kind of seccomp
@@ -38166,15 +38286,11 @@ spec:
                                 type: string
                               hostProcess:
                                 description: HostProcess determines if a container
-                                  should be run as a 'Host Process' container. This
-                                  field is alpha-level and will only be honored by
-                                  components that enable the WindowsHostProcessContainers
-                                  feature flag. Setting this field without the feature
-                                  flag will result in errors when validating the Pod.
-                                  All of a Pod's containers must have the same effective
+                                  should be run as a 'Host Process' container. All
+                                  of a Pod's containers must have the same effective
                                   HostProcess value (it is not allowed to have a mix
-                                  of HostProcess containers and non-HostProcess containers).  In
-                                  addition, if HostProcess is true then HostNetwork
+                                  of HostProcess containers and non-HostProcess containers).
+                                  In addition, if HostProcess is true then HostNetwork
                                   must also be set to true.
                                 type: boolean
                               runAsUserName:
@@ -38221,8 +38337,7 @@ spec:
                             type: integer
                           grpc:
                             description: GRPC specifies an action involving a GRPC
-                              port. This is a beta field and requires enabling GRPCContainerProbe
-                              feature gate.
+                              port.
                             properties:
                               port:
                                 description: Port number of the gRPC service. Number
@@ -38855,7 +38970,7 @@ spec:
                                 value between the SizeLimit specified here and the
                                 sum of memory limits of all containers in a pod. The
                                 default is nil which means that the limit is undefined.
-                                More info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
+                                More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                               pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                               x-kubernetes-int-or-string: true
                           type: object
@@ -39082,7 +39197,8 @@ spec:
                                             If Requests is omitted for a container,
                                             it defaults to Limits if that is explicitly
                                             specified, otherwise to an implementation-defined
-                                            value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                            value. Requests cannot exceed Limits.
+                                            More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                           type: object
                                       type: object
                                     selector:
@@ -47594,8 +47710,7 @@ spec:
                                   type: integer
                                 grpc:
                                   description: GRPC specifies an action involving
-                                    a GRPC port. This is a beta field and requires
-                                    enabling GRPCContainerProbe feature gate.
+                                    a GRPC port.
                                   properties:
                                     port:
                                       description: Port number of the gRPC service.
@@ -47809,8 +47924,7 @@ spec:
                                   type: integer
                                 grpc:
                                   description: GRPC specifies an action involving
-                                    a GRPC port. This is a beta field and requires
-                                    enabling GRPCContainerProbe feature gate.
+                                    a GRPC port.
                                   properties:
                                     port:
                                       description: Port number of the gRPC service.
@@ -47939,6 +48053,28 @@ spec:
                                   format: int32
                                   type: integer
                               type: object
+                            resizePolicy:
+                              description: Resources resize policy for the container.
+                              items:
+                                description: ContainerResizePolicy represents resource
+                                  resize policy for the container.
+                                properties:
+                                  resourceName:
+                                    description: 'Name of the resource to which this
+                                      resource resize policy applies. Supported values:
+                                      cpu, memory.'
+                                    type: string
+                                  restartPolicy:
+                                    description: Restart policy to apply when specified
+                                      resource is resized. If not specified, it defaults
+                                      to NotRequired.
+                                    type: string
+                                required:
+                                - resourceName
+                                - restartPolicy
+                                type: object
+                              type: array
+                              x-kubernetes-list-type: atomic
                             resources:
                               description: 'Compute Resources required by this container.
                                 Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
@@ -47988,9 +48124,32 @@ spec:
                                     of compute resources required. If Requests is
                                     omitted for a container, it defaults to Limits
                                     if that is explicitly specified, otherwise to
-                                    an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                    an implementation-defined value. Requests cannot
+                                    exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                   type: object
                               type: object
+                            restartPolicy:
+                              description: 'RestartPolicy defines the restart behavior
+                                of individual containers in a pod. This field may
+                                only be set for init containers, and the only allowed
+                                value is "Always". For non-init containers or when
+                                this field is not specified, the restart behavior
+                                is defined by the Pod''s restart policy and the container
+                                type. Setting the RestartPolicy as "Always" for the
+                                init container will have the following effect: this
+                                init container will be continually restarted on exit
+                                until all regular containers have terminated. Once
+                                all regular containers have completed, all init containers
+                                with restartPolicy "Always" will be shut down. This
+                                lifecycle differs from normal init containers and
+                                is often referred to as a "sidecar" container. Although
+                                this init container still starts in the init container
+                                sequence, it does not wait for the container to complete
+                                before proceeding to the next init container. Instead,
+                                the next init container starts immediately after this
+                                init container is started, or after any startupProbe
+                                has successfully completed.'
+                              type: string
                             securityContext:
                               description: 'SecurityContext defines the security options
                                 the container should be run with. If set, the fields
@@ -48120,7 +48279,8 @@ spec:
                                         The profile must be preconfigured on the node
                                         to work. Must be a descending path, relative
                                         to the kubelet's configured seccomp profile
-                                        location. Must only be set if type is "Localhost".
+                                        location. Must be set if type is "Localhost".
+                                        Must NOT be set for any other type.
                                       type: string
                                     type:
                                       description: "type indicates which kind of seccomp
@@ -48156,14 +48316,10 @@ spec:
                                     hostProcess:
                                       description: HostProcess determines if a container
                                         should be run as a 'Host Process' container.
-                                        This field is alpha-level and will only be
-                                        honored by components that enable the WindowsHostProcessContainers
-                                        feature flag. Setting this field without the
-                                        feature flag will result in errors when validating
-                                        the Pod. All of a Pod's containers must have
-                                        the same effective HostProcess value (it is
-                                        not allowed to have a mix of HostProcess containers
-                                        and non-HostProcess containers).  In addition,
+                                        All of a Pod's containers must have the same
+                                        effective HostProcess value (it is not allowed
+                                        to have a mix of HostProcess containers and
+                                        non-HostProcess containers). In addition,
                                         if HostProcess is true then HostNetwork must
                                         also be set to true.
                                       type: boolean
@@ -48214,8 +48370,7 @@ spec:
                                   type: integer
                                 grpc:
                                   description: GRPC specifies an action involving
-                                    a GRPC port. This is a beta field and requires
-                                    enabling GRPCContainerProbe feature gate.
+                                    a GRPC port.
                                   properties:
                                     port:
                                       description: Port number of the gRPC service.
@@ -48894,7 +49049,7 @@ spec:
                                       specified here and the sum of memory limits
                                       of all containers in a pod. The default is nil
                                       which means that the limit is undefined. More
-                                      info: http://kubernetes.io/docs/user-guide/volumes#emptydir'
+                                      info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir'
                                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                     x-kubernetes-int-or-string: true
                                 type: object
@@ -49138,7 +49293,8 @@ spec:
                                                   for a container, it defaults to
                                                   Limits if that is explicitly specified,
                                                   otherwise to an implementation-defined
-                                                  value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                                                  value. Requests cannot exceed Limits.
+                                                  More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                                 type: object
                                             type: object
                                           selector:
