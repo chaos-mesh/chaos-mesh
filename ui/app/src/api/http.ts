@@ -18,7 +18,7 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 
 import store from 'store'
 
-import { setAlert } from 'slices/globalStatus'
+import { removeToken, setAlert, setAuthOpen } from 'slices/globalStatus'
 
 interface ErrorData {
   code: number
@@ -45,9 +45,21 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
               message: 'Please check the validity of the token',
             })
           )
-
-          break
         }
+        break
+      case 'internal_server_error':
+        if (data.message.includes('Unauthorized')) {
+          store.dispatch(
+            setAlert({
+              type: 'error',
+              message: 'Unauthorized. Please check the validity of the token',
+            })
+          )
+
+          store.dispatch(removeToken())
+          store.dispatch(setAuthOpen(true))
+        }
+        break
       // eslint-disable-next-line no-fallthrough
       case 'no_cluster_privilege':
       case 'no_namespace_privilege':

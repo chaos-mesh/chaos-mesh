@@ -25,11 +25,9 @@ import PaperTop from '@ui/mui-extends/esm/PaperTop'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { setConfirm } from 'slices/globalStatus'
+import { removeToken, setAuthOpen, setConfirm } from 'slices/globalStatus'
 
 import i18n from 'components/T'
-
-import LS from 'lib/localStorage'
 
 const Token = () => {
   const navigate = useNavigate()
@@ -62,11 +60,11 @@ const Token = () => {
       Cookies.remove('refresh_token')
       Cookies.remove('expiry')
     } else {
-      LS.remove('token')
-      LS.remove('token-name')
+      dispatch(removeToken())
+      dispatch(setAuthOpen(true))
     }
 
-    navigate(0)
+    navigate('/#/dashboard')
   }
 
   return (
