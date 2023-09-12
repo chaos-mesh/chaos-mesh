@@ -25,6 +25,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Upgrade docker/login-action to v2 [#4167](https://github.com/chaos-mesh/chaos-mesh/pull/4167)
 - Automatically remove the token from the dashboard when it expires [#4192](https://github.com/chaos-mesh/chaos-mesh/pull/4192)
 - Update k8s dependencies to 1.28.0 [#4154](https://github.com/chaos-mesh/chaos-mesh/pull/4154)
+- Automatically remove the token from the dashboard when it expires [#4192](https://github.com/chaos-mesh/chaos-mesh/pull/4192)
 
 ### Deprecated
 
