@@ -40,7 +40,7 @@ import Loading from '@ui/mui-extends/esm/Loading'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { setAlertOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 
 import { TokenFormValues } from 'components/Token'
 
@@ -72,7 +72,7 @@ const Root = styled(Box, {
 const TopContainer = () => {
   const theme = useTheme()
 
-  const { alert, alertOpen, confirm, confirmOpen } = useStoreSelector((state) => state.globalStatus)
+  const { alert, alertOpen, confirm, confirmOpen, authOpen } = useStoreSelector((state) => state.globalStatus)
 
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
@@ -87,7 +87,6 @@ const TopContainer = () => {
   }
 
   const [loading, setLoading] = useState(true)
-  const [authOpen, setAuthOpen] = useState(false)
 
   /**
    * Set authorization (RBAC token / GCP) for API use.
@@ -121,7 +120,7 @@ const TopContainer = () => {
       dispatch(setTokens(tokens))
       dispatch(setTokenName(tokenName))
     } else {
-      setAuthOpen(true)
+      dispatch(setAuthOpen(true))
     }
 
     if (globalNamespace) {
@@ -169,7 +168,7 @@ const TopContainer = () => {
         </Box>
       </Root>
 
-      <Auth open={authOpen} setOpen={setAuthOpen} />
+      <Auth open={authOpen} />
 
       <Portal>
         <Snackbar
