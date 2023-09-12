@@ -141,7 +141,7 @@ func (s *Service) createStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 	template.Spec.Default()
-	if err := template.Spec.Validate(); err != nil {
+	if _, err := template.Spec.Validate(); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
@@ -256,7 +256,7 @@ func (s *Service) updateStatusCheckTemplate(c *gin.Context) {
 		return
 	}
 	template.Spec.Default()
-	if err := template.Spec.Validate(); err != nil {
+	if _, err := template.Spec.Validate(); err != nil {
 		u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}

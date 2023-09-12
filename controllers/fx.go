@@ -50,4 +50,5 @@ var Module = fx.Options(
 	fx.Invoke(remotechaos.Bootstrap),
 
 	schedule.Module,
-	chaosimpl.AllImpl)
+	chaosimpl.AllImpl,
+)
