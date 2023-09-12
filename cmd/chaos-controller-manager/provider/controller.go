@@ -22,7 +22,7 @@ import (
 	"strconv"
 
 	"github.com/go-logr/logr"
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -128,7 +128,7 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 // NewClient would build the controller-runtime client.Client with given parameters.
 func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
 	// TODO: make this size configurable
-	cache, err := lru.New(100)
+	cache, err := lru.New[string, runtime.Object](100)
 	if err != nil {
 		return nil, err
 	}
