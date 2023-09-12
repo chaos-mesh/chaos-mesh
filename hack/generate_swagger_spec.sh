@@ -29,7 +29,7 @@ export GOBIN=$PROJECT_DIR/bin
 export PATH=$GOBIN:$PATH
 
 echo "+ Install swaggo/swag"
-go install github.com/swaggo/swag/cmd/swag
+go install github.com/swaggo/swag/cmd/swag@v1.16.2
 
 echo "+ Generate swagger spec"
 swag init -g cmd/chaos-dashboard/main.go --output pkg/dashboard/swaggerdocs --pd --parseInternal
