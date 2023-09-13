@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"strconv"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -35,7 +35,7 @@ type UpdatedClient struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	cache *lru.Cache
+	cache *lru.Cache[string, runtime.Object]
 }
 
 func (c *UpdatedClient) objectKey(key client.ObjectKey, obj client.Object) (string, error) {
