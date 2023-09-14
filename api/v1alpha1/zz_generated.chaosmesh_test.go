@@ -214,6 +214,69 @@ func TestBlockChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestDeploymentChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &DeploymentChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestDeploymentChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &DeploymentChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestDeploymentChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &DeploymentChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestDeploymentChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &DeploymentChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestDeploymentChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &DeploymentChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestDeploymentChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &DeploymentChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestDNSChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

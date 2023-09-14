@@ -3890,6 +3890,9 @@ definitions:
           +optional
           +kubebuilder:validation:Enum=Forbid;Allow
         type: string
+      deploymentChaos:
+        $ref: '#/definitions/v1alpha1.DeploymentChaosSpec'
+        description: +optional
       dnsChaos:
         $ref: '#/definitions/v1alpha1.DNSChaosSpec'
         description: +optional
@@ -4047,6 +4050,25 @@ definitions:
       reorder:
         $ref: '#/definitions/v1alpha1.ReorderSpec'
         description: +optional
+    type: object
+  v1alpha1.DeploymentChaosSpec:
+    properties:
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
+        type: string
+      name:
+        description: Name defines the name of the deployment.
+        type: string
+      namespace:
+        description: Namespace defines the namespace of the deployment.
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
     type: object
   v1alpha1.DiskFillSpec:
     properties:
@@ -6227,6 +6249,9 @@ definitions:
           +kubebuilder:default=Forbid
           +kubebuilder:validation:Enum=Forbid;Allow
         type: string
+      deploymentChaos:
+        $ref: '#/definitions/v1alpha1.DeploymentChaosSpec'
+        description: +optional
       dnsChaos:
         $ref: '#/definitions/v1alpha1.DNSChaosSpec'
         description: +optional
@@ -6634,6 +6659,9 @@ definitions:
       deadline:
         description: +optional
         type: string
+      deploymentChaos:
+        $ref: '#/definitions/v1alpha1.DeploymentChaosSpec'
+        description: +optional
       dnsChaos:
         $ref: '#/definitions/v1alpha1.DNSChaosSpec'
         description: +optional
