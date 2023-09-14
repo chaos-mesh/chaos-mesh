@@ -457,6 +457,144 @@ func (in *BlockChaos) Default() {
 	gw.Default(in)
 }
 
+const KindDeploymentChaos = "DeploymentChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *DeploymentChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *DeploymentChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *DeploymentChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *DeploymentChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *DeploymentChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *DeploymentChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *DeploymentChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// DeploymentChaosList contains a list of DeploymentChaos
+type DeploymentChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []DeploymentChaos `json:"items"`
+}
+
+func (in *DeploymentChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *DeploymentChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *DeploymentChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *DeploymentChaos) IsOneShot() bool {
+	return false
+}
+
+var DeploymentChaosWebhookLog = logf.Log.WithName("DeploymentChaos-resource")
+
+func (in *DeploymentChaos) ValidateCreate() (admission.Warnings, error) {
+	DeploymentChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *DeploymentChaos) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+	DeploymentChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*DeploymentChaos).Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *DeploymentChaos) ValidateDelete() (admission.Warnings, error) {
+	DeploymentChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil, nil
+}
+
+var _ webhook.Validator = &DeploymentChaos{}
+
+func (in *DeploymentChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &DeploymentChaos{}
+
+func (in *DeploymentChaos) Default() {
+	gw.Default(in)
+}
+
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -2366,6 +2504,12 @@ func init() {
 		list:  &BlockChaosList{},
 	})
 
+	SchemeBuilder.Register(&DeploymentChaos{}, &DeploymentChaosList{})
+	all.register(KindDeploymentChaos, &ChaosKind{
+		chaos: &DeploymentChaos{},
+		list:  &DeploymentChaosList{},
+	})
+
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
 		chaos: &DNSChaos{},
@@ -2464,6 +2608,11 @@ func init() {
 	allScheduleItem.register(KindBlockChaos, &ChaosKind{
 		chaos: &BlockChaos{},
 		list:  &BlockChaosList{},
+	})
+
+	allScheduleItem.register(KindDeploymentChaos, &ChaosKind{
+		chaos: &DeploymentChaos{},
+		list:  &DeploymentChaosList{},
 	})
 
 	allScheduleItem.register(KindDNSChaos, &ChaosKind{

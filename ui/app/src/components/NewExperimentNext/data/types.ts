@@ -390,6 +390,23 @@ const data: Record<Kind, Definition> = {
       },
     ],
   },
+  // Deployment
+  DeploymentChaos: {
+    spec: {
+      namespace: {
+        field: 'text',
+        label: 'Namespace',
+        value: '',
+        helperText: 'The namespace of the deployment',
+      },
+      name: {
+        field: 'text',
+        label: 'Name',
+        value: '',
+        helperText: 'The name of the deployment',
+      },
+    } as any,
+  },
   // GCP
   GCPChaos: {
     categories: [
@@ -1392,6 +1409,12 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
     }),
     random: Yup.object({
       patterns: patternsSchema,
+    }),
+  },
+  DeploymentChaos: {
+    default: Yup.object({
+      namespace: Yup.string().required('The namespace is required'),
+      name: Yup.string().required('The name is required'),
     }),
   },
   GCPChaos: {

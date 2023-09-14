@@ -308,6 +308,26 @@ spec:
               deadline:
                 format: date-time
                 type: string
+              deploymentChaos:
+                description: DeploymentChaosSpec defines the desired state of DeploymentChaos
+                properties:
+                  duration:
+                    description: Duration represents the duration of the chaos action
+                    type: string
+                  name:
+                    description: Name defines the name of the deployment.
+                    type: string
+                  namespace:
+                    description: Namespace defines the namespace of the deployment.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
               dnsChaos:
                 description: DNSChaosSpec defines the desired state of DNSChaos
                 properties:
@@ -3212,6 +3232,28 @@ spec:
                     - Forbid
                     - Allow
                     type: string
+                  deploymentChaos:
+                    description: DeploymentChaosSpec defines the desired state of
+                      DeploymentChaos
+                    properties:
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action
+                        type: string
+                      name:
+                        description: Name defines the name of the deployment.
+                        type: string
+                      namespace:
+                        description: Namespace defines the namespace of the deployment.
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
                   dnsChaos:
                     description: DNSChaosSpec defines the desired state of DNSChaos
                     properties:
@@ -6587,6 +6629,29 @@ spec:
                               type: array
                             deadline:
                               type: string
+                            deploymentChaos:
+                              description: DeploymentChaosSpec defines the desired
+                                state of DeploymentChaos
+                              properties:
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action
+                                  type: string
+                                name:
+                                  description: Name defines the name of the deployment.
+                                  type: string
+                                namespace:
+                                  description: Namespace defines the namespace of
+                                    the deployment.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                              required:
+                              - name
+                              - namespace
+                              type: object
                             dnsChaos:
                               description: DNSChaosSpec defines the desired state
                                 of DNSChaos
@@ -9781,6 +9846,29 @@ spec:
                                   - Forbid
                                   - Allow
                                   type: string
+                                deploymentChaos:
+                                  description: DeploymentChaosSpec defines the desired
+                                    state of DeploymentChaos
+                                  properties:
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action
+                                      type: string
+                                    name:
+                                      description: Name defines the name of the deployment.
+                                      type: string
+                                    namespace:
+                                      description: Namespace defines the namespace
+                                        of the deployment.
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
+                                  required:
+                                  - name
+                                  - namespace
+                                  type: object
                                 dnsChaos:
                                   description: DNSChaosSpec defines the desired state
                                     of DNSChaos
