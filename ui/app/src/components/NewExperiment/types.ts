@@ -52,6 +52,11 @@ export interface DNS {
   containerNames?: string[]
 }
 
+export interface Deployment {
+  namespace: string
+  name: string
+}
+
 export interface GCP {
   action: 'node-stop' | 'node-reset' | 'disk-loss'
   secretName: string
@@ -162,6 +167,7 @@ export interface ExperimentType {
   AWSChaos: AWS
   AzureChaos?: unknown
   DNSChaos: DNS
+  DeploymentChaos: Deployment
   GCPChaos: GCP
   HTTPChaos?: unknown
   IOChaos: IO
