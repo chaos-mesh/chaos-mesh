@@ -50,8 +50,8 @@ type StatusAndReason struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
@@ -70,7 +70,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 
+		records := obj.GetStatus().Experiment.Records
 		newConditionMap := make(map[v1alpha1.ChaosConditionType]StatusAndReason)
+
 		if obj.GetStatus().Experiment.Records != nil {
 			newConditionMap[v1alpha1.ConditionSelected] = StatusAndReason{
 				Status: corev1.ConditionTrue,
@@ -81,17 +83,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 
-		allInjected := corev1.ConditionTrue
-		allRecovered := corev1.ConditionTrue
-		for _, record := range obj.GetStatus().Experiment.Records {
-			if record.Phase != v1alpha1.NotInjected {
-				allRecovered = corev1.ConditionFalse
-			}
-
-			if record.Phase != v1alpha1.Injected {
-				allInjected = corev1.ConditionFalse
-			}
+		// If records is `nil`, we don't need to check the `allInjected` and `allRecovered` conditions.
+		var allInjected corev1.ConditionStatus
+		if records != nil && every(records, func(record *v1alpha1.Record) bool {
+			return record.Phase == v1alpha1.Injected
+		}) {
+			allInjected = corev1.ConditionTrue
+		} else {
+			allInjected = corev1.ConditionFalse
 		}
+
+		var allRecovered corev1.ConditionStatus
+		if records != nil && every(records, func(record *v1alpha1.Record) bool {
+			return record.Phase == v1alpha1.NotInjected
+		}) {
+			allRecovered = corev1.ConditionTrue
+		} else {
+			allRecovered = corev1.ConditionFalse
+		}
+
 		newConditionMap[v1alpha1.ConditionAllInjected] = StatusAndReason{
 			Status: allInjected,
 		}
@@ -120,15 +130,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 
 			r.Log.Info("updating conditions", "conditions", conditions)
-			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
+			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
-			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+			if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 				r.Log.Error(err, "unable to get chaos")
 				return err
 			}
 
 			obj.GetStatus().Conditions = conditions
-			return r.Client.Update(context.TODO(), obj)
+			return r.Client.Update(ctx, obj)
 		}
 
 		return nil
@@ -139,5 +149,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update conditions: %s", updateError.Error())
 		return ctrl.Result{}, nil
 	}
+
 	return ctrl.Result{}, nil
+}
+
+func every[T any](arr []T, condition func(T) bool) bool {
+	for _, item := range arr {
+		if !condition(item) {
+			return false
+		}
+	}
+	return true
 }
