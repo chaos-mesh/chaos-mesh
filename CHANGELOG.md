@@ -27,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update lru dependency [#4189](https://github.com/chaos-mesh/chaos-mesh/pull/4189)
 - Update swag dependency [#4191](https://github.com/chaos-mesh/chaos-mesh/pull/4191)
 - Update ginkgo to 2.12.0 [#4190](https://github.com/chaos-mesh/chaos-mesh/pull/4190)
+- Update k8s controller-runtime dependency [#4198](https://github.com/chaos-mesh/chaos-mesh/pull/4198)
 
 ### Deprecated
 
