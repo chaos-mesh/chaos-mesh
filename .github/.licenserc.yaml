@@ -9,6 +9,7 @@ header:
     - '.editorconfig'
     - '.lift.toml'
     - '.muse.toml'
+    - '.devcontainer'
     - '**/*.md'
     - '**/*.json'
     - '**/*.log'

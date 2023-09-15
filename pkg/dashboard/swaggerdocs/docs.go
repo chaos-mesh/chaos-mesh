@@ -2811,12 +2811,7 @@ const docTemplate = `{
                     ]
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType"
-                        }
-                    ]
+                    "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType"
                 }
             }
         },
@@ -5555,12 +5550,7 @@ const docTemplate = `{
                     ]
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType"
-                        }
-                    ]
+                    "$ref": "#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType"
                 },
                 "workflow": {
                     "description": "+optional",

@@ -6496,8 +6496,6 @@ spec:
                           - timeOffset
                           type: object
                         type:
-                          description: 'TODO: use a custom type, as `TemplateType`
-                            contains other possible values'
                           type: string
                       required:
                       - schedule

@@ -374,10 +374,7 @@ definitions:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec'
         description: +optional
       type:
-        allOf:
-        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType'
-        description: 'TODO: use a custom type, as `TemplateType` contains other possible
-          values'
+        $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType'
     type: object
   github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ClockSpec:
     properties:
@@ -2801,10 +2798,7 @@ definitions:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.TimeChaosSpec'
         description: +optional
       type:
-        allOf:
-        - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType'
-        description: 'TODO: use a custom type, as `TemplateType` contains other possible
-          values'
+        $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.ScheduleTemplateType'
       workflow:
         allOf:
         - $ref: '#/definitions/github_com_chaos-mesh_chaos-mesh_api_v1alpha1.WorkflowSpec'
