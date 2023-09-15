@@ -15,6 +15,8 @@ header:
     - 'vendor/**'
     - '**/go.mod'
     - '**/go.sum'
+    - '**/go.work'
+    - '**/go.work.sum'
     - '**/*.crt'
     - '**/*.key'
     - '**/*.ext'
