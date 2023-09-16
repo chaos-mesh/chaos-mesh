@@ -3438,8 +3438,6 @@ definitions:
         $ref: '#/definitions/v1alpha1.TimeChaosSpec'
         description: +optional
       type:
-        description: 'TODO: use a custom type, as `TemplateType` contains other possible
-          values'
         type: string
     type: object
   v1alpha1.ClockSpec:
@@ -5755,8 +5753,6 @@ definitions:
         $ref: '#/definitions/v1alpha1.TimeChaosSpec'
         description: +optional
       type:
-        description: 'TODO: use a custom type, as `TemplateType` contains other possible
-          values'
         type: string
       workflow:
         $ref: '#/definitions/v1alpha1.WorkflowSpec'
