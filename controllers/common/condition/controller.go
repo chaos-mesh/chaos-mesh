@@ -73,7 +73,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		records := obj.GetStatus().Experiment.Records
 		newConditionMap := make(map[v1alpha1.ChaosConditionType]StatusAndReason)
 
-		if obj.GetStatus().Experiment.Records != nil {
+		if records != nil {
 			newConditionMap[v1alpha1.ConditionSelected] = StatusAndReason{
 				Status: corev1.ConditionTrue,
 			}
