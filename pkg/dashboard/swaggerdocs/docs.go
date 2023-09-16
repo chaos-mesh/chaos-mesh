@@ -5201,7 +5201,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
                     "type": "string"
                 }
             }
@@ -7388,7 +7387,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
                     "type": "string"
                 },
                 "workflow": {
