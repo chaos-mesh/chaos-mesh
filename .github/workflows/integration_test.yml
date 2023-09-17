@@ -42,7 +42,7 @@ jobs:
           fetch-depth: 2
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@1.8.0
+        uses: helm/kind-action@v1.8.0
 
       - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
         run: chmod 600 ~/.kube/config
