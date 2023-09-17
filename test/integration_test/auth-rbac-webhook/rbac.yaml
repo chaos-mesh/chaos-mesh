@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: fake-sa
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: pod-chaos-creation-only
+  name: role-podchaos-creation-only
 rules:
   - apiGroups:
       - chaos-mesh.org
@@ -31,15 +26,30 @@ rules:
       - "create"
 
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sa-for-testing
+automountServiceAccountToken: true
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sa-for-testing-secret
+  annotations:
+    kubernetes.io/service-account.name: sa-for-testing
+type: kubernetes.io/service-account-token
+
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: fake-sa-could-only-create-podchaos
+  name: sa-for-testing-could-only-create-podchaos
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: pod-chaos-creation-only
+  name: role-podchaos-creation-only
 subjects:
   - kind: ServiceAccount
-    name: fake-sa
-    namespace: default
+    name: sa-for-testing
