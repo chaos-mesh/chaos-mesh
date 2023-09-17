@@ -53,7 +53,7 @@ echo "Run networkchaos"
 kubectl apply -f ./examples/web-show/network-delay.yaml
 
 echo "Checking chaosctl debug networkchaos"
-./bin/chaosctl debug networkchaos web-show-network-delay > $log_file
+./bin/chaosctl debug networkchaos web-show-network-delay
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
 fi
