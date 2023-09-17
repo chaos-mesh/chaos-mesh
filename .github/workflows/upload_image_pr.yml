@@ -76,7 +76,7 @@ jobs:
           done
 
       - name: Upload Chaos Mesh Image to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: chaos-mesh-images
           path: |
