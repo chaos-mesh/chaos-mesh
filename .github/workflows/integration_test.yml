@@ -49,6 +49,8 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
 
       - name: Magic Kind DNS Fix
         if: ${{ matrix.arch == 'arm64' }}
@@ -58,7 +60,7 @@ jobs:
 
           kubectl rollout restart deployment -n kube-system coredns
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
 
       - uses: actions/setup-go@v4
