@@ -22,13 +22,11 @@ This script is used to install web-show.
 USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
-    -h, --help              Prints help information
-    -d, --delete            Delete web-show application
-        --docker-mirror     Use docker mirror to pull image
+    -d, --delete    Delete web-show application
+    -h, --help      Print help information
 EOF
 }
 
-DOCKER_MIRROR=false
 DELETE_APP=false
 
 while [[ $# -gt 0 ]]
@@ -36,10 +34,6 @@ do
 key="$1"
 
 case $key in
-    --docker-mirror)
-        DOCKER_MIRROR=true
-        shift
-        ;;
     -d|--delete)
         DELETE_APP=true
         shift
@@ -57,12 +51,12 @@ esac
 done
 
 if [ ${DELETE_APP} == "true" ]; then
-    kubectl delete deployments web-show
+    kubectl delete deployment web-show
     kubectl delete service web-show
     exit 0
 fi
 
-TARGET_IP=$(kubectl get pod -n kube-system -o wide| grep kube-controller | head -n 1 | awk '{print $6}')
+TARGET_IP=$(kubectl get pod -n kube-system -o wide | grep kube-controller | head -n 1 | awk '{print $6}')
 
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -104,13 +98,5 @@ spec:
             - /usr/local/bin/web-show
             - --target-ip=${TARGET_IP}
           ports:
-            - name: web-port
-              containerPort: 8081
-              hostPort: 8081
+            - containerPort: 8081
 EOF
-
-kubectl wait --timeout=60s --for=condition=Ready pod -l app=web-show
-
-kill $(lsof -t -i:8081) > /dev/null 2>&1 || true
-
-nohup kubectl port-forward --address 0.0.0.0 svc/web-show 8081:8081 > /dev/null 2>&1 &
