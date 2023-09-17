@@ -41,11 +41,8 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - name: Create kind cluster
-        # released version of kind-action doesn't support arm64
-        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
-        with:
-          kubectl_version: v1.23.1
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@1.8.0
 
       - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
         run: chmod 600 ~/.kube/config
@@ -68,6 +65,7 @@ jobs:
         with:
           check-latest: true
           go-version-file: "go.mod"
+
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -96,11 +94,9 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          export CLUSTER="chart-testing"
-          hack/local-up-chaos-mesh.sh
-          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
-          kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-mesh
-          sleep 5
+          make UI=1 image
+          helm install chaos-mesh helm/chaos-mesh -n=chaos-mesh --set controllerManager.leaderElection.enabled=false
+          kubectl wait --timeout=60s --for=condition=ready pod -n chaos-mesh
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
       - name: Build chaosctl
         run: |
@@ -110,7 +106,7 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
-          kubectl wait --timeout=60s --for=condition=ready --all pod
+          kubectl wait --timeout=60s --for=condition=ready pod -all
 
       - name: Run integration test
         run: |
