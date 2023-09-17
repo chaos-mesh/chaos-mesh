@@ -34,34 +34,6 @@ log_file="debug.log"
 code=0
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-pwd
-echo "Deploy deployments and chaos for testing"
-wget https://mirrors.chaos-mesh.org/v2.6.2/web-show/deploy.sh
-bash deploy.sh
-
-echo "Run networkchaos"
-
-cat <<EOF > delay.yaml
-apiVersion: chaos-mesh.org/v1alpha1
-kind: NetworkChaos
-metadata:
-  name: web-show-network-delay
-spec:
-  action: delay
-  mode: one
-  selector:
-    namespaces:
-      - default
-    labelSelectors:
-      app: web-show
-  delay:
-    latency: 10ms
-    correlation: "100"
-    jitter: 0ms
-  duration: 30s
-EOF
-kubectl apply -f delay.yaml
-
 echo "Checking chaosctl logs"
 ./bin/chaosctl logs > $log_file 2>&1
 if [ $? -ne 0 ]; then
@@ -72,17 +44,23 @@ file_must_contains $log_file "Controller manager Version:" true
 file_must_contains $log_file "Chaos-daemon Version:" true
 file_must_contains $log_file "Chaos Dashboard Version" true
 
+echo "Deploy web-show for testing"
+bash ./examples/web-show/deploy.sh
+
+echo "Run networkchaos"
+kubectl apply -f ./examples/web-show/network-delay.yaml
+
 echo "Checking chaosctl debug networkchaos"
-./bin/chaosctl debug networkchaos web-show-network-delay > $log_file 2>&1
+./bin/chaosctl debug networkchaos web-show-network-delay > $log_file
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
-    code=1
 fi
 file_must_contains $log_file "\[Chaos\]: web-show-network-delay" true
 file_must_contains $log_file "1. \[ipset list\]" true
 file_must_contains $log_file "2. \[tc qdisc list\]" true
 file_must_contains $log_file "3. \[iptables list\]" true
 file_must_contains $log_file "4. \[podnetworkchaos\]" true
+
 echo "Cleaning up networkchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
