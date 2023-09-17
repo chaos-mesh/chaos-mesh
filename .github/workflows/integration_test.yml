@@ -96,7 +96,7 @@ jobs:
         run: |
           make UI=1 image
           helm install chaos-mesh helm/chaos-mesh -n=chaos-mesh  --create-namespace --set controllerManager.leaderElection.enabled=false
-          kubectl wait --timeout=60s --for=condition=ready pod -n chaos-mesh -l app.kubernetes.io/instance=chaos-mesh
+          kubectl wait --timeout=60s --for=condition=Ready pod -n chaos-mesh -l app.kubernetes.io/instance=chaos-mesh
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
       - name: Build chaosctl
         run: |
@@ -106,7 +106,7 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
-          kubectl wait --timeout=60s --for=condition=ready pod --all
+          kubectl wait --timeout=60s --for=condition=Ready pod --all
 
       - name: Run integration test
         run: |

@@ -62,8 +62,7 @@ file_must_contains $log_file "3. \[iptables list\]" true
 file_must_contains $log_file "4. \[podnetworkchaos\]" true
 
 echo "Cleaning up networkchaos"
-kubectl delete -f delay.yaml
-rm delay.yaml
+kubectl delete -f ./examples/web-show/network-delay.yaml
 
 echo "Run httpchaos"
 
