@@ -29,7 +29,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Deprecated
 
-- Nothing
+- Deprecate local-up-chaos-mesh.sh [#4200](https://github.com/chaos-mesh/chaos-mesh/pull/4200)
 
 ### Removed
 
