@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-set -eu
+set -euxo pipefail
 
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
