@@ -36,45 +36,44 @@ cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 pwd
 echo "Deploy deployments and chaos for testing"
-wget https://mirrors.chaos-mesh.org/v1.1.2/web-show/deploy.sh
-# This is a temporary fix
-# TODO: remove the following line after the new deploy.sh released
-sed -i "s|image: pingcap/web-show|image: ghcr.io/chaos-mesh/web-show|g" deploy.sh
+wget https://mirrors.chaos-mesh.org/v2.6.2/web-show/deploy.sh
 bash deploy.sh
 
 echo "Run networkchaos"
 
-cat <<EOF >delay.yaml
+cat <<EOF > delay.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: web-show-network-delay
 spec:
-  action: delay # the specific chaos action to inject
-  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  selector: # pods where to inject chaos actions
+  action: delay
+  mode: one
+  selector:
     namespaces:
       - default
     labelSelectors:
-      "app": "web-show"  # the label of the pod for chaos injection
+      app: web-show
   delay:
-    latency: "10ms"
-  duration: "30s" # duration for the injected chaos experiment
+    latency: 10ms
+    correlation: "100"
+    jitter: 0ms
+  duration: 30s
 EOF
 kubectl apply -f delay.yaml
 
 echo "Checking chaosctl logs"
-./bin/chaosctl logs >$log_file 2>&1
+./bin/chaosctl logs > $log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl logs failed"
     code=1
 fi
 file_must_contains $log_file "Controller manager Version:" true
 file_must_contains $log_file "Chaos-daemon Version:" true
-file_must_contains $log_file "\[chaos-dashboard" true
+file_must_contains $log_file "Chaos Dashboard Version" true
 
 echo "Checking chaosctl debug networkchaos"
-./bin/chaosctl debug networkchaos web-show-network-delay >$log_file 2>&1
+./bin/chaosctl debug networkchaos web-show-network-delay > $log_file 2>&1
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
     code=1
