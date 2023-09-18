@@ -49,17 +49,18 @@ function judge_stress() {
     success=false
 
     for ((time=0; time<30; time++)); do
+        # We expect that there are two `memStress` processes running at the same time (one of them is `grep`) when StressChaos is injected.
         mem_stress_processes=`ps aux | grep "memStress" | wc -l`
 
         if [ "$have_stress" = true ]; then
-            if [ $mem_stress_processes -lt 1 ]; then
+            if [ $mem_stress_processes -lt 2 ]; then
                 echo "memStress is not run when creating stress chaos on physical machine"
             else
                 success=true
                 break
             fi
         else
-            if [ $mem_stress_processes -gt 0 ]; then
+            if [ $mem_stress_processes -gt 1 ]; then
                 echo "memStress is still running when delete stress chaos on physical machine"
             else
                 success=true
