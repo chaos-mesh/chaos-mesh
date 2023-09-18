@@ -47,7 +47,7 @@ file_must_contains $log_file "Chaos Dashboard Version" true
 echo "Deploy web-show for testing"
 bash ./examples/web-show/deploy.sh
 kubectl wait --timeout=60s --for=condition=Ready pod -l app=web-show
-nohup kubectl port-forward --address 0.0.0.0 svc/web-show 8081:8081 > /dev/null 2>&1 &
+kubectl port-forward --address 0.0.0.0 svc/web-show 8081:8081 > /dev/null 2>&1 &
 
 echo "Run networkchaos"
 kubectl apply -f ./examples/web-show/network-delay.yaml

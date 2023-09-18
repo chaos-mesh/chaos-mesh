@@ -38,8 +38,8 @@ cd $cur
 echo "download and deploy chaosd"
 localIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1`
 
-CHAOSD_VERSION=v1.1.0
-curl -fsSL -o chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz https://mirrors.chaos-mesh.org/chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
+CHAOSD_VERSION=v1.4.0
+curl -fsSLO https://mirrors.chaos-mesh.org/chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
 tar zxvf chaosd-${CHAOSD_VERSION}-linux-amd64.tar.gz
 ./chaosd-${CHAOSD_VERSION}-linux-amd64/chaosd server --port 31768 > chaosd.log 2>&1 &
 check_chaosd_health

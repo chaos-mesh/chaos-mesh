@@ -18,8 +18,7 @@ metadata:
   name: test
   namespace: chaos-mesh
 spec:
-  schedule: '@every 5s'
-  startingDeadlineSeconds: null
+  schedule: "@every 5s"
   concurrencyPolicy: Forbid
   historyLimit: 1
   type: PhysicalMachineChaos
