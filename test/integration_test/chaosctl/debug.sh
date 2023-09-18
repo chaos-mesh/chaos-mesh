@@ -54,9 +54,11 @@ kubectl apply -f ./examples/web-show/network-delay.yaml
 
 echo "Checking chaosctl debug networkchaos"
 ./bin/chaosctl debug networkchaos web-show-network-delay > $log_file
+
 if [ $? -ne 0 ]; then
     echo "chaosctl debug networkchaos failed"
 fi
+
 file_must_contains $log_file "\[Chaos\]: web-show-network-delay" true
 file_must_contains $log_file "1. \[ipset list\]" true
 file_must_contains $log_file "2. \[tc qdisc list\]" true
@@ -100,26 +102,26 @@ echo "Cleaning up httpchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
 
-echo "Run iochaos"
+echo "Run IOChaos"
 
-cat <<EOF >delay.yaml
+cat <<EOF > delay.yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: IOChaos
 metadata:
   name: web-show-io-delay
 spec:
   action: latency
-  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  selector: # pods where to inject chaos actions
+  mode: one
+  selector:
     namespaces:
       - default
     labelSelectors:
-      "app": "web-show"  # the label of the pod for chaos injection
+      "app": "web-show"
   volumePath: /var/run/secrets/kubernetes.io/serviceaccount
   path: "/var/run/secrets/kubernetes.io/serviceaccount/**/*"
   delay: "10ms"
   percent: 50
-  duration: "30s" # duration for the injected chaos experiment
+  duration: "30s"
 EOF
 kubectl apply -f delay.yaml
 
@@ -127,16 +129,21 @@ kubectl apply -f delay.yaml
 # TODO: support IOChaos in aarch64, and remove this condition
 if [[ "$(uname -m)" == "x86_64" ]]; then
   echo "Checking chaosctl debug iochaos"
-  ./bin/chaosctl debug iochaos web-show-io-delay >$log_file 2>&1
+  ./bin/chaosctl debug iochaos web-show-io-delay > $log_file 2>&1
+
   if [ $? -ne 0 ]; then
       echo "chaosctl debug iochaos failed"
       code=1
   fi
+
+  sleep 10 # Wait for the IOChaos to take effect.
+
   file_must_contains $log_file "\[Chaos\]: web-show-io-delay" true
   file_must_contains $log_file "1. \[Mount Information\]" true
   file_must_contains $log_file "\[file descriptors of PID:" true
   file_must_contains $log_file "\[podiochaos\]" true
-  echo "Cleaning up iochaos"
+
+  echo "Cleaning up IOChaos"
   kubectl delete -f delay.yaml
   rm delay.yaml
 fi
