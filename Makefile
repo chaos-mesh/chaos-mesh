@@ -154,7 +154,7 @@ gosec-scan: images/dev-env/.dockerbuilt
 groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
 groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
 	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -combine -w -l -local github.com/chaos-mesh/chaos-mesh
+		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive

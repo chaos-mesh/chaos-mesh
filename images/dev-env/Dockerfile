@@ -5,11 +5,7 @@ FROM golang:1.20 AS go_install
 ENV GOPATH /go
 ENV CGO_ENABLED 0
 
-RUN mkdir -p /go/src/github.com/YangKeao/tools
-WORKDIR /go/src/github.com/YangKeao/tools
-RUN git clone https://github.com/YangKeao/tools.git -b v0.1.9-with-combine --depth 1 .
-RUN go install ./cmd/goimports
-
+RUN go install golang.org/x/tools/cmd/goimports@v0.13.0
 RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.13.0
 RUN go install github.com/mgechev/revive@v1.2.4
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
