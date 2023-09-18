@@ -62,6 +62,7 @@ function judge_stress() {
         else
             if [ $mem_stress_processes -gt 1 ]; then
                 echo "memStress is still running when delete stress chaos on physical machine"
+                ps aux | grep "memStress"
             else
                 success=true
                 break
