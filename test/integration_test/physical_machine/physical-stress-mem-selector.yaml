@@ -15,7 +15,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PhysicalMachineChaos
 metadata:
-  name: physical-stress-mem
+  name: physical-stress-mem-selector
   namespace: chaos-mesh
 spec:
   action: stress-mem
