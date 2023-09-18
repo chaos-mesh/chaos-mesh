@@ -70,7 +70,7 @@ RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kusto
 
 RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 
-RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin && \
+RUN curl -L https://get.helm.sh/helm-v3.12.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin && \
     mv /usr/local/bin/$(go env GOOS)-$(go env GOARCH)/helm /usr/local/bin/helm && \
     rm -rf /usr/local/bin/$(go env GOOS)-$(go env GOARCH)
 
