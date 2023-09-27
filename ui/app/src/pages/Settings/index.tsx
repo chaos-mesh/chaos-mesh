@@ -45,6 +45,7 @@ import Token from './Token'
 
 const Settings = () => {
   const state = useStoreSelector((state) => state)
+  const { tokenName } = state.globalStatus
   const { debugMode, enableKubeSystemNS, useNewPhysicalMachine, useNextWorkflowInterface, theme, lang } = state.settings
   const dispatch = useStoreDispatch()
 
@@ -67,7 +68,7 @@ const Settings = () => {
       <div style={{ height: '100%' }}>
         <Space>
           <PaperTop title={<T id="settings.title" />} h1 divider />
-          {config?.security_mode && <Token />}
+          {config?.security_mode && tokenName && <Token />}
           <PaperTop title={<T id="experiments.title" />} />
           <Checkbox
             label={<T id="settings.debugMode.title" />}

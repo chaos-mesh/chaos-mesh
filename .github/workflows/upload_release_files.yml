@@ -31,7 +31,7 @@ jobs:
           echo "The tag must start with 'v'"
           echo "GITHUB_REF: ${GITHUB_REF}"
           exit 1
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Must use at least depth 2!
           fetch-depth: 2

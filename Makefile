@@ -90,8 +90,8 @@ help: ## Display this help
 config: SHELL:=$(RUN_IN_DEV_SHELL)
 config: images/dev-env/.dockerbuilt ## Generate CRD manifests with controller-gen
 	cd ./api ;\
-		controller-gen crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../config/crd/bases ;\
-		controller-gen crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../helm/chaos-mesh/crds ;
+		controller-gen crd:ignoreUnexportedFields=true,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../config/crd/bases ;\
+		controller-gen crd:ignoreUnexportedFields=true,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../helm/chaos-mesh/crds ;
 
 chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
@@ -154,7 +154,7 @@ gosec-scan: images/dev-env/.dockerbuilt
 groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
 groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
 	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -combine -w -l -local github.com/chaos-mesh/chaos-mesh
+		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive

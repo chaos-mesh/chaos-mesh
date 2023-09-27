@@ -21,7 +21,7 @@ RUN npm install pnpm@8 -g
 
 ARG TARGET_PLATFORM=amd64
 
-RUN curl -vvv https://dl.google.com/go/go1.20.7.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
+RUN curl -vvv https://dl.google.com/go/go1.20.8.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GOCACHE /tmp/go-build
 ENV GOPATH /tmp/go
