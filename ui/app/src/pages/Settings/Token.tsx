@@ -16,17 +16,17 @@
  */
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button } from '@mui/material'
+import { resetAPIAuthentication } from 'api/interceptors'
 import Cookies from 'js-cookie'
 import _ from 'lodash'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-import queryClient from 'reactQueryClient'
 
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { removeToken, setConfirm } from 'slices/globalStatus'
+import { removeToken, setAuthOpen, setConfirm } from 'slices/globalStatus'
 
 import i18n from 'components/T'
 
@@ -61,8 +61,9 @@ const Token = () => {
       Cookies.remove('refresh_token')
       Cookies.remove('expiry')
     } else {
+      resetAPIAuthentication()
       dispatch(removeToken())
-      queryClient.clear()
+      dispatch(setAuthOpen(true))
     }
 
     navigate('/dashboard')

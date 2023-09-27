@@ -20,6 +20,8 @@ import store from 'store'
 
 import { removeToken, setAlert, setAuthOpen } from 'slices/globalStatus'
 
+import { resetAPIAuthentication } from './interceptors'
+
 interface ErrorData {
   code: number
   type: string
@@ -56,6 +58,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
             })
           )
 
+          resetAPIAuthentication()
           store.dispatch(removeToken())
           store.dispatch(setAuthOpen(true))
         }
