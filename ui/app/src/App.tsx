@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import type { FC } from 'react'
 import { DndProvider } from 'react-dnd'
@@ -26,9 +26,8 @@ import store from './store'
 
 import IntlProvider from './IntlProvider'
 import ThemeProvider from './ThemeProvider'
+import queryClient from './reactQueryClient'
 import router from './router'
-
-const queryClient = new QueryClient()
 
 interface AppProps {
   forTesting?: boolean

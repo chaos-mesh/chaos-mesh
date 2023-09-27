@@ -20,12 +20,13 @@ import Cookies from 'js-cookie'
 import _ from 'lodash'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
+import queryClient from 'reactQueryClient'
 
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 
 import { useStoreDispatch, useStoreSelector } from 'store'
 
-import { removeToken, setAuthOpen, setConfirm } from 'slices/globalStatus'
+import { removeToken, setConfirm } from 'slices/globalStatus'
 
 import i18n from 'components/T'
 
@@ -61,10 +62,10 @@ const Token = () => {
       Cookies.remove('expiry')
     } else {
       dispatch(removeToken())
-      dispatch(setAuthOpen(true))
+      queryClient.clear()
     }
 
-    navigate('/#/dashboard')
+    navigate('/dashboard')
   }
 
   return (
