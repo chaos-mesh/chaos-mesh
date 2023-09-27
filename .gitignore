@@ -21,8 +21,12 @@ core.sqlite
 # retool. We could check this in like a vendor
 # But it is just tools that can be installed with make setup
 /_tools/
+.devcontainer
 
 node_modules
+
+go.work
+go.work.sum
 
 output/
 _artifacts/

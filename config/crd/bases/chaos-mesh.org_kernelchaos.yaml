@@ -1,11 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.1
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.13.0
   name: kernelchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -53,9 +51,9 @@ spec:
                 description: FailKernRequest defines the request of kernel injection
                 properties:
                   callchain:
-                    description: 'Callchain indicate a special call chain, such as:     ext4_mount       ->
-                      mount_subtree          -> ...             -> should_failslab
-                      With an optional set of predicates and an optional set of parameters,
+                    description: 'Callchain indicate a special call chain, such as:
+                      ext4_mount -> mount_subtree -> ... -> should_failslab With an
+                      optional set of predicates and an optional set of parameters,
                       which used with predicates. You can read call chan and predicate
                       examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
                       to learn more. If no special call chain, just keep Callchain
@@ -88,9 +86,9 @@ spec:
                     description: 'FailType indicates what to fail, can be set to ''0''
                       / ''1'' / ''2'' If `0`, indicates slab to fail (should_failslab)
                       If `1`, indicates alloc_page to fail (should_fail_alloc_page)
-                      If `2`, indicates bio to fail (should_fail_bio) You can read:   1.
-                      https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2.
-                      http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
+                      If `2`, indicates bio to fail (should_fail_bio) You can read:
+                      1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html
+                      2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
                       to learn more'
                     format: int32
                     maximum: 2
@@ -324,9 +322,3 @@ spec:
     served: true
     storage: true
     subresources: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

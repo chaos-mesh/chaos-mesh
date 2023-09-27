@@ -25,8 +25,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
@@ -63,16 +67,25 @@ func NewServer(
 
 	// namespace scoped
 	options := ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: net.JoinHostPort(conf.MetricHost, strconv.Itoa(conf.MetricPort)),
-		LeaderElection:     conf.EnableLeaderElection,
-		Port:               9443,
+		Scheme: scheme,
+		Metrics: metricsserver.Options{
+			BindAddress: net.JoinHostPort(conf.MetricHost, strconv.Itoa(conf.MetricPort)),
+		},
+		LeaderElection: conf.EnableLeaderElection,
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Port: 9443,
+		}),
 	}
 	if conf.ClusterScoped {
 		logger.Info("Chaos controller manager is running in cluster scoped mode.")
 	} else {
 		logger.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", conf.TargetNamespace)
-		options.Namespace = conf.TargetNamespace
+		options.NewCache = func(cfg *rest.Config, opts cache.Options) (cache.Cache, error) {
+			opts.DefaultNamespaces = map[string]cache.Config{
+				conf.TargetNamespace: {},
+			}
+			return cache.New(cfg, opts)
+		}
 	}
 
 	var err error
