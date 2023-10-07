@@ -278,20 +278,23 @@ func (it *TaskReconciler) Reconcile(ctx context.Context, request reconcile.Reque
 			if err != nil {
 				return err
 			}
+			now := metav1.NewTime(time.Now())
 			if evaluated && len(finishedChildren) == len(tasks) {
 				if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
 					it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 				}
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.ConditionAccomplished,
-					Status: corev1.ConditionTrue,
-					Reason: "",
+					Type:               v1alpha1.ConditionAccomplished,
+					Status:             corev1.ConditionTrue,
+					Reason:             "",
+					LastTransitionTime: &now,
 				})
 			} else {
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.ConditionAccomplished,
-					Status: corev1.ConditionFalse,
-					Reason: "",
+					Type:               v1alpha1.ConditionAccomplished,
+					Status:             corev1.ConditionFalse,
+					Reason:             "",
+					LastTransitionTime: &now,
 				})
 			}
 
