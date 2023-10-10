@@ -800,6 +800,30 @@ const data: Record<Kind, Definition> = {
       },
     } as any,
   },
+  // RollingRestart
+  RollingRestartChaos: {
+    spec: {
+      namespace: {
+        field: 'text',
+        label: 'Namespace',
+        value: '',
+        helperText: 'The namespace of the deployment',
+      },
+      name: {
+        field: 'text',
+        label: 'Name',
+        value: '',
+        helperText: 'The name of the deployment',
+      },
+      method: {
+        field: 'select',
+        items: ['', 'daemonset', 'deployment', 'statefulset'],
+        label: 'Type',
+        value: '',
+        helperText: 'Required. The type of the resource to restart',
+      },
+    } as any,
+  },
   // Stress Test
   StressChaos: {
     spec: {

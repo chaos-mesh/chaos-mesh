@@ -34,6 +34,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/physicalmachinechaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/podchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/resourcescalechaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/rollingrestartchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/stresschaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/timechaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/utils"
@@ -58,5 +59,6 @@ var AllImpl = fx.Options(
 	cloudstackvm.Module,
 	k8schaos.Module,
 	resourcescalechaos.Module,
+	rollingrestartchaos.Module,
 
 	utils.Module)

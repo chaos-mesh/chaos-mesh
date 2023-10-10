@@ -6074,6 +6074,154 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
+  name: rollingrestartchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: RollingRestartChaos
+    listKind: RollingRestartChaosList
+    plural: rollingrestartchaos
+    singular: rollingrestartchaos
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: RollingRestartChaos is the Schema for the rolling restart API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the behavior of a pod chaos experiment
+            properties:
+              duration:
+                description: Duration represents the duration of the chaos action
+                type: string
+              name:
+                description: Name defines the name of the deployment.
+                type: string
+              namespace:
+                description: Namespace defines the namespace of the deployment.
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
+              resourceType:
+                description: 'ResourceType defines the specific resource type to restart
+                  Supported resource types: daemonset / deployment / statefulset'
+                enum:
+                - daemonset
+                - deployment
+                - statefulset
+                type: string
+            type: object
+          status:
+            description: Most recently observed status of the chaos experiment about
+              pods
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
+                        id:
+                          type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
+                        phase:
+                          type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - injectedCount
+                      - phase
+                      - recoveredCount
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
   name: schedules.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -9293,6 +9441,33 @@ spec:
                     type: string
                   resourceType:
                     description: Type of resource to scale
+                    type: string
+                type: object
+              rollingrestartChaos:
+                description: RollingRestartChaosSpec defines the desired state of
+                  RollingRestartChaos
+                properties:
+                  duration:
+                    description: Duration represents the duration of the chaos action
+                    type: string
+                  name:
+                    description: Name defines the name of the deployment.
+                    type: string
+                  namespace:
+                    description: Namespace defines the namespace of the deployment.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  resourceType:
+                    description: 'ResourceType defines the specific resource type
+                      to restart Supported resource types: daemonset / deployment
+                      / statefulset'
+                    enum:
+                    - daemonset
+                    - deployment
+                    - statefulset
                     type: string
                 type: object
               schedule:
@@ -13085,6 +13260,35 @@ spec:
                               description: Type of resource to scale
                               type: string
                           type: object
+                        rollingrestartChaos:
+                          description: RollingRestartChaosSpec defines the desired
+                            state of RollingRestartChaos
+                          properties:
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action
+                              type: string
+                            name:
+                              description: Name defines the name of the deployment.
+                              type: string
+                            namespace:
+                              description: Namespace defines the namespace of the
+                                deployment.
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            resourceType:
+                              description: 'ResourceType defines the specific resource
+                                type to restart Supported resource types: daemonset
+                                / deployment / statefulset'
+                              enum:
+                              - daemonset
+                              - deployment
+                              - statefulset
+                              type: string
+                          type: object
                         schedule:
                           description: Schedule describe the Schedule(describing scheduled
                             chaos) to be injected with chaos nodes. Only used when
@@ -16592,6 +16796,35 @@ spec:
                                   type: string
                                 resourceType:
                                   description: Type of resource to scale
+                                  type: string
+                              type: object
+                            rollingrestartChaos:
+                              description: RollingRestartChaosSpec defines the desired
+                                state of RollingRestartChaos
+                              properties:
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action
+                                  type: string
+                                name:
+                                  description: Name defines the name of the deployment.
+                                  type: string
+                                namespace:
+                                  description: Namespace defines the namespace of
+                                    the deployment.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                resourceType:
+                                  description: 'ResourceType defines the specific
+                                    resource type to restart Supported resource types:
+                                    daemonset / deployment / statefulset'
+                                  enum:
+                                  - daemonset
+                                  - deployment
+                                  - statefulset
                                   type: string
                               type: object
                             schedule:
@@ -24871,6 +25104,33 @@ spec:
                     description: Type of resource to scale
                     type: string
                 type: object
+              rollingrestartChaos:
+                description: RollingRestartChaosSpec defines the desired state of
+                  RollingRestartChaos
+                properties:
+                  duration:
+                    description: Duration represents the duration of the chaos action
+                    type: string
+                  name:
+                    description: Name defines the name of the deployment.
+                    type: string
+                  namespace:
+                    description: Namespace defines the namespace of the deployment.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  resourceType:
+                    description: 'ResourceType defines the specific resource type
+                      to restart Supported resource types: daemonset / deployment
+                      / statefulset'
+                    enum:
+                    - daemonset
+                    - deployment
+                    - statefulset
+                    type: string
+                type: object
               schedule:
                 description: ScheduleSpec is the specification of a schedule object
                 properties:
@@ -28136,6 +28396,34 @@ spec:
                         type: string
                       resourceType:
                         description: Type of resource to scale
+                        type: string
+                    type: object
+                  rollingrestartChaos:
+                    description: RollingRestartChaosSpec defines the desired state
+                      of RollingRestartChaos
+                    properties:
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action
+                        type: string
+                      name:
+                        description: Name defines the name of the deployment.
+                        type: string
+                      namespace:
+                        description: Namespace defines the namespace of the deployment.
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
+                      resourceType:
+                        description: 'ResourceType defines the specific resource type
+                          to restart Supported resource types: daemonset / deployment
+                          / statefulset'
+                        enum:
+                        - daemonset
+                        - deployment
+                        - statefulset
                         type: string
                     type: object
                   schedule:
@@ -32040,6 +32328,35 @@ spec:
                                   description: Type of resource to scale
                                   type: string
                               type: object
+                            rollingrestartChaos:
+                              description: RollingRestartChaosSpec defines the desired
+                                state of RollingRestartChaos
+                              properties:
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action
+                                  type: string
+                                name:
+                                  description: Name defines the name of the deployment.
+                                  type: string
+                                namespace:
+                                  description: Namespace defines the namespace of
+                                    the deployment.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                resourceType:
+                                  description: 'ResourceType defines the specific
+                                    resource type to restart Supported resource types:
+                                    daemonset / deployment / statefulset'
+                                  enum:
+                                  - daemonset
+                                  - deployment
+                                  - statefulset
+                                  type: string
+                              type: object
                             schedule:
                               description: Schedule describe the Schedule(describing
                                 scheduled chaos) to be injected with chaos nodes.
@@ -35658,6 +35975,35 @@ spec:
                                       type: string
                                     resourceType:
                                       description: Type of resource to scale
+                                      type: string
+                                  type: object
+                                rollingrestartChaos:
+                                  description: RollingRestartChaosSpec defines the
+                                    desired state of RollingRestartChaos
+                                  properties:
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action
+                                      type: string
+                                    name:
+                                      description: Name defines the name of the deployment.
+                                      type: string
+                                    namespace:
+                                      description: Namespace defines the namespace
+                                        of the deployment.
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
+                                    resourceType:
+                                      description: 'ResourceType defines the specific
+                                        resource type to restart Supported resource
+                                        types: daemonset / deployment / statefulset'
+                                      enum:
+                                      - daemonset
+                                      - deployment
+                                      - statefulset
                                       type: string
                                   type: object
                                 schedule:
@@ -46887,6 +47233,34 @@ spec:
                           description: Type of resource to scale
                           type: string
                       type: object
+                    rollingrestartChaos:
+                      description: RollingRestartChaosSpec defines the desired state
+                        of RollingRestartChaos
+                      properties:
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action
+                          type: string
+                        name:
+                          description: Name defines the name of the deployment.
+                          type: string
+                        namespace:
+                          description: Namespace defines the namespace of the deployment.
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
+                        resourceType:
+                          description: 'ResourceType defines the specific resource
+                            type to restart Supported resource types: daemonset /
+                            deployment / statefulset'
+                          enum:
+                          - daemonset
+                          - deployment
+                          - statefulset
+                          type: string
+                      type: object
                     schedule:
                       description: Schedule describe the Schedule(describing scheduled
                         chaos) to be injected with chaos nodes. Only used when Type
@@ -50291,6 +50665,35 @@ spec:
                               type: string
                             resourceType:
                               description: Type of resource to scale
+                              type: string
+                          type: object
+                        rollingrestartChaos:
+                          description: RollingRestartChaosSpec defines the desired
+                            state of RollingRestartChaos
+                          properties:
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action
+                              type: string
+                            name:
+                              description: Name defines the name of the deployment.
+                              type: string
+                            namespace:
+                              description: Namespace defines the namespace of the
+                                deployment.
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            resourceType:
+                              description: 'ResourceType defines the specific resource
+                                type to restart Supported resource types: daemonset
+                                / deployment / statefulset'
+                              enum:
+                              - daemonset
+                              - deployment
+                              - statefulset
                               type: string
                           type: object
                         schedule:

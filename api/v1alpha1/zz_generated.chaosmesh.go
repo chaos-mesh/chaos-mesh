@@ -2449,6 +2449,148 @@ func (in *ResourceScaleChaos) Default() {
 	gw.Default(in)
 }
 
+const KindRollingRestartChaos = "RollingRestartChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *RollingRestartChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *RollingRestartChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *RollingRestartChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *RollingRestartChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *RollingRestartChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *RollingRestartChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *RollingRestartChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// RollingRestartChaosList contains a list of RollingRestartChaos
+type RollingRestartChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []RollingRestartChaos `json:"items"`
+}
+
+func (in *RollingRestartChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *RollingRestartChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *RollingRestartChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *RollingRestartChaos) IsOneShot() bool {
+	if true {
+		return true
+	}
+
+	return false
+}
+
+var RollingRestartChaosWebhookLog = logf.Log.WithName("RollingRestartChaos-resource")
+
+func (in *RollingRestartChaos) ValidateCreate() (admission.Warnings, error) {
+	RollingRestartChaosWebhookLog.V(1).Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *RollingRestartChaos) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+	RollingRestartChaosWebhookLog.V(1).Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*RollingRestartChaos).Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *RollingRestartChaos) ValidateDelete() (admission.Warnings, error) {
+	RollingRestartChaosWebhookLog.V(1).Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil, nil
+}
+
+var _ webhook.Validator = &RollingRestartChaos{}
+
+func (in *RollingRestartChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &RollingRestartChaos{}
+
+func (in *RollingRestartChaos) Default() {
+	gw.Default(in)
+}
+
 const KindStatusCheck = "StatusCheck"
 
 var StatusCheckWebhookLog = logf.Log.WithName("StatusCheck-resource")
@@ -2872,6 +3014,12 @@ func init() {
 		list:  &ResourceScaleChaosList{},
 	})
 
+	SchemeBuilder.Register(&RollingRestartChaos{}, &RollingRestartChaosList{})
+	all.register(KindRollingRestartChaos, &ChaosKind{
+		chaos: &RollingRestartChaos{},
+		list:  &RollingRestartChaosList{},
+	})
+
 	SchemeBuilder.Register(&StatusCheck{}, &StatusCheckList{})
 
 	SchemeBuilder.Register(&StressChaos{}, &StressChaosList{})
@@ -2965,6 +3113,11 @@ func init() {
 	allScheduleItem.register(KindResourceScaleChaos, &ChaosKind{
 		chaos: &ResourceScaleChaos{},
 		list:  &ResourceScaleChaosList{},
+	})
+
+	allScheduleItem.register(KindRollingRestartChaos, &ChaosKind{
+		chaos: &RollingRestartChaos{},
+		list:  &RollingRestartChaosList{},
 	})
 
 	allScheduleItem.register(KindStressChaos, &ChaosKind{
