@@ -7874,6 +7874,9 @@ const docTemplate = `{
         "v1alpha1.WorkflowCondition": {
             "type": "object",
             "properties": {
+                "lastTransitionTime": {
+                    "type": "string"
+                },
                 "reason": {
                     "type": "string"
                 },
