@@ -3928,6 +3928,9 @@ definitions:
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
         description: +optional
+      rollingrestartChaos:
+        $ref: '#/definitions/v1alpha1.RollingRestartChaosSpec'
+        description: +optional
       schedule:
         type: string
       startingDeadlineSeconds:
@@ -4834,7 +4837,9 @@ definitions:
         $ref: '#/definitions/v1alpha1.K8SChaosAPIObjects'
         description: +kubebuilder:validation:Required
       duration:
-        description: Duration represents the duration of the chaos action
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
         type: string
       remoteCluster:
         description: |-
@@ -6025,6 +6030,31 @@ definitions:
       reorder:
         type: string
     type: object
+  v1alpha1.RollingRestartChaosSpec:
+    properties:
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
+        type: string
+      name:
+        description: Name defines the name of the deployment.
+        type: string
+      namespace:
+        description: Namespace defines the namespace of the deployment.
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
+      resourceType:
+        description: |-
+          ResourceType defines the specific resource type to restart
+          Supported resource types: daemonset / deployment / statefulset
+          +kubebuilder:validation:Enum=daemonset;deployment;statefulset
+        type: string
+    type: object
   v1alpha1.Schedule:
     properties:
       annotations:
@@ -6286,6 +6316,9 @@ definitions:
         description: +optional
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+      rollingrestartChaos:
+        $ref: '#/definitions/v1alpha1.RollingRestartChaosSpec'
         description: +optional
       schedule:
         type: string
@@ -6693,6 +6726,9 @@ definitions:
         description: +optional
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+      rollingrestartChaos:
+        $ref: '#/definitions/v1alpha1.RollingRestartChaosSpec'
         description: +optional
       schedule:
         $ref: '#/definitions/v1alpha1.ChaosOnlyScheduleSpec'

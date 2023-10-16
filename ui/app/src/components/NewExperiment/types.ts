@@ -140,6 +140,12 @@ export interface Pod {
   containerNames?: string[]
 }
 
+export interface RollingRestart {
+  namespace: string
+  name: string
+  type: 'daemonset' | 'deployment' | 'statefulset'
+}
+
 export interface Stress {
   stressors: {
     cpu?: {
@@ -176,6 +182,7 @@ export interface ExperimentType {
   KernelChaos: Kernel
   NetworkChaos: Network
   PodChaos: Pod
+  RollingRestartChaos: RollingRestart
   StressChaos: Stress
   TimeChaos: Time
   PhysicalMachineChaos?: unknown

@@ -4,24 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
-  name: k8schaos.chaos-mesh.org
+  name: rollingrestartchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: K8SChaos
-    listKind: K8SChaosList
-    plural: k8schaos
-    singular: k8schaos
+    kind: RollingRestartChaos
+    listKind: RollingRestartChaosList
+    plural: rollingrestartchaos
+    singular: rollingrestartchaos
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .spec.duration
-      name: duration
-      type: string
-    name: v1alpha1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: K8SChaos is the Schema for the Kubernetes Chaos API
+        description: RollingRestartChaos is the Schema for the rolling restart API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -38,25 +34,27 @@ spec:
           spec:
             description: Spec defines the behavior of a pod chaos experiment
             properties:
-              apiObjects:
-                description: K8SChaosAPIObjects defines ways to specify Kubernetes
-                  API resources to be applied by K8SChaos
-                properties:
-                  value:
-                    description: Literal string containing Kubernetes API resources
-                    type: string
-                required:
-                - value
-                type: object
               duration:
                 description: Duration represents the duration of the chaos action
+                type: string
+              name:
+                description: Name defines the name of the deployment.
+                type: string
+              namespace:
+                description: Namespace defines the namespace of the deployment.
                 type: string
               remoteCluster:
                 description: RemoteCluster represents the remote cluster where the
                   chaos will be deployed
                 type: string
-            required:
-            - apiObjects
+              resourceType:
+                description: 'ResourceType defines the specific resource type to restart
+                  Supported resource types: daemonset / deployment / statefulset'
+                enum:
+                - daemonset
+                - deployment
+                - statefulset
+                type: string
             type: object
           status:
             description: Most recently observed status of the chaos experiment about
@@ -148,4 +146,3 @@ spec:
         type: object
     served: true
     storage: true
-    subresources: {}
