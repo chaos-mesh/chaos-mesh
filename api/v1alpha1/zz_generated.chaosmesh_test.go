@@ -907,6 +907,69 @@ func TestPodChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestRollingRestartChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &RollingRestartChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestRollingRestartChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &RollingRestartChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestRollingRestartChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &RollingRestartChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestRollingRestartChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &RollingRestartChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestRollingRestartChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &RollingRestartChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestRollingRestartChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &RollingRestartChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestStressChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
