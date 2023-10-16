@@ -57,7 +57,6 @@ spec:
                 type: string
             required:
             - apiObjects
-            - duration
             type: object
           status:
             description: Most recently observed status of the chaos experiment about

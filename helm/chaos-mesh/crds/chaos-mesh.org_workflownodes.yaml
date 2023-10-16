@@ -1273,7 +1273,6 @@ spec:
                     type: string
                 required:
                 - apiObjects
-                - duration
                 type: object
               kernelChaos:
                 description: KernelChaosSpec defines the desired state of KernelChaos
@@ -2973,6 +2972,33 @@ spec:
                 - mode
                 - selector
                 type: object
+              rollingrestartChaos:
+                description: RollingRestartChaosSpec defines the desired state of
+                  RollingRestartChaos
+                properties:
+                  duration:
+                    description: Duration represents the duration of the chaos action
+                    type: string
+                  name:
+                    description: Name defines the name of the deployment.
+                    type: string
+                  namespace:
+                    description: Namespace defines the namespace of the deployment.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  resourceType:
+                    description: 'ResourceType defines the specific resource type
+                      to restart Supported resource types: daemonset / deployment
+                      / statefulset'
+                    enum:
+                    - daemonset
+                    - deployment
+                    - statefulset
+                    type: string
+                type: object
               schedule:
                 description: ScheduleSpec is the specification of a schedule object
                 properties:
@@ -4228,7 +4254,6 @@ spec:
                         type: string
                     required:
                     - apiObjects
-                    - duration
                     type: object
                   kernelChaos:
                     description: KernelChaosSpec defines the desired state of KernelChaos
@@ -5959,6 +5984,34 @@ spec:
                     - mode
                     - selector
                     type: object
+                  rollingrestartChaos:
+                    description: RollingRestartChaosSpec defines the desired state
+                      of RollingRestartChaos
+                    properties:
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action
+                        type: string
+                      name:
+                        description: Name defines the name of the deployment.
+                        type: string
+                      namespace:
+                        description: Namespace defines the namespace of the deployment.
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
+                      resourceType:
+                        description: 'ResourceType defines the specific resource type
+                          to restart Supported resource types: daemonset / deployment
+                          / statefulset'
+                        enum:
+                        - daemonset
+                        - deployment
+                        - statefulset
+                        type: string
+                    type: object
                   schedule:
                     type: string
                   startingDeadlineSeconds:
@@ -7687,7 +7740,6 @@ spec:
                                   type: string
                               required:
                               - apiObjects
-                              - duration
                               type: object
                             kernelChaos:
                               description: KernelChaosSpec defines the desired state
@@ -9563,6 +9615,35 @@ spec:
                               - mode
                               - selector
                               type: object
+                            rollingrestartChaos:
+                              description: RollingRestartChaosSpec defines the desired
+                                state of RollingRestartChaos
+                              properties:
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action
+                                  type: string
+                                name:
+                                  description: Name defines the name of the deployment.
+                                  type: string
+                                namespace:
+                                  description: Namespace defines the namespace of
+                                    the deployment.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                resourceType:
+                                  description: 'ResourceType defines the specific
+                                    resource type to restart Supported resource types:
+                                    daemonset / deployment / statefulset'
+                                  enum:
+                                  - daemonset
+                                  - deployment
+                                  - statefulset
+                                  type: string
+                              type: object
                             schedule:
                               description: Schedule describe the Schedule(describing
                                 scheduled chaos) to be injected with chaos nodes.
@@ -10944,7 +11025,6 @@ spec:
                                       type: string
                                   required:
                                   - apiObjects
-                                  - duration
                                   type: object
                                 kernelChaos:
                                   description: KernelChaosSpec defines the desired
@@ -12876,6 +12956,35 @@ spec:
                                   - action
                                   - mode
                                   - selector
+                                  type: object
+                                rollingrestartChaos:
+                                  description: RollingRestartChaosSpec defines the
+                                    desired state of RollingRestartChaos
+                                  properties:
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action
+                                      type: string
+                                    name:
+                                      description: Name defines the name of the deployment.
+                                      type: string
+                                    namespace:
+                                      description: Namespace defines the namespace
+                                        of the deployment.
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
+                                    resourceType:
+                                      description: 'ResourceType defines the specific
+                                        resource type to restart Supported resource
+                                        types: daemonset / deployment / statefulset'
+                                      enum:
+                                      - daemonset
+                                      - deployment
+                                      - statefulset
+                                      type: string
                                   type: object
                                 schedule:
                                   type: string
