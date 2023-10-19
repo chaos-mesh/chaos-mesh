@@ -3302,9 +3302,20 @@ const docTemplate = `{
                     "description": "Periodic probe of container service readiness.\nContainer will be removed from service endpoints if the probe fails.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes\n+optional",
                     "$ref": "#/definitions/v1.Probe"
                 },
+                "resizePolicy": {
+                    "description": "Resources resize policy for the container.\n+featureGate=InPlacePodVerticalScaling\n+optional\n+listType=atomic",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.ContainerResizePolicy"
+                    }
+                },
                 "resources": {
                     "description": "Compute Resources required by this container.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n+optional",
                     "$ref": "#/definitions/v1.ResourceRequirements"
+                },
+                "restartPolicy": {
+                    "description": "RestartPolicy defines the restart behavior of individual containers in a pod.\nThis field may only be set for init containers, and the only allowed value is \"Always\".\nFor non-init containers or when this field is not specified,\nthe restart behavior is defined by the Pod's restart policy and the container type.\nSetting the RestartPolicy as \"Always\" for the init container will have the following effect:\nthis init container will be continually restarted on\nexit until all regular containers have terminated. Once all regular\ncontainers have completed, all init containers with restartPolicy \"Always\"\nwill be shut down. This lifecycle differs from normal init containers and\nis often referred to as a \"sidecar\" container. Although this init\ncontainer still starts in the init container sequence, it does not wait\nfor the container to complete before proceeding to the next init\ncontainer. Instead, the next init container starts immediately after this\ninit container is started, or after any startupProbe has successfully\ncompleted.\n+featureGate=SidecarContainers\n+optional",
+                    "type": "string"
                 },
                 "securityContext": {
                     "description": "SecurityContext defines the security options the container should be run with.\nIf set, the fields of SecurityContext override the equivalent fields of PodSecurityContext.\nMore info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/\n+optional",
@@ -3379,6 +3390,19 @@ const docTemplate = `{
                 }
             }
         },
+        "v1.ContainerResizePolicy": {
+            "type": "object",
+            "properties": {
+                "resourceName": {
+                    "description": "Name of the resource to which this resource resize policy applies.\nSupported values: cpu, memory.",
+                    "type": "string"
+                },
+                "restartPolicy": {
+                    "description": "Restart policy to apply when specified resource is resized.\nIf not specified, it defaults to NotRequired.",
+                    "type": "string"
+                }
+            }
+        },
         "v1.DownwardAPIProjection": {
             "type": "object",
             "properties": {
@@ -3436,7 +3460,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sizeLimit": {
-                    "description": "sizeLimit is the total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: http://kubernetes.io/docs/user-guide/volumes#emptydir\n+optional",
+                    "description": "sizeLimit is the total amount of local storage required for this EmptyDir volume.\nThe size limit is also applicable for memory medium.\nThe maximum usage on memory medium EmptyDir would be the minimum value between\nthe SizeLimit specified here and the sum of memory limits of all containers in a pod.\nThe default is nil which means that the limit is undefined.\nMore info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir\n+optional",
                     "$ref": "#/definitions/resource.Quantity"
                 }
             }
@@ -3806,7 +3830,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "key": {
-                    "description": "key is the label key that the selector applies to.\n+patchMergeKey=key\n+patchStrategy=merge",
+                    "description": "key is the label key that the selector applies to.",
                     "type": "string"
                 },
                 "operator": {
@@ -3977,11 +4001,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name of the referent.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#names",
+                    "description": "Name of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names",
                     "type": "string"
                 },
                 "uid": {
-                    "description": "UID of the referent.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids",
+                    "description": "UID of the referent.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids",
                     "type": "string"
                 }
             }
@@ -4030,7 +4054,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "annotations": {
-                    "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: http://kubernetes.io/docs/user-guide/annotations\n+optional",
+                    "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -4064,7 +4088,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "labels": {
-                    "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: http://kubernetes.io/docs/user-guide/labels\n+optional",
+                    "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -4078,11 +4102,11 @@ const docTemplate = `{
                     }
                 },
                 "name": {
-                    "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#names\n+optional",
+                    "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names\n+optional",
                     "type": "string"
                 },
                 "namespace": {
-                    "description": "Namespace defines the space within which each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/namespaces\n+optional",
+                    "description": "Namespace defines the space within which each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces\n+optional",
                     "type": "string"
                 },
                 "ownerReferences": {
@@ -4105,7 +4129,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.PersistentVolumeClaimSpec"
                 },
                 "uid": {
-                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids\n+optional",
+                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+optional",
                     "type": "string"
                 }
             }
@@ -4165,7 +4189,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "grpc": {
-                    "description": "GRPC specifies an action involving a GRPC port.\nThis is a beta field and requires enabling GRPCContainerProbe feature gate.\n+featureGate=GRPCContainerProbe\n+optional",
+                    "description": "GRPC specifies an action involving a GRPC port.\n+optional",
                     "$ref": "#/definitions/v1.GRPCAction"
                 },
                 "httpGet": {
@@ -4330,7 +4354,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1.ResourceList"
                 },
                 "requests": {
-                    "description": "Requests describes the minimum amount of compute resources required.\nIf Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\notherwise to an implementation-defined value.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n+optional",
+                    "description": "Requests describes the minimum amount of compute resources required.\nIf Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\notherwise to an implementation-defined value. Requests cannot exceed Limits.\nMore info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n+optional",
                     "$ref": "#/definitions/v1.ResourceList"
                 }
             }
@@ -4405,7 +4429,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "localhostProfile": {
-                    "description": "localhostProfile indicates a profile defined in a file on the node should be used.\nThe profile must be preconfigured on the node to work.\nMust be a descending path, relative to the kubelet's configured seccomp profile location.\nMust only be set if type is \"Localhost\".\n+optional",
+                    "description": "localhostProfile indicates a profile defined in a file on the node should be used.\nThe profile must be preconfigured on the node to work.\nMust be a descending path, relative to the kubelet's configured seccomp profile location.\nMust be set if type is \"Localhost\". Must NOT be set for any other type.\n+optional",
                     "type": "string"
                 },
                 "type": {
@@ -4851,7 +4875,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "hostProcess": {
-                    "description": "HostProcess determines if a container should be run as a 'Host Process' container.\nThis field is alpha-level and will only be honored by components that enable the\nWindowsHostProcessContainers feature flag. Setting this field without the feature\nflag will result in errors when validating the Pod. All of a Pod's containers must\nhave the same effective HostProcess value (it is not allowed to have a mix of HostProcess\ncontainers and non-HostProcess containers).  In addition, if HostProcess is true\nthen HostNetwork must also be set to true.\n+optional",
+                    "description": "HostProcess determines if a container should be run as a 'Host Process' container.\nAll of a Pod's containers must have the same effective HostProcess value\n(it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).\nIn addition, if HostProcess is true then HostNetwork must also be set to true.\n+optional",
                     "type": "boolean"
                 },
                 "runAsUserName": {
@@ -5177,7 +5201,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
                     "type": "string"
                 }
             }
@@ -7198,7 +7221,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "annotations": {
-                    "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: http://kubernetes.io/docs/user-guide/annotations\n+optional",
+                    "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -7240,7 +7263,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "labels": {
-                    "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: http://kubernetes.io/docs/user-guide/labels\n+optional",
+                    "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -7254,11 +7277,11 @@ const docTemplate = `{
                     }
                 },
                 "name": {
-                    "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#names\n+optional",
+                    "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names\n+optional",
                     "type": "string"
                 },
                 "namespace": {
-                    "description": "Namespace defines the space within which each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/namespaces\n+optional",
+                    "description": "Namespace defines the space within which each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces\n+optional",
                     "type": "string"
                 },
                 "ownerReferences": {
@@ -7284,7 +7307,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.ScheduleStatus"
                 },
                 "uid": {
-                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids\n+optional",
+                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+optional",
                     "type": "string"
                 }
             }
@@ -7364,7 +7387,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
                     "type": "string"
                 },
                 "workflow": {
@@ -7757,7 +7779,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "annotations": {
-                    "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: http://kubernetes.io/docs/user-guide/annotations\n+optional",
+                    "description": "Annotations is an unstructured key value map stored with a resource that may be\nset by external tools to store and retrieve arbitrary metadata. They are not\nqueryable and should be preserved when modifying objects.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -7799,7 +7821,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "labels": {
-                    "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: http://kubernetes.io/docs/user-guide/labels\n+optional",
+                    "description": "Map of string keys and values that can be used to organize and categorize\n(scope and select) objects. May match selectors of replication controllers\nand services.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels\n+optional",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -7813,11 +7835,11 @@ const docTemplate = `{
                     }
                 },
                 "name": {
-                    "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#names\n+optional",
+                    "description": "Name must be unique within a namespace. Is required when creating resources, although\nsome resources may allow a client to request the generation of an appropriate name\nautomatically. Name is primarily intended for creation idempotence and configuration\ndefinition.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names\n+optional",
                     "type": "string"
                 },
                 "namespace": {
-                    "description": "Namespace defines the space within which each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: http://kubernetes.io/docs/user-guide/namespaces\n+optional",
+                    "description": "Namespace defines the space within which each name must be unique. An empty namespace is\nequivalent to the \"default\" namespace, but \"default\" is the canonical representation.\nNot all objects are required to be scoped to a namespace - the value of this field for\nthose objects will be empty.\n\nMust be a DNS_LABEL.\nCannot be updated.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces\n+optional",
                     "type": "string"
                 },
                 "ownerReferences": {
@@ -7844,7 +7866,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.WorkflowStatus"
                 },
                 "uid": {
-                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: http://kubernetes.io/docs/user-guide/identifiers#uids\n+optional",
+                    "description": "UID is the unique in time and space value for this object. It is typically generated by\nthe server on successful creation of a resource and is not allowed to change on PUT\noperations.\n\nPopulated by the system.\nRead-only.\nMore info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids\n+optional",
                     "type": "string"
                 }
             }

@@ -173,7 +173,6 @@ func Run(params RunParams) error {
 
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
-	hookServer.CertDir = ccfg.ControllerCfg.CertsDir
 
 	controllerRuntimeSignalHandler := ctrl.SetupSignalHandler()
 
@@ -197,9 +196,10 @@ func Run(params RunParams) error {
 	}
 
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli,
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, authCli, mgr.GetScheme(),
 			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.EnableFilterNamespace,
-			params.Logger.WithName("validate-auth")),
+			params.Logger.WithName("validate-auth"),
+		),
 	},
 	)
 

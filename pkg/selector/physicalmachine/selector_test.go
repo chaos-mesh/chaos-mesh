@@ -42,7 +42,11 @@ func TestSelectPhysicalMachines(t *testing.T) {
 	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 	g.Expect(err).NotTo(HaveOccurred())
 
-	c := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithRuntimeObjects(objects...).Build()
+	c := fake.NewClientBuilder().
+		WithScheme(scheme.Scheme).
+		WithRuntimeObjects(objects...).
+		WithStatusSubresource(&v1alpha1.PodNetworkChaos{}).
+		Build()
 	var r client.Reader
 
 	type TestCase struct {

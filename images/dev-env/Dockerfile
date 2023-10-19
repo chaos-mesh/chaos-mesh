@@ -5,12 +5,8 @@ FROM golang:1.20 AS go_install
 ENV GOPATH /go
 ENV CGO_ENABLED 0
 
-RUN mkdir -p /go/src/github.com/YangKeao/tools
-WORKDIR /go/src/github.com/YangKeao/tools
-RUN git clone https://github.com/YangKeao/tools.git -b v0.1.9-with-combine --depth 1 .
-RUN go install ./cmd/goimports
-
-RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.1
+RUN go install golang.org/x/tools/cmd/goimports@v0.13.0
+RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.13.0
 RUN go install github.com/mgechev/revive@v1.2.4
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
@@ -19,8 +15,8 @@ RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.0.0
 RUN go install github.com/AlekSi/gocov-xml@v0.0.0-20190121064608-3a14fb1c4737
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
-RUN go install github.com/swaggo/swag/cmd/swag@v1.8.3
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.8.0
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.7
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.12.0
 RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
 FROM debian:buster-slim
@@ -70,7 +66,7 @@ RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kusto
 
 RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 
-RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin && \
+RUN curl -L https://get.helm.sh/helm-v3.12.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin && \
     mv /usr/local/bin/$(go env GOOS)-$(go env GOARCH)/helm /usr/local/bin/helm && \
     rm -rf /usr/local/bin/$(go env GOOS)-$(go env GOARCH)
 

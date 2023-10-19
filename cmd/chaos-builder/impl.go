@@ -27,11 +27,11 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"k8s.io/apimachinery/pkg/runtime"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	gw "github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
 )
@@ -152,35 +152,35 @@ func (in *{{.Type}}) IsOneShot() bool {
 {{end}}
 var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
-func (in *{{.Type}}) ValidateCreate() error {
+func (in *{{.Type}}) ValidateCreate() (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateUpdate(old runtime.Object) error {
+func (in *{{.Type}}) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
 	{{- if not .EnableUpdate}}
 	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
-		return ErrCanNotUpdateChaos
+		return nil, ErrCanNotUpdateChaos
 	}
 	{{- end}}
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateDelete() error {
+func (in *{{.Type}}) ValidateDelete() (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
-	return nil
+	return nil, nil
 }
 
 var _ webhook.Validator = &{{.Type}}{}
 
-func (in *{{.Type}}) Validate() error {
+func (in *{{.Type}}) Validate() ([]string, error) {
 	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
+	return nil, gw.Aggregate(errs)
 }
 
 var _ webhook.Defaulter = &{{.Type}}{}

@@ -18,7 +18,7 @@ jobs:
     name: Find merge conflicts
     steps:
       # Checkout the source code so there are some files to look at.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # Run the actual merge conflict finder
       - name: Merge Conflict finder
         uses: olivernybroe/action-conflict-finder@v4.0

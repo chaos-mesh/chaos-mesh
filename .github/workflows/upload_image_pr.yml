@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: ${{ github.event.issue.pull_request && startsWith( github.event.comment.body, '/build-image') }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install jq
         run: |
@@ -76,7 +76,7 @@ jobs:
           done
 
       - name: Upload Chaos Mesh Image to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: chaos-mesh-images
           path: |

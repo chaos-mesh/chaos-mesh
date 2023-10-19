@@ -30,7 +30,7 @@ jobs:
           echo "The tag must start with 'chart-'"
           echo "GITHUB_REF: ${GITHUB_REF}"
           exit 1
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: "Extract Version"
         id: extract_version
         run: |

@@ -20,9 +20,10 @@ import (
 	"reflect"
 	"strconv"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -34,7 +35,7 @@ type UpdatedClient struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	cache *lru.Cache
+	cache *lru.Cache[string, runtime.Object]
 }
 
 func (c *UpdatedClient) objectKey(key client.ObjectKey, obj client.Object) (string, error) {
@@ -157,6 +158,14 @@ func (c *UpdatedClient) Status() client.StatusWriter {
 		statusWriter: c.client.Status(),
 		client:       c,
 	}
+}
+
+func (c *UpdatedClient) GroupVersionKindFor(obj runtime.Object) (schema.GroupVersionKind, error) {
+	return c.client.GroupVersionKindFor(obj)
+}
+
+func (c *UpdatedClient) IsObjectNamespaced(obj runtime.Object) (bool, error) {
+	return c.client.IsObjectNamespaced(obj)
 }
 
 type UpdatedStatusWriter struct {

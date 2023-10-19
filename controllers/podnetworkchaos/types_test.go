@@ -90,7 +90,11 @@ func TestHostNetworkOption(t *testing.T) {
 		}
 		objs = append(objs, chaos)
 
-		fakeClient := fake.NewClientBuilder().WithScheme(provider.NewScheme()).WithRuntimeObjects(objs...).Build()
+		fakeClient := fake.NewClientBuilder().
+			WithScheme(provider.NewScheme()).
+			WithRuntimeObjects(objs...).
+			WithStatusSubresource(&v1alpha1.PodNetworkChaos{}).
+			Build()
 
 		recorder := recorder.NewDebugRecorder()
 		h := &Reconciler{

@@ -16,7 +16,7 @@ jobs:
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
       - name: Get changed files
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -106,7 +106,7 @@ jobs:
           docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
 
       - name: upload saved images
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: saved-images
           path: ./output/saved-images
@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout codes
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Restore build cache
         id: cache
         uses: martijnhols/actions-cache/restore@main
@@ -133,7 +133,7 @@ jobs:
         run: |
           make e2e-build
       - name: upload e2e binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: e2e-binary
           path: ./e2e-test/image/e2e/bin
@@ -164,7 +164,7 @@ jobs:
           - "[Basic] [StressChaos]"
     steps:
       - name: checkout codes
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: download saved images
         uses: actions/download-artifact@v2
         with:
@@ -205,8 +205,9 @@ jobs:
         uses: azure/setup-helm@v3
 
       - name: Install Chaos Mesh
+        # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
@@ -225,14 +226,14 @@ jobs:
           kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
       - name: post run - upload Chaos Mesh profile info
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"

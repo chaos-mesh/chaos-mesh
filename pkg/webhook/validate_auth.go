@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
@@ -60,11 +61,12 @@ type AuthValidator struct {
 }
 
 // NewAuthValidator returns a new AuthValidator
-func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Client,
+func NewAuthValidator(enabled bool, authCli *authorizationv1.AuthorizationV1Client, decoderScheme *runtime.Scheme,
 	clusterScoped bool, targetNamespace string, enableFilterNamespace bool, logger logr.Logger) *AuthValidator {
 	return &AuthValidator{
 		enabled:               enabled,
 		authCli:               authCli,
+		decoder:               admission.NewDecoder(decoderScheme),
 		clusterScoped:         clusterScoped,
 		targetNamespace:       targetNamespace,
 		enableFilterNamespace: enableFilterNamespace,
@@ -128,15 +130,6 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	}
 
 	return admission.Allowed("")
-}
-
-// AuthValidator implements admission.DecoderInjector.
-// A decoder will be automatically injected.
-
-// InjectDecoder injects the decoder.
-func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
-	return nil
 }
 
 func (v *AuthValidator) auth(username string, groups []string, namespace string, chaosKind string) (bool, error) {
