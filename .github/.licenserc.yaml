@@ -22,6 +22,7 @@ header:
     - '**/*.key'
     - '**/*.ext'
     - '**/*.csr'
+    - '.github/CODEOWNERS'
     - '.github/workflows/*'
     - '.github/ISSUE_TEMPLATE/config.yml'
     - '.github/.licenserc.yaml'

@@ -1,35 +1,20 @@
-# This workflow defines the go and ui related jobs.
-#
-# First, we use [dorny/paths-filter@v2](https://github.com/dorny/paths-filter) to
-# detect changes in go and ui related files, and then run the corresponding sub-jobs
-# based on the changes.
-#
-# Please note that due to the GitHub required checks, the `go` and `ui` jobs
-# also need to run to report the status. So here we need to define an additional
-# "skip" file to ensure that the status is reported. For details, please refer to:
-#
-# - `ci_skip.yml`
-# - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/troubleshooting-required-status-checks#handling-skipped-but-required-checks
-name: ci
+name: Units test
 
 on:
-  pull_request:
-    branches:
-      - master
-      - release-*
+  workflow_call: {}
 
 permissions: read-all
 
 jobs:
-  # JOB to run change detection
   changes:
     runs-on: ubuntu-20.04
-    # Set job outputs to values from filter step
     outputs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
-      # For pull requests it's not necessary to checkout the code
+      - name: checkout codes
+        uses: actions/checkout@v2
+
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -40,47 +25,22 @@ jobs:
               - '**.go'
               - 'helm/**'
             ui:
-              - 'ui/pnpm-lock.yaml'
+              - 'ui/**'
               - '**.js'
-              - '**.ts?(x)'
+              - '**.ts'
   go:
     needs: changes
     if: ${{ needs.changes.outputs.go == 'true' }}
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, arm64]
         job:
           - verify
-          - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Chaos Mesh Build Env
-        env:
-          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
-        run: |
-          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_BUILD_ENV_BUILD=1;
-          else
-            export IMAGE_BUILD_ENV_BUILD=0;
-          fi
-
-          make image-build-env
-
-      - name: Build Chaos Mesh Dev Env
-        env:
-          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
-        run: |
-          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
-            export IMAGE_DEV_ENV_BUILD=1;
-          else
-            export IMAGE_DEV_ENV_BUILD=0;
-          fi
-
-          make image-dev-env
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: ${{ matrix.job }}
         env:
@@ -90,8 +50,6 @@ jobs:
             make check
             echo "Please make check before creating a PR"
             git diff --quiet -- . || (git diff | cat && false)
-          elif [[ "$job" == "build" ]]; then
-            make image
           elif [[ "$job" == "test" ]]; then
             make test
           else
