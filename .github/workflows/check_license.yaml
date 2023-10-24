@@ -1,9 +1,7 @@
 name: License checker
 
 on:
-  pull_request:
-    branches:
-      - master
+  workflow_call: {}
 
 permissions: read-all
 
@@ -11,7 +9,9 @@ jobs:
   check-license:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Check License Header
         uses: apache/skywalking-eyes@v0.4.0
         env:

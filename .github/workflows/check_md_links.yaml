@@ -1,0 +1,39 @@
+name: Check markdown links
+
+on:
+  workflow_call: {}
+
+permissions: read-all
+
+jobs:
+  changed-files:
+    runs-on: ubuntu-20.04
+    outputs:
+      any-changed: ${{ steps.filter.outputs.any_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Get changed files
+        uses: tj-actions/changed-files@v34
+        id: filter
+        with:
+          files: |
+            **.md
+            .github/checklink_config.json
+
+  markdown-link-check:
+    needs: changed-files
+    if: needs.changed-files.outputs.any-changed == 'false'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: "yes"
+          config-file: ".github/checklink_config.json"

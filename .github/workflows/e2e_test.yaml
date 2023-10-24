@@ -1,0 +1,126 @@
+name: E2E test
+
+on:
+  workflow_call:
+    inputs:
+      images-artifact-name:
+        description: "Name of the images artifact"
+        type: string
+        required: true
+      e2e-binary-name:
+        description: "Name of the e2e-binary artifact"
+        type: string
+        required: true
+
+permissions: read-all
+
+jobs:
+  e2e-test-matrix:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes-version:
+          - v1.20.15
+          - v1.23.4
+          - v1.25.1
+        focus:
+          - "[Graceful-Shutdown] [IOChaos]"
+          - "[Graceful-Shutdown] [HTTPChaos]"
+          - "[Basic] [PodChaos]"
+          - "[Basic] [TimeChaos]"
+          - "[Basic] [IOChaos]"
+          - "[Basic] [HTTPChaos]"
+          - "[Basic] [Sidecar Config]"
+          - "[Basic] [NetworkChaos]"
+          - "[Basic] [DNSChaos]"
+          - "[Basic] [StressChaos]"
+    steps:
+      - name: checkout codes
+        uses: actions/checkout@v2
+
+      - name: download saved images
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ inputs.images-artifact-name }}
+          path: ./output/saved-images
+
+      - name: download e2e binary
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ inputs.e2e-binary-name }}
+          path: ./output/e2e-binary
+
+      - name: move e2e binary
+        run: |
+          mkdir -p ./e2e-test/image/e2e/bin
+          mv ./output/e2e-binary/ginkgo ./e2e-test/image/e2e/bin/ginkgo
+          mv ./output/e2e-binary/e2e.test ./e2e-test/image/e2e/bin/e2e.test
+          chmod +x ./e2e-test/image/e2e/bin/ginkgo
+          chmod +x ./e2e-test/image/e2e/bin/e2e.test
+
+      - name: Setup minikube
+        uses: manusa/actions-setup-minikube@v2.4.3
+        with:
+          driver: docker
+          minikube version: v1.27.0
+          kubernetes version: ${{ matrix.kubernetes-version }}
+          start args: --cni calico
+          github token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: load image into minikube
+        run: |
+          minikube image load ./output/saved-images/chaos-dashboard.tgz
+          minikube image load ./output/saved-images/chaos-daemon.tgz
+          minikube image load ./output/saved-images/chaos-mesh.tgz
+          minikube image load ./output/saved-images/e2e-helper.tgz
+
+      - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
+        run: chmod 600 ~/.kube/config
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Chaos Mesh
+        run: |
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest
+      - name: e2e tests
+        env:
+          FOCUS: ${{ matrix.focus }}
+        run: |
+          # because ginkgo -focus accepts the regex expression, we should use escape to represent the squared brackets and dash
+          export ESCAPED_FOCUS=$(echo $FOCUS | sed -e 's/\[/\\\[/g' | sed -e 's/\]/\\\]/g' | sed -e 's/\-/\\\-/g')
+          KUBECONFIG=~/.kube/config ./e2e-test/image/e2e/bin/ginkgo -focus="${ESCAPED_FOCUS}" ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:latest
+      - name: post run - extract profile info from kubernetes
+        if: always()
+        env:
+          PROFILE_DIRECTORY: ./output/chaos-mesh-profile
+        run: |
+          kubectl cluster-info dump --all-namespaces --output-directory $PROFILE_DIRECTORY/manifests -o yaml
+          kubectl get endpoints -A -o yaml > $PROFILE_DIRECTORY/manifests/endpoints.yaml
+          kubectl get secrets -A -o yaml > $PROFILE_DIRECTORY/manifests/secrets.yaml
+          kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
+      - name: post run - upload Chaos Mesh profile info
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          path: ./output/chaos-mesh-profile
+          retention-days: 7
+      - name: post run - upload junit test reports
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
+          path: "**/*.xml"
+          retention-days: 7
+
+  pass:
+    needs:
+      - e2e-test-matrix
+    name: E2E Test Passed
+    runs-on: ubuntu-20.04
+    steps:
+      - run: echo "🎉 E2E Test Passed!"
