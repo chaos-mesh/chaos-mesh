@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
 
 ### Changed
 
@@ -39,7 +39,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
-- Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
 
 ### Changed
 
