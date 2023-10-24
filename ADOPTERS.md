@@ -1,3 +1,5 @@
+<!-- markdown-link-check-disable -->
+
 # Chaos Mesh Adopters
 
 Chaos Mesh now has over 40 adopters, here we have listed some of them. Some have already gone into production, and others are at various stages of testing.
@@ -32,3 +34,5 @@ If you are an adopter and are willing to share your Chaos Mesh story, feel free 
 | [Civo](https://github.com/civo/kubernetes-marketplace)                  |Chaos Mesh can be directly deployed from the Civo's Kubernetes marketplace.              |[Automating chaos engineering with Chaos Mesh](https://www.civo.com/learn/automating-chaos-engineering-with-chaos-mesh-on-civo)        |
 | [KubeSphere](https://github.com/kubesphere/kubesphere)                  |Chaos Mesh can be directly deployed from the KubeSphere App Store starting from KubeSphere v2.3 onwards.              |To be added.        |
 | [Microsoft](https://www.microsoft.com/)                  |Microsoft's Azure Chaos Studio integrated Chaos Mesh, so that users can inject faults into AKS clusters.             |[Create a chaos experiment that uses a Chaos Mesh fault to kill AKS pods](https://docs.microsoft.com/en-us/azure/chaos-studio/chaos-studio-tutorial-aks)       |
+
+<!-- markdown-link-check-enable -->
