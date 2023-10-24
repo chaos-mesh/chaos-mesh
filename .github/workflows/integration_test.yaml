@@ -1,0 +1,92 @@
+name: Integration test
+
+on:
+  workflow_call:
+    inputs:
+      images-artifact-name:
+        description: "Name of the images artifact"
+        type: string
+        required: true
+
+permissions: read-all
+
+jobs:
+  run:
+    name: Integration Test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+
+      - name: Download saved images
+        id: download-images
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ inputs.images-artifact-name }}
+          path: ./output/${{ inputs.images-artifact-name }}
+
+      - name: Load images into docker
+        run: |
+          docker load --input ./output/${{ inputs.images-artifact-name }}/chaos-dashboard.tgz
+          docker load --input ./output/${{ inputs.images-artifact-name }}/chaos-daemon.tgz
+          docker load --input ./output/${{ inputs.images-artifact-name }}/chaos-mesh.tgz
+
+      - name: Create kind cluster
+        # released version of kind-action doesn't support arm64
+        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
+        with:
+          kubectl_version: v1.23.1
+
+      - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
+        run: chmod 600 ~/.kube/config
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.19.7"
+
+      - name: Install Chaos Mesh
+        run: |
+          export CLUSTER="chart-testing"
+          export SKIP_IMAGE_BUILD=true
+          hack/local-up-chaos-mesh.sh
+          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
+          kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-mesh
+          sleep 5
+          kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
+
+      - name: Build chaosctl
+        run: |
+          make chaosctl
+
+      - name: Install localstack && aws client
+        run: |
+          helm repo add localstack-repo http://helm.localstack.cloud
+          helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
+          pip install awscli
+          kubectl wait --timeout=60s --for=condition=ready --all pod
+
+      - name: Run integration test
+        run: |
+          bash test/integration_test/run.sh
+
+      - name: Post run - dump kubernetes cluster info
+        if: always()
+        run: |
+          kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
+
+      - name: Post run - upload kubernetes cluster info dump
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: integration-test-kubernetes-cluster-info-dump
+          path: cluster-info-dump
+          retention-days: 7

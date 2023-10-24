@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  calculate-tag:
+    uses: ./.github/workflows/calculate_tag.yaml
+
+  check-md-links:
+    uses: ./.github/workflows/check_md_links.yaml
+
+  check-license:
+    uses: ./.github/workflows/check_license.yaml
+
+  unit-test:
+    uses: ./.github/workflows/unit_test.yaml
+
+  changed-files:
+    uses: ./.github/workflows/changed_files.yaml
+
+  build-targets:
+    needs: [changed-files, calculate-tag]
+    if: needs.changed-files.outputs.only_changed == 'false'
+    uses: ./.github/workflows/build_targets.yaml
+    with:
+      tag: ${{needs.calculate-tag.outputs.tag }}
+
+  e2e-test:
+    needs: build-targets
+    uses: ./.github/workflows/e2e_test.yaml
+    with:
+      images-artifact-name: ${{ needs.build-targets.outputs.images-artifact-name }}
+      e2e-binary-name: ${{ needs.build-targets.outputs.e2e-binary-artifact-name }}
+
+  integration-test:
+    needs: build-targets
+    uses: ./.github/workflows/integration_test.yaml
+    with:
+      images-artifact-name: ${{ needs.build-targets.outputs.images-artifact-name }}
+
+  release:
+    runs-on: ubuntu-20.04
+    needs: [calculate-tag, build-targets]
+    permissions: write-all
+    steps:
+      - name: Download saved images
+        id: download-images
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build-targets.outputs.images-artifact-name }}
+          path: ./output/${{ needs.build-targets.outputs.images-artifact-name }}
+
+      - name: Download chart
+        id: download-chart
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build-targets.outputs.chart-artifact-name }}
+          path: ./output/${{ needs.build-targets.outputs.chart-artifact-name }}
+
+      - name: Create GH release
+        uses: softprops/action-gh-release@v1
+        id: release
+        with:
+          generate_release_notes: true
+          target_commitish: "${{ github.base_ref }}"
+          tag_name: ${{ needs.calculate-tag.outputs.tag }}
+          prerelease: "${{ github.event_name == 'pull_request' }}"
+          files: |
+            ./output/${{ needs.build-targets.outputs.images-artifact-name }}/*
+            ./output/${{ needs.build-targets.outputs.chart-artifact-name }}/*
+
+      - name: Comment release
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Created new release based on commit https://github.com/${{ github.repository }}/pull/${{ github.event.number }}/commits/${{github.sha}}
+
+              **Release tag**: ${{ needs.calculate-tag.outputs.tag }}
+
+              [**Link to release**](https://github.com/${{ github.repository }}/releases/tag/${{ needs.calculate-tag.outputs.tag }})`
+            })

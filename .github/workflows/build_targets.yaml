@@ -1,0 +1,183 @@
+name: Build images and chart
+
+on:
+  workflow_call:
+    outputs:
+      images-artifact-name:
+        description: "The name of the image build artifact"
+        value: ${{ inputs.images-artifact-name }}
+
+      images-cache-key:
+        description: "The name of the image cache"
+        value: ${{ inputs.images-cache-key }}
+
+      e2e-binary-artifact-name:
+        description: "The name of the e2e binary build artifact"
+        value: ${{ inputs.e2e-binary-name }}
+
+      e2e-binary-cache-key:
+        description: "The name of the e2e binary cache key"
+        value: ${{ inputs.e2e-binary-cache-key }}
+
+      chart-name:
+        description: "Chart name with a version"
+        value: ${{ jobs.build-chart.outputs.chart-name }}
+
+      chart-artifact-name:
+        description: "The name of the chart artifact"
+        value: ${{ inputs.chart-artifact-name }}
+
+    inputs:
+      images-artifact-name:
+        description: "Name of the images artifact"
+        type: string
+        default: saved-images
+
+      images-cache-key:
+        description: "Key used to upload e2e-image build cache"
+        type: string
+        default: e2e-images-build-cache
+
+      e2e-binary-name:
+        description: "Name of the e2e-binary artifact"
+        type: string
+        default: e2e-binary
+
+      e2e-binary-cache-key:
+        description: "Key used to upload e2e-binary build cache"
+        type: string
+        default: e2e-binary-build-cache
+
+      tag:
+        description: "Tag"
+        type: string
+        required: true
+
+      chart-artifact-name:
+        description: "The name of the chart artifact"
+        type: string
+        default: chart
+
+permissions: read-all
+
+jobs:
+  build-images:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Restore build cache
+        id: cache
+        uses: martijnhols/actions-cache/restore@main
+        with:
+          path: cache
+          key: ${{ inputs.images-cache-key }}
+
+      - name: Build e2e images
+        env:
+          UI: 1
+          DOCKER_CACHE: 1
+          DOCKER_CACHE_DIR: ${{github.workspace}}/cache
+          GO_BUILD_CACHE: ${{github.workspace}}/cache
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        run: |
+          docker buildx create --use --name chaos-mesh-builder
+          make -j4 image e2e-image
+
+      - name: Save docker images
+        run: |
+          mkdir -p ./output/saved-images
+          docker image save ghcr.io/chaos-mesh/chaos-dashboard:latest > ./output/saved-images/chaos-dashboard.tgz
+          docker image save ghcr.io/chaos-mesh/chaos-daemon:latest > ./output/saved-images/chaos-daemon.tgz
+          docker image save ghcr.io/chaos-mesh/chaos-mesh:latest > ./output/saved-images/chaos-mesh.tgz
+          docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
+
+      - name: Upload build cache
+        uses: martijnhols/actions-cache/save@main
+        with:
+          path: cache
+          key: ${{ inputs.images-cache-key }}
+
+      - name: Upload saved images
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ inputs.images-artifact-name }}
+          path: ./output/saved-images
+          retention-days: 7
+
+  build-e2e-binary:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Restore build cache
+        id: cache
+        uses: martijnhols/actions-cache/restore@main
+        with:
+          path: cache
+          key: ${{ inputs.e2e-binary-cache-key }}
+
+      - name: Build e2e binary
+        env:
+          DOCKER_CACHE: 1
+          DOCKER_CACHE_DIR: ${{github.workspace}}/cache
+          GO_BUILD_CACHE: ${{github.workspace}}/cache
+        run: |
+          make e2e-build
+
+      - name: Upload build cache
+        uses: martijnhols/actions-cache/save@main
+        with:
+          path: cache
+          key: ${{ inputs.e2e-binary-cache-key }}
+
+      - name: Upload e2e binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ inputs.e2e-binary-name }}
+          path: ./e2e-test/image/e2e/bin
+          retention-days: 7
+
+  build-chart:
+    runs-on: ubuntu-20.04
+    outputs:
+      chart-name: ${{ steps.build-chart.outputs.chart-name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build helm chart
+        id: build-chart
+        run: |
+          output_dir="./output/${{ inputs.chart-artifact-name }}"
+          helm package ./helm/chaos-mesh \
+            --version ${{ inputs.tag }} --app-version ${{ inputs.tag }} \
+            --destination "$output_dir"
+
+          chart_name="chaos-mesh-chart.tgz"
+          mv "$output_dir/chaos-mesh-${{ inputs.tag }}.tgz" "$output_dir/$chart_name"
+
+          echo "chart-path=$output_dir/$chart_name" >> $GITHUB_OUTPUT
+          echo "chart-name=$chart_name" >> $GITHUB_OUTPUT
+
+      - name: Upload chart
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ inputs.chart-artifact-name }}
+          path: ${{ steps.build-chart.outputs.chart-path }}
+          retention-days: 7
+
+  pass:
+    needs: [build-images, build-e2e-binary, build-chart]
+    name: Build passed
+    runs-on: ubuntu-20.04
+    steps:
+      - run: echo "🎉 Build Passed!"

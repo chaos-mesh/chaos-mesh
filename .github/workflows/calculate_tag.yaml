@@ -1,0 +1,56 @@
+name: Calculate new tag
+
+on:
+  workflow_call:
+    outputs:
+      tag:
+        description: "The the next semantic version tag based on commit messages."
+        value: ${{ jobs.calculate-tag.outputs.tag }}
+    inputs:
+      append_prerelease_suffix:
+        description: |
+          When set to true, a prerelease suffix will be added to the suffix of the tag.
+        required: false
+        type: boolean
+        default: "${{ github.event_name == 'pull_request' }}"
+      head_ref:
+        description: "Head ref to be used as pre-release suffix"
+        type: string
+        default: "${{ github.head_ref }}"
+      f3_tag:
+        description: "Additional tag to be prefixed to the latest upstream release tag"
+        type: string
+        default: "${{ github.sha }}"
+
+jobs:
+  calculate-tag:
+    runs-on: ubuntu-20.04
+    permissions: read-all
+    outputs:
+      tag: "${{ steps.tag.outputs.tag }}"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Determine latest upstream release tag
+        id: latest_tag
+        run: |
+          latest_tag=$(git tag -l | grep -E "v[0-9]+\.[0-9]+\.[0-9]+$" | tail -n 1)
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+      - name: Calculate pre-release suffix
+        id: tag-suffix
+        if: ${{ inputs.append_prerelease_suffix }}
+        run: |
+          PRERELEASE="${{ inputs.head_ref }}"
+          underscores_and_slashes_to_dashes_suffix="${PRERELEASE//[\/_]/-}"
+          echo "tag-suffix=-${underscores_and_slashes_to_dashes_suffix}" >> $GITHUB_OUTPUT
+
+      - name: Compute next tag
+        id: tag
+        run: |
+          latest_tag="${{ steps.latest_tag.outputs.latest_tag }}"
+          sha5=$(echo "${{ inputs.f3_tag }}" | cut -c1-5)
+          tag="${latest_tag}-f3-${sha5}${{steps.tag-suffix.outputs.tag-suffix}}"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
