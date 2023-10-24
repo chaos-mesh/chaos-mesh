@@ -45,6 +45,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove redundant where statements [#4084](https://github.com/chaos-mesh/chaos-mesh/pull/4084)
 - Fix dashboard panic when exec delete action by finish_time [#4100](https://github.com/chaos-mesh/chaos-mesh/pull/4100)
 - Fix remote cluster cannot upgrade helm release [#4075](https://github.com/chaos-mesh/chaos-mesh/pull/4075)
+- Fix goroutine leak [#4229](https://github.com/chaos-mesh/chaos-mesh/pull/4229)
 
 ### Security
 
