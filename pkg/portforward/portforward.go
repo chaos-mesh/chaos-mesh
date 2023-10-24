@@ -91,7 +91,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 	}()
 
 	// run port forwarding
-	errChan := make(chan error)
+	errChan := make(chan error, 1)
 	go func() {
 		errChan <- fw.ForwardPorts()
 	}()

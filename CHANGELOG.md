@@ -27,7 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix goroutine leak [#4229](https://github.com/chaos-mesh/chaos-mesh/pull/4229)
 
 ### Security
 
