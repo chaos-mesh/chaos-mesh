@@ -2,8 +2,9 @@ name: CI
 
 on:
   pull_request:
+  push:
     branches:
-      - builder
+      - master
 
 jobs:
   calculate-tag:
@@ -72,7 +73,9 @@ jobs:
             ./output/${{ needs.build-targets.outputs.images-artifact-name }}/*
             ./output/${{ needs.build-targets.outputs.chart-artifact-name }}/*
 
-      - uses: actions/github-script@v6
+      - name: Comment release
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
         with:
           script: |
             github.rest.issues.createComment({
