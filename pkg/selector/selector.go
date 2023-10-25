@@ -31,6 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodevolumepath"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/resourcescale"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/rollingrestart"
 )
 
@@ -112,5 +113,6 @@ var Module = fx.Provide(
 	nodevolumepath.New,
 	k8schaos.New,
 	deployment.New,
+	resourcescale.New,
 	rollingrestart.New,
 )
