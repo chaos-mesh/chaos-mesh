@@ -1254,33 +1254,33 @@ func (in *K8SChaos) IsOneShot() bool {
 
 var K8SChaosWebhookLog = logf.Log.WithName("K8SChaos-resource")
 
-func (in *K8SChaos) ValidateCreate() error {
+func (in *K8SChaos) ValidateCreate() (admission.Warnings, error) {
 	K8SChaosWebhookLog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *K8SChaos) ValidateUpdate(old runtime.Object) error {
+func (in *K8SChaos) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	K8SChaosWebhookLog.Info("validate update", "name", in.Name)
 	if !reflect.DeepEqual(in.Spec, old.(*K8SChaos).Spec) {
-		return ErrCanNotUpdateChaos
+		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *K8SChaos) ValidateDelete() error {
+func (in *K8SChaos) ValidateDelete() (admission.Warnings, error) {
 	K8SChaosWebhookLog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
-	return nil
+	return nil, nil
 }
 
 var _ webhook.Validator = &K8SChaos{}
 
-func (in *K8SChaos) Validate() error {
+func (in *K8SChaos) Validate() ([]string, error) {
 	errs := gw.Validate(in)
-	return gw.Aggregate(errs)
+	return nil, gw.Aggregate(errs)
 }
 
 var _ webhook.Defaulter = &K8SChaos{}

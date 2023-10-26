@@ -4309,6 +4309,12 @@ definitions:
     type: object
   v1alpha1.K8SChaosSpec:
     properties:
+      allowPatching:
+        description: |-
+          AllowPatching specifies that the chaos should patch & restore the modified object,
+          rather than create & delete.
+          +optional
+        type: boolean
       apiObjects:
         $ref: '#/definitions/v1alpha1.K8SChaosAPIObjects'
         description: +kubebuilder:validation:Required

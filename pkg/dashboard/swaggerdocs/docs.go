@@ -6049,6 +6049,10 @@ const docTemplate = `{
         "v1alpha1.K8SChaosSpec": {
             "type": "object",
             "properties": {
+                "allowPatching": {
+                    "description": "AllowPatching specifies that the chaos should patch \u0026 restore the modified object,\nrather than create \u0026 delete.\n+optional",
+                    "type": "boolean"
+                },
                 "apiObjects": {
                     "description": "+kubebuilder:validation:Required",
                     "$ref": "#/definitions/v1alpha1.K8SChaosAPIObjects"

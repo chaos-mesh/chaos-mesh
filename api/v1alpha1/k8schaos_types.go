@@ -50,6 +50,12 @@ type K8SChaosSpec struct {
 
 	// +kubebuilder:validation:Required
 	APIObjects *K8SChaosAPIObjects `json:"apiObjects"`
+
+	// AllowPatching specifies that the chaos should patch & restore the modified object,
+	// rather than create & delete.
+	// +optional
+	AllowPatching bool `json:"allowPatching,omitempty"`
+
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
