@@ -93,11 +93,18 @@ jobs:
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
-            ROOT=$(pwd)
-            KUBEBUILDER_ASSETS=${ROOT}/output/bin/kubebuilder/bin make test
+            make test
           else
             make $job
           fi
+
+      - name: Upload Code Coverage
+        uses: codecov/codecov-action@v3
+        if: matrix.job == 'test'
+        with:
+          files: ./cover.out
+          verbose: true
+          fail_ci_if_error: true
   ui:
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
