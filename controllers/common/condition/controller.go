@@ -155,6 +155,9 @@ func diffConditions(obj v1alpha1.InnerObject) (newConditionMap map[v1alpha1.Chao
 	return
 }
 
+// every returns true if all elements in the given slice satisfy the given condition.
+//
+// In this package, we use it to check if all records are injected or recovered.
 func every[T any](arr []T, condition func(T) bool) bool {
 	for _, item := range arr {
 		if !condition(item) {
