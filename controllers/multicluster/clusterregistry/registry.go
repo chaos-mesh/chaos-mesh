@@ -29,6 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"github.com/chaos-mesh/chaos-mesh/cmd/chaos-controller-manager/provider"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -98,8 +99,10 @@ func run(lc fx.Lifecycle, mgr ctrl.Manager, logger logr.Logger) error {
 func controllerManagerOption(scheme *runtime.Scheme) *ctrl.Options {
 	options := ctrl.Options{
 		// TODO: accept the schema from parameter instead of using scheme directly
-		Scheme:             scheme,
-		MetricsBindAddress: "0",
+		Scheme: scheme,
+		Metrics: metricsserver.Options{
+			BindAddress: "0",
+		},
 		// TODO: enable leader election
 		LeaderElection: false,
 		RetryPeriod:    &config.ControllerCfg.LeaderElectRetryPeriod,

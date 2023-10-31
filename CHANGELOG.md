@@ -14,6 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
 - Support more rate units for networkchaos [#4129](https://github.com/chaos-mesh/chaos-mesh/pull/4129)
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
+- Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
 
 ### Changed
 
@@ -26,6 +27,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update k8s dependencies to 1.28.0 [#4154](https://github.com/chaos-mesh/chaos-mesh/pull/4154)
 - Update lru dependency [#4189](https://github.com/chaos-mesh/chaos-mesh/pull/4189)
 - Update swag dependency [#4191](https://github.com/chaos-mesh/chaos-mesh/pull/4191)
+- Update ginkgo to 2.12.0 [#4190](https://github.com/chaos-mesh/chaos-mesh/pull/4190)
+- Update k8s controller-runtime dependency [#4198](https://github.com/chaos-mesh/chaos-mesh/pull/4198)
+- Automatically remove the token from the dashboard when it expires [#4193](https://github.com/chaos-mesh/chaos-mesh/pull/4193)
 - Optimize `allInjected` and `allRecovered` states when targets are not selected [#4199](https://github.com/chaos-mesh/chaos-mesh/pull/4199)
 
 ### Deprecated
@@ -42,6 +46,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Remove redundant where statements [#4084](https://github.com/chaos-mesh/chaos-mesh/pull/4084)
 - Fix dashboard panic when exec delete action by finish_time [#4100](https://github.com/chaos-mesh/chaos-mesh/pull/4100)
 - Fix remote cluster cannot upgrade helm release [#4075](https://github.com/chaos-mesh/chaos-mesh/pull/4075)
+- Fix goroutine leak [#4229](https://github.com/chaos-mesh/chaos-mesh/pull/4229)
+- Remove the duplicate `make test` [#4234](https://github.com/chaos-mesh/chaos-mesh/pull/4234)
 
 ### Security
 

@@ -1,11 +1,9 @@
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.1
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.13.0
   name: dnschaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -70,13 +68,13 @@ spec:
                 - random-max-percent
                 type: string
               patterns:
-                description: "Choose which domain names to take effect, support the
+                description: 'Choose which domain names to take effect, support the
                   placeholder ? and wildcard *, or the Specified domain name. Note:
-                  \     1. The wildcard * must be at the end of the string. For example,
-                  chaos-*.org is invalid.      2. if the patterns is empty, will take
-                  effect on all the domain names. For example: \t\tThe value is [\"google.com\",
-                  \"github.*\", \"chaos-mes?.org\"], \t\twill take effect on \"google.com\",
-                  \"github.com\" and \"chaos-mesh.org\""
+                  1. The wildcard * must be at the end of the string. For example,
+                  chaos-*.org is invalid. 2. if the patterns is empty, will take effect
+                  on all the domain names. For example: The value is ["google.com",
+                  "github.*", "chaos-mes?.org"], will take effect on "google.com",
+                  "github.com" and "chaos-mesh.org"'
                 items:
                   type: string
                 type: array
@@ -278,9 +276,3 @@ spec:
     served: true
     storage: true
     subresources: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

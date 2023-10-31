@@ -36,7 +36,7 @@ jobs:
         arch: [amd64, arm64]
     runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Must use at least depth 2!
           fetch-depth: 2
@@ -122,7 +122,7 @@ jobs:
           kubectl cluster-info dump --all-namespaces --output-directory cluster-info-dump
       - name: post run - upload kubernetes cluster info dump
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: integration-test-kubernetes-cluster-info-dump-${{ matrix.arch }}
           path: cluster-info-dump
