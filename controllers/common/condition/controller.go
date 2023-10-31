@@ -121,22 +121,18 @@ func diffConditions(obj v1alpha1.InnerObject) (newConditionMap map[v1alpha1.Chao
 	}
 
 	// If records is `nil`, we don't need to check the `allInjected` and `allRecovered` conditions.
-	var allInjected corev1.ConditionStatus
+	allInjected := corev1.ConditionFalse
 	if records != nil && every(records, func(record *v1alpha1.Record) bool {
 		return record.Phase == v1alpha1.Injected
 	}) {
 		allInjected = corev1.ConditionTrue
-	} else {
-		allInjected = corev1.ConditionFalse
 	}
 
-	var allRecovered corev1.ConditionStatus
+	allRecovered := corev1.ConditionFalse
 	if records != nil && every(records, func(record *v1alpha1.Record) bool {
 		return record.Phase == v1alpha1.NotInjected
 	}) {
 		allRecovered = corev1.ConditionTrue
-	} else {
-		allRecovered = corev1.ConditionFalse
 	}
 
 	newConditionMap[v1alpha1.ConditionAllInjected] = StatusAndReason{
