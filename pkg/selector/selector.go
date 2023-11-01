@@ -31,6 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodevolumepath"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/resourcescale"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/rollingrestart"
 )
 
@@ -78,6 +79,7 @@ type SelectorParams struct {
 	GCPSelector             *gcp.SelectImpl
 	PhysicalMachineSelector *physicalmachine.SelectImpl
 	NodeVolumePath          *nodevolumepath.SelectImpl
+	ResourceScaleSelector   *resourcescale.SelectImpl
 	K8SChaosSelector        *k8schaos.SelectImpl
 	DeploymentSelector      *deployment.SelectImpl
 	RollingRestartSelector  *rollingrestart.SelectImpl
@@ -110,6 +112,7 @@ var Module = fx.Provide(
 	gcp.New,
 	physicalmachine.New,
 	nodevolumepath.New,
+	resourcescale.New,
 	k8schaos.New,
 	deployment.New,
 	rollingrestart.New,
