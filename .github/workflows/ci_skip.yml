@@ -2,6 +2,7 @@
 name: ci
 
 on:
+  merge_group:
   pull_request:
     branches:
       - master
