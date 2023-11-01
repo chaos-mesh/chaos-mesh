@@ -103,8 +103,6 @@ jobs:
         if: matrix.job == 'test'
         with:
           files: ./cover.out
-          verbose: true
-          fail_ci_if_error: true
   ui:
     needs: changes
     if: ${{ needs.changes.outputs.ui == 'true' }}
