@@ -1,0 +1,13 @@
+# Refer to https://github.com/dcoapp/app/issues/199 for more details.
+name: DCO
+on:
+  merge_group:
+
+permissions: read-all
+
+jobs:
+  DCO:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    steps:
+      - run: echo "Dummy DCO workflow (it won't run any check actually) to trigger by merge_group in order to enable merge queue."
