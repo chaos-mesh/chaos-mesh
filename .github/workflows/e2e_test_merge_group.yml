@@ -1,0 +1,12 @@
+name: Dummy E2E Test
+on:
+  merge_group:
+
+permissions: read-all
+
+jobs:
+  pass:
+    name: E2E Test Passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Dummy E2E workflow (it won't run any checks actually) triggered by merge_group in order to pass the merge queue check."

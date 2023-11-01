@@ -243,6 +243,6 @@ jobs:
     needs:
       - e2e-test-matrix
     name: E2E Test Passed
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 E2E Test Passed!"
