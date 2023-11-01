@@ -50,8 +50,8 @@ type StatusAndReason struct {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
-	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+	obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
+	if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
@@ -70,44 +70,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 		}
 
-		newConditionMap := make(map[v1alpha1.ChaosConditionType]StatusAndReason)
-		if obj.GetStatus().Experiment.Records != nil {
-			newConditionMap[v1alpha1.ConditionSelected] = StatusAndReason{
-				Status: corev1.ConditionTrue,
-			}
-		} else {
-			newConditionMap[v1alpha1.ConditionSelected] = StatusAndReason{
-				Status: corev1.ConditionFalse,
-			}
-		}
-
-		allInjected := corev1.ConditionTrue
-		allRecovered := corev1.ConditionTrue
-		for _, record := range obj.GetStatus().Experiment.Records {
-			if record.Phase != v1alpha1.NotInjected {
-				allRecovered = corev1.ConditionFalse
-			}
-
-			if record.Phase != v1alpha1.Injected {
-				allInjected = corev1.ConditionFalse
-			}
-		}
-		newConditionMap[v1alpha1.ConditionAllInjected] = StatusAndReason{
-			Status: allInjected,
-		}
-		newConditionMap[v1alpha1.ConditionAllRecovered] = StatusAndReason{
-			Status: allRecovered,
-		}
-
-		if obj.IsPaused() {
-			newConditionMap[v1alpha1.ConditionPaused] = StatusAndReason{
-				Status: corev1.ConditionTrue,
-			}
-		} else {
-			newConditionMap[v1alpha1.ConditionPaused] = StatusAndReason{
-				Status: corev1.ConditionFalse,
-			}
-		}
+		newConditionMap := diffConditions(obj)
 
 		if !reflect.DeepEqual(newConditionMap, conditionMap) {
 			conditions := make([]v1alpha1.ChaosCondition, 0, 5)
@@ -120,15 +83,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			}
 
 			r.Log.Info("updating conditions", "conditions", conditions)
-			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
+			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObject)
 
-			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+			if err := r.Client.Get(ctx, req.NamespacedName, obj); err != nil {
 				r.Log.Error(err, "unable to get chaos")
 				return err
 			}
 
 			obj.GetStatus().Conditions = conditions
-			return r.Client.Update(context.TODO(), obj)
+			return r.Client.Update(ctx, obj)
 		}
 
 		return nil
@@ -139,5 +102,67 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		r.Recorder.Eventf(obj, "Normal", "Failed", "Failed to update conditions: %s", updateError.Error())
 		return ctrl.Result{}, nil
 	}
+
 	return ctrl.Result{}, nil
+}
+
+func diffConditions(obj v1alpha1.InnerObject) (newConditionMap map[v1alpha1.ChaosConditionType]StatusAndReason) {
+	records := obj.GetStatus().Experiment.Records
+	newConditionMap = make(map[v1alpha1.ChaosConditionType]StatusAndReason)
+
+	if records != nil {
+		newConditionMap[v1alpha1.ConditionSelected] = StatusAndReason{
+			Status: corev1.ConditionTrue,
+		}
+	} else {
+		newConditionMap[v1alpha1.ConditionSelected] = StatusAndReason{
+			Status: corev1.ConditionFalse,
+		}
+	}
+
+	// If records is `nil`, we don't need to check the `allInjected` and `allRecovered` conditions.
+	allInjected := corev1.ConditionFalse
+	if records != nil && every(records, func(record *v1alpha1.Record) bool {
+		return record.Phase == v1alpha1.Injected
+	}) {
+		allInjected = corev1.ConditionTrue
+	}
+
+	allRecovered := corev1.ConditionFalse
+	if records != nil && every(records, func(record *v1alpha1.Record) bool {
+		return record.Phase == v1alpha1.NotInjected
+	}) {
+		allRecovered = corev1.ConditionTrue
+	}
+
+	newConditionMap[v1alpha1.ConditionAllInjected] = StatusAndReason{
+		Status: allInjected,
+	}
+	newConditionMap[v1alpha1.ConditionAllRecovered] = StatusAndReason{
+		Status: allRecovered,
+	}
+
+	if obj.IsPaused() {
+		newConditionMap[v1alpha1.ConditionPaused] = StatusAndReason{
+			Status: corev1.ConditionTrue,
+		}
+	} else {
+		newConditionMap[v1alpha1.ConditionPaused] = StatusAndReason{
+			Status: corev1.ConditionFalse,
+		}
+	}
+
+	return
+}
+
+// every returns true if all elements in the given slice satisfy the given condition.
+//
+// In this package, we use it to check if all records are injected or recovered.
+func every[T any](arr []T, condition func(T) bool) bool {
+	for _, item := range arr {
+		if !condition(item) {
+			return false
+		}
+	}
+	return true
 }
