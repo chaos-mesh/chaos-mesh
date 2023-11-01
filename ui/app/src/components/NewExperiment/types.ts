@@ -140,6 +140,14 @@ export interface Pod {
   containerNames?: string[]
 }
 
+export interface ResourceScale {
+  namespace: string
+  name: string
+  resourceType: 'daemonset' | 'deployment' | 'replicaset' | 'statefulset'
+  applyReplicas: number
+  recoverReplicas: number
+}
+
 export interface RollingRestart {
   namespace: string
   name: string
@@ -183,6 +191,7 @@ export interface ExperimentType {
   NetworkChaos: Network
   PodChaos: Pod
   RollingRestartChaos: RollingRestart
+  ResourceScaleChaos: ResourceScale
   StressChaos: Stress
   TimeChaos: Time
   PhysicalMachineChaos?: unknown

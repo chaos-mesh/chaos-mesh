@@ -2951,6 +2951,37 @@ spec:
                 - mode
                 - selector
                 type: object
+              resourcescaleChaos:
+                description: ResourceScaleChaosSpec defines the desired state of ResourceScaleChaos
+                properties:
+                  applyReplicas:
+                    description: ApplyReplicas is the amount of replicas the scale,
+                      defaults to 0
+                    format: int32
+                    type: integer
+                  duration:
+                    description: Duration represents the duration of the chaos action
+                    type: string
+                  name:
+                    description: Name defines the name of the ResourceScale.
+                    type: string
+                  namespace:
+                    description: Namespace defines the namespace of the ResourceScale.
+                    type: string
+                  recoverReplicas:
+                    description: RecoverReplicas is the amount of replicas the resources
+                      needs to scale to on recovery, defaults to initial replicas
+                      before applying chaos
+                    format: int32
+                    type: integer
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  resourceType:
+                    description: Type of resource to scale
+                    type: string
+                type: object
               rollingrestartChaos:
                 description: RollingRestartChaosSpec defines the desired state of
                   RollingRestartChaos
@@ -6479,6 +6510,40 @@ spec:
                           - mode
                           - selector
                           type: object
+                        resourcescaleChaos:
+                          description: ResourceScaleChaosSpec defines the desired
+                            state of ResourceScaleChaos
+                          properties:
+                            applyReplicas:
+                              description: ApplyReplicas is the amount of replicas
+                                the scale, defaults to 0
+                              format: int32
+                              type: integer
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action
+                              type: string
+                            name:
+                              description: Name defines the name of the ResourceScale.
+                              type: string
+                            namespace:
+                              description: Namespace defines the namespace of the
+                                ResourceScale.
+                              type: string
+                            recoverReplicas:
+                              description: RecoverReplicas is the amount of replicas
+                                the resources needs to scale to on recovery, defaults
+                                to initial replicas before applying chaos
+                              format: int32
+                              type: integer
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            resourceType:
+                              description: Type of resource to scale
+                              type: string
+                          type: object
                         rollingrestartChaos:
                           description: RollingRestartChaosSpec defines the desired
                             state of RollingRestartChaos
@@ -9717,6 +9782,40 @@ spec:
                               - action
                               - mode
                               - selector
+                              type: object
+                            resourcescaleChaos:
+                              description: ResourceScaleChaosSpec defines the desired
+                                state of ResourceScaleChaos
+                              properties:
+                                applyReplicas:
+                                  description: ApplyReplicas is the amount of replicas
+                                    the scale, defaults to 0
+                                  format: int32
+                                  type: integer
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action
+                                  type: string
+                                name:
+                                  description: Name defines the name of the ResourceScale.
+                                  type: string
+                                namespace:
+                                  description: Namespace defines the namespace of
+                                    the ResourceScale.
+                                  type: string
+                                recoverReplicas:
+                                  description: RecoverReplicas is the amount of replicas
+                                    the resources needs to scale to on recovery, defaults
+                                    to initial replicas before applying chaos
+                                  format: int32
+                                  type: integer
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                resourceType:
+                                  description: Type of resource to scale
+                                  type: string
                               type: object
                             rollingrestartChaos:
                               description: RollingRestartChaosSpec defines the desired
