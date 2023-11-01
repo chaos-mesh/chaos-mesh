@@ -20,9 +20,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type K8sChaosTarget struct {
