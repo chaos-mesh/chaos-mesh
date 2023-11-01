@@ -16,6 +16,7 @@ const mapping = new Map<ExperimentKind, string>([
   ['NetworkChaos', 'networkChaos'],
   ['PhysicalMachineChaos', 'physicalmachineChaos'],
   ['PodChaos', 'podChaos'],
+  ['ResourceScaleChaos', 'resourcescaleChaos'],
   ['StressChaos', 'stressChaos'],
   ['TimeChaos', 'timeChaos'],
 ])

@@ -970,6 +970,69 @@ func TestPodChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestResourceScaleChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &ResourceScaleChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestResourceScaleChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &ResourceScaleChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestResourceScaleChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &ResourceScaleChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestResourceScaleChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &ResourceScaleChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestResourceScaleChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &ResourceScaleChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestResourceScaleChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &ResourceScaleChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestStressChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

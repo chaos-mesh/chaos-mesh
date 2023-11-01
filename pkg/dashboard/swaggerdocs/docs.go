@@ -5197,6 +5197,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.PodChaosSpec"
                 },
+                "resourcescaleChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.ResourceScaleChaosSpec"
+                },
                 "schedule": {
                     "type": "string"
                 },
@@ -7479,6 +7483,39 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.ResourceScaleChaosSpec": {
+            "type": "object",
+            "properties": {
+                "applyReplicas": {
+                    "description": "ApplyReplicas is the amount of replicas the scale, defaults to 0\n+optional",
+                    "type": "integer"
+                },
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action\n+optional",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name defines the name of the ResourceScale.",
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Namespace defines the namespace of the ResourceScale.",
+                    "type": "string"
+                },
+                "recoverReplicas": {
+                    "description": "RecoverReplicas is the amount of replicas the resources needs to scale to on recovery, defaults to initial replicas before applying chaos\n+optional",
+                    "type": "integer"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
+                "resourceType": {
+                    "description": "Type of resource to scale",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.Schedule": {
             "type": "object",
             "properties": {
@@ -7644,6 +7681,10 @@ const docTemplate = `{
                 "podChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.PodChaosSpec"
+                },
+                "resourcescaleChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.ResourceScaleChaosSpec"
                 },
                 "schedule": {
                     "type": "string"
@@ -7959,6 +8000,10 @@ const docTemplate = `{
                 "podChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.PodChaosSpec"
+                },
+                "resourcescaleChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.ResourceScaleChaosSpec"
                 },
                 "schedule": {
                     "description": "Schedule describe the Schedule(describing scheduled chaos) to be injected with chaos nodes. Only used when Type is TypeSchedule.\n+optional",

@@ -110,6 +110,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = ""
 	case v1alpha1.ScheduleTypeCiliumChaos:
 		archive.Action = ""
+	case v1alpha1.ScheduleTypeResourceScaleChaos:
+		archive.Action = ""
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}

@@ -764,6 +764,42 @@ const data: Record<Kind, Definition> = {
       },
     ],
   },
+  // ResourceScaleChaos
+  ResourceScaleChaos: {
+    spec: {
+      namespace: {
+        field: 'text',
+        label: 'Namespace',
+        value: '',
+        helperText: 'The namespace of the resource',
+      },
+      name: {
+        field: 'text',
+        label: 'Resource name',
+        value: '',
+        helperText: 'The name of the resource',
+      },
+      resourceType: {
+        field: 'select',
+        items: ['', 'daemonset', 'deployment', 'replicaset', 'statefulset'],
+        label: 'Resource type',
+        value: '',
+        helperText: 'Required. The type of the resource to restart',
+      },
+      applyReplicas: {
+        field: 'number',
+        label: 'Apply # replicas',
+        value: null,
+        helperText: 'Specify the CPU count',
+      },
+      recoverReplicas: {
+        field: 'number',
+        label: 'Recover # replicas Count',
+        value: null,
+        helperText: 'Specify the CPU count',
+      },
+    } as any,
+  },
   // Stress Test
   StressChaos: {
     spec: {

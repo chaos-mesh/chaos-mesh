@@ -135,6 +135,14 @@ export interface Pod {
   containerNames?: string[]
 }
 
+export interface ResourceScale {
+  namespace: string
+  name: string
+  resourceType: 'daemonset' | 'deployment' | 'replicaset' | 'statefulset'
+  applyReplicas: number
+  recoverReplicas: number
+}
+
 export interface Stress {
   stressors: {
     cpu?: {
@@ -172,6 +180,7 @@ export interface ExperimentType {
   KernelChaos: Kernel
   NetworkChaos: Network
   PodChaos: Pod
+  ResourceScaleChaos: ResourceScale
   StressChaos: Stress
   TimeChaos: Time
   PhysicalMachineChaos?: unknown

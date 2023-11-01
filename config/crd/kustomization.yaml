@@ -29,6 +29,7 @@ resources:
 - bases/chaos-mesh.org_ciliumchaos.yaml
 - bases/chaos-mesh.org_cloudstackvmchaos.yaml
 - bases/chaos-mesh.org_k8schaos.yaml
+- bases/chaos-mesh.org_resourcescalechaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
