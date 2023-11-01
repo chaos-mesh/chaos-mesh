@@ -3423,6 +3423,9 @@ definitions:
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
         description: +optional
+      resourcescaleChaos:
+        $ref: '#/definitions/v1alpha1.ResourceScaleChaosSpec'
+        description: +optional
       schedule:
         type: string
       startingDeadlineSeconds:
@@ -5481,6 +5484,38 @@ definitions:
       reorder:
         type: string
     type: object
+  v1alpha1.ResourceScaleChaosSpec:
+    properties:
+      applyReplicas:
+        description: |-
+          ApplyReplicas is the amount of replicas the scale, defaults to 0
+          +optional
+        type: integer
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action
+          +optional
+        type: string
+      name:
+        description: Name defines the name of the ResourceScale.
+        type: string
+      namespace:
+        description: Namespace defines the namespace of the ResourceScale.
+        type: string
+      recoverReplicas:
+        description: |-
+          RecoverReplicas is the amount of replicas the resources needs to scale to on recovery, defaults to initial replicas before applying chaos
+          +optional
+        type: integer
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
+      resourceType:
+        description: Type of resource to scale
+        type: string
+    type: object
   v1alpha1.Schedule:
     properties:
       annotations:
@@ -5736,6 +5771,9 @@ definitions:
         description: +optional
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+      resourcescaleChaos:
+        $ref: '#/definitions/v1alpha1.ResourceScaleChaosSpec'
         description: +optional
       schedule:
         type: string
@@ -6088,6 +6126,9 @@ definitions:
         description: +optional
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+      resourcescaleChaos:
+        $ref: '#/definitions/v1alpha1.ResourceScaleChaosSpec'
         description: +optional
       schedule:
         $ref: '#/definitions/v1alpha1.ChaosOnlyScheduleSpec'

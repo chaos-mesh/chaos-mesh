@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodevolumepath"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/resourcescale"
 )
 
 type Selector struct {
@@ -75,6 +76,7 @@ type SelectorParams struct {
 	GCPSelector             *gcp.SelectImpl
 	PhysicalMachineSelector *physicalmachine.SelectImpl
 	NodeVolumePath          *nodevolumepath.SelectImpl
+	ResourceScaleSelector   *resourcescale.SelectImpl
 }
 
 func New(p SelectorParams) *Selector {
@@ -104,4 +106,5 @@ var Module = fx.Provide(
 	gcp.New,
 	physicalmachine.New,
 	nodevolumepath.New,
+	resourcescale.New,
 )
