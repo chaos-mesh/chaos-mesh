@@ -1,4 +1,4 @@
-// Copyright 2021 Chaos Mesh Authors.
+// Copyright 2023 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,22 +13,16 @@
 // limitations under the License.
 //
 
-package common
+package condition_test
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/condition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/desiredphase"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/finalizers"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/pipeline"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common/records"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func AllSteps() []pipeline.PipelineStep {
-	return []pipeline.PipelineStep{
-		finalizers.InitStep,
-		desiredphase.Step,
-		condition.Step,
-		records.Step,
-		finalizers.CleanStep,
-	}
+func TestCondition(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Condition Suite")
 }
