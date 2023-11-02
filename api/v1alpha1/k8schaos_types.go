@@ -46,11 +46,16 @@ var (
 // K8SChaosSpec defines the desired state of K8SChaos
 type K8SChaosSpec struct {
 	// Duration represents the duration of the chaos action
-	// +optional
-	Duration *string `json:"duration,omitempty" webhook:"Duration"`
+	Duration *string `json:"duration" webhook:"Duration"`
 
 	// +kubebuilder:validation:Required
 	APIObjects *K8SChaosAPIObjects `json:"apiObjects"`
+
+	// AllowPatching specifies that the chaos should patch & restore the modified object,
+	// rather than create & delete.
+	// +optional
+	AllowPatching bool `json:"allowPatching,omitempty"`
+
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`

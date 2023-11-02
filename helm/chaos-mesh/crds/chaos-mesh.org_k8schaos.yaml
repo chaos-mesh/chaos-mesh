@@ -38,6 +38,10 @@ spec:
           spec:
             description: Spec defines the behavior of a pod chaos experiment
             properties:
+              allowPatching:
+                description: AllowPatching specifies that the chaos should patch &
+                  restore the modified object, rather than create & delete.
+                type: boolean
               apiObjects:
                 description: K8SChaosAPIObjects defines ways to specify Kubernetes
                   API resources to be applied by K8SChaos

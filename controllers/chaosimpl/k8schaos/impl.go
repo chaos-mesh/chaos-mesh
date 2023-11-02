@@ -40,6 +40,8 @@ var _ impltypes.ChaosImpl = (*Impl)(nil)
 type Impl struct {
 	client.Client
 	Log logr.Logger
+
+	initialValue *unstructured.Unstructured
 }
 
 const (
@@ -83,7 +85,15 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, fmt.Errorf("get rest mapping: %w", err)
 	}
 
-	_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Create(ctx, resource, v1.CreateOptions{})
+	if k8schaos.Spec.AllowPatching {
+		impl.initialValue, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Get(ctx, resource.GetName(), v1.GetOptions{})
+		if err != nil && !apiErrors.IsNotFound(err) {
+			return v1alpha1.NotInjected, err
+		}
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Apply(ctx, resource.GetName(), resource, v1.ApplyOptions{})
+	} else {
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Create(ctx, resource, v1.CreateOptions{})
+	}
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
@@ -133,7 +143,11 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, fmt.Errorf("resource is not managed by %s", managedBy)
 	}
 
-	err = resourceClient.Delete(ctx, resource.GetName(), v1.DeleteOptions{})
+	if impl.initialValue != nil {
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Apply(ctx, resource.GetName(), impl.initialValue, v1.ApplyOptions{})
+	} else {
+		err = resourceClient.Delete(ctx, resource.GetName(), v1.DeleteOptions{})
+	}
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return v1alpha1.Injected, err
 	}
