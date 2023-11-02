@@ -51,7 +51,7 @@ type ResourceScaleChaos struct {
 type ResourceScaleChaosSpec struct {
 	// Duration represents the duration of the chaos action
 	// +optional
-	Duration *string `json:"duration" webhook:"Duration"`
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	ResourceScaleSelector `json:",inline"`
 
