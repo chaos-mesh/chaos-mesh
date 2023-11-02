@@ -30,6 +30,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update ginkgo to 2.12.0 [#4190](https://github.com/chaos-mesh/chaos-mesh/pull/4190)
 - Update k8s controller-runtime dependency [#4198](https://github.com/chaos-mesh/chaos-mesh/pull/4198)
 - Automatically remove the token from the dashboard when it expires [#4193](https://github.com/chaos-mesh/chaos-mesh/pull/4193)
+- Optimize `allInjected` and `allRecovered` states when targets are not selected [#4199](https://github.com/chaos-mesh/chaos-mesh/pull/4199)
 
 ### Deprecated
 
@@ -50,7 +51,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Remove `-k` from `curl` command lines in chaos-daemon Dockerfile [#4241](https://github.com/chaos-mesh/chaos-mesh/pull/4241)
 
 ## [2.6.0] - 2023-05-30
 
