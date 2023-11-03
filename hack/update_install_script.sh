@@ -23,6 +23,7 @@ helm template chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
       --set controllerManager.chaosdSecurityMode=false \
       --set chaosDaemon.hostNetwork=true \
       --set chaosDaemon.mtls.enabled=false \
+      --set enableCtrlServer=true \
       --set dashboard.securityMode=false > ${tmp_file}
 
 sed -i.bak '/helm/d' $tmp_file

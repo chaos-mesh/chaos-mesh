@@ -57,6 +57,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Security
 
 - Remove `-k` from `curl` command lines in chaos-daemon Dockerfile [#4241](https://github.com/chaos-mesh/chaos-mesh/pull/4241)
+- Disable GraphQL API in chaos-controller-manager by default, and only apply `pods/exec` RBAC rule if enabled [#4247](https://github.com/chaos-mesh/chaos-mesh/pull/4247)
 
 ## [2.6.0] - 2023-05-30
 
