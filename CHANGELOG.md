@@ -49,6 +49,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix remote cluster cannot upgrade helm release [#4075](https://github.com/chaos-mesh/chaos-mesh/pull/4075)
 - Fix goroutine leak [#4229](https://github.com/chaos-mesh/chaos-mesh/pull/4229)
 - Remove the duplicate `make test` [#4234](https://github.com/chaos-mesh/chaos-mesh/pull/4234)
+- Fix daemon-server `SetDNSServer` endpoint to validate provided server address [#4246](https://github.com/chaos-mesh/chaos-mesh/pull/4246)
 
 ### Security
 

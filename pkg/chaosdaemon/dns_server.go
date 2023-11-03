@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -35,6 +36,10 @@ const (
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
+
+	if net.ParseIP(req.DnsServer) == nil {
+		return nil, fmt.Errorf("invalid DNS server address")
+	}
 
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
