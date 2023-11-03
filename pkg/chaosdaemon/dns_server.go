@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -35,6 +36,10 @@ const (
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
+
+	if net.ParseIP(req.DnsServer) == nil {
+		return nil, fmt.Errorf("invalid DNS server address")
+	}
 
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -68,6 +73,7 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 
 		// add chaos dns server to the first line of /etc/resolv.conf
 		// Note: can not replace the /etc/resolv.conf like `mv resolv_conf_dnschaos_temp resolv.conf`, will execute with error `Device or resource busy`
+
 		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s /etc/resolv_conf_dnschaos_temp && sed -i 's/.*nameserver.*/nameserver %s/' /etc/resolv_conf_dnschaos_temp && cat /etc/resolv_conf_dnschaos_temp > %s && rm /etc/resolv_conf_dnschaos_temp", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).SetContext(ctx)
 		if req.EnterNS {
 			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
