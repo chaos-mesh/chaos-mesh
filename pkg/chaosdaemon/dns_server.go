@@ -33,13 +33,11 @@ const (
 	DNSServerConfFile = "/etc/resolv.conf"
 )
 
+var ErrInvalidDNSServer = errors.New("invalid DNS server address")
+
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
-
-	if net.ParseIP(req.DnsServer) == nil {
-		return nil, fmt.Errorf("invalid DNS server address")
-	}
 
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -51,8 +49,8 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	if req.Enable {
 		// set dns server to the chaos dns server's address
 
-		if len(req.DnsServer) == 0 {
-			return &empty.Empty{}, errors.Errorf("invalid set dns server request %v", req)
+		if net.ParseIP(req.DnsServer) == nil {
+			return nil, ErrInvalidDNSServer
 		}
 
 		// backup the /etc/resolv.conf
