@@ -632,6 +632,34 @@
                 }
             }
         },
+        "logging": {
+            "type": "object",
+            "properties": {
+                "format": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "type": "string"
+                },
+                "fieldKeys": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string"
+                        },
+                        "timestamp": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "maxFieldSize": {
+                    "type": ["number", "null"]
+                }
+            }
+        },
         "nameOverride": {
             "type": "string"
         },

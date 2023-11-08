@@ -55,8 +55,8 @@ var AllImpl = fx.Options(
 	timechaos.Module,
 	physicalmachinechaos.Module,
 	blockchaos.Module,
-	resourcescalechaos.Module,
 	k8schaos.Module,
 	rollingrestartchaos.Module,
+	resourcescalechaos.Module,
 
 	utils.Module)

@@ -79,10 +79,10 @@ type SelectorParams struct {
 	GCPSelector             *gcp.SelectImpl
 	PhysicalMachineSelector *physicalmachine.SelectImpl
 	NodeVolumePath          *nodevolumepath.SelectImpl
-	ResourceScaleSelector   *resourcescale.SelectImpl
 	K8SChaosSelector        *k8schaos.SelectImpl
 	DeploymentSelector      *deployment.SelectImpl
 	RollingRestartSelector  *rollingrestart.SelectImpl
+	ResourceScaleSelector   *resourcescale.SelectImpl
 }
 
 func New(p SelectorParams) *Selector {
@@ -112,8 +112,8 @@ var Module = fx.Provide(
 	gcp.New,
 	physicalmachine.New,
 	nodevolumepath.New,
-	resourcescale.New,
 	k8schaos.New,
 	deployment.New,
 	rollingrestart.New,
+	resourcescale.New,
 )

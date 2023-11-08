@@ -7093,11 +7093,8 @@ spec:
                 properties:
                   allowPatching:
                     description: AllowPatching specifies that the chaos should patch
-                      & restore the modified object, rather than create & delete.
                     type: boolean
                   apiObjects:
-                    description: K8SChaosAPIObjects defines ways to specify Kubernetes
-                      API resources to be applied by K8SChaos
                     properties:
                       value:
                         description: Literal string containing Kubernetes API resources
@@ -33328,12 +33325,9 @@ spec:
                                   properties:
                                     allowPatching:
                                       description: AllowPatching specifies that the
-                                        chaos should patch & restore the modified
                                         object, rather than create & delete.
                                       type: boolean
                                     apiObjects:
-                                      description: K8SChaosAPIObjects defines ways
-                                        to specify Kubernetes API resources to be
                                         applied by K8SChaos
                                       properties:
                                         value:
@@ -47392,12 +47386,9 @@ spec:
                       properties:
                         allowPatching:
                           description: AllowPatching specifies that the chaos should
-                            patch & restore the modified object, rather than create
                             & delete.
                           type: boolean
                         apiObjects:
-                          description: K8SChaosAPIObjects defines ways to specify
-                            Kubernetes API resources to be applied by K8SChaos
                           properties:
                             value:
                               description: Literal string containing Kubernetes API

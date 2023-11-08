@@ -190,8 +190,8 @@ export interface ExperimentType {
   KernelChaos: Kernel
   NetworkChaos: Network
   PodChaos: Pod
-  ResourceScaleChaos: ResourceScale
   RollingRestartChaos: RollingRestart
+  ResourceScaleChaos: ResourceScale
   StressChaos: Stress
   TimeChaos: Time
   PhysicalMachineChaos?: unknown
