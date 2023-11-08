@@ -545,6 +545,7 @@ webhook:
     - physicalmachine
     - statuscheck
     - remotecluster
+    - cloudstackvmchaos
     - ciliumchaos
 
 bpfki:

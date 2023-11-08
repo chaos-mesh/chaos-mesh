@@ -369,6 +369,7 @@ const data: Record<Kind, Definition> = {
       },
     ],
   },
+  CloudStackVMChaos: {},
   // DNS Fault
   DNSChaos: {
     categories: [

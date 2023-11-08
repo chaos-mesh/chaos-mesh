@@ -2589,6 +2589,27 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: "chaos-mesh"
+        path: /mutate-chaos-mesh-org-v1alpha1-cloudstackvmchaos
+    failurePolicy: Fail
+    name: mcloudstackvmchaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - cloudstackvmchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-mesh"
         path: /mutate-chaos-mesh-org-v1alpha1-ciliumchaos
     failurePolicy: Fail
     name: mciliumchaos.kb.io
@@ -3031,6 +3052,27 @@ webhooks:
           - UPDATE
         resources:
           - remotecluster
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-mesh"
+        path: /validate-chaos-mesh-org-v1alpha1-cloudstackvmchaos
+    failurePolicy: Fail
+    name: vcloudstackvmchaos.kb.io
+    timeoutSeconds: 5
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - cloudstackvmchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

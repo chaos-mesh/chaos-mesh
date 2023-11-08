@@ -277,6 +277,69 @@ func TestCiliumChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestCloudStackVMChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CloudStackVMChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestCloudStackVMChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CloudStackVMChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestCloudStackVMChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CloudStackVMChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestCloudStackVMChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CloudStackVMChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestCloudStackVMChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &CloudStackVMChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestCloudStackVMChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CloudStackVMChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestDNSChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
