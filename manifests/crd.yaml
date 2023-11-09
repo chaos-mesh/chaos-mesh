@@ -638,6 +638,300 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
+  name: cloudstackvmchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: CloudStackVMChaos
+    listKind: CloudStackVMChaosList
+    plural: cloudstackvmchaos
+    shortNames:
+    - csvm
+    singular: cloudstackvmchaos
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.action
+      name: action
+      type: string
+    - jsonPath: .spec.duration
+      name: duration
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CloudStackVMChaos is the Schema for the cloudstackchaos API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CloudStackVMChaosSpec is the content of the specification
+              for a CloudStackChaos.
+            properties:
+              action:
+                description: 'Action defines the specific cloudstack chaos action.
+                  Supported action: vm-stop / vm-restart Default action: vm-stop'
+                enum:
+                - vm-stop
+                - vm-restart
+                type: string
+              apiConfig:
+                description: APIConfig defines the configuration ncessary to connect
+                  to the CloudStack API.
+                properties:
+                  address:
+                    description: Address defines the address of the CloudStack instsance.
+                    type: string
+                  apiKeyField:
+                    description: APIKeyField defines the key under which the value
+                      for API key is stored inside the secret.
+                    type: string
+                  apiSecretField:
+                    description: APISecretField defines the key under which the value
+                      for API secret is stored inside the secret.
+                    type: string
+                  secretName:
+                    description: SecretName defines the name of the secret where the
+                      API credentials are stored.
+                    type: string
+                  verifySSL:
+                    description: VerifySSL defines whether certificates should be
+                      verified when connecting to the API.
+                    type: boolean
+                required:
+                - address
+                - secretName
+                type: object
+              dryRun:
+                description: DryRun defines whether the chaos should run a dry-run
+                  mode.
+                type: boolean
+              duration:
+                description: Duration represents the duration of the chaos action.
+                type: string
+              remoteCluster:
+                description: RemoteCluster represents the remote cluster where the
+                  chaos will be deployed
+                type: string
+              selector:
+                description: Selector defines the parameters that can be used to select
+                  target VMs.
+                properties:
+                  account:
+                    description: Account defines account to list resources by. Must
+                      be used with the domainId parameter.
+                    type: string
+                  affinityGroupId:
+                    description: AffinityGroupID defines affinity group to list the
+                      VMs by.
+                    type: string
+                  displayVm:
+                    description: DisplayVM defines a flag that indicates whether to
+                      list VMs by the display flag.
+                    type: boolean
+                  domainId:
+                    description: DomainID defines domain ID the VMs belong to.
+                    type: string
+                  groupId:
+                    description: GroupID defines the ID of the group the VMs belong
+                      to.
+                    type: string
+                  hostId:
+                    description: HostID defines the ID of the host the VMs belong
+                      to.
+                    type: string
+                  hypervisor:
+                    description: Hypervisor defines the target hypervisor.
+                    type: string
+                  id:
+                    description: ID defines the ID of the VM.
+                    type: string
+                  ids:
+                    description: IDs defines a list of VM IDs, mutually exclusive
+                      with ID.
+                    items:
+                      type: string
+                    type: array
+                  isRecursive:
+                    description: IsRecursive defines whether VMs should be listed
+                      recursively from parent specified by DomainID.
+                    type: boolean
+                  isoid:
+                    description: ISOID defines the ISO ID to list the VMs by.
+                    type: string
+                  keyPair:
+                    description: KeyPair defines the SSH keypair name to list the
+                      VMs by.
+                    type: string
+                  keyword:
+                    description: Keyword defines the keyword to list the VMs by.
+                    type: string
+                  listAll:
+                    description: ListAll defines whether to list just the resources
+                      that belong to the caller or all the resources the caller is
+                      authorised to see.
+                    type: boolean
+                  name:
+                    description: Name defines the name of the VM instance.
+                    type: string
+                  networkId:
+                    description: NetworkID defines the ID of the network to list the
+                      VMs by.
+                    type: string
+                  projectId:
+                    description: ProjectID defines the project ID to list the VMs
+                      by.
+                    type: string
+                  serviceOffering:
+                    description: ServiceOffering defines the service offering to list
+                      the VMs by.
+                    type: string
+                  state:
+                    description: State defines the state of the VM that should match.
+                    enum:
+                    - Running
+                    - Stopped
+                    - Present
+                    - Destroyed
+                    - Expunged
+                    type: string
+                  storageId:
+                    description: StorageID defines the ID the storage where VM's volumes
+                      belong to.
+                    type: string
+                  tags:
+                    additionalProperties:
+                      type: string
+                    description: Tags defines key/value pairs that should match the
+                      tags of the VMs.
+                    type: object
+                  templateId:
+                    description: TemplateID defines the ID of the template that was
+                      used to create the VMs.
+                    type: string
+                  userId:
+                    description: UserID defines the user ID that created the VM and
+                      is under the account that owns the VM.
+                    type: string
+                  vpcId:
+                    description: VPCID defines the ID of the VPC the VM belongs to.
+                    type: string
+                  zoneId:
+                    description: ZoneID defines the availability zone the VM belongs
+                      to.
+                    type: string
+                type: object
+            required:
+            - action
+            - apiConfig
+            - selector
+            type: object
+          status:
+            description: CloudStackVMChaosStatus represents the status of a CloudStackChaos.
+            properties:
+              conditions:
+                description: Conditions represents the current global condition of
+                  the chaos
+                items:
+                  properties:
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              experiment:
+                description: Experiment records the last experiment state.
+                properties:
+                  containerRecords:
+                    description: Records are used to track the running status
+                    items:
+                      properties:
+                        events:
+                          description: Events are the essential details about the
+                            injections and recoveries
+                          items:
+                            properties:
+                              message:
+                                description: Message is the detail message, e.g. the
+                                  reason why we failed to inject the chaos
+                                type: string
+                              operation:
+                                description: Operation represents the operation we
+                                  are doing, when we crate this event
+                                type: string
+                              timestamp:
+                                description: Timestamp is time when we create this
+                                  event
+                                format: date-time
+                                type: string
+                              type:
+                                description: Type means the stage of this event
+                                type: string
+                            required:
+                            - operation
+                            - timestamp
+                            - type
+                            type: object
+                          type: array
+                        id:
+                          type: string
+                        injectedCount:
+                          description: InjectedCount is a counter to record the sum
+                            of successful injections
+                          type: integer
+                        phase:
+                          type: string
+                        recoveredCount:
+                          description: RecoveredCount is a counter to record the sum
+                            of successful recoveries
+                          type: integer
+                        selectorKey:
+                          type: string
+                      required:
+                      - id
+                      - injectedCount
+                      - phase
+                      - recoveredCount
+                      - selectorKey
+                      type: object
+                    type: array
+                  desiredPhase:
+                    enum:
+                    - Run
+                    - Stop
+                    type: string
+                type: object
+            required:
+            - experiment
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
   name: deploymentchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -6132,6 +6426,171 @@ spec:
                 - selector
                 - volumeName
                 type: object
+              cloudstackvmChaos:
+                description: CloudStackVMChaosSpec is the content of the specification
+                  for a CloudStackChaos.
+                properties:
+                  action:
+                    description: 'Action defines the specific cloudstack chaos action.
+                      Supported action: vm-stop / vm-restart Default action: vm-stop'
+                    enum:
+                    - vm-stop
+                    - vm-restart
+                    type: string
+                  apiConfig:
+                    description: APIConfig defines the configuration ncessary to connect
+                      to the CloudStack API.
+                    properties:
+                      address:
+                        description: Address defines the address of the CloudStack
+                          instsance.
+                        type: string
+                      apiKeyField:
+                        description: APIKeyField defines the key under which the value
+                          for API key is stored inside the secret.
+                        type: string
+                      apiSecretField:
+                        description: APISecretField defines the key under which the
+                          value for API secret is stored inside the secret.
+                        type: string
+                      secretName:
+                        description: SecretName defines the name of the secret where
+                          the API credentials are stored.
+                        type: string
+                      verifySSL:
+                        description: VerifySSL defines whether certificates should
+                          be verified when connecting to the API.
+                        type: boolean
+                    required:
+                    - address
+                    - secretName
+                    type: object
+                  dryRun:
+                    description: DryRun defines whether the chaos should run a dry-run
+                      mode.
+                    type: boolean
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  selector:
+                    description: Selector defines the parameters that can be used
+                      to select target VMs.
+                    properties:
+                      account:
+                        description: Account defines account to list resources by.
+                          Must be used with the domainId parameter.
+                        type: string
+                      affinityGroupId:
+                        description: AffinityGroupID defines affinity group to list
+                          the VMs by.
+                        type: string
+                      displayVm:
+                        description: DisplayVM defines a flag that indicates whether
+                          to list VMs by the display flag.
+                        type: boolean
+                      domainId:
+                        description: DomainID defines domain ID the VMs belong to.
+                        type: string
+                      groupId:
+                        description: GroupID defines the ID of the group the VMs belong
+                          to.
+                        type: string
+                      hostId:
+                        description: HostID defines the ID of the host the VMs belong
+                          to.
+                        type: string
+                      hypervisor:
+                        description: Hypervisor defines the target hypervisor.
+                        type: string
+                      id:
+                        description: ID defines the ID of the VM.
+                        type: string
+                      ids:
+                        description: IDs defines a list of VM IDs, mutually exclusive
+                          with ID.
+                        items:
+                          type: string
+                        type: array
+                      isRecursive:
+                        description: IsRecursive defines whether VMs should be listed
+                          recursively from parent specified by DomainID.
+                        type: boolean
+                      isoid:
+                        description: ISOID defines the ISO ID to list the VMs by.
+                        type: string
+                      keyPair:
+                        description: KeyPair defines the SSH keypair name to list
+                          the VMs by.
+                        type: string
+                      keyword:
+                        description: Keyword defines the keyword to list the VMs by.
+                        type: string
+                      listAll:
+                        description: ListAll defines whether to list just the resources
+                          that belong to the caller or all the resources the caller
+                          is authorised to see.
+                        type: boolean
+                      name:
+                        description: Name defines the name of the VM instance.
+                        type: string
+                      networkId:
+                        description: NetworkID defines the ID of the network to list
+                          the VMs by.
+                        type: string
+                      projectId:
+                        description: ProjectID defines the project ID to list the
+                          VMs by.
+                        type: string
+                      serviceOffering:
+                        description: ServiceOffering defines the service offering
+                          to list the VMs by.
+                        type: string
+                      state:
+                        description: State defines the state of the VM that should
+                          match.
+                        enum:
+                        - Running
+                        - Stopped
+                        - Present
+                        - Destroyed
+                        - Expunged
+                        type: string
+                      storageId:
+                        description: StorageID defines the ID the storage where VM's
+                          volumes belong to.
+                        type: string
+                      tags:
+                        additionalProperties:
+                          type: string
+                        description: Tags defines key/value pairs that should match
+                          the tags of the VMs.
+                        type: object
+                      templateId:
+                        description: TemplateID defines the ID of the template that
+                          was used to create the VMs.
+                        type: string
+                      userId:
+                        description: UserID defines the user ID that created the VM
+                          and is under the account that owns the VM.
+                        type: string
+                      vpcId:
+                        description: VPCID defines the ID of the VPC the VM belongs
+                          to.
+                        type: string
+                      zoneId:
+                        description: ZoneID defines the availability zone the VM belongs
+                          to.
+                        type: string
+                    type: object
+                required:
+                - action
+                - apiConfig
+                - selector
+                type: object
               concurrencyPolicy:
                 default: Forbid
                 enum:
@@ -9496,6 +9955,179 @@ spec:
                           items:
                             type: string
                           type: array
+                        cloudstackvmChaos:
+                          description: CloudStackVMChaosSpec is the content of the
+                            specification for a CloudStackChaos.
+                          properties:
+                            action:
+                              description: 'Action defines the specific cloudstack
+                                chaos action. Supported action: vm-stop / vm-restart
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              type: string
+                            apiConfig:
+                              description: APIConfig defines the configuration ncessary
+                                to connect to the CloudStack API.
+                              properties:
+                                address:
+                                  description: Address defines the address of the
+                                    CloudStack instsance.
+                                  type: string
+                                apiKeyField:
+                                  description: APIKeyField defines the key under which
+                                    the value for API key is stored inside the secret.
+                                  type: string
+                                apiSecretField:
+                                  description: APISecretField defines the key under
+                                    which the value for API secret is stored inside
+                                    the secret.
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of the
+                                    secret where the API credentials are stored.
+                                  type: string
+                                verifySSL:
+                                  description: VerifySSL defines whether certificates
+                                    should be verified when connecting to the API.
+                                  type: boolean
+                              required:
+                              - address
+                              - secretName
+                              type: object
+                            dryRun:
+                              description: DryRun defines whether the chaos should
+                                run a dry-run mode.
+                              type: boolean
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            selector:
+                              description: Selector defines the parameters that can
+                                be used to select target VMs.
+                              properties:
+                                account:
+                                  description: Account defines account to list resources
+                                    by. Must be used with the domainId parameter.
+                                  type: string
+                                affinityGroupId:
+                                  description: AffinityGroupID defines affinity group
+                                    to list the VMs by.
+                                  type: string
+                                displayVm:
+                                  description: DisplayVM defines a flag that indicates
+                                    whether to list VMs by the display flag.
+                                  type: boolean
+                                domainId:
+                                  description: DomainID defines domain ID the VMs
+                                    belong to.
+                                  type: string
+                                groupId:
+                                  description: GroupID defines the ID of the group
+                                    the VMs belong to.
+                                  type: string
+                                hostId:
+                                  description: HostID defines the ID of the host the
+                                    VMs belong to.
+                                  type: string
+                                hypervisor:
+                                  description: Hypervisor defines the target hypervisor.
+                                  type: string
+                                id:
+                                  description: ID defines the ID of the VM.
+                                  type: string
+                                ids:
+                                  description: IDs defines a list of VM IDs, mutually
+                                    exclusive with ID.
+                                  items:
+                                    type: string
+                                  type: array
+                                isRecursive:
+                                  description: IsRecursive defines whether VMs should
+                                    be listed recursively from parent specified by
+                                    DomainID.
+                                  type: boolean
+                                isoid:
+                                  description: ISOID defines the ISO ID to list the
+                                    VMs by.
+                                  type: string
+                                keyPair:
+                                  description: KeyPair defines the SSH keypair name
+                                    to list the VMs by.
+                                  type: string
+                                keyword:
+                                  description: Keyword defines the keyword to list
+                                    the VMs by.
+                                  type: string
+                                listAll:
+                                  description: ListAll defines whether to list just
+                                    the resources that belong to the caller or all
+                                    the resources the caller is authorised to see.
+                                  type: boolean
+                                name:
+                                  description: Name defines the name of the VM instance.
+                                  type: string
+                                networkId:
+                                  description: NetworkID defines the ID of the network
+                                    to list the VMs by.
+                                  type: string
+                                projectId:
+                                  description: ProjectID defines the project ID to
+                                    list the VMs by.
+                                  type: string
+                                serviceOffering:
+                                  description: ServiceOffering defines the service
+                                    offering to list the VMs by.
+                                  type: string
+                                state:
+                                  description: State defines the state of the VM that
+                                    should match.
+                                  enum:
+                                  - Running
+                                  - Stopped
+                                  - Present
+                                  - Destroyed
+                                  - Expunged
+                                  type: string
+                                storageId:
+                                  description: StorageID defines the ID the storage
+                                    where VM's volumes belong to.
+                                  type: string
+                                tags:
+                                  additionalProperties:
+                                    type: string
+                                  description: Tags defines key/value pairs that should
+                                    match the tags of the VMs.
+                                  type: object
+                                templateId:
+                                  description: TemplateID defines the ID of the template
+                                    that was used to create the VMs.
+                                  type: string
+                                userId:
+                                  description: UserID defines the user ID that created
+                                    the VM and is under the account that owns the
+                                    VM.
+                                  type: string
+                                vpcId:
+                                  description: VPCID defines the ID of the VPC the
+                                    VM belongs to.
+                                  type: string
+                                zoneId:
+                                  description: ZoneID defines the availability zone
+                                    the VM belongs to.
+                                  type: string
+                              type: object
+                          required:
+                          - action
+                          - apiConfig
+                          - selector
+                          type: object
                         conditionalBranches:
                           description: ConditionalBranches describes the conditional
                             branches of custom tasks. Only used when Type is TypeTask.
@@ -12697,6 +13329,184 @@ spec:
                               - mode
                               - selector
                               - volumeName
+                              type: object
+                            cloudstackvmChaos:
+                              description: CloudStackVMChaosSpec is the content of
+                                the specification for a CloudStackChaos.
+                              properties:
+                                action:
+                                  description: 'Action defines the specific cloudstack
+                                    chaos action. Supported action: vm-stop / vm-restart
+                                    Default action: vm-stop'
+                                  enum:
+                                  - vm-stop
+                                  - vm-restart
+                                  type: string
+                                apiConfig:
+                                  description: APIConfig defines the configuration
+                                    ncessary to connect to the CloudStack API.
+                                  properties:
+                                    address:
+                                      description: Address defines the address of
+                                        the CloudStack instsance.
+                                      type: string
+                                    apiKeyField:
+                                      description: APIKeyField defines the key under
+                                        which the value for API key is stored inside
+                                        the secret.
+                                      type: string
+                                    apiSecretField:
+                                      description: APISecretField defines the key
+                                        under which the value for API secret is stored
+                                        inside the secret.
+                                      type: string
+                                    secretName:
+                                      description: SecretName defines the name of
+                                        the secret where the API credentials are stored.
+                                      type: string
+                                    verifySSL:
+                                      description: VerifySSL defines whether certificates
+                                        should be verified when connecting to the
+                                        API.
+                                      type: boolean
+                                  required:
+                                  - address
+                                  - secretName
+                                  type: object
+                                dryRun:
+                                  description: DryRun defines whether the chaos should
+                                    run a dry-run mode.
+                                  type: boolean
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                selector:
+                                  description: Selector defines the parameters that
+                                    can be used to select target VMs.
+                                  properties:
+                                    account:
+                                      description: Account defines account to list
+                                        resources by. Must be used with the domainId
+                                        parameter.
+                                      type: string
+                                    affinityGroupId:
+                                      description: AffinityGroupID defines affinity
+                                        group to list the VMs by.
+                                      type: string
+                                    displayVm:
+                                      description: DisplayVM defines a flag that indicates
+                                        whether to list VMs by the display flag.
+                                      type: boolean
+                                    domainId:
+                                      description: DomainID defines domain ID the
+                                        VMs belong to.
+                                      type: string
+                                    groupId:
+                                      description: GroupID defines the ID of the group
+                                        the VMs belong to.
+                                      type: string
+                                    hostId:
+                                      description: HostID defines the ID of the host
+                                        the VMs belong to.
+                                      type: string
+                                    hypervisor:
+                                      description: Hypervisor defines the target hypervisor.
+                                      type: string
+                                    id:
+                                      description: ID defines the ID of the VM.
+                                      type: string
+                                    ids:
+                                      description: IDs defines a list of VM IDs, mutually
+                                        exclusive with ID.
+                                      items:
+                                        type: string
+                                      type: array
+                                    isRecursive:
+                                      description: IsRecursive defines whether VMs
+                                        should be listed recursively from parent specified
+                                        by DomainID.
+                                      type: boolean
+                                    isoid:
+                                      description: ISOID defines the ISO ID to list
+                                        the VMs by.
+                                      type: string
+                                    keyPair:
+                                      description: KeyPair defines the SSH keypair
+                                        name to list the VMs by.
+                                      type: string
+                                    keyword:
+                                      description: Keyword defines the keyword to
+                                        list the VMs by.
+                                      type: string
+                                    listAll:
+                                      description: ListAll defines whether to list
+                                        just the resources that belong to the caller
+                                        or all the resources the caller is authorised
+                                        to see.
+                                      type: boolean
+                                    name:
+                                      description: Name defines the name of the VM
+                                        instance.
+                                      type: string
+                                    networkId:
+                                      description: NetworkID defines the ID of the
+                                        network to list the VMs by.
+                                      type: string
+                                    projectId:
+                                      description: ProjectID defines the project ID
+                                        to list the VMs by.
+                                      type: string
+                                    serviceOffering:
+                                      description: ServiceOffering defines the service
+                                        offering to list the VMs by.
+                                      type: string
+                                    state:
+                                      description: State defines the state of the
+                                        VM that should match.
+                                      enum:
+                                      - Running
+                                      - Stopped
+                                      - Present
+                                      - Destroyed
+                                      - Expunged
+                                      type: string
+                                    storageId:
+                                      description: StorageID defines the ID the storage
+                                        where VM's volumes belong to.
+                                      type: string
+                                    tags:
+                                      additionalProperties:
+                                        type: string
+                                      description: Tags defines key/value pairs that
+                                        should match the tags of the VMs.
+                                      type: object
+                                    templateId:
+                                      description: TemplateID defines the ID of the
+                                        template that was used to create the VMs.
+                                      type: string
+                                    userId:
+                                      description: UserID defines the user ID that
+                                        created the VM and is under the account that
+                                        owns the VM.
+                                      type: string
+                                    vpcId:
+                                      description: VPCID defines the ID of the VPC
+                                        the VM belongs to.
+                                      type: string
+                                    zoneId:
+                                      description: ZoneID defines the availability
+                                        zone the VM belongs to.
+                                      type: string
+                                  type: object
+                              required:
+                              - action
+                              - apiConfig
+                              - selector
                               type: object
                             concurrencyPolicy:
                               enum:
@@ -22481,6 +23291,171 @@ spec:
                 items:
                   type: string
                 type: array
+              cloudstackvmChaos:
+                description: CloudStackVMChaosSpec is the content of the specification
+                  for a CloudStackChaos.
+                properties:
+                  action:
+                    description: 'Action defines the specific cloudstack chaos action.
+                      Supported action: vm-stop / vm-restart Default action: vm-stop'
+                    enum:
+                    - vm-stop
+                    - vm-restart
+                    type: string
+                  apiConfig:
+                    description: APIConfig defines the configuration ncessary to connect
+                      to the CloudStack API.
+                    properties:
+                      address:
+                        description: Address defines the address of the CloudStack
+                          instsance.
+                        type: string
+                      apiKeyField:
+                        description: APIKeyField defines the key under which the value
+                          for API key is stored inside the secret.
+                        type: string
+                      apiSecretField:
+                        description: APISecretField defines the key under which the
+                          value for API secret is stored inside the secret.
+                        type: string
+                      secretName:
+                        description: SecretName defines the name of the secret where
+                          the API credentials are stored.
+                        type: string
+                      verifySSL:
+                        description: VerifySSL defines whether certificates should
+                          be verified when connecting to the API.
+                        type: boolean
+                    required:
+                    - address
+                    - secretName
+                    type: object
+                  dryRun:
+                    description: DryRun defines whether the chaos should run a dry-run
+                      mode.
+                    type: boolean
+                  duration:
+                    description: Duration represents the duration of the chaos action.
+                    type: string
+                  remoteCluster:
+                    description: RemoteCluster represents the remote cluster where
+                      the chaos will be deployed
+                    type: string
+                  selector:
+                    description: Selector defines the parameters that can be used
+                      to select target VMs.
+                    properties:
+                      account:
+                        description: Account defines account to list resources by.
+                          Must be used with the domainId parameter.
+                        type: string
+                      affinityGroupId:
+                        description: AffinityGroupID defines affinity group to list
+                          the VMs by.
+                        type: string
+                      displayVm:
+                        description: DisplayVM defines a flag that indicates whether
+                          to list VMs by the display flag.
+                        type: boolean
+                      domainId:
+                        description: DomainID defines domain ID the VMs belong to.
+                        type: string
+                      groupId:
+                        description: GroupID defines the ID of the group the VMs belong
+                          to.
+                        type: string
+                      hostId:
+                        description: HostID defines the ID of the host the VMs belong
+                          to.
+                        type: string
+                      hypervisor:
+                        description: Hypervisor defines the target hypervisor.
+                        type: string
+                      id:
+                        description: ID defines the ID of the VM.
+                        type: string
+                      ids:
+                        description: IDs defines a list of VM IDs, mutually exclusive
+                          with ID.
+                        items:
+                          type: string
+                        type: array
+                      isRecursive:
+                        description: IsRecursive defines whether VMs should be listed
+                          recursively from parent specified by DomainID.
+                        type: boolean
+                      isoid:
+                        description: ISOID defines the ISO ID to list the VMs by.
+                        type: string
+                      keyPair:
+                        description: KeyPair defines the SSH keypair name to list
+                          the VMs by.
+                        type: string
+                      keyword:
+                        description: Keyword defines the keyword to list the VMs by.
+                        type: string
+                      listAll:
+                        description: ListAll defines whether to list just the resources
+                          that belong to the caller or all the resources the caller
+                          is authorised to see.
+                        type: boolean
+                      name:
+                        description: Name defines the name of the VM instance.
+                        type: string
+                      networkId:
+                        description: NetworkID defines the ID of the network to list
+                          the VMs by.
+                        type: string
+                      projectId:
+                        description: ProjectID defines the project ID to list the
+                          VMs by.
+                        type: string
+                      serviceOffering:
+                        description: ServiceOffering defines the service offering
+                          to list the VMs by.
+                        type: string
+                      state:
+                        description: State defines the state of the VM that should
+                          match.
+                        enum:
+                        - Running
+                        - Stopped
+                        - Present
+                        - Destroyed
+                        - Expunged
+                        type: string
+                      storageId:
+                        description: StorageID defines the ID the storage where VM's
+                          volumes belong to.
+                        type: string
+                      tags:
+                        additionalProperties:
+                          type: string
+                        description: Tags defines key/value pairs that should match
+                          the tags of the VMs.
+                        type: object
+                      templateId:
+                        description: TemplateID defines the ID of the template that
+                          was used to create the VMs.
+                        type: string
+                      userId:
+                        description: UserID defines the user ID that created the VM
+                          and is under the account that owns the VM.
+                        type: string
+                      vpcId:
+                        description: VPCID defines the ID of the VPC the VM belongs
+                          to.
+                        type: string
+                      zoneId:
+                        description: ZoneID defines the availability zone the VM belongs
+                          to.
+                        type: string
+                    type: object
+                required:
+                - action
+                - apiConfig
+                - selector
+                type: object
               conditionalBranches:
                 items:
                   properties:
@@ -25475,6 +26450,176 @@ spec:
                     - mode
                     - selector
                     - volumeName
+                    type: object
+                  cloudstackvmChaos:
+                    description: CloudStackVMChaosSpec is the content of the specification
+                      for a CloudStackChaos.
+                    properties:
+                      action:
+                        description: 'Action defines the specific cloudstack chaos
+                          action. Supported action: vm-stop / vm-restart Default action:
+                          vm-stop'
+                        enum:
+                        - vm-stop
+                        - vm-restart
+                        type: string
+                      apiConfig:
+                        description: APIConfig defines the configuration ncessary
+                          to connect to the CloudStack API.
+                        properties:
+                          address:
+                            description: Address defines the address of the CloudStack
+                              instsance.
+                            type: string
+                          apiKeyField:
+                            description: APIKeyField defines the key under which the
+                              value for API key is stored inside the secret.
+                            type: string
+                          apiSecretField:
+                            description: APISecretField defines the key under which
+                              the value for API secret is stored inside the secret.
+                            type: string
+                          secretName:
+                            description: SecretName defines the name of the secret
+                              where the API credentials are stored.
+                            type: string
+                          verifySSL:
+                            description: VerifySSL defines whether certificates should
+                              be verified when connecting to the API.
+                            type: boolean
+                        required:
+                        - address
+                        - secretName
+                        type: object
+                      dryRun:
+                        description: DryRun defines whether the chaos should run a
+                          dry-run mode.
+                        type: boolean
+                      duration:
+                        description: Duration represents the duration of the chaos
+                          action.
+                        type: string
+                      remoteCluster:
+                        description: RemoteCluster represents the remote cluster where
+                          the chaos will be deployed
+                        type: string
+                      selector:
+                        description: Selector defines the parameters that can be used
+                          to select target VMs.
+                        properties:
+                          account:
+                            description: Account defines account to list resources
+                              by. Must be used with the domainId parameter.
+                            type: string
+                          affinityGroupId:
+                            description: AffinityGroupID defines affinity group to
+                              list the VMs by.
+                            type: string
+                          displayVm:
+                            description: DisplayVM defines a flag that indicates whether
+                              to list VMs by the display flag.
+                            type: boolean
+                          domainId:
+                            description: DomainID defines domain ID the VMs belong
+                              to.
+                            type: string
+                          groupId:
+                            description: GroupID defines the ID of the group the VMs
+                              belong to.
+                            type: string
+                          hostId:
+                            description: HostID defines the ID of the host the VMs
+                              belong to.
+                            type: string
+                          hypervisor:
+                            description: Hypervisor defines the target hypervisor.
+                            type: string
+                          id:
+                            description: ID defines the ID of the VM.
+                            type: string
+                          ids:
+                            description: IDs defines a list of VM IDs, mutually exclusive
+                              with ID.
+                            items:
+                              type: string
+                            type: array
+                          isRecursive:
+                            description: IsRecursive defines whether VMs should be
+                              listed recursively from parent specified by DomainID.
+                            type: boolean
+                          isoid:
+                            description: ISOID defines the ISO ID to list the VMs
+                              by.
+                            type: string
+                          keyPair:
+                            description: KeyPair defines the SSH keypair name to list
+                              the VMs by.
+                            type: string
+                          keyword:
+                            description: Keyword defines the keyword to list the VMs
+                              by.
+                            type: string
+                          listAll:
+                            description: ListAll defines whether to list just the
+                              resources that belong to the caller or all the resources
+                              the caller is authorised to see.
+                            type: boolean
+                          name:
+                            description: Name defines the name of the VM instance.
+                            type: string
+                          networkId:
+                            description: NetworkID defines the ID of the network to
+                              list the VMs by.
+                            type: string
+                          projectId:
+                            description: ProjectID defines the project ID to list
+                              the VMs by.
+                            type: string
+                          serviceOffering:
+                            description: ServiceOffering defines the service offering
+                              to list the VMs by.
+                            type: string
+                          state:
+                            description: State defines the state of the VM that should
+                              match.
+                            enum:
+                            - Running
+                            - Stopped
+                            - Present
+                            - Destroyed
+                            - Expunged
+                            type: string
+                          storageId:
+                            description: StorageID defines the ID the storage where
+                              VM's volumes belong to.
+                            type: string
+                          tags:
+                            additionalProperties:
+                              type: string
+                            description: Tags defines key/value pairs that should
+                              match the tags of the VMs.
+                            type: object
+                          templateId:
+                            description: TemplateID defines the ID of the template
+                              that was used to create the VMs.
+                            type: string
+                          userId:
+                            description: UserID defines the user ID that created the
+                              VM and is under the account that owns the VM.
+                            type: string
+                          vpcId:
+                            description: VPCID defines the ID of the VPC the VM belongs
+                              to.
+                            type: string
+                          zoneId:
+                            description: ZoneID defines the availability zone the
+                              VM belongs to.
+                            type: string
+                        type: object
+                    required:
+                    - action
+                    - apiConfig
+                    - selector
                     type: object
                   concurrencyPolicy:
                     default: Forbid
@@ -28916,6 +30061,184 @@ spec:
                               items:
                                 type: string
                               type: array
+                            cloudstackvmChaos:
+                              description: CloudStackVMChaosSpec is the content of
+                                the specification for a CloudStackChaos.
+                              properties:
+                                action:
+                                  description: 'Action defines the specific cloudstack
+                                    chaos action. Supported action: vm-stop / vm-restart
+                                    Default action: vm-stop'
+                                  enum:
+                                  - vm-stop
+                                  - vm-restart
+                                  type: string
+                                apiConfig:
+                                  description: APIConfig defines the configuration
+                                    ncessary to connect to the CloudStack API.
+                                  properties:
+                                    address:
+                                      description: Address defines the address of
+                                        the CloudStack instsance.
+                                      type: string
+                                    apiKeyField:
+                                      description: APIKeyField defines the key under
+                                        which the value for API key is stored inside
+                                        the secret.
+                                      type: string
+                                    apiSecretField:
+                                      description: APISecretField defines the key
+                                        under which the value for API secret is stored
+                                        inside the secret.
+                                      type: string
+                                    secretName:
+                                      description: SecretName defines the name of
+                                        the secret where the API credentials are stored.
+                                      type: string
+                                    verifySSL:
+                                      description: VerifySSL defines whether certificates
+                                        should be verified when connecting to the
+                                        API.
+                                      type: boolean
+                                  required:
+                                  - address
+                                  - secretName
+                                  type: object
+                                dryRun:
+                                  description: DryRun defines whether the chaos should
+                                    run a dry-run mode.
+                                  type: boolean
+                                duration:
+                                  description: Duration represents the duration of
+                                    the chaos action.
+                                  type: string
+                                remoteCluster:
+                                  description: RemoteCluster represents the remote
+                                    cluster where the chaos will be deployed
+                                  type: string
+                                selector:
+                                  description: Selector defines the parameters that
+                                    can be used to select target VMs.
+                                  properties:
+                                    account:
+                                      description: Account defines account to list
+                                        resources by. Must be used with the domainId
+                                        parameter.
+                                      type: string
+                                    affinityGroupId:
+                                      description: AffinityGroupID defines affinity
+                                        group to list the VMs by.
+                                      type: string
+                                    displayVm:
+                                      description: DisplayVM defines a flag that indicates
+                                        whether to list VMs by the display flag.
+                                      type: boolean
+                                    domainId:
+                                      description: DomainID defines domain ID the
+                                        VMs belong to.
+                                      type: string
+                                    groupId:
+                                      description: GroupID defines the ID of the group
+                                        the VMs belong to.
+                                      type: string
+                                    hostId:
+                                      description: HostID defines the ID of the host
+                                        the VMs belong to.
+                                      type: string
+                                    hypervisor:
+                                      description: Hypervisor defines the target hypervisor.
+                                      type: string
+                                    id:
+                                      description: ID defines the ID of the VM.
+                                      type: string
+                                    ids:
+                                      description: IDs defines a list of VM IDs, mutually
+                                        exclusive with ID.
+                                      items:
+                                        type: string
+                                      type: array
+                                    isRecursive:
+                                      description: IsRecursive defines whether VMs
+                                        should be listed recursively from parent specified
+                                        by DomainID.
+                                      type: boolean
+                                    isoid:
+                                      description: ISOID defines the ISO ID to list
+                                        the VMs by.
+                                      type: string
+                                    keyPair:
+                                      description: KeyPair defines the SSH keypair
+                                        name to list the VMs by.
+                                      type: string
+                                    keyword:
+                                      description: Keyword defines the keyword to
+                                        list the VMs by.
+                                      type: string
+                                    listAll:
+                                      description: ListAll defines whether to list
+                                        just the resources that belong to the caller
+                                        or all the resources the caller is authorised
+                                        to see.
+                                      type: boolean
+                                    name:
+                                      description: Name defines the name of the VM
+                                        instance.
+                                      type: string
+                                    networkId:
+                                      description: NetworkID defines the ID of the
+                                        network to list the VMs by.
+                                      type: string
+                                    projectId:
+                                      description: ProjectID defines the project ID
+                                        to list the VMs by.
+                                      type: string
+                                    serviceOffering:
+                                      description: ServiceOffering defines the service
+                                        offering to list the VMs by.
+                                      type: string
+                                    state:
+                                      description: State defines the state of the
+                                        VM that should match.
+                                      enum:
+                                      - Running
+                                      - Stopped
+                                      - Present
+                                      - Destroyed
+                                      - Expunged
+                                      type: string
+                                    storageId:
+                                      description: StorageID defines the ID the storage
+                                        where VM's volumes belong to.
+                                      type: string
+                                    tags:
+                                      additionalProperties:
+                                        type: string
+                                      description: Tags defines key/value pairs that
+                                        should match the tags of the VMs.
+                                      type: object
+                                    templateId:
+                                      description: TemplateID defines the ID of the
+                                        template that was used to create the VMs.
+                                      type: string
+                                    userId:
+                                      description: UserID defines the user ID that
+                                        created the VM and is under the account that
+                                        owns the VM.
+                                      type: string
+                                    vpcId:
+                                      description: VPCID defines the ID of the VPC
+                                        the VM belongs to.
+                                      type: string
+                                    zoneId:
+                                      description: ZoneID defines the availability
+                                        zone the VM belongs to.
+                                      type: string
+                                  type: object
+                              required:
+                              - action
+                              - apiConfig
+                              - selector
+                              type: object
                             conditionalBranches:
                               description: ConditionalBranches describes the conditional
                                 branches of custom tasks. Only used when Type is TypeTask.
@@ -32212,6 +33535,188 @@ spec:
                                   - mode
                                   - selector
                                   - volumeName
+                                  type: object
+                                cloudstackvmChaos:
+                                  description: CloudStackVMChaosSpec is the content
+                                    of the specification for a CloudStackChaos.
+                                  properties:
+                                    action:
+                                      description: 'Action defines the specific cloudstack
+                                        chaos action. Supported action: vm-stop /
+                                        vm-restart Default action: vm-stop'
+                                      enum:
+                                      - vm-stop
+                                      - vm-restart
+                                      type: string
+                                    apiConfig:
+                                      description: APIConfig defines the configuration
+                                        ncessary to connect to the CloudStack API.
+                                      properties:
+                                        address:
+                                          description: Address defines the address
+                                            of the CloudStack instsance.
+                                          type: string
+                                        apiKeyField:
+                                          description: APIKeyField defines the key
+                                            under which the value for API key is stored
+                                            inside the secret.
+                                          type: string
+                                        apiSecretField:
+                                          description: APISecretField defines the
+                                            key under which the value for API secret
+                                            is stored inside the secret.
+                                          type: string
+                                        secretName:
+                                          description: SecretName defines the name
+                                            of the secret where the API credentials
+                                            are stored.
+                                          type: string
+                                        verifySSL:
+                                          description: VerifySSL defines whether certificates
+                                            should be verified when connecting to
+                                            the API.
+                                          type: boolean
+                                      required:
+                                      - address
+                                      - secretName
+                                      type: object
+                                    dryRun:
+                                      description: DryRun defines whether the chaos
+                                        should run a dry-run mode.
+                                      type: boolean
+                                    duration:
+                                      description: Duration represents the duration
+                                        of the chaos action.
+                                      type: string
+                                    remoteCluster:
+                                      description: RemoteCluster represents the remote
+                                        cluster where the chaos will be deployed
+                                      type: string
+                                    selector:
+                                      description: Selector defines the parameters
+                                        that can be used to select target VMs.
+                                      properties:
+                                        account:
+                                          description: Account defines account to
+                                            list resources by. Must be used with the
+                                            domainId parameter.
+                                          type: string
+                                        affinityGroupId:
+                                          description: AffinityGroupID defines affinity
+                                            group to list the VMs by.
+                                          type: string
+                                        displayVm:
+                                          description: DisplayVM defines a flag that
+                                            indicates whether to list VMs by the display
+                                            flag.
+                                          type: boolean
+                                        domainId:
+                                          description: DomainID defines domain ID
+                                            the VMs belong to.
+                                          type: string
+                                        groupId:
+                                          description: GroupID defines the ID of the
+                                            group the VMs belong to.
+                                          type: string
+                                        hostId:
+                                          description: HostID defines the ID of the
+                                            host the VMs belong to.
+                                          type: string
+                                        hypervisor:
+                                          description: Hypervisor defines the target
+                                            hypervisor.
+                                          type: string
+                                        id:
+                                          description: ID defines the ID of the VM.
+                                          type: string
+                                        ids:
+                                          description: IDs defines a list of VM IDs,
+                                            mutually exclusive with ID.
+                                          items:
+                                            type: string
+                                          type: array
+                                        isRecursive:
+                                          description: IsRecursive defines whether
+                                            VMs should be listed recursively from
+                                            parent specified by DomainID.
+                                          type: boolean
+                                        isoid:
+                                          description: ISOID defines the ISO ID to
+                                            list the VMs by.
+                                          type: string
+                                        keyPair:
+                                          description: KeyPair defines the SSH keypair
+                                            name to list the VMs by.
+                                          type: string
+                                        keyword:
+                                          description: Keyword defines the keyword
+                                            to list the VMs by.
+                                          type: string
+                                        listAll:
+                                          description: ListAll defines whether to
+                                            list just the resources that belong to
+                                            the caller or all the resources the caller
+                                            is authorised to see.
+                                          type: boolean
+                                        name:
+                                          description: Name defines the name of the
+                                            VM instance.
+                                          type: string
+                                        networkId:
+                                          description: NetworkID defines the ID of
+                                            the network to list the VMs by.
+                                          type: string
+                                        projectId:
+                                          description: ProjectID defines the project
+                                            ID to list the VMs by.
+                                          type: string
+                                        serviceOffering:
+                                          description: ServiceOffering defines the
+                                            service offering to list the VMs by.
+                                          type: string
+                                        state:
+                                          description: State defines the state of
+                                            the VM that should match.
+                                          enum:
+                                          - Running
+                                          - Stopped
+                                          - Present
+                                          - Destroyed
+                                          - Expunged
+                                          type: string
+                                        storageId:
+                                          description: StorageID defines the ID the
+                                            storage where VM's volumes belong to.
+                                          type: string
+                                        tags:
+                                          additionalProperties:
+                                            type: string
+                                          description: Tags defines key/value pairs
+                                            that should match the tags of the VMs.
+                                          type: object
+                                        templateId:
+                                          description: TemplateID defines the ID of
+                                            the template that was used to create the
+                                            VMs.
+                                          type: string
+                                        userId:
+                                          description: UserID defines the user ID
+                                            that created the VM and is under the account
+                                            that owns the VM.
+                                          type: string
+                                        vpcId:
+                                          description: VPCID defines the ID of the
+                                            VPC the VM belongs to.
+                                          type: string
+                                        zoneId:
+                                          description: ZoneID defines the availability
+                                            zone the VM belongs to.
+                                          type: string
+                                      type: object
+                                  required:
+                                  - action
+                                  - apiConfig
+                                  - selector
                                   type: object
                                 concurrencyPolicy:
                                   enum:
@@ -46352,6 +47857,176 @@ spec:
                       items:
                         type: string
                       type: array
+                    cloudstackvmChaos:
+                      description: CloudStackVMChaosSpec is the content of the specification
+                        for a CloudStackChaos.
+                      properties:
+                        action:
+                          description: 'Action defines the specific cloudstack chaos
+                            action. Supported action: vm-stop / vm-restart Default
+                            action: vm-stop'
+                          enum:
+                          - vm-stop
+                          - vm-restart
+                          type: string
+                        apiConfig:
+                          description: APIConfig defines the configuration ncessary
+                            to connect to the CloudStack API.
+                          properties:
+                            address:
+                              description: Address defines the address of the CloudStack
+                                instsance.
+                              type: string
+                            apiKeyField:
+                              description: APIKeyField defines the key under which
+                                the value for API key is stored inside the secret.
+                              type: string
+                            apiSecretField:
+                              description: APISecretField defines the key under which
+                                the value for API secret is stored inside the secret.
+                              type: string
+                            secretName:
+                              description: SecretName defines the name of the secret
+                                where the API credentials are stored.
+                              type: string
+                            verifySSL:
+                              description: VerifySSL defines whether certificates
+                                should be verified when connecting to the API.
+                              type: boolean
+                          required:
+                          - address
+                          - secretName
+                          type: object
+                        dryRun:
+                          description: DryRun defines whether the chaos should run
+                            a dry-run mode.
+                          type: boolean
+                        duration:
+                          description: Duration represents the duration of the chaos
+                            action.
+                          type: string
+                        remoteCluster:
+                          description: RemoteCluster represents the remote cluster
+                            where the chaos will be deployed
+                          type: string
+                        selector:
+                          description: Selector defines the parameters that can be
+                            used to select target VMs.
+                          properties:
+                            account:
+                              description: Account defines account to list resources
+                                by. Must be used with the domainId parameter.
+                              type: string
+                            affinityGroupId:
+                              description: AffinityGroupID defines affinity group
+                                to list the VMs by.
+                              type: string
+                            displayVm:
+                              description: DisplayVM defines a flag that indicates
+                                whether to list VMs by the display flag.
+                              type: boolean
+                            domainId:
+                              description: DomainID defines domain ID the VMs belong
+                                to.
+                              type: string
+                            groupId:
+                              description: GroupID defines the ID of the group the
+                                VMs belong to.
+                              type: string
+                            hostId:
+                              description: HostID defines the ID of the host the VMs
+                                belong to.
+                              type: string
+                            hypervisor:
+                              description: Hypervisor defines the target hypervisor.
+                              type: string
+                            id:
+                              description: ID defines the ID of the VM.
+                              type: string
+                            ids:
+                              description: IDs defines a list of VM IDs, mutually
+                                exclusive with ID.
+                              items:
+                                type: string
+                              type: array
+                            isRecursive:
+                              description: IsRecursive defines whether VMs should
+                                be listed recursively from parent specified by DomainID.
+                              type: boolean
+                            isoid:
+                              description: ISOID defines the ISO ID to list the VMs
+                                by.
+                              type: string
+                            keyPair:
+                              description: KeyPair defines the SSH keypair name to
+                                list the VMs by.
+                              type: string
+                            keyword:
+                              description: Keyword defines the keyword to list the
+                                VMs by.
+                              type: string
+                            listAll:
+                              description: ListAll defines whether to list just the
+                                resources that belong to the caller or all the resources
+                                the caller is authorised to see.
+                              type: boolean
+                            name:
+                              description: Name defines the name of the VM instance.
+                              type: string
+                            networkId:
+                              description: NetworkID defines the ID of the network
+                                to list the VMs by.
+                              type: string
+                            projectId:
+                              description: ProjectID defines the project ID to list
+                                the VMs by.
+                              type: string
+                            serviceOffering:
+                              description: ServiceOffering defines the service offering
+                                to list the VMs by.
+                              type: string
+                            state:
+                              description: State defines the state of the VM that
+                                should match.
+                              enum:
+                              - Running
+                              - Stopped
+                              - Present
+                              - Destroyed
+                              - Expunged
+                              type: string
+                            storageId:
+                              description: StorageID defines the ID the storage where
+                                VM's volumes belong to.
+                              type: string
+                            tags:
+                              additionalProperties:
+                                type: string
+                              description: Tags defines key/value pairs that should
+                                match the tags of the VMs.
+                              type: object
+                            templateId:
+                              description: TemplateID defines the ID of the template
+                                that was used to create the VMs.
+                              type: string
+                            userId:
+                              description: UserID defines the user ID that created
+                                the VM and is under the account that owns the VM.
+                              type: string
+                            vpcId:
+                              description: VPCID defines the ID of the VPC the VM
+                                belongs to.
+                              type: string
+                            zoneId:
+                              description: ZoneID defines the availability zone the
+                                VM belongs to.
+                              type: string
+                          type: object
+                      required:
+                      - action
+                      - apiConfig
+                      - selector
+                      type: object
                     conditionalBranches:
                       description: ConditionalBranches describes the conditional branches
                         of custom tasks. Only used when Type is TypeTask.
@@ -49464,6 +51139,179 @@ spec:
                           - mode
                           - selector
                           - volumeName
+                          type: object
+                        cloudstackvmChaos:
+                          description: CloudStackVMChaosSpec is the content of the
+                            specification for a CloudStackChaos.
+                          properties:
+                            action:
+                              description: 'Action defines the specific cloudstack
+                                chaos action. Supported action: vm-stop / vm-restart
+                                Default action: vm-stop'
+                              enum:
+                              - vm-stop
+                              - vm-restart
+                              type: string
+                            apiConfig:
+                              description: APIConfig defines the configuration ncessary
+                                to connect to the CloudStack API.
+                              properties:
+                                address:
+                                  description: Address defines the address of the
+                                    CloudStack instsance.
+                                  type: string
+                                apiKeyField:
+                                  description: APIKeyField defines the key under which
+                                    the value for API key is stored inside the secret.
+                                  type: string
+                                apiSecretField:
+                                  description: APISecretField defines the key under
+                                    which the value for API secret is stored inside
+                                    the secret.
+                                  type: string
+                                secretName:
+                                  description: SecretName defines the name of the
+                                    secret where the API credentials are stored.
+                                  type: string
+                                verifySSL:
+                                  description: VerifySSL defines whether certificates
+                                    should be verified when connecting to the API.
+                                  type: boolean
+                              required:
+                              - address
+                              - secretName
+                              type: object
+                            dryRun:
+                              description: DryRun defines whether the chaos should
+                                run a dry-run mode.
+                              type: boolean
+                            duration:
+                              description: Duration represents the duration of the
+                                chaos action.
+                              type: string
+                            remoteCluster:
+                              description: RemoteCluster represents the remote cluster
+                                where the chaos will be deployed
+                              type: string
+                            selector:
+                              description: Selector defines the parameters that can
+                                be used to select target VMs.
+                              properties:
+                                account:
+                                  description: Account defines account to list resources
+                                    by. Must be used with the domainId parameter.
+                                  type: string
+                                affinityGroupId:
+                                  description: AffinityGroupID defines affinity group
+                                    to list the VMs by.
+                                  type: string
+                                displayVm:
+                                  description: DisplayVM defines a flag that indicates
+                                    whether to list VMs by the display flag.
+                                  type: boolean
+                                domainId:
+                                  description: DomainID defines domain ID the VMs
+                                    belong to.
+                                  type: string
+                                groupId:
+                                  description: GroupID defines the ID of the group
+                                    the VMs belong to.
+                                  type: string
+                                hostId:
+                                  description: HostID defines the ID of the host the
+                                    VMs belong to.
+                                  type: string
+                                hypervisor:
+                                  description: Hypervisor defines the target hypervisor.
+                                  type: string
+                                id:
+                                  description: ID defines the ID of the VM.
+                                  type: string
+                                ids:
+                                  description: IDs defines a list of VM IDs, mutually
+                                    exclusive with ID.
+                                  items:
+                                    type: string
+                                  type: array
+                                isRecursive:
+                                  description: IsRecursive defines whether VMs should
+                                    be listed recursively from parent specified by
+                                    DomainID.
+                                  type: boolean
+                                isoid:
+                                  description: ISOID defines the ISO ID to list the
+                                    VMs by.
+                                  type: string
+                                keyPair:
+                                  description: KeyPair defines the SSH keypair name
+                                    to list the VMs by.
+                                  type: string
+                                keyword:
+                                  description: Keyword defines the keyword to list
+                                    the VMs by.
+                                  type: string
+                                listAll:
+                                  description: ListAll defines whether to list just
+                                    the resources that belong to the caller or all
+                                    the resources the caller is authorised to see.
+                                  type: boolean
+                                name:
+                                  description: Name defines the name of the VM instance.
+                                  type: string
+                                networkId:
+                                  description: NetworkID defines the ID of the network
+                                    to list the VMs by.
+                                  type: string
+                                projectId:
+                                  description: ProjectID defines the project ID to
+                                    list the VMs by.
+                                  type: string
+                                serviceOffering:
+                                  description: ServiceOffering defines the service
+                                    offering to list the VMs by.
+                                  type: string
+                                state:
+                                  description: State defines the state of the VM that
+                                    should match.
+                                  enum:
+                                  - Running
+                                  - Stopped
+                                  - Present
+                                  - Destroyed
+                                  - Expunged
+                                  type: string
+                                storageId:
+                                  description: StorageID defines the ID the storage
+                                    where VM's volumes belong to.
+                                  type: string
+                                tags:
+                                  additionalProperties:
+                                    type: string
+                                  description: Tags defines key/value pairs that should
+                                    match the tags of the VMs.
+                                  type: object
+                                templateId:
+                                  description: TemplateID defines the ID of the template
+                                    that was used to create the VMs.
+                                  type: string
+                                userId:
+                                  description: UserID defines the user ID that created
+                                    the VM and is under the account that owns the
+                                    VM.
+                                  type: string
+                                vpcId:
+                                  description: VPCID defines the ID of the VPC the
+                                    VM belongs to.
+                                  type: string
+                                zoneId:
+                                  description: ZoneID defines the availability zone
+                                    the VM belongs to.
+                                  type: string
+                              type: object
+                          required:
+                          - action
+                          - apiConfig
+                          - selector
                           type: object
                         concurrencyPolicy:
                           enum:
