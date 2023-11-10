@@ -92,7 +92,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 - Joining the #project-chaos-mesh channel in the [CNCF Slack](https://slack.cncf.io/) workspace.
 
-- Filing an issue or opening a PR against this repository.
+- Filling an issue or opening a PR against this repository.
 
 ### Community meetings
 
@@ -143,19 +143,14 @@ Please reach out for bugs, feature requests, and other issues via:
 - InfoQ: [Chaos Engineering on Kubernetes : Chaos Mesh Generally Available with v1.0](https://www.infoq.com/news/2020/10/kubernetes-chaos-mesh-ga/)
 - TechGenix: [Chaos Mesh Promises to Bring Order to Chaos Engineering](http://techgenix.com/chaos-mesh-chaos-engineering/)
 
-## FAQs
-
-See [FAQs](https://chaos-mesh.org/docs).
-
 ## Roadmap
 
 See [ROADMAP](./ROADMAP.md).
 
 ## License
 
-Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
+Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full content.
 
-<!-- markdown-link-check-disable-next-line -->
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh?ref=badge_large)
 
 ## Trademark
