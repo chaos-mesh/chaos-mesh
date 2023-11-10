@@ -85,12 +85,17 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, fmt.Errorf("get rest mapping: %w", err)
 	}
 
-	if k8schaos.Spec.AllowPatching {
+	if k8schaos.Spec.Update {
 		impl.initialValue, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Get(ctx, resource.GetName(), v1.GetOptions{})
 		if err != nil && !apiErrors.IsNotFound(err) {
 			return v1alpha1.NotInjected, err
 		}
-		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Apply(ctx, resource.GetName(), resource, v1.ApplyOptions{})
+
+		unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "creationTimestamp")
+		unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "resourceVersion")
+		unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "uid")
+
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, resource, v1.UpdateOptions{})
 	} else {
 		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Create(ctx, resource, v1.CreateOptions{})
 	}
@@ -139,12 +144,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return v1alpha1.Injected, err
 	}
 
-	if !isManaged(existingResource) {
-		return v1alpha1.Injected, fmt.Errorf("resource is not managed by %s", managedBy)
+	if resMgr := getResourceManager(existingResource); resMgr != managedBy {
+		return v1alpha1.Injected, fmt.Errorf("resource is not managed by %s: %s: \"%s\"", managedBy, managedByLabel, resMgr)
 	}
 
 	if impl.initialValue != nil {
-		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Apply(ctx, resource.GetName(), impl.initialValue, v1.ApplyOptions{})
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, impl.initialValue, v1.UpdateOptions{})
 	} else {
 		err = resourceClient.Delete(ctx, resource.GetName(), v1.DeleteOptions{})
 	}
@@ -155,9 +160,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	return v1alpha1.NotInjected, nil
 }
 
-func isManaged(resource *unstructured.Unstructured) bool {
+func getResourceManager(resource *unstructured.Unstructured) string {
 	labels := resource.GetLabels()
-	return labels != nil && labels[managedByLabel] == managedBy
+	if labels == nil {
+		return ""
+	} else {
+		return labels[managedByLabel]
+	}
 }
 
 func (impl *Impl) dynamicClient() (dynamic.Interface, error) {

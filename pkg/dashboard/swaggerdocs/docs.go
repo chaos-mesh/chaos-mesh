@@ -6383,10 +6383,6 @@ const docTemplate = `{
         "v1alpha1.K8SChaosSpec": {
             "type": "object",
             "properties": {
-                "allowPatching": {
-                    "description": "AllowPatching specifies that the chaos should patch \u0026 restore the modified object,\nrather than create \u0026 delete.\n+optional",
-                    "type": "boolean"
-                },
                 "apiObjects": {
                     "description": "+kubebuilder:validation:Required",
                     "$ref": "#/definitions/v1alpha1.K8SChaosAPIObjects"
@@ -6398,6 +6394,10 @@ const docTemplate = `{
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
+                },
+                "update": {
+                    "description": "Patch specifies that the chaos should update an existing resource rather than create a new one.\n+optional",
+                    "type": "boolean"
                 }
             }
         },
