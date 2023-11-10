@@ -164,9 +164,8 @@ func getResourceManager(resource *unstructured.Unstructured) string {
 	labels := resource.GetLabels()
 	if labels == nil {
 		return ""
-	} else {
-		return labels[managedByLabel]
 	}
+	return labels[managedByLabel]
 }
 
 func (impl *Impl) dynamicClient() (dynamic.Interface, error) {
