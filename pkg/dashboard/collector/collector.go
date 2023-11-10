@@ -190,6 +190,8 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 		archive.Action = string(chaos.Spec.Action)
 	case *v1alpha1.K8SChaos:
 		archive.Action = ""
+	case *v1alpha1.CloudStackVMChaos:
+		archive.Action = ""
 	default:
 		return nil, errors.New("unsupported chaos type " + archive.Kind)
 	}

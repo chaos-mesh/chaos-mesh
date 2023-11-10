@@ -11,6 +11,7 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/antonmedv/expr v1.8.9
+	github.com/apache/cloudstack-go/v2 v2.15.0
 	github.com/aws/aws-sdk-go-v2 v1.3.2
 	github.com/aws/aws-sdk-go-v2/config v1.1.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.1.1
@@ -168,6 +169,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect

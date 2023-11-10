@@ -569,6 +569,7 @@ webhook:
     - physicalmachine
     - statuscheck
     - remotecluster
+    - cloudstackvmchaos
 
 bpfki:
   # Enable chaos-kernel

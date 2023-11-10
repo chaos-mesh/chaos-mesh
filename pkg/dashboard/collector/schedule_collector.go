@@ -106,6 +106,8 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 		archive.Action = string(schedule.Spec.ScheduleItem.JVMChaos.Action)
 	case v1alpha1.ScheduleTypePhysicalMachineChaos:
 		archive.Action = string(schedule.Spec.ScheduleItem.PhysicalMachineChaos.Action)
+	case v1alpha1.ScheduleTypeCloudStackVMChaos:
+		archive.Action = ""
 	default:
 		return errors.New("unsupported chaos type " + string(schedule.Spec.Type))
 	}

@@ -180,6 +180,7 @@ export interface Time {
 export interface ExperimentType {
   AWSChaos: AWS
   AzureChaos?: unknown
+  CloudStackVMChaos?: unknown
   DNSChaos: DNS
   DeploymentChaos: Deployment
   GCPChaos: GCP
