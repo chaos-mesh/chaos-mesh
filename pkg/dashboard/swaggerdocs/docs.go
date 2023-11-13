@@ -6565,6 +6565,10 @@ const docTemplate = `{
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
+                },
+                "update": {
+                    "description": "Patch specifies that the chaos should update an existing resource rather than create a new one.\n+optional",
+                    "type": "boolean"
                 }
             }
         },
