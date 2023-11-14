@@ -11,6 +11,7 @@ permissions: read-all
 
 jobs:
   build-specific-architecture:
+    if: ${{ github.repository == 'chaos-mesh/chaos-mesh' }}
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
