@@ -226,7 +226,7 @@ func (impl *Impl) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ker
 
 // CreateBPFKIConnection create a grpc connection with bpfki
 func (impl *Impl) CreateBPFKIConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
-	daemonIP, err := impl.chaosDaemonClientBuilder.FindDaemonIP(ctx, pod)
+	daemonIP, err := impl.chaosDaemonClientBuilder.FindDaemonIP(ctx, pod.Spec.NodeName)
 	if err != nil {
 		return nil, err
 	}

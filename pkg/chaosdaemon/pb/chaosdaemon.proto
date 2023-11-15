@@ -32,6 +32,9 @@ service ChaosDaemon {
   rpc InstallJVMRules(InstallJVMRulesRequest) returns (google.protobuf.Empty) {}
 
   rpc UninstallJVMRules(UninstallJVMRulesRequest) returns (google.protobuf.Empty) {}
+
+  rpc ApplyCiliumChaos(ApplyCiliumChaosRequest) returns (google.protobuf.Empty) {}
+  rpc RecoverCiliumChaos(RecoverCiliumChaosRequest) returns (google.protobuf.Empty) {}
 }
 
 message TcHandle {
@@ -317,3 +320,12 @@ message ApplyBlockChaosResponse {
 message RecoverBlockChaosRequest {
   int32 injection_id = 1;
 }
+
+message ApplyCiliumChaosRequest {
+  string container_id = 1;
+}
+
+message RecoverCiliumChaosRequest {
+  string container_id = 1;
+}
+

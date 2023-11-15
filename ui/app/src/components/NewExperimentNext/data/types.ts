@@ -744,6 +744,7 @@ const data: Record<Kind, Definition> = {
       },
     ],
   },
+  CiliumChaos: {},
   // Pod Fault
   PodChaos: {
     categories: [

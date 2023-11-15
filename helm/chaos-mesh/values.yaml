@@ -570,6 +570,7 @@ webhook:
     - statuscheck
     - remotecluster
     - cloudstackvmchaos
+    - ciliumchaos
 
 bpfki:
   # Enable chaos-kernel

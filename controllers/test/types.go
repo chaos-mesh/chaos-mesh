@@ -113,3 +113,11 @@ func (c *MockChaosDaemonClient) ApplyBlockChaos(ctx context.Context, req *pb.App
 func (c *MockChaosDaemonClient) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return &empty.Empty{}, nil
 }
+
+func (c *MockChaosDaemonClient) ApplyCiliumChaos(ctx context.Context, req *pb.ApplyCiliumChaosRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("ApplyCiliumChaosRequest")
+}
+
+func (c *MockChaosDaemonClient) RecoverCiliumChaos(ctx context.Context, in *pb.RecoverCiliumChaosRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("RecoverCiliumChaosRequest")
+}

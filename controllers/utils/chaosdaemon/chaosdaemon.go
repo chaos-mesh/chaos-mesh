@@ -49,8 +49,7 @@ type ChaosDaemonClientBuilder struct {
 	client.Reader
 }
 
-func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod) (string, error) {
-	nodeName := pod.Spec.NodeName
+func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, nodeName string) (string, error) {
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
 	ns := config.ControllerCfg.Namespace
@@ -82,7 +81,7 @@ func (b *ChaosDaemonClientBuilder) Build(ctx context.Context, pod *v1.Pod, id *t
 		return nil, err.(error)
 	}
 
-	daemonIP, err := b.FindDaemonIP(ctx, pod)
+	daemonIP, err := b.FindDaemonIP(ctx, pod.Spec.NodeName)
 	if err != nil {
 		return nil, err
 	}

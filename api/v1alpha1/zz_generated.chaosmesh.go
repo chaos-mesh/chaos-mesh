@@ -457,6 +457,144 @@ func (in *BlockChaos) Default() {
 	gw.Default(in)
 }
 
+const KindCiliumChaos = "CiliumChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *CiliumChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *CiliumChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *CiliumChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *CiliumChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *CiliumChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *CiliumChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *CiliumChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// CiliumChaosList contains a list of CiliumChaos
+type CiliumChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []CiliumChaos `json:"items"`
+}
+
+func (in *CiliumChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *CiliumChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *CiliumChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *CiliumChaos) IsOneShot() bool {
+	return false
+}
+
+var CiliumChaosWebhookLog = logf.Log.WithName("CiliumChaos-resource")
+
+func (in *CiliumChaos) ValidateCreate() (admission.Warnings, error) {
+	CiliumChaosWebhookLog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *CiliumChaos) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+	CiliumChaosWebhookLog.Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*CiliumChaos).Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *CiliumChaos) ValidateDelete() (admission.Warnings, error) {
+	CiliumChaosWebhookLog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil, nil
+}
+
+var _ webhook.Validator = &CiliumChaos{}
+
+func (in *CiliumChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &CiliumChaos{}
+
+func (in *CiliumChaos) Default() {
+	gw.Default(in)
+}
+
 const KindCloudStackVMChaos = "CloudStackVMChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -2926,6 +3064,12 @@ func init() {
 		list:  &BlockChaosList{},
 	})
 
+	SchemeBuilder.Register(&CiliumChaos{}, &CiliumChaosList{})
+	all.register(KindCiliumChaos, &ChaosKind{
+		chaos: &CiliumChaos{},
+		list:  &CiliumChaosList{},
+	})
+
 	SchemeBuilder.Register(&CloudStackVMChaos{}, &CloudStackVMChaosList{})
 	all.register(KindCloudStackVMChaos, &ChaosKind{
 		chaos: &CloudStackVMChaos{},
@@ -3048,6 +3192,11 @@ func init() {
 	allScheduleItem.register(KindBlockChaos, &ChaosKind{
 		chaos: &BlockChaos{},
 		list:  &BlockChaosList{},
+	})
+
+	allScheduleItem.register(KindCiliumChaos, &ChaosKind{
+		chaos: &CiliumChaos{},
+		list:  &CiliumChaosList{},
 	})
 
 	allScheduleItem.register(KindCloudStackVMChaos, &ChaosKind{

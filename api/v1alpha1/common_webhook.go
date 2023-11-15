@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/chaos-mesh/chaos-mesh/api/genericwebhook"
@@ -171,6 +172,18 @@ func (f *FloatStr) Default(root interface{}, field *reflect.StructField) {
 	if len(*f) == 0 && field != nil {
 		*f = FloatStr(field.Tag.Get("default"))
 	}
+}
+
+func (in *LabelSelectorRequirements) Validate(root interface{}, path *field.Path) field.ErrorList {
+	if in == nil {
+		return nil
+	}
+
+	if _, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{MatchExpressions: *in}); err != nil {
+		return field.ErrorList{field.Invalid(path, in, fmt.Sprintf("invalid expression selector: %s", err))}
+	}
+
+	return nil
 }
 
 func init() {
