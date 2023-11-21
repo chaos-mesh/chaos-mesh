@@ -91,9 +91,21 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 			return v1alpha1.NotInjected, err
 		}
 
-		unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "creationTimestamp")
-		unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "resourceVersion")
-		unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "uid")
+		if impl.initialValue != nil {
+			var resourceVersion string
+			var found bool
+			resourceVersion, found, err = unstructured.NestedString(impl.initialValue.Object, "metadata", "resourceVersion")
+			if err != nil {
+				return v1alpha1.NotInjected, err
+			}
+			if found {
+				resource.SetResourceVersion(resourceVersion)
+			}
+
+			unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "creationTimestamp")
+			unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "resourceVersion")
+			unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "uid")
+		}
 
 		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, resource, v1.UpdateOptions{})
 	} else {
