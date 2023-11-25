@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# This script would report the tag of build-env and dev-env to use based on configuartion file env-images.yaml.
+# This script would report the tag of build-env and dev-env to use based on configuration file env-images.yaml.
 #
 # Usage:
 # On master branch:
@@ -29,9 +29,9 @@ set -euo pipefail
 DIR="$( cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 PROJECT_DIR="$(dirname "$DIR")"
 
-if [ "$#" -eq  "0" ]; then
-  echo "Usage: $0 <env-image-name>"
-  exit 1
+if [[ "$#" == "0" ]]; then
+  echo "Usage: $0 <env-image-name: dev-env|build-env>"
+  exit 0
 fi
 
 if [[ "$1" == "dev-env" || "$1" == "build-env"  ]]; then
