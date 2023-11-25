@@ -29,6 +29,7 @@ header:
     - '*.mk'
     - 'PROJECT'
     - 'LICENSE'
+    - '.go-version'
     # build cache in dev-env
     - '.cache'
     # reported as unsupported by skywalking-eyes as of October 4th 2021

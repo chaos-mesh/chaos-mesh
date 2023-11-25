@@ -572,3 +572,7 @@ chaosDlv:
     # empty tag means using the global images.tag
     tag: ""
   imagePullPolicy: IfNotPresent
+
+reInjectController:
+  enable: false
+  chaosKinds: StressChaos

@@ -154,6 +154,12 @@ spec:
             value: {{ .Values.controllerManager.leaderElection.renewDeadline | quote }}
           - name: LEADER_ELECT_RETRY_PERIOD
             value: {{ .Values.controllerManager.leaderElection.retryPeriod | quote }}
+          {{- if .Values.reInjectController.enable }}
+          - name: ENABLE_REINJECT_CONTROLLER
+            value: {{ .Values.reInjectController.enable }}
+          - name: REINJECT_CHAOS_KINDS
+            value: {{ .Values.reInjectController.chaosKinds }}
+          {{- end }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

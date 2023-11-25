@@ -1282,7 +1282,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-dns-server-target-namespace
-  namespace: 
+  namespace: "chaos-mesh"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1649,7 +1649,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: ${socketDir}
         - name: sys-path
           hostPath:
@@ -1971,7 +1971,6 @@ spec:
                     operator: In
                     values: ["chaos-dns"]
               topologyKey: kubernetes.io/hostname
-      priorityClassName: 
       containers:
       - name: chaos-dns-server
         image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6

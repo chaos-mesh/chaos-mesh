@@ -176,7 +176,7 @@ spec:
         {{- end }}
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: {{template "chaos-daemon.socket-path" . }}
         - name: sys-path
           hostPath:

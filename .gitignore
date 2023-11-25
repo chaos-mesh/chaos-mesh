@@ -47,3 +47,5 @@ e2e-test/image/e2e/manifests/
 
 __pycache__
 *.pyc
+
+.go-version

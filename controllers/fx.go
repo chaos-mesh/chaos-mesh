@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podhttpchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/reinjection"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
@@ -48,6 +49,7 @@ var Module = fx.Options(
 	fx.Invoke(statuscheck.Bootstrap),
 	fx.Invoke(remotecluster.Bootstrap),
 	fx.Invoke(remotechaos.Bootstrap),
+	fx.Invoke(reinjection.Bootstrap),
 
 	schedule.Module,
 	chaosimpl.AllImpl,

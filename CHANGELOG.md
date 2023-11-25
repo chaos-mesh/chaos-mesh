@@ -60,6 +60,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Added
 
 - Install offline Helm Chart for a multi-cluster [#3897](https://github.com/chaos-mesh/chaos-mesh/pull/3897)
+- Add a re-inject controller to handle pod restarts [#4057](https://github.com/chaos-mesh/chaos-mesh/pull/4057)
 
 ### Changed
 
