@@ -40,8 +40,6 @@ var _ impltypes.ChaosImpl = (*Impl)(nil)
 type Impl struct {
 	client.Client
 	Log logr.Logger
-
-	initialValue *unstructured.Unstructured
 }
 
 const (
@@ -52,8 +50,6 @@ const (
 func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Record, obj v1alpha1.InnerObject) (v1alpha1.Phase, error) {
 	impl.Log.Info("k8schaos Apply", "namespace", obj.GetNamespace(), "name", obj.GetName())
 
-	// TODO: We need to consider the case where we're applying an object that already exists (updating it).
-	// In that case we should store the original objects in k8schaos.Status.OriginalObjects.
 	k8schaos, ok := obj.(*v1alpha1.K8SChaos)
 	if !ok {
 		err := errors.New("chaos is not K8SChaos")
@@ -85,33 +81,55 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, fmt.Errorf("get rest mapping: %w", err)
 	}
 
-	if k8schaos.Spec.Update {
-		impl.initialValue, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Get(ctx, resource.GetName(), v1.GetOptions{})
-		if err != nil && !apiErrors.IsNotFound(err) {
+	originalValue, err := client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Get(ctx, resource.GetName(), v1.GetOptions{})
+	if err != nil && !apiErrors.IsNotFound(err) {
+		return v1alpha1.NotInjected, err
+	}
+
+	if k8schaos.Spec.Update && originalValue != nil {
+		var resourceVersion string
+		var found bool
+		resourceVersion, found, err = unstructured.NestedString(originalValue.Object, "metadata", "resourceVersion")
+		if err != nil {
+			impl.Log.Error(err, "k8schaos: resource version is not a string", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+				"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
+			return v1alpha1.NotInjected, fmt.Errorf("resourceVersion is not a string: %w", err)
+		}
+		if found {
+			resource.SetResourceVersion(resourceVersion)
+		}
+
+		// unstructured.RemoveNestedField(initialValue.Object, "metadata", "creationTimestamp")
+		// unstructured.RemoveNestedField(originalValue.Object, "metadata", "resourceVersion")
+		// unstructured.RemoveNestedField(originalValue.Object, "metadata", "uid")
+		k8schaos.Status.OriginalObjectValue = originalValue
+
+		impl.Log.Info("k8schaos: updating existing resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "method", "PUT", "resourceVersion", resourceVersion)
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, resource, v1.UpdateOptions{})
+
+		if err != nil {
+			impl.Log.Error(err, "k8schaos: failed to update resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+				"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
 			return v1alpha1.NotInjected, err
 		}
 
-		if impl.initialValue != nil {
-			var resourceVersion string
-			var found bool
-			resourceVersion, found, err = unstructured.NestedString(impl.initialValue.Object, "metadata", "resourceVersion")
-			if err != nil {
-				return v1alpha1.NotInjected, err
-			}
-			if found {
-				resource.SetResourceVersion(resourceVersion)
-			}
-
-			unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "creationTimestamp")
-			unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "resourceVersion")
-			unstructured.RemoveNestedField(impl.initialValue.Object, "metadata", "uid")
+		return v1alpha1.Injected, nil
+	} else {
+		if k8schaos.Spec.Update {
+			impl.Log.Info("k8schaos: warning: chaos has update=true but resource not found - creating a new resource instead", "namespace",
+				obj.GetNamespace(), "name", obj.GetName(),
+				"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
 		}
 
-		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, resource, v1.UpdateOptions{})
-	} else {
+		impl.Log.Info("k8schaos: creating new resources", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "method", "POST")
 		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Create(ctx, resource, v1.CreateOptions{})
 	}
+
 	if err != nil {
+		impl.Log.Error(err, "k8schaos: failed to create resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
 		return v1alpha1.NotInjected, err
 	}
 
@@ -132,11 +150,13 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	client, err := impl.dynamicClient()
 	if err != nil {
+		impl.Log.Error(err, "failed to create client instance")
 		return v1alpha1.Injected, fmt.Errorf("dynamic client new: %w", err)
 	}
 
 	resource, err := impl.resourceForIndex(k8schaos.Spec.APIObjects.Value, index)
 	if err != nil {
+		impl.Log.Error(err, "failed to load resource from chaos definition")
 		return v1alpha1.Injected, err
 	}
 
@@ -144,6 +164,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 	mapping, err := impl.Client.RESTMapper().RESTMapping(gvk.GroupKind(), gvk.Version)
 	if err != nil {
+		impl.Log.Error(err, "failed to get rest mapping")
 		return v1alpha1.Injected, fmt.Errorf("get rest mapping: %w", err)
 	}
 
@@ -151,21 +172,61 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	existingResource, err := resourceClient.Get(ctx, resource.GetName(), v1.GetOptions{})
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
+			impl.Log.Error(err, "k8schaos: resource not found", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+				"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
 			return v1alpha1.NotInjected, nil
 		}
+		impl.Log.Error(err, "k8schaos: failed to load resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
 		return v1alpha1.Injected, err
 	}
 
 	if resMgr := getResourceManager(existingResource); resMgr != managedBy {
+		impl.Log.Error(err, "k8schaos: resource not managed by chaos mesh", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "managed-by", resMgr)
 		return v1alpha1.Injected, fmt.Errorf("resource is not managed by %s: %s: \"%s\"", managedBy, managedByLabel, resMgr)
 	}
 
-	if impl.initialValue != nil {
-		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, impl.initialValue, v1.UpdateOptions{})
-	} else {
-		err = resourceClient.Delete(ctx, resource.GetName(), v1.DeleteOptions{})
+	if k8schaos.Status.OriginalObjectValue != nil {
+		recoveryValue := k8schaos.Status.OriginalObjectValue
+
+		var resourceVersion string
+		var found bool
+		resourceVersion, found, err = unstructured.NestedString(existingResource.Object, "metadata", "resourceVersion")
+		if err != nil {
+			impl.Log.Error(err, "k8schaos: resourceVersion is not a string", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+				"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
+			return v1alpha1.Injected, fmt.Errorf("resourceVersion is not a string: %w", err)
+		}
+		if found {
+			recoveryValue.SetResourceVersion(resourceVersion)
+		}
+
+		impl.Log.Info("k8schaos: rolling back resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "method", "PUT")
+		_, err = client.Resource(mapping.Resource).Namespace(resource.GetNamespace()).Update(ctx, recoveryValue, v1.UpdateOptions{})
+		if err != nil {
+			impl.Log.Info("k8schaos: failed to roll back resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+				"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "method", "PUT")
+			return v1alpha1.Injected, err
+		}
+
+		return v1alpha1.NotInjected, nil
 	}
+
+	if k8schaos.Spec.Update {
+		impl.Log.Info("k8schaos: warning: chaos has update=true but no resource is stored in status - resource will be deleted", "namespace",
+			obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName())
+	}
+
+	impl.Log.Info("k8schaos: deleting resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+		"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "method", "DELETE")
+	err = resourceClient.Delete(ctx, resource.GetName(), v1.DeleteOptions{})
+
 	if err != nil && !apiErrors.IsNotFound(err) {
+		impl.Log.Info("k8schaos: failed to delete resource", "namespace", obj.GetNamespace(), "name", obj.GetName(),
+			"target-namespace", resource.GetNamespace(), "target-name", resource.GetName(), "method", "DELETE")
 		return v1alpha1.Injected, err
 	}
 

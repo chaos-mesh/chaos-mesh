@@ -19,6 +19,7 @@ import (
 	"errors"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // +kubebuilder:object:root=true
@@ -76,7 +77,8 @@ type K8SChaosAPIObjects struct {
 
 // K8SChaosStatus defines the observed state of K8SChaos
 type K8SChaosStatus struct {
-	ChaosStatus `json:",inline"`
+	ChaosStatus         `json:",inline"`
+	OriginalObjectValue *unstructured.Unstructured `json:"originalObjectValue,omitempty"`
 }
 
 func (obj *K8SChaos) GetSelectorSpecs() map[string]interface{} {
