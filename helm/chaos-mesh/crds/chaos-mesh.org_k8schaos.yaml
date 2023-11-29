@@ -145,7 +145,7 @@ spec:
                     type: string
                 type: object
               originalObjectValue:
-                type: object
+                type: string
             required:
             - experiment
             type: object
