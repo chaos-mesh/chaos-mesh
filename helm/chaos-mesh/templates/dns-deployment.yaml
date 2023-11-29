@@ -42,17 +42,10 @@ spec:
     {{- end }}
     spec:
       serviceAccountName: {{ .Values.dnsServer.serviceAccount }}
+      {{- with .Values.dnsServer.affinity }}
       affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: k8s-app
-                    operator: In
-                    values: ["chaos-dns"]
-              topologyKey: kubernetes.io/hostname
+{{ toYaml . | indent 8 }}
+      {{- end }}
       {{- with .Values.dnsServer.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
