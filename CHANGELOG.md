@@ -16,6 +16,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
 - Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
 - Add [`GreptimeDB`](https://greptime.com) to ADOPTERS.md [#4245](https://github.com/chaos-mesh/chaos-mesh/pull/4245)
+- Support configurable chaos-dns-server pod affinities[#4260](https://github.com/chaos-mesh/chaos-mesh/pull/4260)
 
 ### Changed
 
