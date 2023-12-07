@@ -59,7 +59,7 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_controller_manager_chaos_experiments",
 			Help: "Total number of chaos experiments and their phases",
-		}, []string{"namespace", "kind", "phase"}),
+		}, []string{"namespace", "kind", "phase", "name"}),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "chaos_mesh_templates",
 			Help: "Total number of injection templates",
@@ -153,7 +153,6 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 	collector.chaosExperiments.Reset()
 
 	for kind, obj := range v1alpha1.AllKinds() {
-		expCache := map[string]map[string]int{}
 		chaosList := obj.SpawnList()
 		if err := collector.store.List(context.TODO(), chaosList); err != nil {
 			collector.logger.Error(err, "failed to list chaos", "kind", kind)
@@ -162,18 +161,11 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 
 		items := chaosList.GetItems()
 		for _, item := range items {
-			if _, ok := expCache[item.GetNamespace()]; !ok {
-				// There is only 4 supported phases
-				expCache[item.GetNamespace()] = make(map[string]int, 4)
-			}
 			innerObject := reflect.ValueOf(item).Interface().(v1alpha1.InnerObject)
-			expCache[item.GetNamespace()][string(status.GetChaosStatus(innerObject))]++
-		}
-
-		for ns, v := range expCache {
-			for phase, count := range v {
-				collector.chaosExperiments.WithLabelValues(ns, kind, phase).Set(float64(count))
-			}
+			ns := item.GetNamespace()
+			name := item.GetName()
+			phase := string(status.GetChaosStatus(innerObject))
+			collector.chaosExperiments.WithLabelValues(ns, kind, phase, name).Inc()
 		}
 	}
 }
