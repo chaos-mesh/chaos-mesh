@@ -16,6 +16,7 @@
 package statuscheck
 
 import (
+	"crypto/x509"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -48,17 +49,19 @@ type manager struct {
 	workers     workerCache
 	results     resultCache
 	newExecutor newExecutorFunc
+	certPool    *x509.CertPool
 }
 
-type newExecutorFunc func(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor, error)
+type newExecutorFunc func(logger logr.Logger, certPool *x509.CertPool, statusCheck v1alpha1.StatusCheck) (Executor, error)
 
-func NewManager(logger logr.Logger, eventRecorder recorder.ChaosRecorder, newExecutorFunc newExecutorFunc) Manager {
+func NewManager(logger logr.Logger, eventRecorder recorder.ChaosRecorder, certPool *x509.CertPool, newExecutorFunc newExecutorFunc) Manager {
 	return &manager{
 		logger:        logger,
 		eventRecorder: eventRecorder,
 		workers:       workerCache{workers: sync.Map{}},
 		results:       resultCache{results: make(map[types.NamespacedName]Result)},
 		newExecutor:   newExecutorFunc,
+		certPool:      certPool,
 	}
 }
 
@@ -74,7 +77,7 @@ func (m *manager) Add(statusCheck v1alpha1.StatusCheck) error {
 		return errors.New("status check is completed")
 	}
 
-	executor, err := m.newExecutor(m.logger, statusCheck)
+	executor, err := m.newExecutor(m.logger, m.certPool, statusCheck)
 	if err != nil {
 		return errors.Wrap(err, "new executor")
 	}
@@ -192,7 +195,7 @@ func limitRecords(records []v1alpha1.StatusCheckRecord, limit uint) []v1alpha1.S
 	return records[length-int(limit):]
 }
 
-func newExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor, error) {
+func newExecutor(logger logr.Logger, certPool *x509.CertPool, statusCheck v1alpha1.StatusCheck) (Executor, error) {
 	var executor Executor
 	switch statusCheck.Spec.Type {
 	case v1alpha1.TypeHTTP:
@@ -202,7 +205,10 @@ func newExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor
 		}
 		executor = http.NewExecutor(
 			logger.WithName("http-executor").WithValues("url", statusCheck.Spec.HTTPStatusCheck.RequestUrl),
-			statusCheck.Spec.TimeoutSeconds, *statusCheck.Spec.HTTPStatusCheck)
+			certPool,
+			statusCheck.Spec.TimeoutSeconds,
+			*statusCheck.Spec.HTTPStatusCheck,
+		)
 	default:
 		return nil, errors.Errorf("unsupported type '%s'", statusCheck.Spec.Type)
 	}

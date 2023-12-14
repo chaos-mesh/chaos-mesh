@@ -17,24 +17,43 @@ package statuscheck
 
 import (
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	"go.uber.org/fx"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/builder"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/catrust"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 )
 
-func Bootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, recorderBuilder *recorder.RecorderBuilder) error {
+type Params struct {
+	fx.In
+
+	Mgr             ctrl.Manager
+	CertLoader      *catrust.CACertLoader
+	KubeClient      client.Client
+	Logger          logr.Logger
+	RecorderBuilder *recorder.RecorderBuilder
+}
+
+func Bootstrap(params Params) error {
 	if !config.ShouldSpawnController("statuscheck") {
 		return nil
 	}
-	eventRecorder := recorderBuilder.Build("statuscheck")
-	manager := NewManager(logger.WithName("statuscheck-manager"), eventRecorder, newExecutor)
 
-	return builder.Default(mgr).
+	certPool, err := params.CertLoader.Load()
+	if err != nil {
+		return errors.Wrap(err, "loading CA certs")
+	}
+
+	eventRecorder := params.RecorderBuilder.Build("statuscheck")
+	manager := NewManager(params.Logger.WithName("statuscheck-manager"), eventRecorder, certPool, newExecutor)
+
+	return builder.Default(params.Mgr).
 		For(&v1alpha1.StatusCheck{}).
 		Named("statuscheck").
-		Complete(NewReconciler(logger.WithName("statuscheck-reconciler"), client, eventRecorder, manager))
+		Complete(NewReconciler(params.Logger.WithName("statuscheck-reconciler"), params.KubeClient, eventRecorder, manager))
 }

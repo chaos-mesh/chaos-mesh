@@ -17,6 +17,8 @@ package http
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,14 +33,15 @@ import (
 )
 
 type httpExecutor struct {
-	logger logr.Logger
+	logger   logr.Logger
+	certPool *x509.CertPool
 
 	timeoutSeconds  int
 	httpStatusCheck v1alpha1.HTTPStatusCheck
 }
 
-func NewExecutor(logger logr.Logger, timeoutSeconds int, httpStatusCheck v1alpha1.HTTPStatusCheck) *httpExecutor {
-	return &httpExecutor{logger: logger, timeoutSeconds: timeoutSeconds, httpStatusCheck: httpStatusCheck}
+func NewExecutor(logger logr.Logger, certPool *x509.CertPool, timeoutSeconds int, httpStatusCheck v1alpha1.HTTPStatusCheck) *httpExecutor {
+	return &httpExecutor{logger: logger, certPool: certPool, timeoutSeconds: timeoutSeconds, httpStatusCheck: httpStatusCheck}
 }
 
 type response struct {
@@ -53,6 +56,14 @@ func (e *httpExecutor) Type() string {
 func (e *httpExecutor) Do() (bool, string, error) {
 	client := &http.Client{
 		Timeout: time.Duration(e.timeoutSeconds) * time.Second,
+	}
+
+	if e.certPool != nil {
+		client.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: e.certPool,
+			},
+		}
 	}
 
 	httpStatusCheck := e.httpStatusCheck

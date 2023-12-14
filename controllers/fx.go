@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/schedule"
 	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/catrust"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/chaosdaemon"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
@@ -39,6 +40,7 @@ var Module = fx.Options(
 		recorder.NewRecorderBuilder,
 		common.AllSteps,
 		clusterregistry.New,
+		catrust.New,
 	),
 	fx.Invoke(common.Bootstrap),
 	fx.Invoke(podhttpchaos.Bootstrap),

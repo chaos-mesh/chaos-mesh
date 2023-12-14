@@ -81,6 +81,8 @@ controllerManager:
   # Image pull policy
   imagePullPolicy: IfNotPresent
 
+  extraCATrust: []
+
   # The keys within the "env" map are mounted as environment variables on the pod.
   env:
     # WEBHOOK_PORT is configured the port for chaos-controller-manager provides webhooks.

@@ -192,6 +192,23 @@
                         }
                     }
                 },
+                "extraCATrust": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "secret": {
+                                "type": "string"
+                            },
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
                 "hostNetwork": {
                     "type": "boolean"
                 },

@@ -16,6 +16,7 @@
 package statuscheck
 
 import (
+	"crypto/x509"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -40,7 +41,7 @@ func (e *fakeHTTPExecutor) Type() string {
 	return "Fake-HTTP"
 }
 
-func newFakeExecutor(logger logr.Logger, statusCheck v1alpha1.StatusCheck) (Executor, error) {
+func newFakeExecutor(logger logr.Logger, _ *x509.CertPool, statusCheck v1alpha1.StatusCheck) (Executor, error) {
 	var executor Executor
 	switch statusCheck.Spec.Type {
 	case v1alpha1.TypeHTTP:

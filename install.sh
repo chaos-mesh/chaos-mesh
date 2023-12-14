@@ -1885,6 +1885,8 @@ spec:
             value: "false"
           - name: CHAOSD_SECURITY_MODE
             value: "false"
+          - name: EXTRA_CA_TRUST_PATH
+            value: /etc/extra-ca-trust
           - name: POD_FAILURE_PAUSE_IMAGE
             value: gcr.io/google-containers/pause:latest
           - name: ENABLE_LEADER_ELECTION

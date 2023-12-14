@@ -123,7 +123,7 @@ func testBootstrap(mgr ctrl.Manager, client client.Client, logger logr.Logger, r
 		return nil
 	}
 	eventRecorder := recorderBuilder.Build("statuscheck")
-	manager := NewManager(logger.WithName("statuscheck-manager"), eventRecorder, newFakeExecutor)
+	manager := NewManager(logger.WithName("statuscheck-manager"), eventRecorder, nil, newFakeExecutor)
 
 	return builder.Default(mgr).
 		For(&v1alpha1.StatusCheck{}).

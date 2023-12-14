@@ -130,6 +130,8 @@ spec:
           - name: BURST
             value: "50"
           {{- end }}
+          - name: EXTRA_CA_TRUST_PATH
+            value: /etc/extra-ca-trust
           {{- if .Values.controllerManager.chaosdSecurityMode }}
           - name: CHAOSD_CA_CERT
             value: /etc/chaosd/cert/ca.crt
@@ -161,6 +163,11 @@ spec:
           {{- if .Values.chaosDaemon.mtls.enabled }}
           - name: chaos-daemon-client-cert
             mountPath: /etc/chaos-daemon/cert
+            readOnly: true
+          {{- end }}
+          {{- range .Values.controllerManager.extraCATrust }}
+          - name: extra-ca-trust-certs-{{ .secret }}
+            mountPath: /etc/extra-ca-trust/{{ .secret }}
             readOnly: true
           {{- end }}
           {{- if .Values.controllerManager.chaosdSecurityMode }}
@@ -209,6 +216,16 @@ spec:
         - name: chaos-daemon-client-cert
           secret:
             secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
+        {{- end }}
+        {{- range .Values.controllerManager.extraCATrust }}
+        - name: extra-ca-trust-certs-{{ .secret }}
+          secret:
+            secretName: {{ .secret }}
+            items:
+            {{- range .items }}
+              - key: {{ . }}
+                path: {{ . }}
+            {{- end }}
         {{- end }}
         {{- if .Values.controllerManager.chaosdSecurityMode }}
         - name: chaosd-client-cert
