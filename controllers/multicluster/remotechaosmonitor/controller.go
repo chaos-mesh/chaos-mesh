@@ -117,7 +117,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		shouldUpdate = true
 	}
+
 	// TODO: set the status
+	if !reflect.DeepEqual(localObj.GetStatus(), remoteObj.GetStatus()) {
+		r.logger.Info("setting new status", "local:", localObj.GetStatus(), "remote:", remoteObj.GetStatus())
+		shouldUpdate = true
+	}
 
 	if shouldUpdate {
 		retry.RetryOnConflict(retry.DefaultRetry, func() error {
@@ -129,7 +134,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 			// TODO: also refresh the remote chaos object
 			localObj.SetFinalizers(remoteObj.GetFinalizers())
-
+			remoteObj.GetStatus().DeepCopyInto(localObj.GetStatus())
 			return r.localClient.Update(ctx, localObj)
 		})
 	}
