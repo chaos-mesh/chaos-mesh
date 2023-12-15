@@ -126,7 +126,7 @@ func (info *reconcileInfo) CalcDesiredPhase() (v1alpha1.DesiredPhase, []recorder
 func (info *reconcileInfo) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	desiredPhase, events := info.CalcDesiredPhase()
 
-	info.Log.Info("modify desiredPhase", "desiredPhase", desiredPhase)
+	info.Log.V(1).Info("modify desiredPhase", "desiredPhase", desiredPhase)
 	if info.obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
 		for _, ev := range events {
 			info.Recorder.Event(info.obj, ev)
@@ -142,7 +142,7 @@ func (info *reconcileInfo) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			if obj.GetStatus().Experiment.DesiredPhase != desiredPhase {
 				obj.GetStatus().Experiment.DesiredPhase = desiredPhase
-				info.Log.Info("update object", "namespace", obj.GetNamespace(), "name", obj.GetName())
+				info.Log.V(1).Info("update object", "namespace", obj.GetNamespace(), "name", obj.GetName())
 				return info.Client.Update(context.TODO(), obj)
 			}
 

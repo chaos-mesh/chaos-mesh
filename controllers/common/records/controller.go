@@ -117,7 +117,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	for index, record := range records {
 		var err error
 		idLogger := logger.WithValues("id", records[index].Id)
-		idLogger.Info("iterating record", "record", record, "desiredPhase", desiredPhase)
+		idLogger.V(1).Info("iterating record", "record", record, "desiredPhase", desiredPhase)
 
 		// The whole running logic is a cycle:
 		// Not Injected -> Not Injected/* -> Injected -> Injected/* -> Not Injected
@@ -217,7 +217,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 	if shouldUpdate {
 		updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-			logger.Info("updating records", "records", records)
+			logger.V(1).Info("updating records", "records", records)
 			obj := r.Object.DeepCopyObject().(v1alpha1.InnerObjectWithSelector)
 
 			if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {

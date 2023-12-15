@@ -105,7 +105,6 @@ var remotePredicates = predicate.Funcs{
 		}
 
 		if obj.GetRemoteCluster() == "" {
-			fmt.Println("remote cluster is empty")
 			return false
 		}
 
@@ -121,7 +120,6 @@ var remotePredicates = predicate.Funcs{
 		}
 
 		if obj.GetRemoteCluster() == "" {
-			fmt.Println("remote cluster is empty")
 			return false
 		}
 

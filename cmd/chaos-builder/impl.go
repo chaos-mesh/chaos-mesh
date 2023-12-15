@@ -153,13 +153,13 @@ func (in *{{.Type}}) IsOneShot() bool {
 var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
 func (in *{{.Type}}) ValidateCreate() (admission.Warnings, error) {
-	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)
+	{{.Type}}WebhookLog.V(1).Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
+	{{.Type}}WebhookLog.V(1).Info("validate update", "name", in.Name)
 	{{- if not .EnableUpdate}}
 	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
 		return nil, ErrCanNotUpdateChaos
@@ -170,7 +170,7 @@ func (in *{{.Type}}) ValidateUpdate(old runtime.Object) (admission.Warnings, err
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateDelete() (admission.Warnings, error) {
-	{{.Type}}WebhookLog.Info("validate delete", "name", in.Name)
+	{{.Type}}WebhookLog.V(1).Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
 	return nil, nil

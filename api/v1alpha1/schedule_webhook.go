@@ -33,7 +33,7 @@ var _ webhook.Defaulter = &Schedule{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (in *Schedule) Default() {
-	schedulelog.Info("default", "name", in.Name)
+	schedulelog.V(1).Info("default", "name", in.Name)
 	in.Spec.ConcurrencyPolicy.Default()
 }
 
@@ -47,13 +47,13 @@ var _ webhook.Validator = &Schedule{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *Schedule) ValidateCreate() (admission.Warnings, error) {
-	schedulelog.Info("validate create", "name", in.Name)
+	schedulelog.V(1).Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *Schedule) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	schedulelog.Info("validate update", "name", in.Name)
+	schedulelog.V(1).Info("validate update", "name", in.Name)
 	return in.Validate()
 }
 
