@@ -163,19 +163,18 @@ jobs:
           - "[Basic] [DNSChaos]"
           - "[Basic] [StressChaos]"
     steps:
-      - name: checkout codes
-        uses: actions/checkout@v4
-      - name: download saved images
+      - uses: actions/checkout@v4
+      - name: Download saved images
         uses: actions/download-artifact@v2
         with:
           name: saved-images
           path: ./output/saved-images
-      - name: download e2e binary
+      - name: Download e2e binary
         uses: actions/download-artifact@v2
         with:
           name: e2e-binary
           path: ./output/e2e-binary
-      - name: move e2e binary
+      - name: Move e2e binary
         run: |
           mkdir -p ./e2e-test/image/e2e/bin
           mv ./output/e2e-binary/ginkgo ./e2e-test/image/e2e/bin/ginkgo
@@ -204,10 +203,14 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
 
+      - name: Choose Chaos Mesh version
+        id: chaos-mesh-version
+        run: echo "version=$(yq '.images.tag' helm/chaos-mesh/values.yaml)" >> "$GITHUB_OUTPUT"
+
       - name: Install Chaos Mesh
         # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh -n=chaos-mesh --set images.tag=${{ steps.chaos-mesh-version.outputs.version }},chaosDaemon.env.DOCKER_API_VERSION=1.41
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}

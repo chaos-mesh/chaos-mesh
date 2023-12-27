@@ -59,7 +59,7 @@ spec:
       {{- end }}
       containers:
         - name: chaos-daemon
-          image: {{template "chaos-daemon.image" . }}
+          image: {{ template "chaos-daemon.image" . }}
           imagePullPolicy: {{ .Values.chaosDaemon.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.chaosDaemon.resources }}
           resources:
@@ -176,7 +176,7 @@ spec:
         {{- end }}
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: {{template "chaos-daemon.socket-path" . }}
         - name: sys-path
           hostPath:
