@@ -273,7 +273,7 @@ dashboard:
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
   gcpSecurityMode:
-    enabled: true
+    enabled: false
     clientId: ""
     clientSecret: ""
     # Refernces existing Kubernetes secret containg `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`
