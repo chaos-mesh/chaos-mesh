@@ -36,6 +36,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Automatically remove the token from the dashboard when it expires [#4193](https://github.com/chaos-mesh/chaos-mesh/pull/4193)
 - Optimize `allInjected` and `allRecovered` states when targets are not selected [#4199](https://github.com/chaos-mesh/chaos-mesh/pull/4199)
 - Upgrade byteman-helper to v4.0.22 [#4299](https://github.com/chaos-mesh/chaos-mesh/pull/4299)
+- GCP auth is changed to object with additional key `existingSecret` in helm chart values [#4206](https://github.com/chaos-mesh/chaos-mesh/issues/4206)
 
 ### Deprecated
 
