@@ -488,12 +488,12 @@ webhook:
   certManager:
     # Setup the webhook using cert-manager
     enabled: false
-  # if empty and disable certManager, Helm will auto-generate these fields
-  caBundlePEM: |
+  # if certManager is disabled and PEMs are empty, Helm will auto-generate these fields.
+  caBundlePEM: ""
 
-  crtPEM: |
+  crtPEM: ""
 
-  keyPEM: |
+  keyPEM: ""
 
   # It is recommended that admission webhooks should evaluate as quickly as possible (typically in milliseconds),
   # since they add to API request latency. It is encouraged to use a small timeout for webhooks.
