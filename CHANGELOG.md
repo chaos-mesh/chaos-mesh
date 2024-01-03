@@ -15,6 +15,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support more rate units for networkchaos [#4129](https://github.com/chaos-mesh/chaos-mesh/pull/4129)
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
 - Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
+- Add [`GreptimeDB`](https://greptime.com) to ADOPTERS.md [#4245](https://github.com/chaos-mesh/chaos-mesh/pull/4245)
+- Support configurable chaos-dns-server pod affinities[#4260](https://github.com/chaos-mesh/chaos-mesh/pull/4260)
+- Add experiment `name`, `namespace` and `kind` to "apply chaos" and "recover chaos" log messages [4278](https://github.com/chaos-mesh/chaos-mesh/pull/4278)
+- Support for watch remote chaos experiments to locally chaos  [#4188](https://github.com/chaos-mesh/chaos-mesh/pull/4188)
 
 ### Changed
 
@@ -31,6 +35,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update k8s controller-runtime dependency [#4198](https://github.com/chaos-mesh/chaos-mesh/pull/4198)
 - Automatically remove the token from the dashboard when it expires [#4193](https://github.com/chaos-mesh/chaos-mesh/pull/4193)
 - Optimize `allInjected` and `allRecovered` states when targets are not selected [#4199](https://github.com/chaos-mesh/chaos-mesh/pull/4199)
+- Upgrade byteman-helper to v4.0.22 [#4299](https://github.com/chaos-mesh/chaos-mesh/pull/4299)
 
 ### Deprecated
 
@@ -48,6 +53,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix remote cluster cannot upgrade helm release [#4075](https://github.com/chaos-mesh/chaos-mesh/pull/4075)
 - Fix goroutine leak [#4229](https://github.com/chaos-mesh/chaos-mesh/pull/4229)
 - Remove the duplicate `make test` [#4234](https://github.com/chaos-mesh/chaos-mesh/pull/4234)
+- Fix daemon-server `SetDNSServer` endpoint to validate provided server address [#4246](https://github.com/chaos-mesh/chaos-mesh/pull/4246)
 
 ### Security
 

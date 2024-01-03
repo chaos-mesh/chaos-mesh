@@ -23,7 +23,6 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -106,10 +105,10 @@ func (c *MockChaosDaemonClient) UninstallJVMRules(ctx context.Context, in *chaos
 	return nil, mockError("UninstallJVMRules")
 }
 
-func (c *MockChaosDaemonClient) ApplyBlockChaos(ctx context.Context, req *pb.ApplyBlockChaosRequest, opts ...grpc.CallOption) (*pb.ApplyBlockChaosResponse, error) {
+func (c *MockChaosDaemonClient) ApplyBlockChaos(ctx context.Context, req *chaosdaemon.ApplyBlockChaosRequest, opts ...grpc.CallOption) (*chaosdaemon.ApplyBlockChaosResponse, error) {
 	return nil, mockError("ApplyBlockChaosRequest")
 }
 
-func (c *MockChaosDaemonClient) RecoverBlockChaos(ctx context.Context, req *pb.RecoverBlockChaosRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *MockChaosDaemonClient) RecoverBlockChaos(ctx context.Context, req *chaosdaemon.RecoverBlockChaosRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return &empty.Empty{}, nil
 }
