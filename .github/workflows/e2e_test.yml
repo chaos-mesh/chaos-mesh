@@ -37,14 +37,13 @@ jobs:
             .github/workflows/license_checker.yml
             .github/workflows/must_update_changelog.yml
             .github/workflows/release_helm_chart.yml
-            .github/workflows/stale.yml
             .github/workflows/upload_env_image.yml
             .github/workflows/upload_image.yml
             .github/workflows/upload_image_pr.yml
             .github/workflows/upload_latest_files.yml
             .github/workflows/upload_release_files.yml
       - name: Echo changed files
-        run: echo "${{ toJSON(steps.filter.outputs) }}"
+        run: echo "${{ steps.filter.outputs }}"
 
   build-image:
     needs: changed-files
