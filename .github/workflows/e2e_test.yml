@@ -42,8 +42,8 @@ jobs:
             .github/workflows/upload_image_pr.yml
             .github/workflows/upload_latest_files.yml
             .github/workflows/upload_release_files.yml
-      - name: Echo changed files
-        run: echo "${{ steps.filter.outputs }}"
+      - name: Show outputs
+        run: echo "${{ toJSON(steps.filter.outputs) }}"
 
   build-image:
     needs: changed-files
