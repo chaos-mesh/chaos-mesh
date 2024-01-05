@@ -402,6 +402,10 @@ var _ = Describe("Workflow", func() {
 
 						g.Expect(ConditionEqualsTo(entryNode.Status, v1alpha1.ConditionAborted, corev1.ConditionTrue)).
 							To(BeTrue(), "entry node should be aborted")
+
+						workflow := v1alpha1.Workflow{}
+						g.Expect(kubeClient.Get(ctx, types.NamespacedName{Namespace: ns, Name: "statuscheck-abort"}, &workflow)).To(Succeed())
+						g.Expect(WorkflowAborted(workflow)).To(BeTrue(), "workflow should be aborted")
 					}, 10*time.Second, time.Second).Should(Succeed())
 				})
 			})
