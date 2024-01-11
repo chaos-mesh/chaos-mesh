@@ -6583,7 +6583,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.K8SChaosAPIObjects"
                 },
                 "duration": {
-                    "description": "Duration represents the duration of the chaos action",
+                    "description": "Duration represents the duration of the chaos action\n+optional",
                     "type": "string"
                 },
                 "remoteCluster": {
