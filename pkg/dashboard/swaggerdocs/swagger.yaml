@@ -3965,7 +3965,9 @@ definitions:
           `app.kubernetes.io/name=cilium-agent` and `app.kubernetes.io/part-of=cilium` (which are used by default by the cilium
           helm chart)
       duration:
-        description: Duration represents the duration of the chaos action.
+        description: |-
+          Duration represents the duration of the chaos action.
+          +optional
         type: string
       mode:
         description: |-
