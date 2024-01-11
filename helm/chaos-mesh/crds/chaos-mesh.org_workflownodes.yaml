@@ -381,7 +381,6 @@ spec:
                     type: string
                 required:
                 - ciliumPodSelector
-                - duration
                 - mode
                 - selector
                 type: object
@@ -3621,7 +3620,6 @@ spec:
                         type: string
                     required:
                     - ciliumPodSelector
-                    - duration
                     - mode
                     - selector
                     type: object
@@ -7318,7 +7316,6 @@ spec:
                                   type: string
                               required:
                               - ciliumPodSelector
-                              - duration
                               - mode
                               - selector
                               type: object
@@ -10882,7 +10879,6 @@ spec:
                                       type: string
                                   required:
                                   - ciliumPodSelector
-                                  - duration
                                   - mode
                                   - selector
                                   type: object

@@ -42,7 +42,8 @@ type CiliumChaosSpec struct {
 	NodeSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action.
-	Duration *string `json:"duration" webhook:"Duration"`
+	// +optional
+	Duration *string `json:"duration,omitempty" webhook:"Duration"`
 
 	// CiliumPodSelector provides a custom selector to find the cilium-agent pod for the node.
 	//

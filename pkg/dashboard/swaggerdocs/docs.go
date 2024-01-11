@@ -5534,7 +5534,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.CiliumPodSelectorSpec"
                 },
                 "duration": {
-                    "description": "Duration represents the duration of the chaos action.",
+                    "description": "Duration represents the duration of the chaos action.\n+optional",
                     "type": "string"
                 },
                 "mode": {
