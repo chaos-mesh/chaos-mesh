@@ -20,7 +20,6 @@ on:
       - .github/workflows/license_checker.yml
       - .github/workflows/must_update_changelog.yml
       - .github/workflows/release_helm_chart.yml
-      - .github/workflows/stale.yml
       - .github/workflows/upload_env_image.yml
       - .github/workflows/upload_image.yml
       - .github/workflows/upload_image_pr.yml
