@@ -276,7 +276,7 @@ dashboard:
     enabled: false
     clientId: ""
     clientSecret: ""
-    # Refernces existing Kubernetes secret containg `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`
+    # References existing Kubernetes secret containing `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`.
     existingSecret: ""
   # Node labels for chaos-dashboard  pod assignment
   nodeSelector: {}
