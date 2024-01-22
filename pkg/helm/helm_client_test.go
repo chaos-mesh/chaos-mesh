@@ -27,7 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
 
-func ExampleHelmClient_UpgradeOrInstall() {
+func ExampleHelmClient_InstallRelease() {
 	chart, err := FetchChaosMeshChart(context.Background(), "2.2.0")
 	if err != nil {
 		panic(err)
@@ -43,7 +43,35 @@ func ExampleHelmClient_UpgradeOrInstall() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = client.UpgradeOrInstall(
+	_, err = client.InstallRelease(
+		"chaos-mesh",
+		"chaos-mesh-in-remote-cluster",
+		chart,
+		nil,
+	)
+	if err != nil {
+		panic(err)
+	}
+	// Output:
+}
+
+func ExampleHelmClient_UpgradeRelease() {
+	chart, err := FetchChaosMeshChart(context.Background(), "2.5.0")
+	if err != nil {
+		panic(err)
+	}
+
+	settings := cli.New()
+	restClientGetter := settings.RESTClientGetter()
+	logger, err := log.NewDefaultZapLogger()
+	if err != nil {
+		panic(err)
+	}
+	client, err := NewHelmClient(restClientGetter, logger)
+	if err != nil {
+		panic(err)
+	}
+	_, err = client.UpgradeRelease(
 		"chaos-mesh",
 		"chaos-mesh-in-remote-cluster",
 		chart,

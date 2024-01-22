@@ -80,7 +80,7 @@ func (h *HelmClient) GetRelease(namespace string, releaseName string) (*release.
 	return result, nil
 }
 
-func (h *HelmClient) UpgradeOrInstall(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+func (h *HelmClient) InstallRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
 	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "create helm configuration")
@@ -92,6 +92,20 @@ func (h *HelmClient) UpgradeOrInstall(namespace string, releaseName string, char
 	result, err := actionInstall.Run(chart, values)
 	if err != nil {
 		return nil, errors.Wrapf(err, "install release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
+	}
+	return result, nil
+}
+
+func (h *HelmClient) UpgradeRelease(namespace string, releaseName string, chart *chart.Chart, values map[string]interface{}) (*release.Release, error) {
+	configurationWithNamespace, err := h.spawnConfigurationWithNamespace(namespace)
+	if err != nil {
+		return nil, errors.Wrap(err, "create helm configuration")
+	}
+	actionUpgrade := action.NewUpgrade(configurationWithNamespace)
+	actionUpgrade.Namespace = namespace
+	result, err := actionUpgrade.Run(releaseName, chart, values)
+	if err != nil {
+		return nil, errors.Wrapf(err, "upgrade release %s, with chart %s, with values %v", releaseName, chart.Metadata.Name, values)
 	}
 	return result, nil
 }
