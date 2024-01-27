@@ -135,7 +135,7 @@ func TestMergenetem(t *testing.T) {
 		}
 	})
 
-	t.Run("delay loss", func(t *testing.T) {
+	t.Run("delay loss rate", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
 		spec := v1alpha1.TcParameter{
@@ -148,6 +148,9 @@ func TestMergenetem(t *testing.T) {
 				Loss:        "25",
 				Correlation: "25",
 			},
+			Rate: &v1alpha1.RateSpec{
+				Rate: "25mbps",
+			},
 		}
 		m, err := mergeNetem(spec)
 		g.Expect(err).ShouldNot(HaveOccurred())
@@ -157,6 +160,7 @@ func TestMergenetem(t *testing.T) {
 			DelayCorr: 25,
 			Loss:      25,
 			LossCorr:  25,
+			Rate:      "25mbps",
 		}
 		g.Expect(m).Should(Equal(em))
 	})
