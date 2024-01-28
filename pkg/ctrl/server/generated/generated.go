@@ -16708,9 +16708,9 @@ func (ec *executionContext) _PodIOChaosSpec_container(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _PodIOChaosSpec_actions(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.PodIOChaosSpec) (ret graphql.Marshaler) {
