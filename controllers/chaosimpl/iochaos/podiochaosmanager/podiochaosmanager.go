@@ -49,8 +49,9 @@ type PodIOManager struct {
 	client.Reader
 	scheme *runtime.Scheme
 
-	Key types.NamespacedName
-	T   *PodIOTransaction
+	PodKey   types.NamespacedName
+	ChaosKey types.NamespacedName
+	T        *PodIOTransaction
 }
 
 // CommitResponse is a tuple (Key, Err)
@@ -61,11 +62,11 @@ type CommitResponse struct {
 
 // Commit will update all modifications to the cluster
 func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IOChaos) (int64, error) {
-	m.Log.Info("running modification on pod", "key", m.Key, "modification", m.T)
+	m.Log.Info("running modification on pod", "key", m.PodKey, "modification", m.T)
 	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodIOChaos{}
 
-		err := m.Client.Get(ctx, m.Key, chaos)
+		err := m.Client.Get(ctx, m.ChaosKey, chaos)
 		if err != nil {
 			if !k8sError.IsNotFound(err) {
 				m.Log.Error(err, "error while getting podiochaos")
@@ -94,7 +95,7 @@ func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IOChaos) (int
 	}
 
 	chaos := &v1alpha1.PodIOChaos{}
-	err := m.Reader.Get(ctx, m.Key, chaos)
+	err := m.Reader.Get(ctx, m.ChaosKey, chaos)
 	if err != nil {
 		m.Log.Error(err, "error while getting the latest generation number")
 		return 0, err
@@ -107,26 +108,26 @@ func (m *PodIOManager) CreateNewPodIOChaos(ctx context.Context) error {
 	chaos := &v1alpha1.PodIOChaos{}
 
 	pod := v1.Pod{}
-	err = m.Client.Get(ctx, m.Key, &pod)
+	err = m.Client.Get(ctx, m.PodKey, &pod)
 	if err != nil {
 		if !k8sError.IsNotFound(err) {
 			m.Log.Error(err, "error while finding pod")
 			return err
 		}
 
-		m.Log.Info("pod not found", "key", m.Key, "error", err.Error())
+		m.Log.Info("pod not found", "key", m.PodKey, "error", err.Error())
 		err = ErrPodNotFound
 		return err
 	}
 
 	if pod.Status.Phase != v1.PodRunning {
-		m.Log.Info("pod is not running", "key", m.Key)
+		m.Log.Info("pod is not running", "key", m.PodKey)
 		err = ErrPodNotRunning
 		return err
 	}
 
-	chaos.Name = m.Key.Name
-	chaos.Namespace = m.Key.Namespace
+	chaos.Name = m.ChaosKey.Name
+	chaos.Namespace = m.ChaosKey.Namespace
 	chaos.OwnerReferences = []metav1.OwnerReference{
 		{
 			APIVersion: pod.APIVersion,

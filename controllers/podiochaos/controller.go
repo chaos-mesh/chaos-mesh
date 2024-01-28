@@ -66,11 +66,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	r.Log.Info("updating io chaos", "pod", obj.Namespace+"/"+obj.Name, "spec", obj.Spec)
 
 	pod := &v1.Pod{}
-
-	err := r.Client.Get(ctx, types.NamespacedName{
-		Name:      obj.Name,
+	podName := strings.Split(obj.Name, "-")[0]
+	podKey := types.NamespacedName{
 		Namespace: obj.Namespace,
-	}, pod)
+		Name:      podName,
+	}
+
+	err := r.Client.Get(ctx, podKey, pod)
 	if err != nil {
 		r.Log.Error(err, "fail to find pod")
 		return ctrl.Result{}, nil
@@ -123,23 +125,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-	if obj.Spec.Container != nil &&
-		len(strings.TrimSpace(*obj.Spec.Container)) != 0 {
-		containerID = ""
-		for _, container := range pod.Status.ContainerStatuses {
-			if container.Name == *obj.Spec.Container {
-				containerID = container.ContainerID
-				break
-			}
-		}
-		if len(containerID) == 0 {
-			err = errors.Errorf("cannot find container with name %s", *obj.Spec.Container)
-			r.Recorder.Event(obj, "Warning", "Failed", err.Error())
-			return ctrl.Result{}, nil
-		}
-	}
-
 	actions, err := json.Marshal(obj.Spec.Actions)
 	if err != nil {
 		r.Recorder.Event(obj, "Warning", "Failed", err.Error())
@@ -148,10 +133,19 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	input := string(actions)
 	r.Log.Info("input with", "config", input)
 
+	containerId := ""
+	for _, container := range pod.Status.ContainerStatuses {
+		if container.Name == obj.Spec.Container {
+			containerId = container.ContainerID
+
+			break
+		}
+	}
+
 	res, err := pbClient.ApplyIOChaos(ctx, &pb.ApplyIOChaosRequest{
 		Actions:     input,
 		Volume:      obj.Spec.VolumeMountPath,
-		ContainerId: containerID,
+		ContainerId: containerId,
 
 		Instance:  obj.Status.Pid,
 		StartTime: obj.Status.StartTime,

@@ -75,7 +75,7 @@ type SetContainer struct {
 
 // Apply runs this action
 func (s *SetContainer) Apply(chaos *v1alpha1.PodIOChaos) error {
-	chaos.Spec.Container = &s.Container
+	chaos.Spec.Container = s.Container
 
 	return nil
 }
@@ -92,14 +92,14 @@ func (s *SetVolumePath) Apply(chaos *v1alpha1.PodIOChaos) error {
 	return nil
 }
 
-// Clear will clear all related items in podnetworkchaos
+// Clear will clear all related items in podiochaos
 func (t *PodIOTransaction) Clear(source string) {
 	t.Steps = append(t.Steps, &Clear{
 		Source: source,
 	})
 }
 
-// Append adds an item to corresponding list in podnetworkchaos
+// Append adds an item to corresponding list in podiochaos
 func (t *PodIOTransaction) Append(item interface{}) error {
 	switch item.(type) {
 	case v1alpha1.IOChaosAction:

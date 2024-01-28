@@ -25,9 +25,7 @@ type PodIOChaosSpec struct {
 	// TODO: support multiple different volume mount path in one pod
 	VolumeMountPath string `json:"volumeMountPath"`
 
-	// TODO: support multiple different container to inject in one pod
-	// +optional
-	Container *string `json:"container,omitempty"`
+	Container string `json:"container,omitempty"`
 
 	// Actions are a list of IOChaos actions
 	// +optional
