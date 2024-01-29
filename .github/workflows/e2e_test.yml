@@ -165,12 +165,12 @@ jobs:
       - name: checkout codes
         uses: actions/checkout@v4
       - name: download saved images
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: saved-images
           path: ./output/saved-images
       - name: download e2e binary
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: e2e-binary
           path: ./output/e2e-binary
