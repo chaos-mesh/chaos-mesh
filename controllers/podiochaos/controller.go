@@ -66,7 +66,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	r.Log.Info("updating io chaos", "pod", obj.Namespace+"/"+obj.Name, "spec", obj.Spec)
 
 	pod := &v1.Pod{}
-	podName := strings.Split(obj.Name, "-")[0]
+	podName := obj.Name[:strings.LastIndex(obj.Name, "-")]
 	podKey := types.NamespacedName{
 		Namespace: obj.Namespace,
 		Name:      podName,
