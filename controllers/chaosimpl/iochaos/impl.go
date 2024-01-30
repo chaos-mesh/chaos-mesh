@@ -105,7 +105,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	}
 
 	source := iochaos.Namespace + "/" + iochaos.Name + "-" + containerName
-	m := impl.builder.WithInit(source, types.NamespacedName{
+	m := impl.builder.InitManager(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
 	}, types.NamespacedName{
@@ -134,13 +134,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		MistakeSpec:      iochaos.Spec.Mistake,
 		Source:           m.Source,
 	})
-	generationNumber, err := m.Commit(ctx, iochaos)
+
+	generationNumber, err := m.Commit(ctx)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
-
 	// modify the custom status
 	iochaos.Status.Instances[record.Id] = generationNumber
+
 	return waitForApplySync, nil
 }
 
@@ -171,6 +172,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
 			}
+
 			return waitForRecoverSync, err
 		}
 
@@ -197,11 +199,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
+
 		return v1alpha1.Injected, err
 	}
 
 	source := iochaos.Namespace + "/" + iochaos.Name + "-" + containerName
-	m := impl.builder.WithInit(source, types.NamespacedName{
+	m := impl.builder.InitManager(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
 	}, types.NamespacedName{
@@ -209,7 +212,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		Name:      pod.Name + "-" + containerName,
 	})
 
-	generationNumber, err := m.Commit(ctx, iochaos)
+	generationNumber, err := m.Commit(ctx)
 	if err != nil {
 		if err == podiochaosmanager.ErrPodNotFound || err == podiochaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
@@ -223,9 +226,9 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 
 		return v1alpha1.Injected, err
 	}
-
 	// Now modify the custom status and phase
 	iochaos.Status.Instances[record.Id] = generationNumber
+
 	return waitForRecoverSync, nil
 }
 

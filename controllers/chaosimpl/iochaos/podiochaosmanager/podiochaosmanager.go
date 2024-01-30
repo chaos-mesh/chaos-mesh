@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	// ErrPodNotFound means operate pod may be deleted(almostly)
+	// ErrPodNotFound means operate pod may be deleted (almostly).
 	ErrPodNotFound = errors.New("pod not found")
 
 	// ErrPodNotRunning means operate pod may be not working
@@ -61,9 +61,10 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IOChaos) (int64, error) {
+func (m *PodIOManager) Commit(ctx context.Context) (int64, error) {
 	m.Log.Info("running modification on pod", "key", m.PodKey, "modification", m.T)
-	updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+
+	if updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		chaos := &v1alpha1.PodIOChaos{}
 
 		err := m.Client.Get(ctx, m.ChaosKey, chaos)
@@ -89,8 +90,7 @@ func (m *PodIOManager) Commit(ctx context.Context, owner *v1alpha1.IOChaos) (int
 		}
 
 		return m.Client.Update(ctx, chaos)
-	})
-	if updateError != nil {
+	}); updateError != nil {
 		return 0, updateError
 	}
 
