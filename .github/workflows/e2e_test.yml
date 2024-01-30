@@ -182,10 +182,10 @@ jobs:
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
       - name: Setup minikube
-        uses: manusa/actions-setup-minikube@v2.4.3
+        uses: manusa/actions-setup-minikube@v2.10.0
         with:
           driver: docker
-          minikube version: v1.27.0
+          minikube version: v1.32.0
           kubernetes version: ${{ matrix.kubernetes-version }}
           start args: --cni calico
           github token: ${{ secrets.GITHUB_TOKEN }}
