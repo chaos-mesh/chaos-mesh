@@ -234,6 +234,27 @@ var _ = Describe("networkchaos_webhook", func() {
 					expect: "error",
 				},
 				{
+					name: "validate the rate",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo11",
+						},
+						Spec: NetworkChaosSpec{
+							TcParameter: TcParameter{
+								Rate: &RateSpec{
+									Rate: "10",
+								},
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						_, err := chaos.ValidateCreate()
+						return err
+					},
+					expect: "error",
+				},
+				{
 					name: "validate the target",
 					chaos: NetworkChaos{
 						ObjectMeta: metav1.ObjectMeta{

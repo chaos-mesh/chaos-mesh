@@ -984,6 +984,7 @@ data:
             ttl 30
             grpcport 9288
         }
+        prometheus :9153
         forward . /etc/resolv.conf {
             max_concurrent 1000
         }

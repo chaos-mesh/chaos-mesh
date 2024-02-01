@@ -379,14 +379,22 @@
                 "extraContainers": {
                     "type": "array"
                 },
-                "gcpClientId": {
-                    "type": "string"
-                },
-                "gcpClientSecret": {
-                    "type": "string"
-                },
                 "gcpSecurityMode": {
-                    "type": "boolean"
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "clientId": {
+                            "type": "string"
+                        },
+                        "clientSecret": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "hostNetwork": {
                     "type": "boolean"

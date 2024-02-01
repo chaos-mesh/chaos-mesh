@@ -17,6 +17,8 @@ package netem
 
 import (
 	"math"
+	"strconv"
+	"strings"
 
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -53,6 +55,7 @@ func MergeNetem(a, b *chaosdaemon.Netem) *chaosdaemon.Netem {
 		ReorderCorr:   maxf32(a.GetReorderCorr(), b.GetReorderCorr()),
 		Corrupt:       maxf32(a.GetCorrupt(), b.GetCorrupt()),
 		CorruptCorr:   maxf32(a.GetCorruptCorr(), b.GetCorruptCorr()),
+		Rate:          maxRateString(a.GetRate(), b.GetRate()),
 	}
 }
 
@@ -65,4 +68,59 @@ func maxu32(a, b uint32) uint32 {
 
 func maxf32(a, b float32) float32 {
 	return float32(math.Max(float64(a), float64(b)))
+}
+
+func parseRate(nu string) uint64 {
+	// normalize input
+	s := strings.ToLower(strings.TrimSpace(nu))
+
+	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
+		if strings.HasSuffix(s, u) {
+			ts := strings.TrimSuffix(s, u)
+			s := strings.TrimSpace(ts)
+
+			n, err := strconv.ParseUint(s, 10, 64)
+
+			if err != nil {
+				return 0
+			}
+
+			// convert unit to bytes
+			for j := 4 - i; j > 0; j-- {
+				n = n * 1024
+			}
+
+			return n
+		}
+	}
+
+	for i, u := range []string{"tbit", "gbit", "mbit", "kbit", "bit"} {
+		if strings.HasSuffix(s, u) {
+			ts := strings.TrimSuffix(s, u)
+			s := strings.TrimSpace(ts)
+
+			n, err := strconv.ParseUint(s, 10, 64)
+
+			if err != nil {
+				return 0
+			}
+
+			// convert unit to bytes
+			for j := 4 - i; j > 0; j-- {
+				n = n * 1000
+			}
+			n = n / 8
+
+			return n
+		}
+	}
+
+	return 0
+}
+
+func maxRateString(a, b string) string {
+	if parseRate(a) > parseRate(b) {
+		return a
+	}
+	return b
 }
