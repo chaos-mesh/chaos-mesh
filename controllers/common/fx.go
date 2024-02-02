@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosimpltypes "github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
@@ -84,10 +83,8 @@ func Bootstrap(params Params) error {
 		if len(pair.Controlls) > 0 {
 			pair := pair
 			for _, obj := range pair.Controlls {
-				builder.Watches(&source.Kind{
-					Type: obj,
-				},
-					handler.EnqueueRequestsFromMapFunc(func(obj client.Object) []reconcile.Request {
+				builder.Watches(obj,
+					handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj client.Object) []reconcile.Request {
 						reqs := []reconcile.Request{}
 						objName := k8sTypes.NamespacedName{
 							Namespace: obj.GetNamespace(),

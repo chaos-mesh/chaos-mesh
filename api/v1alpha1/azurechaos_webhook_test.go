@@ -46,7 +46,8 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -59,7 +60,8 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -78,7 +80,8 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},
@@ -97,7 +100,8 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						return chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate()
+						return err
 					},
 					expect: "error",
 				},

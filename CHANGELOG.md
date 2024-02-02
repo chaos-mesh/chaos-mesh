@@ -24,6 +24,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Set the database column type to text for 'Workflow/Experiment/Schedule' [#4151](https://github.com/chaos-mesh/chaos-mesh/pull/4151)
 - Bump go to v1.20 [#4157](https://github.com/chaos-mesh/chaos-mesh/pull/4157)
 - Upgrade docker/login-action to v2 [#4167](https://github.com/chaos-mesh/chaos-mesh/pull/4167)
+- Update k8s dependencies to 1.28.0 [#4154](https://github.com/chaos-mesh/chaos-mesh/pull/4154)
 
 ### Deprecated
 
