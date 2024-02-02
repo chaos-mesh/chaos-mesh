@@ -19,6 +19,7 @@ functions used in multiple scripts
 
 import os
 import sys
+from collections import namedtuple
 
 
 def underscore_uppercase(name):
@@ -33,21 +34,22 @@ def get_target_platform():
     get the target platform according to the `TARGET_PLATFORM` variable or the
     `uname` syscall
     """
+    Platform = namedtuple('Platform', ['platform', 'from_env'])
 
     if os.getenv("TARGET_PLATFORM") is not None and os.getenv("TARGET_PLATFORM") != "":
-        return os.getenv("TARGET_PLATFORM")
+        return Platform(os.getenv("TARGET_PLATFORM"), True)
 
     machine = os.uname().machine
     if machine == "x86_64":
-        return "amd64"
+        return Platform("amd64", False)
 
     if machine == "amd64":
-        return "amd64"
+        return Platform("amd64", False)
 
     if machine == "arm64":
-        return "arm64"
+        return Platform("arm64", False)
 
     if machine == "aarch64":
-        return "arm64"
+        return Platform("arm64", False)
 
-    sys.exit("Please run this script on amd64 or arm64 machine")
+    sys.exit("Please run this script on amd64 or arm64 machines.")
