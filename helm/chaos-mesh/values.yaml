@@ -272,9 +272,12 @@ dashboard:
   # securityMode requires user to provide credentials on Chaos Dashboard, instead of using chaos-dashboard service account
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
-  gcpSecurityMode: false
-  gcpClientId: ""
-  gcpClientSecret: ""
+  gcpSecurityMode:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+    # References existing Kubernetes secret containing `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`.
+    existingSecret: ""
   # Node labels for chaos-dashboard  pod assignment
   nodeSelector: {}
   # Toleration labels for chaos-dashboard pod assignment
@@ -452,6 +455,18 @@ dnsServer:
     LISTEN_HOST: "0.0.0.0"
     # The port of chaos-dns-server listen on
     LISTEN_PORT: 53
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - chaos-dns-server
+            topologyKey: kubernetes.io/hostname
+          weight: 100
 
 prometheus:
   # Enable prometheus

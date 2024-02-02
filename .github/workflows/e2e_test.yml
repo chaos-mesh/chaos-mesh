@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v34
+        uses: tj-actions/changed-files@v41
         id: filter
         with:
           # Not available for frontend code for now.
@@ -37,13 +37,12 @@ jobs:
             .github/workflows/license_checker.yml
             .github/workflows/must_update_changelog.yml
             .github/workflows/release_helm_chart.yml
-            .github/workflows/stale.yml
             .github/workflows/upload_env_image.yml
             .github/workflows/upload_image.yml
             .github/workflows/upload_image_pr.yml
             .github/workflows/upload_latest_files.yml
             .github/workflows/upload_release_files.yml
-      - name: Echo changed files
+      - name: Show outputs
         run: echo "${{ toJSON(steps.filter.outputs) }}"
 
   build-image:
@@ -106,7 +105,7 @@ jobs:
           docker image save ghcr.io/chaos-mesh/e2e-helper:latest > ./output/saved-images/e2e-helper.tgz
 
       - name: upload saved images
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: saved-images
           path: ./output/saved-images
@@ -133,7 +132,7 @@ jobs:
         run: |
           make e2e-build
       - name: upload e2e binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-binary
           path: ./e2e-test/image/e2e/bin
@@ -166,12 +165,12 @@ jobs:
       - name: checkout codes
         uses: actions/checkout@v4
       - name: download saved images
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: saved-images
           path: ./output/saved-images
       - name: download e2e binary
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: e2e-binary
           path: ./output/e2e-binary
@@ -183,10 +182,10 @@ jobs:
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
       - name: Setup minikube
-        uses: manusa/actions-setup-minikube@v2.4.3
+        uses: manusa/actions-setup-minikube@v2.10.0
         with:
           driver: docker
-          minikube version: v1.27.0
+          minikube version: v1.32.0
           kubernetes version: ${{ matrix.kubernetes-version }}
           start args: --cni calico
           github token: ${{ secrets.GITHUB_TOKEN }}
@@ -226,14 +225,14 @@ jobs:
           kubectl get configmaps -A -o yaml > $PROFILE_DIRECTORY/manifests/configmaps.yaml
       - name: post run - upload Chaos Mesh profile info
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: profiling-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: ./output/chaos-mesh-profile
           retention-days: 7
       - name: post run - upload junit test reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-junit-reports-${{ matrix.focus }}-k8s-${{ matrix.kubernetes-version }}
           path: "**/*.xml"

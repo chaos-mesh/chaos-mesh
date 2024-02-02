@@ -50,7 +50,7 @@ endif
 
 endif
 
-BASIC_IMAGE_ENV= IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
+BASIC_IMAGE_ENV=IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) \
 	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
@@ -214,12 +214,24 @@ PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 e2e: e2e-build ## Run e2e tests in current kubernetes cluster
 	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
 
+define failpoint-ctl
+	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl $1
+endef
+
+failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
+failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing
+	$(call failpoint-ctl,enable)
+
+failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
+failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
+	$(call failpoint-ctl,disable)
+
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
-	make failpoint-enable
+	$(call failpoint-ctl,enable)
 	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
-	make failpoint-disable
+	$(call failpoint-ctl,disable)
 
 ##@ Advanced building targets
 
@@ -302,14 +314,6 @@ e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Buil
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
-
-failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
-failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing
-	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
-
-failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
-failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
-	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
 	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \

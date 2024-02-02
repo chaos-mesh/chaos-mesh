@@ -44,6 +44,11 @@ func TestMergeNetem(t *testing.T) {
 			&chaosdaemonpb.Netem{DelayCorr: 90},
 			&chaosdaemonpb.Netem{Loss: 25, DelayCorr: 100.2},
 		},
+		{
+			&chaosdaemonpb.Netem{Time: 100},
+			&chaosdaemonpb.Netem{Rate: "800kbit"},
+			&chaosdaemonpb.Netem{Time: 100, Rate: "800kbit"},
+		},
 	}
 
 	for _, tc := range cases {
