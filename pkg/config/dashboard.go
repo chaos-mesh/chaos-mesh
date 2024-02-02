@@ -91,8 +91,8 @@ type TTLConfigWithStringTime struct {
 
 	EventTTL      string `envconfig:"TTL_EVENT"         default:"168h"` // one week
 	ExperimentTTL string `envconfig:"TTL_EXPERIMENT"    default:"336h"` // two weeks
-	ScheduleTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
-	WorkflowTTL   string `envconfig:"TTL_EXPERIMENT"    default:"336h"`
+	ScheduleTTL   string `envconfig:"TTL_SCHEDULE"      default:"336h"`
+	WorkflowTTL   string `envconfig:"TTL_WORKFLOW"      default:"336h"`
 }
 
 func (config *TTLConfigWithStringTime) Parse() (*TTLConfig, error) {
