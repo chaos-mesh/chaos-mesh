@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 
 ### Security
 
