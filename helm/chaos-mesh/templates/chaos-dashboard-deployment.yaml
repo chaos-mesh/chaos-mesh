@@ -199,11 +199,10 @@ spec:
       port: {{ .Values.dashboard.env.METRIC_PORT }}
       targetPort: {{ .Values.dashboard.env.METRIC_PORT }}
       name: metric
-{{- end }}
-
-{{- if and .Values.dashboard.service.type (eq .Values.dashboard.service.type "LoadBalancer") }}
+{{- if and .Values.dashboard.service.type (eq .Values.dashboard.service.type "LoadBalancer") .Values.dashboard.service.loadBalancerSourceRanges }}
   loadBalancerSourceRanges:
 {{- with .Values.dashboard.service.loadBalancerSourceRanges }}
-   {{- toYaml . | nindent 4 }}
+{{- toYaml . | nindent 4 }}
+{{- end }}
 {{- end }}
 {{- end }}

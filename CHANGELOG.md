@@ -16,11 +16,11 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for deploying chaos-dashboard with sidecar containers in helm chart [#4164](https://github.com/chaos-mesh/chaos-mesh/pull/4164)
 - Add `values.schema.json` [#4205](https://github.com/chaos-mesh/chaos-mesh/pull/4205)
 - Add [`GreptimeDB`](https://greptime.com) to ADOPTERS.md [#4245](https://github.com/chaos-mesh/chaos-mesh/pull/4245)
-- Support configurable chaos-dns-server pod affinities[#4260](https://github.com/chaos-mesh/chaos-mesh/pull/4260)
+- Support configurable chaos-dns-server pod affinities [#4260](https://github.com/chaos-mesh/chaos-mesh/pull/4260)
 - Add experiment `name`, `namespace` and `kind` to "apply chaos" and "recover chaos" log messages [4278](https://github.com/chaos-mesh/chaos-mesh/pull/4278)
 - Support for watching remote status of chaos experiments to local [#4188](https://github.com/chaos-mesh/chaos-mesh/pull/4188)
 - Add netem/rate support for NetworkChaos [#4017](https://github.com/chaos-mesh/chaos-mesh/pull/4017)
-- Support for setting `loadBalancerSourceRanges` in chaos-dashboard service in helm chart [#3920](https://github.com/chaos-mesh/chaos-mesh/pull/4172)
+- Support for setting `loadBalancerSourceRanges` in chaos-dashboard service in helm chart [#4172](https://github.com/chaos-mesh/chaos-mesh/pull/4172)
 
 ### Changed
 
