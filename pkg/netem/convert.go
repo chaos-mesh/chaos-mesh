@@ -118,6 +118,13 @@ func FromCorrupt(in *v1alpha1.CorruptSpec) (*chaosdaemonpb.Netem, error) {
 	}, nil
 }
 
+// FromRate convert RateSpec to netem
+func FromRate(in *v1alpha1.RateSpec) (*chaosdaemonpb.Netem, error) {
+	return &chaosdaemonpb.Netem{
+		Rate: in.Rate,
+	}, nil
+}
+
 // FromBandwidth converts BandwidthSpec to *chaosdaemonpb.Tbf
 // Bandwidth action use TBF under the hood.
 // TBF stands for Token Bucket Filter, is a classful queueing discipline available

@@ -11,9 +11,9 @@ ENV https_proxy $HTTPS_PROXY
 ARG TARGET_PLATFORM=amd64
 
 RUN mkdir -p /tmp/bin && \
-    curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.20-0.12.tar.gz -o /usr/local/byteman.tar.gz && \
+    curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.22-0.12.tar.gz -o /usr/local/byteman.tar.gz && \
     tar xvf /usr/local/byteman.tar.gz -C /usr/local && \
-    mv /usr/local/byteman-chaos-mesh-download-v4.0.20-0.12 /tmp/byteman && \
+    mv /usr/local/byteman-chaos-mesh-download-v4.0.22-0.12 /tmp/byteman && \
     rm /usr/local/byteman.tar.gz
 
 # toda doesn't support arm64 yet

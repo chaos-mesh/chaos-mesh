@@ -186,6 +186,11 @@ type TcParameter struct {
 	// +ui:form:when=action=='bandwidth'
 	// +optional
 	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
+
+	// Rate represents the detail about rate control action
+	// +ui:form:when=action=='rate'
+	// +optional
+	Rate *RateSpec `json:"rate,omitempty"`
 }
 
 // RawRuleSource represents the name and namespace of the source network chaos
