@@ -106,10 +106,10 @@ jobs:
           make chaosctl
       - name: Install localstack && aws client
         run: |
-          helm repo add localstack-repo http://helm.localstack.cloud
-          helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
-          pip install awscli
+          helm repo add localstack https://localstack.github.io/helm-charts
+          helm upgrade --install localstack localstack/localstack --version 0.6.8
           kubectl wait --timeout=60s --for=condition=ready --all pod
+          pip install awscli
 
       - name: Run integration test
         run: |
