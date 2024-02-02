@@ -22,7 +22,7 @@ import (
 	"strconv"
 
 	"github.com/go-logr/logr"
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"go.uber.org/fx"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -34,6 +34,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -63,11 +65,13 @@ func NewOption(logger logr.Logger, scheme *runtime.Scheme) *ctrl.Options {
 	if len(leaderElectionNamespace) == 0 {
 		leaderElectionNamespace = "default"
 	}
+
 	options := ctrl.Options{
 		// TODO: accept the schema from parameter instead of using scheme directly
-		CertDir:                    config.ControllerCfg.CertsDir,
-		Scheme:                     scheme,
-		MetricsBindAddress:         net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
+		Scheme: scheme,
+		Metrics: metricsserver.Options{
+			BindAddress: net.JoinHostPort(config.ControllerCfg.MetricsHost, strconv.Itoa(config.ControllerCfg.MetricsPort)),
+		},
 		LeaderElection:             config.ControllerCfg.EnableLeaderElection,
 		LeaderElectionNamespace:    leaderElectionNamespace,
 		LeaderElectionResourceLock: "leases",
@@ -75,12 +79,15 @@ func NewOption(logger logr.Logger, scheme *runtime.Scheme) *ctrl.Options {
 		LeaseDuration:              &config.ControllerCfg.LeaderElectLeaseDuration,
 		RetryPeriod:                &config.ControllerCfg.LeaderElectRetryPeriod,
 		RenewDeadline:              &config.ControllerCfg.LeaderElectRenewDeadline,
-		Port:                       config.ControllerCfg.WebhookPort,
-		Host:                       config.ControllerCfg.WebhookHost,
 		// Don't aggregate events
 		EventBroadcaster: record.NewBroadcasterWithCorrelatorOptions(record.CorrelatorOptions{
 			MaxEvents:            math.MaxInt32,
 			MaxIntervalInSeconds: 1,
+		}),
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Host:    config.ControllerCfg.WebhookHost,
+			Port:    config.ControllerCfg.WebhookPort,
+			CertDir: config.ControllerCfg.CertsDir,
 		}),
 	}
 
@@ -89,7 +96,12 @@ func NewOption(logger logr.Logger, scheme *runtime.Scheme) *ctrl.Options {
 		// will not specific a certain namespace
 	} else {
 		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", config.ControllerCfg.TargetNamespace)
-		options.Namespace = config.ControllerCfg.TargetNamespace
+		options.NewCache = func(cfg *rest.Config, opts cache.Options) (cache.Cache, error) {
+			opts.DefaultNamespaces = map[string]cache.Config{
+				config.ControllerCfg.TargetNamespace: {},
+			}
+			return cache.New(cfg, opts)
+		}
 	}
 
 	return &options
@@ -128,7 +140,7 @@ func NewAuthCli(cfg *rest.Config) (*authorizationv1.AuthorizationV1Client, error
 // NewClient would build the controller-runtime client.Client with given parameters.
 func NewClient(mgr ctrl.Manager, scheme *runtime.Scheme) (client.Client, error) {
 	// TODO: make this size configurable
-	cache, err := lru.New(100)
+	cache, err := lru.New[string, runtime.Object](100)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +186,13 @@ func NewControlPlaneCacheReader(logger logr.Logger, cfg *rest.Config) (controlPl
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	// Create the cache for the cached read client and registering informers
-	cacheReader, err := cache.New(cfg, cache.Options{Scheme: scheme, Mapper: mapper, Namespaces: []string{config.ControllerCfg.Namespace}})
+	cacheReader, err := cache.New(cfg, cache.Options{
+		Scheme: scheme,
+		Mapper: mapper,
+		DefaultNamespaces: map[string]cache.Config{
+			config.ControllerCfg.Namespace: {},
+		},
+	})
 	if err != nil {
 		return controlPlaneCacheReader{}, err
 	}

@@ -18,6 +18,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -31,6 +32,8 @@ const (
 	// DNSServerConfFile is the default config file for DNS server
 	DNSServerConfFile = "/etc/resolv.conf"
 )
+
+var ErrInvalidDNSServer = errors.New("invalid DNS server address")
 
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
@@ -46,8 +49,8 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	if req.Enable {
 		// set dns server to the chaos dns server's address
 
-		if len(req.DnsServer) == 0 {
-			return &empty.Empty{}, errors.Errorf("invalid set dns server request %v", req)
+		if net.ParseIP(req.DnsServer) == nil {
+			return nil, ErrInvalidDNSServer
 		}
 
 		// backup the /etc/resolv.conf

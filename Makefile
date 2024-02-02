@@ -50,7 +50,7 @@ endif
 
 endif
 
-BASIC_IMAGE_ENV= IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
+BASIC_IMAGE_ENV=IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_BUILD_ENV_TAG=$(IMAGE_BUILD_ENV_TAG) \
 	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
@@ -90,8 +90,8 @@ help: ## Display this help
 config: SHELL:=$(RUN_IN_DEV_SHELL)
 config: images/dev-env/.dockerbuilt ## Generate CRD manifests with controller-gen
 	cd ./api ;\
-		controller-gen crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../config/crd/bases ;\
-		controller-gen crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../helm/chaos-mesh/crds ;
+		controller-gen crd:ignoreUnexportedFields=true,crdVersions=v1 rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../config/crd/bases ;\
+		rm ../helm/chaos-mesh/crds/* && cp ../config/crd/bases/* ../helm/chaos-mesh/crds
 
 chaos-build: SHELL:=$(RUN_IN_DEV_SHELL)
 chaos-build: bin/chaos-builder images/dev-env/.dockerbuilt ## Generate codes for CustomResource Kinds under api/v1alpha1
@@ -154,7 +154,7 @@ gosec-scan: images/dev-env/.dockerbuilt
 groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
 groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
 	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -combine -w -l -local github.com/chaos-mesh/chaos-mesh
+		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive
@@ -214,12 +214,24 @@ PAUSE_IMAGE ?= gcr.io/google-containers/pause:latest
 e2e: e2e-build ## Run e2e tests in current kubernetes cluster
 	./e2e-test/image/e2e/bin/ginkgo ${GINKGO_FLAGS} ./e2e-test/image/e2e/bin/e2e.test -- --e2e-image ghcr.io/chaos-mesh/e2e-helper:${IMAGE_TAG} --pause-image ${PAUSE_IMAGE}
 
+define failpoint-ctl
+	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl $1
+endef
+
+failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
+failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing
+	$(call failpoint-ctl,enable)
+
+failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
+failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
+	$(call failpoint-ctl,disable)
+
 test: SHELL:=$(RUN_IN_DEV_SHELL)
 test: generate manifests test-utils images/dev-env/.dockerbuilt ## Run unit tests
-	make failpoint-enable
+	$(call failpoint-ctl,enable)
 	CGO_ENABLED=1 $(GOTEST) -p 1 $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp -covermode=atomic
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
-	make failpoint-disable
+	$(call failpoint-ctl,disable)
 
 ##@ Advanced building targets
 
@@ -302,14 +314,6 @@ e2e-build: e2e-test/image/e2e/bin/ginkgo e2e-test/image/e2e/bin/e2e.test ## Buil
 bin/chaos-builder: SHELL:=$(RUN_IN_DEV_SHELL)
 bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
-
-failpoint-enable: SHELL:=$(RUN_IN_DEV_SHELL)
-failpoint-enable: images/dev-env/.dockerbuilt ## Enable failpoint stub for testing
-	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl enable
-
-failpoint-disable: SHELL:=$(RUN_IN_DEV_SHELL)
-failpoint-disable: images/dev-env/.dockerbuilt ## Disable failpoint stub for testing
-	find $(ROOT)/* -type d | grep -vE "(\.git|bin|\.cache|ui)" | xargs failpoint-ctl disable
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
 	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \

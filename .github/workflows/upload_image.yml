@@ -11,6 +11,7 @@ permissions: read-all
 
 jobs:
   build-specific-architecture:
+    if: ${{ github.repository == 'chaos-mesh/chaos-mesh' }}
     permissions:
       # https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#authenticating-to-package-registries-on-github
       packages: write
@@ -23,7 +24,7 @@ jobs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
     runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # It requires all the tags and branches to generate the correct GitVersion with `hack/version.sh`.
           fetch-depth: 0
@@ -173,7 +174,7 @@ jobs:
     env:
       IMAGE_TAG: ${{ needs.build-specific-architecture.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v4

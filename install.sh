@@ -984,6 +984,7 @@ data:
             ttl 30
             grpcport 9288
         }
+        prometheus :9153
         forward . /etc/resolv.conf {
             max_concurrent 1000
         }
@@ -1963,14 +1964,15 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
+          - podAffinityTerm:
               labelSelector:
                 matchExpressions:
-                  - key: k8s-app
-                    operator: In
-                    values: ["chaos-dns"]
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                  - chaos-dns-server
               topologyKey: kubernetes.io/hostname
+            weight: 100
       priorityClassName: 
       containers:
       - name: chaos-dns-server

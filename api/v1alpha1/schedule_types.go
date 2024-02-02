@@ -70,7 +70,6 @@ type ScheduleSpec struct {
 	// +kubebuilder:validation:Minimum=1
 	HistoryLimit int `json:"historyLimit,omitempty"`
 
-	// TODO: use a custom type, as `TemplateType` contains other possible values
 	Type ScheduleTemplateType `json:"type"`
 
 	ScheduleItem `json:",inline"`

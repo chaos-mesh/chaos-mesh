@@ -20,7 +20,7 @@ import (
 	"strings"
 	"sync"
 
-	lru "github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru/v2"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -89,18 +89,18 @@ type ClientsPool struct {
 
 	scheme      *runtime.Scheme
 	localConfig *rest.Config
-	clients     *lru.Cache
-	authClients *lru.Cache
+	clients     *lru.Cache[string, pkgclient.Client]
+	authClients *lru.Cache[string, *authorizationv1.AuthorizationV1Client]
 }
 
 // New creates a new Clients
 func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (Clients, error) {
-	clients, err := lru.New(maxClientNum)
+	clients, err := lru.New[string, pkgclient.Client](maxClientNum)
 	if err != nil {
 		return nil, err
 	}
 
-	authClients, err := lru.New(maxClientNum)
+	authClients, err := lru.New[string, *authorizationv1.AuthorizationV1Client](maxClientNum)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (c *ClientsPool) Client(token string) (pkgclient.Client, error) {
 
 	value, ok := c.clients.Get(token)
 	if ok {
-		return value.(pkgclient.Client), nil
+		return value, nil
 	}
 
 	config := rest.CopyConfig(c.localConfig)
@@ -159,7 +159,7 @@ func (c *ClientsPool) AuthClient(token string) (authorizationv1.AuthorizationV1I
 
 	value, ok := c.authClients.Get(token)
 	if ok {
-		return value.(authorizationv1.AuthorizationV1Interface), nil
+		return value, nil
 	}
 
 	config := rest.CopyConfig(c.localConfig)

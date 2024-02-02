@@ -5201,7 +5201,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
                     "type": "string"
                 }
             }
@@ -6296,6 +6295,10 @@ const docTemplate = `{
                     "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
                     "type": "string"
                 },
+                "rate": {
+                    "description": "Rate represents the detail about rate control action\n+ui:form:when=action=='rate'\n+optional",
+                    "$ref": "#/definitions/v1alpha1.RateSpec"
+                },
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
@@ -7089,6 +7092,15 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.RateSpec": {
+            "type": "object",
+            "properties": {
+                "rate": {
+                    "description": "Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.RedisCacheLimitSpec": {
             "type": "object",
             "properties": {
@@ -7388,7 +7400,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/v1alpha1.TimeChaosSpec"
                 },
                 "type": {
-                    "description": "TODO: use a custom type, as ` + "`" + `TemplateType` + "`" + ` contains other possible values",
                     "type": "string"
                 },
                 "workflow": {
