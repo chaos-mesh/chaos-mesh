@@ -4911,6 +4911,17 @@ const docTemplate = `{
                     "description": "Endpoint indicates the endpoint of the aws server. Just used it in test now.\n+ui:form:ignore\n+optional",
                     "type": "string"
                 },
+                "filters": {
+                    "description": "Filters defines the filters to pass to the AWS api to query the list of instances.\nCan be specified instead of Ec2Instance, in order to specify instances by tag or other attributes\nAny parameter supported by AWS DescribeInstances method can be used.\nFor details see: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstances.html",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1alpha1.AWSFilter"
+                    }
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nUsed only if Filters is specified.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent\n+optional",
+                    "type": "string"
+                },
                 "remoteCluster": {
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
@@ -4919,9 +4930,27 @@ const docTemplate = `{
                     "description": "SecretName defines the name of kubernetes secret.\n+optional",
                     "type": "string"
                 },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                },
                 "volumeID": {
                     "description": "EbsVolume indicates the ID of the EBS volume.\nNeeded in detach-volume.\n+ui:form:when=action=='detach-volume'\n+optional",
                     "type": "string"
+                }
+            }
+        },
+        "v1alpha1.AWSFilter": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
