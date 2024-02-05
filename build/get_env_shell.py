@@ -88,6 +88,11 @@ def main():
     else:
         cmd += ["--env", f"TARGET_PLATFORM={target_platform.platform}"]
 
+    # For testing on arm64.
+    # See https://etcd.io/docs/v3.5/op-guide/supported-platform/#unsupported-platforms.
+    if target_platform == "arm64":
+        cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
+
     if os.getenv("GO_BUILD_CACHE") is not None and os.getenv(
             "GO_BUILD_CACHE") != "":
         tmp_go_dir = f"{os.getenv('GO_BUILD_CACHE')}/chaos-mesh-gopath"
