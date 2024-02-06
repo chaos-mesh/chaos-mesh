@@ -90,7 +90,7 @@ def main():
 
     # For testing on arm64.
     # See https://etcd.io/docs/v3.5/op-guide/supported-platform/#unsupported-platforms.
-    if target_platform == "arm64":
+    if target_platform.platform == "arm64":
         cmd += ["--env", "ETCD_UNSUPPORTED_ARCH=arm64"]
 
     if os.getenv("GO_BUILD_CACHE") is not None and os.getenv(
