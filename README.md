@@ -4,12 +4,13 @@
 ---
 
 <!-- markdown-link-check-disable -->
-[![Upload Image](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml/badge.svg?event=schedule)](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml)
-[![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
+
 [![LICENSE](https://img.shields.io/github/license/chaos-mesh/chaos-mesh.svg)](https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE)
-[![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
 [![Go Report Card](https://goreportcard.com/badge/github.com/chaos-mesh/chaos-mesh)](https://goreportcard.com/report/github.com/chaos-mesh/chaos-mesh)
 [![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/chaos-mesh/chaos-mesh)
+[![Upload Image](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml/badge.svg?event=schedule)](https://github.com/chaos-mesh/chaos-mesh/actions/workflows/upload_image.yml)
+
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh?ref=badge_shield)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3680/badge)](https://bestpractices.coreinfrastructure.org/projects/3680)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https%3A%2F%2Fartifacthub.io%2Fbadge%2Frepository%2Fchaos-mesh)](https://artifacthub.io/packages/helm/chaos-mesh/chaos-mesh)
@@ -38,32 +39,26 @@ See the following demo video for a quick view of Chaos Mesh:
 
 ## Chaos Operator
 
-Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are three components at play:
+Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are two components at play:
 
-**Controller-manager**: used to schedule and manage the lifecycle of CRD objects.
+**Chaos Controller Manager**: is primarily responsible for the scheduling and management of Chaos experiments. This component contains several CRD Controllers, such as Workflow Controller, Scheduler Controller, and Controllers of various fault types.
 
-**Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specific node.
+**Chaos Daemon**: runs as DaemonSet and has Privileged permission by default (which can be disabled). This component mainly interferes with specific network devices, file systems, kernels by hacking into the target Pod Namespace.
 
 ![Chaos Operator](./static/chaos-mesh.png)
 
 Chaos Operator uses [CustomResourceDefinition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
-The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIOChaos, PodNetworkChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
 
-- pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
-- pod-failure: The selected pod will be unavailable in a specified period of time.
-- container-kill: The selected container is killed in the selected pod.
-- netem chaos: Network chaos such as delay, duplication, etc.
-- network-partition: Simulate network partition.
-- IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
-- time chaos: The selected pod will be injected with clock skew.
-- cpu-burn: Simulate the CPU of the selected pod stress.
-- memory-burn: Simulate the memory of the selected pod stress.
-- kernel chaos: The selected pod will be injected with (slab, bio, etc) errors.
-- dns chaos: The selected pod will be injected with dns errors, such as error, random.
+The current implementation supports a few types of CRD objects for fault injection, namely `PodChaos`, `NetworkChaos`, `IOChaos`, `TimeChaos`, `StressChaos`, and so on.
+You can get the full list of CRD objects and their specifications in the [Chaos Mesh Docs](https://chaos-mesh.org/docs/).
 
 ## Quick start
 
-See [Chaos Mesh Docs](https://chaos-mesh.org/docs/).
+See [Quick Start](https://chaos-mesh.org/docs/quick-start) and [Install Chaos Mesh using Helm](https://chaos-mesh.org/docs/production-installation-using-helm/).
+
+## Contributing
+
+See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/developer-guide-overview).
 
 ## Adopters
 
@@ -80,19 +75,15 @@ Blogs on Chaos Mesh design & implementation, features, chaos engineering, commun
 - [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://chaos-mesh.org/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
 - [Building an Automated Testing Framework Based on Chaos Mesh and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
 
-## Contributing
-
-See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/developer-guide-overview).
-
 ## Community
 
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter [@chaos_mesh](https://twitter.com/chaos_mesh).
 
-- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://slack.cncf.io/) workspace.
+- Joining the `#project-chaos-mesh` channel in the [CNCF Slack](https://slack.cncf.io/) workspace.
 
-- Filing an issue or opening a PR against this repository.
+- Filling an issue or opening a PR against this repository.
 
 ### Community meetings
 
@@ -104,7 +95,7 @@ Please reach out for bugs, feature requests, and other issues via:
 - Chaos Mesh Development Meeting (Releases, roadmap/features/RFC planning and discussion, issue triage/discussion, etc)
   - Time: Every other Tuesday (unless otherwise specified)
   - [RSVP here](https://community.cncf.io/chaos-mesh-community/)
-  - [Meeting minutes](https://docs.google.com/document/d/1s9X6tTOy3OGZaLDZQesGw1BNOrxQfWExjBFIn5irpPE/edit#heading=h.94nzmll6m8n5)
+  - [Meeting minutes](https://docs.google.com/document/d/1s9X6tTOy3OGZaLDZQesGw1BNOrxQfWExjBFIn5irpPE/edit)
 
 ### Community blogs
 
@@ -143,17 +134,9 @@ Please reach out for bugs, feature requests, and other issues via:
 - InfoQ: [Chaos Engineering on Kubernetes : Chaos Mesh Generally Available with v1.0](https://www.infoq.com/news/2020/10/kubernetes-chaos-mesh-ga/)
 - TechGenix: [Chaos Mesh Promises to Bring Order to Chaos Engineering](http://techgenix.com/chaos-mesh-chaos-engineering/)
 
-## FAQs
-
-See [FAQs](https://chaos-mesh.org/docs).
-
-## Roadmap
-
-See [ROADMAP](./ROADMAP.md).
-
 ## License
 
-Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
+Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full content.
 
 <!-- markdown-link-check-disable-next-line -->
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fchaos-mesh%2Fchaos-mesh?ref=badge_large)
