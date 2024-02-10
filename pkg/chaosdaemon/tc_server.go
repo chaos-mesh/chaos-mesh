@@ -468,6 +468,10 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		}
 	}
 
+	if len(netem.Rate) > 0 {
+		args = fmt.Sprintf("%s rate %s", args, netem.Rate)
+	}
+
 	trimedArgs := []string{}
 
 	for _, part := range strings.Split(args, " ") {

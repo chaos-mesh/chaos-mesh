@@ -2710,6 +2710,17 @@ spec:
                 - fixed-percent
                 - random-max-percent
                 type: string
+              rate:
+                description: Rate represents the detail about rate control action
+                properties:
+                  rate:
+                    description: Rate is the speed knob. Allows bit, kbit, mbit, gbit,
+                      tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per
+                      second.
+                    type: string
+                required:
+                - rate
+                type: object
               remoteCluster:
                 description: RemoteCluster represents the remote cluster where the
                   chaos will be deployed
@@ -5116,6 +5127,17 @@ spec:
                       required:
                       - loss
                       type: object
+                    rate:
+                      description: Rate represents the detail about rate control action
+                      properties:
+                        rate:
+                          description: Rate is the speed knob. Allows bit, kbit, mbit,
+                            gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                            bytes per second.
+                          type: string
+                      required:
+                      - rate
+                      type: object
                     source:
                       description: The name and namespace of the source network chaos
                       type: string
@@ -6802,6 +6824,17 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  rate:
+                    description: Rate represents the detail about rate control action
+                    properties:
+                      rate:
+                        description: Rate is the speed knob. Allows bit, kbit, mbit,
+                          gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                          bytes per second.
+                        type: string
+                    required:
+                    - rate
+                    type: object
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
                       the chaos will be deployed
@@ -10170,6 +10203,18 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            rate:
+                              description: Rate represents the detail about rate control
+                                action
+                              properties:
+                                rate:
+                                  description: Rate is the speed knob. Allows bit,
+                                    kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps,
+                                    tbps unit. bps means bytes per second.
+                                  type: string
+                              required:
+                              - rate
+                              type: object
                             remoteCluster:
                               description: RemoteCluster represents the remote cluster
                                 where the chaos will be deployed
@@ -13280,6 +13325,18 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                rate:
+                                  description: Rate represents the detail about rate
+                                    control action
+                                  properties:
+                                    rate:
+                                      description: Rate is the speed knob. Allows
+                                        bit, kbit, mbit, gbit, tbit, bps, kbps, mbps,
+                                        gbps, tbps unit. bps means bytes per second.
+                                      type: string
+                                  required:
+                                  - rate
+                                  type: object
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
                                     cluster where the chaos will be deployed
@@ -21375,6 +21432,17 @@ spec:
                     - fixed-percent
                     - random-max-percent
                     type: string
+                  rate:
+                    description: Rate represents the detail about rate control action
+                    properties:
+                      rate:
+                        description: Rate is the speed knob. Allows bit, kbit, mbit,
+                          gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means
+                          bytes per second.
+                        type: string
+                    required:
+                    - rate
+                    type: object
                   remoteCluster:
                     description: RemoteCluster represents the remote cluster where
                       the chaos will be deployed
@@ -24292,6 +24360,18 @@ spec:
                         - fixed-percent
                         - random-max-percent
                         type: string
+                      rate:
+                        description: Rate represents the detail about rate control
+                          action
+                        properties:
+                          rate:
+                            description: Rate is the speed knob. Allows bit, kbit,
+                              mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit.
+                              bps means bytes per second.
+                            type: string
+                        required:
+                        - rate
+                        type: object
                       remoteCluster:
                         description: RemoteCluster represents the remote cluster where
                           the chaos will be deployed
@@ -27731,6 +27811,18 @@ spec:
                                   - fixed-percent
                                   - random-max-percent
                                   type: string
+                                rate:
+                                  description: Rate represents the detail about rate
+                                    control action
+                                  properties:
+                                    rate:
+                                      description: Rate is the speed knob. Allows
+                                        bit, kbit, mbit, gbit, tbit, bps, kbps, mbps,
+                                        gbps, tbps unit. bps means bytes per second.
+                                      type: string
+                                  required:
+                                  - rate
+                                  type: object
                                 remoteCluster:
                                   description: RemoteCluster represents the remote
                                     cluster where the chaos will be deployed
@@ -30948,6 +31040,19 @@ spec:
                                       - fixed-percent
                                       - random-max-percent
                                       type: string
+                                    rate:
+                                      description: Rate represents the detail about
+                                        rate control action
+                                      properties:
+                                        rate:
+                                          description: Rate is the speed knob. Allows
+                                            bit, kbit, mbit, gbit, tbit, bps, kbps,
+                                            mbps, gbps, tbps unit. bps means bytes
+                                            per second.
+                                          type: string
+                                      required:
+                                      - rate
+                                      type: object
                                     remoteCluster:
                                       description: RemoteCluster represents the remote
                                         cluster where the chaos will be deployed
@@ -41977,6 +42082,18 @@ spec:
                           - fixed-percent
                           - random-max-percent
                           type: string
+                        rate:
+                          description: Rate represents the detail about rate control
+                            action
+                          properties:
+                            rate:
+                              description: Rate is the speed knob. Allows bit, kbit,
+                                mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit.
+                                bps means bytes per second.
+                              type: string
+                          required:
+                          - rate
+                          type: object
                         remoteCluster:
                           description: RemoteCluster represents the remote cluster
                             where the chaos will be deployed
@@ -45011,6 +45128,18 @@ spec:
                               - fixed-percent
                               - random-max-percent
                               type: string
+                            rate:
+                              description: Rate represents the detail about rate control
+                                action
+                              properties:
+                                rate:
+                                  description: Rate is the speed knob. Allows bit,
+                                    kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps,
+                                    tbps unit. bps means bytes per second.
+                                  type: string
+                              required:
+                              - rate
+                              type: object
                             remoteCluster:
                               description: RemoteCluster represents the remote cluster
                                 where the chaos will be deployed

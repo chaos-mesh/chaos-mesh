@@ -4554,6 +4554,12 @@ definitions:
           Supported mode: one / all / fixed / fixed-percent / random-max-percent
           +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
         type: string
+      rate:
+        $ref: '#/definitions/v1alpha1.RateSpec'
+        description: |-
+          Rate represents the detail about rate control action
+          +ui:form:when=action=='rate'
+          +optional
       remoteCluster:
         description: |-
           RemoteCluster represents the remote cluster where the chaos will be deployed
@@ -5388,6 +5394,13 @@ definitions:
       signal:
         description: the signal number to send
         type: integer
+    type: object
+  v1alpha1.RateSpec:
+    properties:
+      rate:
+        description: Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps,
+          kbps, mbps, gbps, tbps unit. bps means bytes per second.
+        type: string
     type: object
   v1alpha1.RedisCacheLimitSpec:
     properties:
