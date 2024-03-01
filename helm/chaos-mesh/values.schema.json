@@ -96,6 +96,9 @@
                 "podSecurityPolicy": {
                     "type": "boolean"
                 },
+                "podSecurityContext": {
+                    "type": "object"
+                },
                 "priorityClassName": {
                     "type": "string"
                 },
@@ -309,10 +312,18 @@
                     }
                 },
                 "serviceAccount": {
-                    "type": "string"
-                },
-                "serviceAccountAnnotations": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "boolean"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "annotations": {
+                            "type": "object"
+                        }
+                    }
                 },
                 "targetNamespace": {
                     "type": "string"
