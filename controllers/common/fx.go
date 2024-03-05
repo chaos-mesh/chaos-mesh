@@ -100,7 +100,17 @@ func Bootstrap(params Params) error {
 						item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
 
 						for _, record := range item.GetStatus().Experiment.Records {
-							namespacedName, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
+							var (
+								namespacedName k8sTypes.NamespacedName
+								containerName  string
+							)
+
+							kind := item.GetObjectKind().GroupVersionKind().Kind
+							if kind == "IOChaos" {
+								namespacedName, containerName, err = controller.ParseNamespacedNameContainer(record.Id)
+							} else {
+								namespacedName, err = controller.ParseNamespacedName(record.Id)
+							}
 							if err != nil {
 								setupLog.Error(err, "failed to parse record", "record", record.Id)
 								continue
