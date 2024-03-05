@@ -100,21 +100,21 @@ func Bootstrap(params Params) error {
 						items := reflect.ValueOf(list).Elem().FieldByName("Items")
 						for i := 0; i < items.Len(); i++ {
 							item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
-							// kind := item.GetObjectKind().GroupVersionKind().Kind
+							kind := item.GetObjectKind().GroupVersionKind().Kind
 
 							for _, record := range item.GetStatus().Experiment.Records {
-								namespacedName, err := controller.ParseNamespacedName(record.Id)
+								namespacedName, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 								if err != nil {
 									setupLog.Error(err, "failed to parse record", "record", record.Id)
 									continue
 								}
 
-								// namespacedNameContainer := k8sTypes.NamespacedName{
-								// 	Namespace: namespacedName.Namespace,
-								// 	Name:      namespacedName.Name + "-" + containerName,
-								// }
+								namespacedNameContainer := k8sTypes.NamespacedName{
+									Namespace: namespacedName.Namespace,
+									Name:      namespacedName.Name + "-" + containerName,
+								}
 
-								if namespacedName == objName {
+								if namespacedName == objName || (kind == "PodIOChaos" && namespacedNameContainer == objName) {
 									id := k8sTypes.NamespacedName{
 										Namespace: item.GetNamespace(),
 										Name:      item.GetName(),
