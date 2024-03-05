@@ -100,6 +100,8 @@ func Bootstrap(params Params) error {
 						items := reflect.ValueOf(list).Elem().FieldByName("Items")
 						for i := 0; i < items.Len(); i++ {
 							item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
+							kind := item.GetObjectKind().GroupVersionKind().Kind
+
 							for _, record := range item.GetStatus().Experiment.Records {
 								namespacedName, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 								if err != nil {
@@ -112,7 +114,7 @@ func Bootstrap(params Params) error {
 									Name:      namespacedName.Name + "-" + containerName,
 								}
 
-								if namespacedName == objName || namespacedNameContainer == objName {
+								if namespacedName == objName || (kind == "IOChaos" && objName == namespacedNameContainer) {
 									id := k8sTypes.NamespacedName{
 										Namespace: item.GetNamespace(),
 										Name:      item.GetName(),
