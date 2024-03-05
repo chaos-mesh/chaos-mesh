@@ -61,11 +61,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	if phase == waitForApplySync {
 		podiochaos := &v1alpha1.PodIOChaos{}
-		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 		if err != nil {
 			return waitForApplySync, err
 		}
-		err = impl.Client.Get(ctx, namespacedName, podiochaos)
+		err = impl.Client.Get(ctx, types.NamespacedName{
+			Namespace: podId.Namespace,
+			Name:      podId.Name + "-" + containerName,
+		}, podiochaos)
 		if err != nil {
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
@@ -101,10 +104,13 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
-	source := iochaos.Namespace + "/" + iochaos.Name
-	m := impl.builder.WithInit(source, types.NamespacedName{
+	source := iochaos.Namespace + "/" + iochaos.Name + "-" + containerName
+	m := impl.builder.InitManager(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
+	}, types.NamespacedName{
+		Namespace: pod.Namespace,
+		Name:      pod.Name + "-" + containerName,
 	})
 
 	m.T.SetVolumePath(iochaos.Spec.VolumePath)
@@ -128,13 +134,14 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		MistakeSpec:      iochaos.Spec.Mistake,
 		Source:           m.Source,
 	})
-	generationNumber, err := m.Commit(ctx, iochaos)
+
+	generationNumber, err := m.Commit(ctx)
 	if err != nil {
 		return v1alpha1.NotInjected, err
 	}
-
 	// modify the custom status
 	iochaos.Status.Instances[record.Id] = generationNumber
+
 	return waitForApplySync, nil
 }
 
@@ -150,17 +157,22 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 	phase := record.Phase
 	if phase == waitForRecoverSync {
 		podiochaos := &v1alpha1.PodIOChaos{}
-		namespacedName, err := controller.ParseNamespacedName(record.Id)
+		podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 		if err != nil {
 			// This error is not expected to exist
 			return waitForRecoverSync, nil
 		}
-		err = impl.Client.Get(ctx, namespacedName, podiochaos)
+
+		err = impl.Client.Get(ctx, types.NamespacedName{
+			Namespace: podId.Namespace,
+			Name:      podId.Name + "-" + containerName,
+		}, podiochaos)
 		if err != nil {
 			// TODO: handle this error
 			if k8sError.IsNotFound(err) {
 				return v1alpha1.NotInjected, nil
 			}
+
 			return waitForRecoverSync, err
 		}
 
@@ -175,7 +187,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		return waitForRecoverSync, nil
 	}
 
-	podId, _, err := controller.ParseNamespacedNameContainer(records[index].Id)
+	podId, containerName, err := controller.ParseNamespacedNameContainer(records[index].Id)
 	if err != nil {
 		// This error is not expected to exist
 		return v1alpha1.NotInjected, err
@@ -187,16 +199,20 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 		if k8sError.IsNotFound(err) {
 			return v1alpha1.NotInjected, nil
 		}
+
 		return v1alpha1.Injected, err
 	}
 
-	source := iochaos.Namespace + "/" + iochaos.Name
-	m := impl.builder.WithInit(source, types.NamespacedName{
+	source := iochaos.Namespace + "/" + iochaos.Name + "-" + containerName
+	m := impl.builder.InitManager(source, types.NamespacedName{
 		Namespace: pod.Namespace,
 		Name:      pod.Name,
+	}, types.NamespacedName{
+		Namespace: pod.Namespace,
+		Name:      pod.Name + "-" + containerName,
 	})
 
-	generationNumber, err := m.Commit(ctx, iochaos)
+	generationNumber, err := m.Commit(ctx)
 	if err != nil {
 		if err == podiochaosmanager.ErrPodNotFound || err == podiochaosmanager.ErrPodNotRunning {
 			return v1alpha1.NotInjected, nil
@@ -207,11 +223,12 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 				return v1alpha1.NotInjected, nil
 			}
 		}
+
 		return v1alpha1.Injected, err
 	}
-
 	// Now modify the custom status and phase
 	iochaos.Status.Instances[record.Id] = generationNumber
+
 	return waitForRecoverSync, nil
 }
 

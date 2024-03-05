@@ -4870,8 +4870,6 @@ spec:
                   type: object
                 type: array
               container:
-                description: 'TODO: support multiple different container to inject
-                  in one pod'
                 type: string
               volumeMountPath:
                 description: 'VolumeMountPath represents the target mount path It

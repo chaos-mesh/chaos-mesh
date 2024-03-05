@@ -78,7 +78,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	framework.ExpectNoError(err, "create io chaos")
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}
@@ -94,7 +94,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 
 	klog.Infof("success to perform io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}
@@ -154,7 +154,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	klog.Info("create iochaos successfully")
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}
@@ -189,7 +189,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	// wait 1 min to check whether io delay still exists
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}
@@ -216,7 +216,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	framework.ExpectNoError(err, "check resumed chaos failed")
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}
@@ -278,7 +278,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	framework.ExpectNoError(err, "create io chaos")
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}
@@ -294,7 +294,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 
 	klog.Infof("success to perform io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-		res, err := getPodIoMistake(c, port)
+		res, err := getPodIOMistake(c, port)
 		if err != nil {
 			return false, nil
 		}

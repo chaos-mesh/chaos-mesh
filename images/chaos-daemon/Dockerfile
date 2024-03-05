@@ -32,9 +32,9 @@ RUN case "$TARGET_PLATFORM" in \
     curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3/memStress_v0.3-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
 
 
-
-
 # ---
+
+
 FROM debian:bullseye-slim
 
 ARG HTTPS_PROXY

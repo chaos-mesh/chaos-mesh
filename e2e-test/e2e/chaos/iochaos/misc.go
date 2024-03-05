@@ -50,7 +50,7 @@ func getPodIODelay(c http.Client, port uint16) (time.Duration, error) {
 	return dur, nil
 }
 
-func getPodIoMistake(c http.Client, port uint16) (bool, error) {
+func getPodIOMistake(c http.Client, port uint16) (bool, error) {
 	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/mistake", port))
 	if err != nil {
 		return false, err

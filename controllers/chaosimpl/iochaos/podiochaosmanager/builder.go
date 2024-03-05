@@ -48,7 +48,7 @@ func NewBuilder(params Params) *Builder {
 	}
 }
 
-func (b *Builder) WithInit(source string, key types.NamespacedName) *PodIOManager {
+func (b *Builder) InitManager(source string, podKey types.NamespacedName, chaosKey types.NamespacedName) *PodIOManager {
 	t := &PodIOTransaction{}
 	t.Clear(source)
 
@@ -59,7 +59,8 @@ func (b *Builder) WithInit(source string, key types.NamespacedName) *PodIOManage
 		Reader: b.Reader,
 		scheme: b.scheme,
 
-		Key: key,
-		T:   t,
+		PodKey:   podKey,
+		ChaosKey: chaosKey,
+		T:        t,
 	}
 }
