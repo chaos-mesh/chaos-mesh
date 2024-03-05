@@ -88,7 +88,6 @@ func Bootstrap(params Params) error {
 						Namespace: obj.GetNamespace(),
 						Name:      obj.GetName(),
 					}
-					kind := obj.GetObjectKind().GroupVersionKind().Kind
 
 					list := pair.ObjectList.DeepCopyList()
 					err := kubeclient.List(context.TODO(), list)
@@ -107,15 +106,12 @@ func Bootstrap(params Params) error {
 								continue
 							}
 
-							objNameString := objName.String()
-							namespacedNameString := namespacedName.String()
 							namespacedNameContainer := k8sTypes.NamespacedName{
 								Namespace: namespacedName.Namespace,
 								Name:      namespacedName.Name + "-" + containerName,
 							}
-							namespacedNameContainerString := namespacedNameContainer.String()
 
-							if namespacedNameString == objNameString || (kind == "PodIOChaos" && namespacedNameContainerString == objNameString) {
+							if namespacedName == objName || namespacedNameContainer == objName {
 								id := k8sTypes.NamespacedName{
 									Namespace: item.GetNamespace(),
 									Name:      item.GetName(),
@@ -128,8 +124,7 @@ func Bootstrap(params Params) error {
 						}
 					}
 					return reqs
-				}),
-				)
+				}))
 			}
 			predicaters = append(predicaters, PickChildCRDPredicate{})
 		}
