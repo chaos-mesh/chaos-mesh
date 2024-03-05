@@ -101,12 +101,18 @@ func Bootstrap(params Params) error {
 						for i := 0; i < items.Len(); i++ {
 							item := items.Index(i).Addr().Interface().(v1alpha1.InnerObjectWithSelector)
 							for _, record := range item.GetStatus().Experiment.Records {
-								namespacedName, err := controller.ParseNamespacedName(record.Id)
+								namespacedName, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
 								if err != nil {
 									setupLog.Error(err, "failed to parse record", "record", record.Id)
 									continue
 								}
-								if namespacedName == objName {
+
+								namespacedNameContainer := k8sTypes.NamespacedName{
+									Namespace: namespacedName.Namespace,
+									Name:      namespacedName.Name + "-" + containerName,
+								}
+
+								if namespacedName == objName || namespacedNameContainer == objName {
 									id := k8sTypes.NamespacedName{
 										Namespace: item.GetNamespace(),
 										Name:      item.GetName(),
