@@ -102,12 +102,12 @@ func Bootstrap(params Params) error {
 						for _, record := range item.GetStatus().Experiment.Records {
 							var (
 								namespacedName k8sTypes.NamespacedName
-								containerName  string
+								// containerName  string
 							)
 
 							kind := item.GetObjectKind().GroupVersionKind().Kind
 							if kind == "IOChaos" {
-								namespacedName, containerName, err = controller.ParseNamespacedNameContainer(record.Id)
+								namespacedName, _, err = controller.ParseNamespacedNameContainer(record.Id)
 							} else {
 								namespacedName, err = controller.ParseNamespacedName(record.Id)
 							}
@@ -116,12 +116,12 @@ func Bootstrap(params Params) error {
 								continue
 							}
 
-							namespacedNameContainer := k8sTypes.NamespacedName{
-								Namespace: namespacedName.Namespace,
-								Name:      namespacedName.Name + "-" + containerName,
-							}
+							// namespacedNameContainer := k8sTypes.NamespacedName{
+							// 	Namespace: namespacedName.Namespace,
+							// 	Name:      namespacedName.Name + "-" + containerName,
+							// }
 
-							if namespacedName == objName || namespacedNameContainer == objName {
+							if namespacedName == objName {
 								id := k8sTypes.NamespacedName{
 									Namespace: item.GetNamespace(),
 									Name:      item.GetName(),
