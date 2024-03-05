@@ -1,0 +1,142 @@
+CI/CD:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+
+rebuild-build-env-image:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "images/build-env/Dockerfile"
+rebuild-dev-env-image:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "images/dev-env/Dockerfile"
+
+components/tests:
+  - changed-files:
+      - any-glob-to-all-files:
+          - "test/**"
+          - "*_test.go"
+          - "*.test.(js|ts|tsx)"
+component/daemon:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cmd/chaosdaemon/**"
+          - "pkg/chaosdaemon/**"
+          - "chaos-daemon-*.yaml"
+component/helm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "helm/**"
+component/operator:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cmd/chaos-controller-manager/**"
+          - "controllers/**"
+          - "controller-manager-*.yaml"
+component/scripts:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "hack/**"
+          - "install.sh"
+component/ui:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "ui/**"
+component/workflow:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "pkg/workflow/**"
+component/chaosctl:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cmd/chaosctl/**"
+          - "pkg/chaosctl/**"
+component/e2e:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "e2e-test/**"
+component/dashboard:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "cmd/chaos-dashboard/**"
+          - "pkg/dashboard/**"
+          - "chaos-dashboard-*.yaml"
+
+chaos/gcp:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "gcpchaos_*.go"
+          - "controllers/chaosimpl/gcpchaos/**"
+chaos/dns:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "dnschaos_*.go"
+          - "controllers/chaosimpl/dnschaos/**"
+chaos/kernel:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "kernelchaos_*.go"
+          - "controllers/chaosimpl/kernelchaos/**"
+chaos/jvm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "jvmchaos_*.go"
+          - "controllers/chaosimpl/jvmchaos/**"
+chaos/network:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "networkchaos_*.go"
+          - "controllers/chaosimpl/networkchaos/**"
+          - "podnetworkchaos_*.go"
+          - "controllers/podnetworkchaos/**"
+chaos/io:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "iochaos_*.go"
+          - "controllers/chaosimpl/iochaos/**"
+          - "podiochaos_*.go"
+          - "controllers/podiochaos/**"
+chaos/stress:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "stresschaos_*.go"
+          - "controllers/chaosimpl/stresschaos/**"
+chaos/time:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "timechaos_*.go"
+          - "controllers/chaosimpl/timechaos/**"
+          - "pkg/time/**"
+chaos/pod:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "podchaos_*.go"
+          - "controllers/chaosimpl/podchaos/**"
+chaos/aws:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "awschaos_*.go"
+          - "controllers/chaosimpl/awschaos/**"
+chaos/http:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "httpchaos_*.go"
+          - "controllers/chaosimpl/httpchaos/**"
+          - "podhttpchaos_*.go"
+          - "controllers/podhttpchaos/**"
+chaos/physical-machine:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "physicalmachinechaos_*.go"
+          - "controllers/chaosimpl/physicalmachinechaos/**"
+chaos/azure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "azurechaos_*.go"
+          - "controllers/chaosimpl/azurechaos/**"
+chaos/block:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "blockchaos_*.go"
+          - "controllers/chaosimpl/blockchaos/**"
