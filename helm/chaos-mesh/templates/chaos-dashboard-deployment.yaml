@@ -107,6 +107,11 @@ spec:
             - secretRef:
                 name: "{{ .Values.dashboard.gcpSecurityMode.existingSecret }}"
           {{- end }}
+          {{- if .Values.dashboard.databaseSecretName }}
+          envFrom:
+            - secretRef:
+                name: "{{ .Values.dashboard.databaseSecretName }}"
+          {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}

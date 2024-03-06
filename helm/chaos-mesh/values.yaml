@@ -248,6 +248,8 @@ chaosDaemon:
 dashboard:
   # Enable chaos-dashboard
   create: true
+  # Optional, the secret name that has DATABASE_DATASOURCE defined
+  databaseSecretName: ""
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
   # securityContext if needed
