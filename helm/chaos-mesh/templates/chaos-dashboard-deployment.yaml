@@ -89,17 +89,24 @@ spec:
             - name: SECURITY_MODE
               value: "{{ .Values.dashboard.securityMode }}"
             - name: GCP_SECURITY_MODE
-              value: "{{ .Values.dashboard.gcpSecurityMode }}"
+              value: "{{ .Values.dashboard.gcpSecurityMode.enabled }}"
+            {{- if not .Values.dashboard.gcpSecurityMode.existingSecret }}
             - name: GCP_CLIENT_ID
-              value: "{{ .Values.dashboard.gcpClientId }}"
+              value: "{{ .Values.dashboard.gcpSecurityMode.clientId }}"
             - name: GCP_CLIENT_SECRET
-              value: "{{ .Values.dashboard.gcpClientSecret }}"
+              value: "{{ .Values.dashboard.gcpSecurityMode.clientSecret }}"
+            {{- end }}
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
             - name: ROOT_URL
               value: "{{ .Values.dashboard.rootUrl }}"
             - name: ENABLE_PROFILING
               value: "{{ .Values.enableProfiling }}"
+          {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
+          envFrom:
+            - secretRef:
+                name: "{{ .Values.dashboard.gcpSecurityMode.existingSecret }}"
+          {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
@@ -192,4 +199,10 @@ spec:
       port: {{ .Values.dashboard.env.METRIC_PORT }}
       targetPort: {{ .Values.dashboard.env.METRIC_PORT }}
       name: metric
+{{- if and .Values.dashboard.service.type (eq .Values.dashboard.service.type "LoadBalancer") .Values.dashboard.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{- with .Values.dashboard.service.loadBalancerSourceRanges }}
+{{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 {{- end }}

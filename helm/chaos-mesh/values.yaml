@@ -272,9 +272,12 @@ dashboard:
   # securityMode requires user to provide credentials on Chaos Dashboard, instead of using chaos-dashboard service account
   securityMode: true
   # Enable GCP Authentication Integration, see: https://chaos-mesh.org/docs/gcp-authentication/ for more details
-  gcpSecurityMode: false
-  gcpClientId: ""
-  gcpClientSecret: ""
+  gcpSecurityMode:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+    # References existing Kubernetes secret containing `GCP_CLIENT_ID` and `GCP_CLIENT_SECRET`.
+    existingSecret: ""
   # Node labels for chaos-dashboard  pod assignment
   nodeSelector: {}
   # Toleration labels for chaos-dashboard pod assignment
@@ -294,6 +297,9 @@ dashboard:
     # clusterIP:
     # Set the `nodePort` of the dashboard service if the type is `NodePort`
     # nodePort:
+    # Set the `loadBalancerSourceRanges` of the dashboard service if the type is `LoadBalancer` and
+    # you want to specify the IP ranges that are allowed to access the dashboard service.
+    # loadBalancerSourceRanges: []
 
   # CPU/Memory resource requests/limits for chaos-dashboard pod
   resources:

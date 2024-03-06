@@ -35,6 +35,7 @@ data:
             ttl 30
             grpcport {{ .Values.dnsServer.grpcPort }}
         }
+        prometheus :9153
         forward . /etc/resolv.conf {
             max_concurrent 1000
         }
