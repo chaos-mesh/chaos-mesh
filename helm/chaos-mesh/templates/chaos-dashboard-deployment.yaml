@@ -102,15 +102,17 @@ spec:
               value: "{{ .Values.dashboard.rootUrl }}"
             - name: ENABLE_PROFILING
               value: "{{ .Values.enableProfiling }}"
+            {{- if .Values.dashboard.databaseSecretName }}
+            - name: DATABASE_DATASOURCE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.dashboard.databaseSecretName }}"
+                  key: DATABASE_DATASOURCE
+            {{- end }}
           {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
           envFrom:
             - secretRef:
                 name: "{{ .Values.dashboard.gcpSecurityMode.existingSecret }}"
-          {{- end }}
-          {{- if .Values.dashboard.databaseSecretName }}
-          envFrom:
-            - secretRef:
-                name: "{{ .Values.dashboard.databaseSecretName }}"
           {{- end }}
           volumeMounts:
             - name: storage-volume
