@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Helm: allow templating of dashboard rootUrl [#4370](https://github.com/chaos-mesh/chaos-mesh/pull/4370)
 
 ### Changed
 
