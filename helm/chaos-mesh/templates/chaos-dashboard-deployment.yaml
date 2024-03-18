@@ -99,7 +99,7 @@ spec:
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
             - name: ROOT_URL
-              value: "{{ .Values.dashboard.rootUrl }}"
+              value: "{{ tpl .Values.dashboard.rootUrl . }}"
             - name: ENABLE_PROFILING
               value: "{{ .Values.enableProfiling }}"
           {{- if .Values.dashboard.gcpSecurityMode.existingSecret }}
