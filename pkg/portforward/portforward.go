@@ -71,6 +71,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 	readyChan := make(chan struct{})
 	fw, err := portforward.NewOnAddresses(dialer, addresses, ports, ctx.Done(), readyChan, w, w)
 	if err != nil {
+		cancel()
 		return nil, nil, err
 	}
 
