@@ -248,7 +248,8 @@ chaosDaemon:
 dashboard:
   # Enable chaos-dashboard
   create: true
-  # Optional, the secret name that has DATABASE_DATASOURCE defined
+  # Optional, the secret name that has `DATABASE_DATASOURCE` defined.
+  # It's recommended to use a secret to store the database credentials.
   databaseSecretName: ""
   # rootUrl specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL.
   rootUrl: http://localhost:2333
@@ -358,7 +359,8 @@ dashboard:
 
     # If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
     DATABASE_DRIVER: sqlite3
-    # The db dsn used for Chaos Dashboard
+    # **Deprecated**, use `dashboard.databaseSecretName` instead.
+    # Database DSN used for Chaos Dashboard.
     DATABASE_DATASOURCE: /data/core.sqlite
 
     # Set the sync period to clean up archived data
