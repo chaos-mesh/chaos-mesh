@@ -10,6 +10,7 @@ header:
     - '.lift.toml'
     - '.muse.toml'
     - '.devcontainer'
+    - .prettierrc
     - '**/*.md'
     - '**/*.json'
     - '**/*.log'
