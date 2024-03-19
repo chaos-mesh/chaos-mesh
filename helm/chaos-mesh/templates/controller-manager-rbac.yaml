@@ -108,9 +108,11 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
+{{- if .Values.enableCtrlServer}}
   - apiGroups: [ "" ]
     resources: [ "pods/exec" ]
     verbs: [ "create" ]
+{{- end }}
   - apiGroups: [ "coordination.k8s.io" ]
     resources: [ "leases" ]
     verbs: [ "*" ]

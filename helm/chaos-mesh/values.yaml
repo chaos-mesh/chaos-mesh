@@ -42,7 +42,7 @@ timezone: "UTC"
 enableProfiling: true
 
 # enableCtrlServer is a flag to enable ctrlserver which provides service to chaosctl in controller-manager.
-enableCtrlServer: true
+enableCtrlServer: false
 
 images:
   # images.registry is the global container registry for the images, you could replace it with your self-hosted container registry.
