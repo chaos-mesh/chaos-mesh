@@ -100,6 +100,7 @@ spec:
             {{- if .Values.chaosDaemon.env }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.chaosDaemon | trim | nindent 12 }}
             {{- end }}
+            {{- include "chaos-mesh.helpers.loggingEnvVars" .Values | trim | nindent 12 }}
             {{- if not .Values.chaosDaemon.env.TZ }}
             - name: TZ
               value: {{ .Values.timezone | default "UTC" }}
