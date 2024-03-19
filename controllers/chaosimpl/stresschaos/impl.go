@@ -62,16 +62,13 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.Injected, nil
 	}
 
-	stressors := stresschaos.Spec.StressngStressors
 	cpuStressors := ""
 	memoryStressors := ""
-	if len(stressors) == 0 {
-		cpuStressors, memoryStressors, err = stresschaos.Spec.Stressors.Normalize()
-		if err != nil {
-			impl.Log.Info("fail to ")
-			// TODO: add an event here
-			return v1alpha1.NotInjected, err
-		}
+	cpuStressors, memoryStressors, err = stresschaos.Spec.Stressors.Normalize()
+	if err != nil {
+		impl.Log.Info("fail to ")
+		// TODO: add an event here
+		return v1alpha1.NotInjected, err
 	}
 
 	req := pb.ExecStressRequest{
