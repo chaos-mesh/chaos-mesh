@@ -22,7 +22,7 @@ require (
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.7.11
-	github.com/docker/docker v24.0.7+incompatible
+	github.com/docker/docker v24.0.9+incompatible
 	github.com/ethereum/go-ethereum v1.12.1
 	github.com/fatih/color v1.13.0
 	github.com/gin-contrib/pprof v1.3.0
