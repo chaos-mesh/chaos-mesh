@@ -1,28 +1,32 @@
-## Integration Test
+# Integration Test
 
-### Preparation
+## Preparation
 
 1. Install Chaos Mesh
 
-You can install Chaos Mesh by commands:
+   Refer to <https://chaos-mesh.org/docs/configure-development-environment/> to configure your development environment.
 
-```bash
-hack/local-up-chaos-mesh.sh
-kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
-kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
-```
+   For bootstrapping, we currently use the following command to suit our test cases:
 
-2. Install localstack && aws client(optional)
+   ```shell
+   helm install chaos-mesh helm/chaos-mesh -n=chaos-mesh --create-namespace --set chaosDaemon.runtime=containerd,chaosDaemon.socketPath=/run/containerd/containerd.sock,controllerManager.leaderElection.enabled=false,controllerManager.chaosdSecurityMode=false
+   kubectl wait --timeout=60s --for=condition=Ready pod -n chaos-mesh -l app.kubernetes.io/instance=chaos-mesh
+   kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333
+   ```
 
-It is required when run aws test. You can install localstack and aws client by command:
+   You should also check out the file `.github/workflows/integration-test.yaml` to learn how to set up Chaos Mesh, as this document may not be up to date.
 
-```bash
-helm repo add localstack-repo http://helm.localstack.cloud
-helm upgrade --install localstack localstack-repo/localstack
-pip install awscli
-```
+2. Install localstack && aws client (optional)
 
-### Run all tests
+   It is required when run aws test. You can install localstack and aws client by command:
+
+   ```bash
+   helm repo add localstack-repo http://helm.localstack.cloud
+   helm upgrade --install localstack localstack-repo/localstack
+   pip install awscli
+   ```
+
+## Run all tests
 
 Executing command below to run all test cases:
 
@@ -30,7 +34,7 @@ Executing command below to run all test cases:
 ./test/integration_test/run.sh
 ```
 
-### Run a specified test
+## Run a specified test
 
 Executing command below to run specified test cases:
 

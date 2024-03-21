@@ -18,19 +18,18 @@ metadata:
   namespace: busybox
   name: role-busybox-viewer
 rules:
-- apiGroups: [""]
-  resources: ["pods", "namespaces"]
-  verbs: ["get", "watch", "list"]
-- apiGroups:
-  - chaos-mesh.org
-  resources: [ "*" ]
-  verbs:
-  - get
-  - list
-  - watch
+  - apiGroups: [""]
+    resources: ["pods", "namespaces"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups:
+      - chaos-mesh.org
+    resources: ["*"]
+    verbs:
+      - get
+      - list
+      - watch
 
 ---
-
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -38,16 +37,25 @@ metadata:
   name: account-busybox-viewer
 
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: account-busybox-viewer-secret
+  namespace: busybox
+  annotations:
+    kubernetes.io/service-account.name: account-busybox-viewer
+type: kubernetes.io/service-account-token
 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: bind-busybox-viewer
   namespace: busybox
 subjects:
-- kind: ServiceAccount
-  name: account-busybox-viewer
-  namespace: busybox
+  - kind: ServiceAccount
+    name: account-busybox-viewer
+    namespace: busybox
 roleRef:
   kind: Role
   name: role-busybox-viewer

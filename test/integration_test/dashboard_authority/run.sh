@@ -43,14 +43,13 @@ kubectl apply -f ./cluster-viewer.yaml
 kubectl apply -f ./busybox-manager.yaml
 kubectl apply -f ./busybox-viewer.yaml
 
-CLUSTER_MANAGER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-BUSYBOX_MANAGER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-BUSYBOX_VIEWER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
+CLUSTER_MANAGER_TOKEN=$(kubectl get secrets -n chaos-mesh account-cluster-manager-secret -o=jsonpath='{.data.token}' | base64 -d)
+CLUSTER_VIEWER_TOKEN=$(kubectl get secrets -n chaos-mesh account-cluster-viewer-secret -o=jsonpath='{.data.token}' | base64 -d)
+BUSYBOX_MANAGER_TOKEN=$(kubectl get secrets -n busybox account-busybox-manager-secret -o=jsonpath='{.data.token}' | base64 -d)
+BUSYBOX_VIEWER_TOKEN=$(kubectl get secrets -n busybox account-busybox-viewer-secret -o=jsonpath='{.data.token}' | base64 -d)
 
-BUSYBOX_MANAGER_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN)
 CLUSTER_MANAGER_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN)
-
+BUSYBOX_MANAGER_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN)
 CLUSTER_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN)
 CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST=($CLUSTER_VIEWER_TOKEN $BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)

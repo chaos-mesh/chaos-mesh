@@ -40,17 +40,16 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - name: Create kind cluster
-        # released version of kind-action doesn't support arm64
-        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
-        with:
-          kubectl_version: v1.23.1
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.8.0
 
       - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
         run: chmod 600 ~/.kube/config
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
 
       - name: Magic Kind DNS Fix
         if: ${{ matrix.arch == 'arm64' }}
@@ -60,13 +59,14 @@ jobs:
 
           kubectl rollout restart deployment -n kube-system coredns
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
 
       - uses: actions/setup-go@v4
         with:
           check-latest: true
           go-version-file: "go.mod"
+
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -95,11 +95,9 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          export CLUSTER="chart-testing"
-          hack/local-up-chaos-mesh.sh
-          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
-          kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-mesh
-          sleep 5
+          make image
+          helm install chaos-mesh helm/chaos-mesh -n=chaos-mesh --create-namespace --set chaosDaemon.runtime=containerd,chaosDaemon.socketPath=/run/containerd/containerd.sock,controllerManager.leaderElection.enabled=false,controllerManager.chaosdSecurityMode=false
+          kubectl wait --timeout=60s --for=condition=Ready pod -n chaos-mesh -l app.kubernetes.io/instance=chaos-mesh
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
       - name: Build chaosctl
         run: |
@@ -109,7 +107,7 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
-          kubectl wait --timeout=60s --for=condition=ready --all pod
+          kubectl wait --timeout=60s --for=condition=Ready pod --all
 
       - name: Run integration test
         run: |

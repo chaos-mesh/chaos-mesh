@@ -1,4 +1,4 @@
-# Copyright 2021 Chaos Mesh Authors.
+# Copyright 2023 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,24 +13,19 @@
 # limitations under the License.
 #
 apiVersion: chaos-mesh.org/v1alpha1
-kind: Schedule
+kind: NetworkChaos
 metadata:
   name: web-show-network-delay
 spec:
-  schedule: '@every 60s'
-  type: NetworkChaos
-  historyLimit: 5
-  concurrencyPolicy: Forbid
-  networkChaos:
-    action: delay
-    mode: one
-    selector:
-      namespaces:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
       - default
-      labelSelectors:
-        app: web-show
-    delay:
-      latency: 10ms
-      correlation: "100"
-      jitter: 0ms
-    duration: 30s
+    labelSelectors:
+      app: web-show
+  delay:
+    latency: 10ms
+    correlation: "100"
+    jitter: 0ms
+  duration: 30s

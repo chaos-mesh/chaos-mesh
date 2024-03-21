@@ -1,5 +1,7 @@
 # Contributing to Chaos Mesh
 
+> **This document is outdated. Please refer to [Development Guide](https://chaos-mesh.org/docs/developer-guide-overview) for the latest information.**
+
 Thanks for your interest in improving the project! This document provides a step-by-step guide for general contributions to Chaos Mesh.
 
 ## Communications
