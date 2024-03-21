@@ -33,7 +33,7 @@ jobs:
           # we assume that both image tags of build-env and dev-env are same during this workflow
           IMAGE_TAG=$(./hack/env-image-tag.sh build-env)
 
-          echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
+          echo "image_tag=$(echo $IMAGE_TAG)" >> $GITHUB_OUTPUT
         id: image_tag
 
       - name: Log in to GitHub Docker Registry
