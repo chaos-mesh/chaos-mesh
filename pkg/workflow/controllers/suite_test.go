@@ -35,6 +35,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/statuscheck"
 	"github.com/chaos-mesh/chaos-mesh/controllers/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/catrust"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/log"
 )
@@ -81,12 +82,15 @@ var _ = BeforeSuite(func(ctx SpecContext) {
 	rootLogger, err := log.NewDefaultZapLogger()
 	Expect(err).ToNot(HaveOccurred())
 
+	certLoader := catrust.New()
+
 	app = fx.New(
 		fx.Options(
 			fx.Supply(rootLogger),
 			test.Module,
 			fx.Supply(restConfig),
 			types.ChaosObjects,
+			fx.Supply(certLoader),
 		),
 		// only startup workflow related
 		fx.Invoke(BootstrapWorkflowControllers),
