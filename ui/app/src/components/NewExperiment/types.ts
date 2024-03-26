@@ -135,6 +135,10 @@ export interface Pod {
   containerNames?: string[]
 }
 
+export interface PodPVC {
+  volumeName: string
+}
+
 export interface ResourceScale {
   namespace: string
   name: string
@@ -186,6 +190,7 @@ export interface ExperimentType {
   KernelChaos: Kernel
   NetworkChaos: Network
   PodChaos: Pod
+  PodPVCChaos: PodPVC
   ResourceScaleChaos: ResourceScale
   RollingRestartChaos: RollingRestart
   StressChaos: Stress

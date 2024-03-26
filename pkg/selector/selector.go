@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/nodevolumepath"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/physicalmachine"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/pod"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector/podpvc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/resourcescale"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector/rollingrestart"
 )
@@ -85,6 +86,7 @@ type SelectorParams struct {
 	K8SChaosSelector        *k8schaos.SelectImpl
 	ResourceScaleSelector   *resourcescale.SelectImpl
 	RollingRestartSelector  *rollingrestart.SelectImpl
+	PodPVCSelector          *podpvc.SelectImpl
 }
 
 func New(p SelectorParams) *Selector {
@@ -119,4 +121,5 @@ var Module = fx.Provide(
 	k8schaos.New,
 	resourcescale.New,
 	rollingrestart.New,
+	podpvc.New,
 )

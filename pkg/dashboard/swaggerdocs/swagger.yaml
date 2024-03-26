@@ -3931,6 +3931,9 @@ definitions:
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
         description: +optional
+      podpvcChaos:
+        $ref: '#/definitions/v1alpha1.PodPVCChaosSpec'
+        description: +optional
       resourcescaleChaos:
         $ref: '#/definitions/v1alpha1.ResourceScaleChaosSpec'
         description: +optional
@@ -6080,6 +6083,52 @@ definitions:
         description: SecretNamespace represents the namespace of required secret resource
         type: string
     type: object
+  v1alpha1.PodPVCChaosSpec:
+    properties:
+      duration:
+        description: |-
+          Duration represents the duration of the chaos action.
+          It is required when the action is `PodFailureAction`.
+          A duration string is a possibly signed sequence of
+          decimal numbers, each with optional fraction and a unit suffix,
+          such as "300ms", "-1.5h" or "2h45m".
+          Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+          +optional
+        type: string
+      gracePeriod:
+        description: |-
+          GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
+          Value must be non-negative integer. The default value is zero that indicates delete immediately.
+          +optional
+          +kubebuilder:validation:Minimum=0
+        type: integer
+      mode:
+        description: |-
+          Mode defines the mode to run chaos action.
+          Supported mode: one / all / fixed / fixed-percent / random-max-percent
+          +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+        type: string
+      remoteCluster:
+        description: |-
+          RemoteCluster represents the remote cluster where the chaos will be deployed
+          +optional
+        type: string
+      selector:
+        $ref: '#/definitions/v1alpha1.PodSelectorSpec'
+        description: Selector is used to select pods that are used to inject chaos
+          action.
+      value:
+        description: |-
+          Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+          If `FixedMode`, provide an integer of pods to do chaos action.
+          If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+          IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+          +optional
+        type: string
+      volumeName:
+        description: VolumeName defines the name of the Volume to target.
+        type: string
+    type: object
   v1alpha1.PodSelector:
     properties:
       mode:
@@ -6596,6 +6645,9 @@ definitions:
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
         description: +optional
+      podpvcChaos:
+        $ref: '#/definitions/v1alpha1.PodPVCChaosSpec'
+        description: +optional
       resourcescaleChaos:
         $ref: '#/definitions/v1alpha1.ResourceScaleChaosSpec'
         description: +optional
@@ -7011,6 +7063,9 @@ definitions:
         description: +optional
       podChaos:
         $ref: '#/definitions/v1alpha1.PodChaosSpec'
+        description: +optional
+      podpvcChaos:
+        $ref: '#/definitions/v1alpha1.PodPVCChaosSpec'
         description: +optional
       resourcescaleChaos:
         $ref: '#/definitions/v1alpha1.ResourceScaleChaosSpec'

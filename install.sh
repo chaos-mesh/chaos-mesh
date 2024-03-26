@@ -1089,6 +1089,14 @@ rules:
   - apiGroups:
       - ""
     resources:
+      - persistentvolumeclaims
+    verbs: 
+      - get
+      - list
+      - delete
+  - apiGroups:
+      - ""
+    resources:
       - events
     verbs:
       - patch

@@ -39,6 +39,7 @@ const (
 	TypeNetworkChaos TemplateType = "NetworkChaos"
 	TypePhysicalMachineChaos TemplateType = "PhysicalMachineChaos"
 	TypePodChaos TemplateType = "PodChaos"
+	TypePodPVCChaos TemplateType = "PodPVCChaos"
 	TypeResourceScaleChaos TemplateType = "ResourceScaleChaos"
 	TypeRollingRestartChaos TemplateType = "RollingRestartChaos"
 	TypeStressChaos TemplateType = "StressChaos"
@@ -63,6 +64,7 @@ var allChaosTemplateType = []TemplateType{
 	TypeNetworkChaos,
 	TypePhysicalMachineChaos,
 	TypePodChaos,
+	TypePodPVCChaos,
 	TypeResourceScaleChaos,
 	TypeRollingRestartChaos,
 	TypeStressChaos,
@@ -101,6 +103,8 @@ type EmbedChaos struct {
 	PhysicalMachineChaos *PhysicalMachineChaosSpec `json:"physicalmachineChaos,omitempty"`
 	// +optional
 	PodChaos *PodChaosSpec `json:"podChaos,omitempty"`
+	// +optional
+	PodPVCChaos *PodPVCChaosSpec `json:"podpvcChaos,omitempty"`
 	// +optional
 	ResourceScaleChaos *ResourceScaleChaosSpec `json:"resourcescaleChaos,omitempty"`
 	// +optional
@@ -174,6 +178,10 @@ func (it *EmbedChaos) SpawnNewObject(templateType TemplateType) (GenericChaos, e
 		result := PodChaos{}
 		result.Spec = *it.PodChaos
 		return &result, nil
+	case TypePodPVCChaos:
+		result := PodPVCChaos{}
+		result.Spec = *it.PodPVCChaos
+		return &result, nil
 	case TypeResourceScaleChaos:
 		result := ResourceScaleChaos{}
 		result.Spec = *it.ResourceScaleChaos
@@ -243,6 +251,9 @@ func (it *EmbedChaos) RestoreChaosSpec(root interface{}) error {
 	case *PodChaos:
 		*it.PodChaos = chaos.Spec
 		return nil
+	case *PodPVCChaos:
+		*it.PodPVCChaos = chaos.Spec
+		return nil
 	case *ResourceScaleChaos:
 		*it.ResourceScaleChaos = chaos.Spec
 		return nil
@@ -307,6 +318,9 @@ func (it *EmbedChaos) SpawnNewList(templateType TemplateType) (GenericChaosList,
 		return &result, nil
 	case TypePodChaos:
 		result := PodChaosList{}
+		return &result, nil
+	case TypePodPVCChaos:
+		result := PodPVCChaosList{}
 		return &result, nil
 	case TypeResourceScaleChaos:
 		result := ResourceScaleChaosList{}
@@ -439,6 +453,14 @@ func (in *PhysicalMachineChaosList) GetItems() []GenericChaos {
 	return result
 }
 func (in *PodChaosList) GetItems() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+func (in *PodPVCChaosList) GetItems() []GenericChaos {
 	var result []GenericChaos
 	for _, item := range in.Items {
 		item := item

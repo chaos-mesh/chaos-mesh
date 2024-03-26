@@ -2272,6 +2272,144 @@ func (in *PodNetworkChaos) Default() {
 	gw.Default(in)
 }
 
+const KindPodPVCChaos = "PodPVCChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *PodPVCChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *PodPVCChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetObjectMeta would return the ObjectMeta for chaos
+func (in *PodPVCChaos) GetObjectMeta() *metav1.ObjectMeta {
+	return &in.ObjectMeta
+}
+
+// GetDuration would return the duration for chaos
+func (in *PodPVCChaosSpec) GetDuration() (*time.Duration, error) {
+	if in.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(string(*in.Duration))
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+// GetStatus returns the status
+func (in *PodPVCChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetRemoteCluster returns the remoteCluster
+func (in *PodPVCChaos) GetRemoteCluster() string {
+	return in.Spec.RemoteCluster
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *PodPVCChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// PodPVCChaosList contains a list of PodPVCChaos
+type PodPVCChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []PodPVCChaos `json:"items"`
+}
+
+func (in *PodPVCChaosList) DeepCopyList() GenericChaosList {
+	return in.DeepCopy()
+}
+
+// ListChaos returns a list of chaos
+func (in *PodPVCChaosList) ListChaos() []GenericChaos {
+	var result []GenericChaos
+	for _, item := range in.Items {
+		item := item
+		result = append(result, &item)
+	}
+	return result
+}
+
+func (in *PodPVCChaos) DurationExceeded(now time.Time) (bool, time.Duration, error) {
+	duration, err := in.Spec.GetDuration()
+	if err != nil {
+		return false, 0, err
+	}
+
+	if duration != nil {
+		stopTime := in.GetCreationTimestamp().Add(*duration)
+		if stopTime.Before(now) {
+			return true, 0, nil
+		}
+
+		return false, stopTime.Sub(now), nil
+	}
+
+	return false, 0, nil
+}
+
+func (in *PodPVCChaos) IsOneShot() bool {
+	return false
+}
+
+var PodPVCChaosWebhookLog = logf.Log.WithName("PodPVCChaos-resource")
+
+func (in *PodPVCChaos) ValidateCreate() (admission.Warnings, error) {
+	PodPVCChaosWebhookLog.V(1).Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PodPVCChaos) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+	PodPVCChaosWebhookLog.V(1).Info("validate update", "name", in.Name)
+	if !reflect.DeepEqual(in.Spec, old.(*PodPVCChaos).Spec) {
+		return nil, ErrCanNotUpdateChaos
+	}
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PodPVCChaos) ValidateDelete() (admission.Warnings, error) {
+	PodPVCChaosWebhookLog.V(1).Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil, nil
+}
+
+var _ webhook.Validator = &PodPVCChaos{}
+
+func (in *PodPVCChaos) Validate() ([]string, error) {
+	errs := gw.Validate(in)
+	return nil, gw.Aggregate(errs)
+}
+
+var _ webhook.Defaulter = &PodPVCChaos{}
+
+func (in *PodPVCChaos) Default() {
+	gw.Default(in)
+}
+
 const KindRemoteCluster = "RemoteCluster"
 
 var RemoteClusterWebhookLog = logf.Log.WithName("RemoteCluster-resource")
@@ -3006,6 +3144,12 @@ func init() {
 
 	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
 
+	SchemeBuilder.Register(&PodPVCChaos{}, &PodPVCChaosList{})
+	all.register(KindPodPVCChaos, &ChaosKind{
+		chaos: &PodPVCChaos{},
+		list:  &PodPVCChaosList{},
+	})
+
 	SchemeBuilder.Register(&RemoteCluster{}, &RemoteClusterList{})
 
 	SchemeBuilder.Register(&ResourceScaleChaos{}, &ResourceScaleChaosList{})
@@ -3108,6 +3252,11 @@ func init() {
 	allScheduleItem.register(KindPodChaos, &ChaosKind{
 		chaos: &PodChaos{},
 		list:  &PodChaosList{},
+	})
+
+	allScheduleItem.register(KindPodPVCChaos, &ChaosKind{
+		chaos: &PodPVCChaos{},
+		list:  &PodPVCChaosList{},
 	})
 
 	allScheduleItem.register(KindResourceScaleChaos, &ChaosKind{

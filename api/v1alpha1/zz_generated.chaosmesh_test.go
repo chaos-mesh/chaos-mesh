@@ -970,6 +970,69 @@ func TestPodChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestPodPVCChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &PodPVCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestPodPVCChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &PodPVCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestPodPVCChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &PodPVCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.Spec.GetDuration()
+}
+
+func TestPodPVCChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &PodPVCChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestPodPVCChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &PodPVCChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestPodPVCChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &PodPVCChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestResourceScaleChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

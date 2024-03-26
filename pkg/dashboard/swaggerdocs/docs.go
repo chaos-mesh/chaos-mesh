@@ -5498,6 +5498,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.PodChaosSpec"
                 },
+                "podpvcChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.PodPVCChaosSpec"
+                },
                 "resourcescaleChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.ResourceScaleChaosSpec"
@@ -7561,6 +7565,39 @@ const docTemplate = `{
                 }
             }
         },
+        "v1alpha1.PodPVCChaosSpec": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "Duration represents the duration of the chaos action.\nIt is required when the action is ` + "`" + `PodFailureAction` + "`" + `.\nA duration string is a possibly signed sequence of\ndecimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".\n+optional",
+                    "type": "string"
+                },
+                "gracePeriod": {
+                    "description": "GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.\nValue must be non-negative integer. The default value is zero that indicates delete immediately.\n+optional\n+kubebuilder:validation:Minimum=0",
+                    "type": "integer"
+                },
+                "mode": {
+                    "description": "Mode defines the mode to run chaos action.\nSupported mode: one / all / fixed / fixed-percent / random-max-percent\n+kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent",
+                    "type": "string"
+                },
+                "remoteCluster": {
+                    "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
+                    "type": "string"
+                },
+                "selector": {
+                    "description": "Selector is used to select pods that are used to inject chaos action.",
+                    "$ref": "#/definitions/v1alpha1.PodSelectorSpec"
+                },
+                "value": {
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
+                    "type": "string"
+                },
+                "volumeName": {
+                    "description": "VolumeName defines the name of the Volume to target.",
+                    "type": "string"
+                }
+            }
+        },
         "v1alpha1.PodSelector": {
             "type": "object",
             "properties": {
@@ -8012,6 +8049,10 @@ const docTemplate = `{
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.PodChaosSpec"
                 },
+                "podpvcChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.PodPVCChaosSpec"
+                },
                 "resourcescaleChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.ResourceScaleChaosSpec"
@@ -8386,6 +8427,10 @@ const docTemplate = `{
                 "podChaos": {
                     "description": "+optional",
                     "$ref": "#/definitions/v1alpha1.PodChaosSpec"
+                },
+                "podpvcChaos": {
+                    "description": "+optional",
+                    "$ref": "#/definitions/v1alpha1.PodPVCChaosSpec"
                 },
                 "resourcescaleChaos": {
                     "description": "+optional",

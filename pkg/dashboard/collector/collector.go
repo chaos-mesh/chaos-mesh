@@ -198,6 +198,8 @@ func convertInnerObjectToExperiment(obj v1alpha1.InnerObject) (*core.Experiment,
 		archive.Action = ""
 	case *v1alpha1.RollingRestartChaos:
 		archive.Action = ""
+	case *v1alpha1.PodPVCChaos:
+		archive.Action = ""
 	default:
 		return nil, errors.New("unsupported chaos type " + archive.Kind)
 	}
