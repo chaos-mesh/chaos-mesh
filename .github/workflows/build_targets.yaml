@@ -81,8 +81,9 @@ jobs:
           DOCKER_CACHE_DIR: ${{github.workspace}}/cache
           GO_BUILD_CACHE: ${{github.workspace}}/cache
           DOCKER_CLI_EXPERIMENTAL: enabled
+          TARGET_PLATFORM: "linux/amd64,linux/arm64"
         run: |
-          docker buildx create --use --name chaos-mesh-builder
+          docker buildx create --use --platform="linux/amd64,linux/arm64" --name chaos-mesh-builder
           make -j4 image e2e-image
 
       - name: Save docker images
