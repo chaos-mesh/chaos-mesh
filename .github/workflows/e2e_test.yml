@@ -86,7 +86,7 @@ jobs:
           # whose target is the branch)
           key: e2e-image-build-cache-${{ runner.os }}
 
-      - name: build e2e images
+      - name: Build e2e images
         env:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
