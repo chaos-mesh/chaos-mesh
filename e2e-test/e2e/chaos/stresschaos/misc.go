@@ -112,7 +112,6 @@ func getStressCondition(c http.Client, port uint16) (*StressCondition, error) {
 	if err != nil {
 		return nil, err
 	}
-	klog.Info("out", out)
 
 	condition := &StressCondition{}
 	err = json.Unmarshal(out, condition)
