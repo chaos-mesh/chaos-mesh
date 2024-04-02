@@ -36,7 +36,7 @@ jobs:
         run: |
           GIT_TAG=${GITHUB_REF##*/}
           VERSION=${GIT_TAG##chart-}
-          echo "::set-output name=version::$(echo $VERSION)"
+          echo "version=$(echo $VERSION)" >> $GITHUB_OUTPUT
       - name: Publish Helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
