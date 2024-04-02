@@ -63,7 +63,7 @@ func exec(ctx context.Context, pod *v1.Pod, cmd string, c *kubernetes.Clientset)
 	if err != nil {
 		return "", errors.Wrapf(err, "error in creating NewSPDYExecutor for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
-	err = exec.Stream(remotecommand.StreamOptions{
+	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
 		Stdin:  nil,
 		Stdout: &stdout,
 		Stderr: &stderr,
