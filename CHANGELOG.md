@@ -66,6 +66,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Security
 
 - Remove `-k` from `curl` command lines in chaos-daemon Dockerfile [#4241](https://github.com/chaos-mesh/chaos-mesh/pull/4241)
+- Upgrade the base image of dev/build-env [#4388](https://github.com/chaos-mesh/chaos-mesh/pull/4388)
 
 ## [2.6.0] - 2023-05-30
 
