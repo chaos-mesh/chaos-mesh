@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -10,12 +10,12 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \
-    apt-get install build-essential curl git pkg-config libfuse-dev fuse -y && \
+RUN apt update && \
+    apt install build-essential curl git pkg-config libfuse-dev fuse -y && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs && \
+    apt install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 RUN npm install pnpm@8 -g
 

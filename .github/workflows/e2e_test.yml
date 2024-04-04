@@ -86,7 +86,7 @@ jobs:
           # whose target is the branch)
           key: e2e-image-build-cache-${{ runner.os }}
 
-      - name: build e2e images
+      - name: Build e2e images
         env:
           DOCKER_CACHE: 1
           DOCKER_CACHE_DIR: ${{ github.workspace }}/cache
@@ -181,14 +181,12 @@ jobs:
           mv ./output/e2e-binary/e2e.test ./e2e-test/image/e2e/bin/e2e.test
           chmod +x ./e2e-test/image/e2e/bin/ginkgo
           chmod +x ./e2e-test/image/e2e/bin/e2e.test
+
       - name: Setup minikube
-        uses: manusa/actions-setup-minikube@v2.10.0
+        uses: medyagh/setup-minikube@latest
         with:
-          driver: docker
-          minikube version: v1.32.0
-          kubernetes version: ${{ matrix.kubernetes-version }}
-          start args: --cni calico
-          github token: ${{ secrets.GITHUB_TOKEN }}
+          minikube-version: 1.32.0
+          kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
         run: |

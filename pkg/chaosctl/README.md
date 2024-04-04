@@ -1,6 +1,6 @@
 # chaosctl
 
-Chaostl is a tool (currently) used to print debug info. Maintainers would make use of it to better provide their suggestions for issues.
+Chaosctl is a tool (currently) used to print debug info. Maintainers would make use of it to better provide their suggestions for issues.
 
 ## How to build
 

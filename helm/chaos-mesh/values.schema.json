@@ -348,6 +348,9 @@
                 "create": {
                     "type": "boolean"
                 },
+                "databaseSecretName": {
+                  "type": "string"
+                },
                 "env": {
                     "type": "object",
                     "properties": {
@@ -359,7 +362,7 @@
                         },
                         "DATABASE_DRIVER": {
                             "type": "string",
-                            "enum": ["sqlite3", "mysql"]
+                            "enum": ["sqlite3", "mysql", "postgres"]
                         },
                         "LISTEN_HOST": {
                             "type": "string"

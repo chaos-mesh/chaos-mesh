@@ -19,7 +19,7 @@ RUN go install github.com/swaggo/swag/cmd/swag@v1.8.7
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.12.0
 RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -29,8 +29,8 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN apt-get update && \
-    apt-get install unzip git build-essential curl python musl musl-dev python3 -y && \
+RUN apt update && \
+    apt install unzip git build-essential curl musl musl-dev -y && \
     rm -rf /var/lib/apt/lists/*
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
