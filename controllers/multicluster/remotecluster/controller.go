@@ -80,17 +80,22 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	r.Log.Info("remote cluster", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
-
-	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
-		r.Log.Info("the target remote cluster has been up to date", "remote cluster", obj.Namespace+"/"+obj.Name)
-		return ctrl.Result{}, nil
-	}
-
 	clientConfig, err := r.getRestConfig(ctx, obj.Spec.KubeConfig.SecretRef)
 	if err != nil {
 		r.Log.Error(err, "fail to get clientConfig from secret")
 		return ctrl.Result{Requeue: true}, nil
+	}
+
+	r.Log.Info("remote cluster", "Generation:", obj.ObjectMeta.Generation, "ObservedGeneration:", obj.Status.ObservedGeneration)
+
+	if obj.ObjectMeta.Generation <= obj.Status.ObservedGeneration {
+		err = r.ensureClusterControllerManager(ctx, &obj, clientConfig)
+		if err != nil {
+			r.Log.Error(err, "fail to boot remote cluster controller manager")
+			return ctrl.Result{Requeue: true}, nil
+		}
+		r.Log.Info("the target remote cluster has been up to date", "remote cluster", obj.Namespace+"/"+obj.Name)
+		return ctrl.Result{}, nil
 	}
 
 	// if the remoteCluster itself is being deleted, we should remove the cluster controller manager
