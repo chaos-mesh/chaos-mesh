@@ -30,7 +30,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.securityContext` | Pod securityContext if needed | `{}` |
 | `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
-| `controllerManager.serviceAccount` | The serviceAccount name for chaos-controller-manager | `chaos-controller-manager` |
+| `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.serviceAccountAnnotations` | ServiceAccount annotations for chaos-controller-manager | `{}` |
 | `controllerManager.serviceAccountCreate` | Create the serviceAccount for chaos-controller-manager | `true` |
 | `controllerManager.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
