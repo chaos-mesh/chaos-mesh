@@ -30,9 +30,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.securityContext` | Pod securityContext if needed | `{}` |
 | `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
-| `controllerManager.serviceAccount.create` | Create the serviceAccount for chaos-controller-manager | `true` |
-| `controllerManager.serviceAccount.name` | The serviceAccount name for chaos-controller-manager | `chaos-controller-manager` |
-| `controllerManager.serviceAccount.annotations` | ServiceAccount annotations for chaos-controller-manager | `{}` |
+| `controllerManager.serviceAccount` | The serviceAccount name for chaos-controller-manager | `chaos-controller-manager` |
+| `controllerManager.serviceAccountAnnotations` | ServiceAccount annotations for chaos-controller-manager | `{}` |
+| `controllerManager.serviceAccountCreate` | Create the serviceAccount for chaos-controller-manager | `true` |
 | `controllerManager.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `3` |
 | `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |

@@ -312,18 +312,13 @@
                     }
                 },
                 "serviceAccount": {
-                    "type": "object",
-                    "properties": {
-                        "create": {
-                            "type": "boolean"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "annotations": {
-                            "type": "object"
-                        }
-                    }
+                    "type": "string"
+                },
+                "serviceAccountAnnotations": {
+                    "type": "object"
+                },
+                "serviceAccountCreate": {
+                    "type": "boolean"
                 },
                 "targetNamespace": {
                     "type": "string"

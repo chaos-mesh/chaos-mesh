@@ -66,6 +66,8 @@ controllerManager:
   serviceAccount: chaos-controller-manager
   # ServiceAccount annotations for chaos-controller-manager
   serviceAccountAnnotations: {}
+  # Create the serviceAccount for chaos-controller-manager
+  serviceAccountCreate: true
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # Replicas for chaos-controller-manager
