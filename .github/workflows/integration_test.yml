@@ -109,7 +109,7 @@ jobs:
           helm repo add localstack-repo http://helm.localstack.cloud
           helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
           pip install awscli
-          kubectl wait --timeout=60s --for=condition=ready --all pod
+          kubectl wait --timeout=160s --for=condition=ready --all pod
 
       - name: Run integration test
         run: |
