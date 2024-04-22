@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"os"
 	"strconv"
@@ -107,7 +108,7 @@ func (it *RawProvider) getCredentialOption() (grpc.DialOption, error) {
 }
 
 func (it *InsecureProvider) getCredentialOption() (grpc.DialOption, error) {
-	return grpc.WithInsecure(), nil
+	return grpc.WithTransportCredentials(insecure.NewCredentials()), nil
 }
 
 type GrpcBuilder struct {

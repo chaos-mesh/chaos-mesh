@@ -132,13 +132,14 @@ var _ = Describe("Schedule", func() {
 
 			By("Reconciling the created schedule obj")
 			{
-				err := wait.Poll(time.Second*1, time.Minute*1, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, schedule)
-					if err != nil {
-						return false, err
-					}
-					return len(schedule.Status.Active) > 0, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), time.Second*1, time.Minute*1, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, schedule)
+						if err != nil {
+							return false, err
+						}
+						return len(schedule.Status.Active) > 0, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -197,14 +198,15 @@ var _ = Describe("Schedule", func() {
 
 			By("Allowing concurrency and skip deleting running chaos")
 			{
-				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, schedule)
-					if err != nil {
-						return false, err
-					}
-					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
-					return len(schedule.Status.Active) >= 4, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
+					func(ctx context.Context) (done bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, schedule)
+						if err != nil {
+							return false, err
+						}
+						ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+						return len(schedule.Status.Active) >= 4, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -256,14 +258,15 @@ var _ = Describe("Schedule", func() {
 			By("deleting outdated chaos")
 			{
 				time.Sleep(time.Second * 10)
-				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, schedule)
-					if err != nil {
-						return false, err
-					}
-					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
-					return len(schedule.Status.Active) == 2, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
+					func(ctx context.Context) (done bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, schedule)
+						if err != nil {
+							return false, err
+						}
+						ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+						return len(schedule.Status.Active) == 2, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -325,14 +328,15 @@ var _ = Describe("Schedule", func() {
 			By("disallowing concurrent")
 			{
 				time.Sleep(time.Second * 10)
-				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, schedule)
-					if err != nil {
-						return false, err
-					}
-					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
-					return len(schedule.Status.Active) == 1, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
+					func(ctx context.Context) (done bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, schedule)
+						if err != nil {
+							return false, err
+						}
+						ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+						return len(schedule.Status.Active) == 1, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -386,14 +390,15 @@ var _ = Describe("Schedule", func() {
 			By("deleting outdated workflow")
 			{
 				time.Sleep(time.Second * 10)
-				err := wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, schedule)
-					if err != nil {
-						return false, err
-					}
-					ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
-					return len(schedule.Status.Active) == 2, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
+					func(ctx context.Context) (done bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, schedule)
+						if err != nil {
+							return false, err
+						}
+						ctrl.Log.Info("active chaos", "size", len(schedule.Status.Active))
+						return len(schedule.Status.Active) == 2, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 

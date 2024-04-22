@@ -73,21 +73,23 @@ var _ = Describe("Schedule", func() {
 
 			By("Reconciling desired phase")
 			{
-				err := wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, chaos)
-					if err != nil {
-						return false, err
-					}
-					return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), time.Second*1, time.Second*10, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, chaos)
+						if err != nil {
+							return false, err
+						}
+						return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
-				err = wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, chaos)
-					if err != nil {
-						return false, err
-					}
-					return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
-				})
+				err = wait.PollUntilContextTimeout(context.TODO(), time.Second*1, time.Second*10, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, chaos)
+						if err != nil {
+							return false, err
+						}
+						return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -126,13 +128,14 @@ var _ = Describe("Schedule", func() {
 
 			By("Reconciling desired phase")
 			{
-				err := wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, chaos)
-					if err != nil {
-						return false, err
-					}
-					return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), time.Second*1, time.Second*10, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, chaos)
+						if err != nil {
+							return false, err
+						}
+						return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 			By("Pause chaos")
@@ -146,13 +149,14 @@ var _ = Describe("Schedule", func() {
 					return k8sClient.Update(context.TODO(), chaos)
 				})
 				Expect(err).ToNot(HaveOccurred())
-				err = wait.Poll(time.Second*5, time.Second*60, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, chaos)
-					if err != nil {
-						return false, err
-					}
-					return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
-				})
+				err = wait.PollUntilContextTimeout(context.TODO(), time.Second*5, time.Second*60, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, chaos)
+						if err != nil {
+							return false, err
+						}
+						return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.StoppedPhase, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
@@ -167,13 +171,14 @@ var _ = Describe("Schedule", func() {
 					return k8sClient.Update(context.TODO(), chaos)
 				})
 				Expect(err).ToNot(HaveOccurred())
-				err = wait.Poll(time.Second*5, time.Second*60, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, chaos)
-					if err != nil {
-						return false, err
-					}
-					return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
-				})
+				err = wait.PollUntilContextTimeout(context.TODO(), time.Second*5, time.Second*60, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(context.TODO(), key, chaos)
+						if err != nil {
+							return false, err
+						}
+						return chaos.GetStatus().Experiment.DesiredPhase == v1alpha1.RunningPhase, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 
