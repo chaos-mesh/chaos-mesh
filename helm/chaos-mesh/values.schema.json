@@ -154,6 +154,9 @@
         "clusterScoped": {
             "type": "boolean"
         },
+        "openshift": {
+            "type": "boolean"
+        },
         "controllerManager": {
             "type": "object",
             "properties": {

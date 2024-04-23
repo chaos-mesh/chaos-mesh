@@ -26,6 +26,9 @@ customLabels: {}
 # Also see rbac.create and controllerManager.serviceAccount
 clusterScoped: true
 
+# flag to enable openshift-specific configurations
+openshift: false
+
 # Creating rbac API Objects. Also see clusterScoped and controllerManager.serviceAccount
 rbac:
   create: true
