@@ -62,6 +62,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix daemon-server `SetDNSServer` endpoint to validate provided server address [#4246](https://github.com/chaos-mesh/chaos-mesh/pull/4246)
 - Enable prometheus directive within CoreDNS [#4321](https://github.com/chaos-mesh/chaos-mesh/pull/4321)
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
+- Fix failing to inject StressChaos in certain cgroup v1 environment [#4407](https://github.com/chaos-mesh/chaos-mesh/pull/4407)
 
 ### Security
 
