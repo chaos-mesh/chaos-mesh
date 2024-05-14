@@ -17,6 +17,7 @@ package metrics
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"reflect"
 
 	"github.com/go-logr/logr"
@@ -30,20 +31,21 @@ import (
 
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
-	logger              logr.Logger
-	store               cache.Cache
-	chaosExperiments    *prometheus.GaugeVec
-	SidecarTemplates    prometheus.Gauge
-	ConfigTemplates     *prometheus.GaugeVec
-	InjectionConfigs    *prometheus.GaugeVec
-	TemplateNotExist    *prometheus.CounterVec
-	TemplateLoadError   prometheus.Counter
-	ConfigNameDuplicate *prometheus.CounterVec
-	InjectRequired      *prometheus.CounterVec
-	Injections          *prometheus.CounterVec
-	chaosSchedules      *prometheus.GaugeVec
-	chaosWorkflows      *prometheus.GaugeVec
-	EmittedEvents       *prometheus.CounterVec
+	logger                   logr.Logger
+	store                    cache.Cache
+	chaosExperiments         *prometheus.GaugeVec
+	chaosExperimentsRelation *prometheus.GaugeVec
+	SidecarTemplates         prometheus.Gauge
+	ConfigTemplates          *prometheus.GaugeVec
+	InjectionConfigs         *prometheus.GaugeVec
+	TemplateNotExist         *prometheus.CounterVec
+	TemplateLoadError        prometheus.Counter
+	ConfigNameDuplicate      *prometheus.CounterVec
+	InjectRequired           *prometheus.CounterVec
+	Injections               *prometheus.CounterVec
+	chaosSchedules           *prometheus.GaugeVec
+	chaosWorkflows           *prometheus.GaugeVec
+	EmittedEvents            *prometheus.CounterVec
 }
 
 // NewChaosControllerManagerMetricsCollector initializes metrics and collector
@@ -60,6 +62,10 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 			Name: "chaos_controller_manager_chaos_experiments",
 			Help: "Total number of chaos experiments and their phases",
 		}, []string{"namespace", "kind", "phase"}),
+		chaosExperimentsRelation: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "chaos_controller_manager_chaos_experiments_container_relation",
+			Help: "Relation between chaos experiments and selected pods and containers",
+		}, []string{"namespace", "kind", "phase", "name", "uid", "pod", "container"}),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "chaos_mesh_templates",
 			Help: "Total number of injection templates",
@@ -115,6 +121,7 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 // Describe implements the prometheus.Collector interface.
 func (collector *ChaosControllerManagerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	collector.chaosExperiments.Describe(ch)
+	collector.chaosExperimentsRelation.Describe(ch)
 	collector.SidecarTemplates.Describe(ch)
 	collector.ConfigTemplates.Describe(ch)
 	collector.InjectionConfigs.Describe(ch)
@@ -142,6 +149,7 @@ func (collector *ChaosControllerManagerMetricsCollector) Collect(ch chan<- prome
 	collector.InjectRequired.Collect(ch)
 	collector.Injections.Collect(ch)
 	collector.chaosExperiments.Collect(ch)
+	collector.chaosExperimentsRelation.Collect(ch)
 	collector.chaosSchedules.Collect(ch)
 	collector.chaosWorkflows.Collect(ch)
 	collector.EmittedEvents.Collect(ch)
@@ -167,7 +175,36 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 				expCache[item.GetNamespace()] = make(map[string]int, 4)
 			}
 			innerObject := reflect.ValueOf(item).Interface().(v1alpha1.InnerObject)
-			expCache[item.GetNamespace()][string(status.GetChaosStatus(innerObject))]++
+			ns := item.GetNamespace()
+			phase := status.GetChaosStatus(innerObject)
+			expCache[ns][string(phase)]++
+
+			// Only export container relation metrics for active experiments
+			if phase == status.Finished || phase == status.Deleting {
+				continue
+			}
+
+			expStatus := innerObject.GetStatus()
+			if expStatus == nil {
+				continue
+			}
+			for _, record := range expStatus.Experiment.Records {
+				podId, containerName, err := controller.ParseNamespacedNameContainer(record.Id)
+				if err != nil {
+					collector.logger.Error(err, "failed to parse namespaced name container", "id", record.Id)
+					continue
+				}
+
+				collector.chaosExperimentsRelation.WithLabelValues(
+					ns,
+					kind,
+					string(phase),
+					item.GetName(),
+					string(item.GetUID()),
+					podId.Name,
+					containerName,
+				).Set(1.0)
+			}
 		}
 
 		for ns, v := range expCache {
