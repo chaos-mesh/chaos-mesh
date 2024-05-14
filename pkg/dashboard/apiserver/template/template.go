@@ -77,7 +77,7 @@ func (s *Service) listStatusCheckTemplate(c *gin.Context) {
 	ns, name := c.Query("namespace"), c.Query("name")
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
-		s.logger.Info("Replace query namespace with", ns)
+		s.logger.Info("Replace query namespace", "ns", ns)
 	}
 
 	configMapList := v1.ConfigMapList{}
@@ -195,7 +195,7 @@ func (s *Service) getStatusCheckTemplateDetail(c *gin.Context) {
 	ns, name := c.Query("namespace"), c.Query("name")
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
-		s.logger.Info("Replace query namespace with", ns)
+		s.logger.Info("Replace query namespace", "ns", ns)
 	}
 	if name == "" {
 		u.SetAPIError(c, u.ErrBadRequest.New("name is required"))
@@ -315,7 +315,7 @@ func (s *Service) deleteStatusCheckTemplate(c *gin.Context) {
 	ns, name := c.Query("namespace"), c.Query("name")
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
-		s.logger.Info("Replace query namespace with", ns)
+		s.logger.Info("Replace query namespace", "ns", ns)
 	}
 	if name == "" {
 		u.SetAPIError(c, u.ErrBadRequest.New("name is required"))
