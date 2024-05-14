@@ -18,6 +18,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 	"net/http"
 
 	"github.com/docker/docker/api/types"
@@ -120,6 +121,12 @@ func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID 
 	}
 
 	return container.Config.Labels, nil
+}
+
+// StatsByContainerID returns the stats according to container ID
+func (c DockerClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
+	// TODO: implement StatsByContainerID
+	return nil, errors.New("not implemented")
 }
 
 func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*DockerClient, error) {

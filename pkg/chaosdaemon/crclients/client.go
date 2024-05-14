@@ -17,6 +17,7 @@ package crclients
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 
 	"github.com/pkg/errors"
 
@@ -44,6 +45,8 @@ type CrClientConfig struct {
 	ContainerdNS string
 }
 
+type ContainerStats = utils.ContainerStats
+
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
@@ -51,6 +54,7 @@ type ContainerRuntimeInfoClient interface {
 	FormatContainerID(ctx context.Context, containerID string) (string, error)
 	ListContainerIDs(ctx context.Context) ([]string, error)
 	GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error)
+	StatsByContainerID(ctx context.Context, containerID string) (*ContainerStats, error)
 }
 
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
