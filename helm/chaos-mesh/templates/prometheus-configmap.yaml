@@ -28,6 +28,11 @@ data:
       scrape_timeout: 15s
       evaluation_interval: 15s
 
+    rule_files:
+{{- if .Values.prometheus.experimentMetrics.enabled }}
+    - 'experiment_metrics.yml'
+{{- end }}
+
     scrape_configs:
     - job_name: 'prometheus'
       static_configs:
@@ -74,4 +79,78 @@ data:
         target_label: pod
         replacement: $1
         action: replace
+
+{{- if .Values.prometheus.experimentMetrics.enabled }}
+  experiment_metrics.yml: |-
+    groups:
+    - name: chaos-mesh.rules.experiments
+      rules:
+      - record: chaos_mesh:stress_chaos:cpu_usage_seconds_total
+        expr: |
+          label_replace(
+            chaos_daemon_container_cpu_usage_seconds_total * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:cpu_usage_seconds_total:irate
+        expr: |
+          irate(chaos_mesh:stress_chaos:cpu_usage_seconds_total[5m])
+      - record: chaos_mesh:stress_chaos:memory_working_set_bytes
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_working_set_bytes * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_available_bytes
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_available_bytes * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_usage_bytes
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_usage_bytes * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_rss_bytes
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_rss_bytes * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_page_faults_total
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_page_faults_total * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_major_page_faults_total
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_major_page_faults_total * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_swap_available_bytes
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_swap_available_bytes * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+      - record: chaos_mesh:stress_chaos:memory_swap_usage_bytes
+        expr: |
+          label_replace(
+            chaos_daemon_container_memory_swap_usage_bytes * on(namespace, exported_pod, container) group_right
+            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            "pod", "$1", "exported_pod", "(.*)"
+          )
+{{- end }}
+
 {{- end }}
