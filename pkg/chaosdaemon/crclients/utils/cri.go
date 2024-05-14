@@ -17,10 +17,11 @@ package utils
 
 import (
 	"fmt"
+	"strings"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
-	"strings"
 )
 
 // BuildRuntimeServiceClient creates a new RuntimeServiceClient from the given endpoint

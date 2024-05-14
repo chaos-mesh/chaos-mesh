@@ -18,8 +18,9 @@ package docker
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 	"net/http"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"

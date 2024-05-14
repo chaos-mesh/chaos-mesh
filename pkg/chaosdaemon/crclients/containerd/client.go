@@ -18,10 +18,12 @@ package containerd
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
+	"syscall"
+
 	"google.golang.org/grpc"
 	runtimev1 "k8s.io/cri-api/pkg/apis/runtime/v1"
-	"syscall"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 
 	"github.com/containerd/containerd"
 	"github.com/pkg/errors"
