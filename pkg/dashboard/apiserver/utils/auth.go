@@ -47,7 +47,7 @@ func AuthMiddleware(c *gin.Context, config *config.ChaosDashboardConfig) {
 	if ns == "" && !config.ClusterScoped && config.TargetNamespace != "" {
 		ns = config.TargetNamespace
 
-		log.L().WithName("auth middleware").V(1).Info("Replace query namespace with", ns)
+		log.L().WithName("auth middleware").V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	verb := "list"
