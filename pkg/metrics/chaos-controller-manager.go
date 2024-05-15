@@ -17,8 +17,9 @@ package metrics
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 	"reflect"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils/controller"
 
 	"github.com/go-logr/logr"
 	"github.com/prometheus/client_golang/prometheus"
