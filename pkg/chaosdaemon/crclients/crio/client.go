@@ -129,8 +129,19 @@ func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID st
 
 // StatsByContainerID returns the stats according to container ID
 func (c CrioClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
-	// TODO: implement StatsByContainerID
-	return nil, errors.New("not implemented")
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+	req := &v1.ContainerStatsRequest{
+		ContainerId: id,
+	}
+	resp, err := c.runtimeClient.ContainerStats(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.BuildContainerStatsFromCRIResponse(resp), nil
 }
 
 func New(socketPath string) (*CrioClient, error) {
