@@ -33,6 +33,7 @@ const (
 	ContainerRuntimeCrio       = "crio"
 
 	defaultDockerSocket     = "unix:///var/run/docker.sock"
+	defaultDockerCriSocket  = "unix:///var/run/cri-dockerd.sock"
 	defaultContainerdSocket = "/run/containerd/containerd.sock"
 	defaultCrioSocket       = "/var/run/crio/crio.sock"
 	containerdDefaultNS     = "k8s.io"
@@ -41,9 +42,10 @@ const (
 // CrClientConfig contains the basic cr client configuration.
 type CrClientConfig struct {
 	// Support docker, containerd, crio for now
-	Runtime      string
-	SocketPath   string
-	ContainerdNS string
+	Runtime       string
+	SocketPath    string
+	CriSocketPath string
+	ContainerdNS  string
 }
 
 type ContainerStats = utils.ContainerStats
@@ -72,7 +74,13 @@ func CreateContainerRuntimeInfoClient(clientConfig *CrClientConfig) (ContainerRu
 		} else {
 			socketPath = "unix://" + socketPath
 		}
-		cli, err = docker.New(socketPath, "", nil, nil)
+		criSocketPath := clientConfig.CriSocketPath
+		if criSocketPath == "" {
+			criSocketPath = defaultDockerCriSocket
+		} else {
+			criSocketPath = "unix://" + criSocketPath
+		}
+		cli, err = docker.New(socketPath, "", nil, nil, criSocketPath)
 		if err != nil {
 			return nil, err
 		}

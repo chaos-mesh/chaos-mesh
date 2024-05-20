@@ -96,6 +96,15 @@ spec:
             - /host-run/crio.sock
           {{- end }}
         {{- end }}
+        {{- if eq .Values.chaosDaemon.runtime "docker" }}
+            - --cri-socket-path
+          {{- if .Values.chaosDaemon.criSocketPath }}
+            {{- $socketDir := include "chaos-daemon.socket-path" . }}
+            - /host-run/{{ .Values.chaosDaemon.criSocketPath | trimPrefix $socketDir | trimPrefix "/" }}
+          {{- else }}
+            - /host-run/cri-dockerd.sock
+          {{- end }}
+        {{- end }}
           env:
             {{- if .Values.chaosDaemon.env }}
             {{- include "chaos-mesh.helpers.listEnvVars" .Values.chaosDaemon | trim | nindent 12 }}
@@ -176,7 +185,7 @@ spec:
         {{- end }}
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: {{template "chaos-daemon.socket-path" . }}
         - name: sys-path
           hostPath:
