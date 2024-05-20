@@ -88,8 +88,8 @@ data:
       - record: chaos_mesh:stress_chaos:cpu_usage_seconds_total
         expr: |
           label_replace(
-            chaos_daemon_container_cpu_usage_seconds_total * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_cpu_usage_seconds_total * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:cpu_usage_seconds_total:irate
@@ -98,57 +98,57 @@ data:
       - record: chaos_mesh:stress_chaos:memory_working_set_bytes
         expr: |
           label_replace(
-            chaos_daemon_container_memory_working_set_bytes * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_working_set_bytes * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_available_bytes
         expr: |
           label_replace(
-            chaos_daemon_container_memory_available_bytes * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_available_bytes * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_usage_bytes
         expr: |
           label_replace(
-            chaos_daemon_container_memory_usage_bytes * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_usage_bytes * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_rss_bytes
         expr: |
           label_replace(
-            chaos_daemon_container_memory_rss_bytes * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_rss_bytes * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_page_faults_total
         expr: |
           label_replace(
-            chaos_daemon_container_memory_page_faults_total * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_page_faults_total * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_major_page_faults_total
         expr: |
           label_replace(
-            chaos_daemon_container_memory_major_page_faults_total * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_major_page_faults_total * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_swap_available_bytes
         expr: |
           label_replace(
-            chaos_daemon_container_memory_swap_available_bytes * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_swap_available_bytes * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
       - record: chaos_mesh:stress_chaos:memory_swap_usage_bytes
         expr: |
           label_replace(
-            chaos_daemon_container_memory_swap_usage_bytes * on(namespace, exported_pod, container) group_right
-            chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"},
+            chaos_daemon_container_memory_swap_usage_bytes * on(namespace, exported_pod, container) group_right(job, instance)
+            max(chaos_controller_manager_chaos_experiments_container_relation{kind="StressChaos"}) without (instance, pod),
             "pod", "$1", "exported_pod", "(.*)"
           )
 {{- end }}
