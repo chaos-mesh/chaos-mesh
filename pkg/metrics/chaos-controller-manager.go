@@ -66,7 +66,7 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 		chaosExperimentsRelation: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Name: "chaos_controller_manager_chaos_experiments_container_relation",
 			Help: "Relation between chaos experiments and selected pods and containers",
-		}, []string{"namespace", "kind", "phase", "name", "uid", "pod", "container"}),
+		}, []string{"namespace", "kind", "name", "uid", "pod", "container"}),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "chaos_mesh_templates",
 			Help: "Total number of injection templates",
@@ -199,7 +199,6 @@ func (collector *ChaosControllerManagerMetricsCollector) collectChaosExperiments
 				collector.chaosExperimentsRelation.WithLabelValues(
 					ns,
 					kind,
-					string(phase),
 					item.GetName(),
 					string(item.GetUID()),
 					podId.Name,
