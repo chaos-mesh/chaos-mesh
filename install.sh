@@ -1628,6 +1628,8 @@ spec:
             - --pprof
             - --runtime-socket-path
             - /host-run/${socketName}
+            - --cri-socket-path
+            - /host-run/cri-dockerd.sock
           env:
             - name: TZ
               value: ${timezone}
@@ -1650,7 +1652,7 @@ spec:
               containerPort: 31766
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: ${socketDir}
         - name: sys-path
           hostPath:
