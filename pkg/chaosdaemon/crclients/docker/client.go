@@ -22,6 +22,7 @@ import (
 	"google.golang.org/grpc"
 	runtimev1 "k8s.io/cri-api/pkg/apis/runtime/v1"
 	"net/http"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -133,6 +134,9 @@ func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID 
 
 // StatsByContainerID returns the stats according to container ID
 func (c DockerClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
+	if c.runtimeClient == nil {
+		return nil, errors.New("cri socket is not connected")
+	}
 	id, err := c.FormatContainerID(ctx, containerID)
 	if err != nil {
 		return nil, err
@@ -169,9 +173,11 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 	if err != nil {
 		return nil, err
 	}
-	runtimeClient, err := utils.BuildRuntimeServiceClient(criHost)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	runtimeClient, err := utils.BuildRuntimeServiceClient(ctx, criHost)
 	if err != nil {
-		return nil, err
+		runtimeClient = nil
 	}
 	// The real logic
 	return &DockerClient{

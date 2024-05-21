@@ -153,7 +153,7 @@ func New(socketPath string) (*CrioClient, error) {
 		Transport: tr,
 	}
 
-	runtimeClient, err := utils.BuildRuntimeServiceClient(socketPath)
+	runtimeClient, err := utils.BuildRuntimeServiceClient(context.TODO(), socketPath)
 	if err != nil {
 		return nil, err
 	}

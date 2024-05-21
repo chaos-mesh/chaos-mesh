@@ -16,6 +16,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -25,12 +26,13 @@ import (
 )
 
 // BuildRuntimeServiceClient creates a new RuntimeServiceClient from the given endpoint
-func BuildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
+func BuildRuntimeServiceClient(ctx context.Context, endpoint string) (v1.RuntimeServiceClient, error) {
 	addr := endpoint
 	if !strings.HasPrefix(addr, "unix://") {
 		addr = fmt.Sprintf("unix://%s", addr)
 	}
-	conn, err := grpc.Dial(addr,
+	conn, err := grpc.DialContext(ctx,
+		addr,
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

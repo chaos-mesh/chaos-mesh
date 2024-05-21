@@ -177,7 +177,7 @@ func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error
 	if err != nil {
 		return nil, err
 	}
-	runtimeClient, err := utils.BuildRuntimeServiceClient(address)
+	runtimeClient, err := utils.BuildRuntimeServiceClient(context.TODO(), address)
 	if err != nil {
 		return nil, err
 	}
