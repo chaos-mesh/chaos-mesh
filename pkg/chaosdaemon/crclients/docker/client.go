@@ -18,11 +18,13 @@ package docker
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
-	"google.golang.org/grpc"
-	runtimev1 "k8s.io/cri-api/pkg/apis/runtime/v1"
 	"net/http"
 	"time"
+
+	"google.golang.org/grpc"
+	runtimev1 "k8s.io/cri-api/pkg/apis/runtime/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
