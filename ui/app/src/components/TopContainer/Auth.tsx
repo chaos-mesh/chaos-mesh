@@ -19,6 +19,7 @@ import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Space from '@/mui-extends/Space'
 import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
+import SyncIcon from '@mui/icons-material/Sync';
 import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -45,6 +46,7 @@ const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
 
   const handleSubmitCallback = () => navigate(0)
   const handleAuthGCP = () => (window.location.href = '/api/auth/gcp/redirect')
+  const handleAuthOIDC = () => (window.location.href = '/api/auth/oidc/redirect')
 
   return (
     <ConfirmDialog
@@ -78,6 +80,19 @@ const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
           </Box>
         </>
       )}
+      {config?.oidc_security_mode && (  
+        <>  
+          <Divider sx={{ mt: 6, mb: 3, color: 'text.secondary', typography: 'body2' }}>  
+            {i18n('settings.addToken.or')}  
+          </Divider>  
+          <Box textAlign="center">  
+            <IconButton color="primary" onClick={handleAuthOIDC}>  
+              <SyncIcon />  
+            </IconButton>  
+          </Box>  
+        </>  
+      )}  
+
 
       <ConfirmDialog
         open={tokenGenOpen}
