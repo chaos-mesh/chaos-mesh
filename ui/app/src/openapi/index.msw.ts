@@ -132,6 +132,7 @@ export const getGetCommonConfigMock = () => ({
   enableFilterNamespace: faker.datatype.boolean(),
   enableProfiling: faker.datatype.boolean(),
   gcp_security_mode: faker.datatype.boolean(),
+  oidc_security_mode: faker.datatype.boolean(),
   listen_host: faker.random.word(),
   listen_port: faker.datatype.number({ min: undefined, max: undefined }),
   qps: faker.datatype.number({ min: undefined, max: undefined }),

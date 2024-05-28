@@ -399,6 +399,26 @@
                         }
                     }
                 },
+                "OIDCSecurityMode": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "clientId": {
+                            "type": "string"
+                        },
+                        "clientSecret": {
+                            "type": "string"
+                        },
+                        "issuerUrl": {
+                            "type": "string"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "hostNetwork": {
                     "type": "boolean"
                 },

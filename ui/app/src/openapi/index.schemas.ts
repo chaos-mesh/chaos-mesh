@@ -4493,6 +4493,7 @@ annotated with `chaos-mesh.org/inject=enabled` will be injected. */
   enableProfiling?: boolean
   /** GcpSecurityMode will use the gcloud authentication to login to GKE user */
   gcp_security_mode?: boolean
+  oidc_security_mode?: boolean
   listen_host?: string
   listen_port?: number
   /** The QPS config for kubernetes client */
