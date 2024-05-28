@@ -20,6 +20,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/archive"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/auth/gcp"
+	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/auth/oidc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/apiserver/experiment"
@@ -37,11 +38,13 @@ var handlerModule = fx.Options(
 		event.NewService,
 		archive.NewService,
 		gcp.NewService,
+		oidc.NewService,
 		template.Bootstrap,
 	),
 	fx.Invoke(
 		// gcp should register at the first, because it registers a middleware
 		gcp.Register,
+		oidc.Register,
 		common.Register,
 		experiment.Register,
 		schedule.Register,
