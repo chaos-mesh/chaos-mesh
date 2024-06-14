@@ -56,6 +56,9 @@
                 "grpcPort": {
                     "type": "integer"
                 },
+                "securityContext": {
+                    "type": "object"
+                },
                 "hostNetwork": {
                     "type": "boolean"
                 },
@@ -95,9 +98,6 @@
                 },
                 "podSecurityPolicy": {
                     "type": "boolean"
-                },
-                "podSecurityContext": {
-                    "type": "object"
                 },
                 "priorityClassName": {
                     "type": "string"

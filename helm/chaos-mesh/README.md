@@ -61,6 +61,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
 | `chaosDaemon.env` | Extra chaosDaemon envs | `{}` |
+| `chaosDaemon.securityContext` | Pod securityContext if needed | `{}`|
 | `chaosDaemon.hostNetwork` | Running chaosDaemon on host network | `false` |
 | `chaosDaemon.mtls.enabled` | Enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon | `true` |
 | `chaosDaemon.privileged` | Run chaos-daemon container in privileged mode. If it is set to false, chaos-daemon will be run in some specified capabilities. capabilities: SYS_PTRACE, NET_ADMIN, MKNOD, SYS_CHROOT, SYS_ADMIN, KILL, IPC_LOCK | `true` |
@@ -69,7 +70,6 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.serviceAccount` | ServiceAccount name for chaos-daemon | `chaos-daemon` |
 | `chaosDaemon.serviceAccountAnnotations` | ServiceAccount annotations for chaos-daemon | `{}` |
 | `chaosDaemon.podSecurityPolicy` | Specify PodSecurityPolicy(psp) on chaos-daemon pods | `false`|
-| `chaosDaemon.podSecurityContext` | Specify securityContext on chaos-daemon pods | `{}`|
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker, containerd and CRI-O. | `docker` |
 | `chaosDaemon.socketPath` | Specifiesthe path of container runtime socket on the host. | `/var/run/docker.sock` |
 | `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container | `{}` |
