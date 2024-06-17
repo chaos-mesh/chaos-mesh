@@ -102,7 +102,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.config.ClusterScoped && s.config.TargetNamespace != "" {
 		ns = s.config.TargetNamespace
 
-		s.log.V(1).Info("Replace query namespace with", ns)
+		s.log.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	ScheduleList := v1alpha1.ScheduleList{}
