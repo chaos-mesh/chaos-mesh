@@ -32,6 +32,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.serviceAccountAnnotations` | ServiceAccount annotations for chaos-controller-manager | `{}` |
+| `controllerManager.serviceAccountCreate` | Create the serviceAccount for chaos-controller-manager | `true` |
 | `controllerManager.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `3` |
 | `controllerManager.image.registry` | Override global registry, empty value means using the global images.registry | `` |
@@ -60,6 +61,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
 | `chaosDaemon.env` | Extra chaosDaemon envs | `{}` |
+| `chaosDaemon.securityContext` | Pod securityContext if needed | `{}`|
 | `chaosDaemon.hostNetwork` | Running chaosDaemon on host network | `false` |
 | `chaosDaemon.mtls.enabled` | Enable mtls on the grpc connection between chaos-controller-manager and chaos-daemon | `true` |
 | `chaosDaemon.privileged` | Run chaos-daemon container in privileged mode. If it is set to false, chaos-daemon will be run in some specified capabilities. capabilities: SYS_PTRACE, NET_ADMIN, MKNOD, SYS_CHROOT, SYS_ADMIN, KILL, IPC_LOCK | `true` |

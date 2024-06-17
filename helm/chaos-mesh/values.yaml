@@ -66,6 +66,8 @@ controllerManager:
   serviceAccount: chaos-controller-manager
   # ServiceAccount annotations for chaos-controller-manager
   serviceAccountAnnotations: {}
+  # Create the serviceAccount for chaos-controller-manager
+  serviceAccountCreate: true
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # Replicas for chaos-controller-manager
@@ -166,6 +168,8 @@ chaosDaemon:
   httpPort: 31766
   # extra chaosDaemon envs
   env: {}
+  # securityContext if needed
+  securityContext: {}
   # running chaosDaemon on host network
   hostNetwork: false
   # configurations about mtls.
