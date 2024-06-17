@@ -56,6 +56,9 @@
                 "grpcPort": {
                     "type": "integer"
                 },
+                "securityContext": {
+                    "type": "object"
+                },
                 "hostNetwork": {
                     "type": "boolean"
                 },
@@ -313,6 +316,9 @@
                 },
                 "serviceAccountAnnotations": {
                     "type": "object"
+                },
+                "serviceAccountCreate": {
+                    "type": "boolean"
                 },
                 "targetNamespace": {
                     "type": "string"

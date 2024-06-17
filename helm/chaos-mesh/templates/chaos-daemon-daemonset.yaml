@@ -57,6 +57,9 @@ spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets: {{ toYaml .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
+      {{- if .Values.chaosDaemon.securityContext }}
+      securityContext: {{ toYaml .Values.chaosDaemon.securityContext | nindent 8 }}
+      {{- end }}
       containers:
         - name: chaos-daemon
           image: {{template "chaos-daemon.image" . }}
@@ -176,7 +179,7 @@ spec:
         {{- end }}
       volumes:
         - name: socket-path
-          hostPath: 
+          hostPath:
             path: {{template "chaos-daemon.socket-path" . }}
         - name: sys-path
           hostPath:
