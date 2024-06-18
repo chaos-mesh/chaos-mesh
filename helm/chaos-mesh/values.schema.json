@@ -829,7 +829,7 @@
                     "type": "string"
                 },
                 "caBundlePEM": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "certManager": {
                     "properties": {
@@ -840,10 +840,10 @@
                     "type": "object"
                 },
                 "crtPEM": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "keyPEM": {
-                    "type": "null"
+                    "type": "string"
                 },
                 "timeoutSeconds": {
                     "type": "integer"
