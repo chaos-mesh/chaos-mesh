@@ -73,6 +73,7 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/s
 
 RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git
 # Grant permission to plugins directory.
+RUN mkdir /.local
 RUN chmod -R 777 /.local
 
 RUN mkdir /.cache
