@@ -513,6 +513,10 @@ prometheus:
   # Kubernetes Service type
   service:
     type: ClusterIP
+  # Settings for chaos experiment metrics
+  experimentMetrics:
+    # Enable exporting chaos experiment metrics
+    enabled: false
 
   volume:
     # storage size of PVC
