@@ -209,6 +209,10 @@ chaosDaemon:
   runtime: docker
   # socketPath specifies the path of container runtime socket on the host.
   socketPath: /var/run/docker.sock
+  # criSocketPath specifies the path of CRI socket on the host for docker
+  # runtime. It is only used when runtime is docker. In Kubernetes 1.23
+  # and earlier, this value should be `/var/run/dockershim.sock`.
+  criSocketPath: /var/run/cri-dockerd.sock
 
   # If you are using Kind or using containerd as CRI, you can use the
   # config below to use containerd as the runtime in chaos-daemon.

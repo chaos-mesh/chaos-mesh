@@ -18,6 +18,8 @@ package crclients
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
+
 	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
@@ -31,6 +33,7 @@ const (
 	ContainerRuntimeCrio       = "crio"
 
 	defaultDockerSocket     = "unix:///var/run/docker.sock"
+	defaultDockerCriSocket  = "unix:///var/run/cri-dockerd.sock"
 	defaultContainerdSocket = "/run/containerd/containerd.sock"
 	defaultCrioSocket       = "/var/run/crio/crio.sock"
 	containerdDefaultNS     = "k8s.io"
@@ -39,10 +42,13 @@ const (
 // CrClientConfig contains the basic cr client configuration.
 type CrClientConfig struct {
 	// Support docker, containerd, crio for now
-	Runtime      string
-	SocketPath   string
-	ContainerdNS string
+	Runtime       string
+	SocketPath    string
+	CriSocketPath string
+	ContainerdNS  string
 }
+
+type ContainerStats = utils.ContainerStats
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
@@ -51,6 +57,7 @@ type ContainerRuntimeInfoClient interface {
 	FormatContainerID(ctx context.Context, containerID string) (string, error)
 	ListContainerIDs(ctx context.Context) ([]string, error)
 	GetLabelsFromContainerID(ctx context.Context, containerID string) (map[string]string, error)
+	StatsByContainerID(ctx context.Context, containerID string) (*ContainerStats, error)
 }
 
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
@@ -67,7 +74,13 @@ func CreateContainerRuntimeInfoClient(clientConfig *CrClientConfig) (ContainerRu
 		} else {
 			socketPath = "unix://" + socketPath
 		}
-		cli, err = docker.New(socketPath, "", nil, nil)
+		criSocketPath := clientConfig.CriSocketPath
+		if criSocketPath == "" {
+			criSocketPath = defaultDockerCriSocket
+		} else {
+			criSocketPath = "unix://" + criSocketPath
+		}
+		cli, err = docker.New(socketPath, "", nil, nil, criSocketPath)
 		if err != nil {
 			return nil, err
 		}

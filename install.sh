@@ -1628,6 +1628,8 @@ spec:
             - --pprof
             - --runtime-socket-path
             - /host-run/${socketName}
+            - --cri-socket-path
+            - /host-run/cri-dockerd.sock
           env:
             - name: TZ
               value: ${timezone}

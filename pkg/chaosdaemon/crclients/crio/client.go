@@ -24,8 +24,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
+
 	"github.com/pkg/errors"
-	"google.golang.org/grpc"
 	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
 )
 
@@ -126,15 +127,21 @@ func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID st
 	return container.Status.Labels, nil
 }
 
-func buildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
-	addr := fmt.Sprintf("unix://%s", endpoint)
-	conn, err := grpc.Dial(addr, grpc.WithBlock(), grpc.WithInsecure())
+// StatsByContainerID returns the stats according to container ID
+func (c CrioClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+	req := &v1.ContainerStatsRequest{
+		ContainerId: id,
+	}
+	resp, err := c.runtimeClient.ContainerStats(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	client := v1.NewRuntimeServiceClient(conn)
-	return client, err
+	return utils.BuildContainerStatsFromCRIResponse(resp), nil
 }
 
 func New(socketPath string) (*CrioClient, error) {
@@ -146,7 +153,7 @@ func New(socketPath string) (*CrioClient, error) {
 		Transport: tr,
 	}
 
-	runtimeClient, err := buildRuntimeServiceClient(socketPath)
+	runtimeClient, err := utils.BuildRuntimeServiceClient(context.TODO(), socketPath)
 	if err != nil {
 		return nil, err
 	}

@@ -19,6 +19,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
+
+	"google.golang.org/grpc"
+	runtimev1 "k8s.io/cri-api/pkg/apis/runtime/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
@@ -44,9 +50,15 @@ type DockerClientInterface interface {
 	ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error)
 }
 
+// DockerRuntimeServiceInterface represents the runtimev1.RuntimeServiceClient, it's used to simply unit test
+type DockerRuntimeServiceInterface interface {
+	ContainerStats(ctx context.Context, in *runtimev1.ContainerStatsRequest, opts ...grpc.CallOption) (*runtimev1.ContainerStatsResponse, error)
+}
+
 // DockerClient can get information from docker
 type DockerClient struct {
-	client DockerClientInterface
+	client        DockerClientInterface
+	runtimeClient DockerRuntimeServiceInterface
 }
 
 // FormatContainerID strips protocol prefix from the container ID
@@ -122,14 +134,35 @@ func (c DockerClient) GetLabelsFromContainerID(ctx context.Context, containerID 
 	return container.Config.Labels, nil
 }
 
-func New(host string, version string, client *http.Client, httpHeaders map[string]string) (*DockerClient, error) {
+// StatsByContainerID returns the stats according to container ID
+func (c DockerClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
+	if c.runtimeClient == nil {
+		return nil, errors.New("cri socket is not connected")
+	}
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+	req := &runtimev1.ContainerStatsRequest{
+		ContainerId: id,
+	}
+	resp, err := c.runtimeClient.ContainerStats(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.BuildContainerStatsFromCRIResponse(resp), nil
+}
+
+func New(host string, version string, client *http.Client, httpHeaders map[string]string, criHost string) (*DockerClient, error) {
 	// Mock point to return error or mock client in unit test
 	if err := mock.On("NewDockerClientError"); err != nil {
 		return nil, err.(error)
 	}
 	if client := mock.On("MockDockerClient"); client != nil {
 		return &DockerClient{
-			client: client.(DockerClientInterface),
+			client:        client.(DockerClientInterface),
+			runtimeClient: client.(DockerRuntimeServiceInterface),
 		}, nil
 	}
 
@@ -142,8 +175,15 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 	if err != nil {
 		return nil, err
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	runtimeClient, err := utils.BuildRuntimeServiceClient(ctx, criHost)
+	if err != nil {
+		runtimeClient = nil
+	}
 	// The real logic
 	return &DockerClient{
-		client: c,
+		client:        c,
+		runtimeClient: runtimeClient,
 	}, nil
 }
