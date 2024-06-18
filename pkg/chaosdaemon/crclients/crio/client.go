@@ -24,8 +24,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
+
 	"github.com/pkg/errors"
-	"google.golang.org/grpc"
 	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
 )
 
@@ -126,15 +127,10 @@ func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID st
 	return container.Status.Labels, nil
 }
 
-func buildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
-	addr := fmt.Sprintf("unix://%s", endpoint)
-	conn, err := grpc.Dial(addr, grpc.WithBlock(), grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-
-	client := v1.NewRuntimeServiceClient(conn)
-	return client, err
+// StatsByContainerID returns the stats according to container ID
+func (c CrioClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
+	// TODO: implement StatsByContainerID
+	return nil, errors.New("not implemented")
 }
 
 func New(socketPath string) (*CrioClient, error) {
@@ -146,7 +142,7 @@ func New(socketPath string) (*CrioClient, error) {
 		Transport: tr,
 	}
 
-	runtimeClient, err := buildRuntimeServiceClient(socketPath)
+	runtimeClient, err := utils.BuildRuntimeServiceClient(socketPath)
 	if err != nil {
 		return nil, err
 	}

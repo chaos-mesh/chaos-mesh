@@ -20,6 +20,11 @@ import (
 	"fmt"
 	"syscall"
 
+	"google.golang.org/grpc"
+	runtimev1 "k8s.io/cri-api/pkg/apis/runtime/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/utils"
+
 	"github.com/containerd/containerd"
 	"github.com/pkg/errors"
 
@@ -41,9 +46,15 @@ type ContainerdClientInterface interface {
 	Containers(ctx context.Context, filters ...string) ([]containerd.Container, error)
 }
 
+// ContainerdRuntimeServiceInterface represents the runtimev1.RuntimeServiceClient, it's used to simply unit test
+type ContainerdRuntimeServiceInterface interface {
+	ContainerStats(ctx context.Context, in *runtimev1.ContainerStatsRequest, opts ...grpc.CallOption) (*runtimev1.ContainerStatsResponse, error)
+}
+
 // ContainerdClient can get information from containerd
 type ContainerdClient struct {
-	client ContainerdClientInterface
+	client        ContainerdClientInterface
+	runtimeClient ContainerdRuntimeServiceInterface
 }
 
 // FormatContainerID strips protocol prefix from the container ID
@@ -133,6 +144,23 @@ func (c ContainerdClient) GetLabelsFromContainerID(ctx context.Context, containe
 	return labels, nil
 }
 
+// StatsByContainerID returns the stats according to container ID
+func (c ContainerdClient) StatsByContainerID(ctx context.Context, containerID string) (*utils.ContainerStats, error) {
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return nil, err
+	}
+	req := &runtimev1.ContainerStatsRequest{
+		ContainerId: id,
+	}
+	resp, err := c.runtimeClient.ContainerStats(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.BuildContainerStatsFromCRIResponse(resp), nil
+}
+
 func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error) {
 	// Mock point to return error in unit test
 	if err := mock.On("NewContainerdClientError"); err != nil {
@@ -141,6 +169,7 @@ func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error
 	if client := mock.On("MockContainerdClient"); client != nil {
 		return &ContainerdClient{
 			client.(ContainerdClientInterface),
+			client.(ContainerdRuntimeServiceInterface),
 		}, nil
 	}
 
@@ -148,9 +177,14 @@ func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error
 	if err != nil {
 		return nil, err
 	}
+	runtimeClient, err := utils.BuildRuntimeServiceClient(address)
+	if err != nil {
+		return nil, err
+	}
 	// The real logic
 	return &ContainerdClient{
-		client: c,
+		client:        c,
+		runtimeClient: runtimeClient,
 	}, nil
 }
 
