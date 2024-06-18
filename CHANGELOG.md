@@ -24,6 +24,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for setting `loadBalancerSourceRanges` in chaos-dashboard service in helm chart [#4172](https://github.com/chaos-mesh/chaos-mesh/pull/4172)
 - Helm: allow templating of dashboard rootUrl [#4370](https://github.com/chaos-mesh/chaos-mesh/pull/4370)
 - Support for reading database connection string from secret [#4363](https://github.com/chaos-mesh/chaos-mesh/pull/4363)
+- Export relation between experiment and container to metrics [#4415](https://github.com/chaos-mesh/chaos-mesh/pull/4415)
 
 ### Changed
 
