@@ -71,10 +71,10 @@ RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/s
     ./get_helm.sh && \
     rm get_helm.sh
 
+# Create and grant permissions to plugins directory.
+RUN mkdir -p /opt/helm/plugins && chmod a+rwx /opt/helm
+ENV HELM_PLUGINS=/opt/helm/plugins
 RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git
-# Grant permission to plugins directory.
-RUN mkdir /.local
-RUN chmod -R 777 /.local
 
 RUN mkdir /.cache
 RUN chmod -R 777 /.cache
