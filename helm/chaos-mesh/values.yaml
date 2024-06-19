@@ -64,6 +64,10 @@ controllerManager:
   allowHostNetworkTesting: false
   # The serviceAccount for chaos-controller-manager
   serviceAccount: chaos-controller-manager
+  # ServiceAccount annotations for chaos-controller-manager
+  serviceAccountAnnotations: {}
+  # Create the serviceAccount for chaos-controller-manager
+  serviceAccountCreate: true
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # Replicas for chaos-controller-manager
@@ -164,6 +168,8 @@ chaosDaemon:
   httpPort: 31766
   # extra chaosDaemon envs
   env: {}
+  # securityContext if needed
+  securityContext: {}
   # running chaosDaemon on host network
   hostNetwork: false
   # configurations about mtls.
@@ -194,6 +200,8 @@ chaosDaemon:
   podAnnotations: {}
   # ServiceAccount name for chaos-daemon
   serviceAccount: chaos-daemon
+  # ServiceAccount annotations for chaos-daemon
+  serviceAccountAnnotations: {}
   # Specify PodSecurityPolicy(psp) on chaos-daemon pods
   podSecurityPolicy: false
   # runtime specifies which container runtime to use. Currently
@@ -216,7 +224,8 @@ chaosDaemon:
   # If you set socketPath and socketDir at the same time, only socketPath will work.
 
   # CPU/Memory resource requests/limits for chaosDaemon container
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -235,7 +244,8 @@ chaosDaemon:
   affinity: {}
 
   # Specify DaemonSetUpdateStrategy for chaos-daemon
-  updateStrategy: {}
+  updateStrategy:
+    {}
     # Example update strategy:
     # type: RollingUpdate
     # rollingUpdate:

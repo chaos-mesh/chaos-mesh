@@ -54,7 +54,7 @@ RUN case "$TARGET_PLATFORM" in \
     curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-$PROTOC_ARCH.zip > /protoc.zip && \
     unzip /protoc.zip -d /usr/local && \
     rm /protoc.zip
-RUN chmod +xr -R /usr/local/include
+RUN chmod +rx -R /usr/local/include
 RUN chmod +x /usr/local/bin/protoc
 
 RUN mkdir -p /go/bin
@@ -71,9 +71,15 @@ RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kusto
 
 RUN curl -L https://storage.googleapis.com/kubebuilder-tools/kubebuilder-tools-1.19.2-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/
 
-RUN curl -L https://get.helm.sh/helm-v3.6.3-$(go env GOOS)-$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin && \
-    mv /usr/local/bin/$(go env GOOS)-$(go env GOARCH)/helm /usr/local/bin/helm && \
-    rm -rf /usr/local/bin/$(go env GOOS)-$(go env GOARCH)
+RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 && \
+    chmod 700 get_helm.sh && \
+    ./get_helm.sh && \
+    rm get_helm.sh
+
+# Create and grant permissions to plugins directory.
+RUN mkdir -p /opt/helm/plugins && chmod a+rwx /opt/helm
+ENV HELM_PLUGINS=/opt/helm/plugins
+RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git
 
 RUN mkdir /.cache
 RUN chmod -R 777 /.cache

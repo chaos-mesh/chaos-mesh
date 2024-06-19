@@ -132,7 +132,7 @@ swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for f
 
 ##@ Linters, formatters and others
 
-check: generate manifests/crd.yaml vet boilerplate lint tidy install.sh fmt ## Run prerequisite checks for PR
+check: generate manifests/crd.yaml vet boilerplate lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
 
 SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
 boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
@@ -172,6 +172,10 @@ tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
 vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
 	$(CGOENV) go vet ./...
+
+helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
+helm-values-schema: images/dev-env/.dockerbuilt
+	helm schema -input helm/chaos-mesh/values.yaml -output helm/chaos-mesh/values.schema.json
 
 ##@ Common used building targets
 
@@ -275,7 +279,6 @@ pkg/time/fakeclock/fake_gettimeofday.o: SHELL:=$(RUN_IN_BUILD_SHELL)
 pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c images/build-env/.dockerbuilt
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
-
 
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
