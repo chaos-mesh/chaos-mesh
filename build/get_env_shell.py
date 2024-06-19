@@ -78,6 +78,7 @@ def main():
 
     cwd = os.getcwd()
     cmd += ["--volume", f"{cwd}:{cwd}"]
+    # HACK: if you have permission issues when using Docker Desktop for Mac, you can try removing this line to see if it works.
     cmd += ["--user", f"{os.getuid()}:{os.getgid()}"]
 
     target_platform = utils.get_target_platform()

@@ -112,8 +112,16 @@
                 "runtime": {
                     "type": "string"
                 },
+                "securityContext": {
+                    "properties": {},
+                    "type": "object"
+                },
                 "serviceAccount": {
                     "type": "string"
+                },
+                "serviceAccountAnnotations": {
+                    "properties": {},
+                    "type": "object"
                 },
                 "socketPath": {
                     "type": "string"
@@ -316,6 +324,13 @@
                 },
                 "serviceAccount": {
                     "type": "string"
+                },
+                "serviceAccountAnnotations": {
+                    "properties": {},
+                    "type": "object"
+                },
+                "serviceAccountCreate": {
+                    "type": "boolean"
                 },
                 "targetNamespace": {
                     "type": "string"
