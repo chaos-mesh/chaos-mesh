@@ -1,6 +1,6 @@
 # This workflow defines the go and ui related jobs.
 #
-# First, we use [dorny/paths-filter@v2](https://github.com/dorny/paths-filter) to
+# First, we use [dorny/paths-filter@v3](https://github.com/dorny/paths-filter) to
 # detect changes in go and ui related files, and then run the corresponding sub-jobs
 # based on the changes.
 #
@@ -30,7 +30,7 @@ jobs:
       ui: ${{ steps.filter.outputs.ui }}
     steps:
       # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
