@@ -46,8 +46,8 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 			lastScheduleTime:  "2021-04-28T05:59:38.0Z",
 			creationTimeStamp: zeroTime,
 			schedule:          "@every 5s",
-			missedRun:         pointer.StringPtr("2021-04-28T05:59:43.0Z"),
-			nextRun:           pointer.StringPtr("2021-04-28T05:59:48.0Z"),
+			missedRun:         pointer.String("2021-04-28T05:59:43.0Z"),
+			nextRun:           pointer.String("2021-04-28T05:59:48.0Z"),
 			err:               nil,
 		},
 		{
@@ -56,7 +56,7 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 			creationTimeStamp: zeroTime,
 			schedule:          "@every 5s",
 			missedRun:         nil,
-			nextRun:           pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			nextRun:           pointer.String("2021-04-28T06:49:40.000Z"),
 			err:               nil,
 		},
 		{
@@ -65,7 +65,7 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 			creationTimeStamp: "2021-04-28T06:49:35.000Z",
 			schedule:          "@every 5s",
 			missedRun:         nil,
-			nextRun:           pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			nextRun:           pointer.String("2021-04-28T06:49:40.000Z"),
 			err:               nil,
 		},
 		{
@@ -74,7 +74,7 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 			creationTimeStamp: "2021-04-28T06:49:35.000Z",
 			schedule:          "@every 5s",
 			missedRun:         nil,
-			nextRun:           pointer.StringPtr("2021-04-28T06:49:40.000Z"),
+			nextRun:           pointer.String("2021-04-28T06:49:40.000Z"),
 			err:               nil,
 		},
 		{
@@ -82,8 +82,8 @@ func TestGetRecentUnmetScheduleTime(t *testing.T) {
 			lastScheduleTime:  zeroTime,
 			creationTimeStamp: "2021-04-28T06:49:35.000Z",
 			schedule:          "@every 5s",
-			missedRun:         pointer.StringPtr("2021-04-28T06:49:40.000Z"),
-			nextRun:           pointer.StringPtr("2021-04-28T06:49:45.000Z"),
+			missedRun:         pointer.String("2021-04-28T06:49:40.000Z"),
+			nextRun:           pointer.String("2021-04-28T06:49:45.000Z"),
 			err:               nil,
 		},
 	}
