@@ -66,7 +66,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Enable prometheus directive within CoreDNS [#4321](https://github.com/chaos-mesh/chaos-mesh/pull/4321)
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 - Fix dashboard panic while replacing query namespace with targetNamespace in namespace scoped mode [#4409](https://github.com/chaos-mesh/chaos-mesh/issues/4409)
-- fix chaos controller can't find daemonIP over 1000 node using endpoints [#4421](https://github.com/chaos-mesh/chaos-mesh/pull/4421)
+- Fix chaos controller can't find daemonIP over 1000 nodes using endpoints [#4421](https://github.com/chaos-mesh/chaos-mesh/pull/4421)
 
 ### Security
 
