@@ -1102,7 +1102,7 @@ type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 
 type RateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RateSpec"){
     # Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
-    Rate: String!
+    rate: String!
 }
 
 # ReorderSpec defines details of packet reorder.
