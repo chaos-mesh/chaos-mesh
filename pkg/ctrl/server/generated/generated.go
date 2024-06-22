@@ -3817,7 +3817,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["selector"].(model.PodSelectorInput)), true
 
-	case "RateSpec.Rate":
+	case "RateSpec.rate":
 		if e.complexity.RateSpec.Rate == nil {
 			break
 		}
@@ -5422,7 +5422,7 @@ type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
 
 type RateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RateSpec"){
     # Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
-    Rate: String!
+    rate: String!
 }
 
 # ReorderSpec defines details of packet reorder.
@@ -18969,7 +18969,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RateSpec_Rate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RateSpec) (ret graphql.Marshaler) {
+func (ec *executionContext) _RateSpec_rate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RateSpec) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -28128,9 +28128,9 @@ func (ec *executionContext) _RateSpec(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("RateSpec")
-		case "Rate":
+		case "rate":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._RateSpec_Rate(ctx, field, obj)
+				return ec._RateSpec_rate(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
