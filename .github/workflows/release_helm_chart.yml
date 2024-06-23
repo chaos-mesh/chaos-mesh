@@ -9,6 +9,7 @@ permissions: read-all
 
 jobs:
   release-chart:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Extract version

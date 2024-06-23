@@ -11,6 +11,7 @@ permissions: read-all
 
 jobs:
   unitTestAndCodeCoverage:
+    runs-on: ubuntu-latest
     name: "Unit Test And Code Coverage"
     steps:
       - uses: actions/checkout@v4
