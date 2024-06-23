@@ -25,23 +25,19 @@ jobs:
       LABEL_EXISTS: ${{ contains(github.event.pull_request.labels.*.name, 'no-need-update-changelog') }}
     steps:
       - name: "Skip if label exists"
-        id: "skip-if-label-exists"
+        if: env.LABEL_EXISTS == 'true'
         run: |
-          if [ "${LABEL_EXISTS}" = "true" ] ; then
-            echo "no-need-update-changelog exists, skipping this check"
-            exit 0
-          fi
+          echo "no-need-update-changelog exists, skipping this check"
       - name: "Collect changes"
         id: "collect-changes"
-        if: ${{ ! fromJSON(env.LABEL_EXISTS) }}
-        uses: dorny/paths-filter@v2
+        if: env.LABEL_EXISTS != 'true'
+        uses: dorny/paths-filter@v3
         with:
           filters: |
             changelog:
             - CHANGELOG.md
       - name: "Make sure CHANGELOG.md is updated"
-        id: "check-changelog"
-        if: ${{ ! fromJSON(env.LABEL_EXISTS) }}
+        if: env.LABEL_EXISTS != 'true'
         env:
           CHANGELOG_UPDATED: ${{ steps.collect-changes.outputs.changelog }}
         run: |
