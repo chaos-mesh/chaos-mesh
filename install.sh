@@ -1126,6 +1126,10 @@ rules:
     resources:
       - subjectaccessreviews
     verbs: [ "create" ]
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - remoteclusters
+    verbs: [ "*" ]
 ---
 # Source: chaos-mesh/templates/dns-rbac.yaml
 # roles
