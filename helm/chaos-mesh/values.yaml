@@ -66,6 +66,8 @@ controllerManager:
   serviceAccount: chaos-controller-manager
   # ServiceAccount annotations for chaos-controller-manager
   serviceAccountAnnotations: {}
+  # Create the serviceAccount for chaos-controller-manager
+  serviceAccountCreate: true
   # Custom priorityClassName for using pod priorities
   priorityClassName: ""
   # Replicas for chaos-controller-manager
@@ -166,6 +168,8 @@ chaosDaemon:
   httpPort: 31766
   # extra chaosDaemon envs
   env: {}
+  # securityContext if needed
+  securityContext: {}
   # running chaosDaemon on host network
   hostNetwork: false
   # configurations about mtls.
@@ -220,7 +224,8 @@ chaosDaemon:
   # If you set socketPath and socketDir at the same time, only socketPath will work.
 
   # CPU/Memory resource requests/limits for chaosDaemon container
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -239,7 +244,8 @@ chaosDaemon:
   affinity: {}
 
   # Specify DaemonSetUpdateStrategy for chaos-daemon
-  updateStrategy: {}
+  updateStrategy:
+    {}
     # Example update strategy:
     # type: RollingUpdate
     # rollingUpdate:
@@ -521,11 +527,11 @@ webhook:
     # Setup the webhook using cert-manager
     enabled: false
   # if empty and disable certManager, Helm will auto-generate these fields
-  caBundlePEM: |
+  caBundlePEM: ""
 
-  crtPEM: |
+  crtPEM: ""
 
-  keyPEM: |
+  keyPEM: ""
 
   # It is recommended that admission webhooks should evaluate as quickly as possible (typically in milliseconds),
   # since they add to API request latency. It is encouraged to use a small timeout for webhooks.

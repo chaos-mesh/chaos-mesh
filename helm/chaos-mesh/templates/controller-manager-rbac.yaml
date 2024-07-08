@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 {{- if .Values.rbac.create }}
+{{- if .Values.controllerManager.serviceAccountCreate }}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -25,7 +26,7 @@ metadata:
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
-
+{{- end }}
 ---
 # roles
 kind: ClusterRole
