@@ -31,6 +31,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 - Fix dashboard panic while replacing query namespace with targetNamespace in namespace scoped mode [#4409](https://github.com/chaos-mesh/chaos-mesh/issues/4409)
+- Fix incorrect mmap args for IOChaos [#3680](https://github.com/chaos-mesh/chaos-mesh/issues/3680)
 
 ### Security
 
