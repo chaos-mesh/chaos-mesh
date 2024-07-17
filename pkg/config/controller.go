@@ -114,6 +114,8 @@ type ChaosControllerConfig struct {
 	EnabledWebhooks    []string `envconfig:"ENABLED_WEBHOOKS" default:"*"`
 
 	LocalHelmChartPath string `envconfig:"LOCAL_HELM_CHART_PATH" default:""`
+
+	MaxEvents int `envconfig:"MAX_EVENTS" default:"100"`
 }
 
 // EnvironChaosController returns the settings from the environment.
