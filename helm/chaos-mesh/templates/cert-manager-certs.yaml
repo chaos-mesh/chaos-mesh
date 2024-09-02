@@ -98,12 +98,11 @@ metadata:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-mesh-cert
 spec:
-  duration: 43800h #5year
+  duration: 43800h0m0s #5year
   dnsNames:
     - {{ template "chaos-mesh.svc" . }}
     - {{ template "chaos-mesh.svc" . }}.{{ .Release.Namespace }}
     - {{ template "chaos-mesh.svc" . }}.{{ .Release.Namespace }}.svc
-  isCA: false
   secretName: {{ template "chaos-mesh.webhook.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
@@ -130,7 +129,6 @@ spec:
   duration: 43800h0m0s #5year
   dnsNames:
     - controller-manager.chaos-mesh.org
-  isCA: false
   secretName: {{ template "chaos-mesh.daemon-client.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
@@ -157,7 +155,6 @@ spec:
   duration: 43800h0m0s #5year
   dnsNames:
     - chaos-daemon.chaos-mesh.org
-  isCA: false
   secretName: {{ template "chaos-mesh.daemon.certs" . }}
   issuerRef:
     name: chaos-mesh-ca
