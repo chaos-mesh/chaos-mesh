@@ -55,7 +55,7 @@ When using this template, it requires the top-level scope
     {{- /* webhookName would be the FQDN of in-cluster service chaos-mesh.*/ -}}
     {{- $webhookName := printf "%s.%s.svc" (include "chaos-mesh.svc" .) .Release.Namespace }}
     {{- $webhookCA := required "self-signed CA keypair is requried" .selfSignedCAKeypair -}}
-    {{- /* Generate cert keypair for webhook with 5 year validity duration. */ -}}
+    {{- /* Generate cert keypair for webhook with 5 years validity duration. */ -}}
     {{- $webhookServerTLSKeypair := .webhookTLSKeypair | default (genSignedCert $webhookName nil (list $webhookName) 1825 $webhookCA) }}
     {{- $_ := set . "webhookTLSKeypair" $webhookServerTLSKeypair -}}
     {{- $webhookServerTLSKeypair.Cert -}}
@@ -76,7 +76,7 @@ When using this template, it requires the top-level scope
     {{- /* webhookName would be the FQDN of in-cluster service chaos-mesh.*/ -}}
     {{- $webhookName := printf "%s.%s.svc" (include "chaos-mesh.svc" .) .Release.Namespace -}}
     {{- $webhookCA := required "self-signed CA keypair is requried" .selfSignedCAKeypair -}}
-    {{- /* Generate cert key pair for webhook with 5 year validity duration. */ -}}
+    {{- /* Generate cert key pair for webhook with 5 years validity duration. */ -}}
     {{- $webhookServerTLSKeypair := .webhookTLSKeypair | default (genSignedCert $webhookName nil (list $webhookName) 1825 $webhookCA) -}}
     {{- $_ := set . "webhookTLSKeypair" $webhookServerTLSKeypair -}}
     {{- $webhookServerTLSKeypair.Key -}}
