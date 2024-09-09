@@ -251,6 +251,12 @@ chaosDaemon:
     # rollingUpdate:
     #   maxUnavailable: 33%
 
+  # Service setting for chaos-daemon
+  service:
+    scrape:
+      # Enable metric scraping from Promethues by annotations
+      enabled: true
+
 dashboard:
   # Enable chaos-dashboard
   create: true
