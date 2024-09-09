@@ -18,8 +18,10 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-daemon.svc" . }}
   annotations:
+    {{- if .Values.chaosDaemon.service.scrape.enabled }}
     prometheus.io/scrape: "true"
     prometheus.io/port: "{{ .Values.chaosDaemon.httpPort }}"
+    {{- end }}
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: chaos-daemon
