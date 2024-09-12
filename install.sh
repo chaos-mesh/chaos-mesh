@@ -1313,8 +1313,11 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "services", "endpoints", "secrets" ]
+    resources: [ "services", "secrets" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
       - subjectaccessreviews

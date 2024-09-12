@@ -20,7 +20,7 @@ jobs:
       - name: Publish Helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_HELM_CHART_TOKEN }}
           charts_dir: helm
           charts_url: https://charts.chaos-mesh.org
           owner: chaos-mesh
