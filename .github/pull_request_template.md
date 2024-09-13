@@ -1,24 +1,21 @@
-<!--
-Thank you for contributing to Chaos Mesh!
-
-If you're unsure where to start, please refer to the contributing doc:
-
-https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md
-
-If you still have questions, please let us know via issues.
-
-Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new PR:
--->
+> [!IMPORTANT]
+> Thank you for contributing to Chaos Mesh! Please fill out the template below to help us review your PR.
+>
+> If you are new to Chaos Mesh, please read the [contributing guide](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md) first.
+>
+> Please follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) when writing the PR title and commit messages.
 
 ## What problem does this PR solve?
 
-<!-- Uncomment this line if some issues to close -->
-<!-- Close #<issue number> -->
+> [!TIP]
+> Please replace this with a brief description of the problem this PR solves.
+> You can also close #issue_number if this PR solves the issue.
 
 ## What's changed and how it works?
 
-<!-- Uncomment this line if this PR is associated with a proposal -->
-<!-- Proposal: [name](url) -->
+> [!TIP]
+> Please replace this with a brief description of the changes and how it works.
+> You can also refer to a proposal or design doc if it exists.
 
 ## Related changes
 
@@ -55,7 +52,11 @@ Please follow https://www.conventionalcommits.org/en/v1.0.0/ when you open a new
 
 ## DCO
 
-If you find the DCO check fails, please run commands like below (Depends on the actual situations. For example, if the failed commit isn't the most recent) to fix it:
+If you find the DCO check fails, please run commands like below to fix it:
+
+> [!TIP]
+> Depends on actual situations, for example, if the failed commit isn't the most recent
+> one, you can use `git rebase -i HEAD~n` to re-signoff the commit.
 
 ```shell
 git commit --amend --signoff
