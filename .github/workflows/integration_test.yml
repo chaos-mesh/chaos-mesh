@@ -5,7 +5,10 @@ on:
     branches:
       - master
     paths-ignore:
+      - .gitignore
       - "**.md"
+      - .github/ISSUE_TEMPLATE/*
+      - .github/pull_request_template.md
       # Not available for frontend code for now.
       - "ui/**"
       - .github/workflows/checklink.yaml
