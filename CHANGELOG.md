@@ -67,7 +67,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 - Fix dashboard panic while replacing query namespace with targetNamespace in namespace scoped mode [#4409](https://github.com/chaos-mesh/chaos-mesh/issues/4409)
 - Fix incorrect mmap args for IOChaos [#3680](https://github.com/chaos-mesh/chaos-mesh/issues/3680)
-- Fix limit the number of events and minify the events [#4402](https://github.com/chaos-mesh/chaos-mesh/pull/4402)
+- Fix excessive records by adding the `MaxEvents` field [#4402](https://github.com/chaos-mesh/chaos-mesh/pull/4402)
 - Fix chaos controller can't find daemonIP over 1000 nodes using endpoints [#4421](https://github.com/chaos-mesh/chaos-mesh/pull/4421)
 - Minor fixes in certificates to make them ArgoCD friendly [#4482](https://github.com/chaos-mesh/chaos-mesh/pull/4482)
 
