@@ -67,7 +67,7 @@ func (b *ChaosDaemonClientBuilder) FindDaemonIP(ctx context.Context, pod *v1.Pod
 
 	daemonIP := findIPOnEndpointSlice(&endpointSliceList, nodeName)
 	if len(daemonIP) == 0 {
-		return "", errors.Errorf("cannot find daemonIP on node %s ", nodeName)
+		return "", errors.Errorf("cannot find daemonIP on node %s", nodeName)
 	}
 
 	return daemonIP, nil
