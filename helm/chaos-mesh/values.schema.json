@@ -116,6 +116,19 @@
                     "properties": {},
                     "type": "object"
                 },
+                "service": {
+                    "properties": {
+                        "scrape": {
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "type": "object"
+                },
                 "serviceAccount": {
                     "type": "string"
                 },
