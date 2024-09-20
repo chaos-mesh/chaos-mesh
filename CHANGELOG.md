@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.6.5] - 2024-09-20
+
+### Added
+
 - Add an option to toggle metric scraping of Chaos Daemon [#4488](https://github.com/chaos-mesh/chaos-mesh/pull/4488)
 
 ### Changed
