@@ -29,6 +29,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/chaosimpl/types"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/utils/recorder"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
@@ -156,6 +157,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to apply chaos")
 				applyFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Apply, err.Error())
+				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
+					records[index].Events = records[index].Events[1:]
+				}
 				records[index].Events = append(records[index].Events, *applyFailedEvent)
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "apply chaos",
@@ -170,6 +174,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if record.Phase == v1alpha1.Injected {
 				records[index].InjectedCount++
 				applySucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Apply, "")
+				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
+					records[index].Events = records[index].Events[1:]
+				}
 				records[index].Events = append(records[index].Events, *applySucceedEvent)
 				r.Recorder.Event(obj, recorder.Applied{
 					Id: records[index].Id,
@@ -186,6 +193,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				// but the retry shouldn't block other resource process
 				r.Log.Error(err, "fail to recover chaos")
 				recoverFailedEvent := newRecordEvent(v1alpha1.TypeFailed, v1alpha1.Recover, err.Error())
+				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
+					records[index].Events = records[index].Events[1:]
+				}
 				records[index].Events = append(records[index].Events, *recoverFailedEvent)
 				r.Recorder.Event(obj, recorder.Failed{
 					Activity: "recover chaos",
@@ -200,6 +210,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if record.Phase == v1alpha1.NotInjected {
 				records[index].RecoveredCount++
 				recoverSucceedEvent := newRecordEvent(v1alpha1.TypeSucceeded, v1alpha1.Recover, "")
+				if len(records[index].Events) >= config.ControllerCfg.MaxEvents {
+					records[index].Events = records[index].Events[1:]
+				}
 				records[index].Events = append(records[index].Events, *recoverSucceedEvent)
 				r.Recorder.Event(obj, recorder.Recovered{
 					Id: records[index].Id,
