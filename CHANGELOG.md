@@ -40,7 +40,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
 - Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
 - Integrate helm-values-schema-json to generate schema for values.yaml [#4435](https://github.com/chaos-mesh/chaos-mesh/pull/4435)
-- Option to toggle metric scraping from Promethues by annotations [#4488](https://github.com/chaos-mesh/chaos-mesh/pull/4488)
+- Add an option to toggle metric scraping of Chaos Daemon [#4488](https://github.com/chaos-mesh/chaos-mesh/pull/4488)
 
 ### Changed
 
