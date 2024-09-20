@@ -77,6 +77,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.affinity` | Map of chaos-daemon node/pod affinities | `{}` |
 | `chaosDaemon.updateStrategy` | Specify DaemonSetUpdateStrategy for chaos-daemon | `{}` |
+| `chaosDaemon.service.scrape.enabled` | Enable metric scraping from Promethues by annotations | `true` |
 | `dashboard.create` | Enable chaos-dashboard | `true` |
 | `dashboard.databaseSecretName` | Optional, the secret name that has `DATABASE_DATASOURCE` defined | `` |
 | `dashboard.rootUrl` | Specify the base url for openid/oauth2 (like GCP Auth Integration) callback URL. | `http://localhost:2333` |
