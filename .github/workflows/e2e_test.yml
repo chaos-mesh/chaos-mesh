@@ -27,6 +27,8 @@ jobs:
           files: |
             .gitignore
             **.md
+            .github/ISSUE_TEMPLATE/*
+            .github/pull_request_template.md
             ui/**
             .github/workflows/checklink.yaml
             .github/checklink_config.json

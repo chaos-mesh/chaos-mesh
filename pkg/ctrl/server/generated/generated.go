@@ -660,6 +660,10 @@ type ComplexityRoot struct {
 		Pods      func(childComplexity int, selector model.PodSelectorInput) int
 	}
 
+	RateSpec struct {
+		Rate func(childComplexity int) int
+	}
+
 	RawIPSet struct {
 		CidrAndPorts func(childComplexity int) int
 		Cidrs        func(childComplexity int) int
@@ -685,6 +689,7 @@ type ComplexityRoot struct {
 		Duplicate func(childComplexity int) int
 		IPSet     func(childComplexity int) int
 		Loss      func(childComplexity int) int
+		Rate      func(childComplexity int) int
 		Source    func(childComplexity int) int
 		Type      func(childComplexity int) int
 	}
@@ -3812,6 +3817,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["selector"].(model.PodSelectorInput)), true
 
+	case "RateSpec.rate":
+		if e.complexity.RateSpec.Rate == nil {
+			break
+		}
+
+		return e.complexity.RateSpec.Rate(childComplexity), true
+
 	case "RawIPSet.cidrAndPorts":
 		if e.complexity.RawIPSet.CidrAndPorts == nil {
 			break
@@ -3937,6 +3949,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RawTrafficControl.Loss(childComplexity), true
+
+	case "RawTrafficControl.rate":
+		if e.complexity.RawTrafficControl.Rate == nil {
+			break
+		}
+
+		return e.complexity.RawTrafficControl.Rate(childComplexity), true
 
 	case "RawTrafficControl.source":
 		if e.complexity.RawTrafficControl.Source == nil {
@@ -5338,6 +5357,9 @@ type RawTrafficControl @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1a
     # bandwidth represents the detail about bandwidth control action
     bandwidth: BandwidthSpec
 
+    # Rate represents the detail about rate control action
+    rate: RateSpec
+
     # The name of target ipset
     ipSet: String
 
@@ -5396,6 +5418,11 @@ type BandwidthSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha
     # size can be raised. A 3000 byte minburst allows around 3mbit/s
     # of peakrate, given 1000 byte packets.
     minburst: Int
+}
+
+type RateSpec @goModel(model: "github.com/chaos-mesh/chaos-mesh/api/v1alpha1.RateSpec"){
+    # Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+    rate: String!
 }
 
 # ReorderSpec defines details of packet reorder.
@@ -18942,6 +18969,41 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _RateSpec_rate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RateSpec) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RateSpec",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _RawIPSet_name(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawIPSet) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -19514,6 +19576,38 @@ func (ec *executionContext) _RawTrafficControl_bandwidth(ctx context.Context, fi
 	res := resTmp.(*v1alpha1.BandwidthSpec)
 	fc.Result = res
 	return ec.marshalOBandwidthSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐBandwidthSpec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RawTrafficControl_rate(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RawTrafficControl",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*v1alpha1.RateSpec)
+	fc.Result = res
+	return ec.marshalORateSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRateSpec(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _RawTrafficControl_ipSet(ctx context.Context, field graphql.CollectedField, obj *v1alpha1.RawTrafficControl) (ret graphql.Marshaler) {
@@ -28024,6 +28118,37 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var rateSpecImplementors = []string{"RateSpec"}
+
+func (ec *executionContext) _RateSpec(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RateSpec) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rateSpecImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RateSpec")
+		case "rate":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RateSpec_rate(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var rawIPSetImplementors = []string{"RawIPSet"}
 
 func (ec *executionContext) _RawIPSet(ctx context.Context, sel ast.SelectionSet, obj *v1alpha1.RawIPSet) graphql.Marshaler {
@@ -28251,6 +28376,13 @@ func (ec *executionContext) _RawTrafficControl(ctx context.Context, sel ast.Sele
 		case "bandwidth":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._RawTrafficControl_bandwidth(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+		case "rate":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._RawTrafficControl_rate(ctx, field, obj)
 			}
 
 			out.Values[i] = innerFunc(ctx)
@@ -31289,6 +31421,13 @@ func (ec *executionContext) marshalOProcessStress2ᚕᚖgithubᚗcomᚋchaosᚑm
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalORateSpec2ᚖgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRateSpec(ctx context.Context, sel ast.SelectionSet, v *v1alpha1.RateSpec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._RateSpec(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalORawIPSet2ᚕgithubᚗcomᚋchaosᚑmeshᚋchaosᚑmeshᚋapiᚋv1alpha1ᚐRawIPSetᚄ(ctx context.Context, sel ast.SelectionSet, v []v1alpha1.RawIPSet) graphql.Marshaler {
