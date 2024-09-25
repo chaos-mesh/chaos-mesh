@@ -133,7 +133,7 @@ func (in *AWSChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *AWSChaos) IsOneShot() bool {
-	if in.Spec.Action==Ec2Restart {
+	if in.Spec.Action == Ec2Restart {
 		return true
 	}
 
@@ -275,7 +275,7 @@ func (in *AzureChaos) DurationExceeded(now time.Time) (bool, time.Duration, erro
 }
 
 func (in *AzureChaos) IsOneShot() bool {
-	if in.Spec.Action==AzureVmRestart {
+	if in.Spec.Action == AzureVmRestart {
 		return true
 	}
 
@@ -693,7 +693,7 @@ func (in *GCPChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *GCPChaos) IsOneShot() bool {
-	if in.Spec.Action==NodeReset {
+	if in.Spec.Action == NodeReset {
 		return true
 	}
 
@@ -1702,7 +1702,7 @@ func (in *PodChaos) DurationExceeded(now time.Time) (bool, time.Duration, error)
 }
 
 func (in *PodChaos) IsOneShot() bool {
-	if in.Spec.Action==PodKillAction || in.Spec.Action==ContainerKillAction {
+	if in.Spec.Action == PodKillAction || in.Spec.Action == ContainerKillAction {
 		return true
 	}
 
@@ -2305,7 +2305,6 @@ func init() {
 		chaos: &TimeChaos{},
 		list:  &TimeChaosList{},
 	})
-
 
 	allScheduleItem.register(KindAWSChaos, &ChaosKind{
 		chaos: &AWSChaos{},
