@@ -26,6 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for reading database connection string from secret [#4363](https://github.com/chaos-mesh/chaos-mesh/pull/4363)
 - Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
 - Integrate helm-values-schema-json to generate schema for values.yaml [#4435](https://github.com/chaos-mesh/chaos-mesh/pull/4435)
+- Add an option to toggle metric scraping of Chaos Daemon [#4488](https://github.com/chaos-mesh/chaos-mesh/pull/4488)
 
 ### Changed
 
@@ -67,6 +68,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 - Fix dashboard panic while replacing query namespace with targetNamespace in namespace scoped mode [#4409](https://github.com/chaos-mesh/chaos-mesh/issues/4409)
 - Fix incorrect mmap args for IOChaos [#3680](https://github.com/chaos-mesh/chaos-mesh/issues/3680)
+- Fix excessive records by adding the `MaxEvents` field [#4402](https://github.com/chaos-mesh/chaos-mesh/pull/4402)
 - Fix chaos controller can't find daemonIP over 1000 nodes using endpoints [#4421](https://github.com/chaos-mesh/chaos-mesh/pull/4421)
 - Minor fixes in certificates to make them ArgoCD friendly [#4482](https://github.com/chaos-mesh/chaos-mesh/pull/4482)
 
