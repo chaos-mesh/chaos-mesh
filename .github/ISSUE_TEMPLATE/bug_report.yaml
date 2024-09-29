@@ -13,7 +13,8 @@ body:
       label: Chaos Mesh Version
       description: What version of Chaos Mesh are you using?
       placeholder: v2.x.x or master
-    required: true
+    validations:
+      required: true
   - type: input
     id: k8s-version
     attributes:
