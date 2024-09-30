@@ -208,7 +208,9 @@ jobs:
       - name: Install Chaos Mesh
         # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
         run: |
-          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
+            --set images.tag=latest \
+            --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
