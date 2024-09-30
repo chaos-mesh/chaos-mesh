@@ -12,7 +12,7 @@ permissions: read-all
 jobs:
   unitTestAndCodeCoverage:
     runs-on: ubuntu-latest
-    name: "Unit Test And Code Coverage"
+    name: Unit Test And Code Coverage
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +22,7 @@ jobs:
       - name: Upload Code Coverage
         uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./cover.out
           verbose: true
           fail_ci_if_error: true
