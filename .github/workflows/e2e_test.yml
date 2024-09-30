@@ -189,6 +189,8 @@ jobs:
         with:
           minikube-version: 1.32.0
           kubernetes-version: ${{ matrix.kubernetes-version }}
+          driver: docker
+          container-runtime: containerd
 
       - name: load image into minikube
         run: |
