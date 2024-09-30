@@ -28,7 +28,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/containerd/cgroups"
+	"github.com/containerd/cgroups/v3"
+	cgroup1 "github.com/containerd/cgroups/v3/cgroup1"
+	cgroup2 "github.com/containerd/cgroups/v3/cgroup2"
 )
 
 func main() {
@@ -276,28 +278,66 @@ func (s *server) networkRecvTest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
-	control, err := cgroups.Load(cgroups.V1, cgroups.PidPath(1))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var isCgroupsV2 bool
+	if cgroups.Mode() == cgroups.Unified {
+		isCgroupsV2 = true
 	}
 
-	stats, err := control.Stat(cgroups.IgnoreNotExist)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	if isCgroupsV2 {
+		group, err := cgroup2.PidGroupPath(1)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 
-	response, err := json.Marshal(map[string]uint64{
-		"cpuTime":     stats.CPU.Usage.Total,
-		"memoryUsage": stats.Memory.Usage.Usage - stats.Memory.Kernel.Usage - stats.Memory.Cache,
-	})
-	if err != nil {
-		http.Error(w, "fail to marshal response", http.StatusInternalServerError)
-		return
-	}
+			return
+		}
 
-	w.Write(response)
+		m, err := cgroup2.LoadSystemd("", group)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+
+			return
+		}
+
+		stats, err := m.Stat()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		response, err := json.Marshal(map[string]uint64{
+			"cpuTime":     stats.CPU.UsageUsec,
+			"memoryUsage": stats.Memory.Usage,
+		})
+		if err != nil {
+			http.Error(w, "fail to marshal response", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(response)
+	} else {
+		control, err := cgroup1.Load(cgroup1.PidPath(1))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		stats, err := control.Stat(cgroup1.IgnoreNotExist)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		response, err := json.Marshal(map[string]uint64{
+			"cpuTime":     stats.CPU.Usage.Total,
+			"memoryUsage": stats.Memory.Usage.Usage - stats.Memory.Kernel.Usage - stats.Memory.Cache,
+		})
+		if err != nil {
+			http.Error(w, "fail to marshal response", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(response)
+	}
 }
 
 func (s *server) httpEcho(w http.ResponseWriter, r *http.Request) {
