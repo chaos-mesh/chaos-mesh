@@ -26,8 +26,8 @@
 
 > This PR should be cherry-picked to the following release branches:
 
+- [ ] release-2.7
 - [ ] release-2.6
-- [ ] release-2.5
 
 ## Checklist
 
