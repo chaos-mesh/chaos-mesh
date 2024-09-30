@@ -12,7 +12,7 @@ permissions: read-all
 
 jobs:
   changed-files:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       only_changed: ${{ steps.filter.outputs.only_changed }}
     steps:
@@ -50,7 +50,7 @@ jobs:
   build-image:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
         uses: actions/checkout@v4
@@ -116,7 +116,7 @@ jobs:
   build-e2e-binary:
     needs: changed-files
     if: needs.changed-files.outputs.only_changed == 'false'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout codes
         uses: actions/checkout@v4
@@ -144,7 +144,7 @@ jobs:
     needs:
       - build-image
       - build-e2e-binary
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -242,6 +242,6 @@ jobs:
     needs:
       - e2e-test-matrix
     name: E2E Test Passed
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - run: echo "🎉 E2E Test Passed!"
