@@ -49,6 +49,8 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 			return false, err
 		}
 
+		framework.Logf("current CPU: [%d, %d]", conditions[0].CpuTime, conditions[1].CpuTime)
+
 		diff[0] = conditions[0].CpuTime - lastCPUTime[0]
 		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
 		lastCPUTime[0] = conditions[0].CpuTime

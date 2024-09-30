@@ -189,8 +189,6 @@ jobs:
         with:
           minikube-version: 1.32.0
           kubernetes-version: ${{ matrix.kubernetes-version }}
-          driver: docker
-          container-runtime: containerd
 
       - name: load image into minikube
         run: |
@@ -206,11 +204,9 @@ jobs:
         uses: azure/setup-helm@v3
 
       - name: Install Chaos Mesh
-        # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh --namespace=chaos-mesh \
-            --set images.tag=latest \
-            --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+            --set images.tag=latest
       - name: e2e tests
         env:
           FOCUS: ${{ matrix.focus }}
