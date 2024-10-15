@@ -10,6 +10,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.7.0] - 2024-09-20
+
+### Added
+
 - Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
