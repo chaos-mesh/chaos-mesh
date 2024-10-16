@@ -117,6 +117,9 @@ spec:
                 description: RemoteCluster represents the remote cluster where the
                   chaos will be deployed
                 type: string
+              returnValue:
+                description: the return value for action 'return'
+                type: string
               ruleData:
                 description: the byteman rule's data for action 'ruleData'
                 type: string

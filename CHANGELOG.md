@@ -27,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Issue with getting a single archive in the Dashboard UI [#4521](https://github.com/chaos-mesh/chaos-mesh/pull/4521)
+- Changed JVMParameter.ReturnValue json tag field name to `returnValue` [#4517](https://github.com/chaos-mesh/chaos-mesh/issues/4517)
 
 ### Security
 
