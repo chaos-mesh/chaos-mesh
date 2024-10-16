@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Upgrade pnpm to v9
+- Upgrade pnpm lockfile version to 9.0
 
 ### Deprecated
 
