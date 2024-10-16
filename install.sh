@@ -1632,6 +1632,10 @@ spec:
             - --runtime-socket-path
             - /host-run/${socketName}
           env:
+            - name: LOG_FORMAT
+              value: "console"
+            - name: LOG_LEVEL
+              value: "debug"
             - name: TZ
               value: ${timezone}
           securityContext:
@@ -1747,6 +1751,10 @@ spec:
               value: "336h"
             - name: TTL_WORKFLOW
               value: "336h"
+            - name: LOG_FORMAT
+              value: "console"
+            - name: LOG_LEVEL
+              value: "debug"
             - name: TZ
               value: ${timezone}
             - name: CLUSTER_SCOPED
@@ -1847,6 +1855,10 @@ spec:
             value: "10080"
           - name: WEBHOOK_PORT
             value: "10250"
+          - name: LOG_FORMAT
+            value: "console"
+          - name: LOG_LEVEL
+            value: "debug"
           - name: NAMESPACE
             valueFrom:
               fieldRef:
