@@ -14,7 +14,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Nothing
+- Upgrade pnpm lockfile version to 9.0 [#4522](https://github.com/chaos-mesh/chaos-mesh/pull/4522)
 
 ### Deprecated
 
