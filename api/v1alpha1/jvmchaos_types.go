@@ -84,7 +84,7 @@ type JVMParameter struct {
 
 	// +optional
 	// the return value for action 'return'
-	ReturnValue string `json:"value"`
+	ReturnValue string `json:"returnValue"`
 
 	// +optional
 	// the exception which needs to throw for action `exception`
