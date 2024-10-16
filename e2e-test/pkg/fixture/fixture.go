@@ -178,7 +178,7 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(1),
+			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
