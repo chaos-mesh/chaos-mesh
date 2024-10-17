@@ -309,7 +309,7 @@ func (s *Service) detailSchedule(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrBadRequest.New("the archive schedule is not found"))
+			_ = c.Error(u.ErrBadRequest.New("the archived schedule is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrInternalServer.NewWithNoMessage())
@@ -486,7 +486,7 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(u.ErrBadRequest.New("the archive schedule is not found"))
+			_ = c.Error(u.ErrBadRequest.New("the archived workflow is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrInternalServer.NewWithNoMessage())
