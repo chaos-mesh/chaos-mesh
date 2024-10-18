@@ -18,6 +18,7 @@ package dnschaos
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"time"
 
@@ -100,7 +101,7 @@ func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, p
 		Namespace: pod.Namespace,
 	}
 
-	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
@@ -179,7 +180,7 @@ func (impl *Impl) Recover(ctx context.Context, index int, records []*v1alpha1.Re
 }
 
 func (impl *Impl) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
-	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithInsecure())
+	conn, err := grpc.Dial(net.JoinHostPort(dnsServerIP, fmt.Sprintf("%d", port)), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
