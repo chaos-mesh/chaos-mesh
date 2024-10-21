@@ -81,3 +81,4 @@ header:
     # OWNERS
     - 'OWNERS'
     - 'OWNERS_ALIASES'
+    - '.well-known/funding-manifest-urls'
