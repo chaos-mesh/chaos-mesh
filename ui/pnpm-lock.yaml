@@ -251,8 +251,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       http-proxy-middleware:
-        specifier: ^2.0.1
-        version: 2.0.6(@types/express@4.17.17)
+        specifier: ^2.0.7
+        version: 2.0.7(@types/express@4.17.17)
       msw:
         specifier: ^1.2.1
         version: 1.2.1(typescript@4.5.5)
@@ -3253,6 +3253,7 @@ packages:
   '@xmldom/xmldom@0.8.6':
     resolution: {integrity: sha512-uRjjusqpoqfmRkTaNuLJ2VohVr67Q5YwDATW3VU7PfzTj6IRaihGrYI7zckGZjxQPBIp63nfvJbM+Yu5ICh0Bg==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -5229,6 +5230,7 @@ packages:
   eslint@8.43.0:
     resolution: {integrity: sha512-aaCpf2JqqKesMFGgmRPessmVKjcGXqdlAYLLC3THM8t5nBRZRQ+st5WM/hoJXkdioEXLLbXgclUpM0TXo5HX5Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.5.2:
@@ -5931,8 +5933,8 @@ packages:
     resolution: {integrity: sha512-k0zdNgqWTGA6aeIRVpvfVob4fL52dTfaehylg0Y4UvSySvOq/Y+BOyPrgpUrA7HylqvU8vIZGsRuXmspskV0Tg==}
     engines: {node: '>= 6'}
 
-  http-proxy-middleware@2.0.6:
-    resolution: {integrity: sha512-ya/UeJ6HVBYxrgYotAZo1KvPWlgB48kUJLDePFeneHsVujFaW5WNj2NgWCAE//B1Dl02BIfYlpNgBy8Kf8Rjmw==}
+  http-proxy-middleware@2.0.7:
+    resolution: {integrity: sha512-fgVY8AV7qU7z/MmXJ/rxwbrtQH4jBQ9m7kp3llF0liB7glmFeVZFBepQb32T3y8n8k2+AEYuMPCpinYW+/CuRA==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
       '@types/express': ^4.17.13
@@ -13076,7 +13078,7 @@ snapshots:
       style-loader: 1.3.0(webpack@4.46.0)
       terser-webpack-plugin: 4.2.3(webpack@4.46.0)
       ts-dedent: 2.2.0
-      url-loader: 4.1.1(file-loader@6.2.0(webpack@5.75.0))(webpack@4.46.0)
+      url-loader: 4.1.1(file-loader@6.2.0(webpack@4.46.0))(webpack@4.46.0)
       util-deprecate: 1.0.2
       webpack: 4.46.0
       webpack-dev-middleware: 3.7.3(webpack@4.46.0)
@@ -13449,7 +13451,7 @@ snapshots:
       telejson: 6.0.8
       terser-webpack-plugin: 4.2.3(webpack@4.46.0)
       ts-dedent: 2.2.0
-      url-loader: 4.1.1(file-loader@6.2.0(webpack@5.75.0))(webpack@4.46.0)
+      url-loader: 4.1.1(file-loader@6.2.0(webpack@4.46.0))(webpack@4.46.0)
       util-deprecate: 1.0.2
       webpack: 4.46.0
       webpack-dev-middleware: 3.7.3(webpack@4.46.0)
@@ -17966,7 +17968,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy-middleware@2.0.6(@types/express@4.17.17):
+  http-proxy-middleware@2.0.7(@types/express@4.17.17):
     dependencies:
       '@types/http-proxy': 1.17.10
       http-proxy: 1.18.1
@@ -22634,14 +22636,14 @@ snapshots:
 
   urix@0.1.0: {}
 
-  url-loader@4.1.1(file-loader@6.2.0(webpack@5.75.0))(webpack@4.46.0):
+  url-loader@4.1.1(file-loader@6.2.0(webpack@4.46.0))(webpack@4.46.0):
     dependencies:
       loader-utils: 2.0.4
       mime-types: 2.1.35
       schema-utils: 3.1.1
       webpack: 4.46.0
     optionalDependencies:
-      file-loader: 6.2.0(webpack@5.75.0)
+      file-loader: 6.2.0(webpack@4.46.0)
 
   url-parse@1.5.10:
     dependencies:
@@ -22842,7 +22844,7 @@ snapshots:
       express: 4.18.2
       graceful-fs: 4.2.10
       html-entities: 2.3.3
-      http-proxy-middleware: 2.0.6(@types/express@4.17.17)
+      http-proxy-middleware: 2.0.7(@types/express@4.17.17)
       ipaddr.js: 2.0.1
       open: 8.4.2
       p-retry: 4.6.2
