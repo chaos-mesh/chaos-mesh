@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh
 
-go 1.20
+go 1.21
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
@@ -22,6 +22,7 @@ require (
 	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v1.1.0
 	github.com/containerd/containerd v1.7.11
+	github.com/coreos/go-oidc/v3 v3.11.0
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/ethereum/go-ethereum v1.12.1
 	github.com/fatih/color v1.13.0
@@ -64,11 +65,11 @@ require (
 	github.com/vishvananda/netlink v1.2.1-beta.2
 	go.uber.org/fx v1.19.2
 	go.uber.org/zap v1.25.0
-	golang.org/x/crypto v0.17.0
-	golang.org/x/oauth2 v0.10.0
-	golang.org/x/sync v0.3.0
-	golang.org/x/sys v0.15.0
-	golang.org/x/term v0.15.0
+	golang.org/x/crypto v0.25.0
+	golang.org/x/oauth2 v0.21.0
+	golang.org/x/sync v0.7.0
+	golang.org/x/sys v0.22.0
+	golang.org/x/term v0.22.0
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	google.golang.org/api v0.126.0
 	google.golang.org/grpc v1.58.3
@@ -87,8 +88,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.21.0 // indirect
-	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20230306123547-8075edf89bb0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
@@ -150,6 +150,7 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
@@ -171,7 +172,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
@@ -264,11 +265,11 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/exp v0.0.0-20230515195305-f3d0a9c9a5cc // indirect
-	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.12.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect

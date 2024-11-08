@@ -50,6 +50,7 @@ type ChaosDashboardConfig struct {
 	OidcClientId     string `envconfig:"OIDC_CLIENT_ID" default:"" json:"-"`
 	OidcClientSecret string `envconfig:"OIDC_CLIENT_SECRET" default:"" json:"-"`
 	OidcIssuerURL    string `envconfig:"OIDC_ISSUER_URL" default:"" json:"-"`
+	OidcCaFile       string `envconfig:"OIDC_CA_FILE" default:"" json:"-"`
 
 	RootUrl string `envconfig:"ROOT_URL" default:"http://localhost:2333" json:"root_path"`
 

@@ -289,6 +289,8 @@ dashboard:
     issuerUrl: ""
     # References existing Kubernetes secret containing `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and `OIDC_ISSUER_URL`.
     existingSecret: ""
+    # for self-signed CA
+    caBundlePEM: ""
 
   # Node labels for chaos-dashboard  pod assignment
   nodeSelector: {}
