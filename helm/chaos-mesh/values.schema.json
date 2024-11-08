@@ -106,8 +106,7 @@
                     "type": "object"
                 },
                 "runtime": {
-                    "type": "string",
-                    "enum": ["docker", "containerd", "CRI-O"]
+                    "type": "string"
                 },
                 "serviceAccount": {
                     "type": "string"
@@ -317,9 +316,6 @@
                 "targetNamespace": {
                     "type": "string"
                 },
-                "test": {
-                    "type": "integer"
-                },
                 "tolerations": {
                     "type": "array"
                 }
@@ -338,7 +334,7 @@
                     "type": "boolean"
                 },
                 "databaseSecretName": {
-                  "type": "string"
+                    "type": "string"
                 },
                 "env": {
                     "type": "object",
@@ -350,8 +346,7 @@
                             "type": "string"
                         },
                         "DATABASE_DRIVER": {
-                            "type": "string",
-                            "enum": ["sqlite3", "mysql", "postgres"]
+                            "type": "string"
                         },
                         "LISTEN_HOST": {
                             "type": "string"
@@ -385,34 +380,14 @@
                 "gcpSecurityMode": {
                     "type": "object",
                     "properties": {
-                        "enabled": {
-                            "type": "boolean"
-                        },
                         "clientId": {
                             "type": "string"
                         },
                         "clientSecret": {
                             "type": "string"
                         },
-                        "existingSecret": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "OIDCSecurityMode": {
-                    "type": "object",
-                    "properties": {
                         "enabled": {
                             "type": "boolean"
-                        },
-                        "clientId": {
-                            "type": "string"
-                        },
-                        "clientSecret": {
-                            "type": "string"
-                        },
-                        "issuerUrl": {
-                            "type": "string"
                         },
                         "existingSecret": {
                             "type": "string"
@@ -481,6 +456,29 @@
                 },
                 "nodeSelector": {
                     "type": "object"
+                },
+                "oidcSecurityMode": {
+                    "type": "object",
+                    "properties": {
+                        "caBundlePEM": {
+                            "type": "string"
+                        },
+                        "clientId": {
+                            "type": "string"
+                        },
+                        "clientSecret": {
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "existingSecret": {
+                            "type": "string"
+                        },
+                        "issuerUrl": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "persistentVolume": {
                     "type": "object",
@@ -564,6 +562,60 @@
         "dnsServer": {
             "type": "object",
             "properties": {
+                "affinity": {
+                    "type": "object",
+                    "properties": {
+                        "podAntiAffinity": {
+                            "type": "object",
+                            "properties": {
+                                "preferredDuringSchedulingIgnoredDuringExecution": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "podAffinityTerm": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "labelSelector": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "matchExpressions": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "key": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "values": {
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "topologyKey": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            },
+                                            "weight": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "create": {
                     "type": "boolean"
                 },
