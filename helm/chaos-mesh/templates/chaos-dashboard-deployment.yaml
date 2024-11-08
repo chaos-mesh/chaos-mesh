@@ -106,6 +106,10 @@ spec:
             - name: OIDC_ISSUER_URL
               value: "{{ .Values.dashboard.oidcSecurityMode.issuerUrl }}"
             {{- end }}
+            {{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+            - name: OIDC_CA_FILE
+              value: "/etc/chaos-mesh/oidc-ca/ca.pem"
+            {{- end }}
             - name: DNS_SERVER_CREATE
               value: "{{ .Values.dnsServer.create }}"
             - name: ROOT_URL
@@ -133,6 +137,11 @@ spec:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
               subPath: "{{ .Values.dashboard.persistentVolume.subPath }}"
+            {{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+            - name: oidc-ca
+              mountPath: "/etc/chaos-mesh/oidc-ca/"
+              readOnly: true
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
@@ -169,6 +178,11 @@ spec:
 {{ toYaml . | indent 8 }}
       {{- end }}
       volumes:
+      {{- if .Values.dashboard.oidcSecurityMode.caBundlePEM }}
+      - name: oidc-ca
+        secret:
+          secretName: chaos-mesh-oidc-ca
+      {{- end }}
       - name: storage-volume
       {{- if .Values.dashboard.persistentVolume.enabled }}
         persistentVolumeClaim:
