@@ -494,6 +494,9 @@ prometheus:
   serviceAccount: prometheus
   # Docker image for prometheus
   image: prom/prometheus:v2.18.1
+  # Docker image for busybox
+  busybox:
+    image: busybox
   # Image pull policy
   imagePullPolicy: IfNotPresent
   # Custom priorityClassName for using pod priorities
