@@ -16,14 +16,26 @@
 package chaosdaemon
 
 import (
+	"time"
+
 	"github.com/vishvananda/netlink"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func ToNetlinkNetemAttrs(netem *pb.Netem) netlink.NetemQdiscAttrs {
+	delayTime, err := time.ParseDuration(netem.Time)
+	if err != nil {
+		delayTime = 0
+	}
+
+	jitter, err := time.ParseDuration(netem.Jitter)
+	if err != nil {
+		jitter = 0
+	}
+
 	return netlink.NetemQdiscAttrs{
-		Latency:       netem.Time,
+		Latency:       uint32(delayTime.Microseconds()),
 		DelayCorr:     netem.DelayCorr,
 		Limit:         netem.Limit,
 		Loss:          netem.Loss,
@@ -31,7 +43,7 @@ func ToNetlinkNetemAttrs(netem *pb.Netem) netlink.NetemQdiscAttrs {
 		Gap:           netem.Gap,
 		Duplicate:     netem.Duplicate,
 		DuplicateCorr: netem.DuplicateCorr,
-		Jitter:        netem.Jitter,
+		Jitter:        uint32(jitter.Microseconds()),
 		ReorderProb:   netem.Reorder,
 		ReorderCorr:   netem.ReorderCorr,
 		CorruptProb:   netem.Corrupt,

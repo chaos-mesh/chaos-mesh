@@ -140,9 +140,9 @@ func TestMergenetem(t *testing.T) {
 
 		spec := v1alpha1.TcParameter{
 			Delay: &v1alpha1.DelaySpec{
-				Latency:     "90ms",
+				Latency:     "1s",
 				Correlation: "25",
-				Jitter:      "90ms",
+				Jitter:      "100ms",
 			},
 			Loss: &v1alpha1.LossSpec{
 				Loss:        "25",
@@ -155,13 +155,32 @@ func TestMergenetem(t *testing.T) {
 		m, err := mergeNetem(spec)
 		g.Expect(err).ShouldNot(HaveOccurred())
 		em := &pb.Netem{
-			Time:      90000,
-			Jitter:    90000,
+			Time:      "1s",
+			Jitter:    "100ms",
 			DelayCorr: 25,
 			Loss:      25,
 			LossCorr:  25,
 			Rate:      "25mbps",
 		}
 		g.Expect(m).Should(Equal(em))
+
+		// Latency should have units in duration
+		spec = v1alpha1.TcParameter{
+			Delay: &v1alpha1.DelaySpec{
+				Latency: "1000",
+			},
+		}
+		_, err = mergeNetem(spec)
+		g.Expect(err).Should(HaveOccurred())
+
+		// Jitter should have units in duration
+		spec = v1alpha1.TcParameter{
+			Delay: &v1alpha1.DelaySpec{
+				Latency: "1s",
+				Jitter:  "100",
+			},
+		}
+		_, err = mergeNetem(spec)
+		g.Expect(err).Should(HaveOccurred())
 	})
 }
