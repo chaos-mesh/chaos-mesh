@@ -50,9 +50,9 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-        --kind-version       Version of the Kind tool, default value: v0.11.1
+        --kind-version       Version of the Kind tool, default value: v0.25.0
         --node-num           The count of the cluster nodes,default value: 3
-        --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
+        --k8s-version        Version of the Kubernetes cluster,default value: v1.29.10
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-mesh
@@ -64,9 +64,9 @@ main() {
     local local_kube=""
     local cm_version="${VERSION}"
     local kind_name="kind"
-    local kind_version="v0.11.1"
+    local kind_version="v0.25.0"
     local node_num=3
-    local k8s_version="v1.17.2"
+    local k8s_version="v1.29.10"
     local volume_num=5
     local release_name="chaos-mesh"
     local namespace="chaos-mesh"
@@ -1283,7 +1283,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-dns-server-target-namespace
-  namespace: 
+  namespace:
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1976,7 +1976,7 @@ spec:
                   - chaos-dns-server
               topologyKey: kubernetes.io/hostname
             weight: 100
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-dns-server
         image: ghcr.io/chaos-mesh/chaos-coredns:v0.2.6
