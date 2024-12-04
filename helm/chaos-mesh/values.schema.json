@@ -177,6 +177,9 @@
         "clusterScoped": {
             "type": "boolean"
         },
+        "openshift": {
+            "type": "boolean"
+        },
         "controllerManager": {
             "properties": {
                 "affinity": {
