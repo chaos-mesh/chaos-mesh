@@ -3538,9 +3538,12 @@ definitions:
         type: string
       jitter:
         default: 0ms
-        description: +optional
+        description: |-
+          +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$"
+          +optional
         type: string
       latency:
+        description: +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$"
         type: string
       reorder:
         $ref: '#/definitions/v1alpha1.ReorderSpec'

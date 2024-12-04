@@ -56,8 +56,8 @@ message NetemRequest {
 }
 
 message Netem {
-  uint32 time = 1;
-  uint32 jitter = 2;
+  string time = 1;
+  string jitter = 2;
   float delay_corr = 3;
   uint32 limit = 4;
   float loss = 5;

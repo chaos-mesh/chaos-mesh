@@ -27,6 +27,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Issue with getting a single archive in the Dashboard UI [#4521](https://github.com/chaos-mesh/chaos-mesh/pull/4521)
+- Fix inconsistent units for latency and jitter values in Network Chaos [#4546](https://github.com/chaos-mesh/chaos-mesh/pull/4546)
 
 ### Security
 
