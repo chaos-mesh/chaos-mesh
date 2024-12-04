@@ -90,7 +90,7 @@ func (s *Service) list(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		s.logger.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	start, _ := time.Parse(time.RFC3339, c.Query("start"))
@@ -146,7 +146,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		s.logger.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	// we should fetch the events for Workflow and related WorkflowNode, so we need namespaced name at first
@@ -261,7 +261,7 @@ func (s *Service) get(c *gin.Context) {
 	if ns == "" && !s.conf.ClusterScoped && s.conf.TargetNamespace != "" {
 		ns = s.conf.TargetNamespace
 
-		s.logger.V(1).Info("Replace query namespace with", ns)
+		s.logger.V(1).Info("Replace query namespace", "ns", ns)
 	}
 
 	event, err := s.event.Find(context.Background(), uint(intID))

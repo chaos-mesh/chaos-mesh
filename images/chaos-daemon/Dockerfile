@@ -17,7 +17,7 @@ RUN mkdir -p /tmp/bin && \
     rm /usr/local/byteman.tar.gz
 
 # toda doesn't support arm64 yet
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.3/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.2.4/toda-linux-amd64.tar.gz | tar xz -C /tmp/bin
 RUN case "$TARGET_PLATFORM" in \
     'amd64') \
     export NSEXEC_ARCH='x86_64'; \
@@ -48,7 +48,7 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
 RUN apt-get update && \
     echo "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian bullseye-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
-    apt --allow-releaseinfo-change update && apt upgrade  -y && \
+    apt --allow-releaseinfo-change update && apt upgrade -y && \
     apt-get install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-11-jre && \
     rm -rf /var/lib/apt/lists/*
 
