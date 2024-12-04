@@ -93,7 +93,7 @@ type ChaosControllerConfig struct {
 
 	// DNSServiceName is the name of DNS service, which is used for DNS chaos
 	DNSServiceName string `envconfig:"CHAOS_DNS_SERVICE_NAME" default:""`
-	DNSServicePort int    `envconfig:"CHAOS_DNS_SERVICE_PORT" default:""`
+	DNSServicePort int    `envconfig:"CHAOS_DNS_SERVICE_PORT" default:"53"`
 
 	// SecurityMode is used for enable authority validation in admission webhook
 	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
