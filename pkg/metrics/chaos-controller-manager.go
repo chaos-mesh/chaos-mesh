@@ -125,6 +125,7 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 	if registerer != nil {
 		registerer.MustRegister(c)
 	}
+
 	return c
 }
 
