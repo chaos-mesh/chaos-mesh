@@ -125,9 +125,10 @@ const (
 )
 
 type WorkflowNodeCondition struct {
-	Type   WorkflowNodeConditionType `json:"type"`
-	Status corev1.ConditionStatus    `json:"status"`
-	Reason string                    `json:"reason"`
+	Type               WorkflowNodeConditionType `json:"type"`
+	Status             corev1.ConditionStatus    `json:"status"`
+	Reason             string                    `json:"reason"`
+	LastTransitionTime *metav1.Time              `json:"lastTransitionTime"`
 }
 
 // +kubebuilder:object:root=true

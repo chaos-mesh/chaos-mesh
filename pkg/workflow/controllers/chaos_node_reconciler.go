@@ -84,7 +84,7 @@ func (it *ChaosNodeReconciler) Reconcile(ctx context.Context, request reconcile.
 		if err != nil {
 			return client.IgnoreNotFound(err)
 		}
-
+		now := metav1.NewTime(time.Now())
 		if nodeNeedUpdate.Spec.Type == v1alpha1.TypeSchedule {
 			// sync status with schedule
 			scheduleList, err := it.fetchChildrenSchedule(ctx, nodeNeedUpdate)
@@ -107,16 +107,18 @@ func (it *ChaosNodeReconciler) Reconcile(ctx context.Context, request reconcile.
 				}
 				nodeNeedUpdate.Status.ChaosResource = &chaosRef
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.ConditionChaosInjected,
-					Status: corev1.ConditionTrue,
-					Reason: v1alpha1.ChaosCRCreated,
+					Type:               v1alpha1.ConditionChaosInjected,
+					Status:             corev1.ConditionTrue,
+					Reason:             v1alpha1.ChaosCRCreated,
+					LastTransitionTime: &now,
 				})
 			} else {
 				nodeNeedUpdate.Status.ChaosResource = nil
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.ConditionChaosInjected,
-					Status: corev1.ConditionFalse,
-					Reason: v1alpha1.ChaosCRNotExists,
+					Type:               v1alpha1.ConditionChaosInjected,
+					Status:             corev1.ConditionFalse,
+					Reason:             v1alpha1.ChaosCRNotExists,
+					LastTransitionTime: &now,
 				})
 			}
 
@@ -145,16 +147,18 @@ func (it *ChaosNodeReconciler) Reconcile(ctx context.Context, request reconcile.
 			}
 			nodeNeedUpdate.Status.ChaosResource = &chaosRef
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionChaosInjected,
-				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.ChaosCRCreated,
+				Type:               v1alpha1.ConditionChaosInjected,
+				Status:             corev1.ConditionTrue,
+				Reason:             v1alpha1.ChaosCRCreated,
+				LastTransitionTime: &now,
 			})
 		} else {
 			nodeNeedUpdate.Status.ChaosResource = nil
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionChaosInjected,
-				Status: corev1.ConditionFalse,
-				Reason: v1alpha1.ChaosCRNotExists,
+				Type:               v1alpha1.ConditionChaosInjected,
+				Status:             corev1.ConditionFalse,
+				Reason:             v1alpha1.ChaosCRNotExists,
+				LastTransitionTime: &now,
 			})
 		}
 
