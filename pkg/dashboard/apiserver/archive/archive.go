@@ -308,7 +308,7 @@ func (s *Service) detailSchedule(c *gin.Context) {
 	exp, err := s.archiveSchedule.FindByUID(context.Background(), uid)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
+			c.Status(http.StatusNotFound)
 			_ = c.Error(u.ErrBadRequest.New("the archived schedule is not found"))
 		} else {
 			c.Status(http.StatusInternalServerError)
