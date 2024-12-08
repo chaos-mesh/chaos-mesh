@@ -493,12 +493,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "create service error")
 				nd := fixture.NewStressTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
 				_, err = kubeCli.AppsV1().Deployments(ns).Create(context.TODO(), nd, metav1.CreateOptions{})
-				framework.ExpectNoError(err, "create network-peer deployment error")
+				framework.ExpectNoError(err, "create stress-peer deployment error")
 				err = util.WaitDeploymentReady(name, ns, kubeCli)
-				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+				framework.ExpectNoError(err, "wait stress-peer deployment ready error")
 
 				pod, err := getPod(kubeCli, ns, name)
-				framework.ExpectNoError(err, "select network-peer pod error")
+				framework.ExpectNoError(err, "select stress-peer pod error")
 				stressPeers = append(stressPeers, pod)
 
 				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
