@@ -23,7 +23,8 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	authv1 "k8s.io/api/authorization/v1"
+	authnv1 "k8s.io/api/authentication/v1"
+	authzv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
@@ -103,7 +104,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	requireClusterPrivileges, affectedNamespaces := affectedNamespaces(chaos)
 
 	if requireClusterPrivileges {
-		allow, err := v.auth(username, groups, "", requestKind)
+		allow, err := v.auth(req.UserInfo, "", requestKind)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -116,7 +117,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		v.logger.Info("start validating user", "user", username, "groups", groups, "namespace", affectedNamespaces)
 
 		for namespace := range affectedNamespaces {
-			allow, err := v.auth(username, groups, namespace, requestKind)
+			allow, err := v.auth(req.UserInfo, namespace, requestKind)
 			if err != nil {
 				return admission.Errored(http.StatusBadRequest, err)
 			}
@@ -132,21 +133,23 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	return admission.Allowed("")
 }
 
-func (v *AuthValidator) auth(username string, groups []string, namespace string, chaosKind string) (bool, error) {
+func (v *AuthValidator) auth(userInfo authnv1.UserInfo, namespace string, chaosKind string) (bool, error) {
 	resourceName, err := v.resourceFor(chaosKind)
 	if err != nil {
 		return false, err
 	}
-	sar := authv1.SubjectAccessReview{
-		Spec: authv1.SubjectAccessReviewSpec{
-			ResourceAttributes: &authv1.ResourceAttributes{
+
+	sar := authzv1.SubjectAccessReview{
+		Spec: authzv1.SubjectAccessReviewSpec{
+			ResourceAttributes: &authzv1.ResourceAttributes{
 				Namespace: namespace,
 				Verb:      "create",
 				Group:     "chaos-mesh.org",
 				Resource:  resourceName,
 			},
-			User:   username,
-			Groups: groups,
+			User:   userInfo.Username,
+			Groups: userInfo.Groups,
+			Extra:  convertExtra(userInfo.Extra),
 		},
 	}
 
@@ -171,4 +174,13 @@ func contains(arr []string, target string) bool {
 		}
 	}
 	return false
+}
+
+func convertExtra(in map[string]authnv1.ExtraValue) map[string]authzv1.ExtraValue {
+	// map from authentication and authorization types
+	extra := make(map[string]authzv1.ExtraValue)
+	for key, value := range in {
+		extra[key] = authzv1.ExtraValue(value)
+	}
+	return extra
 }
