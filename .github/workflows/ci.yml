@@ -54,7 +54,7 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
 
