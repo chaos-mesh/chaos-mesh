@@ -42,6 +42,8 @@ const (
 	kubernetesPodNameLabel       = "io.kubernetes.pod.name"
 	kubernetesPodNamespaceLabel  = "io.kubernetes.pod.namespace"
 	kubernetesContainerNameLabel = "io.kubernetes.container.name"
+	// chaosDaemonMetricsSubsystem is the subsystem name for chaos daemon metrics
+	chaosDaemonMetricsSubsystem = "chaos_daemon"
 )
 
 func WithHistogramName(name string) grpcprometheus.HistogramOption {
@@ -64,20 +66,24 @@ func NewChaosDaemonMetricsCollector(logger logr.Logger) *ChaosDaemonMetricsColle
 	return &ChaosDaemonMetricsCollector{
 		logger: logger,
 		iptablesPackets: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_daemon_iptables_packets",
-			Help: "Total number of iptables packets",
+			Subsystem: chaosDaemonMetricsSubsystem,
+			Name:      "iptables_packets",
+			Help:      "Total number of iptables packets",
 		}, []string{"namespace", "pod", "container", "table", "chain", "policy", "rule"}),
 		iptablesPacketBytes: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_daemon_iptables_packet_bytes",
-			Help: "Total bytes of iptables packets",
+			Subsystem: chaosDaemonMetricsSubsystem,
+			Name:      "iptables_packet_bytes",
+			Help:      "Total bytes of iptables packets",
 		}, []string{"namespace", "pod", "container", "table", "chain", "policy", "rule"}),
 		ipsetMembers: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_daemon_ipset_members",
-			Help: "Total number of ipset members",
+			Subsystem: chaosDaemonMetricsSubsystem,
+			Name:      "ipset_members",
+			Help:      "Total number of ipset members",
 		}, []string{"namespace", "pod", "container"}),
 		tcRules: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_daemon_tcs",
-			Help: "Total number of tc rules",
+			Subsystem: chaosDaemonMetricsSubsystem,
+			Name:      "tcs_rules",
+			Help:      "Total number of tc rules",
 		}, []string{"namespace", "pod", "container"}),
 	}
 }
