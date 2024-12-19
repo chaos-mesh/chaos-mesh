@@ -28,6 +28,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Fixed
 
 - Issue with getting a single archive in the Dashboard UI [#4521](https://github.com/chaos-mesh/chaos-mesh/pull/4521)
+- Wrong references of helm values in the prometheus template [#4543](https://github.com/chaos-mesh/chaos-mesh/pull/4543)
 - Return 404 when the archive schedule was not found [#4553](https://github.com/chaos-mesh/chaos-mesh/pull/4553)
 
 ### Security

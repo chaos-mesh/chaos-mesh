@@ -744,6 +744,14 @@
                     "properties": {},
                     "type": "object"
                 },
+                "busybox": {
+                    "properties": {
+                        "image": {
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
                 "create": {
                     "type": "boolean"
                 },
