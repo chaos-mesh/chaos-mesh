@@ -28,6 +28,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/status"
 )
 
+const (
+	// chaosControllerManagerMetricsSubsystem is the subsystem name for chaos controller manager metrics
+	chaosControllerManagerMetricsSubsystem = "chaos_controller_manager"
+)
+
 // ChaosControllerManagerMetricsCollector implements prometheus.Collector interface
 type ChaosControllerManagerMetricsCollector struct {
 	logger              logr.Logger
@@ -57,58 +62,70 @@ func NewChaosControllerManagerMetricsCollector(manager ctrl.Manager, registerer 
 		logger: logger,
 		store:  store,
 		chaosExperiments: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_chaos_experiments",
-			Help: "Total number of chaos experiments and their phases",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_experiments",
+			Help:      "Total number of chaos experiments and their phases",
 		}, []string{"namespace", "kind", "phase"}),
 		SidecarTemplates: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "chaos_mesh_templates",
-			Help: "Total number of injection templates",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_templates",
+			Help:      "Total number of injection templates",
 		}),
 		ConfigTemplates: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_mesh_config_templates",
-			Help: "Total number of config templates",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_config_templates",
+			Help:      "Total number of config templates",
 		}, []string{"namespace", "template"}),
 		InjectionConfigs: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_mesh_injection_configs",
-			Help: "Total number of injection configs",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_injection_configs",
+			Help:      "Total number of injection configs",
 		}, []string{"namespace", "template"}),
 		TemplateNotExist: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "chaos_mesh_template_not_exist_total",
-			Help: "Total number of template not exist error",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_template_not_exist_total",
+			Help:      "Total number of template not exist error",
 		}, []string{"namespace", "template"}),
 		ConfigNameDuplicate: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "chaos_mesh_config_name_duplicate_total",
-			Help: "Total number of config name duplication error",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_config_name_duplicate_total",
+			Help:      "Total number of config name duplication error",
 		}, []string{"namespace", "config"}),
 		TemplateLoadError: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "chaos_mesh_template_load_failed_total",
-			Help: "Total number of failures when rendering config args to template",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_template_load_failed_total",
+			Help:      "Total number of failures when rendering config args to template",
 		}),
 		InjectRequired: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "chaos_mesh_inject_required_total",
-			Help: "Total number of injections required",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_mesh_inject_required_total",
+			Help:      "Total number of injections required",
 		}, []string{"namespace", "config"}),
 		Injections: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "chaos_mesh_injections_total",
 			Help: "Total number of sidecar injections performed on the webhook",
 		}, []string{"namespace", "config"}),
 		chaosSchedules: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_chaos_schedules",
-			Help: "Total number of chaos schedules",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_schedules",
+			Help:      "Total number of chaos schedules",
 		}, []string{"namespace"}),
 		chaosWorkflows: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "chaos_controller_manager_chaos_workflows",
-			Help: "Total number of chaos workflows",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "chaos_workflows",
+			Help:      "Total number of chaos workflows",
 		}, []string{"namespace"}),
 		EmittedEvents: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Name: "chaos_controller_manager_emitted_event_total",
-			Help: "Total number of the emitted event by chaos-controller-manager",
+			Subsystem: chaosControllerManagerMetricsSubsystem,
+			Name:      "emitted_event_total",
+			Help:      "Total number of the emitted event by chaos-controller-manager",
 		}, []string{"type", "reason", "namespace"}),
 	}
 
 	if registerer != nil {
 		registerer.MustRegister(c)
 	}
+
 	return c
 }
 

@@ -76,7 +76,9 @@ file_must_contains $log_file "\[chaos-dashboard" true
 echo "Checking chaosctl debug networkchaos"
 ./bin/chaosctl debug networkchaos web-show-network-delay >$log_file 2>&1
 if [ $? -ne 0 ]; then
-    echo "chaosctl debug networkchaos failed"
+    echo "chaosctl debug networkchaos failed, exit code: $?, log file: $log_file"
+    echo "log file content:"
+    cat $log_file
     code=1
 fi
 file_must_contains $log_file "\[Chaos\]: web-show-network-delay" true

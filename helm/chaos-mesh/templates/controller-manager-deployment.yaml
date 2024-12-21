@@ -48,7 +48,7 @@ spec:
       {{- if .Values.controllerManager.hostNetwork }}
       hostNetwork: true
       {{- end }}
-      {{- if .Values.controllerManager.serviceAccount }}
+      {{- if .Values.controllerManager.serviceAccountCreate }}
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       {{- end }}
       {{- if  .Values.controllerManager.priorityClassName }}
