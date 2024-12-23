@@ -30,8 +30,10 @@ ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
 RUN apt update && \
-    apt install unzip git build-essential curl musl musl-dev -y && \
+    apt install unzip git build-essential curl musl musl-dev ebtables -y && \
     rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --set ebtables /usr/sbin/ebtables-legacy
 
 # The `TARGET_PLATFORM` would be `amd64` or `arm64`
 ARG TARGET_PLATFORM=amd64
