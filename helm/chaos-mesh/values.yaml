@@ -55,6 +55,26 @@ images:
 imagePullSecrets: []
 # - name: secretName
 
+# Log configuration shared by all deployed applications
+logging:
+  # Logging output format: "console" or "json"
+  format: console
+  # Log level to output
+  level: debug
+
+  # remaining fields only take effect if format is "json"
+
+  # Format for timestamp field: "epoch" (seconds since unix epoch, as a floating point), "rfc3339" and "rfc3339nano" (ns precision)
+  timestampFormat: epoch
+  # Allow customization of "message" and "timestamp" value keys in json output, to give consistency with other
+  # applications and/or allow proper indexing by log aggregation platforms
+  fieldKeys: {}
+    # message: msg
+    # timestamp: ts
+  # Optional configuration to determine the maximum size of a log field when serializing an object.
+  # This can be useful to avoid extremely long log entries that can cause problems with log synchronization.
+  maxFieldSize:
+
 controllerManager:
   # securityContext if needed
   securityContext: {}
