@@ -291,7 +291,7 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		m, err := cgroup2.LoadSystemd("/host-sys/fs/cgroup", group)
+		m, err := cgroup2.LoadSystemd("/", group)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 
