@@ -203,24 +203,24 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 									corev1.ResourceMemory: resource.MustParse("150M"),
 								},
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "sys",
-									MountPath: "/sys",
-								},
-							},
+							// VolumeMounts: []corev1.VolumeMount{
+							// 	{
+							// 		Name:      "sys",
+							// 		MountPath: "/sys",
+							// 	},
+							// },
 						},
 					},
-					Volumes: []corev1.Volume{
-						{
-							Name: "sys",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/sys",
-								},
-							},
-						},
-					},
+					// Volumes: []corev1.Volume{
+					// 	{
+					// 		Name: "sys",
+					// 		VolumeSource: corev1.VolumeSource{
+					// 			HostPath: &corev1.HostPathVolumeSource{
+					// 				Path: "/sys",
+					// 			},
+					// 		},
+					// 	},
+					// },
 				},
 			},
 		},
