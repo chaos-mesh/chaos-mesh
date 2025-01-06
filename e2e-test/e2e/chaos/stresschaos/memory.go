@@ -46,13 +46,14 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 	err := cli.Create(ctx, memoryStressChaos.DeepCopy())
 	framework.ExpectNoError(err, "create stresschaos error")
 
-	By("waiting for assertion some pods are experiencing memory stress ")
+	By("waiting for assertion some pods are experiencing memory stress")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err
 		}
 		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
+		framework.Logf("memory usage diff: %d", conditions[0].MemoryUsage-conditions[1].MemoryUsage)
 		if int(conditions[0].MemoryUsage)-int(conditions[1].MemoryUsage) > allowedJitter {
 			return true, nil
 		}

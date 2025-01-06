@@ -278,12 +278,7 @@ func (s *server) networkRecvTest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
-	var isCgroupsV2 bool
 	if cgroups.Mode() == cgroups.Unified {
-		isCgroupsV2 = true
-	}
-
-	if isCgroupsV2 {
 		group, err := cgroup2.PidGroupPath(1)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -291,7 +286,7 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		m, err := cgroup2.LoadSystemd("/", group)
+		m, err := cgroup2.Load(group)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 
