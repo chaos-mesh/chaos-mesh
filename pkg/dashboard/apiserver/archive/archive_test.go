@@ -673,7 +673,7 @@ var _ = Describe("event", func() {
 			rr := httptest.NewRecorder()
 			request, _ := http.NewRequest(http.MethodGet, "/api/archives/schedules/testErrRecordNotFound", nil)
 			router.ServeHTTP(rr, request)
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(rr.Code).Should(Equal(http.StatusNotFound))
 		})
 
 		It("test err", func() {

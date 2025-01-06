@@ -10,6 +10,36 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Upgrade pnpm lockfile version to 9.0 [#4522](https://github.com/chaos-mesh/chaos-mesh/pull/4522)
+- Use gauge subsystem in controller/daemon metrics [#4554](https://github.com/chaos-mesh/chaos-mesh/pull/4554)
+- Bump kubernetes dependencies to 1.28.12 [#4565](https://github.com/chaos-mesh/chaos-mesh/pull/4565)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Issue with getting a single archive in the Dashboard UI [#4521](https://github.com/chaos-mesh/chaos-mesh/pull/4521)
+- Wrong references of helm values in the prometheus template [#4543](https://github.com/chaos-mesh/chaos-mesh/pull/4543)
+- Return 404 when the archive schedule was not found [#4553](https://github.com/chaos-mesh/chaos-mesh/pull/4553)
+
+### Security
+
+- Nothing
+
+## [2.7.0] - 2024-09-20
+
+### Added
+
 - Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
