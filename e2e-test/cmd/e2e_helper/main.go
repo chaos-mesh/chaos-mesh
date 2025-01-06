@@ -300,9 +300,6 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 		}
 
 		response, err := json.Marshal(map[string]interface{}{
-			"group":       group,
-			"m":           m,
-			"stats":       stats,
 			"cpuTime":     stats.CPU.UsageUsec * 1000,
 			"memoryUsage": stats.Memory.Usage - stats.Memory.KernelStack - stats.Memory.File,
 		})

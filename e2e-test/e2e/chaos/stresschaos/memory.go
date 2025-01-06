@@ -52,9 +52,12 @@ func TestcaseMemoryStressInjectionOnceThenRecover(
 		if err != nil {
 			return false, err
 		}
-		framework.Logf("get Memory: [%d, %d]", conditions[0].MemoryUsage, conditions[1].MemoryUsage)
-		framework.Logf("memory usage diff: %d", conditions[0].MemoryUsage-conditions[1].MemoryUsage)
-		if int(conditions[0].MemoryUsage)-int(conditions[1].MemoryUsage) > allowedJitter {
+
+		diff := int(conditions[0].MemoryUsage) - int(conditions[1].MemoryUsage)
+
+		framework.Logf("memory: [%d, %d], diff: %d", conditions[0].MemoryUsage, conditions[1].MemoryUsage, diff)
+
+		if diff > allowedJitter {
 			return true, nil
 		}
 		return false, nil
