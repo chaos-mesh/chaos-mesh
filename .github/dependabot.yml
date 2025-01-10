@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    # For GitHub Actions, use the value /. Dependabot will search the /.github/workflows directory,
+    # as well as the action.yml/action.yaml file from the root directory.
+    directories: "/"
+    schedule:
+      interval: "monthly"
+  - package-ecosystem: "gomod"
+    directories:
+      - "/"
+      - "/api"
+      - "/e2e-test"
+    schedule:
+      interval: "monthly"
+    allow:
+      - dependency-type: all
