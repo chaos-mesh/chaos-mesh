@@ -42,18 +42,22 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 
 	lastCPUTime := make([]uint64, 2)
 	diff := make([]uint64, 2)
-	By("waiting for assertion some pods are experiencing cpu stress ")
+	By("waiting for assertion some pods are experiencing cpu stress")
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		conditions, err := probeStressCondition(c, peers, ports)
+		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err
 		}
+
+		framework.Logf("CPU: [%d, %d]", conditions[0].CpuTime, conditions[1].CpuTime)
 
 		diff[0] = conditions[0].CpuTime - lastCPUTime[0]
 		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
 		lastCPUTime[0] = conditions[0].CpuTime
 		lastCPUTime[1] = conditions[1].CpuTime
-		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
+
+		framework.Logf("CPU diff: [%d, %d]", diff[0], diff[1])
+
 		// diff means the increasing CPU time (in nanosecond)
 		// just pick two threshold, 5e8 is a little shorter than one second
 		if diff[0] > 5e8 && diff[1] < 5e6 {
@@ -70,7 +74,7 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 	lastCPUTime = make([]uint64, 2)
 	diff = make([]uint64, 2)
 	err = wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		conditions, err := probeStressCondition(c, peers, ports)
+		conditions, err := probeStressCondition(c, ports)
 		if err != nil {
 			return false, err
 		}
@@ -79,7 +83,9 @@ func TestcaseCPUStressInjectionOnceThenRecover(
 		diff[1] = conditions[1].CpuTime - lastCPUTime[1]
 		lastCPUTime[0] = conditions[0].CpuTime
 		lastCPUTime[1] = conditions[1].CpuTime
-		framework.Logf("get CPU: [%d, %d]", diff[0], diff[1])
+
+		framework.Logf("CPU diff: [%d, %d]", diff[0], diff[1])
+
 		// diff means the increasing CPU time (in nanosecond)
 		// just pick two threshold, they are both much shorter than 1 second
 		if diff[0] < 1e7 && diff[1] < 5e6 {
