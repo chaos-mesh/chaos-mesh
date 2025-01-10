@@ -6,6 +6,8 @@ updates:
     directories: "/"
     schedule:
       interval: "monthly"
+    commit-message:
+      prefix: "github-actions"
   - package-ecosystem: "gomod"
     directories:
       - "/"
@@ -15,3 +17,5 @@ updates:
       interval: "monthly"
     allow:
       - dependency-type: all
+    commit-message:
+      prefix: "go"
