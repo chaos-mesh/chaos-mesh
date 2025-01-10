@@ -148,6 +148,7 @@ func (v *AuthValidator) auth(userInfo authnv1.UserInfo, namespace string, chaosK
 				Resource:  resourceName,
 			},
 			User:   userInfo.Username,
+			UID:    userInfo.UID,
 			Groups: userInfo.Groups,
 			Extra:  convertExtra(userInfo.Extra),
 		},
@@ -177,6 +178,9 @@ func contains(arr []string, target string) bool {
 }
 
 func convertExtra(in map[string]authnv1.ExtraValue) map[string]authzv1.ExtraValue {
+	if in == nil {
+		return nil
+	}
 	// map from authentication and authorization types
 	extra := make(map[string]authzv1.ExtraValue)
 	for key, value := range in {
