@@ -47,7 +47,7 @@ spec:
       {{- end }}
       initContainers:
         - name: data-permission-fix
-          image: busybox
+          image: {{ .Values.prometheus.busybox.image }}
           command: ["/bin/chmod","-R","777", "/data"]
           volumeMounts:
             - name: data
@@ -56,9 +56,9 @@ spec:
       - name: prometheus
         image: {{ .Values.prometheus.image }}
         imagePullPolicy: {{ .Values.prometheus.imagePullPolicy | default "IfNotPresent" }}
-        {{- if .Values.chaosDaemon.resources }}
+        {{- if .Values.prometheus.resources }}
         resources:
-      {{ toYaml .Values.chaosDaemon.resources | indent 12 }}
+{{ toYaml .Values.prometheus.resources | indent 12 }}
         {{- end }}
         args:
           - --storage.tsdb.path=/data
@@ -88,15 +88,15 @@ spec:
       - configMap:
           name: prometheus-config
         name: prometheus-config
-  {{- with .Values.controllerManager.nodeSelector }}
+  {{- with .Values.prometheus.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
   {{- end }}
-  {{- with .Values.controllerManager.affinity }}
+  {{- with .Values.prometheus.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
   {{- end }}
-  {{- with .Values.controllerManager.tolerations }}
+  {{- with .Values.prometheus.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
   {{- end }}

@@ -5,7 +5,10 @@ on:
     branches:
       - master
     paths-ignore:
+      - .gitignore
       - "**.md"
+      - .github/ISSUE_TEMPLATE/*
+      - .github/pull_request_template.md
       # Not available for frontend code for now.
       - "ui/**"
       - .github/workflows/checklink.yaml
@@ -33,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: [amd64, arm64]
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":"github-arm64-2c-8gb"]}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -107,7 +110,7 @@ jobs:
       - name: Install localstack && aws client
         run: |
           helm repo add localstack-repo http://helm.localstack.cloud
-          helm upgrade --install localstack localstack-repo/localstack --version 0.1.2
+          helm upgrade --install localstack localstack-repo/localstack --version 0.6.14
           pip install awscli
           kubectl wait --timeout=60s --for=condition=ready --all pod
 

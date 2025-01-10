@@ -17,7 +17,7 @@ RUN apt update && \
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
-RUN npm install pnpm@8 -g
+RUN npm install pnpm@9 -g
 
 ARG TARGET_PLATFORM=amd64
 

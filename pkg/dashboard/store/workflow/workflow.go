@@ -119,7 +119,7 @@ func (it *WorkflowStore) DeleteByFinishTime(ctx context.Context, ttl time.Durati
 	nowTime := time.Now()
 	for _, wfl := range workflows {
 		if wfl.FinishTime == nil {
-			log.Error(nil, "workflow finish time is nil when deleting archived workflow reocrds, skip it", "workflow", wfl)
+			log.Error(nil, "workflow finish time is nil when deleting archived workflow records, skip it", "workflow", wfl)
 			continue
 		}
 		if wfl.FinishTime.Add(ttl).Before(nowTime) {
