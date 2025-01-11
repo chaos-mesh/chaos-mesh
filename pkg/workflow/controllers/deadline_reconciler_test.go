@@ -257,7 +257,7 @@ var _ = Describe("Workflow", func() {
 						Templates: []v1alpha1.Template{{
 							Name:     "entry-serial",
 							Type:     v1alpha1.TypeSerial,
-							Deadline: pointer.StringPtr(serialDuration.String()),
+							Deadline: pointer.String(serialDuration.String()),
 							Children: []string{
 								"serial-task-1",
 								"serial-task-2",
@@ -266,15 +266,15 @@ var _ = Describe("Workflow", func() {
 						}, {
 							Name:     "serial-task-1",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSubTask1.String()),
+							Deadline: pointer.String(durationOfSubTask1.String()),
 						}, {
 							Name:     "serial-task-2",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSubTask2.String()),
+							Deadline: pointer.String(durationOfSubTask2.String()),
 						}, {
 							Name:     "serial-task-3",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSubTask3.String()),
+							Deadline: pointer.String(durationOfSubTask3.String()),
 						}},
 					},
 					Status: v1alpha1.WorkflowStatus{},
@@ -393,7 +393,7 @@ var _ = Describe("Workflow", func() {
 						Templates: []v1alpha1.Template{{
 							Name:     "entry-parallel",
 							Type:     v1alpha1.TypeParallel,
-							Deadline: pointer.StringPtr(parallelDuration.String()),
+							Deadline: pointer.String(parallelDuration.String()),
 							Children: []string{
 								"parallel-task-1",
 								"parallel-task-2",
@@ -402,15 +402,15 @@ var _ = Describe("Workflow", func() {
 						}, {
 							Name:     "parallel-task-1",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSubTask1.String()),
+							Deadline: pointer.String(durationOfSubTask1.String()),
 						}, {
 							Name:     "parallel-task-2",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSubTask2.String()),
+							Deadline: pointer.String(durationOfSubTask2.String()),
 						}, {
 							Name:     "parallel-task-3",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSubTask3.String()),
+							Deadline: pointer.String(durationOfSubTask3.String()),
 						}},
 					},
 					Status: v1alpha1.WorkflowStatus{},
@@ -528,7 +528,7 @@ var _ = Describe("Workflow", func() {
 						Templates: []v1alpha1.Template{{
 							Name:     "entry-parallel",
 							Type:     v1alpha1.TypeParallel,
-							Deadline: pointer.StringPtr(parallelDuration.String()),
+							Deadline: pointer.String(parallelDuration.String()),
 							Children: []string{
 								"parallel-level-1",
 							},
@@ -547,7 +547,7 @@ var _ = Describe("Workflow", func() {
 						}, {
 							Name:     "suspend-task",
 							Type:     v1alpha1.TypeSuspend,
-							Deadline: pointer.StringPtr(durationOfSuspend.String()),
+							Deadline: pointer.String(durationOfSuspend.String()),
 						}},
 					},
 					Status: v1alpha1.WorkflowStatus{},
