@@ -18,9 +18,10 @@ package dnschaos
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	"github.com/go-logr/logr"

@@ -19,11 +19,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"net/http"
 	"syscall"
 	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"

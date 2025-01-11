@@ -19,11 +19,12 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"os"
 	"strconv"
 	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
