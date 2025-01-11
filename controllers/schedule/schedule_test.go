@@ -132,9 +132,9 @@ var _ = Describe("Schedule", func() {
 
 			By("Reconciling the created schedule obj")
 			{
-				err := wait.PollUntilContextTimeout(context.TODO(), time.Second*1, time.Minute*1, true,
+				err := wait.PollUntilContextTimeout(context.TODO(), time.Second, time.Minute, true,
 					func(ctx context.Context) (ok bool, err error) {
-						err = k8sClient.Get(context.TODO(), key, schedule)
+						err = k8sClient.Get(ctx, key, schedule)
 						if err != nil {
 							return false, err
 						}
@@ -200,7 +200,7 @@ var _ = Describe("Schedule", func() {
 			{
 				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
 					func(ctx context.Context) (done bool, err error) {
-						err = k8sClient.Get(context.TODO(), key, schedule)
+						err = k8sClient.Get(ctx, key, schedule)
 						if err != nil {
 							return false, err
 						}
@@ -260,7 +260,7 @@ var _ = Describe("Schedule", func() {
 				time.Sleep(time.Second * 10)
 				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
 					func(ctx context.Context) (done bool, err error) {
-						err = k8sClient.Get(context.TODO(), key, schedule)
+						err = k8sClient.Get(ctx, key, schedule)
 						if err != nil {
 							return false, err
 						}
@@ -330,7 +330,7 @@ var _ = Describe("Schedule", func() {
 				time.Sleep(time.Second * 10)
 				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
 					func(ctx context.Context) (done bool, err error) {
-						err = k8sClient.Get(context.TODO(), key, schedule)
+						err = k8sClient.Get(ctx, key, schedule)
 						if err != nil {
 							return false, err
 						}
@@ -392,7 +392,7 @@ var _ = Describe("Schedule", func() {
 				time.Sleep(time.Second * 10)
 				err := wait.PollUntilContextTimeout(context.TODO(), 5*time.Second, 1*time.Minute, true,
 					func(ctx context.Context) (done bool, err error) {
-						err = k8sClient.Get(context.TODO(), key, schedule)
+						err = k8sClient.Get(ctx, key, schedule)
 						if err != nil {
 							return false, err
 						}

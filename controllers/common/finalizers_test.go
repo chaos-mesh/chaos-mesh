@@ -73,9 +73,9 @@ var _ = Describe("Finalizer", func() {
 
 			By("Adding finalizers")
 			{
-				err := wait.PollUntilContextTimeout(context.TODO(), time.Second*1, time.Second*10, true,
+				err := wait.PollUntilContextTimeout(context.TODO(), time.Second, time.Second*10, true,
 					func(ctx context.Context) (ok bool, err error) {
-						err = k8sClient.Get(context.TODO(), key, chaos)
+						err = k8sClient.Get(ctx, key, chaos)
 						if err != nil {
 							return false, err
 						}

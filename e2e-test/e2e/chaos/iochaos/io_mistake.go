@@ -71,7 +71,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 			},
 			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
-			Duration: pointer.StringPtr("9m"),
+			Duration: pointer.String("9m"),
 		},
 	}
 	err = cli.Create(ctx, ioChaos)
@@ -145,7 +145,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 			},
 			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
-			Duration: pointer.StringPtr("9m"),
+			Duration: pointer.String("9m"),
 		},
 	}
 	err = cli.Create(ctx, ioChaos)
@@ -271,7 +271,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 			},
 			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
-			Duration: pointer.StringPtr("9m"),
+			Duration: pointer.String("9m"),
 		},
 	}
 	err = cli.Create(ctx, ioChaos)
