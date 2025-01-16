@@ -32,6 +32,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Wrong references of helm values in the prometheus template [#4543](https://github.com/chaos-mesh/chaos-mesh/pull/4543)
 - Return 404 when the archive schedule was not found [#4553](https://github.com/chaos-mesh/chaos-mesh/pull/4553)
 - Changed JVMParameter.ReturnValue json tag field name to `returnValue` [#4525](https://github.com/chaos-mesh/chaos-mesh/pull/4525)
+- Correct the parsing of the physical machines in the Dashboard UI
 
 ### Security
 
