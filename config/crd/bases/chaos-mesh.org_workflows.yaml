@@ -10127,6 +10127,9 @@ spec:
                   current state.
                 items:
                   properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
                     reason:
                       type: string
                     startTime:
@@ -10137,6 +10140,7 @@ spec:
                     type:
                       type: string
                   required:
+                  - lastTransitionTime
                   - reason
                   - status
                   - type

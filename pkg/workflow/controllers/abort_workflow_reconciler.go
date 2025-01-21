@@ -17,10 +17,12 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -75,20 +77,23 @@ func (it *AbortWorkflowReconciler) Reconcile(ctx context.Context, request reconc
 		}
 
 		entryNode := entryNodes[0]
+		now := metav1.NewTime(time.Now())
 		if WorkflowAborted(workflowNeedUpdate) {
 			if !ConditionEqualsTo(entryNode.Status, v1alpha1.ConditionAborted, corev1.ConditionTrue) {
 				it.eventRecorder.Event(&entryNode, recorder.WorkflowAborted{WorkflowName: workflow.Name})
 			}
 			SetCondition(&entryNode.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAborted,
-				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.WorkflowAborted,
+				Type:               v1alpha1.ConditionAborted,
+				Status:             corev1.ConditionTrue,
+				Reason:             v1alpha1.WorkflowAborted,
+				LastTransitionTime: &now,
 			})
 		} else {
 			SetCondition(&entryNode.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAborted,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:               v1alpha1.ConditionAborted,
+				Status:             corev1.ConditionFalse,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 		}
 
