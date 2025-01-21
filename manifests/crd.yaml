@@ -2644,8 +2644,10 @@ spec:
                   correlation:
                     type: string
                   jitter:
+                    pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                     type: string
                   latency:
+                    pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                     type: string
                   reorder:
                     description: ReorderSpec defines details of packet reorder.
@@ -5084,8 +5086,10 @@ spec:
                         correlation:
                           type: string
                         jitter:
+                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                           type: string
                         latency:
+                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                           type: string
                         reorder:
                           description: ReorderSpec defines details of packet reorder.
@@ -6760,8 +6764,10 @@ spec:
                       correlation:
                         type: string
                       jitter:
+                        pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                         type: string
                       latency:
+                        pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                         type: string
                       reorder:
                         description: ReorderSpec defines details of packet reorder.
@@ -10137,8 +10143,10 @@ spec:
                                 correlation:
                                   type: string
                                 jitter:
+                                  pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                   type: string
                                 latency:
+                                  pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                   type: string
                                 reorder:
                                   description: ReorderSpec defines details of packet
@@ -13261,8 +13269,10 @@ spec:
                                     correlation:
                                       type: string
                                     jitter:
+                                      pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                       type: string
                                     latency:
+                                      pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                       type: string
                                     reorder:
                                       description: ReorderSpec defines details of
@@ -21377,8 +21387,10 @@ spec:
                       correlation:
                         type: string
                       jitter:
+                        pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                         type: string
                       latency:
+                        pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                         type: string
                       reorder:
                         description: ReorderSpec defines details of packet reorder.
@@ -24306,8 +24318,10 @@ spec:
                           correlation:
                             type: string
                           jitter:
+                            pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                             type: string
                           latency:
+                            pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                             type: string
                           reorder:
                             description: ReorderSpec defines details of packet reorder.
@@ -27756,8 +27770,10 @@ spec:
                                     correlation:
                                       type: string
                                     jitter:
+                                      pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                       type: string
                                     latency:
+                                      pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                       type: string
                                     reorder:
                                       description: ReorderSpec defines details of
@@ -30987,8 +31003,10 @@ spec:
                                         correlation:
                                           type: string
                                         jitter:
+                                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                           type: string
                                         latency:
+                                          pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                           type: string
                                         reorder:
                                           description: ReorderSpec defines details
@@ -42036,8 +42054,10 @@ spec:
                             correlation:
                               type: string
                             jitter:
+                              pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                               type: string
                             latency:
+                              pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                               type: string
                             reorder:
                               description: ReorderSpec defines details of packet reorder.
@@ -45083,8 +45103,10 @@ spec:
                                 correlation:
                                   type: string
                                 jitter:
+                                  pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                   type: string
                                 latency:
+                                  pattern: ^[0-9]+(\.[0-9]+)?(ns|us|ms|s|m|h)$
                                   type: string
                                 reorder:
                                   description: ReorderSpec defines details of packet
