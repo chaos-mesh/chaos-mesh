@@ -65,7 +65,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
     )
 
     if (process.env.NODE_ENV === 'development' || debugMode) {
-      console.debug('Debug parsedValues:', parsedValues)
+      console.debug('Here is the experiment you are going to submit:', JSON.stringify(parsedValues, null, 2))
     }
 
     if (!debugMode) {

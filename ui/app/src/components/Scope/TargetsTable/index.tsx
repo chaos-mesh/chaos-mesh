@@ -41,11 +41,12 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
   const targetsCount = originalTargets.length
 
   const { values, setFieldValue } = useFormikContext()
-  const formikTargets: string[] = getIn(values, `${scope}.pods`)
+  const formikTargets: string[] = getIn(values, `${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`) || []
 
   const selected = formikTargets.length > 0 ? formikTargets : originalTargets
   const isSelected = (name: string) => selected.indexOf(name) !== -1
-  const setSelected = (newVal: string[]) => setFieldValue(`${scope}.pods`, newVal)
+  const setSelected = (newVal: string[]) =>
+    setFieldValue(`${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`, newVal)
 
   const dispatch = useStoreDispatch()
 
@@ -67,7 +68,7 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
       dispatch(
         setAlert({
           type: 'warning',
-          message: 'Please select at least one pod.',
+          message: 'Please select at least one target.',
         })
       )
 
