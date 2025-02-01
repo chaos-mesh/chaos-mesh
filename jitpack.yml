@@ -1,0 +1,15 @@
+# From: https://www.jbang.dev/documentation/guide/latest/exporting.html
+before_install:
+  - sdk install java 11.0.15-tem
+  - sdk use java 11.0.15-tem
+  - curl -Ls https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o envsubst && chmod +x envsubst
+  - curl -Ls https://sh.jbang.dev | bash -s - app setup
+  - curl -Ls https://github.com/codacy/git-version/releases/download/2.8.0/git-version -o git-version && chmod a+x git-version
+install:
+  - ./envsubst < java/chaos-mesh.java.template > java/chaos-mesh.java
+  - ~/.jbang/bin/jbang io.fabric8:java-generator-cli:${FABRIC8_VERSION} --source config/crd/bases --target ./java/src
+  - ~/.jbang/bin/jbang export mavenrepo --force -O target --group=org.chaos_mesh --artifact=chaos-mesh --version=$(./git-version) java/chaos-mesh.java
+  - mkdir -p ~/.m2/repository
+  - cp -rv target/* ~/.m2/repository/
+env:
+  FABRIC8_VERSION: "6.7.2"
