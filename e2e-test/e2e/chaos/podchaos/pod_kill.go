@@ -109,7 +109,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			Action:   v1alpha1.PodKillAction,
-			Duration: pointer.StringPtr("9m"),
+			Duration: pointer.String("9m"),
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
