@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.14.0
   name: jvmchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -27,14 +27,19 @@ spec:
         description: JVMChaos is the Schema for the jvmchaos API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -42,8 +47,9 @@ spec:
             description: JVMChaosSpec defines the desired state of JVMChaos
             properties:
               action:
-                description: 'Action defines the specific jvm chaos action. Supported
-                  action: latency;return;exception;stress;gc;ruleData'
+                description: |-
+                  Action defines the specific jvm chaos action.
+                  Supported action: latency;return;exception;stress;gc;ruleData
                 enum:
                 - latency
                 - return
@@ -57,8 +63,9 @@ spec:
                 description: Java class
                 type: string
               containerNames:
-                description: ContainerNames indicates list of the name of affected
-                  container. If not set, the first container will be injected
+                description: |-
+                  ContainerNames indicates list of the name of affected container.
+                  If not set, the first container will be injected
                 items:
                   type: string
                 type: array
@@ -67,19 +74,22 @@ spec:
                   is stress
                 type: integer
               database:
-                description: the match database default value is "", means match all
-                  database
+                description: |-
+                  the match database
+                  default value is "", means match all database
                 type: string
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string
               exception:
-                description: the exception which needs to throw for action `exception`
+                description: |-
+                  the exception which needs to throw for action `exception`
                   or the exception message needs to throw in action `mysql`
                 type: string
               latency:
-                description: the latency duration for action 'latency', unit ms or
-                  the latency duration in action `mysql`
+                description: |-
+                  the latency duration for action 'latency', unit ms
+                  or the latency duration in action `mysql`
                 type: integer
               memType:
                 description: the memory type needs to locate, only set it when action
@@ -89,8 +99,9 @@ spec:
                 description: the method in Java class
                 type: string
               mode:
-                description: 'Mode defines the mode to run chaos action. Supported
-                  mode: one / all / fixed / fixed-percent / random-max-percent'
+                description: |-
+                  Mode defines the mode to run chaos action.
+                  Supported mode: one / all / fixed / fixed-percent / random-max-percent
                 enum:
                 - one
                 - all
@@ -130,32 +141,33 @@ spec:
                   annotationSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select objects. A selector based on annotations.
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on annotations.
                     type: object
                   expressionSelectors:
-                    description: a slice of label selector expressions that can be
-                      used to select objects. A list of selectors based on set-based
-                      label expressions.
+                    description: |-
+                      a slice of label selector expressions that can be used to select objects.
+                      A list of selectors based on set-based label expressions.
                     items:
-                      description: A label selector requirement is a selector that
-                        contains values, a key, and an operator that relates the key
-                        and values.
+                      description: |-
+                        A label selector requirement is a selector that contains values, a key, and an operator that
+                        relates the key and values.
                       properties:
                         key:
                           description: key is the label key that the selector applies
                             to.
                           type: string
                         operator:
-                          description: operator represents a key's relationship to
-                            a set of values. Valid operators are In, NotIn, Exists
-                            and DoesNotExist.
+                          description: |-
+                            operator represents a key's relationship to a set of values.
+                            Valid operators are In, NotIn, Exists and DoesNotExist.
                           type: string
                         values:
-                          description: values is an array of string values. If the
-                            operator is In or NotIn, the values array must be non-empty.
-                            If the operator is Exists or DoesNotExist, the values
-                            array must be empty. This array is replaced during a strategic
+                          description: |-
+                            values is an array of string values. If the operator is In or NotIn,
+                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                            the values array must be empty. This array is replaced during a strategic
                             merge patch.
                           items:
                             type: string
@@ -168,14 +180,16 @@ spec:
                   fieldSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select objects. A selector based on fields.
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on fields.
                     type: object
                   labelSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select objects. A selector based on labels.
+                    description: |-
+                      Map of string keys and values that can be used to select objects.
+                      A selector based on labels.
                     type: object
                   namespaces:
                     description: Namespaces is a set of namespace to which objects
@@ -186,9 +200,10 @@ spec:
                   nodeSelectors:
                     additionalProperties:
                       type: string
-                    description: Map of string keys and values that can be used to
-                      select nodes. Selector which must match a node's labels, and
-                      objects must belong to these selected nodes.
+                    description: |-
+                      Map of string keys and values that can be used to select nodes.
+                      Selector which must match a node's labels,
+                      and objects must belong to these selected nodes.
                     type: object
                   nodes:
                     description: Nodes is a set of node name and objects must belong
@@ -197,9 +212,9 @@ spec:
                       type: string
                     type: array
                   podPhaseSelectors:
-                    description: 'PodPhaseSelectors is a set of condition of a pod
-                      at the current time. supported value: Pending / Running / Succeeded
-                      / Failed / Unknown'
+                    description: |-
+                      PodPhaseSelectors is a set of condition of a pod at the current time.
+                      supported value: Pending / Running / Succeeded / Failed / Unknown
                     items:
                       type: string
                     type: array
@@ -208,27 +223,29 @@ spec:
                       items:
                         type: string
                       type: array
-                    description: Pods is a map of string keys and a set values that
-                      used to select pods. The key defines the namespace which pods
-                      belong, and the each values is a set of pod names.
+                    description: |-
+                      Pods is a map of string keys and a set values that used to select pods.
+                      The key defines the namespace which pods belong,
+                      and the each values is a set of pod names.
                     type: object
                 type: object
               sqlType:
-                description: the match sql type default value is "", means match all
-                  SQL type. The value can be 'select', 'insert', 'update', 'delete',
-                  'replace'.
+                description: |-
+                  the match sql type
+                  default value is "", means match all SQL type.
+                  The value can be 'select', 'insert', 'update', 'delete', 'replace'.
                 type: string
               table:
-                description: the match table default value is "", means match all
-                  table
+                description: |-
+                  the match table
+                  default value is "", means match all table
                 type: string
               value:
-                description: Value is required when the mode is set to `FixedMode`
-                  / `FixedPercentMode` / `RandomMaxPercentMode`. If `FixedMode`, provide
-                  an integer of pods to do chaos action. If `FixedPercentMode`, provide
-                  a number from 0-100 to specify the percent of pods the server can
-                  do chaos action. IF `RandomMaxPercentMode`,  provide a number from
-                  0-100 to specify the max percent of pods to do chaos action
+                description: |-
+                  Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+                  If `FixedMode`, provide an integer of pods to do chaos action.
+                  If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+                  IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
                 type: string
             required:
             - action
