@@ -76,10 +76,12 @@ jobs:
 
           make image-dev-env
 
-      - name: Build Chaos Mesh Images
+      - name: Build and load Chaos Mesh images
         run: |
-          eval $(minikube docker-env)
           make image
+          minikube image load ghcr.io/chaos-mesh/chaos-mesh:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-daemon:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-dashboard:latest
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
