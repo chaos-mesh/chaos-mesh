@@ -21,14 +21,11 @@ cd $cur
 
 kubectl apply -f ./rbac.yaml
 
-SA_SECRET_NAME=$(kubectl get serviceaccounts fake-sa -ojsonpath='{.secrets[0].name}')
-SA_SECRET=$(kubectl get secrets "${SA_SECRET_NAME}" -o=jsonpath='{.data.token}' | base64 -d)
-
-kubectl config set-credentials fake-sa --token "${SA_SECRET}"
+kubectl config set-credentials fake-sa --token "$(kubectl create token fake-sa)"
 
 CURRENT_CONTEXT=$(kubectl config current-context)
 # line 2, column 3
-CURRENT_CLUSTER=$(kubectl config get-contexts "${CURRENT_CONTEXT}" |awk 'NR==2'| awk '{print $3}')
+CURRENT_CLUSTER=$(kubectl config get-contexts "${CURRENT_CONTEXT}" | awk 'NR==2'| awk '{print $3}')
 
 kubectl config set-context fake-sa-test --cluster "${CURRENT_CLUSTER}" --user fake-sa
 
