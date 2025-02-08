@@ -35,6 +35,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Fix inconsistent units for latency and jitter values in Network Chaos [#4546](https://github.com/chaos-mesh/chaos-mesh/pull/4546)
 - Return 404 when the archive schedule was not found [#4553](https://github.com/chaos-mesh/chaos-mesh/pull/4553)
 - Changed JVMParameter.ReturnValue json tag field name to `returnValue` [#4525](https://github.com/chaos-mesh/chaos-mesh/pull/4525)
+- Correct the parsing of the physical machines in the Dashboard UI [#4580](https://github.com/chaos-mesh/chaos-mesh/pull/4580)
 
 ### Security
 
