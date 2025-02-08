@@ -43,10 +43,10 @@ kubectl apply -f ./cluster-viewer.yaml
 kubectl apply -f ./busybox-manager.yaml
 kubectl apply -f ./busybox-viewer.yaml
 
-CLUSTER_MANAGER_TOKEN=$(kubectl create token account-busybox-viewer)
-CLUSTER_VIEWER_TOKEN=$(kubectl create token account-cluster-viewer)
-BUSYBOX_MANAGER_TOKEN=$(kubectl create token account-busybox-manager)
-BUSYBOX_VIEWER_TOKEN=$(kubectl create token account-busybox-viewer)
+CLUSTER_MANAGER_TOKEN=$(kubectl create token -n chaos-mesh account-cluster-manager)
+CLUSTER_VIEWER_TOKEN=$(kubectl create token -n chaos-mesh account-cluster-viewer)
+BUSYBOX_MANAGER_TOKEN=$(kubectl create token -n busybox account-busybox-manager)
+BUSYBOX_VIEWER_TOKEN=$(kubectl create token -n busybox account-busybox-viewer)
 
 BUSYBOX_MANAGER_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN)
 CLUSTER_MANAGER_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN)
