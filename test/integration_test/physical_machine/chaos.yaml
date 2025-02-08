@@ -20,7 +20,7 @@ metadata:
 spec:
   action: stress-mem
   address:
-  - CHAOSD_ADDRESS
+    - CHAOSD_ADDRESS
   mode: one
   stress-mem:
     size: 100MB

@@ -48,7 +48,7 @@ function judge_stress() {
     have_stress=$1
     success=false
     for ((k=0; k<10; k++)); do
-        stress_ng_num=`ps aux > test.temp && grep "stress-ng" test.temp | wc -l && rm test.temp`
+        stress_ng_num=`ps aux | grep "stress-ng" | wc -l`
         if [ "$have_stress" = true ]; then
             if [ ${stress_ng_num} -lt 1 ]; then
                 echo "stress-ng is not run when creating stress chaos on physical machine"
@@ -72,8 +72,8 @@ function judge_stress() {
         echo "[debug] chaos-controller-manager log:"
         kubectl logs -n chaos-mesh -l app.kubernetes.io/component=controller-manager --tail=20
 
-        echo ""
-        echo "[debug]chaosd log:"
+        echo
+        echo "[debug] chaosd log:"
         tail chaosd.log
         exit 1
     fi
