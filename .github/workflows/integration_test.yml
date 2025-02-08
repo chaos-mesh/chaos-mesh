@@ -35,7 +35,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64]
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04"}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
         with:
