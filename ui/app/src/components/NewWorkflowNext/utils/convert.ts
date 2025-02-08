@@ -23,6 +23,7 @@ import type { NodeExperiment } from 'slices/workflows'
 
 import { Schedule, scheduleInitialValues } from 'components/AutoForm/data'
 
+import { parsePodsOrPhysicalMachines } from 'lib/formikhelpers'
 import { arrToObjBySep, isDeepEmpty, objToArrBySep } from 'lib/utils'
 
 export enum ExperimentKind {
@@ -206,7 +207,11 @@ export function flowToWorkflow(nodes: Node[], edges: Edge[], storeTemplates: Rec
 
         // Parse labels, annotations, labelSelectors, and annotationSelectors to object.
         if (['labels', 'annotations', 'labelSelectors', 'annotationSelectors'].includes(key)) {
-          return arrToObjBySep(value, ': ')
+          return arrToObjBySep(value, ':', { removeAllSpaces: true })
+        }
+
+        if (key === 'physicalMachines') {
+          return parsePodsOrPhysicalMachines(value)
         }
 
         return value
