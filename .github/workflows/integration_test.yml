@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [amd64, arm64]
+        arch: [amd64]
     runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04"}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
@@ -44,8 +44,7 @@ jobs:
           fetch-depth: 2
 
       - name: Create kind cluster
-        # released version of kind-action doesn't support arm64
-        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
+        uses: helm/kind-action@v1
         with:
           kubectl_version: v1.23.1
 
@@ -55,16 +54,16 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
 
-      - name: Magic Kind DNS Fix
-        if: ${{ matrix.arch == 'arm64' }}
-        run: |
-          docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/nameserver \(.*\)/nameserver 8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
-          docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
+      # - name: Magic Kind DNS Fix
+      #   if: ${{ matrix.arch == 'arm64' }}
+      #   run: |
+      #     docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/nameserver \(.*\)/nameserver 8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
+      #     docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
 
-          kubectl rollout restart deployment -n kube-system coredns
+      #     kubectl rollout restart deployment -n kube-system coredns
 
       - uses: actions/setup-python@v2
-        if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
+        # if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
 
       - uses: actions/setup-go@v4
         with:
