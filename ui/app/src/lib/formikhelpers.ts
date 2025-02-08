@@ -29,6 +29,20 @@ import { ScheduleSpecific } from 'components/Schedule/types'
 
 import { arrToObjBySep, sanitize } from './utils'
 
+export function parsePodsOrPhysicalMachines(data: string[]) {
+  return data.reduce((acc, d) => {
+    const [namespace, name] = d.split(':')
+
+    if (acc.hasOwnProperty(namespace)) {
+      acc[namespace].push(name)
+    } else {
+      acc[namespace] = [name]
+    }
+
+    return acc
+  }, {} as Record<string, string[]>)
+}
+
 export function parseSubmit<K extends ExperimentKind>(
   env: Env,
   _kind: K,
@@ -70,20 +84,6 @@ export function parseSubmit<K extends ExperimentKind>(
       scope.annotationSelectors = arrToObjBySep(scope.annotationSelectors, ':', { removeAllSpaces: true }) as any
     } else {
       delete scope.annotationSelectors
-    }
-
-    function parsePodsOrPhysicalMachines(data: string[]) {
-      return data.reduce((acc, d) => {
-        const [namespace, name] = d.split(':')
-
-        if (acc.hasOwnProperty(namespace)) {
-          acc[namespace].push(name)
-        } else {
-          acc[namespace] = [name]
-        }
-
-        return acc
-      }, {} as Record<string, string[]>)
     }
 
     // Parse pods if exists.
