@@ -17,7 +17,6 @@ RUN go install github.com/AlekSi/gocov-xml@v1.1.0
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.8.7
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.12.0
-RUN go install github.com/apache/skywalking-eyes/cmd/license-eye@v0.2.0
 
 FROM debian:bookworm-slim
 
