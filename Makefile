@@ -132,16 +132,7 @@ swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for f
 
 ##@ Linters, formatters and others
 
-check: generate manifests/crd.yaml vet boilerplate lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
-
-SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
-boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate: images/dev-env/.dockerbuilt
-	$(SKYWALKING_EYES_HEADER) check
-
-boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate-fix: images/dev-env/.dockerbuilt ## Fix boilerplate
-	$(SKYWALKING_EYES_HEADER) fix
+check: generate manifests/crd.yaml vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: groupimports images/dev-env/.dockerbuilt ## Reformat go files with gofmt and goimports
