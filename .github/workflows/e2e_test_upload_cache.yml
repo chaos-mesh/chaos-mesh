@@ -11,20 +11,8 @@ on:
       - "**.md"
       # Not available for frontend code for now.
       - "ui/**"
-      - .github/workflows/checklink.yaml
-      - .github/checklink_config.json
-      - .github/workflows/ci.yml
-      - .github/workflows/ci_skip.yml
-      - .github/workflows/codecov_unittest.yaml
-      - .github/workflows/integration_test.yml
-      - .github/workflows/license_checker.yml
-      - .github/workflows/must_update_changelog.yml
-      - .github/workflows/release_helm_chart.yml
-      - .github/workflows/upload_env_image.yml
-      - .github/workflows/upload_image.yml
-      - .github/workflows/upload_image_pr.yml
-      - .github/workflows/upload_latest_files.yml
-      - .github/workflows/upload_release_files.yml
+      - .github/workflows/**
+      - "!.github/workflows/e2e_test_upload_cache.yml"
 
 permissions: read-all
 
@@ -32,8 +20,7 @@ jobs:
   build-image:
     runs-on: ubuntu-20.04
     steps:
-      - name: checkout codes
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: build e2e images
         env:
           DOCKER_CACHE: 1
@@ -52,8 +39,7 @@ jobs:
   build-e2e-binary:
     runs-on: ubuntu-20.04
     steps:
-      - name: checkout codes
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: build e2e binary
         env:
           DOCKER_CACHE: 1
