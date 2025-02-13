@@ -210,7 +210,7 @@ jobs:
         run: chmod 600 ~/.kube/config
 
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
 
       - name: Install Chaos Mesh
         # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
