@@ -130,7 +130,7 @@ jobs:
 
       - name: Cache app/build
         if: ${{ matrix.job == 'build' }}
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./ui/app/build
           key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.yaml') }}
