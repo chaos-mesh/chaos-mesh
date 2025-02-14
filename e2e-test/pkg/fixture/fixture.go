@@ -98,7 +98,7 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(1),
+			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": name,
@@ -140,7 +140,7 @@ func NewNetworkTestDeployment(name, namespace string, extraLabels map[string]str
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(1),
+			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
@@ -178,7 +178,7 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(1),
+			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},
@@ -203,22 +203,6 @@ func NewStressTestDeployment(name, namespace string, extraLabels map[string]stri
 									corev1.ResourceMemory: resource.MustParse("150M"),
 								},
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "sys",
-									MountPath: "/sys",
-								},
-							},
-						},
-					},
-					Volumes: []corev1.Volume{
-						{
-							Name: "sys",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/sys",
-								},
-							},
 						},
 					},
 				},
@@ -238,7 +222,7 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(1),
+			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": "io",
@@ -293,7 +277,7 @@ func NewHTTPTestDeployment(name, namespace string) *appsv1.Deployment {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: pointer.Int32Ptr(1),
+			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": "http",
