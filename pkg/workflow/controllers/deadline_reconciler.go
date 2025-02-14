@@ -89,11 +89,12 @@ func (it *DeadlineReconciler) Reconcile(ctx context.Context, request reconcile.R
 			if !ConditionEqualsTo(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) && reason == v1alpha1.NodeDeadlineExceed {
 				it.eventRecorder.Event(&node, recorder.DeadlineExceed{})
 			}
-
+			now := metav1.NewTime(time.Now())
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionDeadlineExceed,
-				Status: corev1.ConditionTrue,
-				Reason: reason,
+				Type:               v1alpha1.ConditionDeadlineExceed,
+				Status:             corev1.ConditionTrue,
+				Reason:             reason,
+				LastTransitionTime: &now,
 			})
 
 			return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
@@ -123,11 +124,12 @@ func (it *DeadlineReconciler) Reconcile(ctx context.Context, request reconcile.R
 				GetCondition(nodeNeedUpdate.Status, v1alpha1.ConditionDeadlineExceed).Reason == v1alpha1.ParentNodeDeadlineExceed {
 				return nil
 			}
-
+			now := metav1.NewTime(time.Now())
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionDeadlineExceed,
-				Status: corev1.ConditionFalse,
-				Reason: v1alpha1.NodeDeadlineNotExceed,
+				Type:               v1alpha1.ConditionDeadlineExceed,
+				Status:             corev1.ConditionFalse,
+				Reason:             v1alpha1.NodeDeadlineNotExceed,
+				LastTransitionTime: &now,
 			})
 			return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
 		})
@@ -177,10 +179,12 @@ func (it *DeadlineReconciler) propagateDeadlineToChildren(ctx context.Context, p
 					)
 					return nil
 				}
+				now := metav1.NewTime(time.Now())
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.ConditionDeadlineExceed,
-					Status: corev1.ConditionTrue,
-					Reason: v1alpha1.ParentNodeDeadlineExceed,
+					Type:               v1alpha1.ConditionDeadlineExceed,
+					Status:             corev1.ConditionTrue,
+					Reason:             v1alpha1.ParentNodeDeadlineExceed,
+					LastTransitionTime: &now,
 				})
 				it.eventRecorder.Event(&nodeNeedUpdate, recorder.ParentNodeDeadlineExceed{ParentNodeName: parent.Name})
 				return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)
