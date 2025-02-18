@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
-    "husky": "^8.0.3",
+    "husky": "^9.1.7",
     "is-ci": "^3.0.1",
     "lint-staged": "^13.1.2",
     "prettier": "^2.8.4",
