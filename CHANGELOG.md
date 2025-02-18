@@ -14,6 +14,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Noting
+
+### Security
+
+- Nothing
+
+## [2.7.1] - 2025-02-18
+
+### Added
+
+- Nothing
+
+### Changed
+
 - Upgrade pnpm lockfile version to 9.0 [#4522](https://github.com/chaos-mesh/chaos-mesh/pull/4522)
 - Use gauge subsystem in controller/daemon metrics [#4554](https://github.com/chaos-mesh/chaos-mesh/pull/4554)
 
