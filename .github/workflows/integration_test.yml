@@ -33,43 +33,23 @@ jobs:
   run:
     name: Integration Test
     strategy:
-      fail-fast: false
       matrix:
-        arch: [amd64, arm64]
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+        arch: [amd64]
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04"}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
         with:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - name: Create kind cluster
-        # released version of kind-action doesn't support arm64
-        uses: helm/kind-action@4c7909140acfc81a05fc96fed8fea6673ba8ce80
+      - name: Setup minikube
+        uses: medyagh/setup-minikube@latest
         with:
-          kubectl_version: v1.23.1
+          minikube-version: 1.35.0
 
       - name: Restrict access to kubeconfig # https://github.com/helm/helm/issues/9115
         run: chmod 600 ~/.kube/config
 
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-
-      - name: Magic Kind DNS Fix
-        if: ${{ matrix.arch == 'arm64' }}
-        run: |
-          docker exec chart-testing-control-plane /bin/bash -c "sed -e 's/nameserver \(.*\)/nameserver 8.8.8.8/g' /etc/resolv.conf > /etc/resolv.conf.sed"
-          docker exec chart-testing-control-plane /bin/bash -c "cp /etc/resolv.conf.sed /etc/resolv.conf"
-
-          kubectl rollout restart deployment -n kube-system coredns
-
-      - uses: actions/setup-python@v2
-        if: ${{ matrix.arch != 'arm64' }} # We can assume the self-hosted arm64 has a functional python
-
-      - uses: actions/setup-go@v4
-        with:
-          check-latest: true
-          go-version-file: "go.mod"
       - name: Build Chaos Mesh Build Env
         if: ${{ github.event.pull_request }}
         env:
@@ -96,17 +76,33 @@ jobs:
 
           make image-dev-env
 
-      - name: Install Chaos Mesh
+      - name: Build and load Chaos Mesh images
         run: |
-          export CLUSTER="chart-testing"
-          hack/local-up-chaos-mesh.sh
-          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-mesh
-          kubectl set env deployment/chaos-controller-manager SECURITY_MODE=true -n chaos-mesh
-          sleep 5
+          make image
+          minikube image load ghcr.io/chaos-mesh/chaos-mesh:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-daemon:latest
+          minikube image load ghcr.io/chaos-mesh/chaos-dashboard:latest
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      - name: Install Chaos Mesh
+        # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.
+        run: |
+          helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
+            -n=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41 \
+            --set controllerManager.chaosdSecurityMode=false
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
+
+      - uses: actions/setup-go@v4
+        with:
+          check-latest: true
+          go-version-file: "go.mod"
       - name: Build chaosctl
         run: |
           make chaosctl
+
+      - uses: actions/setup-python@v5
       - name: Install localstack && aws client
         run: |
           helm repo add localstack-repo http://helm.localstack.cloud
