@@ -7,25 +7,10 @@ on:
     paths-ignore:
       - .gitignore
       - "**.md"
-      - .github/ISSUE_TEMPLATE/*
-      - .github/pull_request_template.md
       # Not available for frontend code for now.
       - "ui/**"
-      - .github/workflows/checklink.yaml
-      - .github/checklink_config.json
-      - .github/workflows/ci.yml
-      - .github/workflows/ci_skip.yml
-      - .github/workflows/codecov_unittest.yaml
-      - .github/workflows/e2e_test.yml
-      - .github/workflows/e2e_test_upload_cache.yml
-      - .github/workflows/license_checker.yml
-      - .github/workflows/must_update_changelog.yml
-      - .github/workflows/release_helm_chart.yml
-      - .github/workflows/upload_env_image.yml
-      - .github/workflows/upload_image.yml
-      - .github/workflows/upload_image_pr.yml
-      - .github/workflows/upload_latest_files.yml
-      - .github/workflows/upload_release_files.yml
+      - .github/workflows/**
+      - "!.github/workflows/integration_test.yml"
 
 permissions: read-all
 
@@ -84,7 +69,7 @@ jobs:
           minikube image load ghcr.io/chaos-mesh/chaos-dashboard:latest
 
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
 
       - name: Install Chaos Mesh
         # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.

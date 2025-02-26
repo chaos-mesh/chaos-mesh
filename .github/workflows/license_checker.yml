@@ -4,6 +4,60 @@ on:
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - ".github/**"
+      - ".well-known/**"
+      - "**.md"
+      - "**.json"
+      - "*.mk"
+      - ".dockerignore"
+      - ".editorconfig"
+      - "**/.gitignore"
+      - ".lift.toml"
+      - ".muse.toml"
+      - ".prettierrc"
+      - "codecov.yml"
+      - "env-images.yaml"
+      - "Makefile"
+      - "OWNERS"
+      - "OWNERS_ALIASES"
+      - "revive.toml"
+      - "**/go.mod"
+      - "**/go.sum"
+      - "**/Dockerfile"
+      - "**/.gitkeep"
+      - "helm/chaos-mesh/.helmignore"
+      - "helm/chaos-mesh/templates/*.tpl"
+      - "**.proto"
+      # skip auto-generated files
+      - "config/**"
+      - "helm/chaos-mesh/crds/*"
+      - "manifests/**"
+      - "**/*_generated*"
+      - "pkg/dashboard/swaggerdocs/docs.go"
+      - "pkg/dashboard/swaggerdocs/swagger.yaml"
+      - "pkg/ctrlserver/graph/model/models_gen.go"
+      - "pkg/ctrlserver/graph/generated/generated.go"
+      - "pkg/ctrlserver/graph/schema.resolvers.go"
+      - "**.pb.go"
+      - "pkg/time/fakeclock/.embed.o"
+      # UI
+      - "ui/.husky/**"
+      - "ui/.prettierignore"
+      - "ui/.prettierrc"
+      - "ui/pnpm-lock.yaml"
+      - "ui/pnpm-workspace.yaml"
+      - "ui/app/public/**"
+      - "ui/app/src/api/zz_generated.frontend.chaos-mesh.ts"
+      - "ui/app/src/formik/**"
+      - "ui/app/src/openapi/**"
+      - "ui/app/src/setupProxy.js"
+      - "ui/**/*.svg"
+      - "**/__mocks__/**"
+      - "**/__snapshots__/**"
+      - "ui/packages/mui-extends/.storybook/**"
+      - "ui/packages/mui-extends/stories/**"
+      - "ui/packages/mui-extends/test/storyshots.test.js"
 
 permissions: read-all
 
@@ -12,10 +66,18 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Check License Header
-        uses: apache/skywalking-eyes@v0.4.0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+
+      - name: Check license header for changed files
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          log: info
-          config: .github/.licenserc.yaml
+          ADDED_FILES: ${{ steps.changed-files.outputs.added_files }}
+        run: |
+          for file in ${ADDED_FILES}; do
+            if ! grep -q "Licensed under the Apache License, Version 2.0" $file; then
+              echo "License header is missing in $file."
+              echo "Please check all added files have the license header before committing."
+              exit 1
+            fi
+          done
