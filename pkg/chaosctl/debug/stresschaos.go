@@ -62,7 +62,7 @@ func (d *stressDebugger) Collect(ctx context.Context, namespace, chaosName strin
 							Period int
 						}
 						Memory *struct {
-							Limit uint64
+							Limit int64
 						}
 					}
 					ProcessStress []struct {
@@ -101,33 +101,59 @@ func (d *stressDebugger) Collect(ctx context.Context, namespace, chaosName strin
 				Name: podStressChaos.Pod.Name,
 			}
 
-			podResult.Items = append(podResult.Items, common.ItemResult{Name: "cat /proc/cgroups", Value: podStressChaos.Cgroups.Raw})
+			podResult.Items = append(podResult.Items, common.ItemResult{
+				Name:  "/proc/cgroups or /sys/fs/cgroup/cgroup.controllers",
+				Value: podStressChaos.Cgroups.Raw,
+			})
+
 			for _, process := range podStressChaos.ProcessStress {
 				podResult.Items = append(podResult.Items, common.ItemResult{
 					Name:  fmt.Sprintf("/proc/%s/cgroup of %s", process.Process.Pid, process.Process.Command),
 					Value: process.Cgroup,
 				})
 			}
+
 			if podStressChaos.Cgroups.Cpu != nil {
-				podResult.Items = append(podResult.Items, common.ItemResult{Name: "cpu.cfs_quota_us", Value: strconv.Itoa(podStressChaos.Cgroups.Cpu.Quota)})
-				periodItem := common.ItemResult{Name: "cpu.cfs_period_us", Value: strconv.Itoa(podStressChaos.Cgroups.Cpu.Period)}
+				podResult.Items = append(podResult.Items, common.ItemResult{
+					Name:  "CPU Quota",
+					Value: strconv.Itoa(podStressChaos.Cgroups.Cpu.Quota),
+				})
+
+				periodItem := common.ItemResult{
+					Name:  "CPU Period",
+					Value: strconv.Itoa(podStressChaos.Cgroups.Cpu.Period),
+				}
 				if podStressChaos.Cgroups.Cpu.Quota == -1 {
 					periodItem.Status = common.ItemFailure
-					periodItem.ErrInfo = "no cpu limit is set for now"
+					periodItem.ErrInfo = "No CPU limit set"
 				} else {
 					periodItem.Status = common.ItemSuccess
-					periodItem.SucInfo = fmt.Sprintf("cpu limit is equals to %.2f", float64(podStressChaos.Cgroups.Cpu.Quota)/float64(podStressChaos.Cgroups.Cpu.Period))
+					periodItem.SucInfo = fmt.Sprintf("CPU limit is equals to %.2f", float64(podStressChaos.Cgroups.Cpu.Quota)/float64(podStressChaos.Cgroups.Cpu.Period))
 				}
+
 				podResult.Items = append(podResult.Items, periodItem)
 			}
 
 			if podStressChaos.Cgroups.Memory != nil {
-				podResult.Items = append(podResult.Items, common.ItemResult{Name: "memory.limit_in_bytes", Value: bytefmt.ByteSize(podStressChaos.Cgroups.Memory.Limit) + "B"})
+				if podStressChaos.Cgroups.Memory.Limit == -1 {
+					podResult.Items = append(podResult.Items, common.ItemResult{
+						Name:  "Memory Limit",
+						Value: "No memory limit set",
+					})
+				} else {
+					podResult.Items = append(podResult.Items, common.ItemResult{
+						Name:  "Memory Limit (bytes)",
+						Value: bytefmt.ByteSize(uint64(podStressChaos.Cgroups.Memory.Limit)) + "B",
+					})
+				}
 			}
+
 			result.Pods = append(result.Pods, podResult)
 		}
+
 		results = append(results, result)
 	}
+
 	return results, nil
 }
 
