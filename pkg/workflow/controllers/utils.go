@@ -30,12 +30,14 @@ import (
 )
 
 func SetCondition(status *v1alpha1.WorkflowNodeStatus, condition v1alpha1.WorkflowNodeCondition) {
-	currentCond := GetCondition(*status, condition.Type)
-	if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
-		return
-	}
-	newConditions := filterOutCondition(status.Conditions, condition.Type)
-	status.Conditions = append(newConditions, condition)
+    currentCond := GetCondition(*status, condition.Type)
+    if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
+        // Update generation if statuses match
+		status.ObservedGeneration = condition.Generation
+        return
+    }
+    newConditions := filterOutCondition(status.Conditions, condition.Type)
+    status.Conditions = append(newConditions, condition)
 }
 
 func GetCondition(status v1alpha1.WorkflowNodeStatus, conditionType v1alpha1.WorkflowNodeConditionType) *v1alpha1.WorkflowNodeCondition {

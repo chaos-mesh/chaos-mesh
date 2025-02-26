@@ -19082,6 +19082,16 @@ spec:
                   executed.
                 format: int64
                 type: integer
+              generation:
+                format: int64
+                type: integer
+              observedGeneration:
+                description: |-
+                  ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                  For instance, if .metadata.generation is currently 12, but the .status.observedGeneration is 9,
+                  the condition is out of date with respect to the current state of the instance.
+                format: int64
+                type: integer
               records:
                 description: Records contains the history of the execution of StatusCheck.
                 items:
@@ -39725,6 +39735,9 @@ spec:
                   node's current state.
                 items:
                   properties:
+                    generation:
+                      format: int64
+                      type: integer
                     reason:
                       type: string
                     status:
@@ -39754,6 +39767,16 @@ spec:
                   type: object
                   x-kubernetes-map-type: atomic
                 type: array
+              generation:
+                format: int64
+                type: integer
+              observedGeneration:
+                description: |-
+                  ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                  For instance, if .metadata.generation is currently 12, but the .status.observedGeneration is 9,
+                  the condition is out of date with respect to the current state of the instance.
+                format: int64
+                type: integer
             type: object
         required:
         - spec
