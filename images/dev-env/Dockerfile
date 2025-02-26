@@ -5,7 +5,7 @@ FROM golang:1.22 AS go_install
 ENV GOPATH /go
 ENV CGO_ENABLED 0
 
-RUN go install golang.org/x/tools/cmd/goimports@v0.33.0
+RUN go install golang.org/x/tools/cmd/goimports@v0.30.0
 RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
 RUN go install github.com/mgechev/revive@v1.2.4
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
