@@ -135,17 +135,13 @@ swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for f
 check: generate manifests/crd.yaml vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
-fmt: groupimports images/dev-env/.dockerbuilt ## Reformat go files with gofmt and goimports
-	$(CGO) fmt $$($(PACKAGE_LIST))
+fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' \
+		-exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
 gosec-scan: images/dev-env/.dockerbuilt
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
-
-groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
-groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive
@@ -310,7 +306,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
-	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \
+	boilerplate tidy fmt vet lint install.sh schedule-migration \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	gosec-scan \
