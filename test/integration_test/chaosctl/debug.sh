@@ -194,8 +194,6 @@ if [ $? -ne 0 ]; then
     echo "chaosctl debug stresschaos failed"
     code=1
 fi
-echo "[Debug] ls /sys/fs/cgroup"
-ls /sys/fs/cgroup
 file_must_contains "\[Chaos\]: web-show-memory-stress" true
 file_must_contains "/sys/fs/cgroup/memory" true
 echo "Cleaning up stresschaos"

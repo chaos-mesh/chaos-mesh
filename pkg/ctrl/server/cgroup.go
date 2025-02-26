@@ -31,8 +31,8 @@ import (
 
 // IsCgroupV2 detects if the system is using cgroup v2
 func (r *Resolver) IsCgroupV2(ctx context.Context, obj *v1.Pod) (bool, error) {
-	// Check if the unified cgroup hierarchy exists
-	cmd := "test -d /sys/fs/cgroup/cgroup.controllers && echo true || echo false"
+	// Check if the unified cgroup hierarchy exists by testing for cgroup.controllers file
+	cmd := "test -f /sys/fs/cgroup/cgroup.controllers && echo true || echo false"
 	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
 		return false, err
