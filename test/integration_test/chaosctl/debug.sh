@@ -30,6 +30,7 @@ function file_must_contains() {
   if [ "$?" != "0" ]; then
       echo "'$substring' not found in '$log_file'"
       echo "[Debug] $log_file:"
+      cat $log_file
       exit 1
   fi
 }
@@ -194,8 +195,7 @@ if [ $? -ne 0 ]; then
     code=1
 fi
 file_must_contains "\[Chaos\]: web-show-memory-stress" true
-file_must_contains "1. \[cat /proc/cgroups\]" true
-file_must_contains "\[memory.limit_in_bytes\]" true
+file_must_contains "/sys/fs/cgroup/memory" true
 echo "Cleaning up stresschaos"
 kubectl delete -f stress.yaml
 rm stress.yaml
