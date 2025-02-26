@@ -136,8 +136,8 @@ check: generate manifests/crd.yaml vet lint fmt tidy install.sh helm-values-sche
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
 fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-  find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' \
-    -exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' \
+		-exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
 gosec-scan: images/dev-env/.dockerbuilt
