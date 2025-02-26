@@ -19,7 +19,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // ExperimentStore defines operations for working with experiments.

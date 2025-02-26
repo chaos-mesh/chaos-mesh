@@ -1728,7 +1728,7 @@ spec:
             - name: CLEAN_SYNC_PERIOD
               value: "12h"
             - name: DATABASE_DATASOURCE
-              value: "/data/core.sqlite"
+              value: "/data/chaos-dashboard.sqlite"
             - name: DATABASE_DRIVER
               value: "sqlite3"
             - name: LISTEN_HOST

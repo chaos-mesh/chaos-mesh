@@ -373,7 +373,7 @@ dashboard:
     DATABASE_DRIVER: sqlite3
     # **Deprecated**, use `dashboard.databaseSecretName` instead.
     # Database DSN used for Chaos Dashboard.
-    DATABASE_DATASOURCE: /data/core.sqlite
+    DATABASE_DATASOURCE: /data/chaos-dashboard.sqlite
 
     # Set the sync period to clean up archived data
     CLEAN_SYNC_PERIOD: 12h

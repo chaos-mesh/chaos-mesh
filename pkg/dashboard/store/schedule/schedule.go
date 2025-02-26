@@ -17,9 +17,10 @@ package schedule
 
 import (
 	"context"
+	"errors"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
@@ -36,7 +37,7 @@ func NewStore(db *gorm.DB) core.ScheduleStore {
 
 // DeleteIncompleteSchedules call core.ScheduleStore.DeleteIncompleteSchedules to deletes all incomplete schedules.
 func DeleteIncompleteSchedules(es core.ScheduleStore, _ core.EventStore) {
-	if err := es.DeleteIncompleteSchedules(context.Background()); err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := es.DeleteIncompleteSchedules(context.Background()); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Error(err, "failed to delete all incomplete schedules")
 	}
 }
@@ -51,7 +52,7 @@ func (e *ScheduleStore) ListMeta(_ context.Context, namespace, name string, arch
 	sches := make([]*core.ScheduleMeta, 0)
 	query, args := constructQueryArgs("", namespace, name, "")
 
-	if err := db.Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args).Where("archived = ?", archived).Find(&sches).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
@@ -90,7 +91,7 @@ func (e *ScheduleStore) Set(_ context.Context, schedule *core.Schedule) error {
 func (e *ScheduleStore) Archive(_ context.Context, ns, name string) error {
 	if err := e.db.Model(core.Schedule{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 

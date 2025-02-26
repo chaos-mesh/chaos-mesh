@@ -22,9 +22,10 @@ import (
 	"time"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
@@ -59,7 +60,13 @@ var _ = Describe("Event", func() {
 		db, mock, err = sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		Expect(err).ShouldNot(HaveOccurred())
 
-		gdb, err := gorm.Open("sqlite3", db)
+		// GORM v2 uses a different approach to create a DB instance from an existing connection
+		dialector := postgres.New(postgres.Config{
+			Conn:       db,
+			DriverName: "postgres",
+		})
+
+		gdb, err := gorm.Open(dialector, &gorm.Config{})
 		Expect(err).ShouldNot(HaveOccurred())
 
 		es = &eventStore{db: gdb}

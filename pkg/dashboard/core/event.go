@@ -56,7 +56,7 @@ type EventStore interface {
 }
 
 type Event struct {
-	ID        uint      `gorm:"primary_key" json:"id"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
 	ObjectID  string    `gorm:"index:object_id" json:"object_id"`
 	CreatedAt time.Time `json:"created_at"`
 	Namespace string    `json:"namespace"`

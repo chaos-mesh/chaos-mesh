@@ -17,6 +17,7 @@ package event
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"sort"
 	"strconv"
@@ -24,7 +25,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -152,7 +153,7 @@ func (s *Service) cascadeFetchEventsForWorkflow(c *gin.Context) {
 	// we should fetch the events for Workflow and related WorkflowNode, so we need namespaced name at first
 	workflowEntity, err := s.workflowStore.FindByUID(ctx, uid)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.Wrap(err, "this requested workflow is not found, uid: %s", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -266,7 +267,7 @@ func (s *Service) get(c *gin.Context) {
 
 	event, err := s.event.Find(context.Background(), uint(intID))
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Event "+id+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
