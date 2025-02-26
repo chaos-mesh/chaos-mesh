@@ -195,7 +195,7 @@ if [ $? -ne 0 ]; then
     code=1
 fi
 file_must_contains "\[Chaos\]: web-show-memory-stress" true
-file_must_contains "/sys/fs/cgroup/memory" true
+file_must_contains "\[/proc/1/cgroup of web-show\]" true
 echo "Cleaning up stresschaos"
 kubectl delete -f stress.yaml
 rm stress.yaml
