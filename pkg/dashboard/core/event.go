@@ -28,8 +28,8 @@ type EventStore interface {
 	// ListByUID returns an event list by the UID.
 	ListByUID(context.Context, string) ([]*Event, error)
 
-	// ListByUIDs returns an event list by the UID list.
-	ListByUIDs(context.Context, []string) ([]*Event, error)
+	// ListByUIDList returns an event list by the UID string list.
+	ListByUIDList(context.Context, []string) ([]*Event, error)
 
 	// ListByExperiment returns an event list by the namespace, name, or kind.
 	ListByExperiment(context context.Context, namespace string, name string, kind string) ([]*Event, error)
@@ -45,11 +45,8 @@ type EventStore interface {
 	// DeleteByUID deletes events by the UID.
 	DeleteByUID(context.Context, string) error
 
-	// DeleteByUIDs deletes events by the UID list.
-	DeleteByUIDs(context.Context, []string) error
-
-	// DeleteByTime deletes events within the specified time interval.
-	DeleteByTime(context.Context, string, string) error
+	// DeleteByUIDList deletes events by the UID string list.
+	DeleteByUIDList(context.Context, []string) error
 
 	// DeleteByDuration selete events that exceed duration.
 	DeleteByDuration(context.Context, time.Duration) error

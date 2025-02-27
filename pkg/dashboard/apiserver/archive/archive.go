@@ -240,7 +240,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
@@ -417,7 +417,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
@@ -582,7 +582,7 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return

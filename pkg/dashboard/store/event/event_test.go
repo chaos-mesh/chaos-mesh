@@ -24,7 +24,7 @@ import (
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"gorm.io/driver/postgres"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
@@ -60,13 +60,14 @@ var _ = Describe("Event", func() {
 		db, mock, err = sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		Expect(err).ShouldNot(HaveOccurred())
 
-		// GORM v2 uses a different approach to create a DB instance from an existing connection
-		dialector := postgres.New(postgres.Config{
-			Conn:       db,
-			DriverName: "postgres",
+		dialector := mysql.New(mysql.Config{
+			Conn:                      db,
+			SkipInitializeWithVersion: true, // Skip automatic version check
 		})
 
-		gdb, err := gorm.Open(dialector, &gorm.Config{})
+		gdb, err := gorm.Open(dialector, &gorm.Config{
+			DisableAutomaticPing: true, // Prevent GORM from pinging the DB during setup
+		})
 		Expect(err).ShouldNot(HaveOccurred())
 
 		es = &eventStore{db: gdb}
@@ -75,7 +76,7 @@ var _ = Describe("Event", func() {
 		event0 = &core.Event{
 			ID:        0,
 			ObjectID:  "UID0",
-			CreatedAt: now,
+			CreatedAt: now.Add(-time.Hour),
 			Namespace: "default",
 			Name:      "event0",
 			Kind:      "PodChaos",
@@ -86,7 +87,7 @@ var _ = Describe("Event", func() {
 		event1 = &core.Event{
 			ID:        1,
 			ObjectID:  "UID1",
-			CreatedAt: now.Add(time.Hour * 24),
+			CreatedAt: now.Add(time.Hour),
 			Namespace: "chaos-mesh",
 			Name:      "event1",
 			Kind:      "NetworkChaos",
@@ -105,7 +106,7 @@ var _ = Describe("Event", func() {
 			rows := genRows()
 			addRow(rows, event0)
 
-			mock.ExpectQuery("SELECT * FROM \"events\"").WillReturnRows(rows)
+			mock.ExpectQuery("SELECT * FROM `events`").WillReturnRows(rows)
 
 			events, err := es.List(context.TODO())
 			Expect(err).ShouldNot(HaveOccurred())
@@ -114,7 +115,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("ListByUID", func() {
-		sql := "SELECT * FROM \"events\" WHERE (object_id = ?)"
+		sql := "SELECT * FROM `events` WHERE object_id = ?"
 
 		It("event0 should be found", func() {
 			rows := genRows()
@@ -138,8 +139,25 @@ var _ = Describe("Event", func() {
 		})
 	})
 
+	Context("ListByUIDs", func() {
+		sql := "SELECT * FROM `events` WHERE object_id IN (?,?)"
+
+		It("event0 and event1 should be found", func() {
+			rows := genRows()
+			addRow(rows, event0)
+			addRow(rows, event1)
+
+			mock.ExpectQuery(sql).WithArgs(event0.ObjectID, event1.ObjectID).WillReturnRows(rows)
+
+			events, err := es.ListByUIDList(context.TODO(), []string{event0.ObjectID, event1.ObjectID})
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(events[0]).Should(Equal(event0))
+			Expect(events[1]).Should(Equal(event1))
+		})
+	})
+
 	Context("ListByExperiment", func() {
-		sql := "SELECT * FROM \"events\" WHERE (namespace = ? AND name = ? AND kind = ?)"
+		sql := "SELECT * FROM `events` WHERE namespace = ? AND name = ? AND kind = ?"
 
 		It("event0 should be found", func() {
 			rows := genRows()
@@ -165,7 +183,7 @@ var _ = Describe("Event", func() {
 	})
 
 	Context("Find", func() {
-		sql := "SELECT * FROM \"events\" WHERE (\"events\".\"id\" = 0) ORDER BY \"events\".\"id\" ASC LIMIT 1"
+		sql := "SELECT * FROM `events` WHERE `events`.`id` = ? ORDER BY `events`.`id` LIMIT ?"
 
 		It("event0 should be found", func() {
 			rows := genRows()
@@ -176,6 +194,58 @@ var _ = Describe("Event", func() {
 			event, err := es.Find(context.TODO(), 0)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(event).Should(Equal(event0))
+		})
+	})
+
+	Context("Create", func() {
+		sql := "INSERT INTO `events` (`object_id`,`created_at`,`namespace`,`name`,`kind`,`type`,`reason`,`message`) VALUES (?,?,?,?,?,?,?,?)"
+
+		It("event0 should be created", func() {
+			mock.ExpectBegin()
+			mock.ExpectExec(sql).WithArgs(event0.ObjectID, event0.CreatedAt, event0.Namespace, event0.Name, event0.Kind, event0.Type, event0.Reason, event0.Message).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectCommit()
+
+			err := es.Create(context.TODO(), event0)
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+	})
+
+	Context("DeleteByUID", func() {
+		sql := "DELETE FROM `events` WHERE object_id = ?"
+
+		It("event0 should be deleted", func() {
+			mock.ExpectBegin()
+			mock.ExpectExec(sql).WithArgs(event0.ObjectID).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectCommit()
+
+			err := es.DeleteByUID(context.TODO(), event0.ObjectID)
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+	})
+
+	Context("DeleteByUIDList", func() {
+		sql := "DELETE FROM `events` WHERE object_id IN (?,?)"
+
+		It("event0 and event1 should be deleted", func() {
+			mock.ExpectBegin()
+			mock.ExpectExec(sql).WithArgs(event0.ObjectID, event1.ObjectID).WillReturnResult(sqlmock.NewResult(1, 2))
+			mock.ExpectCommit()
+
+			err := es.DeleteByUIDList(context.TODO(), []string{event0.ObjectID, event1.ObjectID})
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+	})
+
+	Context("DeleteByDuration", func() {
+		sql := "DELETE FROM `events` WHERE created_at <= ?"
+
+		It("event0 should be deleted", func() {
+			mock.ExpectBegin()
+			mock.ExpectExec(sql).WithArgs(event0.CreatedAt.UTC().Format("2006-01-02 15:04:05")).WillReturnResult(sqlmock.NewResult(1, 1))
+			mock.ExpectCommit()
+
+			err := es.DeleteByDuration(context.TODO(), time.Hour)
+			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
 })
