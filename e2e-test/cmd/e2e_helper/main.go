@@ -301,7 +301,7 @@ func (s *server) stressCondition(w http.ResponseWriter, r *http.Request) {
 
 		response, err := json.Marshal(map[string]interface{}{
 			"cpuTime":     stats.CPU.UsageUsec * 1000,
-			"memoryUsage": stats.Memory.Usage - stats.Memory.KernelStack - stats.Memory.File,
+			"memoryUsage": stats.Memory.Usage,
 		})
 		if err != nil {
 			http.Error(w, "fail to marshal response", http.StatusInternalServerError)
