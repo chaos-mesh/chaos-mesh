@@ -156,7 +156,7 @@ jobs:
           cosign sign --key env://COSIGN_PRIVATE_KEY ghcr.io/chaos-mesh/chaos-kernel:$IMAGE_TAG --output-signature ghcr.io-chaos-mesh-chaos-kernel-$IMAGE_TAG.sig
           cosign public-key --key env://COSIGN_PRIVATE_KEY > cosign.pub
       - name: Upload cosign.pub and sigs
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             cosign.pub
@@ -189,6 +189,6 @@ jobs:
         run: bom generate -n https://chaos-mesh.org/chaos-mesh.spdx -o chaos-mesh-$IMAGE_TAG-sbom.spdx .
 
       - name: Upload SBOM
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: chaos-mesh-${{ needs.build-specific-architecture.outputs.image_tag }}-sbom.spdx
