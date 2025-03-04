@@ -27,7 +27,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-logr/logr v1.2.4
+	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.2.4
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/golang/protobuf v1.5.4
@@ -236,7 +236,6 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7 // indirect
 	github.com/rubenv/sql-migrate v1.5.2 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -256,10 +255,11 @@ require (
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
+	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0 // indirect
-	go.opentelemetry.io/otel v1.19.0 // indirect
-	go.opentelemetry.io/otel/metric v1.19.0 // indirect
-	go.opentelemetry.io/otel/trace v1.19.0 // indirect
+	go.opentelemetry.io/otel v1.34.0 // indirect
+	go.opentelemetry.io/otel/metric v1.34.0 // indirect
+	go.opentelemetry.io/otel/trace v1.34.0 // indirect
 	go.starlark.net v0.0.0-20230525235612-a134d8f9ddca // indirect
 	go.uber.org/dig v1.16.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
