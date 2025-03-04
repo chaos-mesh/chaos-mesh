@@ -38,7 +38,7 @@ jobs:
             IMAGE_TAG=latest;
           fi
 
-          echo "::set-output name=image_tag::$(echo $IMAGE_TAG)"
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container registry
         uses: docker/login-action@v2
