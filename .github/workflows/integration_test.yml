@@ -79,7 +79,7 @@ jobs:
             --set controllerManager.chaosdSecurityMode=false
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           check-latest: true
           go-version-file: "go.mod"
