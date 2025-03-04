@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -137,7 +137,7 @@ func (s *Service) get(c *gin.Context) {
 	uid := c.Param("uid")
 	exp, err := s.archive.FindByUID(context.Background(), uid)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -190,7 +190,7 @@ func (s *Service) delete(c *gin.Context) {
 	uid := c.Param("uid")
 
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrBadRequest.New("the archived experiment is not found"))
 		} else {
@@ -240,7 +240,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
@@ -307,7 +307,7 @@ func (s *Service) detailSchedule(c *gin.Context) {
 
 	exp, err := s.archiveSchedule.FindByUID(context.Background(), uid)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(u.ErrBadRequest.New("the archived schedule is not found"))
 		} else {
@@ -367,7 +367,7 @@ func (s *Service) deleteSchedule(c *gin.Context) {
 	uid := c.Param("uid")
 
 	if exp, err = s.archiveSchedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrBadRequest.New("the archived schedule is not found"))
 		} else {
@@ -417,7 +417,7 @@ func (s *Service) batchDeleteSchedule(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return
@@ -484,7 +484,7 @@ func (s *Service) detailWorkflow(c *gin.Context) {
 
 	meta, err := s.workflowStore.FindByUID(context.Background(), uid)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(u.ErrBadRequest.New("the archived workflow is not found"))
 		} else {
@@ -582,7 +582,7 @@ func (s *Service) batchDeleteWorkflow(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if err = s.event.DeleteByUIDs(context.Background(), uidSlice); err != nil {
+	if err = s.event.DeleteByUIDList(context.Background(), uidSlice); err != nil {
 		_ = c.Error(u.ErrInternalServer.WrapWithNoMessage(err))
 		c.Status(http.StatusInternalServerError)
 		return

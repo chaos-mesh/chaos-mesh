@@ -115,7 +115,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.env.METRIC_HOST` | The address which metrics endpoints would listen on. | `0.0.0.0` |
 | `dashboard.env.METRIC_PORT` | The address which metrics endpoints would listen on. | `2334` |
 | `dashboard.env.DATABASE_DRIVER` | The db driver used for Chaos Dashboard, support db: sqlite3, mysql, postgres | `sqlite3` |
-| `dashboard.env.DATABASE_DATASOURCE` | (**Deprecated**, use `dashboard.databaseSecretName` instead) Database DSN used for Chaos Dashboard | `/data/core.sqlite` |
+| `dashboard.env.DATABASE_DATASOURCE` | (**Deprecated**, use `dashboard.databaseSecretName` instead) Database DSN used for Chaos Dashboard | `/data/chaos-dashboard.sqlite` |
 | `dashboard.env.CLEAN_SYNC_PERIOD` | Set the sync period to clean up archived data | `12h` |
 | `dashboard.env.TTL_EVENT` | Set TTL of archived event data | `168h` |
 | `dashboard.env.TTL_EXPERIMENT` | Set TTL of archived experiment data | `336h` |

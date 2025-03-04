@@ -1,6 +1,7 @@
 **/bin/*
 !bin/.gitkeep
 
+.DS_Store
 .vscode/
 .idea/
 *.iml
@@ -9,8 +10,7 @@
 tags
 *.fail.go
 vendor
-.DS_Store
-core.sqlite
+chaos-dashboard.sqlite
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 /cover.*
