@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.17.2
   name: podiochaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
@@ -177,15 +177,11 @@ spec:
                   type: object
                 type: array
               container:
-                description: 'TODO: support multiple different container to inject
-                  in one pod'
                 type: string
               volumeMountPath:
                 description: |-
                   VolumeMountPath represents the target mount path
                   It must be a root of mount path now.
-                  TODO: search the mount parent of any path automatically.
-                  TODO: support multiple different volume mount path in one pod
                 type: string
             required:
             - volumeMountPath

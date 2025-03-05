@@ -6,11 +6,11 @@ ENV GOPATH /go
 ENV CGO_ENABLED 0
 
 RUN go install golang.org/x/tools/cmd/goimports@v0.30.0
-RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.14.0
+RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.17.2
 RUN go install github.com/mgechev/revive@v1.2.4
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
-RUN go install github.com/99designs/gqlgen@v0.17.63
+RUN go install github.com/99designs/gqlgen@v0.17.66
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.1.0
 RUN go install github.com/AlekSi/gocov-xml@v1.1.0
@@ -59,7 +59,7 @@ COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
 # The `gqlgen` depends on the plugin in it
-COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.63 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.63
+COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.66 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.66
 
 ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 

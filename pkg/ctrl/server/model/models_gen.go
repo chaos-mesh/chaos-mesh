@@ -93,9 +93,6 @@ type ProcessStress struct {
 	Cgroup  string   `json:"cgroup"`
 }
 
-type Query struct {
-}
-
 type Component string
 
 const (
