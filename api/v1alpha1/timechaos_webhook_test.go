@@ -16,6 +16,8 @@
 package v1alpha1
 
 import (
+	"context"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +29,7 @@ var _ = Describe("timechaos_webhook", func() {
 			timechaos := &TimeChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			timechaos.Default()
+			timechaos.Default(context.Background(), nil)
 			Expect(timechaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 			Expect(timechaos.Spec.ClockIds[0]).To(Equal("CLOCK_REALTIME"))
 		})
@@ -52,7 +54,7 @@ var _ = Describe("timechaos_webhook", func() {
 						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -67,7 +69,7 @@ var _ = Describe("timechaos_webhook", func() {
 						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateUpdate(chaos)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
 						return err
 					},
 					expect: "",
@@ -82,7 +84,7 @@ var _ = Describe("timechaos_webhook", func() {
 						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateDelete()
+						_, err := chaos.ValidateDelete(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -99,7 +101,7 @@ var _ = Describe("timechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",

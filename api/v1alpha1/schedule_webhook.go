@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -29,12 +30,13 @@ import (
 // log is for logging in this package.
 var schedulelog = logf.Log.WithName("schedule-resource")
 
-var _ webhook.Defaulter = &Schedule{}
+var _ webhook.CustomDefaulter = &Schedule{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (in *Schedule) Default() {
+func (in *Schedule) Default(_ context.Context, _ runtime.Object) error {
 	schedulelog.Info("default", "name", in.Name)
 	in.Spec.ConcurrencyPolicy.Default()
+	return nil
 }
 
 func (in *ConcurrencyPolicy) Default() {
@@ -43,22 +45,22 @@ func (in *ConcurrencyPolicy) Default() {
 	}
 }
 
-var _ webhook.Validator = &Schedule{}
+var _ webhook.CustomValidator = &Schedule{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateCreate() (admission.Warnings, error) {
+func (in *Schedule) ValidateCreate(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	schedulelog.Info("validate create", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+func (in *Schedule) ValidateUpdate(_ context.Context, _ runtime.Object, _ runtime.Object) (admission.Warnings, error) {
 	schedulelog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateDelete() (admission.Warnings, error) {
+func (in *Schedule) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	schedulelog.Info("validate delete", "name", in.Name)
 	return nil, nil
 }

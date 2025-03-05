@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -43,7 +44,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					},
 				},
 			}
-			physicalMachineChaos.Default()
+			physicalMachineChaos.Default(context.Background(), nil)
 			Expect(physicalMachineChaos.Spec.UID).ToNot(Equal(""))
 			Expect(physicalMachineChaos.Spec.Address).To(BeEquivalentTo([]string{
 				"http://123.123.123.123:123",
@@ -75,7 +76,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.chaos.ValidateCreate()
+				_, err := testCase.chaos.ValidateCreate(context.Background(), nil)
 				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
 			}
 		})
@@ -173,7 +174,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.chaos.ValidateCreate()
+				_, err := testCase.chaos.ValidateCreate(context.Background(), nil)
 				if len(testCase.err) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
@@ -1043,7 +1044,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 						ExpInfo: testCase.expInfo,
 					},
 				}
-				_, err := chaos.ValidateCreate()
+				_, err := chaos.ValidateCreate(context.Background(), nil)
 				if len(testCase.err) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
@@ -1083,7 +1084,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.chaos.ValidateCreate()
+				_, err := testCase.chaos.ValidateCreate(context.Background(), nil)
 				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
 			}
 		})

@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -156,7 +157,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		}
 		return false, err
 	})
-	framework.ExpectError(err, "chaos shouldn't enter stopped phase")
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("chaos shouldn't enter stopped phase")))
 
 	// wait for 1 minutes and no pod is killed
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
@@ -166,7 +167,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		framework.ExpectNoError(err, "get nginx pods error")
 		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
 	})
-	framework.ExpectError(err, "wait pod not killed failed")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait pod not killed failed")))
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 }
