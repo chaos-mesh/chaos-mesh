@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -125,7 +125,7 @@ func (r *ScheduleCollector) setUnarchivedSchedule(req ctrl.Request, schedule v1a
 	archive.Schedule = string(data)
 
 	find, err := r.archive.FindByUID(context.Background(), string(schedule.UID))
-	if err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		r.Log.Error(err, "failed to find schedule", "UID", schedule.UID)
 		return err
 	}
