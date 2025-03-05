@@ -1,6 +1,6 @@
 module github.com/chaos-mesh/chaos-mesh/test/cmd/e2e_helper
 
-go 1.22
+go 1.23.7
 
 require github.com/containerd/cgroups v1.1.0
 

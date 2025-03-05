@@ -21,6 +21,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -51,8 +52,8 @@ func TestcasePeersCrossover(
 	}
 
 	result := probeNetworkCondition(c, networkPeers, ports, false)
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 
 	var (
 		testDelayTcParam = v1alpha1.TcParameter{
@@ -91,8 +92,8 @@ func TestcasePeersCrossover(
 	})
 
 	framework.ExpectNoError(err, "failed to waiting condition for chaos injection")
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(result[networkConditionSlow], [][]int{{0, 1}, {0, 3}, {1, 2}, {2, 3}})
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(result[networkConditionSlow]).To(gomega.Equal([][]int{{0, 1}, {0, 3}, {1, 2}, {2, 3}}))
 
 	By("recover")
 	err = cli.Delete(ctx, networkDelay.DeepCopy())
@@ -107,7 +108,6 @@ func TestcasePeersCrossover(
 	})
 
 	framework.ExpectNoError(err, "failed to waiting condition for chaos recover")
-	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
-	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
-
+	gomega.Expect(len(result[networkConditionBlocked])).To(gomega.BeZero())
+	gomega.Expect(len(result[networkConditionSlow])).To(gomega.BeZero())
 }

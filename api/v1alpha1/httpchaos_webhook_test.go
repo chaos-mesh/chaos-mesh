@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -52,7 +53,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -70,7 +71,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateUpdate(chaos)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
 						return err
 					},
 					expect: "",
@@ -88,7 +89,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateDelete()
+						_, err := chaos.ValidateDelete(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -107,7 +108,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -129,7 +130,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -151,7 +152,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -173,7 +174,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -195,7 +196,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -217,7 +218,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -234,7 +235,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -252,7 +253,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -269,7 +270,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -287,7 +288,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -306,7 +307,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "ok",
@@ -325,7 +326,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "ok",
@@ -344,7 +345,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -365,7 +366,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "ok",
@@ -386,7 +387,7 @@ var _ = Describe("HTTPChaos Webhook", func() {
 						},
 					},
 					execute: func(chaos *HTTPChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",

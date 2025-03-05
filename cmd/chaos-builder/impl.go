@@ -22,6 +22,7 @@ import (
 
 const implImport = `
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"time"
@@ -152,41 +153,42 @@ func (in *{{.Type}}) IsOneShot() bool {
 {{end}}
 var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
-func (in *{{.Type}}) ValidateCreate() (admission.Warnings, error) {
+func (in *{{.Type}}) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
+	return in.Validate(ctx, obj)
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
 	{{- if not .EnableUpdate}}
-	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
+	if !reflect.DeepEqual(in.Spec, oldObj.(*{{.Type}}).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	{{- end}}
-	return in.Validate()
+	return in.Validate(ctx, newObj)
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateDelete() (admission.Warnings, error) {
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *{{.Type}}) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate delete", "name", in.Name)
 
 	// Nothing to do?
 	return nil, nil
 }
 
-var _ webhook.Validator = &{{.Type}}{}
+var _ webhook.CustomValidator = &{{.Type}}{}
 
-func (in *{{.Type}}) Validate() ([]string, error) {
+func (in *{{.Type}}) Validate(_ context.Context, _ runtime.Object) ([]string, error) {
 	errs := gw.Validate(in)
 	return nil, gw.Aggregate(errs)
 }
 
-var _ webhook.Defaulter = &{{.Type}}{}
+var _ webhook.CustomDefaulter = &{{.Type}}{}
 
-func (in *{{.Type}}) Default() {
+func (in *{{.Type}}) Default(_ context.Context, _ runtime.Object) error {
 	gw.Default(in)
+	return nil
 }
 `
 

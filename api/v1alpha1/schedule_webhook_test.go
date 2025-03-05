@@ -16,6 +16,8 @@
 package v1alpha1
 
 import (
+	"context"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,7 +50,7 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate()
+						_, err := schedule.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -67,7 +69,7 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate()
+						_, err := schedule.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -86,7 +88,7 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate()
+						_, err := schedule.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -105,7 +107,7 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate()
+						_, err := schedule.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "",
@@ -135,7 +137,7 @@ var _ = Describe("schedule_webhook", func() {
 				Schedule:     "*/1 * * * * *",
 			},
 		}
-		s.Default()
+		s.Default(context.Background(), nil)
 		Expect(s.Spec.ConcurrencyPolicy).To(Equal(ForbidConcurrent))
 	})
 })
