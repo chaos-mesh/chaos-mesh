@@ -29,30 +29,40 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/ctrl/server/model"
 )
 
-// GetCgroups returns result of cat /proc/cgroups
+// IsCgroupV2 detects if the system is using cgroup v2
+func (r *Resolver) IsCgroupV2(ctx context.Context, obj *v1.Pod) (bool, error) {
+	// Check if the unified cgroup hierarchy exists by testing for cgroup.controllers file
+	cmd := "test -f /sys/fs/cgroup/cgroup.controllers && echo true || echo false"
+	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
+	if err != nil {
+		return false, err
+	}
+	return strings.TrimSpace(out) == "true", nil
+}
+
+func (r *Resolver) GetCgroup(ctx context.Context, obj *v1.Pod, pid string) (string, error) {
+	cmd := fmt.Sprintf("cat /proc/%s/cgroup", pid)
+	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
+}
+
+// GetCgroups also needs to be updated to handle cgroup v2
 func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*model.Cgroups, error) {
-	cmd := "cat /proc/cgroups"
+	// Check cgroup version first
+	isV2, err := r.IsCgroupV2(ctx, obj.Pod)
+	if err != nil {
+		return nil, err
+	}
 
-	// the raw looks like:
-	// ```
-	// #subsys_name    hierarchy       num_cgroups     enabled
-	// cpuset  0       127     1
-	// cpu     0       127     1
-	// cpuacct 0       127     1
-	// blkio   0       127     1
-	// memory  0       127     1
-	// devices 0       127     1
-	// freezer 0       127     1
-	// net_cls 0       127     1
-	// perf_event      0       127     1
-	// net_prio        0       127     1
-	// hugetlb 0       127     1
-	// pids    0       127     1
-	// rdma    0       127     1
-	// misc    0       127     1
-	// ```
+	var cmd string
+	if isV2 {
+		// In cgroup v2, controllers are listed in cgroup.controllers
+		cmd = "cat /sys/fs/cgroup/cgroup.controllers"
+	} else {
+		// Original cgroup v1 command
+		cmd = "cat /proc/cgroups"
+	}
+
 	raw, err := r.ExecBypass(ctx, obj.Pod, cmd, bpm.PidNS, bpm.MountNS)
-
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +71,6 @@ func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*
 		Raw: raw,
 	}
 
-	// no more info for StressngStressors
 	if obj.StressChaos.Spec.StressngStressors != "" || obj.StressChaos.Spec.Stressors == nil {
 		return cgroups, nil
 	}
@@ -72,14 +81,18 @@ func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*
 	}
 
 	if isCPU {
-		var cpuMountType string
-		if regexp.MustCompile("(cpu,cpuacct)").MatchString(string(raw)) {
-			cpuMountType = "cpu,cpuacct"
-		} else {
-			// cgroup does not support cpuacct sub-system
-			cpuMountType = "cpu"
-		}
 		cgroups.CPU = &model.CgroupsCPU{}
+
+		var cpuMountType string
+		if !isV2 {
+			if regexp.MustCompile("(cpu,cpuacct)").MatchString(string(raw)) {
+				cpuMountType = "cpu,cpuacct"
+			} else {
+				// cgroup does not support cpuacct sub-system
+				cpuMountType = "cpu"
+			}
+		}
+
 		cgroups.CPU.Quota, err = r.GetCPUQuota(ctx, obj.Pod, cpuMountType)
 		if err != nil {
 			return nil, err
@@ -99,28 +112,35 @@ func (r *Resolver) GetCgroups(ctx context.Context, obj *model.PodStressChaos) (*
 	return cgroups, nil
 }
 
-// GetCgroup returns result of cat /proc/:pid/cgroup
-// The output looks like:
-// ```
-// 11:freezer:/
-// 10:hugetlb:/
-// 9:memory:/system.slice/sshd.service
-// 8:pids:/system.slice/sshd.service
-// 7:perf_event:/
-// 6:net_cls,net_prio:/
-// 5:devices:/system.slice/sshd.service
-// 4:blkio:/system.slice/sshd.service
-// 3:cpu,cpuacct:/system.slice/sshd.service
-// 2:cpuset:/
-// 1:name=systemd:/system.slice/sshd.service
-// ```
-func (r *Resolver) GetCgroup(ctx context.Context, obj *v1.Pod, pid string) (string, error) {
-	cmd := fmt.Sprintf("cat /proc/%s/cgroup", pid)
-	return r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
-}
-
-// GetCPUQuota returns result of cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_quota_us
+// GetCPUQuota returns CPU quota based on cgroup version
 func (r *Resolver) GetCPUQuota(ctx context.Context, obj *v1.Pod, cpuMountType string) (int, error) {
+	isV2, err := r.IsCgroupV2(ctx, obj)
+	if err != nil {
+		return 0, err
+	}
+
+	if isV2 {
+		// In cgroup v2, quota and period are in the same file (cpu.max)
+		cmd := "cat /sys/fs/cgroup/cpu.max"
+		out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
+		if err != nil {
+			return 0, err
+		}
+		// Format is "quota period"
+		parts := strings.Fields(out)
+		if len(parts) < 1 {
+			return 0, fmt.Errorf("unexpected format in cpu.max: %s", out)
+		}
+
+		// Handle "max" value which means no limit
+		if parts[0] == "max" {
+			return -1, nil
+		}
+
+		return strconv.Atoi(parts[0])
+	}
+
+	// Original cgroup v1 code
 	cmd := fmt.Sprintf("cat /sys/fs/cgroup/%s/cpu.cfs_quota_us", cpuMountType)
 	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
@@ -129,8 +149,29 @@ func (r *Resolver) GetCPUQuota(ctx context.Context, obj *v1.Pod, cpuMountType st
 	return strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 }
 
-// GetCPUPeriod returns result of cat /sys/fs/cgroup/:cpuMountType/cpu.cfs_period_us
+// GetCPUPeriod returns CPU period based on cgroup version
 func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType string) (int, error) {
+	isV2, err := r.IsCgroupV2(ctx, obj)
+	if err != nil {
+		return 0, err
+	}
+
+	if isV2 {
+		// In cgroup v2, quota and period are in the same file (cpu.max)
+		cmd := "cat /sys/fs/cgroup/cpu.max"
+		out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
+		if err != nil {
+			return 0, err
+		}
+		// Format is "quota period"
+		parts := strings.Fields(out)
+		if len(parts) < 2 {
+			return 0, fmt.Errorf("unexpected format in cpu.max: %s", out)
+		}
+		return strconv.Atoi(parts[1])
+	}
+
+	// Original cgroup v1 code
 	cmd := fmt.Sprintf("cat /sys/fs/cgroup/%s/cpu.cfs_period_us", cpuMountType)
 	out, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
@@ -139,16 +180,34 @@ func (r *Resolver) GetCPUPeriod(ctx context.Context, obj *v1.Pod, cpuMountType s
 	return strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 }
 
-// GetMemoryLimit returns result of cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+// GetMemoryLimit returns memory limit based on cgroup version
 func (r *Resolver) GetMemoryLimit(ctx context.Context, obj *v1.Pod) (int64, error) {
-	cmd := "cat /sys/fs/cgroup/memory/memory.limit_in_bytes"
+	isV2, err := r.IsCgroupV2(ctx, obj)
+	if err != nil {
+		return 0, err
+	}
+
+	var cmd string
+	if isV2 {
+		cmd = "cat /sys/fs/cgroup/memory.max"
+	} else {
+		cmd = "cat /sys/fs/cgroup/memory/memory.limit_in_bytes"
+	}
+
 	rawLimit, err := r.ExecBypass(ctx, obj, cmd, bpm.PidNS, bpm.MountNS)
 	if err != nil {
-		return 0, errors.Wrap(err, "could not get memory.limit_in_bytes")
+		return 0, errors.Wrap(err, "could not get memory limit")
 	}
-	limit, err := strconv.ParseUint(strings.TrimSuffix(rawLimit, "\n"), 10, 64)
+
+	// Handle "max" value in cgroup v2
+	if strings.TrimSpace(rawLimit) == "max" {
+		// Return -1 to indicate unlimited memory
+		return -1, nil
+	}
+
+	limit, err := strconv.ParseUint(strings.TrimSpace(rawLimit), 10, 64)
 	if err != nil {
-		return 0, errors.Wrap(err, "could not parse memory.limit_in_bytes")
+		return 0, errors.Wrap(err, "could not parse memory limit")
 	}
 	return int64(limit), nil
 }
