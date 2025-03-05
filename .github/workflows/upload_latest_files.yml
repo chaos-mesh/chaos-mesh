@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 2
 
       - uses: actions/setup-python@v5
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           check-latest: true
           go-version-file: "go.mod"
