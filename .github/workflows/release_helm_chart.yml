@@ -9,38 +9,18 @@ permissions: read-all
 
 jobs:
   release-chart:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - name: "Must Triggered by Tag chart-<version>"
-        run: |
-          # GITHUB_REF_TYPE MUST equals to "tag"
-          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
-            echo "This workflow must be triggered by tag"
-            echo "GITHUB_REF_TYPE: ${GITHUB_REF_TYPE}"
-            echo "GITHUB_REF: ${GITHUB_REF}"
-            exit 1
-          fi
-
-          # The tag MUST start with "chart-"
-          GIT_TAG=${GITHUB_REF##*/}
-          if [[ "${GIT_TAG}" == "chart-"* ]]; then
-            exit 0
-          fi
-
-          echo "The tag must start with 'chart-'"
-          echo "GITHUB_REF: ${GITHUB_REF}"
-          exit 1
       - uses: actions/checkout@v4
-      - name: "Extract Version"
+      - name: Extract version
         id: extract_version
         run: |
-          GIT_TAG=${GITHUB_REF##*/}
-          VERSION=${GIT_TAG##chart-}
-          echo "::set-output name=version::$(echo $VERSION)"
+          VERSION=${GITHUB_REF_NAME##chart-}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Publish Helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
-          token: ${{ secrets.CR_TOKEN }}
+          token: ${{ secrets.RELEASE_HELM_CHART_TOKEN }}
           charts_dir: helm
           charts_url: https://charts.chaos-mesh.org
           owner: chaos-mesh

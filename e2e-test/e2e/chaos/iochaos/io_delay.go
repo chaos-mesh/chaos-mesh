@@ -371,7 +371,7 @@ func TestcaseIODelayWithWrongSpec(
 			Path:       "/var/run/data/*",
 			Delay:      "1s",
 			Percent:    100,
-			Duration:   pointer.StringPtr("9m"),
+			Duration:   pointer.String("9m"),
 		},
 	}
 	err = cli.Create(ctx, ioChaos)

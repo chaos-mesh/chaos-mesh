@@ -43,10 +43,10 @@ kubectl apply -f ./cluster-viewer.yaml
 kubectl apply -f ./busybox-manager.yaml
 kubectl apply -f ./busybox-viewer.yaml
 
-CLUSTER_MANAGER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-mesh describe secret $(kubectl -n chaos-mesh get secret | grep account-cluster-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-BUSYBOX_MANAGER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
-BUSYBOX_VIEWER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
+CLUSTER_MANAGER_TOKEN=$(kubectl create token -n chaos-mesh account-cluster-manager)
+CLUSTER_VIEWER_TOKEN=$(kubectl create token -n chaos-mesh account-cluster-viewer)
+BUSYBOX_MANAGER_TOKEN=$(kubectl create token -n busybox account-busybox-manager)
+BUSYBOX_VIEWER_TOKEN=$(kubectl create token -n busybox account-busybox-viewer)
 
 BUSYBOX_MANAGER_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN)
 CLUSTER_MANAGER_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN)

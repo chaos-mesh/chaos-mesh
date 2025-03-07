@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@v45
         id: filter
         with:
           # Not available for frontend code for now.
@@ -28,20 +28,9 @@ jobs:
             .gitignore
             **.md
             ui/**
-            .github/workflows/checklink.yaml
-            .github/checklink_config.json
-            .github/workflows/ci.yml
-            .github/workflows/ci_skip.yml
-            .github/workflows/codecov_unittest.yaml
-            .github/workflows/integration_test.yml
-            .github/workflows/license_checker.yml
-            .github/workflows/must_update_changelog.yml
-            .github/workflows/release_helm_chart.yml
-            .github/workflows/upload_env_image.yml
-            .github/workflows/upload_image.yml
-            .github/workflows/upload_image_pr.yml
-            .github/workflows/upload_latest_files.yml
-            .github/workflows/upload_release_files.yml
+            .github/**
+            !.github/workflows/e2e_test.yml
+            test/integration_test/**
       - name: Show outputs
         run: echo "${{ toJSON(steps.filter.outputs) }}"
 
@@ -118,6 +107,28 @@ jobs:
     steps:
       - name: checkout codes
         uses: actions/checkout@v4
+      - name: Build Chaos Mesh Build Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_BUILD_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-build-env-image') }}
+        run: |
+          if [ "${IMAGE_BUILD_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_BUILD_ENV_BUILD=1;
+          else
+            export IMAGE_BUILD_ENV_BUILD=0;
+          fi
+          make image-build-env
+      - name: Build Chaos Mesh Dev Env
+        if: ${{ github.event.pull_request }}
+        env:
+          IMAGE_DEV_ENV_BUILD: ${{ contains(github.event.pull_request.labels.*.name, 'rebuild-dev-env-image') }}
+        run: |
+          if [ "${IMAGE_DEV_ENV_BUILD}" = "true" ] ; then
+            export IMAGE_DEV_ENV_BUILD=1;
+          else
+            export IMAGE_DEV_ENV_BUILD=0;
+          fi
+          make image-dev-env
       - name: Restore build cache
         id: cache
         uses: martijnhols/actions-cache/restore@main
@@ -199,7 +210,7 @@ jobs:
         run: chmod 600 ~/.kube/config
 
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v4
 
       - name: Install Chaos Mesh
         # Set DOCKER_API_VERSION to 1.41 to bypass https://github.com/chaos-mesh/chaos-mesh/pull/4154#issuecomment-1704442551.

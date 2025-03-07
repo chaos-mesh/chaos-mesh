@@ -24,6 +24,8 @@ import (
 	"syscall"
 	"time"
 
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	v1 "k8s.io/cri-api/pkg/apis/runtime/v1"
@@ -128,7 +130,7 @@ func (c CrioClient) GetLabelsFromContainerID(ctx context.Context, containerID st
 
 func buildRuntimeServiceClient(endpoint string) (v1.RuntimeServiceClient, error) {
 	addr := fmt.Sprintf("unix://%s", endpoint)
-	conn, err := grpc.Dial(addr, grpc.WithBlock(), grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

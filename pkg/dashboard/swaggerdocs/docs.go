@@ -5300,11 +5300,12 @@ const docTemplate = `{
                     "default": "0"
                 },
                 "jitter": {
-                    "description": "+optional",
+                    "description": "+kubebuilder:validation:Pattern=\"^[0-9]+(\\\\.[0-9]+)?(ns|us|ms|s|m|h)$\"\n+optional",
                     "type": "string",
                     "default": "0ms"
                 },
                 "latency": {
+                    "description": "+kubebuilder:validation:Pattern=\"^[0-9]+(\\\\.[0-9]+)?(ns|us|ms|s|m|h)$\"",
                     "type": "string"
                 },
                 "reorder": {
@@ -5885,6 +5886,10 @@ const docTemplate = `{
                     "description": "RemoteCluster represents the remote cluster where the chaos will be deployed\n+optional",
                     "type": "string"
                 },
+                "returnValue": {
+                    "description": "+optional\nthe return value for action 'return'",
+                    "type": "string"
+                },
                 "ruleData": {
                     "description": "+optional\nthe byteman rule's data for action 'ruleData'",
                     "type": "string"
@@ -5902,7 +5907,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "+optional\nthe return value for action 'return'",
+                    "description": "Value is required when the mode is set to ` + "`" + `FixedMode` + "`" + ` / ` + "`" + `FixedPercentMode` + "`" + ` / ` + "`" + `RandomMaxPercentMode` + "`" + `.\nIf ` + "`" + `FixedMode` + "`" + `, provide an integer of pods to do chaos action.\nIf ` + "`" + `FixedPercentMode` + "`" + `, provide a number from 0-100 to specify the percent of pods the server can do chaos action.\nIF ` + "`" + `RandomMaxPercentMode` + "`" + `,  provide a number from 0-100 to specify the max percent of pods to do chaos action\n+optional",
                     "type": "string"
                 }
             }

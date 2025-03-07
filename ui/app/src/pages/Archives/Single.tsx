@@ -40,26 +40,26 @@ const Single = () => {
   const { uuid } = useParams()
   const query = useQuery()
   let kind = query.get('kind') || 'experiment'
+  let useGetArchives =
+    kind === 'workflow'
+      ? useGetArchivesWorkflowsUid
+      : kind === 'schedule'
+      ? useGetArchivesSchedulesUid
+      : useGetArchivesUid
 
   const [archive, setArchive] = useState<TypesArchiveDetail>()
 
-  const { isLoading: loading1 } = useGetArchivesWorkflowsUid(uuid!, {
-    query: { enabled: kind !== 'workflow', onSuccess: setArchive },
+  const { isLoading: loadingArchives } = useGetArchives(uuid!, {
+    query: { onSuccess: setArchive },
   })
-  const { isLoading: loading2 } = useGetArchivesSchedulesUid(uuid!, {
-    query: { enabled: kind !== 'schedule', onSuccess: setArchive },
-  })
-  const { isLoading: loading3 } = useGetArchivesUid(uuid!, {
-    query: { enabled: kind !== 'experiment', onSuccess: setArchive },
-  })
-  const { data: events, isLoading: loading4 } = useGetEvents(
+  const { data: events, isLoading: loadingEvents } = useGetEvents(
     {
       object_id: uuid,
       limit: 999,
     },
     { query: { enabled: kind !== 'workflow' } }
   )
-  const loading = loading1 || loading2 || loading3 || loading4
+  const loading = kind === 'workflow' ? loadingArchives : loadingArchives && loadingEvents
 
   const YAML = () => (
     <Paper sx={{ height: kind === 'workflow' ? (theme) => `calc(100vh - 56px - ${theme.spacing(18)})` : 600, p: 0 }}>
