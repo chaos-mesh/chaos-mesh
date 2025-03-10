@@ -20,6 +20,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump kubernetes dependencies to 1.28.12 [#4565](https://github.com/chaos-mesh/chaos-mesh/pull/4565)
 - Support for userInfo.Extra in validating webhook [#4559](https://github.com/chaos-mesh/chaos-mesh/pull/4559)
 - Bump go to 1.22 [#4578](https://github.com/chaos-mesh/chaos-mesh/pull/4578)
+- Upgrade k8s versions in e2e tests
 
 ### Deprecated
 
