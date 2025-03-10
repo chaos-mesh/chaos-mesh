@@ -196,7 +196,7 @@ jobs:
       - name: Setup minikube
         uses: medyagh/setup-minikube@latest
         with:
-          minikube-version: 1.32.0
+          minikube-version: 1.35.0
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
       - name: load image into minikube
