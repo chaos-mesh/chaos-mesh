@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -75,7 +76,7 @@ func (in *StatusCheckTemplate) Validate() (admission.Warnings, error) {
 	statusCheck := &StatusCheck{
 		Spec: in.StatusCheckSpec,
 	}
-	return statusCheck.Validate()
+	return statusCheck.Validate(context.Background(), nil)
 }
 
 func (in *StatusCheckTemplate) Default() {
@@ -86,6 +87,6 @@ func (in *StatusCheckTemplate) Default() {
 	statusCheck := &StatusCheck{
 		Spec: in.StatusCheckSpec,
 	}
-	statusCheck.Default()
+	statusCheck.Default(context.Background(), nil)
 	in.StatusCheckSpec = *statusCheck.Spec.DeepCopy()
 }

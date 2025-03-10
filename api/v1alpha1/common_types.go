@@ -20,6 +20,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -172,10 +173,11 @@ type InnerObjectWithSelector interface {
 
 // +kubebuilder:object:generate=false
 
-// WebhookObject is basic Object which implement `webhook.Validator` and `webhook.Defaulter`
+// WebhookObject is basic Object which implement `webhook.CustomValidator` and `webhook.CustomDefaulter`
 type WebhookObject interface {
-	webhook.Validator
-	webhook.Defaulter
+	webhook.CustomValidator
+	webhook.CustomDefaulter
+	runtime.Object
 }
 
 // +kubebuilder:object:generate=false

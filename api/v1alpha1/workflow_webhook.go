@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -34,9 +35,9 @@ import (
 // log is for logging in this package.
 var workflowlog = logf.Log.WithName("workflow-resource")
 
-var _ webhook.Validator = &Workflow{}
+var _ webhook.CustomValidator = &Workflow{}
 
-func (in *Workflow) ValidateCreate() (admission.Warnings, error) {
+func (in *Workflow) ValidateCreate(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	var allErrs field.ErrorList
 	specPath := field.NewPath("spec")
 	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), in.Spec.Entry, in.Spec.Templates)...)
@@ -47,11 +48,11 @@ func (in *Workflow) ValidateCreate() (admission.Warnings, error) {
 	return nil, nil
 }
 
-func (in *Workflow) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	return in.ValidateCreate()
+func (in *Workflow) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+	return in.ValidateCreate(ctx, newObj)
 }
 
-func (in *Workflow) ValidateDelete() (admission.Warnings, error) {
+func (in *Workflow) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	return nil, nil
 }
 
