@@ -20,6 +20,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for userInfo.Extra in validating webhook [#4559](https://github.com/chaos-mesh/chaos-mesh/pull/4559)
 - Bump go to 1.22 [#4578](https://github.com/chaos-mesh/chaos-mesh/pull/4578)
 - Upgrade GitHub CI runners to Ubuntu 22.04 [#4516](https://github.com/chaos-mesh/chaos-mesh/pull/4516)
+- Upgrade k8s versions in e2e tests [#4648](https://github.com/chaos-mesh/chaos-mesh/pull/4648)
 
 ### Deprecated
 
