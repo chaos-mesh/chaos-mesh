@@ -10,7 +10,7 @@ We provide a bash script to do step 1,2 and 4. Check it out.
 
 Before running the script, you need to compile an `schedule-migrate` binary
 
-```bash 
+```bash
 go build -o schedule-migration main.go
 ```
 
