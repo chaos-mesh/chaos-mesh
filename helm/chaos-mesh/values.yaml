@@ -609,3 +609,6 @@ chaosDlv:
     # empty tag means using the global images.tag
     tag: ""
   imagePullPolicy: IfNotPresent
+
+# Extra Kubernetes objects to deploy with the helm chart
+extraObjects: []

@@ -10,7 +10,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
-- Nothing
+- Support for deploying extra Kubernetes objects with the helm chart [#4649](https://github.com/chaos-mesh/chaos-mesh/pull/4649)
 
 ### Changed
 
