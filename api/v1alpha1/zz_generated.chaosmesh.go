@@ -149,9 +149,9 @@ func (in *AWSChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *AWSChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *AWSChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	AWSChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*AWSChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*AWSChaos).Spec, newObj.(*AWSChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -291,9 +291,9 @@ func (in *AzureChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (a
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *AzureChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *AzureChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	AzureChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*AzureChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*AzureChaos).Spec, newObj.(*AzureChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -429,9 +429,9 @@ func (in *BlockChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (a
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *BlockChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *BlockChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	BlockChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*BlockChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*BlockChaos).Spec, newObj.(*BlockChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -567,9 +567,9 @@ func (in *DNSChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *DNSChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *DNSChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	DNSChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*DNSChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*DNSChaos).Spec, newObj.(*DNSChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -709,9 +709,9 @@ func (in *GCPChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *GCPChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *GCPChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	GCPChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*GCPChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*GCPChaos).Spec, newObj.(*GCPChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -847,9 +847,9 @@ func (in *HTTPChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (ad
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *HTTPChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *HTTPChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	HTTPChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*HTTPChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*HTTPChaos).Spec, newObj.(*HTTPChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -985,9 +985,9 @@ func (in *IOChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admi
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *IOChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *IOChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	IOChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*IOChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*IOChaos).Spec, newObj.(*IOChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1123,9 +1123,9 @@ func (in *JVMChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *JVMChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *JVMChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	JVMChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*JVMChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*JVMChaos).Spec, newObj.(*JVMChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1261,9 +1261,9 @@ func (in *KernelChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *KernelChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *KernelChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	KernelChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*KernelChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*KernelChaos).Spec, newObj.(*KernelChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1399,9 +1399,9 @@ func (in *NetworkChaos) ValidateCreate(ctx context.Context, obj runtime.Object) 
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *NetworkChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *NetworkChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	NetworkChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*NetworkChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*NetworkChaos).Spec, newObj.(*NetworkChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1537,9 +1537,9 @@ func (in *PhysicalMachineChaos) ValidateCreate(ctx context.Context, obj runtime.
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *PhysicalMachineChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *PhysicalMachineChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	PhysicalMachineChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*PhysicalMachineChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*PhysicalMachineChaos).Spec, newObj.(*PhysicalMachineChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1576,9 +1576,9 @@ func (in *PhysicalMachine) ValidateCreate(ctx context.Context, obj runtime.Objec
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *PhysicalMachine) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *PhysicalMachine) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	PhysicalMachineWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*PhysicalMachine).Spec) {
+	if !reflect.DeepEqual(oldObj.(*PhysicalMachine).Spec, newObj.(*PhysicalMachine).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1718,9 +1718,9 @@ func (in *PodChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *PodChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *PodChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	PodChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*PodChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*PodChaos).Spec, newObj.(*PodChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1757,7 +1757,7 @@ func (in *PodHttpChaos) ValidateCreate(ctx context.Context, obj runtime.Object) 
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *PodHttpChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *PodHttpChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	PodHttpChaosWebhookLog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
@@ -1793,7 +1793,7 @@ func (in *PodIOChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (a
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *PodIOChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *PodIOChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	PodIOChaosWebhookLog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
@@ -1829,7 +1829,7 @@ func (in *PodNetworkChaos) ValidateCreate(ctx context.Context, obj runtime.Objec
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *PodNetworkChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *PodNetworkChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	PodNetworkChaosWebhookLog.Info("validate update", "name", in.Name)
 	return in.Validate()
 }
@@ -1865,9 +1865,9 @@ func (in *RemoteCluster) ValidateCreate(ctx context.Context, obj runtime.Object)
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *RemoteCluster) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *RemoteCluster) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	RemoteClusterWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*RemoteCluster).Spec) {
+	if !reflect.DeepEqual(oldObj.(*RemoteCluster).Spec, newObj.(*RemoteCluster).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -1904,9 +1904,9 @@ func (in *StatusCheck) ValidateCreate(ctx context.Context, obj runtime.Object) (
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *StatusCheck) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *StatusCheck) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	StatusCheckWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*StatusCheck).Spec) {
+	if !reflect.DeepEqual(oldObj.(*StatusCheck).Spec, newObj.(*StatusCheck).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -2042,9 +2042,9 @@ func (in *StressChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *StressChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *StressChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	StressChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*StressChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*StressChaos).Spec, newObj.(*StressChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()
@@ -2180,9 +2180,9 @@ func (in *TimeChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (ad
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *TimeChaos) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *TimeChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	TimeChaosWebhookLog.Info("validate update", "name", in.Name)
-	if !reflect.DeepEqual(in.Spec, oldObj.(*TimeChaos).Spec) {
+	if !reflect.DeepEqual(oldObj.(*TimeChaos).Spec, newObj.(*TimeChaos).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	return in.Validate()

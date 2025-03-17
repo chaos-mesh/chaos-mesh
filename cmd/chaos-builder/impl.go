@@ -159,10 +159,10 @@ func (in *{{.Type}}) ValidateCreate(ctx context.Context, obj runtime.Object) (ad
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
+func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
 	{{- if not .EnableUpdate}}
-	if !reflect.DeepEqual(in.Spec, oldObj.(*{{.Type}}).Spec) {
+	if !reflect.DeepEqual(oldObj.(*{{.Type}}).Spec, newObj.(*{{.Type}}).Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	{{- end}}
