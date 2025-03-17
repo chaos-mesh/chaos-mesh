@@ -21,7 +21,6 @@ import (
 	"io"
 	"net/http"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
@@ -112,6 +111,7 @@ func getStressCondition(c http.Client, port uint16) (*StressCondition, error) {
 	if err != nil {
 		return nil, err
 	}
+	klog.Infof("response: %s", out)
 
 	condition := &StressCondition{}
 	err = json.Unmarshal(out, condition)
@@ -122,9 +122,7 @@ func getStressCondition(c http.Client, port uint16) (*StressCondition, error) {
 	return condition, nil
 }
 
-func probeStressCondition(
-	c http.Client, peers []*corev1.Pod, ports []uint16,
-) (map[int]*StressCondition, error) {
+func probeStressCondition(c http.Client, ports []uint16) (map[int]*StressCondition, error) {
 	stressConditions := make(map[int]*StressCondition)
 
 	for index, port := range ports {
