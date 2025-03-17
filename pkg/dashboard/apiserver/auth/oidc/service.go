@@ -58,6 +58,7 @@ func NewService(
 	caFilePath := conf.OidcCaFile
 	if caFilePath != "" {
 		caFile, err := os.Open(caFilePath)
+		defer caFile.Close()
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +67,6 @@ func NewService(
 			return nil, err
 		}
 		caPEMBytes = caFileBytes
-		caFile.Close()
 	}
 
 	return &Service{
