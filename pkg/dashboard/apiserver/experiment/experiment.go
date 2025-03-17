@@ -18,6 +18,7 @@ package experiment
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"reflect"
 	"sort"
@@ -27,8 +28,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -224,7 +225,7 @@ func (s *Service) get(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -318,7 +319,7 @@ func (s *Service) delete(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -375,7 +376,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-			if gorm.IsRecordNotFoundError(err) {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 			} else {
 				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -468,7 +469,7 @@ func (s *Service) pause(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -511,7 +512,7 @@ func (s *Service) start(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
