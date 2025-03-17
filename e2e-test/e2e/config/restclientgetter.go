@@ -67,7 +67,7 @@ func (getter *simpleRestClientGetter) ToRESTMapper() (meta.RESTMapper, error) {
 	}
 
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(discoveryClient)
-	expander := restmapper.NewShortcutExpander(mapper, discoveryClient)
+	expander := restmapper.NewShortcutExpander(mapper, discoveryClient, func(s string) {})
 	return expander, nil
 }
 

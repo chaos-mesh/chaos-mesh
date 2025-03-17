@@ -51,7 +51,7 @@ function download_image() {
         -H "Authorization: token $TOKEN" \
         "$ARTIFACT_URL" > .cache/chaos-mesh-images.zip
     unzip -o -d .cache/ .cache/chaos-mesh-images.zip
-    
+
     for IMAGE in "chaos-mesh" "chaos-daemon" "chaos-dashboard"
     do
         docker image import .cache/$IMAGE.tar ghcr.io/chaos-mesh/$IMAGE:latest &>/dev/null
