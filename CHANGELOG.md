@@ -14,7 +14,6 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Changed
 
-- Update kubernetes dependencies to 1.32.2 and bump go to 1.23 [#4644](https://github.com/chaos-mesh/chaos-mesh/pull/4644)
 - Upgrade pnpm lockfile version to 9.0 [#4522](https://github.com/chaos-mesh/chaos-mesh/pull/4522)
 - Use gauge subsystem in controller/daemon metrics [#4554](https://github.com/chaos-mesh/chaos-mesh/pull/4554)
 - Bump kubernetes dependencies to 1.28.12 [#4565](https://github.com/chaos-mesh/chaos-mesh/pull/4565)
@@ -22,6 +21,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.22 [#4578](https://github.com/chaos-mesh/chaos-mesh/pull/4578)
 - Upgrade GitHub CI runners to Ubuntu 22.04 [#4516](https://github.com/chaos-mesh/chaos-mesh/pull/4516)
 - Upgrade k8s versions in e2e tests [#4648](https://github.com/chaos-mesh/chaos-mesh/pull/4648)
+- Update kubernetes dependencies to 1.32.2 and bump go to 1.23 [#4644](https://github.com/chaos-mesh/chaos-mesh/pull/4644)
 
 ### Deprecated
 

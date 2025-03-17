@@ -76,7 +76,7 @@ func (in *StatusCheckTemplate) Validate() (admission.Warnings, error) {
 	statusCheck := &StatusCheck{
 		Spec: in.StatusCheckSpec,
 	}
-	return statusCheck.Validate(context.Background(), nil)
+	return statusCheck.Validate()
 }
 
 func (in *StatusCheckTemplate) Default() {
