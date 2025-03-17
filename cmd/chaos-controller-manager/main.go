@@ -133,6 +133,8 @@ func Run(params RunParams) error {
 
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
+			WithValidator(obj.Object).
+			WithDefaulter(obj.Object).
 			Complete()
 		if err != nil {
 			return err
@@ -146,6 +148,8 @@ func Run(params RunParams) error {
 
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(obj.Object).
+			WithValidator(obj.Object).
+			WithDefaulter(obj.Object).
 			Complete()
 		if err != nil {
 			return err
@@ -156,6 +160,8 @@ func Run(params RunParams) error {
 		// setup schedule webhook
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(&v1alpha1.Schedule{}).
+			WithValidator(&v1alpha1.Schedule{}).
+			WithDefaulter(&v1alpha1.Schedule{}).
 			Complete()
 		if err != nil {
 			return err
@@ -165,6 +171,7 @@ func Run(params RunParams) error {
 	if ccfg.ShouldStartWebhook("workflow") {
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(&v1alpha1.Workflow{}).
+			WithValidator(&v1alpha1.Workflow{}).
 			Complete()
 		if err != nil {
 			return err
