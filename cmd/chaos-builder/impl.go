@@ -155,7 +155,7 @@ var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
 func (in *{{.Type}}) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate(ctx, obj)
+	return in.Validate()
 }
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
@@ -166,20 +166,19 @@ func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj runtime.Object, 
 		return nil, ErrCanNotUpdateChaos
 	}
 	{{- end}}
-	return in.Validate(ctx, newObj)
+	return in.Validate()
 }
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	{{.Type}}WebhookLog.Info("validate delete", "name", in.Name)
 
-	// Nothing to do?
 	return nil, nil
 }
 
 var _ webhook.CustomValidator = &{{.Type}}{}
 
-func (in *{{.Type}}) Validate(_ context.Context, _ runtime.Object) ([]string, error) {
+func (in *{{.Type}}) Validate() ([]string, error) {
 	errs := gw.Validate(in)
 	return nil, gw.Aggregate(errs)
 }
