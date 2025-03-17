@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 {{- if .Values.rbac.create }}
+{{- if .Values.controllerManager.serviceAccountCreate }}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -25,7 +26,7 @@ metadata:
   labels:
     {{- include "chaos-mesh.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller-manager
-
+{{- end }}
 ---
 # roles
 kind: ClusterRole
@@ -90,7 +91,6 @@ rules:
       - subjectaccessreviews
     verbs: [ "create" ]
 
-
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -102,8 +102,11 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "services", "endpoints", "secrets" ]
+    resources: [ "services", "secrets" ]
     verbs: [ "get", "list", "watch" ]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: [ "authorization.k8s.io" ]
     resources:
       - subjectaccessreviews

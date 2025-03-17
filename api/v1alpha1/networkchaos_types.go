@@ -140,9 +140,11 @@ type NetworkChaosStatus struct {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
+	// +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$"
 	Latency string `json:"latency" webhook:"Duration"`
 	// +optional
 	Correlation string `json:"correlation,omitempty" default:"0" webhook:"FloatStr"`
+	// +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$"
 	// +optional
 	Jitter string `json:"jitter,omitempty" default:"0ms" webhook:"Duration"`
 	// +optional

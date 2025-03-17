@@ -1,6 +1,6 @@
 # This workflow defines the go and ui related jobs.
 #
-# First, we use [dorny/paths-filter@v2](https://github.com/dorny/paths-filter) to
+# First, we use [dorny/paths-filter@v3](https://github.com/dorny/paths-filter) to
 # detect changes in go and ui related files, and then run the corresponding sub-jobs
 # based on the changes.
 #
@@ -23,14 +23,14 @@ permissions: read-all
 jobs:
   # JOB to run change detection
   changes:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # Set job outputs to values from filter step
     outputs:
       go: ${{ steps.filter.outputs.go }}
       ui: ${{ steps.filter.outputs.ui }}
     steps:
       # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -54,7 +54,7 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":["self-hosted", "Linux", "ARM64"]}')[matrix.arch] }}
+    runs-on: ${{ fromJSON('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
 
@@ -88,8 +88,8 @@ jobs:
         run: |
           if [[ "$job" == "verify" ]]; then
             make check
-            echo "Please make check before creating a PR"
-            git diff --quiet -- . || (git diff | cat && false)
+            echo "Please run [make check] before creating a PR"
+            git diff --quiet
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
@@ -99,7 +99,7 @@ jobs:
           fi
 
       - name: Upload Code Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         if: matrix.job == 'test'
         with:
           files: ./cover.out
@@ -117,12 +117,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
-      - uses: actions/setup-node@v3
+          version: 9
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: "pnpm"
           cache-dependency-path: "ui/pnpm-lock.yaml"
 
@@ -130,7 +130,7 @@ jobs:
 
       - name: Cache app/build
         if: ${{ matrix.job == 'build' }}
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./ui/app/build
           key: ${{ runner.os }}-pnpm-${{ hashFiles('ui/pnpm-lock.yaml') }}

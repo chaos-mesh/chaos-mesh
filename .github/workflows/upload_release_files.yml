@@ -10,7 +10,7 @@ permissions: read-all
 jobs:
   run:
     name: Upload
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: "Must Triggered by Tag v<version>"
         run: |
@@ -36,8 +36,8 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - uses: actions/setup-python@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-python@v5
+      - uses: actions/setup-go@v5
         with:
           check-latest: true
           go-version-file: "go.mod"

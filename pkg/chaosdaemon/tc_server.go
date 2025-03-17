@@ -420,10 +420,10 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 
 func convertNetemToArgs(netem *pb.Netem) string {
 	args := ""
-	if netem.Time > 0 {
-		args = fmt.Sprintf("delay %d", netem.Time)
-		if netem.Jitter > 0 {
-			args = fmt.Sprintf("%s %d", args, netem.Jitter)
+	if netem.Time > "0ms" {
+		args = fmt.Sprintf("delay %s", netem.Time)
+		if netem.Jitter > "0ms" {
+			args = fmt.Sprintf("%s %s", args, netem.Jitter)
 
 			if netem.DelayCorr > 0 {
 				args = fmt.Sprintf("%s %f", args, netem.DelayCorr)

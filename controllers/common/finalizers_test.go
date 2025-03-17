@@ -73,13 +73,14 @@ var _ = Describe("Finalizer", func() {
 
 			By("Adding finalizers")
 			{
-				err := wait.Poll(time.Second*1, time.Second*10, func() (ok bool, err error) {
-					err = k8sClient.Get(context.TODO(), key, chaos)
-					if err != nil {
-						return false, err
-					}
-					return len(chaos.GetObjectMeta().GetFinalizers()) > 0 && chaos.GetObjectMeta().GetFinalizers()[0] == finalizers.RecordFinalizer, nil
-				})
+				err := wait.PollUntilContextTimeout(context.TODO(), time.Second, time.Second*10, true,
+					func(ctx context.Context) (ok bool, err error) {
+						err = k8sClient.Get(ctx, key, chaos)
+						if err != nil {
+							return false, err
+						}
+						return len(chaos.GetObjectMeta().GetFinalizers()) > 0 && chaos.GetObjectMeta().GetFinalizers()[0] == finalizers.RecordFinalizer, nil
+					})
 				Expect(err).ToNot(HaveOccurred())
 			}
 

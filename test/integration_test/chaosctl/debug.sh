@@ -14,25 +14,26 @@
 # limitations under the License.
 #
 
-function file_must_contains() {
-  file=$1
-  substring=$2
-  match=""
-  if [ "$3" = "false" ]; then
-      match="-v"
-  fi
-
-  grep $match "$substring" $file
-  if [ "$?" != "0" ]; then
-      echo "'$substring' not found in '$file'"
-      exit 1
-  fi
-}
-
 set -u
 log_file="debug.log"
 code=0
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+function file_must_contains() {
+  substring=$1
+  match=""
+  if [ "$2" = "false" ]; then
+      match="-v"
+  fi
+
+  grep $match "$substring" "$log_file"
+  if [ "$?" != "0" ]; then
+      echo "'$substring' not found in '$log_file'"
+      echo "[Debug] $log_file:"
+      cat $log_file
+      exit 1
+  fi
+}
 
 pwd
 echo "Deploy deployments and chaos for testing"
@@ -51,15 +52,15 @@ metadata:
   name: web-show-network-delay
 spec:
   action: delay # the specific chaos action to inject
-  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  selector: # pods where to inject chaos actions
+  mode: one
+  selector:
     namespaces:
       - default
     labelSelectors:
-      "app": "web-show"  # the label of the pod for chaos injection
+      "app": "web-show"
   delay:
     latency: "10ms"
-  duration: "30s" # duration for the injected chaos experiment
+  duration: "30s"
 EOF
 kubectl apply -f delay.yaml
 
@@ -69,21 +70,23 @@ if [ $? -ne 0 ]; then
     echo "chaosctl logs failed"
     code=1
 fi
-file_must_contains $log_file "Controller manager Version:" true
-file_must_contains $log_file "Chaos-daemon Version:" true
-file_must_contains $log_file "\[chaos-dashboard" true
+file_must_contains "Controller manager Version:" true
+file_must_contains "Chaos-daemon Version:" true
+file_must_contains "\[chaos-dashboard" true
 
 echo "Checking chaosctl debug networkchaos"
 ./bin/chaosctl debug networkchaos web-show-network-delay >$log_file 2>&1
 if [ $? -ne 0 ]; then
-    echo "chaosctl debug networkchaos failed"
+    echo "chaosctl debug networkchaos failed, exit code: $?, log file: $log_file"
+    echo "log file content:"
+    cat $log_file
     code=1
 fi
-file_must_contains $log_file "\[Chaos\]: web-show-network-delay" true
-file_must_contains $log_file "1. \[ipset list\]" true
-file_must_contains $log_file "2. \[tc qdisc list\]" true
-file_must_contains $log_file "3. \[iptables list\]" true
-file_must_contains $log_file "4. \[podnetworkchaos\]" true
+file_must_contains "\[Chaos\]: web-show-network-delay" true
+file_must_contains "1. \[ipset list\]" true
+file_must_contains "2. \[tc qdisc list\]" true
+file_must_contains "3. \[iptables list\]" true
+file_must_contains "4. \[podnetworkchaos\]" true
 echo "Cleaning up networkchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
@@ -96,17 +99,17 @@ kind: HTTPChaos
 metadata:
   name: web-show-http-delay
 spec:
-  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  selector: # pods where to inject chaos actions
+  mode: one
+  selector:
     namespaces:
       - default
     labelSelectors:
-      "app": "web-show"  # the label of the pod for chaos injection
+      "app": "web-show"
   target: Request
   port: 8081
   path: "*"
   delay: "10ms"
-  duration: "30s" # duration for the injected chaos experiment
+  duration: "30s"
 EOF
 kubectl apply -f delay.yaml
 sleep 3
@@ -116,8 +119,8 @@ if [ $? -ne 0 ]; then
     echo "chaosctl debug httpchaos failed"
     code=1
 fi
-file_must_contains $log_file "\[Chaos\]: web-show-http-delay" true
-file_must_contains $log_file "\[podhttpchaos\]" true
+file_must_contains "\[Chaos\]: web-show-http-delay" true
+file_must_contains "\[podhttpchaos\]" true
 echo "Cleaning up httpchaos"
 kubectl delete -f delay.yaml
 rm delay.yaml
@@ -131,17 +134,17 @@ metadata:
   name: web-show-io-delay
 spec:
   action: latency
-  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  selector: # pods where to inject chaos actions
+  mode: one
+  selector:
     namespaces:
       - default
     labelSelectors:
-      "app": "web-show"  # the label of the pod for chaos injection
+      "app": "web-show"
   volumePath: /var/run/secrets/kubernetes.io/serviceaccount
   path: "/var/run/secrets/kubernetes.io/serviceaccount/**/*"
   delay: "10ms"
   percent: 50
-  duration: "30s" # duration for the injected chaos experiment
+  duration: "30s"
 EOF
 kubectl apply -f delay.yaml
 
@@ -154,10 +157,10 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
       echo "chaosctl debug iochaos failed"
       code=1
   fi
-  file_must_contains $log_file "\[Chaos\]: web-show-io-delay" true
-  file_must_contains $log_file "1. \[Mount Information\]" true
-  file_must_contains $log_file "\[file descriptors of PID:" true
-  file_must_contains $log_file "\[podiochaos\]" true
+  file_must_contains "\[Chaos\]: web-show-io-delay" true
+  file_must_contains "1. \[Mount Information\]" true
+  file_must_contains "\[file descriptors of PID:" true
+  file_must_contains "\[podiochaos\]" true
   echo "Cleaning up iochaos"
   kubectl delete -f delay.yaml
   rm delay.yaml
@@ -171,17 +174,17 @@ kind: StressChaos
 metadata:
   name: web-show-memory-stress
 spec:
-  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  selector: # pods where to inject chaos actions
+  mode: one
+  selector:
     namespaces:
       - default
     labelSelectors:
-      "app": "web-show"  # the label of the pod for chaos injection
+      "app": "web-show"
   stressors:
     memory:
       workers: 4
-      size: '256MB'
-  duration: "30s" # duration for the injected chaos experiment
+      size: "256MB"
+  duration: "30s"
 EOF
 kubectl apply -f stress.yaml
 
@@ -191,9 +194,8 @@ if [ $? -ne 0 ]; then
     echo "chaosctl debug stresschaos failed"
     code=1
 fi
-file_must_contains $log_file "\[Chaos\]: web-show-memory-stress" true
-file_must_contains $log_file "1. \[cat /proc/cgroups\]" true
-file_must_contains $log_file "\[memory.limit_in_bytes\]" true
+file_must_contains "\[Chaos\]: web-show-memory-stress" true
+file_must_contains "\[/proc/1/cgroup of web-show\]" true
 echo "Cleaning up stresschaos"
 kubectl delete -f stress.yaml
 rm stress.yaml

@@ -10,6 +10,44 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Added
 
+- Nothing
+
+### Changed
+
+- Upgrade pnpm lockfile version to 9.0 [#4522](https://github.com/chaos-mesh/chaos-mesh/pull/4522)
+- Use gauge subsystem in controller/daemon metrics [#4554](https://github.com/chaos-mesh/chaos-mesh/pull/4554)
+- Bump kubernetes dependencies to 1.28.12 [#4565](https://github.com/chaos-mesh/chaos-mesh/pull/4565)
+- Support for userInfo.Extra in validating webhook [#4559](https://github.com/chaos-mesh/chaos-mesh/pull/4559)
+- Bump go to 1.22 [#4578](https://github.com/chaos-mesh/chaos-mesh/pull/4578)
+- Upgrade GitHub CI runners to Ubuntu 22.04 [#4516](https://github.com/chaos-mesh/chaos-mesh/pull/4516)
+- Upgrade k8s versions in e2e tests [#4648](https://github.com/chaos-mesh/chaos-mesh/pull/4648)
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
+- Issue with getting a single archive in the Dashboard UI [#4521](https://github.com/chaos-mesh/chaos-mesh/pull/4521)
+- Wrong references of helm values in the prometheus template [#4543](https://github.com/chaos-mesh/chaos-mesh/pull/4543)
+- Fix inconsistent units for latency and jitter values in Network Chaos [#4546](https://github.com/chaos-mesh/chaos-mesh/pull/4546)
+- Return 404 when the archive schedule was not found [#4553](https://github.com/chaos-mesh/chaos-mesh/pull/4553)
+- Changed JVMParameter.ReturnValue json tag field name to `returnValue` [#4525](https://github.com/chaos-mesh/chaos-mesh/pull/4525)
+- Correct the parsing of the physical machines in the Dashboard UI [#4580](https://github.com/chaos-mesh/chaos-mesh/pull/4580)
+
+### Security
+
+- Nothing
+
+## [2.7.0] - 2024-09-20
+
+### Added
+
+- Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
 - Allow annotations on chaos-controller-manager and chaos-daemon ServiceAccount [#4106](https://github.com/chaos-mesh/chaos-mesh/pull/4106)
 - Support for deploying chaos-dashboard under the subpath [#4093](https://github.com/chaos-mesh/chaos-mesh/pull/4093)
 - Support more rate units for networkchaos [#4129](https://github.com/chaos-mesh/chaos-mesh/pull/4129)
@@ -23,6 +61,9 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Support for setting `loadBalancerSourceRanges` in chaos-dashboard service in helm chart [#4172](https://github.com/chaos-mesh/chaos-mesh/pull/4172)
 - Helm: allow templating of dashboard rootUrl [#4370](https://github.com/chaos-mesh/chaos-mesh/pull/4370)
 - Support for reading database connection string from secret [#4363](https://github.com/chaos-mesh/chaos-mesh/pull/4363)
+- Allow if condition for creating chaos-controller-manager ServiceAccount and allow setting securityContext for chaos-daemon pods [#4390](https://github.com/chaos-mesh/chaos-mesh/pull/4390)
+- Integrate helm-values-schema-json to generate schema for values.yaml [#4435](https://github.com/chaos-mesh/chaos-mesh/pull/4435)
+- Add an option to toggle metric scraping of Chaos Daemon [#4488](https://github.com/chaos-mesh/chaos-mesh/pull/4488)
 
 ### Changed
 
@@ -63,6 +104,10 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Enable prometheus directive within CoreDNS [#4321](https://github.com/chaos-mesh/chaos-mesh/pull/4321)
 - Fix TTL configuration from environment variables [#4338](https://github.com/chaos-mesh/chaos-mesh/pull/4338)
 - Fix dashboard panic while replacing query namespace with targetNamespace in namespace scoped mode [#4409](https://github.com/chaos-mesh/chaos-mesh/issues/4409)
+- Fix incorrect mmap args for IOChaos [#3680](https://github.com/chaos-mesh/chaos-mesh/issues/3680)
+- Fix excessive records by adding the `MaxEvents` field [#4402](https://github.com/chaos-mesh/chaos-mesh/pull/4402)
+- Fix chaos controller can't find daemonIP over 1000 nodes using endpoints [#4421](https://github.com/chaos-mesh/chaos-mesh/pull/4421)
+- Minor fixes in certificates to make them ArgoCD friendly [#4482](https://github.com/chaos-mesh/chaos-mesh/pull/4482)
 
 ### Security
 

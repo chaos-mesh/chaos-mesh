@@ -132,29 +132,16 @@ swagger_spec: images/dev-env/.dockerbuilt ## Generate OpenAPI/Swagger spec for f
 
 ##@ Linters, formatters and others
 
-check: generate manifests/crd.yaml vet boilerplate lint tidy install.sh fmt ## Run prerequisite checks for PR
-
-SKYWALKING_EYES_HEADER = /go/bin/license-eye header -c ./.github/.licenserc.yaml
-boilerplate: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate: images/dev-env/.dockerbuilt
-	$(SKYWALKING_EYES_HEADER) check
-
-boilerplate-fix: SHELL:=$(RUN_IN_DEV_SHELL)
-boilerplate-fix: images/dev-env/.dockerbuilt ## Fix boilerplate
-	$(SKYWALKING_EYES_HEADER) fix
+check: generate manifests/crd.yaml vet lint fmt tidy install.sh helm-values-schema ## Run prerequisite checks for PR
 
 fmt: SHELL:=$(RUN_IN_DEV_SHELL)
-fmt: groupimports images/dev-env/.dockerbuilt ## Reformat go files with gofmt and goimports
-	$(CGO) fmt $$($(PACKAGE_LIST))
+fmt: images/dev-env/.dockerbuilt ## Reformat go files with goimports
+	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' \
+		-exec goimports -w -l -local github.com/chaos-mesh/chaos-mesh {} +
 
 gosec-scan: SHELL:=$(RUN_IN_DEV_SHELL)
 gosec-scan: images/dev-env/.dockerbuilt
 	gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
-
-groupimports: SHELL:=$(RUN_IN_DEV_SHELL)
-groupimports: images/dev-env/.dockerbuilt ## Reformat go files with goimports
-	find . -type f -name '*.go' -not -path '**/zz_generated.*.go' -not -path './.cache/**' | xargs \
-		-d $$'\n' -n 10 goimports -w -l -local github.com/chaos-mesh/chaos-mesh
 
 lint: SHELL:=$(RUN_IN_DEV_SHELL)
 lint: images/dev-env/.dockerbuilt ## Lint go files with revive
@@ -171,6 +158,10 @@ tidy: images/dev-env/.dockerbuilt ## Run go mod tidy in all submodules
 vet: SHELL:=$(RUN_IN_DEV_SHELL)
 vet: images/dev-env/.dockerbuilt ## Lint go files with go vet
 	$(CGOENV) go vet ./...
+
+helm-values-schema: SHELL:=$(RUN_IN_DEV_SHELL)
+helm-values-schema: images/dev-env/.dockerbuilt
+	helm schema -input helm/chaos-mesh/values.yaml -output helm/chaos-mesh/values.schema.json
 
 ##@ Common used building targets
 
@@ -287,7 +278,6 @@ pkg/time/fakeclock/fake_gettimeofday.o: pkg/time/fakeclock/fake_gettimeofday.c i
 	[[ "$$TARGET_PLATFORM" == "arm64" ]] && CFLAGS="-mcmodel=tiny" ;\
 	cc -c ./pkg/time/fakeclock/fake_gettimeofday.c -fPIE -O2 -o pkg/time/fakeclock/fake_gettimeofday.o $$CFLAGS
 
-
 CLEAN_TARGETS += e2e-test/image/e2e/manifests e2e-test/image/e2e/chaos-mesh
 
 e2e-test/image/e2e/manifests: manifests ## Copy CRD manifests to e2e image build directory
@@ -316,7 +306,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
-	boilerplate tidy groupimports fmt vet lint install.sh schedule-migration \
+	boilerplate tidy fmt vet lint install.sh schedule-migration \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	gosec-scan \

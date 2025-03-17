@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"time"
 
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -107,7 +109,7 @@ func (it *RawProvider) getCredentialOption() (grpc.DialOption, error) {
 }
 
 func (it *InsecureProvider) getCredentialOption() (grpc.DialOption, error) {
-	return grpc.WithInsecure(), nil
+	return grpc.WithTransportCredentials(insecure.NewCredentials()), nil
 }
 
 type GrpcBuilder struct {
