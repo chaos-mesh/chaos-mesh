@@ -55,9 +55,9 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
-RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+RUN_IN_DEV_SHELL:=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)
-RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+RUN_IN_BUILD_SHELL:=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
 # See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
