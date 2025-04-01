@@ -21,4 +21,4 @@ jobs:
       - uses: actions/checkout@v4
       # Run the actual merge conflict finder
       - name: Merge Conflict finder
-        uses: olivernybroe/action-conflict-finder@v4.0
+        uses: olivernybroe/action-conflict-finder@v4.1
