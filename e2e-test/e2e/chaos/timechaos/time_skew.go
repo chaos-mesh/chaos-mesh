@@ -21,6 +21,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -100,8 +101,8 @@ func TestcaseTimeSkewOnceThenRecover(
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait no timechaos error")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait no timechaos error")))
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 	By("success to perform time chaos")
 }
 
@@ -189,8 +190,8 @@ func TestcaseTimeSkewPauseThenUnpause(
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait time chaos paused error")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait time chaos paused error")))
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	By("resume time skew chaos experiment")
 	err = util.UnPauseChaos(ctx, cli, timeChaos)
@@ -292,7 +293,7 @@ func TestcaseTimeSkewShouldAlsoAffectChildProces(
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait no timechaos error")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait no timechaos error")))
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 	By("success to perform time chaos")
 }

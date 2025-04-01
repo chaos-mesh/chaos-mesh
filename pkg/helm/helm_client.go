@@ -46,9 +46,6 @@ func (h HelmClient) spawnConfigurationWithNamespace(namespace string) (*action.C
 		return nil, errors.Wrap(err, "create helm registry client")
 	}
 	kubeclient := kube.New(h.restClientGetter)
-	if err != nil {
-		return nil, errors.Wrap(err, "create kubernetes client set")
-	}
 	clientset, err := kubeclient.Factory.KubernetesClientSet()
 	if err != nil {
 		return nil, errors.Wrap(err, "create kubernetes client set")
