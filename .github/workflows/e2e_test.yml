@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Get changed files
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
         id: filter
         with:
           # Not available for frontend code for now.
