@@ -36,12 +36,6 @@ import (
 // updating spec of a chaos will have no effect, we'd better reject it
 var ErrCanNotUpdateChaos = errors.New("Cannot update chaos spec")
 
-func compareGVK(a, b runtime.Object) bool {
-	gvkA := a.GetObjectKind().GroupVersionKind().String()
-	gvkB := b.GetObjectKind().GroupVersionKind().String()
-	return gvkA == gvkB
-}
-
 const KindAWSChaos = "AWSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -150,15 +144,9 @@ func (in *AWSChaos) IsOneShot() bool {
 var AWSChaosWebhookLog = logf.Log.WithName("AWSChaos-resource")
 
 func (in *AWSChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*AWSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AWSChaos", obj)
+		return nil, errors.Errorf("expected type *AWSChaos, got %T", obj)
 	}
 	AWSChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -167,25 +155,14 @@ func (in *AWSChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *AWSChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*AWSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AWSChaos", oldObj)
+		return nil, errors.Errorf("expected type *AWSChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*AWSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AWSChaos", newObj)
+		return nil, errors.Errorf("expected type *AWSChaos, got %T", newObj)
 	}
 
 	AWSChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -197,15 +174,9 @@ func (in *AWSChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.O
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *AWSChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*AWSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AWSChaos", obj)
+		return nil, errors.Errorf("expected type *AWSChaos, got %T", obj)
 	}
 
 	AWSChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -335,15 +306,9 @@ func (in *AzureChaos) IsOneShot() bool {
 var AzureChaosWebhookLog = logf.Log.WithName("AzureChaos-resource")
 
 func (in *AzureChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*AzureChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AzureChaos", obj)
+		return nil, errors.Errorf("expected type *AzureChaos, got %T", obj)
 	}
 	AzureChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -352,25 +317,14 @@ func (in *AzureChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (a
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *AzureChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*AzureChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AzureChaos", oldObj)
+		return nil, errors.Errorf("expected type *AzureChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*AzureChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AzureChaos", newObj)
+		return nil, errors.Errorf("expected type *AzureChaos, got %T", newObj)
 	}
 
 	AzureChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -382,15 +336,9 @@ func (in *AzureChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *AzureChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*AzureChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *AzureChaos", obj)
+		return nil, errors.Errorf("expected type *AzureChaos, got %T", obj)
 	}
 
 	AzureChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -516,15 +464,9 @@ func (in *BlockChaos) IsOneShot() bool {
 var BlockChaosWebhookLog = logf.Log.WithName("BlockChaos-resource")
 
 func (in *BlockChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*BlockChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *BlockChaos", obj)
+		return nil, errors.Errorf("expected type *BlockChaos, got %T", obj)
 	}
 	BlockChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -533,25 +475,14 @@ func (in *BlockChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (a
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *BlockChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*BlockChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *BlockChaos", oldObj)
+		return nil, errors.Errorf("expected type *BlockChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*BlockChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *BlockChaos", newObj)
+		return nil, errors.Errorf("expected type *BlockChaos, got %T", newObj)
 	}
 
 	BlockChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -563,15 +494,9 @@ func (in *BlockChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *BlockChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*BlockChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *BlockChaos", obj)
+		return nil, errors.Errorf("expected type *BlockChaos, got %T", obj)
 	}
 
 	BlockChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -697,15 +622,9 @@ func (in *DNSChaos) IsOneShot() bool {
 var DNSChaosWebhookLog = logf.Log.WithName("DNSChaos-resource")
 
 func (in *DNSChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*DNSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *DNSChaos", obj)
+		return nil, errors.Errorf("expected type *DNSChaos, got %T", obj)
 	}
 	DNSChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -714,25 +633,14 @@ func (in *DNSChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *DNSChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*DNSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *DNSChaos", oldObj)
+		return nil, errors.Errorf("expected type *DNSChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*DNSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *DNSChaos", newObj)
+		return nil, errors.Errorf("expected type *DNSChaos, got %T", newObj)
 	}
 
 	DNSChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -744,15 +652,9 @@ func (in *DNSChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.O
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *DNSChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*DNSChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *DNSChaos", obj)
+		return nil, errors.Errorf("expected type *DNSChaos, got %T", obj)
 	}
 
 	DNSChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -882,15 +784,9 @@ func (in *GCPChaos) IsOneShot() bool {
 var GCPChaosWebhookLog = logf.Log.WithName("GCPChaos-resource")
 
 func (in *GCPChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*GCPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *GCPChaos", obj)
+		return nil, errors.Errorf("expected type *GCPChaos, got %T", obj)
 	}
 	GCPChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -899,25 +795,14 @@ func (in *GCPChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *GCPChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*GCPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *GCPChaos", oldObj)
+		return nil, errors.Errorf("expected type *GCPChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*GCPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *GCPChaos", newObj)
+		return nil, errors.Errorf("expected type *GCPChaos, got %T", newObj)
 	}
 
 	GCPChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -929,15 +814,9 @@ func (in *GCPChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.O
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *GCPChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*GCPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *GCPChaos", obj)
+		return nil, errors.Errorf("expected type *GCPChaos, got %T", obj)
 	}
 
 	GCPChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -1063,15 +942,9 @@ func (in *HTTPChaos) IsOneShot() bool {
 var HTTPChaosWebhookLog = logf.Log.WithName("HTTPChaos-resource")
 
 func (in *HTTPChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*HTTPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *HTTPChaos", obj)
+		return nil, errors.Errorf("expected type *HTTPChaos, got %T", obj)
 	}
 	HTTPChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -1080,25 +953,14 @@ func (in *HTTPChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (ad
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *HTTPChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*HTTPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *HTTPChaos", oldObj)
+		return nil, errors.Errorf("expected type *HTTPChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*HTTPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *HTTPChaos", newObj)
+		return nil, errors.Errorf("expected type *HTTPChaos, got %T", newObj)
 	}
 
 	HTTPChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -1110,15 +972,9 @@ func (in *HTTPChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *HTTPChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*HTTPChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *HTTPChaos", obj)
+		return nil, errors.Errorf("expected type *HTTPChaos, got %T", obj)
 	}
 
 	HTTPChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -1244,15 +1100,9 @@ func (in *IOChaos) IsOneShot() bool {
 var IOChaosWebhookLog = logf.Log.WithName("IOChaos-resource")
 
 func (in *IOChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*IOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *IOChaos", obj)
+		return nil, errors.Errorf("expected type *IOChaos, got %T", obj)
 	}
 	IOChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -1261,25 +1111,14 @@ func (in *IOChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admi
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *IOChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*IOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *IOChaos", oldObj)
+		return nil, errors.Errorf("expected type *IOChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*IOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *IOChaos", newObj)
+		return nil, errors.Errorf("expected type *IOChaos, got %T", newObj)
 	}
 
 	IOChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -1291,15 +1130,9 @@ func (in *IOChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Ob
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *IOChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*IOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *IOChaos", obj)
+		return nil, errors.Errorf("expected type *IOChaos, got %T", obj)
 	}
 
 	IOChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -1425,15 +1258,9 @@ func (in *JVMChaos) IsOneShot() bool {
 var JVMChaosWebhookLog = logf.Log.WithName("JVMChaos-resource")
 
 func (in *JVMChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*JVMChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *JVMChaos", obj)
+		return nil, errors.Errorf("expected type *JVMChaos, got %T", obj)
 	}
 	JVMChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -1442,25 +1269,14 @@ func (in *JVMChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*JVMChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *JVMChaos", oldObj)
+		return nil, errors.Errorf("expected type *JVMChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*JVMChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *JVMChaos", newObj)
+		return nil, errors.Errorf("expected type *JVMChaos, got %T", newObj)
 	}
 
 	JVMChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -1472,15 +1288,9 @@ func (in *JVMChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.O
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *JVMChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*JVMChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *JVMChaos", obj)
+		return nil, errors.Errorf("expected type *JVMChaos, got %T", obj)
 	}
 
 	JVMChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -1606,15 +1416,9 @@ func (in *KernelChaos) IsOneShot() bool {
 var KernelChaosWebhookLog = logf.Log.WithName("KernelChaos-resource")
 
 func (in *KernelChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*KernelChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *KernelChaos", obj)
+		return nil, errors.Errorf("expected type *KernelChaos, got %T", obj)
 	}
 	KernelChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -1623,25 +1427,14 @@ func (in *KernelChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *KernelChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*KernelChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *KernelChaos", oldObj)
+		return nil, errors.Errorf("expected type *KernelChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*KernelChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *KernelChaos", newObj)
+		return nil, errors.Errorf("expected type *KernelChaos, got %T", newObj)
 	}
 
 	KernelChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -1653,15 +1446,9 @@ func (in *KernelChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtim
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *KernelChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*KernelChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *KernelChaos", obj)
+		return nil, errors.Errorf("expected type *KernelChaos, got %T", obj)
 	}
 
 	KernelChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -1787,15 +1574,9 @@ func (in *NetworkChaos) IsOneShot() bool {
 var NetworkChaosWebhookLog = logf.Log.WithName("NetworkChaos-resource")
 
 func (in *NetworkChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*NetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *NetworkChaos", obj)
+		return nil, errors.Errorf("expected type *NetworkChaos, got %T", obj)
 	}
 	NetworkChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -1804,25 +1585,14 @@ func (in *NetworkChaos) ValidateCreate(ctx context.Context, obj runtime.Object) 
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *NetworkChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*NetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *NetworkChaos", oldObj)
+		return nil, errors.Errorf("expected type *NetworkChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*NetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *NetworkChaos", newObj)
+		return nil, errors.Errorf("expected type *NetworkChaos, got %T", newObj)
 	}
 
 	NetworkChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -1834,15 +1604,9 @@ func (in *NetworkChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runti
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *NetworkChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*NetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *NetworkChaos", obj)
+		return nil, errors.Errorf("expected type *NetworkChaos, got %T", obj)
 	}
 
 	NetworkChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -1968,15 +1732,9 @@ func (in *PhysicalMachineChaos) IsOneShot() bool {
 var PhysicalMachineChaosWebhookLog = logf.Log.WithName("PhysicalMachineChaos-resource")
 
 func (in *PhysicalMachineChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PhysicalMachineChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachineChaos", obj)
+		return nil, errors.Errorf("expected type *PhysicalMachineChaos, got %T", obj)
 	}
 	PhysicalMachineChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -1985,25 +1743,14 @@ func (in *PhysicalMachineChaos) ValidateCreate(ctx context.Context, obj runtime.
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PhysicalMachineChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*PhysicalMachineChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachineChaos", oldObj)
+		return nil, errors.Errorf("expected type *PhysicalMachineChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*PhysicalMachineChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachineChaos", newObj)
+		return nil, errors.Errorf("expected type *PhysicalMachineChaos, got %T", newObj)
 	}
 
 	PhysicalMachineChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2015,15 +1762,9 @@ func (in *PhysicalMachineChaos) ValidateUpdate(ctx context.Context, oldObj, newO
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PhysicalMachineChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PhysicalMachineChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachineChaos", obj)
+		return nil, errors.Errorf("expected type *PhysicalMachineChaos, got %T", obj)
 	}
 
 	PhysicalMachineChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2050,15 +1791,9 @@ const KindPhysicalMachine = "PhysicalMachine"
 var PhysicalMachineWebhookLog = logf.Log.WithName("PhysicalMachine-resource")
 
 func (in *PhysicalMachine) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PhysicalMachine)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachine", obj)
+		return nil, errors.Errorf("expected type *PhysicalMachine, got %T", obj)
 	}
 	PhysicalMachineWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2067,25 +1802,14 @@ func (in *PhysicalMachine) ValidateCreate(ctx context.Context, obj runtime.Objec
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PhysicalMachine) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*PhysicalMachine)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachine", oldObj)
+		return nil, errors.Errorf("expected type *PhysicalMachine, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*PhysicalMachine)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachine", newObj)
+		return nil, errors.Errorf("expected type *PhysicalMachine, got %T", newObj)
 	}
 
 	PhysicalMachineWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2097,15 +1821,9 @@ func (in *PhysicalMachine) ValidateUpdate(ctx context.Context, oldObj, newObj ru
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PhysicalMachine) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PhysicalMachine)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PhysicalMachine", obj)
+		return nil, errors.Errorf("expected type *PhysicalMachine, got %T", obj)
 	}
 
 	PhysicalMachineWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2235,15 +1953,9 @@ func (in *PodChaos) IsOneShot() bool {
 var PodChaosWebhookLog = logf.Log.WithName("PodChaos-resource")
 
 func (in *PodChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodChaos", obj)
+		return nil, errors.Errorf("expected type *PodChaos, got %T", obj)
 	}
 	PodChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2252,25 +1964,14 @@ func (in *PodChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*PodChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodChaos", oldObj)
+		return nil, errors.Errorf("expected type *PodChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*PodChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodChaos", newObj)
+		return nil, errors.Errorf("expected type *PodChaos, got %T", newObj)
 	}
 
 	PodChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2282,15 +1983,9 @@ func (in *PodChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.O
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodChaos", obj)
+		return nil, errors.Errorf("expected type *PodChaos, got %T", obj)
 	}
 
 	PodChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2317,15 +2012,9 @@ const KindPodHttpChaos = "PodHttpChaos"
 var PodHttpChaosWebhookLog = logf.Log.WithName("PodHttpChaos-resource")
 
 func (in *PodHttpChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodHttpChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodHttpChaos", obj)
+		return nil, errors.Errorf("expected type *PodHttpChaos, got %T", obj)
 	}
 	PodHttpChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2334,25 +2023,14 @@ func (in *PodHttpChaos) ValidateCreate(ctx context.Context, obj runtime.Object) 
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodHttpChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*PodHttpChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodHttpChaos", oldObj)
+		return nil, errors.Errorf("expected type *PodHttpChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*PodHttpChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodHttpChaos", newObj)
+		return nil, errors.Errorf("expected type *PodHttpChaos, got %T", newObj)
 	}
 
 	PodHttpChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2361,15 +2039,9 @@ func (in *PodHttpChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runti
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodHttpChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodHttpChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodHttpChaos", obj)
+		return nil, errors.Errorf("expected type *PodHttpChaos, got %T", obj)
 	}
 
 	PodHttpChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2396,15 +2068,9 @@ const KindPodIOChaos = "PodIOChaos"
 var PodIOChaosWebhookLog = logf.Log.WithName("PodIOChaos-resource")
 
 func (in *PodIOChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodIOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodIOChaos", obj)
+		return nil, errors.Errorf("expected type *PodIOChaos, got %T", obj)
 	}
 	PodIOChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2413,25 +2079,14 @@ func (in *PodIOChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (a
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodIOChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*PodIOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodIOChaos", oldObj)
+		return nil, errors.Errorf("expected type *PodIOChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*PodIOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodIOChaos", newObj)
+		return nil, errors.Errorf("expected type *PodIOChaos, got %T", newObj)
 	}
 
 	PodIOChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2440,15 +2095,9 @@ func (in *PodIOChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodIOChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodIOChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodIOChaos", obj)
+		return nil, errors.Errorf("expected type *PodIOChaos, got %T", obj)
 	}
 
 	PodIOChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2475,15 +2124,9 @@ const KindPodNetworkChaos = "PodNetworkChaos"
 var PodNetworkChaosWebhookLog = logf.Log.WithName("PodNetworkChaos-resource")
 
 func (in *PodNetworkChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodNetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodNetworkChaos", obj)
+		return nil, errors.Errorf("expected type *PodNetworkChaos, got %T", obj)
 	}
 	PodNetworkChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2492,25 +2135,14 @@ func (in *PodNetworkChaos) ValidateCreate(ctx context.Context, obj runtime.Objec
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodNetworkChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*PodNetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodNetworkChaos", oldObj)
+		return nil, errors.Errorf("expected type *PodNetworkChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*PodNetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodNetworkChaos", newObj)
+		return nil, errors.Errorf("expected type *PodNetworkChaos, got %T", newObj)
 	}
 
 	PodNetworkChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2519,15 +2151,9 @@ func (in *PodNetworkChaos) ValidateUpdate(ctx context.Context, oldObj, newObj ru
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *PodNetworkChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*PodNetworkChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *PodNetworkChaos", obj)
+		return nil, errors.Errorf("expected type *PodNetworkChaos, got %T", obj)
 	}
 
 	PodNetworkChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2554,15 +2180,9 @@ const KindRemoteCluster = "RemoteCluster"
 var RemoteClusterWebhookLog = logf.Log.WithName("RemoteCluster-resource")
 
 func (in *RemoteCluster) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*RemoteCluster)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *RemoteCluster", obj)
+		return nil, errors.Errorf("expected type *RemoteCluster, got %T", obj)
 	}
 	RemoteClusterWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2571,25 +2191,14 @@ func (in *RemoteCluster) ValidateCreate(ctx context.Context, obj runtime.Object)
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *RemoteCluster) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*RemoteCluster)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *RemoteCluster", oldObj)
+		return nil, errors.Errorf("expected type *RemoteCluster, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*RemoteCluster)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *RemoteCluster", newObj)
+		return nil, errors.Errorf("expected type *RemoteCluster, got %T", newObj)
 	}
 
 	RemoteClusterWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2601,15 +2210,9 @@ func (in *RemoteCluster) ValidateUpdate(ctx context.Context, oldObj, newObj runt
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *RemoteCluster) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*RemoteCluster)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *RemoteCluster", obj)
+		return nil, errors.Errorf("expected type *RemoteCluster, got %T", obj)
 	}
 
 	RemoteClusterWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2636,15 +2239,9 @@ const KindStatusCheck = "StatusCheck"
 var StatusCheckWebhookLog = logf.Log.WithName("StatusCheck-resource")
 
 func (in *StatusCheck) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*StatusCheck)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StatusCheck", obj)
+		return nil, errors.Errorf("expected type *StatusCheck, got %T", obj)
 	}
 	StatusCheckWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2653,25 +2250,14 @@ func (in *StatusCheck) ValidateCreate(ctx context.Context, obj runtime.Object) (
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *StatusCheck) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*StatusCheck)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StatusCheck", oldObj)
+		return nil, errors.Errorf("expected type *StatusCheck, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*StatusCheck)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StatusCheck", newObj)
+		return nil, errors.Errorf("expected type *StatusCheck, got %T", newObj)
 	}
 
 	StatusCheckWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2683,15 +2269,9 @@ func (in *StatusCheck) ValidateUpdate(ctx context.Context, oldObj, newObj runtim
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *StatusCheck) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*StatusCheck)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StatusCheck", obj)
+		return nil, errors.Errorf("expected type *StatusCheck, got %T", obj)
 	}
 
 	StatusCheckWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2817,15 +2397,9 @@ func (in *StressChaos) IsOneShot() bool {
 var StressChaosWebhookLog = logf.Log.WithName("StressChaos-resource")
 
 func (in *StressChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*StressChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StressChaos", obj)
+		return nil, errors.Errorf("expected type *StressChaos, got %T", obj)
 	}
 	StressChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -2834,25 +2408,14 @@ func (in *StressChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *StressChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*StressChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StressChaos", oldObj)
+		return nil, errors.Errorf("expected type *StressChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*StressChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StressChaos", newObj)
+		return nil, errors.Errorf("expected type *StressChaos, got %T", newObj)
 	}
 
 	StressChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -2864,15 +2427,9 @@ func (in *StressChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtim
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *StressChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*StressChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *StressChaos", obj)
+		return nil, errors.Errorf("expected type *StressChaos, got %T", obj)
 	}
 
 	StressChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
@@ -2998,15 +2555,9 @@ func (in *TimeChaos) IsOneShot() bool {
 var TimeChaosWebhookLog = logf.Log.WithName("TimeChaos-resource")
 
 func (in *TimeChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*TimeChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *TimeChaos", obj)
+		return nil, errors.Errorf("expected type *TimeChaos, got %T", obj)
 	}
 	TimeChaosWebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -3015,25 +2566,14 @@ func (in *TimeChaos) ValidateCreate(ctx context.Context, obj runtime.Object) (ad
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *TimeChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if !compareGVK(in, oldObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), oldObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Check if newObj is of the same type as in
-	if !compareGVK(in, newObj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), newObj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*TimeChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *TimeChaos", oldObj)
+		return nil, errors.Errorf("expected type *TimeChaos, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*TimeChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *TimeChaos", newObj)
+		return nil, errors.Errorf("expected type *TimeChaos, got %T", newObj)
 	}
 
 	TimeChaosWebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -3045,15 +2585,9 @@ func (in *TimeChaos) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *TimeChaos) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	// Check if obj is of the same type as in
-	if !compareGVK(in, obj) {
-		return nil, errors.Errorf("expected type %s, got %s", in.GetObjectKind().GroupVersionKind().String(), obj.GetObjectKind().GroupVersionKind().String())
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*TimeChaos)
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *TimeChaos", obj)
+		return nil, errors.Errorf("expected type *TimeChaos, got %T", obj)
 	}
 
 	TimeChaosWebhookLog.Info("validate delete", "name", typedObj.GetName())
