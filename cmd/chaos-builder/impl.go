@@ -154,16 +154,9 @@ func (in *{{.Type}}) IsOneShot() bool {
 var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
 func (in *{{.Type}}) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-
-	// Check if obj is of the same type as in
-	if obj.GetObjectKind().GroupVersionKind() != in.GetObjectKind().GroupVersionKind() {
-		return nil, errors.Errorf("expected type %T, got %T", in, obj)
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*{{.Type}})
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *{{.Type}}", obj)
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", obj)
 	}
 	{{.Type}}WebhookLog.Info("validate create", "name", typedObj.GetName())
 
@@ -172,25 +165,14 @@ func (in *{{.Type}}) ValidateCreate(ctx context.Context, obj runtime.Object) (ad
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	// Check if oldObj is of the same type as in
-	if oldObj.GetObjectKind().GroupVersionKind() != in.GetObjectKind().GroupVersionKind() {
-		return nil, errors.Errorf("expected type %T, got %T", in, oldObj)
-	}
-
-	// Check if newObj is of the same type as in
-	if newObj.GetObjectKind().GroupVersionKind() != in.GetObjectKind().GroupVersionKind() {
-		return nil, errors.Errorf("expected type %T, got %T", in, newObj)
-	}
-
-	// Convert objects to the same type as in
 	typedOldObj, ok := oldObj.(*{{.Type}})
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *{{.Type}}", oldObj)
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", oldObj)
 	}
 
 	typedNewObj, ok := newObj.(*{{.Type}})
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *{{.Type}}", newObj)
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", newObj)
 	}
 
 	{{.Type}}WebhookLog.Info("validate update", "name", typedOldObj.GetName())
@@ -205,16 +187,9 @@ func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
 func (in *{{.Type}}) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-
-	// Check if obj is of the same type as in
-	if obj.GetObjectKind().GroupVersionKind() != in.GetObjectKind().GroupVersionKind() {
-		return nil, errors.Errorf("expected type %T, got %T", in, obj)
-	}
-
-	// Convert obj to the same type as in
 	typedObj, ok := obj.(*{{.Type}})
 	if !ok {
-		return nil, errors.Errorf("failed to convert %T to *{{.Type}}", obj)
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", obj)
 	}
 
 	{{.Type}}WebhookLog.Info("validate delete", "name", typedObj.GetName())
