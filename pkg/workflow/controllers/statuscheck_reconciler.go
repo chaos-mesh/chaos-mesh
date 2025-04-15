@@ -44,31 +44,38 @@ func NewStatusCheckReconciler(kubeClient client.Client, eventRecorder recorder.C
 }
 
 func (it *StatusCheckReconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	startTime := time.Now()
-	defer func() {
-		it.logger.V(4).Info("finished syncing for status check node",
-			"node", request.NamespacedName,
-			"duration", time.Since(startTime),
-		)
-	}()
+    startTime := time.Now()
+    defer func() {
+        it.logger.V(4).Info("finished syncing for status check node",
+            "node", request.NamespacedName,
+            "duration", time.Since(startTime),
+        )
+    }()
 
-	node := v1alpha1.WorkflowNode{}
-	err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
-	if err != nil {
-		return reconcile.Result{}, client.IgnoreNotFound(err)
-	}
-	if node.Spec.Type != v1alpha1.TypeStatusCheck {
-		return reconcile.Result{}, nil
-	}
+    node := v1alpha1.WorkflowNode{}
+    err := it.kubeClient.Get(ctx, request.NamespacedName, &node)
+    if err != nil {
+        return reconcile.Result{}, client.IgnoreNotFound(err)
+    }
+    if node.Spec.Type != v1alpha1.TypeStatusCheck {
+        return reconcile.Result{}, nil
+    }
 
-	it.logger.V(4).Info("resolve status check node", "node", request)
-	if err := it.syncStatusCheck(ctx, request, node); err != nil {
-		return reconcile.Result{}, errors.Wrap(err, "sync status check")
-	}
+    // Check if status reflects current spec
+    if node.Status.ObservedGeneration == node.Generation {
+        it.logger.V(4).Info("status is up to date", 
+            "node", request.NamespacedName,
+            "generation", node.Generation)
+        return reconcile.Result{}, nil
+    }
 
-	updateError := retry.RetryOnConflict(retry.DefaultRetry, it.updateNodeStatus(ctx, request))
+    it.logger.V(4).Info("resolve status check node", "node", request)
+    if err := it.syncStatusCheck(ctx, request, node); err != nil {
+        return reconcile.Result{}, errors.Wrap(err, "sync status check")
+    }
 
-	return reconcile.Result{}, updateError
+    updateError := retry.RetryOnConflict(retry.DefaultRetry, it.updateNodeStatus(ctx, request))
+    return reconcile.Result{}, updateError
 }
 
 func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request reconcile.Request, node v1alpha1.WorkflowNode) error {
@@ -137,15 +144,18 @@ func (it *StatusCheckReconciler) syncStatusCheck(ctx context.Context, request re
 
 func (it *StatusCheckReconciler) updateNodeStatus(ctx context.Context, request reconcile.Request) func() error {
 	return func() error {
-		node := v1alpha1.WorkflowNode{}
-		if err := it.kubeClient.Get(ctx, request.NamespacedName, &node); err != nil {
-			return client.IgnoreNotFound(err)
-		}
+        node := v1alpha1.WorkflowNode{}
+        if err := it.kubeClient.Get(ctx, request.NamespacedName, &node); err != nil {
+            return client.IgnoreNotFound(err)
+        }
 
-		statusChecks, err := it.fetchChildrenStatusCheck(ctx, node)
-		if err != nil {
-			return client.IgnoreNotFound(err)
-		}
+        // Store current generation for status update
+        currentGeneration := node.Generation
+
+        statusChecks, err := it.fetchChildrenStatusCheck(ctx, node)
+        if err != nil {
+            return client.IgnoreNotFound(err)
+        }
 		if len(statusChecks) > 1 {
 			it.logger.Info("the number of StatusCheck affected by status check node is more than 1",
 				"node", fmt.Sprintf("%s/%s", node.Namespace, node.Name),
@@ -161,32 +171,37 @@ func (it *StatusCheckReconciler) updateNodeStatus(ctx context.Context, request r
 		statusCheck := statusChecks[0]
 		if statusCheck.IsCompleted() {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.StatusCheckCompleted,
+				Type:       v1alpha1.ConditionAccomplished,
+				Status:     corev1.ConditionTrue,
+				Reason:     v1alpha1.StatusCheckCompleted,
+				Generation: node.Generation, // Set generation
 			})
 		} else {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:       v1alpha1.ConditionAccomplished,
+				Status:     corev1.ConditionFalse,
+				Reason:     "",
+				Generation: node.Generation, // Set generation
 			})
 		}
 
 		if node.Spec.AbortWithStatusCheck && needToAbort(statusCheck) {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAborted,
-				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.StatusCheckNotExceedSuccessThreshold,
+				Type:       v1alpha1.ConditionAborted,
+				Status:     corev1.ConditionTrue,
+				Reason:     v1alpha1.StatusCheckNotExceedSuccessThreshold,
+				Generation: node.Generation, // Set generation
 			})
 		} else {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAborted,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:       v1alpha1.ConditionAborted,
+				Status:     corev1.ConditionFalse,
+				Reason:     "",
+				Generation: node.Generation, // Set generation
 			})
 		}
 
+		node.Status.ObservedGeneration = currentGeneration
 		return client.IgnoreNotFound(it.kubeClient.Status().Update(ctx, &node))
 	}
 }
