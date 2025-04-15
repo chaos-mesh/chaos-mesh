@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
 )
@@ -59,7 +59,7 @@ func (e *eventStore) ListByUID(c context.Context, uid string) ([]*core.Event, er
 	return e.ListBy(c, "object_id = ?", uid)
 }
 
-func (e *eventStore) ListByUIDs(c context.Context, uids []string) ([]*core.Event, error) {
+func (e *eventStore) ListByUIDList(c context.Context, uids []string) ([]*core.Event, error) {
 	return e.ListBy(c, "object_id IN (?)", uids)
 }
 
@@ -111,12 +111,8 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 	return e.db.Where("object_id = ?", uid).Delete(&core.Event{}).Error
 }
 
-func (e *eventStore) DeleteByUIDs(_ context.Context, uids []string) error {
+func (e *eventStore) DeleteByUIDList(_ context.Context, uids []string) error {
 	return e.db.Where("object_id IN (?)", uids).Delete(&core.Event{}).Error
-}
-
-func (e *eventStore) DeleteByTime(_ context.Context, start string, end string) error {
-	return e.db.Where("created_at BETWEEN ? AND ?", start, end).Delete(&core.Event{}).Error
 }
 
 func (e *eventStore) DeleteByDuration(_ context.Context, duration time.Duration) error {
