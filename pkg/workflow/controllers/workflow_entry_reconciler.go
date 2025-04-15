@@ -133,7 +133,7 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 			)
 			return err
 		}
-
+		now := metav1.NewTime(time.Now())
 		if len(entryNodes) > 0 {
 			if len(entryNodes) > 1 {
 				var nodeNames []string
@@ -148,40 +148,44 @@ func (it *WorkflowEntryReconciler) Reconcile(ctx context.Context, request reconc
 
 			workflowNeedUpdate.Status.EntryNode = pointer.String(entryNodes[0].Name)
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
-				Type:   v1alpha1.WorkflowConditionScheduled,
-				Status: corev1.ConditionTrue,
-				Reason: "",
+				Type:               v1alpha1.WorkflowConditionScheduled,
+				Status:             corev1.ConditionTrue,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 
 			if WorkflowNodeFinished(entryNodes[0].Status) {
 				SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
-					Type:   v1alpha1.WorkflowConditionAccomplished,
-					Status: corev1.ConditionTrue,
-					Reason: "",
+					Type:               v1alpha1.WorkflowConditionAccomplished,
+					Status:             corev1.ConditionTrue,
+					Reason:             "",
+					LastTransitionTime: &now,
 				})
 				if workflowNeedUpdate.Status.EndTime == nil {
-					now := metav1.NewTime(time.Now())
 					workflowNeedUpdate.Status.EndTime = &now
 					it.eventRecorder.Event(&workflow, recorder.WorkflowAccomplished{})
 				}
 			} else {
 				SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
-					Type:   v1alpha1.WorkflowConditionAccomplished,
-					Status: corev1.ConditionFalse,
-					Reason: "",
+					Type:               v1alpha1.WorkflowConditionAccomplished,
+					Status:             corev1.ConditionFalse,
+					Reason:             "",
+					LastTransitionTime: &now,
 				})
 				workflowNeedUpdate.Status.EndTime = nil
 			}
 		} else {
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
-				Type:   v1alpha1.WorkflowConditionScheduled,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:               v1alpha1.WorkflowConditionScheduled,
+				Status:             corev1.ConditionFalse,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 			SetWorkflowCondition(&workflowNeedUpdate.Status, v1alpha1.WorkflowCondition{
-				Type:   v1alpha1.WorkflowConditionAccomplished,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:               v1alpha1.WorkflowConditionAccomplished,
+				Status:             corev1.ConditionFalse,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 			workflowNeedUpdate.Status.EndTime = nil
 		}
