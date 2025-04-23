@@ -62,6 +62,18 @@ spec:
                 items:
                   type: string
                 type: array
+              domainAndIPList:
+                items:
+                  properties:
+                    domain:
+                      type: string
+                    ip:
+                      type: string
+                  required:
+                  - domain
+                  - ip
+                  type: object
+                type: array
               duration:
                 description: Duration represents the duration of the chaos action
                 type: string

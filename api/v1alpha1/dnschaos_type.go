@@ -31,6 +31,9 @@ const (
 
 	// RandomAction represents get random IP when send DNS request.
 	RandomAction DNSChaosAction = "random"
+
+	// DefaultAction represents the default action of DNS chaos.
+	StaticAction DNSChaosAction = "static"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -83,11 +86,18 @@ type DNSChaosSpec struct {
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
+
+	DomainAndIPList []*DomainIP `json:"domainAndIPList,omitempty"`
 }
 
 // DNSChaosStatus defines the observed state of DNSChaos
 type DNSChaosStatus struct {
 	ChaosStatus `json:",inline"`
+}
+
+type DomainIP struct {
+	Domain string `json:"domain"`
+	IP     string `json:"ip"`
 }
 
 func (obj *DNSChaos) GetSelectorSpecs() map[string]interface{} {
