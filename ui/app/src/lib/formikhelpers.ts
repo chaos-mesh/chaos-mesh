@@ -223,6 +223,20 @@ function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
+function isSchedule(kind: ExperimentKind | 'Schedule') {
+  return kind === 'Schedule'
+}
+
+function shouldHasSelector(kind: ExperimentKind | 'Schedule') {
+  return (
+    kind !== 'PhysicalMachineChaos' &&
+    kind !== 'AWSChaos' &&
+    kind !== 'GCPChaos' &&
+    kind !== 'AzureChaos' &&
+    kind !== 'Schedule'
+  )
+}
+
 export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spec: any } {
   let { kind, metadata, spec }: { kind: ExperimentKind; metadata: any; spec: any } = yamlObj
 
@@ -230,9 +244,7 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
   }
 
-  const isSchedule = (kind as any) === 'Schedule'
-
-  if (!isSchedule && kind !== 'PhysicalMachineChaos' && !spec.selector) {
+  if (shouldHasSelector(kind) && !spec.selector) {
     throw new Error('The required spec.selector field is missing.')
   }
 
@@ -246,6 +258,12 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
   }
 
   function parseBasicSpec(kind: ExperimentKind, spec: typeof basicData.spec) {
+    if (kind === 'AWSChaos' || kind === 'GCPChaos' || kind === 'AzureChaos') {
+      return {
+        duration: spec.duration ?? '',
+      }
+    }
+
     return {
       selector: {
         ...basicData.spec.selector,
@@ -267,7 +285,7 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     }
   }
 
-  if (isSchedule) {
+  if (isSchedule(kind)) {
     const { schedule, historyLimit, concurrencyPolicy, startingDeadlineSeconds, ...rest } =
       spec as unknown as ScheduleSpecific
     const scheduleSpec = {
