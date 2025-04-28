@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc/credentials/insecure"
@@ -71,7 +72,8 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 
 	dnschaos := obj.(*v1alpha1.DNSChaos)
 	for _, pod := range dnsPods {
-		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns, dnschaos.Spec.DomainAndIPList)
+		err = impl.setDNSServerRules(pod.Status.PodIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, decodedContainer.Pod, dnschaos.Spec.Action,
+			dnschaos.Spec.DomainNamePatterns, dnschaos.Spec.DomainIpMappingList)
 		if err != nil {
 			impl.Log.Error(err, "fail to set DNS server rules")
 			return v1alpha1.NotInjected, err
@@ -93,7 +95,7 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 	return v1alpha1.Injected, nil
 }
 
-func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, pod *v1.Pod, action v1alpha1.DNSChaosAction, patterns []string, domainIPList []*v1alpha1.DomainIP) error {
+func (impl *Impl) setDNSServerRules(dnsServerIP string, port int, name string, pod *v1.Pod, action v1alpha1.DNSChaosAction, patterns []string, domainIPList []string) error {
 	impl.Log.Info("setDNSServerRules", "name", name)
 
 	pbPods := make([]*dnspb.Pod, 1)
@@ -258,12 +260,17 @@ var Module = fx.Provide(
 )
 
 // ConvertDomainIPList
-func (impl *Impl) convertDomainIPList(domainIPList []*v1alpha1.DomainIP) []*dnspb.IpDomainMap {
+func (impl *Impl) convertDomainIPList(domainIPList []string) []*dnspb.IpDomainMap {
 	var result []*dnspb.IpDomainMap
 	for _, item := range domainIPList {
+		//"google.com=1.2.3.4"
+		strs := strings.Split(item, "=")
+		if len(strs) != 2 {
+			continue
+		}
 		result = append(result, &dnspb.IpDomainMap{
-			Ip:     item.IP,
-			Domain: item.Domain,
+			Domain: strs[0],
+			Ip:     strs[1],
 		})
 	}
 	return result

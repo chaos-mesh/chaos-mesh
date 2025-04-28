@@ -54,6 +54,7 @@ spec:
                 enum:
                 - error
                 - random
+                - static
                 type: string
               containerNames:
                 description: |-
@@ -62,17 +63,9 @@ spec:
                 items:
                   type: string
                 type: array
-              domainAndIPList:
+              domainIpMapping:
                 items:
-                  properties:
-                    domain:
-                      type: string
-                    ip:
-                      type: string
-                  required:
-                  - domain
-                  - ip
-                  type: object
+                  type: string
                 type: array
               duration:
                 description: Duration represents the duration of the chaos action

@@ -818,16 +818,10 @@ func (in *DNSChaosSpec) DeepCopyInto(out *DNSChaosSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.DomainAndIPList != nil {
-		in, out := &in.DomainAndIPList, &out.DomainAndIPList
-		*out = make([]*DomainIP, len(*in))
-		for i := range *in {
-			if (*in)[i] != nil {
-				in, out := &(*in)[i], &(*out)[i]
-				*out = new(DomainIP)
-				**out = **in
-			}
-		}
+	if in.DomainIpMappingList != nil {
+		in, out := &in.DomainIpMappingList, &out.DomainIpMappingList
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 }
 

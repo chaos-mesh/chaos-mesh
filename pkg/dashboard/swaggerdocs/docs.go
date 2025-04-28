@@ -5252,11 +5252,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random\nDefault action: error\n+kubebuilder:validation:Enum=error;random",
+                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random\nDefault action: error\n+kubebuilder:validation:Enum=error;random;static",
                     "type": "string"
                 },
                 "containerNames": {
                     "description": "ContainerNames indicates list of the name of affected container.\nIf not set, the first container will be injected\n+optional",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "domainIpMapping": {
                     "type": "array",
                     "items": {
                         "type": "string"

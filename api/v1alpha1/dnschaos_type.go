@@ -65,7 +65,7 @@ type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.
 	// Supported action: error, random
 	// Default action: error
-	// +kubebuilder:validation:Enum=error;random
+	// +kubebuilder:validation:Enum=error;random;static
 	Action DNSChaosAction `json:"action"`
 
 	ContainerSelector `json:",inline"`
@@ -87,7 +87,7 @@ type DNSChaosSpec struct {
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
 
-	DomainAndIPList []*DomainIP `json:"domainAndIPList,omitempty"`
+	DomainIpMappingList []string `json:"domainIpMapping,omitempty"`
 }
 
 // DNSChaosStatus defines the observed state of DNSChaos

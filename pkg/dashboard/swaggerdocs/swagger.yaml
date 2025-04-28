@@ -3483,13 +3483,17 @@ definitions:
           Action defines the specific DNS chaos action.
           Supported action: error, random
           Default action: error
-          +kubebuilder:validation:Enum=error;random
+          +kubebuilder:validation:Enum=error;random;static
         type: string
       containerNames:
         description: |-
           ContainerNames indicates list of the name of affected container.
           If not set, the first container will be injected
           +optional
+        items:
+          type: string
+        type: array
+      domainIpMapping:
         items:
           type: string
         type: array
