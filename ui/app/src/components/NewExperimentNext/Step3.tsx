@@ -75,7 +75,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
         mutateAsync({
           data: parsedValues,
         })
-          .then(() => {
+          .then((response) => {
             dispatch(
               setAlert({
                 type: 'success',
@@ -87,7 +87,15 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
 
             navigate('/experiments')
           })
-          .catch(console.error)
+          .catch((error) => {
+            const errorMsg = error?.response?.data?.message || error?.message
+            dispatch(
+              setAlert({
+                type: 'error',
+                message: errorMsg,
+              })
+            )
+          })
       }
     }
   }
