@@ -54,7 +54,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Issue with getting a single archive in the Dashboard UI [#4521](https://github.com/chaos-mesh/chaos-mesh/pull/4521)
 - Correct the parsing of the physical machines in the Dashboard UI [#4580](https://github.com/chaos-mesh/chaos-mesh/pull/4580)
-- Correct the processing of no-selector chaos experiments in the Dashboard UI
+- Correct the processing of no-selector chaos experiments in the Dashboard UI [#4671](https://github.com/chaos-mesh/chaos-mesh/pull/4671)
 
 ### Security
 
