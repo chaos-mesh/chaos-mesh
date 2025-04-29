@@ -46,11 +46,19 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
   inArchive,
   vertical,
 }) => {
-  const { lang } = useStoreSelector((state) => state.settings)
+  const { lang, useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
 
-  const spec: any = inNode ? config : config!.kube_object!.spec
+  const spec: any = inNode ? config : config.kube_object?.spec
   const experiment =
     inSchedule || inNode ? spec[templateTypeToFieldName(inSchedule ? spec.type : (config as any).templateType)] : spec
+
+  const hasAddress =
+    !useNewPhysicalMachine &&
+    (inNode
+      ? (config as any).templateType === 'PhysicalMachineChaos'
+      : inSchedule
+      ? spec.type === 'PhysicalMachineChaos'
+      : (config.kind as any) === 'PhysicalMachineChaos')
 
   return (
     <>
@@ -102,38 +110,32 @@ const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
           </Grid>
         )}
 
-        <Grid item xs={vertical ? 12 : 3}>
-          <Typography variant="subtitle2" gutterBottom>
-            {i18n('newE.steps.scope')}
-          </Typography>
+        {(hasAddress || experiment.selector) && (
+          <Grid item xs={vertical ? 12 : 3}>
+            <Typography variant="subtitle2" gutterBottom>
+              {i18n('newE.steps.scope')}
+            </Typography>
 
-          {(inNode
-            ? (config as any).templateType !== 'PhysicalMachineChaos'
-            : inSchedule
-            ? spec.type !== 'PhysicalMachineChaos'
-            : (config.kind as any) !== 'PhysicalMachineChaos') && <Selector data={experiment.selector} />}
+            {experiment.selector && <Selector data={experiment.selector} />}
 
-          {(inNode
-            ? (config as any).templateType === 'PhysicalMachineChaos'
-            : inSchedule
-            ? spec.type === 'PhysicalMachineChaos'
-            : (config.kind as any) === 'PhysicalMachineChaos') && (
-            <Table>
-              <TableRow>
-                <TableCell>{i18n('physic.address')}</TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="textSecondary">
-                    {inNode
-                      ? (config as any).physicalmachineChaos.address
-                      : inSchedule
-                      ? spec.physicalmachineChaos.address
-                      : spec.address}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </Table>
-          )}
-        </Grid>
+            {hasAddress && (
+              <Table>
+                <TableRow>
+                  <TableCell>{i18n('physic.address')}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="textSecondary">
+                      {inNode
+                        ? (config as any).physicalmachineChaos.address
+                        : inSchedule
+                        ? spec.physicalmachineChaos.address
+                        : spec.address}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </Table>
+            )}
+          </Grid>
+        )}
 
         <Grid item xs={vertical ? 12 : 3}>
           <Typography variant="subtitle2" gutterBottom>
