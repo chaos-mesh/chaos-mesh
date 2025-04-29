@@ -137,10 +137,13 @@
     "basic": {
       "nameHelper": "计划的名称",
       "scheduleHelper": "计划以 CronJob 的形式表示。如果你还不熟悉它，可以借助 {crontabguru} 来辅助制定计划。",
+      "historyLimit": "历史限制",
       "historyLimitHelper": "最大实验记录数。",
+      "concurrencyPolicy": "并发性规则",
       "concurrencyPolicyHelper": "是否允许实验同时运行。",
       "forbid": "禁止",
       "allow": "允许",
+      "startingDeadlineSeconds": "延迟开始的最后期限",
       "startingDeadlineSecondsHelper": "统计从 startingDeadlineSeconds 设置的值到现在错过了多少次 job。"
     }
   },
