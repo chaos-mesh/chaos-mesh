@@ -200,10 +200,13 @@
     "basic": {
       "nameHelper": "The schedule name",
       "scheduleHelper": "The schedule is expressed in the form of CronJob. If you are not familiar with it, you can use {crontabguru} to help define it.",
+      "historyLimit": "History limit",
       "historyLimitHelper": "Maximum number of experiment records.",
+      "concurrencyPolicy": "Concurrency policy",
       "concurrencyPolicyHelper": "Whether to allow experiments to run at the same time.",
       "forbid": "Forbid",
       "allow": "Allow",
+      "startingDeadlineSeconds": "Deadline for delayed Job start",
       "startingDeadlineSecondsHelper": "Counts how many missed jobs occurred from the value of startingDeadlineSeconds until now."
     }
   },
