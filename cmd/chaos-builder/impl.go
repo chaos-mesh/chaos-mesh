@@ -22,6 +22,7 @@ import (
 
 const implImport = `
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"time"
@@ -152,41 +153,62 @@ func (in *{{.Type}}) IsOneShot() bool {
 {{end}}
 var {{.Type}}WebhookLog = logf.Log.WithName("{{.Type}}-resource")
 
-func (in *{{.Type}}) ValidateCreate() (admission.Warnings, error) {
-	{{.Type}}WebhookLog.Info("validate create", "name", in.Name)
-	return in.Validate()
+func (in *{{.Type}}) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*{{.Type}})
+	if !ok {
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", obj)
+	}
+	{{.Type}}WebhookLog.Info("validate create", "name", typedObj.GetName())
+
+	return typedObj.Validate()
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	{{.Type}}WebhookLog.Info("validate update", "name", in.Name)
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *{{.Type}}) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
+	typedOldObj, ok := oldObj.(*{{.Type}})
+	if !ok {
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", oldObj)
+	}
+
+	typedNewObj, ok := newObj.(*{{.Type}})
+	if !ok {
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", newObj)
+	}
+
+	{{.Type}}WebhookLog.Info("validate update", "name", typedOldObj.GetName())
+
 	{{- if not .EnableUpdate}}
-	if !reflect.DeepEqual(in.Spec, old.(*{{.Type}}).Spec) {
+	if !reflect.DeepEqual(typedOldObj.Spec, typedNewObj.Spec) {
 		return nil, ErrCanNotUpdateChaos
 	}
 	{{- end}}
-	return in.Validate()
+	return typedNewObj.Validate()
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *{{.Type}}) ValidateDelete() (admission.Warnings, error) {
-	{{.Type}}WebhookLog.Info("validate delete", "name", in.Name)
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type
+func (in *{{.Type}}) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*{{.Type}})
+	if !ok {
+		return nil, errors.Errorf("expected type *{{.Type}}, got %T", obj)
+	}
 
-	// Nothing to do?
+	{{.Type}}WebhookLog.Info("validate delete", "name", typedObj.GetName())
+
 	return nil, nil
 }
 
-var _ webhook.Validator = &{{.Type}}{}
+var _ webhook.CustomValidator = &{{.Type}}{}
 
 func (in *{{.Type}}) Validate() ([]string, error) {
 	errs := gw.Validate(in)
 	return nil, gw.Aggregate(errs)
 }
 
-var _ webhook.Defaulter = &{{.Type}}{}
+var _ webhook.CustomDefaulter = &{{.Type}}{}
 
-func (in *{{.Type}}) Default() {
-	gw.Default(in)
+func (in *{{.Type}}) Default(_ context.Context, obj runtime.Object) error {
+	gw.Default(obj)
+	return nil
 }
 `
 

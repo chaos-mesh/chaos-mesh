@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -65,8 +66,8 @@ selector:
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait chaos mesh not dies")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait chaos mesh not dies")))
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	cancel()
 }
@@ -108,6 +109,6 @@ selector:
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait chaos mesh not dies")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait chaos mesh not dies")))
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 }

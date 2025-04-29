@@ -16,6 +16,8 @@
 package v1alpha1
 
 import (
+	"context"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +48,7 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -60,7 +62,7 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -80,7 +82,7 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
@@ -100,7 +102,7 @@ var _ = Describe("azurechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *AzureChaos) error {
-						_, err := chaos.ValidateCreate()
+						_, err := chaos.ValidateCreate(context.Background(), nil)
 						return err
 					},
 					expect: "error",
