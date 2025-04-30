@@ -88,11 +88,14 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
             navigate('/experiments')
           })
           .catch((error) => {
-            const errorMsg = error?.response?.data?.message || error?.message
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Error submitting experiment:', error.response)
+            }
+
             dispatch(
               setAlert({
                 type: 'error',
-                message: errorMsg,
+                message: error.response.data.message,
               })
             )
           })
