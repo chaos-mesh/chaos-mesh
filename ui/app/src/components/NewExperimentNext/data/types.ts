@@ -399,6 +399,7 @@ const data: Record<Kind, Definition> = {
             value: [],
             helperText: 'the corresponding IP address, for example: google.com=1.2.3.4',
           },
+          containerNames,
         },
       },
     ],

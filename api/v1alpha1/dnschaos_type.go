@@ -63,7 +63,7 @@ var _ InnerObject = (*DNSChaos)(nil)
 // DNSChaosSpec defines the desired state of DNSChaos
 type DNSChaosSpec struct {
 	// Action defines the specific DNS chaos action.
-	// Supported action: error, random
+	// Supported action: error, random,static
 	// Default action: error
 	// +kubebuilder:validation:Enum=error;random;static
 	Action DNSChaosAction `json:"action"`
@@ -86,7 +86,8 @@ type DNSChaosSpec struct {
 	// RemoteCluster represents the remote cluster where the chaos will be deployed
 	// +optional
 	RemoteCluster string `json:"remoteCluster,omitempty"`
-
+	// DomainIpMappingList represents the domain ip mapping list
+	// +optional
 	DomainIpMappingList []string `json:"domainIpMapping,omitempty"`
 }
 
