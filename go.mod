@@ -323,5 +323,3 @@ replace (
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.28.12
 	k8s.io/sample-controller => k8s.io/sample-controller v0.28.12
 )
-
-replace github.com/chaos-mesh/k8s_dns_chaos => ./k8s_dns_chaos
