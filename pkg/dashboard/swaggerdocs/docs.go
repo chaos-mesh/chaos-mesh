@@ -5263,6 +5263,7 @@ const docTemplate = `{
                     }
                 },
                 "domainIpMapping": {
+                    "description": "DomainIpMappingList represents the domain ip mapping list\n+optional",
                     "type": "array",
                     "items": {
                         "type": "string"

@@ -3494,6 +3494,9 @@ definitions:
           type: string
         type: array
       domainIpMapping:
+        description: |-
+          DomainIpMappingList represents the domain ip mapping list
+          +optional
         items:
           type: string
         type: array
