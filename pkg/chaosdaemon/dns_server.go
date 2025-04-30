@@ -38,9 +38,6 @@ var ErrInvalidDNSServer = errors.New("invalid DNS server address")
 func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
 	log := s.getLoggerFromContext(ctx)
-	log.Info("========================")
-	log.Info("SetDNSServer", "request", req)
-	log.Info("========================")
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {

@@ -96,11 +96,6 @@ type DNSChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
-type DomainIP struct {
-	Domain string `json:"domain"`
-	IP     string `json:"ip"`
-}
-
 func (obj *DNSChaos) GetSelectorSpecs() map[string]interface{} {
 	return map[string]interface{}{
 		".": &obj.Spec.ContainerSelector,
