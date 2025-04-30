@@ -359,6 +359,8 @@ spec:
                             type: string
                           type: array
                         domainIpMapping:
+                          description: DomainIpMappingList represents the domain ip
+                            mapping list
                           items:
                             type: string
                           type: array
@@ -3385,6 +3387,8 @@ spec:
                                 type: string
                               type: array
                             domainIpMapping:
+                              description: DomainIpMappingList represents the domain
+                                ip mapping list
                               items:
                                 type: string
                               type: array
