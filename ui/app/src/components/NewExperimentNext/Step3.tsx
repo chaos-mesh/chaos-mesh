@@ -75,7 +75,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
         mutateAsync({
           data: parsedValues,
         })
-          .then(() => {
+          .then((response) => {
             dispatch(
               setAlert({
                 type: 'success',
