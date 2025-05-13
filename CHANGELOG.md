@@ -42,7 +42,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Security
 
-- Nothing
+- Upgrade all bullseye-slim to bookworm-slim
 
 ## [2.7.0] - 2024-09-20
 
