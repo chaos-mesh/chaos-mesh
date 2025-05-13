@@ -2,8 +2,6 @@ module github.com/chaos-mesh/chaos-mesh
 
 go 1.22.5
 
-toolchain go1.24.1
-
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/99designs/gqlgen v0.17.63
