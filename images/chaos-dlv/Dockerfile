@@ -1,10 +1,9 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.19 AS build-env
-ENV GO111MODULE on
+FROM golang:1.19-bookworm AS build-env
 RUN go install github.com/go-delve/delve/cmd/dlv@v1.9.1
 
-FROM debian:buster
+FROM debian:bookworm-slim
 
 RUN apt-get update && \
     apt-get install procps -y && \

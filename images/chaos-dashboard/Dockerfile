@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
@@ -9,7 +9,7 @@ ENV https_proxy $HTTPS_PROXY
 ARG UI
 ARG SWAGGER
 
-RUN apt-get update && \ 
+RUN apt-get update && \
     echo "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian bullseye-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
     apt --allow-releaseinfo-change update && apt upgrade  -y && \
