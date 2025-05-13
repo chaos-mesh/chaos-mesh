@@ -344,7 +344,7 @@ spec:
                         action:
                           description: |-
                             Action defines the specific DNS chaos action.
-                            Supported action: error, random
+                            Supported action: error, random,static
                             Default action: error
                           enum:
                           - error
@@ -3372,7 +3372,7 @@ spec:
                             action:
                               description: |-
                                 Action defines the specific DNS chaos action.
-                                Supported action: error, random
+                                Supported action: error, random,static
                                 Default action: error
                               enum:
                               - error

@@ -3481,7 +3481,7 @@ definitions:
       action:
         description: |-
           Action defines the specific DNS chaos action.
-          Supported action: error, random
+          Supported action: error, random,static
           Default action: error
           +kubebuilder:validation:Enum=error;random;static
         type: string

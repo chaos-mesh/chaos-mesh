@@ -5252,7 +5252,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "action": {
-                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random\nDefault action: error\n+kubebuilder:validation:Enum=error;random;static",
+                    "description": "Action defines the specific DNS chaos action.\nSupported action: error, random,static\nDefault action: error\n+kubebuilder:validation:Enum=error;random;static",
                     "type": "string"
                 },
                 "containerNames": {
