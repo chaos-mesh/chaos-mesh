@@ -35,7 +35,7 @@ RUN case "$TARGET_PLATFORM" in \
 
 
 # ---
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
