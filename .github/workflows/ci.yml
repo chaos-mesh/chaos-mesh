@@ -23,7 +23,7 @@ permissions: read-all
 jobs:
   # JOB to run change detection
   changes:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     # Set job outputs to values from filter step
     outputs:
       go: ${{ steps.filter.outputs.go }}
@@ -54,7 +54,7 @@ jobs:
           - verify
           - build
           - test
-    runs-on: ${{ fromJson('{"amd64":"ubuntu-20.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
+    runs-on: ${{ fromJson('{"amd64":"ubuntu-22.04", "arm64":"github-arm64-2c-8gb"}')[matrix.arch] }}
     steps:
       - uses: actions/checkout@v4
 
