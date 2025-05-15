@@ -26,6 +26,32 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
+- Nothing
+
+### Security
+
+- Nothing
+
+## [2.6.7] - 2025-05-15
+
+### Added
+
+- Nothing
+
+### Changed
+
+- Nothing
+
+### Deprecated
+
+- Nothing
+
+### Removed
+
+- Nothing
+
+### Fixed
+
 - Correct the processing of no-selector chaos experiments in the Dashboard UI [#4671](https://github.com/chaos-mesh/chaos-mesh/pull/4671)
 
 ### Security
