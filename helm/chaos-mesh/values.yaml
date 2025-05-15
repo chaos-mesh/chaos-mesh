@@ -48,7 +48,7 @@ images:
   # images.registry is the global container registry for the images, you could replace it with your self-hosted container registry.
   registry: "ghcr.io"
   # images.tag is the global image tag (for example, semiVer with prefix v, or latest).
-  tag: "v2.7.1"
+  tag: "v2.7.2"
 
 ## Optional array of imagePullSecrets containing private registry credentials
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
