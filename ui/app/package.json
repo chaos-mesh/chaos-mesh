@@ -28,7 +28,7 @@
     "@tanstack/react-query": "^4.28.0",
     "@ui/mui-extends": "workspace:*",
     "ace-builds": "^1.4.12",
-    "axios": "^0.24.0",
+    "axios": "^1.8.2",
     "clsx": "^1.1.1",
     "copy-text-to-clipboard": "^3.0.1",
     "cytoscape": "^3.18.1",
@@ -101,7 +101,7 @@
     "@types/uuid": "^8.3.4",
     "@types/yup": "^0.29.11",
     "cross-env": "^7.0.3",
-    "http-proxy-middleware": "^2.0.1",
+    "http-proxy-middleware": "^2.0.7",
     "msw": "^1.2.1",
     "redux-logger": "^3.0.6",
     "source-map-explorer": "^2.5.2"
