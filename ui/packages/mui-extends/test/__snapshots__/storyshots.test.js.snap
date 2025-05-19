@@ -478,7 +478,7 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
 >
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1rwxdiw-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1if130n-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -508,7 +508,7 @@ exports[`Storyshots Form/AutoCompleteField Default 1`] = `
         value=""
       />
       <div
-        className="MuiAutocomplete-endAdornment css-1q60rmi-MuiAutocomplete-endAdornment"
+        className="MuiAutocomplete-endAdornment css-p1olib-MuiAutocomplete-endAdornment"
       >
         <button
           aria-label="Open"
@@ -574,7 +574,7 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
   </label>
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1rwxdiw-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1if130n-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -604,7 +604,7 @@ exports[`Storyshots Form/AutoCompleteField Label And Helper Text 1`] = `
         value=""
       />
       <div
-        className="MuiAutocomplete-endAdornment css-1q60rmi-MuiAutocomplete-endAdornment"
+        className="MuiAutocomplete-endAdornment css-p1olib-MuiAutocomplete-endAdornment"
       >
         <button
           aria-label="Open"
@@ -675,7 +675,7 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
   </label>
   <div
     aria-owns={null}
-    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-1rwxdiw-MuiAutocomplete-root"
+    className="MuiAutocomplete-root MuiAutocomplete-hasPopupIcon css-uq1gw3-MuiAutocomplete-root"
     onClick={[Function]}
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -705,7 +705,7 @@ exports[`Storyshots Form/AutoCompleteField Multiple 1`] = `
         value=""
       />
       <div
-        className="MuiAutocomplete-endAdornment css-1q60rmi-MuiAutocomplete-endAdornment"
+        className="MuiAutocomplete-endAdornment css-p1olib-MuiAutocomplete-endAdornment"
       >
         <button
           aria-label="Open"
@@ -773,7 +773,7 @@ exports[`Storyshots Form/Checkbox Default 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -832,7 +832,7 @@ exports[`Storyshots Form/Checkbox Disabled 1`] = `
   >
     <span
       aria-disabled={true}
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-disabled MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall Mui-disabled PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall Mui-disabled MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -890,7 +890,7 @@ exports[`Storyshots Form/Checkbox With Validation Error 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd Mui-error css-wuturk-MuiFormControlLabel-root"
   >
     <span
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall Mui-checked MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -949,7 +949,7 @@ exports[`Storyshots Form/Checkbox Without Helper Text 1`] = `
     className="MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-wuturk-MuiFormControlLabel-root"
   >
     <span
-      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary Mui-checked MuiCheckbox-root MuiCheckbox-colorPrimary css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
+      className="MuiButtonBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall PrivateSwitchBase-root MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall Mui-checked MuiCheckbox-root MuiCheckbox-colorPrimary MuiCheckbox-sizeSmall css-15wgggf-MuiButtonBase-root-MuiCheckbox-root"
       onBlur={[Function]}
       onContextMenu={[Function]}
       onDragLeave={[Function]}
@@ -1011,7 +1011,7 @@ exports[`Storyshots Form/SelectField Default 1`] = `
       onFocus={[Function]}
       onKeyDown={[Function]}
       onMouseDown={[Function]}
-      role="button"
+      role="combobox"
       tabIndex={0}
     >
       <span
@@ -1022,6 +1022,7 @@ exports[`Storyshots Form/SelectField Default 1`] = `
     </div>
     <input
       aria-hidden={true}
+      aria-invalid={false}
       className="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
       disabled={false}
       onAnimationStart={[Function]}
@@ -1081,7 +1082,7 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
       onFocus={[Function]}
       onKeyDown={[Function]}
       onMouseDown={null}
-      role="button"
+      role="combobox"
       tabIndex={null}
     >
       <span
@@ -1092,6 +1093,7 @@ exports[`Storyshots Form/SelectField Disabled 1`] = `
     </div>
     <input
       aria-hidden={true}
+      aria-invalid={false}
       className="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
       disabled={true}
       onAnimationStart={[Function]}
@@ -1150,12 +1152,12 @@ exports[`Storyshots Form/SelectField Error 1`] = `
     <div
       aria-expanded="false"
       aria-haspopup="listbox"
-      className="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
+      className="MuiSelect-select MuiSelect-outlined Mui-error MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
       onBlur={[Function]}
       onFocus={[Function]}
       onKeyDown={[Function]}
       onMouseDown={[Function]}
-      role="button"
+      role="combobox"
       tabIndex={0}
     >
       <span
@@ -1166,6 +1168,7 @@ exports[`Storyshots Form/SelectField Error 1`] = `
     </div>
     <input
       aria-hidden={true}
+      aria-invalid={true}
       className="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
       disabled={false}
       onAnimationStart={[Function]}
@@ -1229,7 +1232,7 @@ exports[`Storyshots Form/SelectField Label And Helper Text 1`] = `
       onFocus={[Function]}
       onKeyDown={[Function]}
       onMouseDown={[Function]}
-      role="button"
+      role="combobox"
       tabIndex={0}
     >
       <span
@@ -1240,6 +1243,7 @@ exports[`Storyshots Form/SelectField Label And Helper Text 1`] = `
     </div>
     <input
       aria-hidden={true}
+      aria-invalid={false}
       className="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
       disabled={false}
       onAnimationStart={[Function]}
@@ -1418,7 +1422,7 @@ exports[`Storyshots Form/TextField Error 1`] = `
 
 exports[`Storyshots Form/TextField Group 1`] = `
 <div
-  className="MuiStack-root css-b55nah-MuiStack-root"
+  className="MuiStack-root css-10kbc59-MuiStack-root"
 >
   <div
     className="MuiFormControl-root css-1nrlq1o-MuiFormControl-root"
@@ -1537,7 +1541,7 @@ exports[`Storyshots Form/TextField Has Input Adornment 1`] = `
         viewBox="0 0 24 24"
       >
         <path
-          d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+          d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"
         />
       </svg>
     </div>
@@ -1563,7 +1567,7 @@ exports[`Storyshots Form/TextField Has Input Adornment 1`] = `
         viewBox="0 0 24 24"
       >
         <path
-          d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"
+          d="M11 18h2v-2h-2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4"
         />
       </svg>
     </div>
