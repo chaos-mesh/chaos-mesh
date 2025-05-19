@@ -4083,8 +4083,8 @@ definitions:
         type: string
       class:
         description: |-
-          +optional
           Java class
+          +optional
         type: string
       containerNames:
         description: |-
@@ -4096,8 +4096,8 @@ definitions:
         type: array
       cpuCount:
         description: |-
-          +optional
           the CPU core number needs to use, only set it when action is stress
+          +optional
         type: integer
       database:
         description: |-
@@ -4111,25 +4111,25 @@ definitions:
         type: string
       exception:
         description: |-
-          +optional
           the exception which needs to throw for action `exception`
           or the exception message needs to throw in action `mysql`
+          +optional
         type: string
       latency:
         description: |-
-          +optional
           the latency duration for action 'latency', unit ms
           or the latency duration in action `mysql`
+          +optional
         type: integer
       memType:
         description: |-
-          +optional
           the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
+          +optional
         type: string
       method:
         description: |-
-          +optional
           the method in Java class
+          +optional
         type: string
       mode:
         description: |-
@@ -4143,16 +4143,16 @@ definitions:
         type: string
       name:
         description: |-
-          +optional
           byteman rule name, should be unique, and will generate one if not set
+          +optional
         type: string
       pid:
         description: the pid of Java process which needs to attach
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
       remoteCluster:
         description: |-
@@ -4161,13 +4161,13 @@ definitions:
         type: string
       returnValue:
         description: |-
-          +optional
           the return value for action 'return'
+          +optional
         type: string
       ruleData:
         description: |-
-          +optional
           the byteman rule's data for action 'ruleData'
+          +optional
         type: string
       selector:
         $ref: '#/definitions/v1alpha1.PodSelectorSpec'
@@ -4197,24 +4197,24 @@ definitions:
     properties:
       class:
         description: |-
-          +optional
           Java class
+          +optional
         type: string
       exception:
         description: the exception which needs to throw for action `exception`
         type: string
       method:
         description: |-
-          +optional
           the method in Java class
+          +optional
         type: string
       pid:
         description: the pid of Java process which needs to attach
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
     type: object
   v1alpha1.JVMGCSpec:
@@ -4224,53 +4224,53 @@ definitions:
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
     type: object
   v1alpha1.JVMLatencySpec:
     properties:
       class:
         description: |-
-          +optional
           Java class
+          +optional
         type: string
       latency:
         description: the latency duration for action 'latency', unit ms
         type: integer
       method:
         description: |-
-          +optional
           the method in Java class
+          +optional
         type: string
       pid:
         description: the pid of Java process which needs to attach
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
     type: object
   v1alpha1.JVMReturnSpec:
     properties:
       class:
         description: |-
-          +optional
           Java class
+          +optional
         type: string
       method:
         description: |-
-          +optional
           the method in Java class
+          +optional
         type: string
       pid:
         description: the pid of Java process which needs to attach
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
       value:
         description: the return value for action 'return'
@@ -4283,8 +4283,8 @@ definitions:
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
       rule-data:
         description: RuleData used to save the rule file's data, will use it when
@@ -4305,8 +4305,8 @@ definitions:
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
     type: object
   v1alpha1.KafkaFillSpec:
@@ -4569,7 +4569,7 @@ definitions:
         $ref: '#/definitions/v1alpha1.RateSpec'
         description: |-
           Rate represents the detail about rate control action
-          +ui:form:when=action=='rate'
+          +ui:form:ignore
           +optional
       remoteCluster:
         description: |-
@@ -4827,8 +4827,8 @@ definitions:
         type: integer
       port:
         description: |-
-          +optional
           the port of agent server, default 9277
+          +optional
         type: integer
       sqlType:
         description: |-
@@ -5110,6 +5110,15 @@ definitions:
           A selector based on annotations.
           +optional
         type: object
+      expressionSelectors:
+        description: |-
+          a slice of label selector expressions that can be used to select objects.
+          A list of selectors based on set-based label expressions.
+          +ui:form:ignore
+          +optional
+        items:
+          $ref: '#/definitions/v1.LabelSelectorRequirement'
+        type: array
       fieldSelectors:
         additionalProperties:
           type: string
@@ -5335,6 +5344,15 @@ definitions:
           A selector based on annotations.
           +optional
         type: object
+      expressionSelectors:
+        description: |-
+          a slice of label selector expressions that can be used to select objects.
+          A list of selectors based on set-based label expressions.
+          +ui:form:ignore
+          +optional
+        items:
+          $ref: '#/definitions/v1.LabelSelectorRequirement'
+        type: array
       fieldSelectors:
         additionalProperties:
           type: string

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Chaos Mesh Dashboard API
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
- * OpenAPI spec version: 2.2
+ * OpenAPI spec version: 2.5
  */
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type {
@@ -94,7 +94,7 @@ export const useDeleteArchives = <TError = UtilsAPIError, TContext = unknown>(op
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchives>>, { params: DeleteArchivesParams }> = (
-    props
+    props,
   ) => {
     const { params } = props ?? {}
 
@@ -103,7 +103,7 @@ export const useDeleteArchives = <TError = UtilsAPIError, TContext = unknown>(op
 
   return useMutation<Awaited<ReturnType<typeof deleteArchives>>, TError, { params: DeleteArchivesParams }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -122,7 +122,7 @@ export type GetArchivesQueryError = UtilsAPIError
 
 export const useGetArchives = <TData = Awaited<ReturnType<typeof getArchives>>, TError = UtilsAPIError>(
   params?: GetArchivesParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchives>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -168,7 +168,7 @@ export const useDeleteArchivesUid = <TError = UtilsAPIError, TContext = unknown>
 
   return useMutation<Awaited<ReturnType<typeof deleteArchivesUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -187,7 +187,7 @@ export type GetArchivesUidQueryError = UtilsAPIError
 
 export const useGetArchivesUid = <TData = Awaited<ReturnType<typeof getArchivesUid>>, TError = UtilsAPIError>(
   uid: string,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -266,10 +266,10 @@ export type GetArchivesSchedulesQueryError = UtilsAPIError
 
 export const useGetArchivesSchedules = <
   TData = Awaited<ReturnType<typeof getArchivesSchedules>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesSchedulesParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedules>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -316,7 +316,7 @@ export const useDeleteArchivesSchedulesUid = <TError = UtilsAPIError, TContext =
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, { uid: string }> = (
-    props
+    props,
   ) => {
     const { uid } = props ?? {}
 
@@ -325,7 +325,7 @@ export const useDeleteArchivesSchedulesUid = <TError = UtilsAPIError, TContext =
 
   return useMutation<Awaited<ReturnType<typeof deleteArchivesSchedulesUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -344,10 +344,10 @@ export type GetArchivesSchedulesUidQueryError = UtilsAPIError
 
 export const useGetArchivesSchedulesUid = <
   TData = Awaited<ReturnType<typeof getArchivesSchedulesUid>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   uid: string,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesSchedulesUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -427,10 +427,10 @@ export type GetArchivesWorkflowsQueryError = UtilsAPIError
 
 export const useGetArchivesWorkflows = <
   TData = Awaited<ReturnType<typeof getArchivesWorkflows>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params?: GetArchivesWorkflowsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflows>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -477,7 +477,7 @@ export const useDeleteArchivesWorkflowsUid = <TError = UtilsAPIError, TContext =
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, { uid: string }> = (
-    props
+    props,
   ) => {
     const { uid } = props ?? {}
 
@@ -486,7 +486,7 @@ export const useDeleteArchivesWorkflowsUid = <TError = UtilsAPIError, TContext =
 
   return useMutation<Awaited<ReturnType<typeof deleteArchivesWorkflowsUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -505,10 +505,10 @@ export type GetArchivesWorkflowsUidQueryError = UtilsAPIError
 
 export const useGetArchivesWorkflowsUid = <
   TData = Awaited<ReturnType<typeof getArchivesWorkflowsUid>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   uid: string,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getArchivesWorkflowsUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -549,10 +549,10 @@ export type GetCommonAnnotationsQueryError = UtilsAPIError
 
 export const useGetCommonAnnotations = <
   TData = Awaited<ReturnType<typeof getCommonAnnotations>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params: GetCommonAnnotationsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonAnnotations>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -591,7 +591,7 @@ export type GetCommonChaosAvailableNamespacesQueryError = UtilsAPIError
 
 export const useGetCommonChaosAvailableNamespaces = <
   TData = Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonChaosAvailableNamespaces>>, TError, TData>
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -630,7 +630,7 @@ export type GetCommonConfigQueryError = UtilsAPIError
 
 export const useGetCommonConfig = <
   TData = Awaited<ReturnType<typeof getCommonConfig>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonConfig>>, TError, TData>
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -668,7 +668,7 @@ export type GetCommonKindsQueryError = UtilsAPIError
 
 export const useGetCommonKinds = <
   TData = Awaited<ReturnType<typeof getCommonKinds>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonKinds>>, TError, TData>
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -709,7 +709,7 @@ export type GetCommonLabelsQueryError = UtilsAPIError
 
 export const useGetCommonLabels = <TData = Awaited<ReturnType<typeof getCommonLabels>>, TError = UtilsAPIError>(
   params: GetCommonLabelsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonLabels>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -747,7 +747,7 @@ export type GetCommonNamespacesQueryError = UtilsAPIError
 
 export const useGetCommonNamespaces = <
   TData = Awaited<ReturnType<typeof getCommonNamespaces>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(options?: {
   query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonNamespaces>>, TError, TData>
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -777,7 +777,7 @@ export const useGetCommonNamespaces = <
  */
 export const getCommonPhysicalmachineAnnotations = (
   params: GetCommonPhysicalmachineAnnotationsParams,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ) => {
   return customInstance<UtilsMapStringSliceResponse>({
     url: `/common/physicalmachine-annotations`,
@@ -799,10 +799,10 @@ export type GetCommonPhysicalmachineAnnotationsQueryError = UtilsAPIError
 
 export const useGetCommonPhysicalmachineAnnotations = <
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineAnnotationsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineAnnotations>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -849,10 +849,10 @@ export type GetCommonPhysicalmachineLabelsQueryError = UtilsAPIError
 
 export const useGetCommonPhysicalmachineLabels = <
   TData = Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params: GetCommonPhysicalmachineLabelsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonPhysicalmachineLabels>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -879,7 +879,7 @@ export const useGetCommonPhysicalmachineLabels = <
  * @summary Get physicalMachines from Kubernetes cluster.
  */
 export const postCommonPhysicalmachines = (
-  v1alpha1PhysicalMachineSelectorSpec: V1alpha1PhysicalMachineSelectorSpec
+  v1alpha1PhysicalMachineSelectorSpec: V1alpha1PhysicalMachineSelectorSpec,
 ) => {
   return customInstance<TypesPhysicalMachine[]>({
     url: `/common/physicalmachines`,
@@ -950,7 +950,7 @@ export const usePostCommonPods = <TError = UtilsAPIError, TContext = unknown>(op
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof postCommonPods>>, { data: V1alpha1PodSelectorSpec }> = (
-    props
+    props,
   ) => {
     const { data } = props ?? {}
 
@@ -959,7 +959,7 @@ export const usePostCommonPods = <TError = UtilsAPIError, TContext = unknown>(op
 
   return useMutation<Awaited<ReturnType<typeof postCommonPods>>, TError, { data: V1alpha1PodSelectorSpec }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -981,7 +981,7 @@ export type GetCommonRbacConfigQueryError = UtilsAPIError
 
 export const useGetCommonRbacConfig = <TData = Awaited<ReturnType<typeof getCommonRbacConfig>>, TError = UtilsAPIError>(
   params?: GetCommonRbacConfigParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getCommonRbacConfig>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1018,7 +1018,7 @@ export type GetEventsQueryError = UtilsAPIError
 
 export const useGetEvents = <TData = Awaited<ReturnType<typeof getEvents>>, TError = UtilsAPIError>(
   params?: GetEventsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getEvents>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1054,7 +1054,7 @@ export type GetEventsIdQueryError = UtilsAPIError
 
 export const useGetEventsId = <TData = Awaited<ReturnType<typeof getEventsId>>, TError = UtilsAPIError>(
   id: number,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getEventsId>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1094,11 +1094,11 @@ export type GetEventsWorkflowUidQueryError = UtilsAPIError
 
 export const useGetEventsWorkflowUid = <
   TData = Awaited<ReturnType<typeof getEventsWorkflowUid>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   uid: string,
   params?: GetEventsWorkflowUidParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getEventsWorkflowUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1178,7 +1178,7 @@ export type GetExperimentsQueryError = UtilsAPIError
 
 export const useGetExperiments = <TData = Awaited<ReturnType<typeof getExperiments>>, TError = UtilsAPIError>(
   params?: GetExperimentsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getExperiments>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1228,7 +1228,7 @@ export const usePostExperiments = <TError = UtilsAPIError, TContext = unknown>(o
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof postExperiments>>, { data: PostExperimentsBody }> = (
-    props
+    props,
   ) => {
     const { data } = props ?? {}
 
@@ -1237,7 +1237,7 @@ export const usePostExperiments = <TError = UtilsAPIError, TContext = unknown>(o
 
   return useMutation<Awaited<ReturnType<typeof postExperiments>>, TError, { data: PostExperimentsBody }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1295,7 +1295,7 @@ export type GetExperimentsUidQueryError = UtilsAPIError
 
 export const useGetExperimentsUid = <TData = Awaited<ReturnType<typeof getExperimentsUid>>, TError = UtilsAPIError>(
   uid: string,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getExperimentsUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1343,7 +1343,7 @@ export const usePutExperimentsPauseUid = <TError = UtilsAPIError, TContext = unk
 
   return useMutation<Awaited<ReturnType<typeof putExperimentsPauseUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1372,7 +1372,7 @@ export const usePutExperimentsStartUid = <TError = UtilsAPIError, TContext = unk
 
   return useMutation<Awaited<ReturnType<typeof putExperimentsStartUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1394,7 +1394,7 @@ export type GetExperimentsStateQueryError = UtilsAPIError
 
 export const useGetExperimentsState = <TData = Awaited<ReturnType<typeof getExperimentsState>>, TError = UtilsAPIError>(
   params?: GetExperimentsStateParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getExperimentsState>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1439,7 +1439,7 @@ export const useDeleteSchedules = <TError = UtilsAPIError, TContext = unknown>(o
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSchedules>>, { params: DeleteSchedulesParams }> = (
-    props
+    props,
   ) => {
     const { params } = props ?? {}
 
@@ -1448,7 +1448,7 @@ export const useDeleteSchedules = <TError = UtilsAPIError, TContext = unknown>(o
 
   return useMutation<Awaited<ReturnType<typeof deleteSchedules>>, TError, { params: DeleteSchedulesParams }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1467,7 +1467,7 @@ export type GetSchedulesQueryError = UtilsAPIError
 
 export const useGetSchedules = <TData = Awaited<ReturnType<typeof getSchedules>>, TError = UtilsAPIError>(
   params?: GetSchedulesParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getSchedules>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1511,7 +1511,7 @@ export const usePostSchedules = <TError = UtilsAPIError, TContext = unknown>(opt
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSchedules>>, { data: V1alpha1Schedule }> = (
-    props
+    props,
   ) => {
     const { data } = props ?? {}
 
@@ -1520,7 +1520,7 @@ export const usePostSchedules = <TError = UtilsAPIError, TContext = unknown>(opt
 
   return useMutation<Awaited<ReturnType<typeof postSchedules>>, TError, { data: V1alpha1Schedule }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1549,7 +1549,7 @@ export const useDeleteSchedulesUid = <TError = UtilsAPIError, TContext = unknown
 
   return useMutation<Awaited<ReturnType<typeof deleteSchedulesUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1568,7 +1568,7 @@ export type GetSchedulesUidQueryError = UtilsAPIError
 
 export const useGetSchedulesUid = <TData = Awaited<ReturnType<typeof getSchedulesUid>>, TError = UtilsAPIError>(
   uid: string,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getSchedulesUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1616,7 +1616,7 @@ export const usePutSchedulesPauseUid = <TError = UtilsAPIError, TContext = unkno
 
   return useMutation<Awaited<ReturnType<typeof putSchedulesPauseUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1645,7 +1645,7 @@ export const usePutSchedulesStartUid = <TError = UtilsAPIError, TContext = unkno
 
   return useMutation<Awaited<ReturnType<typeof putSchedulesStartUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1672,10 +1672,10 @@ export type GetTemplatesStatuschecksQueryError = UtilsAPIError
 
 export const useGetTemplatesStatuschecks = <
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecks>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params?: GetTemplatesStatuschecksParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecks>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1788,7 +1788,7 @@ export const useDeleteTemplatesStatuschecksStatuscheck = <TError = UtilsAPIError
  */
 export const getTemplatesStatuschecksStatuscheck = (
   params: GetTemplatesStatuschecksStatuscheckParams,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ) => {
   return customInstance<TypesStatusCheckTemplateDetail>({
     url: `/templates/statuschecks/statuscheck`,
@@ -1810,10 +1810,10 @@ export type GetTemplatesStatuschecksStatuscheckQueryError = UtilsAPIError
 
 export const useGetTemplatesStatuschecksStatuscheck = <
   TData = Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>,
-  TError = UtilsAPIError
+  TError = UtilsAPIError,
 >(
   params: GetTemplatesStatuschecksStatuscheckParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getTemplatesStatuschecksStatuscheck>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1896,7 +1896,7 @@ export type GetWorkflowsQueryError = UtilsAPIError
 
 export const useGetWorkflows = <TData = Awaited<ReturnType<typeof getWorkflows>>, TError = UtilsAPIError>(
   params?: GetWorkflowsParams,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getWorkflows>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
@@ -1945,7 +1945,7 @@ export const usePostWorkflows = <TError = UtilsAPIError, TContext = unknown>(opt
   const { mutation: mutationOptions } = options ?? {}
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWorkflows>>, { data: V1alpha1WorkflowBody }> = (
-    props
+    props,
   ) => {
     const { data } = props ?? {}
 
@@ -1954,7 +1954,7 @@ export const usePostWorkflows = <TError = UtilsAPIError, TContext = unknown>(opt
 
   return useMutation<Awaited<ReturnType<typeof postWorkflows>>, TError, { data: V1alpha1WorkflowBody }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -1983,7 +1983,7 @@ export const useDeleteWorkflowsUid = <TError = UtilsAPIError, TContext = unknown
 
   return useMutation<Awaited<ReturnType<typeof deleteWorkflowsUid>>, TError, { uid: string }, TContext>(
     mutationFn,
-    mutationOptions
+    mutationOptions,
   )
 }
 
@@ -2002,7 +2002,7 @@ export type GetWorkflowsUidQueryError = UtilsAPIError
 
 export const useGetWorkflowsUid = <TData = Awaited<ReturnType<typeof getWorkflowsUid>>, TError = UtilsAPIError>(
   uid: string,
-  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData> }
+  options?: { query?: UseQueryOptions<Awaited<ReturnType<typeof getWorkflowsUid>>, TError, TData> },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
   const { query: queryOptions } = options ?? {}
 
