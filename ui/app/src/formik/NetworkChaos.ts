@@ -39,7 +39,8 @@ export const actions = ['netem', 'delay', 'loss', 'duplicate', 'corrupt', 'parti
           field: 'text',
           label: 'rate',
           value: '',
-          helperText: 'Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.',
+          helperText:
+            'Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.',
         },
       ],
       when: "action=='bandwidth'",
