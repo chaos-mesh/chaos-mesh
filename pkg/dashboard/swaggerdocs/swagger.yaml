@@ -4177,7 +4177,9 @@ definitions:
           default value is "", means match all table
         type: string
       value:
-        description: the return value for action 'return'
+        description: |-
+          the return value for action 'return'
+          +optional
         type: string
     type: object
   v1alpha1.JVMExceptionSpec:

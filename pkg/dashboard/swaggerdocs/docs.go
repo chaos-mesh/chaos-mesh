@@ -5902,7 +5902,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "value": {
-                    "description": "the return value for action 'return'",
+                    "description": "the return value for action 'return'\n+optional",
                     "type": "string"
                 }
             }
