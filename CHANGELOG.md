@@ -25,7 +25,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Deprecated
 
-- Nothing
+- Remove schedule migration
 
 ### Removed
 
