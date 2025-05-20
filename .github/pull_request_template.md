@@ -11,7 +11,7 @@
 > Please replace this with a brief description of the problem this PR solves.
 > You can also close #issue_number if this PR solves the issue.
 
-## What's changed and how it works?
+## What's changed and how does it work?
 
 > [!TIP]
 > Please replace this with a brief description of the changes and how it works.

@@ -26,7 +26,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 ### Fixed
 
-- Nothing
+- Re-add the `ExpressionSelectors` to the OpenAPI spec [#4683](https://github.com/chaos-mesh/chaos-mesh/pull/4683)
 
 ### Security
 

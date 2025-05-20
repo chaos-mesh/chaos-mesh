@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Chaos Mesh Dashboard API
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
- * OpenAPI spec version: 2.2
+ * OpenAPI spec version: 2.5
  */
 import { faker } from '@faker-js/faker'
 import { rest } from 'msw'
@@ -29,10 +29,10 @@ export const getGetArchivesUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9ic0000v5difx71h6sk: faker.random.word(),
+        cmauzgw7a00005kt6g9z9h0d6: faker.random.word(),
       },
       labels: {
-        clfp8d9ic0001v5di1qpecewp: faker.random.word(),
+        cmauzgw7a00015kt6adbw1fry: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -65,10 +65,10 @@ export const getGetArchivesSchedulesUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9ij0002v5di52aze8xy: faker.random.word(),
+        cmauzgw7i00025kt6g2gdhttb: faker.random.word(),
       },
       labels: {
-        clfp8d9ij0003v5diaz3ea0yz: faker.random.word(),
+        cmauzgw7i00035kt64nsq8u08: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -101,10 +101,10 @@ export const getGetArchivesWorkflowsUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9ip0004v5di8qc61pfn: faker.random.word(),
+        cmauzgw7n00045kt6bm4ocg4i: faker.random.word(),
       },
       labels: {
-        clfp8d9ip0005v5di2vr17qsf: faker.random.word(),
+        cmauzgw7n00055kt6cii4eplf: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -117,8 +117,8 @@ export const getGetArchivesWorkflowsUidMock = () => ({
 })
 
 export const getGetCommonAnnotationsMock = () => ({
-  clfp8d9iq0006v5dicd5u41dp: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => faker.random.word()
+  cmauzgw7o00065kt6ggie6fcl: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.random.word(),
   ),
 })
 
@@ -126,15 +126,12 @@ export const getGetCommonChaosAvailableNamespacesMock = () =>
   Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, () => faker.random.word())
 
 export const getGetCommonConfigMock = () => ({
-  burst: faker.datatype.number({ min: undefined, max: undefined }),
   cluster_mode: faker.datatype.boolean(),
   dns_server_create: faker.datatype.boolean(),
   enableFilterNamespace: faker.datatype.boolean(),
-  enableProfiling: faker.datatype.boolean(),
   gcp_security_mode: faker.datatype.boolean(),
   listen_host: faker.random.word(),
   listen_port: faker.datatype.number({ min: undefined, max: undefined }),
-  qps: faker.datatype.number({ min: undefined, max: undefined }),
   root_path: faker.random.word(),
   security_mode: faker.datatype.boolean(),
   target_namespace: faker.random.word(),
@@ -145,8 +142,8 @@ export const getGetCommonKindsMock = () =>
   Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, () => faker.random.word())
 
 export const getGetCommonLabelsMock = () => ({
-  clfp8d9iu0007v5di75ez04ik: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => faker.random.word()
+  cmauzgw7s00075kt6etac2zo4: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.random.word(),
   ),
 })
 
@@ -154,14 +151,14 @@ export const getGetCommonNamespacesMock = () =>
   Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, () => faker.random.word())
 
 export const getGetCommonPhysicalmachineAnnotationsMock = () => ({
-  clfp8d9iw0008v5di4nm7f7po: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => faker.random.word()
+  cmauzgw7u00085kt65ry6acp3: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.random.word(),
   ),
 })
 
 export const getGetCommonPhysicalmachineLabelsMock = () => ({
-  clfp8d9ix0009v5di6gu09nh2: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-    () => faker.random.word()
+  cmauzgw7v00095kt6a9f6619x: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+    () => faker.random.word(),
   ),
 })
 
@@ -181,7 +178,7 @@ export const getPostCommonPodsMock = () =>
   }))
 
 export const getGetCommonRbacConfigMock = () => ({
-  clfp8d9j0000av5di9cbxbimk: faker.random.word(),
+  cmauzgw7y000a5kt6er2bbieo: faker.random.word(),
 })
 
 export const getGetEventsMock = () =>
@@ -248,10 +245,10 @@ export const getGetExperimentsUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9j5000bv5diaxnh4d8y: faker.random.word(),
+        cmauzgw82000b5kt6hwsfg3vj: faker.random.word(),
       },
       labels: {
-        clfp8d9j5000cv5digyqv64qk: faker.random.word(),
+        cmauzgw82000c5kt66omad4to: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -290,20 +287,20 @@ export const getGetSchedulesMock = () =>
 
 export const getPostSchedulesMock = () => ({
   annotations: {
-    clfp8d9j8000dv5di3r462nhf: faker.random.word(),
+    cmauzgw86000d5kt60iqtci18: faker.random.word(),
   },
   apiVersion: faker.random.word(),
   creationTimestamp: faker.random.word(),
   deletionGracePeriodSeconds: faker.datatype.number({ min: undefined, max: undefined }),
   deletionTimestamp: faker.random.word(),
   finalizers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-    faker.random.word()
+    faker.random.word(),
   ),
   generateName: faker.random.word(),
   generation: faker.datatype.number({ min: undefined, max: undefined }),
   kind: faker.random.word(),
   labels: {
-    clfp8d9j9000ev5di4hwq5gga: faker.random.word(),
+    cmauzgw86000e5kt69pok27am: faker.random.word(),
   },
   managedFields: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     apiVersion: faker.random.word(),
@@ -352,7 +349,7 @@ export const getPostSchedulesMock = () => ({
     blockChaos: {
       action: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       delay: { correlation: faker.random.word(), jitter: faker.random.word(), latency: faker.random.word() },
       duration: faker.random.word(),
@@ -360,30 +357,39 @@ export const getPostSchedulesMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9j9000fv5di2b9tggja: faker.random.word(),
+          cmauzgw86000f5kt6c9y2fmv7: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9j9000gv5di86zk7inc: faker.random.word(),
+          cmauzgw86000g5kt6cls95k1a: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9j9000hv5dic6g0gz63: faker.random.word(),
+          cmauzgw86000h5kt6fku26jor: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9j9000iv5di6o26cvtm: faker.random.word(),
+          cmauzgw86000i5kt68kwl7p32: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9j9000jv5diblvo8sa4: Array.from(
+          cmauzgw86000j5kt63xyf15a0: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -394,40 +400,49 @@ export const getPostSchedulesMock = () => ({
     dnsChaos: {
       action: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       mode: faker.random.word(),
       patterns: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9j9000kv5di955t1d6j: faker.random.word(),
+          cmauzgw86000k5kt62w9qgyn7: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9j9000lv5di3v0v374z: faker.random.word(),
+          cmauzgw86000l5kt6e6ej3z7z: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9j9000mv5didk4q59ol: faker.random.word(),
+          cmauzgw86000m5kt6agblh97s: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9j9000nv5di4kg38a86: faker.random.word(),
+          cmauzgw86000n5kt6a2i908f1: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9j9000ov5di3qlx6reh: Array.from(
+          cmauzgw86000o5kt6d298efey: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -436,7 +451,7 @@ export const getPostSchedulesMock = () => ({
     gcpChaos: {
       action: faker.random.word(),
       deviceNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       instance: faker.random.word(),
@@ -457,13 +472,13 @@ export const getPostSchedulesMock = () => ({
         body: { type: faker.random.word(), value: faker.random.word() },
         headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
-          )
+            faker.random.word(),
+          ),
         ),
         queries: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
-          )
+            faker.random.word(),
+          ),
         ),
       },
       path: faker.random.word(),
@@ -471,50 +486,59 @@ export const getPostSchedulesMock = () => ({
       remoteCluster: faker.random.word(),
       replace: {
         body: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.datatype.number({ min: undefined, max: undefined })
+          faker.datatype.number({ min: undefined, max: undefined }),
         ),
         code: faker.datatype.number({ min: undefined, max: undefined }),
         headers: {
-          clfp8d9j9000pv5di2r13gnr0: faker.random.word(),
+          cmauzgw86000p5kt6hva602kl: faker.random.word(),
         },
         method: faker.random.word(),
         path: faker.random.word(),
         queries: {
-          clfp8d9j9000qv5di01wm5c1v: faker.random.word(),
+          cmauzgw86000q5kt6fi1sh1yg: faker.random.word(),
         },
       },
       request_headers: {
-        clfp8d9j9000rv5die4b6h53b: faker.random.word(),
+        cmauzgw86000r5kt66kn1bg3g: faker.random.word(),
       },
       response_headers: {
-        clfp8d9j9000sv5dibxr865x9: faker.random.word(),
+        cmauzgw86000s5kt6dr70d5ap: faker.random.word(),
       },
       selector: {
         annotationSelectors: {
-          clfp8d9j9000tv5di65bc7uc5: faker.random.word(),
+          cmauzgw86000t5kt62xup166e: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9j9000uv5dih8wo6io2: faker.random.word(),
+          cmauzgw86000u5kt6ha4e90d6: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9j9000vv5di5azn1bv3: faker.random.word(),
+          cmauzgw86000v5kt670o07ki3: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9j9000wv5di1urx2s4m: faker.random.word(),
+          cmauzgw86000w5kt6gz082tw3: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9j9000xv5di3hp47pdc: Array.from(
+          cmauzgw86000x5kt6bpwzdrpx: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -554,13 +578,13 @@ export const getPostSchedulesMock = () => ({
         uid: faker.datatype.number({ min: undefined, max: undefined }),
       },
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       delay: faker.random.word(),
       duration: faker.random.word(),
       errno: faker.datatype.number({ min: undefined, max: undefined }),
       methods: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       mistake: {
         filling: faker.random.word(),
@@ -573,30 +597,39 @@ export const getPostSchedulesMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9ja000yv5di5ina9m3z: faker.random.word(),
+          cmauzgw86000y5kt67022efsm: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9ja000zv5dig3lg8oxv: faker.random.word(),
+          cmauzgw87000z5kt63hbt3i2n: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9ja0010v5diam1847ud: faker.random.word(),
+          cmauzgw8700105kt60x8ihjjo: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9ja0011v5di298t3ucp: faker.random.word(),
+          cmauzgw8700115kt67uycdvbs: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9ja0012v5dih825cbo9: Array.from(
+          cmauzgw8700125kt65fu765y5: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -607,7 +640,7 @@ export const getPostSchedulesMock = () => ({
       action: faker.random.word(),
       class: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       cpuCount: faker.datatype.number({ min: undefined, max: undefined }),
       database: faker.random.word(),
@@ -622,33 +655,43 @@ export const getPostSchedulesMock = () => ({
       pid: faker.datatype.number({ min: undefined, max: undefined }),
       port: faker.datatype.number({ min: undefined, max: undefined }),
       remoteCluster: faker.random.word(),
+      returnValue: faker.random.word(),
       ruleData: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9ja0013v5dibydk8ieq: faker.random.word(),
+          cmauzgw8700135kt66v6q1mr9: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9ja0014v5di9wab7et4: faker.random.word(),
+          cmauzgw8700145kt6ehxreqy1: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9ja0015v5di4w1h9137: faker.random.word(),
+          cmauzgw8700155kt62hxb4aoe: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9ja0016v5di1ijhalvl: faker.random.word(),
+          cmauzgw8700165kt6cqegdidv: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9ja0017v5dif4sx8oq3: Array.from(
+          cmauzgw8700175kt62wthdslm: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -658,7 +701,7 @@ export const getPostSchedulesMock = () => ({
     },
     kernelChaos: {
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       failKernRequest: {
@@ -669,7 +712,7 @@ export const getPostSchedulesMock = () => ({
         })),
         failtype: faker.datatype.number({ min: undefined, max: undefined }),
         headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         probability: faker.datatype.number({ min: undefined, max: undefined }),
         times: faker.datatype.number({ min: undefined, max: undefined }),
@@ -678,30 +721,39 @@ export const getPostSchedulesMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9ja0018v5di8ifg11d4: faker.random.word(),
+          cmauzgw8700185kt60gwh8csf: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9ja0019v5dihknx1x25: faker.random.word(),
+          cmauzgw8700195kt6hg6z24f4: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9ja001av5di4fh53kbo: faker.random.word(),
+          cmauzgw87001a5kt62lgveax4: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9ja001bv5dihq2pe4i7: faker.random.word(),
+          cmauzgw87001b5kt6giyeeht8: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9ja001cv5difw4sef7u: Array.from(
+          cmauzgw87001c5kt6h1kd0cx3: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -732,37 +784,47 @@ export const getPostSchedulesMock = () => ({
       duplicate: { correlation: faker.random.word(), duplicate: faker.random.word() },
       duration: faker.random.word(),
       externalTargets: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       loss: { correlation: faker.random.word(), loss: faker.random.word() },
       mode: faker.random.word(),
+      rate: { rate: faker.random.word() },
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9ja001dv5di0oyado2q: faker.random.word(),
+          cmauzgw87001d5kt6h221hhvr: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9ja001ev5di6bizc71q: faker.random.word(),
+          cmauzgw87001e5kt6fvfm3vle: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9ja001fv5dig35n3a5q: faker.random.word(),
+          cmauzgw87001f5kt65aon4gdz: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9ja001gv5dihd445k5o: faker.random.word(),
+          cmauzgw87001g5kt673kwh04u: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9ja001hv5dihksig367: Array.from(
+          cmauzgw87001h5kt6apm8ht5j: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -770,30 +832,39 @@ export const getPostSchedulesMock = () => ({
         mode: faker.random.word(),
         selector: {
           annotationSelectors: {
-            clfp8d9ja001iv5di6voegp30: faker.random.word(),
+            cmauzgw87001i5kt68ww2hxk2: faker.random.word(),
           },
+          expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            }),
+          ),
           fieldSelectors: {
-            clfp8d9ja001jv5difklv01ir: faker.random.word(),
+            cmauzgw87001j5kt62zrdhcof: faker.random.word(),
           },
           labelSelectors: {
-            clfp8d9ja001kv5di8ere02cp: faker.random.word(),
+            cmauzgw87001k5kt6d89g16nh: faker.random.word(),
           },
           namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           nodeSelectors: {
-            clfp8d9ja001lv5di934e1sze: faker.random.word(),
+            cmauzgw87001l5kt6ffz054kj: faker.random.word(),
           },
           nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-            () => faker.random.word()
+            () => faker.random.word(),
           ),
           pods: {
-            clfp8d9ja001mv5didx1jb4yg: Array.from(
+            cmauzgw87001m5kt6cdv4gfnf: Array.from(
               { length: faker.datatype.number({ min: 1, max: 10 }) },
-              (_, i) => i + 1
+              (_, i) => i + 1,
             ).map(() => faker.random.word()),
           },
         },
@@ -805,7 +876,7 @@ export const getPostSchedulesMock = () => ({
     physicalmachineChaos: {
       action: faker.random.word(),
       address: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       clock: {
         'clock-ids-slice': faker.random.word(),
@@ -852,7 +923,7 @@ export const getPostSchedulesMock = () => ({
         path: faker.random.word(),
         port: faker.datatype.number({ min: undefined, max: undefined }),
         proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.datatype.number({ min: undefined, max: undefined })
+          faker.datatype.number({ min: undefined, max: undefined }),
         ),
         target: faker.random.word(),
       },
@@ -864,7 +935,7 @@ export const getPostSchedulesMock = () => ({
         path: faker.random.word(),
         port: faker.datatype.number({ min: undefined, max: undefined }),
         proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.datatype.number({ min: undefined, max: undefined })
+          faker.datatype.number({ min: undefined, max: undefined }),
         ),
         target: faker.random.word(),
       },
@@ -1058,34 +1129,43 @@ export const getPostSchedulesMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jb001nv5di69wwa6o6: faker.random.word(),
+          cmauzgw88001n5kt6a78a6viw: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jb001ov5di6oo6bwrj: faker.random.word(),
+          cmauzgw88001o5kt650oh3m7a: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jb001pv5dihgl8e71j: faker.random.word(),
+          cmauzgw88001p5kt6b3b30egu: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         physicalMachines: {
-          clfp8d9jb001qv5di99o85btd: Array.from(
+          cmauzgw88001q5kt66ebv3fel: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
       'stress-cpu': {
         load: faker.datatype.number({ min: undefined, max: undefined }),
         options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         workers: faker.datatype.number({ min: undefined, max: undefined }),
       },
       'stress-mem': {
         options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         size: faker.random.word(),
       },
@@ -1096,7 +1176,7 @@ export const getPostSchedulesMock = () => ({
     podChaos: {
       action: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       gracePeriod: faker.datatype.number({ min: undefined, max: undefined }),
@@ -1104,30 +1184,39 @@ export const getPostSchedulesMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jc001rv5di2l6vbtto: faker.random.word(),
+          cmauzgw88001r5kt6fsxue3l1: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jc001sv5di312kgvch: faker.random.word(),
+          cmauzgw88001s5kt68ei80r5t: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jc001tv5di2y9tab5l: faker.random.word(),
+          cmauzgw88001t5kt6bbbv0n4m: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jc001uv5digjts8kdr: faker.random.word(),
+          cmauzgw88001u5kt605uw5465: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jc001vv5di8vh4br8r: Array.from(
+          cmauzgw88001v5kt6a82wd2yr: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -1137,37 +1226,46 @@ export const getPostSchedulesMock = () => ({
     startingDeadlineSeconds: faker.datatype.number({ min: undefined, max: undefined }),
     stressChaos: {
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       mode: faker.random.word(),
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jc001wv5digsmnc3tg: faker.random.word(),
+          cmauzgw88001w5kt67apb3g1b: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jc001xv5dibnigf9ci: faker.random.word(),
+          cmauzgw88001x5kt60vpj8jhz: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jc001yv5di8e1rbl20: faker.random.word(),
+          cmauzgw88001y5kt64zui3f9y: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jc001zv5di2kpt4eaj: faker.random.word(),
+          cmauzgw88001z5kt6797c6fwo: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jc0020v5di83byaza8: Array.from(
+          cmauzgw8800205kt68ve0desc: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -1176,14 +1274,14 @@ export const getPostSchedulesMock = () => ({
         cpu: {
           load: faker.datatype.number({ min: undefined, max: undefined }),
           options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           workers: faker.datatype.number({ min: undefined, max: undefined }),
         },
         memory: {
           oomScoreAdj: faker.datatype.number({ min: undefined, max: undefined }),
           options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           size: faker.random.word(),
           workers: faker.datatype.number({ min: undefined, max: undefined }),
@@ -1193,40 +1291,49 @@ export const getPostSchedulesMock = () => ({
     },
     timeChaos: {
       clockIds: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       mode: faker.random.word(),
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jc0021v5di6wqu46dw: faker.random.word(),
+          cmauzgw8800215kt66el1g0p5: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jc0022v5di2with2su: faker.random.word(),
+          cmauzgw8800225kt66tm2716e: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jc0023v5di7k7j2qs7: faker.random.word(),
+          cmauzgw8800235kt628u540n7: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jc0024v5di09sr0mmo: faker.random.word(),
+          cmauzgw8800245kt61xr6b3ti: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jc0025v5diaqwp2exz: Array.from(
+          cmauzgw8800255kt65psq5fj5: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -1263,7 +1370,7 @@ export const getPostSchedulesMock = () => ({
         blockChaos: {
           action: faker.random.word(),
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           delay: { correlation: faker.random.word(), jitter: faker.random.word(), latency: faker.random.word() },
           duration: faker.random.word(),
@@ -1271,30 +1378,40 @@ export const getPostSchedulesMock = () => ({
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jc0026v5di8hg1gb2k: faker.random.word(),
+              cmauzgw8800265kt68kl51byy: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jc0027v5dietcw8to6: faker.random.word(),
+              cmauzgw8800275kt6dvwgfvsa: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jc0028v5did9pn4k5t: faker.random.word(),
+              cmauzgw8800285kt63s6va58i: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jc0029v5dia2voaoxd: faker.random.word(),
+              cmauzgw8800295kt61lod14ea: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jc002av5di5tud8tm0: Array.from(
+              cmauzgw88002a5kt6d2xpbr31: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1302,49 +1419,59 @@ export const getPostSchedulesMock = () => ({
           volumeName: faker.random.word(),
         },
         children: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         conditionalBranches: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-          () => ({ expression: faker.random.word(), target: faker.random.word() })
+          () => ({ expression: faker.random.word(), target: faker.random.word() }),
         ),
         deadline: faker.random.word(),
         dnsChaos: {
           action: faker.random.word(),
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           duration: faker.random.word(),
           mode: faker.random.word(),
           patterns: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jc002bv5diervv3iz8: faker.random.word(),
+              cmauzgw88002b5kt61mcg303d: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jc002cv5di23iv36o8: faker.random.word(),
+              cmauzgw88002c5kt61yvu8hu1: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jc002dv5di5l3d33qk: faker.random.word(),
+              cmauzgw88002d5kt63wdy5htm: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jc002ev5di06bt7z1p: faker.random.word(),
+              cmauzgw88002e5kt61p6vezve: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jc002fv5did7p1eqag: Array.from(
+              cmauzgw88002f5kt64r0c3304: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1353,7 +1480,7 @@ export const getPostSchedulesMock = () => ({
         gcpChaos: {
           action: faker.random.word(),
           deviceNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           duration: faker.random.word(),
           instance: faker.random.word(),
@@ -1373,13 +1500,13 @@ export const getPostSchedulesMock = () => ({
             body: { type: faker.random.word(), value: faker.random.word() },
             headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
-              )
+                faker.random.word(),
+              ),
             ),
             queries: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
               Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
-              )
+                faker.random.word(),
+              ),
             ),
           },
           path: faker.random.word(),
@@ -1387,50 +1514,60 @@ export const getPostSchedulesMock = () => ({
           remoteCluster: faker.random.word(),
           replace: {
             body: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.datatype.number({ min: undefined, max: undefined })
+              faker.datatype.number({ min: undefined, max: undefined }),
             ),
             code: faker.datatype.number({ min: undefined, max: undefined }),
             headers: {
-              clfp8d9jc002gv5di8um14lww: faker.random.word(),
+              cmauzgw88002g5kt67ph899g8: faker.random.word(),
             },
             method: faker.random.word(),
             path: faker.random.word(),
             queries: {
-              clfp8d9jc002hv5dibvzf8pj1: faker.random.word(),
+              cmauzgw88002h5kt69d6f1kst: faker.random.word(),
             },
           },
           request_headers: {
-            clfp8d9jc002iv5di8x1i0feq: faker.random.word(),
+            cmauzgw88002i5kt66y1q0iqh: faker.random.word(),
           },
           response_headers: {
-            clfp8d9jc002jv5di1h5h36ej: faker.random.word(),
+            cmauzgw88002j5kt6d711h66j: faker.random.word(),
           },
           selector: {
             annotationSelectors: {
-              clfp8d9jc002kv5di474a09rk: faker.random.word(),
+              cmauzgw88002k5kt60zjag1z3: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jc002lv5dig9fkaiye: faker.random.word(),
+              cmauzgw88002l5kt69c7h7faj: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jc002mv5diaet672nc: faker.random.word(),
+              cmauzgw88002m5kt652446d6c: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jc002nv5di8fow3691: faker.random.word(),
+              cmauzgw88002n5kt66o6vd79q: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jd002ov5di2e2q71i1: Array.from(
+              cmauzgw88002o5kt6ar274kf8: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1470,13 +1607,13 @@ export const getPostSchedulesMock = () => ({
             uid: faker.datatype.number({ min: undefined, max: undefined }),
           },
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           delay: faker.random.word(),
           duration: faker.random.word(),
           errno: faker.datatype.number({ min: undefined, max: undefined }),
           methods: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           mistake: {
             filling: faker.random.word(),
@@ -1489,30 +1626,40 @@ export const getPostSchedulesMock = () => ({
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jd002pv5di5s8h4po0: faker.random.word(),
+              cmauzgw88002p5kt6f5ap7gs4: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jd002qv5dianlwhuzs: faker.random.word(),
+              cmauzgw89002q5kt69vv5ednh: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jd002rv5di19u15trb: faker.random.word(),
+              cmauzgw89002r5kt66v2obx6p: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jd002sv5di1p9v47zw: faker.random.word(),
+              cmauzgw89002s5kt653gc33q0: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jd002tv5di3k0116lh: Array.from(
+              cmauzgw89002t5kt66qxf956l: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1523,7 +1670,7 @@ export const getPostSchedulesMock = () => ({
           action: faker.random.word(),
           class: faker.random.word(),
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           cpuCount: faker.datatype.number({ min: undefined, max: undefined }),
           database: faker.random.word(),
@@ -1538,33 +1685,44 @@ export const getPostSchedulesMock = () => ({
           pid: faker.datatype.number({ min: undefined, max: undefined }),
           port: faker.datatype.number({ min: undefined, max: undefined }),
           remoteCluster: faker.random.word(),
+          returnValue: faker.random.word(),
           ruleData: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jd002uv5di5qe6hkp8: faker.random.word(),
+              cmauzgw89002u5kt62p03a64y: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jd002vv5diew3d807o: faker.random.word(),
+              cmauzgw89002v5kt6fme5geva: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jd002wv5di4yc8gwp6: faker.random.word(),
+              cmauzgw89002w5kt6dcfj9oyh: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jd002xv5di80m54mp1: faker.random.word(),
+              cmauzgw89002x5kt678qp7j4l: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jd002yv5dihpeqe3od: Array.from(
+              cmauzgw89002y5kt6hsp8a0sk: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1574,7 +1732,7 @@ export const getPostSchedulesMock = () => ({
         },
         kernelChaos: {
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           duration: faker.random.word(),
           failKernRequest: {
@@ -1585,7 +1743,7 @@ export const getPostSchedulesMock = () => ({
             })),
             failtype: faker.datatype.number({ min: undefined, max: undefined }),
             headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             probability: faker.datatype.number({ min: undefined, max: undefined }),
             times: faker.datatype.number({ min: undefined, max: undefined }),
@@ -1594,30 +1752,40 @@ export const getPostSchedulesMock = () => ({
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jd002zv5didj4jc0et: faker.random.word(),
+              cmauzgw89002z5kt6g6eq4on5: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jd0030v5di74ez3rr2: faker.random.word(),
+              cmauzgw8900305kt6fh5m0o6y: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jd0031v5di4be66s3n: faker.random.word(),
+              cmauzgw8900315kt649gdf8zu: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jd0032v5di9ak42gu9: faker.random.word(),
+              cmauzgw8900325kt61xpqdrr9: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jd0033v5di8a1uhxyt: Array.from(
+              cmauzgw8900335kt67nkmc9mc: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1649,37 +1817,48 @@ export const getPostSchedulesMock = () => ({
           duplicate: { correlation: faker.random.word(), duplicate: faker.random.word() },
           duration: faker.random.word(),
           externalTargets: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           loss: { correlation: faker.random.word(), loss: faker.random.word() },
           mode: faker.random.word(),
+          rate: { rate: faker.random.word() },
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jd0034v5di4oa6b11b: faker.random.word(),
+              cmauzgw8900345kt63id836gm: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jd0035v5didujqew6t: faker.random.word(),
+              cmauzgw8900355kt60bpl6ri2: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jd0036v5difbsd90yc: faker.random.word(),
+              cmauzgw8900365kt6evo4g5uk: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jd0037v5di1idrg4uj: faker.random.word(),
+              cmauzgw8900375kt66ps60mty: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jd0038v5did8jphwar: Array.from(
+              cmauzgw8900385kt6d2yv194m: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -1687,31 +1866,41 @@ export const getPostSchedulesMock = () => ({
             mode: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jd0039v5di4hck5pbo: faker.random.word(),
+                cmauzgw8900395kt6hi0gg8nu: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jd003av5die00sglia: faker.random.word(),
+                cmauzgw89003a5kt6490ld1q3: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jd003bv5die7md4mzj: faker.random.word(),
+                cmauzgw89003b5kt6gc0u2dne: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jd003cv5di0uf3153n: faker.random.word(),
+                cmauzgw89003c5kt683o70pn8: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jd003dv5difcpkadpr: Array.from(
+                cmauzgw89003d5kt6a6hagvao: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -1723,7 +1912,7 @@ export const getPostSchedulesMock = () => ({
         physicalmachineChaos: {
           action: faker.random.word(),
           address: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           clock: {
             'clock-ids-slice': faker.random.word(),
@@ -1770,7 +1959,7 @@ export const getPostSchedulesMock = () => ({
             path: faker.random.word(),
             port: faker.datatype.number({ min: undefined, max: undefined }),
             proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.datatype.number({ min: undefined, max: undefined })
+              faker.datatype.number({ min: undefined, max: undefined }),
             ),
             target: faker.random.word(),
           },
@@ -1782,7 +1971,7 @@ export const getPostSchedulesMock = () => ({
             path: faker.random.word(),
             port: faker.datatype.number({ min: undefined, max: undefined }),
             proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.datatype.number({ min: undefined, max: undefined })
+              faker.datatype.number({ min: undefined, max: undefined }),
             ),
             target: faker.random.word(),
           },
@@ -1976,34 +2165,44 @@ export const getPostSchedulesMock = () => ({
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9je003ev5di9daph5q3: faker.random.word(),
+              cmauzgw89003e5kt660fubof1: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9je003fv5difs6wb6zg: faker.random.word(),
+              cmauzgw89003f5kt66fllcpvg: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9je003gv5dibj6wdcaw: faker.random.word(),
+              cmauzgw89003g5kt60aywhgo6: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             physicalMachines: {
-              clfp8d9je003hv5di6mlc4bew: Array.from(
+              cmauzgw89003h5kt60455fvnx: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
           'stress-cpu': {
             load: faker.datatype.number({ min: undefined, max: undefined }),
             options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             workers: faker.datatype.number({ min: undefined, max: undefined }),
           },
           'stress-mem': {
             options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             size: faker.random.word(),
           },
@@ -2014,7 +2213,7 @@ export const getPostSchedulesMock = () => ({
         podChaos: {
           action: faker.random.word(),
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           duration: faker.random.word(),
           gracePeriod: faker.datatype.number({ min: undefined, max: undefined }),
@@ -2022,30 +2221,40 @@ export const getPostSchedulesMock = () => ({
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9je003iv5diafxuhrgj: faker.random.word(),
+              cmauzgw8a003i5kt68chzcttf: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9je003jv5diay78brl1: faker.random.word(),
+              cmauzgw8a003j5kt67xcvd5ea: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9je003kv5dic5pvhowk: faker.random.word(),
+              cmauzgw8a003k5kt63ty72ncw: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9je003lv5di8otr4cyn: faker.random.word(),
+              cmauzgw8a003l5kt6b1mp49px: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9je003mv5dich0b9rui: Array.from(
+              cmauzgw8a003m5kt68k125ss9: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -2077,7 +2286,7 @@ export const getPostSchedulesMock = () => ({
           blockChaos: {
             action: faker.random.word(),
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             delay: { correlation: faker.random.word(), jitter: faker.random.word(), latency: faker.random.word() },
             duration: faker.random.word(),
@@ -2085,31 +2294,41 @@ export const getPostSchedulesMock = () => ({
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9je003nv5die2708di9: faker.random.word(),
+                cmauzgw8a003n5kt6g6vea2y2: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9je003ov5di8q296vx8: faker.random.word(),
+                cmauzgw8a003o5kt6alor3rq3: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9je003pv5dih6u2509n: faker.random.word(),
+                cmauzgw8a003p5kt6dj6o634y: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9je003qv5di9spb11fd: faker.random.word(),
+                cmauzgw8a003q5kt6baeke4ul: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jf003rv5di39m48we2: Array.from(
+                cmauzgw8a003r5kt6aifpaddr: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2120,41 +2339,51 @@ export const getPostSchedulesMock = () => ({
           dnsChaos: {
             action: faker.random.word(),
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             duration: faker.random.word(),
             mode: faker.random.word(),
             patterns: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jf003sv5dicvmbfsaf: faker.random.word(),
+                cmauzgw8a003s5kt6cfa909h1: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jf003tv5dibaro3f0u: faker.random.word(),
+                cmauzgw8a003t5kt60547ahob: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jf003uv5di2k5n1we1: faker.random.word(),
+                cmauzgw8a003u5kt60sq2f9mr: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jf003vv5di4ro59lzq: faker.random.word(),
+                cmauzgw8a003v5kt67u5k2gwj: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jf003wv5dib81harok: Array.from(
+                cmauzgw8a003w5kt69ak27s7b: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2163,7 +2392,7 @@ export const getPostSchedulesMock = () => ({
           gcpChaos: {
             action: faker.random.word(),
             deviceNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             duration: faker.random.word(),
             instance: faker.random.word(),
@@ -2184,13 +2413,13 @@ export const getPostSchedulesMock = () => ({
               body: { type: faker.random.word(), value: faker.random.word() },
               headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                 Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
-                )
+                  faker.random.word(),
+                ),
               ),
               queries: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
                 Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
-                )
+                  faker.random.word(),
+                ),
               ),
             },
             path: faker.random.word(),
@@ -2198,51 +2427,61 @@ export const getPostSchedulesMock = () => ({
             remoteCluster: faker.random.word(),
             replace: {
               body: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.datatype.number({ min: undefined, max: undefined })
+                faker.datatype.number({ min: undefined, max: undefined }),
               ),
               code: faker.datatype.number({ min: undefined, max: undefined }),
               headers: {
-                clfp8d9jf003xv5di7dwvbhb5: faker.random.word(),
+                cmauzgw8a003x5kt67i3w15x8: faker.random.word(),
               },
               method: faker.random.word(),
               path: faker.random.word(),
               queries: {
-                clfp8d9jf003yv5di5fu34d1t: faker.random.word(),
+                cmauzgw8a003y5kt68ofy4m7u: faker.random.word(),
               },
             },
             request_headers: {
-              clfp8d9jf003zv5di35cw22wl: faker.random.word(),
+              cmauzgw8a003z5kt6de6y44iw: faker.random.word(),
             },
             response_headers: {
-              clfp8d9jf0040v5difjvf1hqb: faker.random.word(),
+              cmauzgw8a00405kt67rsbhltj: faker.random.word(),
             },
             selector: {
               annotationSelectors: {
-                clfp8d9jf0041v5di9b7s9zmo: faker.random.word(),
+                cmauzgw8a00415kt6h78e1xhr: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jf0042v5di3zpzfvq3: faker.random.word(),
+                cmauzgw8a00425kt61mtlhb78: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jf0043v5digs50enqm: faker.random.word(),
+                cmauzgw8a00435kt6fduid6zn: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jf0044v5didzlwh1wt: faker.random.word(),
+                cmauzgw8a00445kt64y7d5y2k: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jf0045v5difkz0bbx1: Array.from(
+                cmauzgw8a00455kt6dnwnc4jw: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2282,13 +2521,13 @@ export const getPostSchedulesMock = () => ({
               uid: faker.datatype.number({ min: undefined, max: undefined }),
             },
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             delay: faker.random.word(),
             duration: faker.random.word(),
             errno: faker.datatype.number({ min: undefined, max: undefined }),
             methods: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             mistake: {
               filling: faker.random.word(),
@@ -2301,31 +2540,41 @@ export const getPostSchedulesMock = () => ({
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jf0046v5di2jhrd03l: faker.random.word(),
+                cmauzgw8a00465kt67kk4gtcm: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jf0047v5dibyv2f376: faker.random.word(),
+                cmauzgw8a00475kt65tnh1i2o: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jf0048v5didmlxcid9: faker.random.word(),
+                cmauzgw8a00485kt66h7s4vm2: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jf0049v5di0dlpd0sq: faker.random.word(),
+                cmauzgw8a00495kt6ggl1cnpd: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jf004av5di31s2b2d6: Array.from(
+                cmauzgw8a004a5kt60uxscvwa: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2336,7 +2585,7 @@ export const getPostSchedulesMock = () => ({
             action: faker.random.word(),
             class: faker.random.word(),
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             cpuCount: faker.datatype.number({ min: undefined, max: undefined }),
             database: faker.random.word(),
@@ -2351,34 +2600,45 @@ export const getPostSchedulesMock = () => ({
             pid: faker.datatype.number({ min: undefined, max: undefined }),
             port: faker.datatype.number({ min: undefined, max: undefined }),
             remoteCluster: faker.random.word(),
+            returnValue: faker.random.word(),
             ruleData: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jf004bv5di0uw4hbce: faker.random.word(),
+                cmauzgw8a004b5kt6hmem4fdd: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jf004cv5di5gd88h0n: faker.random.word(),
+                cmauzgw8a004c5kt68dpk6tb4: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jf004dv5di70cr3aac: faker.random.word(),
+                cmauzgw8a004d5kt66sro94bx: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jf004ev5dicz5qboq6: faker.random.word(),
+                cmauzgw8a004e5kt6giua6u2i: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jf004fv5difybobwrb: Array.from(
+                cmauzgw8a004f5kt69a5j63ey: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2388,7 +2648,7 @@ export const getPostSchedulesMock = () => ({
           },
           kernelChaos: {
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             duration: faker.random.word(),
             failKernRequest: {
@@ -2397,11 +2657,11 @@ export const getPostSchedulesMock = () => ({
                   funcname: faker.random.word(),
                   parameters: faker.random.word(),
                   predicate: faker.random.word(),
-                })
+                }),
               ),
               failtype: faker.datatype.number({ min: undefined, max: undefined }),
               headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               probability: faker.datatype.number({ min: undefined, max: undefined }),
               times: faker.datatype.number({ min: undefined, max: undefined }),
@@ -2410,31 +2670,41 @@ export const getPostSchedulesMock = () => ({
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jf004gv5di9dvoa3q0: faker.random.word(),
+                cmauzgw8a004g5kt69g855ulx: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jf004hv5dibw257rsz: faker.random.word(),
+                cmauzgw8a004h5kt62l3s9vfd: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jf004iv5dihgki49mm: faker.random.word(),
+                cmauzgw8a004i5kt6dv234ivu: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jf004jv5di5cp8dxwy: faker.random.word(),
+                cmauzgw8a004j5kt673pz2ool: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jf004kv5di0hil0dcm: Array.from(
+                cmauzgw8a004k5kt6c1iz3p2d: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2465,38 +2735,49 @@ export const getPostSchedulesMock = () => ({
             duplicate: { correlation: faker.random.word(), duplicate: faker.random.word() },
             duration: faker.random.word(),
             externalTargets: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             loss: { correlation: faker.random.word(), loss: faker.random.word() },
             mode: faker.random.word(),
+            rate: { rate: faker.random.word() },
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jf004lv5dicmso1r45: faker.random.word(),
+                cmauzgw8a004l5kt6bml7c6l0: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jf004mv5diheacc7dj: faker.random.word(),
+                cmauzgw8a004m5kt60tpshfhs: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jf004nv5didcvzc5h9: faker.random.word(),
+                cmauzgw8a004n5kt63d526lkl: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jg004ov5diajjnhxfe: faker.random.word(),
+                cmauzgw8a004o5kt61xkh4ouj: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jg004pv5di8zcq0w7v: Array.from(
+                cmauzgw8a004p5kt6ablt6o30: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2504,31 +2785,41 @@ export const getPostSchedulesMock = () => ({
               mode: faker.random.word(),
               selector: {
                 annotationSelectors: {
-                  clfp8d9jg004qv5di6fazgy4b: faker.random.word(),
+                  cmauzgw8a004q5kt6ccrf2nad: faker.random.word(),
                 },
+                expressionSelectors: Array.from(
+                  { length: faker.datatype.number({ min: 1, max: 10 }) },
+                  (_, i) => i + 1,
+                ).map(() => ({
+                  key: faker.random.word(),
+                  operator: faker.random.word(),
+                  values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                    faker.random.word(),
+                  ),
+                })),
                 fieldSelectors: {
-                  clfp8d9jg004rv5diepcf2ct3: faker.random.word(),
+                  cmauzgw8a004r5kt6a7bq2t60: faker.random.word(),
                 },
                 labelSelectors: {
-                  clfp8d9jg004sv5di9mlo2lmw: faker.random.word(),
+                  cmauzgw8a004s5kt6dux2cygq: faker.random.word(),
                 },
                 namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.random.word()
+                  () => faker.random.word(),
                 ),
                 nodeSelectors: {
-                  clfp8d9jg004tv5dihx4hdn4t: faker.random.word(),
+                  cmauzgw8a004t5kt65254fzb7: faker.random.word(),
                 },
                 nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
                 podPhaseSelectors: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
                 pods: {
-                  clfp8d9jg004uv5diaf8thqty: Array.from(
+                  cmauzgw8a004u5kt65832h1p8: Array.from(
                     { length: faker.datatype.number({ min: 1, max: 10 }) },
-                    (_, i) => i + 1
+                    (_, i) => i + 1,
                   ).map(() => faker.random.word()),
                 },
               },
@@ -2540,7 +2831,7 @@ export const getPostSchedulesMock = () => ({
           physicalmachineChaos: {
             action: faker.random.word(),
             address: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             clock: {
               'clock-ids-slice': faker.random.word(),
@@ -2587,7 +2878,7 @@ export const getPostSchedulesMock = () => ({
               path: faker.random.word(),
               port: faker.datatype.number({ min: undefined, max: undefined }),
               proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.datatype.number({ min: undefined, max: undefined })
+                faker.datatype.number({ min: undefined, max: undefined }),
               ),
               target: faker.random.word(),
             },
@@ -2599,7 +2890,7 @@ export const getPostSchedulesMock = () => ({
               path: faker.random.word(),
               port: faker.datatype.number({ min: undefined, max: undefined }),
               proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.datatype.number({ min: undefined, max: undefined })
+                faker.datatype.number({ min: undefined, max: undefined }),
               ),
               target: faker.random.word(),
             },
@@ -2793,34 +3084,44 @@ export const getPostSchedulesMock = () => ({
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jg004vv5di7n5bg9x8: faker.random.word(),
+                cmauzgw8b004v5kt6h35camrq: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jg004wv5dibnic6d12: faker.random.word(),
+                cmauzgw8b004w5kt63s0s5el5: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jg004xv5didspqe6s7: faker.random.word(),
+                cmauzgw8b004x5kt6df956073: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               physicalMachines: {
-                clfp8d9jh004yv5di35cj81wt: Array.from(
+                cmauzgw8b004y5kt6387e36va: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
             'stress-cpu': {
               load: faker.datatype.number({ min: undefined, max: undefined }),
               options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               workers: faker.datatype.number({ min: undefined, max: undefined }),
             },
             'stress-mem': {
               options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               size: faker.random.word(),
             },
@@ -2831,7 +3132,7 @@ export const getPostSchedulesMock = () => ({
           podChaos: {
             action: faker.random.word(),
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             duration: faker.random.word(),
             gracePeriod: faker.datatype.number({ min: undefined, max: undefined }),
@@ -2839,31 +3140,41 @@ export const getPostSchedulesMock = () => ({
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jh004zv5di77pldmaj: faker.random.word(),
+                cmauzgw8b004z5kt6ae6816tn: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jh0050v5di3h35euif: faker.random.word(),
+                cmauzgw8b00505kt63f6aawnp: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jh0051v5dibxbvhycy: faker.random.word(),
+                cmauzgw8b00515kt64ws5aqxd: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jh0052v5dihvqc00zm: faker.random.word(),
+                cmauzgw8b00525kt6dxsq7r4e: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jh0053v5di2ibb4d2u: Array.from(
+                cmauzgw8b00535kt60w92emec: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2873,38 +3184,48 @@ export const getPostSchedulesMock = () => ({
           startingDeadlineSeconds: faker.datatype.number({ min: undefined, max: undefined }),
           stressChaos: {
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             duration: faker.random.word(),
             mode: faker.random.word(),
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jh0054v5didsfe4kvk: faker.random.word(),
+                cmauzgw8b00545kt67myycwar: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jh0055v5dih88chlqh: faker.random.word(),
+                cmauzgw8b00555kt6cyxacbjq: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jh0056v5di58sjbk04: faker.random.word(),
+                cmauzgw8b00565kt6acubhed5: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jh0057v5di0jiifk1v: faker.random.word(),
+                cmauzgw8b00575kt601se9hdy: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jh0058v5di7nj4gehc: Array.from(
+                cmauzgw8b00585kt695w32xld: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2913,14 +3234,14 @@ export const getPostSchedulesMock = () => ({
               cpu: {
                 load: faker.datatype.number({ min: undefined, max: undefined }),
                 options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
                 workers: faker.datatype.number({ min: undefined, max: undefined }),
               },
               memory: {
                 oomScoreAdj: faker.datatype.number({ min: undefined, max: undefined }),
                 options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
                 size: faker.random.word(),
                 workers: faker.datatype.number({ min: undefined, max: undefined }),
@@ -2930,41 +3251,51 @@ export const getPostSchedulesMock = () => ({
           },
           timeChaos: {
             clockIds: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             duration: faker.random.word(),
             mode: faker.random.word(),
             remoteCluster: faker.random.word(),
             selector: {
               annotationSelectors: {
-                clfp8d9jh0059v5di6swcc5ln: faker.random.word(),
+                cmauzgw8b00595kt6ge2ldtdj: faker.random.word(),
               },
+              expressionSelectors: Array.from(
+                { length: faker.datatype.number({ min: 1, max: 10 }) },
+                (_, i) => i + 1,
+              ).map(() => ({
+                key: faker.random.word(),
+                operator: faker.random.word(),
+                values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                  faker.random.word(),
+                ),
+              })),
               fieldSelectors: {
-                clfp8d9jh005av5dig7e2afpu: faker.random.word(),
+                cmauzgw8b005a5kt672s97ubk: faker.random.word(),
               },
               labelSelectors: {
-                clfp8d9jh005bv5di4zjk273p: faker.random.word(),
+                cmauzgw8b005b5kt66fpo1pqa: faker.random.word(),
               },
               namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               nodeSelectors: {
-                clfp8d9jh005cv5di1idmeght: faker.random.word(),
+                cmauzgw8b005c5kt6b4epbhng: faker.random.word(),
               },
               nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               podPhaseSelectors: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
               pods: {
-                clfp8d9jh005dv5dib6rl01nh: Array.from(
+                cmauzgw8b005d5kt6b3kg2mob: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => faker.random.word()),
               },
             },
@@ -2980,9 +3311,9 @@ export const getPostSchedulesMock = () => ({
             body: faker.random.word(),
             criteria: { statusCode: faker.random.word() },
             headers: {
-              clfp8d9jh005ev5die7in20yv: Array.from(
+              cmauzgw8b005e5kt6fp1xg32m: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
             method: faker.random.word(),
@@ -2997,37 +3328,47 @@ export const getPostSchedulesMock = () => ({
         },
         stressChaos: {
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           duration: faker.random.word(),
           mode: faker.random.word(),
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jh005fv5didpoh6m27: faker.random.word(),
+              cmauzgw8b005f5kt62nkhdktd: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jh005gv5di49cf9boy: faker.random.word(),
+              cmauzgw8b005g5kt6co70eikj: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jh005hv5dicmao0qb3: faker.random.word(),
+              cmauzgw8b005h5kt65o2vewbd: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jh005iv5di1qho9vwd: faker.random.word(),
+              cmauzgw8b005i5kt62gjzdal3: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jh005jv5di87l9gy2z: Array.from(
+              cmauzgw8b005j5kt6ckztb1x6: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -3036,14 +3377,14 @@ export const getPostSchedulesMock = () => ({
             cpu: {
               load: faker.datatype.number({ min: undefined, max: undefined }),
               options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               workers: faker.datatype.number({ min: undefined, max: undefined }),
             },
             memory: {
               oomScoreAdj: faker.datatype.number({ min: undefined, max: undefined }),
               options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               size: faker.random.word(),
               workers: faker.datatype.number({ min: undefined, max: undefined }),
@@ -3054,10 +3395,10 @@ export const getPostSchedulesMock = () => ({
         task: {
           container: {
             args: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             env: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
               name: faker.random.word(),
@@ -3092,13 +3433,13 @@ export const getPostSchedulesMock = () => ({
               postStart: {
                 exec: {
                   command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.random.word()
+                    faker.random.word(),
                   ),
                 },
                 httpGet: {
                   host: faker.random.word(),
                   httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                    () => ({ name: faker.random.word(), value: faker.random.word() })
+                    () => ({ name: faker.random.word(), value: faker.random.word() }),
                   ),
                   path: faker.random.word(),
                   port: {
@@ -3120,13 +3461,13 @@ export const getPostSchedulesMock = () => ({
               preStop: {
                 exec: {
                   command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.random.word()
+                    faker.random.word(),
                   ),
                 },
                 httpGet: {
                   host: faker.random.word(),
                   httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                    () => ({ name: faker.random.word(), value: faker.random.word() })
+                    () => ({ name: faker.random.word(), value: faker.random.word() }),
                   ),
                   path: faker.random.word(),
                   port: {
@@ -3149,7 +3490,7 @@ export const getPostSchedulesMock = () => ({
             livenessProbe: {
               exec: {
                 command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
               },
               failureThreshold: faker.datatype.number({ min: undefined, max: undefined }),
@@ -3157,7 +3498,7 @@ export const getPostSchedulesMock = () => ({
               httpGet: {
                 host: faker.random.word(),
                 httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => ({ name: faker.random.word(), value: faker.random.word() })
+                  () => ({ name: faker.random.word(), value: faker.random.word() }),
                 ),
                 path: faker.random.word(),
                 port: {
@@ -3192,7 +3533,7 @@ export const getPostSchedulesMock = () => ({
             readinessProbe: {
               exec: {
                 command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
               },
               failureThreshold: faker.datatype.number({ min: undefined, max: undefined }),
@@ -3200,7 +3541,7 @@ export const getPostSchedulesMock = () => ({
               httpGet: {
                 host: faker.random.word(),
                 httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => ({ name: faker.random.word(), value: faker.random.word() })
+                  () => ({ name: faker.random.word(), value: faker.random.word() }),
                 ),
                 path: faker.random.word(),
                 port: {
@@ -3224,25 +3565,29 @@ export const getPostSchedulesMock = () => ({
               terminationGracePeriodSeconds: faker.datatype.number({ min: undefined, max: undefined }),
               timeoutSeconds: faker.datatype.number({ min: undefined, max: undefined }),
             },
+            resizePolicy: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+              () => ({ resourceName: faker.random.word(), restartPolicy: faker.random.word() }),
+            ),
             resources: {
               claims: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
                 name: faker.random.word(),
               })),
               limits: {
-                clfp8d9ji005kv5di1qx17h2h: { Format: faker.random.word() },
+                cmauzgw8c005k5kt65gly8uf1: { Format: faker.random.word() },
               },
               requests: {
-                clfp8d9ji005lv5di4qwp47gh: { Format: faker.random.word() },
+                cmauzgw8c005l5kt6gkju834b: { Format: faker.random.word() },
               },
             },
+            restartPolicy: faker.random.word(),
             securityContext: {
               allowPrivilegeEscalation: faker.datatype.boolean(),
               capabilities: {
                 add: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
                 drop: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
               },
               privileged: faker.datatype.boolean(),
@@ -3268,7 +3613,7 @@ export const getPostSchedulesMock = () => ({
             startupProbe: {
               exec: {
                 command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                  faker.random.word()
+                  faker.random.word(),
                 ),
               },
               failureThreshold: faker.datatype.number({ min: undefined, max: undefined }),
@@ -3276,7 +3621,7 @@ export const getPostSchedulesMock = () => ({
               httpGet: {
                 host: faker.random.word(),
                 httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => ({ name: faker.random.word(), value: faker.random.word() })
+                  () => ({ name: faker.random.word(), value: faker.random.word() }),
                 ),
                 path: faker.random.word(),
                 port: {
@@ -3306,7 +3651,7 @@ export const getPostSchedulesMock = () => ({
             terminationMessagePolicy: faker.random.word(),
             tty: faker.datatype.boolean(),
             volumeDevices: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({ devicePath: faker.random.word(), name: faker.random.word() })
+              () => ({ devicePath: faker.random.word(), name: faker.random.word() }),
             ),
             volumeMounts: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
               () => ({
@@ -3316,7 +3661,7 @@ export const getPostSchedulesMock = () => ({
                 readOnly: faker.datatype.boolean(),
                 subPath: faker.random.word(),
                 subPathExpr: faker.random.word(),
-              })
+              }),
             ),
             workingDir: faker.random.word(),
           },
@@ -3342,7 +3687,7 @@ export const getPostSchedulesMock = () => ({
             },
             cephfs: {
               monitors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               path: faker.random.word(),
               readOnly: faker.datatype.boolean(),
@@ -3372,7 +3717,7 @@ export const getPostSchedulesMock = () => ({
               nodePublishSecretRef: { name: faker.random.word() },
               readOnly: faker.datatype.boolean(),
               volumeAttributes: {
-                clfp8d9ji005mv5dicmkt77nd: faker.random.word(),
+                cmauzgw8c005m5kt640at1u55: faker.random.word(),
               },
             },
             downwardAPI: {
@@ -3392,18 +3737,18 @@ export const getPostSchedulesMock = () => ({
             ephemeral: {
               volumeClaimTemplate: {
                 annotations: {
-                  clfp8d9ji005nv5difz975qt0: faker.random.word(),
+                  cmauzgw8c005n5kt6fihpfoju: faker.random.word(),
                 },
                 creationTimestamp: faker.random.word(),
                 deletionGracePeriodSeconds: faker.datatype.number({ min: undefined, max: undefined }),
                 deletionTimestamp: faker.random.word(),
                 finalizers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-                  () => faker.random.word()
+                  () => faker.random.word(),
                 ),
                 generateName: faker.random.word(),
                 generation: faker.datatype.number({ min: undefined, max: undefined }),
                 labels: {
-                  clfp8d9jj005ov5die0h931sw: faker.random.word(),
+                  cmauzgw8c005o5kt6av6q0r4l: faker.random.word(),
                 },
                 managedFields: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
                   () => ({
@@ -3414,13 +3759,13 @@ export const getPostSchedulesMock = () => ({
                     operation: faker.random.word(),
                     subresource: faker.random.word(),
                     time: faker.random.word(),
-                  })
+                  }),
                 ),
                 name: faker.random.word(),
                 namespace: faker.random.word(),
                 ownerReferences: Array.from(
                   { length: faker.datatype.number({ min: 1, max: 10 }) },
-                  (_, i) => i + 1
+                  (_, i) => i + 1,
                 ).map(() => ({
                   apiVersion: faker.random.word(),
                   blockOwnerDeletion: faker.datatype.boolean(),
@@ -3439,17 +3784,17 @@ export const getPostSchedulesMock = () => ({
               lun: faker.datatype.number({ min: undefined, max: undefined }),
               readOnly: faker.datatype.boolean(),
               targetWWNs: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               wwids: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
             },
             flexVolume: {
               driver: faker.random.word(),
               fsType: faker.random.word(),
               options: {
-                clfp8d9jj005pv5dieutp33c3: faker.random.word(),
+                cmauzgw8c005p5kt6hybfc5xk: faker.random.word(),
               },
               readOnly: faker.datatype.boolean(),
               secretRef: { name: faker.random.word() },
@@ -3477,7 +3822,7 @@ export const getPostSchedulesMock = () => ({
               iscsiInterface: faker.random.word(),
               lun: faker.datatype.number({ min: undefined, max: undefined }),
               portals: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               readOnly: faker.datatype.boolean(),
               secretRef: { name: faker.random.word() },
@@ -3501,7 +3846,7 @@ export const getPostSchedulesMock = () => ({
                       key: faker.random.word(),
                       mode: faker.datatype.number({ min: undefined, max: undefined }),
                       path: faker.random.word(),
-                    })
+                    }),
                   ),
                   name: faker.random.word(),
                   optional: faker.datatype.boolean(),
@@ -3517,7 +3862,7 @@ export const getPostSchedulesMock = () => ({
                         divisor: { Format: faker.random.word() },
                         resource: faker.random.word(),
                       },
-                    })
+                    }),
                   ),
                 },
                 secret: {
@@ -3526,7 +3871,7 @@ export const getPostSchedulesMock = () => ({
                       key: faker.random.word(),
                       mode: faker.datatype.number({ min: undefined, max: undefined }),
                       path: faker.random.word(),
-                    })
+                    }),
                   ),
                   name: faker.random.word(),
                   optional: faker.datatype.boolean(),
@@ -3551,7 +3896,7 @@ export const getPostSchedulesMock = () => ({
               image: faker.random.word(),
               keyring: faker.random.word(),
               monitors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                faker.random.word()
+                faker.random.word(),
               ),
               pool: faker.random.word(),
               readOnly: faker.datatype.boolean(),
@@ -3598,40 +3943,50 @@ export const getPostSchedulesMock = () => ({
         templateType: faker.random.word(),
         timeChaos: {
           clockIds: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           duration: faker.random.word(),
           mode: faker.random.word(),
           remoteCluster: faker.random.word(),
           selector: {
             annotationSelectors: {
-              clfp8d9jk005qv5di34j8c9pd: faker.random.word(),
+              cmauzgw8d005q5kt61cv9g2xe: faker.random.word(),
             },
+            expressionSelectors: Array.from(
+              { length: faker.datatype.number({ min: 1, max: 10 }) },
+              (_, i) => i + 1,
+            ).map(() => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            })),
             fieldSelectors: {
-              clfp8d9jk005rv5di4q5w9cr8: faker.random.word(),
+              cmauzgw8d005r5kt6c3ofa5cl: faker.random.word(),
             },
             labelSelectors: {
-              clfp8d9jk005sv5di90rs9bcb: faker.random.word(),
+              cmauzgw8d005s5kt6ekis9t6e: faker.random.word(),
             },
             namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             nodeSelectors: {
-              clfp8d9jk005tv5dibc8eft7p: faker.random.word(),
+              cmauzgw8d005t5kt6hvjy4keu: faker.random.word(),
             },
             nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => faker.random.word()
+              () => faker.random.word(),
             ),
             pods: {
-              clfp8d9jk005uv5di9jmt7qes: Array.from(
+              cmauzgw8d005u5kt621cmhxu8: Array.from(
                 { length: faker.datatype.number({ min: 1, max: 10 }) },
-                (_, i) => i + 1
+                (_, i) => i + 1,
               ).map(() => faker.random.word()),
             },
           },
@@ -3661,7 +4016,7 @@ export const getDeleteSchedulesUidMock = () => ({ status: faker.random.word() })
 export const getGetSchedulesUidMock = () => ({
   created_at: faker.random.word(),
   experiment_uids: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-    faker.random.word()
+    faker.random.word(),
   ),
   kind: faker.random.word(),
   kube_object: {
@@ -3669,10 +4024,10 @@ export const getGetSchedulesUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9jm005vv5di9ymkht49: faker.random.word(),
+        cmauzgw8e005v5kt66rp5hrbt: faker.random.word(),
       },
       labels: {
-        clfp8d9jm005wv5di8m1zgrxv: faker.random.word(),
+        cmauzgw8e005w5kt6atkfd6cw: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -3709,9 +4064,9 @@ export const getPostTemplatesStatuschecksMock = () => ({
       body: faker.random.word(),
       criteria: { statusCode: faker.random.word() },
       headers: {
-        clfp8d9jo005xv5di8pgx6uhg: Array.from(
+        cmauzgw8g005x5kt69jyo4q6l: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
       method: faker.random.word(),
@@ -3740,9 +4095,9 @@ export const getGetTemplatesStatuschecksStatuscheckMock = () => ({
       body: faker.random.word(),
       criteria: { statusCode: faker.random.word() },
       headers: {
-        clfp8d9jp005yv5dihw6c32wy: Array.from(
+        cmauzgw8h005y5kt67sfe824k: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
       method: faker.random.word(),
@@ -3769,9 +4124,9 @@ export const getPutTemplatesStatuschecksStatuscheckMock = () => ({
       body: faker.random.word(),
       criteria: { statusCode: faker.random.word() },
       headers: {
-        clfp8d9jp005zv5di73a3ehx1: Array.from(
+        cmauzgw8h005z5kt67xnif33w: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
       method: faker.random.word(),
@@ -3810,10 +4165,10 @@ export const getPostWorkflowsMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9jq0060v5dic6seg5ea: faker.random.word(),
+        cmauzgw8j00605kt6fe8b5v0j: faker.random.word(),
       },
       labels: {
-        clfp8d9jq0061v5di5zsgax87: faker.random.word(),
+        cmauzgw8j00615kt66d3vcerk: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -3826,7 +4181,7 @@ export const getPostWorkflowsMock = () => ({
   topology: {
     nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       conditional_branches: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-        () => ({ expression: faker.random.word(), name: faker.random.word(), template: faker.random.word() })
+        () => ({ expression: faker.random.word(), name: faker.random.word(), template: faker.random.word() }),
       ),
       name: faker.random.word(),
       parallel: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -3859,10 +4214,10 @@ export const getGetWorkflowsUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9jr0062v5diezph2yko: faker.random.word(),
+        cmauzgw8k00625kt66z5x1dqf: faker.random.word(),
       },
       labels: {
-        clfp8d9jr0063v5dics022gmz: faker.random.word(),
+        cmauzgw8k00635kt643bn16nt: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -3875,7 +4230,7 @@ export const getGetWorkflowsUidMock = () => ({
   topology: {
     nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       conditional_branches: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-        () => ({ expression: faker.random.word(), name: faker.random.word(), template: faker.random.word() })
+        () => ({ expression: faker.random.word(), name: faker.random.word(), template: faker.random.word() }),
       ),
       name: faker.random.word(),
       parallel: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -3906,10 +4261,10 @@ export const getPutWorkflowsUidMock = () => ({
     kind: faker.random.word(),
     metadata: {
       annotations: {
-        clfp8d9jr0064v5di9riu0uti: faker.random.word(),
+        cmauzgw8k00645kt61jjmbx6k: faker.random.word(),
       },
       labels: {
-        clfp8d9jr0065v5di53k6dabk: faker.random.word(),
+        cmauzgw8k00655kt61r236y04: faker.random.word(),
       },
       name: faker.random.word(),
       namespace: faker.random.word(),
@@ -3922,7 +4277,7 @@ export const getPutWorkflowsUidMock = () => ({
   topology: {
     nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
       conditional_branches: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-        () => ({ expression: faker.random.word(), name: faker.random.word(), template: faker.random.word() })
+        () => ({ expression: faker.random.word(), name: faker.random.word(), template: faker.random.word() }),
       ),
       name: faker.random.word(),
       parallel: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
@@ -3946,8 +4301,8 @@ export const getPostWorkflowsParseTaskHttpMock = () => ({
   body: faker.random.word(),
   followLocation: faker.datatype.boolean(),
   header: {
-    clfp8d9js0066v5dicvfac03q: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-      () => faker.random.word()
+    cmauzgw8l00665kt639p78fbx: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+      () => faker.random.word(),
     ),
   },
   jsonContent: faker.datatype.boolean(),
@@ -3983,7 +4338,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   blockChaos: {
     action: faker.random.word(),
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     delay: { correlation: faker.random.word(), jitter: faker.random.word(), latency: faker.random.word() },
     duration: faker.random.word(),
@@ -3991,30 +4346,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9js0067v5di221e3q0p: faker.random.word(),
+        cmauzgw8l00675kt6hhb573su: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9js0068v5dig7af6l1a: faker.random.word(),
+        cmauzgw8l00685kt6bph14lyv: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9js0069v5di6cx4hild: faker.random.word(),
+        cmauzgw8l00695kt67exv9zoh: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9js006av5di5bp2gbjc: faker.random.word(),
+        cmauzgw8m006a5kt6bwchbest: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9js006bv5di6q4bhcb7: Array.from(
+        cmauzgw8m006b5kt64kbf0jd2: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4022,7 +4386,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     volumeName: faker.random.word(),
   },
   children: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-    faker.random.word()
+    faker.random.word(),
   ),
   conditionalBranches: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     expression: faker.random.word(),
@@ -4032,40 +4396,49 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   dnsChaos: {
     action: faker.random.word(),
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     duration: faker.random.word(),
     mode: faker.random.word(),
     patterns: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9js006cv5dicje6gjfd: faker.random.word(),
+        cmauzgw8m006c5kt62i0chcg0: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jt006dv5dic5v4drzx: faker.random.word(),
+        cmauzgw8m006d5kt6b4ux4615: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jt006ev5di0h80dwwp: faker.random.word(),
+        cmauzgw8m006e5kt60fc3feoh: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jt006fv5di366lfh6b: faker.random.word(),
+        cmauzgw8m006f5kt61k3c415v: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jt006gv5di4iyh5lqj: Array.from(
+        cmauzgw8m006g5kt6c9rn7maw: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4074,7 +4447,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   gcpChaos: {
     action: faker.random.word(),
     deviceNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     duration: faker.random.word(),
     instance: faker.random.word(),
@@ -4094,13 +4467,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       body: { type: faker.random.word(), value: faker.random.word() },
       headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
-        )
+          faker.random.word(),
+        ),
       ),
       queries: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
         Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
-        )
+          faker.random.word(),
+        ),
       ),
     },
     path: faker.random.word(),
@@ -4108,50 +4481,59 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     remoteCluster: faker.random.word(),
     replace: {
       body: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.datatype.number({ min: undefined, max: undefined })
+        faker.datatype.number({ min: undefined, max: undefined }),
       ),
       code: faker.datatype.number({ min: undefined, max: undefined }),
       headers: {
-        clfp8d9jt006hv5dib5yi3b4v: faker.random.word(),
+        cmauzgw8m006h5kt679qh8j4e: faker.random.word(),
       },
       method: faker.random.word(),
       path: faker.random.word(),
       queries: {
-        clfp8d9jt006iv5di6oemdvkv: faker.random.word(),
+        cmauzgw8m006i5kt62wld61dm: faker.random.word(),
       },
     },
     request_headers: {
-      clfp8d9jt006jv5diegy7coad: faker.random.word(),
+      cmauzgw8m006j5kt68gtz5bl2: faker.random.word(),
     },
     response_headers: {
-      clfp8d9jt006kv5dib4lz95wy: faker.random.word(),
+      cmauzgw8m006k5kt67mnr5na2: faker.random.word(),
     },
     selector: {
       annotationSelectors: {
-        clfp8d9jt006lv5di5w838ued: faker.random.word(),
+        cmauzgw8m006l5kt654cyav6n: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jt006mv5dibd5yf6nn: faker.random.word(),
+        cmauzgw8m006m5kt6evk89g6j: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jt006nv5dihhca1tc3: faker.random.word(),
+        cmauzgw8m006n5kt68t6n69sc: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jt006ov5dibdwm5e22: faker.random.word(),
+        cmauzgw8m006o5kt694t5cwxo: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jt006pv5di49mueih7: Array.from(
+        cmauzgw8m006p5kt615715oc0: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4191,13 +4573,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       uid: faker.datatype.number({ min: undefined, max: undefined }),
     },
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     delay: faker.random.word(),
     duration: faker.random.word(),
     errno: faker.datatype.number({ min: undefined, max: undefined }),
     methods: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     mistake: {
       filling: faker.random.word(),
@@ -4210,30 +4592,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9jt006qv5digzhs9q1t: faker.random.word(),
+        cmauzgw8m006q5kt620ww78cw: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jt006rv5dic8j6cl2i: faker.random.word(),
+        cmauzgw8m006r5kt666g2fw96: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jt006sv5di5nenf61t: faker.random.word(),
+        cmauzgw8m006s5kt601ylfval: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jt006tv5di3q3v9tii: faker.random.word(),
+        cmauzgw8m006t5kt6c4wwc5fy: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jt006uv5di3wqm2p81: Array.from(
+        cmauzgw8m006u5kt6eodc3pjz: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4244,7 +4635,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     action: faker.random.word(),
     class: faker.random.word(),
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     cpuCount: faker.datatype.number({ min: undefined, max: undefined }),
     database: faker.random.word(),
@@ -4259,33 +4650,43 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     pid: faker.datatype.number({ min: undefined, max: undefined }),
     port: faker.datatype.number({ min: undefined, max: undefined }),
     remoteCluster: faker.random.word(),
+    returnValue: faker.random.word(),
     ruleData: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9jt006vv5didfo69ek4: faker.random.word(),
+        cmauzgw8m006v5kt678arfbbm: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jt006wv5di1xvgba44: faker.random.word(),
+        cmauzgw8m006w5kt6dzkbf6g7: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jt006xv5dia8ey4yks: faker.random.word(),
+        cmauzgw8m006x5kt6epw44pph: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jt006yv5di41lw5dzr: faker.random.word(),
+        cmauzgw8m006y5kt66ssj7y2d: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jt006zv5di8ujbczds: Array.from(
+        cmauzgw8m006z5kt6h3d0ff9e: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4295,7 +4696,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   },
   kernelChaos: {
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     duration: faker.random.word(),
     failKernRequest: {
@@ -4306,7 +4707,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       })),
       failtype: faker.datatype.number({ min: undefined, max: undefined }),
       headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       probability: faker.datatype.number({ min: undefined, max: undefined }),
       times: faker.datatype.number({ min: undefined, max: undefined }),
@@ -4315,30 +4716,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9jt0070v5di1gk775w9: faker.random.word(),
+        cmauzgw8m00705kt6bohc2zlw: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jt0071v5di45ke1vvg: faker.random.word(),
+        cmauzgw8m00715kt6bm2ic4jy: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jt0072v5didtzkfg21: faker.random.word(),
+        cmauzgw8m00725kt65io93v8q: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jt0073v5di6pkd08p8: faker.random.word(),
+        cmauzgw8m00735kt6fz2p38wv: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jt0074v5di3krabmgh: Array.from(
+        cmauzgw8m00745kt6dfce7z91: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4370,37 +4780,47 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     duplicate: { correlation: faker.random.word(), duplicate: faker.random.word() },
     duration: faker.random.word(),
     externalTargets: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     loss: { correlation: faker.random.word(), loss: faker.random.word() },
     mode: faker.random.word(),
+    rate: { rate: faker.random.word() },
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9jt0075v5didcfa6lqv: faker.random.word(),
+        cmauzgw8m00755kt6157qdo3q: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jt0076v5dihs8k84j0: faker.random.word(),
+        cmauzgw8m00765kt64cv32n58: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jt0077v5di5f9edh79: faker.random.word(),
+        cmauzgw8m00775kt6bjz77e3i: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jt0078v5difzco7dnw: faker.random.word(),
+        cmauzgw8m00785kt6dwh42mbl: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jt0079v5dig73g9c55: Array.from(
+        cmauzgw8m00795kt64quv0muw: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4408,30 +4828,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       mode: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jt007av5didddj3u73: faker.random.word(),
+          cmauzgw8m007a5kt67ak08irm: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jt007bv5di7ydq28zk: faker.random.word(),
+          cmauzgw8m007b5kt62vs66dqr: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jt007cv5di4aqt0t32: faker.random.word(),
+          cmauzgw8m007c5kt600ns94z2: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jt007dv5di3gpo5hqk: faker.random.word(),
+          cmauzgw8m007d5kt63w0x6euo: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jt007ev5di4cngcsq8: Array.from(
+          cmauzgw8m007e5kt67fnucnhu: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -4443,7 +4872,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   physicalmachineChaos: {
     action: faker.random.word(),
     address: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     clock: {
       'clock-ids-slice': faker.random.word(),
@@ -4490,7 +4919,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       path: faker.random.word(),
       port: faker.datatype.number({ min: undefined, max: undefined }),
       proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.datatype.number({ min: undefined, max: undefined })
+        faker.datatype.number({ min: undefined, max: undefined }),
       ),
       target: faker.random.word(),
     },
@@ -4502,7 +4931,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       path: faker.random.word(),
       port: faker.datatype.number({ min: undefined, max: undefined }),
       proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.datatype.number({ min: undefined, max: undefined })
+        faker.datatype.number({ min: undefined, max: undefined }),
       ),
       target: faker.random.word(),
     },
@@ -4696,34 +5125,43 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9ju007fv5di0vq7en0o: faker.random.word(),
+        cmauzgw8n007f5kt6f4rvfm5x: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9ju007gv5dihc2397n5: faker.random.word(),
+        cmauzgw8n007g5kt61ofe54h3: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9ju007hv5di5xby2ydn: faker.random.word(),
+        cmauzgw8n007h5kt60zcrfb5s: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       physicalMachines: {
-        clfp8d9ju007iv5diey44gtxi: Array.from(
+        cmauzgw8n007i5kt6e2uh18dt: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
     'stress-cpu': {
       load: faker.datatype.number({ min: undefined, max: undefined }),
       options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       workers: faker.datatype.number({ min: undefined, max: undefined }),
     },
     'stress-mem': {
       options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       size: faker.random.word(),
     },
@@ -4734,7 +5172,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   podChaos: {
     action: faker.random.word(),
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     duration: faker.random.word(),
     gracePeriod: faker.datatype.number({ min: undefined, max: undefined }),
@@ -4742,30 +5180,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9ju007jv5di3bbn8siu: faker.random.word(),
+        cmauzgw8n007j5kt65mi63qea: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9ju007kv5di7bpbcmsf: faker.random.word(),
+        cmauzgw8n007k5kt688n9dhw3: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9ju007lv5dibeoldi35: faker.random.word(),
+        cmauzgw8n007l5kt6bv7462ng: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9ju007mv5di72bk4euy: faker.random.word(),
+        cmauzgw8n007m5kt6899cc1nr: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9ju007nv5di7bbv1is0: Array.from(
+        cmauzgw8n007n5kt6doc60677: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -4797,7 +5244,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     blockChaos: {
       action: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       delay: { correlation: faker.random.word(), jitter: faker.random.word(), latency: faker.random.word() },
       duration: faker.random.word(),
@@ -4805,30 +5252,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9ju007ov5di2o3y1hjh: faker.random.word(),
+          cmauzgw8n007o5kt66oa4bkt1: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9ju007pv5didh0mhe65: faker.random.word(),
+          cmauzgw8n007p5kt66cbb6l9c: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9ju007qv5dih159a1nb: faker.random.word(),
+          cmauzgw8n007q5kt60r3zdgyq: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9ju007rv5diahmt5n4y: faker.random.word(),
+          cmauzgw8n007r5kt63hend5pn: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9ju007sv5di02xrcmpw: Array.from(
+          cmauzgw8n007s5kt6b3zwg8rm: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -4839,40 +5295,49 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     dnsChaos: {
       action: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       mode: faker.random.word(),
       patterns: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9ju007tv5di1tc43wdk: faker.random.word(),
+          cmauzgw8n007t5kt65el55r67: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9ju007uv5dihnwmey5o: faker.random.word(),
+          cmauzgw8n007u5kt65q9w1eys: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9ju007vv5dibi2i16l0: faker.random.word(),
+          cmauzgw8n007v5kt6h6fd81st: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9ju007wv5didoup5nur: faker.random.word(),
+          cmauzgw8n007w5kt60afigp4o: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jv007xv5diepp61zq7: Array.from(
+          cmauzgw8n007x5kt6dtsoaefh: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -4881,7 +5346,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     gcpChaos: {
       action: faker.random.word(),
       deviceNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       instance: faker.random.word(),
@@ -4902,13 +5367,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         body: { type: faker.random.word(), value: faker.random.word() },
         headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
-          )
+            faker.random.word(),
+          ),
         ),
         queries: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
           Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
-          )
+            faker.random.word(),
+          ),
         ),
       },
       path: faker.random.word(),
@@ -4916,50 +5381,59 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       remoteCluster: faker.random.word(),
       replace: {
         body: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.datatype.number({ min: undefined, max: undefined })
+          faker.datatype.number({ min: undefined, max: undefined }),
         ),
         code: faker.datatype.number({ min: undefined, max: undefined }),
         headers: {
-          clfp8d9jv007yv5die5hz6yr4: faker.random.word(),
+          cmauzgw8n007y5kt623u0a59a: faker.random.word(),
         },
         method: faker.random.word(),
         path: faker.random.word(),
         queries: {
-          clfp8d9jv007zv5di0l9hhiht: faker.random.word(),
+          cmauzgw8n007z5kt6ht412qvm: faker.random.word(),
         },
       },
       request_headers: {
-        clfp8d9jv0080v5diaqggbuhq: faker.random.word(),
+        cmauzgw8n00805kt67te1cyyj: faker.random.word(),
       },
       response_headers: {
-        clfp8d9jv0081v5dibmkf6awu: faker.random.word(),
+        cmauzgw8n00815kt6am671crb: faker.random.word(),
       },
       selector: {
         annotationSelectors: {
-          clfp8d9jv0082v5die8ns65vj: faker.random.word(),
+          cmauzgw8n00825kt681m0cjak: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jv0083v5didr5bedfr: faker.random.word(),
+          cmauzgw8n00835kt62rgc5w59: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jv0084v5diaw3d3bax: faker.random.word(),
+          cmauzgw8n00845kt6ctvb029y: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jv0085v5did8nedjlz: faker.random.word(),
+          cmauzgw8n00855kt6dz9k4nks: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jv0086v5di9v8d0f05: Array.from(
+          cmauzgw8n00865kt60dr528qu: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -4999,13 +5473,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         uid: faker.datatype.number({ min: undefined, max: undefined }),
       },
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       delay: faker.random.word(),
       duration: faker.random.word(),
       errno: faker.datatype.number({ min: undefined, max: undefined }),
       methods: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       mistake: {
         filling: faker.random.word(),
@@ -5018,30 +5492,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jv0087v5di5cns9jfp: faker.random.word(),
+          cmauzgw8n00875kt68trd3evh: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jv0088v5digpwnftaw: faker.random.word(),
+          cmauzgw8n00885kt68fft07pl: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jv0089v5di38lec6wo: faker.random.word(),
+          cmauzgw8n00895kt6f0m83cuq: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jv008av5di93g3aakj: faker.random.word(),
+          cmauzgw8n008a5kt6dkn60827: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jv008bv5di7f3bgc2p: Array.from(
+          cmauzgw8n008b5kt652rn5bwc: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5052,7 +5535,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       action: faker.random.word(),
       class: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       cpuCount: faker.datatype.number({ min: undefined, max: undefined }),
       database: faker.random.word(),
@@ -5067,33 +5550,43 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       pid: faker.datatype.number({ min: undefined, max: undefined }),
       port: faker.datatype.number({ min: undefined, max: undefined }),
       remoteCluster: faker.random.word(),
+      returnValue: faker.random.word(),
       ruleData: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jv008cv5di342cht6o: faker.random.word(),
+          cmauzgw8n008c5kt6fxr1glgf: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jv008dv5didppwfi3b: faker.random.word(),
+          cmauzgw8n008d5kt6b5ke3noo: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jv008ev5dicw5penij: faker.random.word(),
+          cmauzgw8n008e5kt64tdr4soo: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jv008fv5digdgl4ayn: faker.random.word(),
+          cmauzgw8n008f5kt63ql0crg1: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jv008gv5dierydgi7m: Array.from(
+          cmauzgw8n008g5kt6dyckado7: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5103,7 +5596,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     },
     kernelChaos: {
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       failKernRequest: {
@@ -5114,7 +5607,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         })),
         failtype: faker.datatype.number({ min: undefined, max: undefined }),
         headers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         probability: faker.datatype.number({ min: undefined, max: undefined }),
         times: faker.datatype.number({ min: undefined, max: undefined }),
@@ -5123,30 +5616,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jv008hv5di09k95572: faker.random.word(),
+          cmauzgw8n008h5kt661jv4xls: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jv008iv5difmbfhymy: faker.random.word(),
+          cmauzgw8o008i5kt64c8ka078: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jv008jv5dictjq0ffy: faker.random.word(),
+          cmauzgw8o008j5kt6al4j4u0b: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jv008kv5difw6n8e5e: faker.random.word(),
+          cmauzgw8o008k5kt63xa978uk: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jv008lv5difwa20zzn: Array.from(
+          cmauzgw8o008l5kt695vc0fcu: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5177,37 +5679,47 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       duplicate: { correlation: faker.random.word(), duplicate: faker.random.word() },
       duration: faker.random.word(),
       externalTargets: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       loss: { correlation: faker.random.word(), loss: faker.random.word() },
       mode: faker.random.word(),
+      rate: { rate: faker.random.word() },
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jv008mv5di1kqa7sb6: faker.random.word(),
+          cmauzgw8o008m5kt6bg2wcbld: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jv008nv5di91bg2xtr: faker.random.word(),
+          cmauzgw8o008n5kt6hcoq33vm: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jv008ov5di9dq9ek3i: faker.random.word(),
+          cmauzgw8o008o5kt6b6tw8xf0: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jv008pv5di6t3n1zid: faker.random.word(),
+          cmauzgw8o008p5kt6fp33fyra: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jv008qv5di7ioy0udy: Array.from(
+          cmauzgw8o008q5kt69rhkhpe2: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5215,30 +5727,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         mode: faker.random.word(),
         selector: {
           annotationSelectors: {
-            clfp8d9jv008rv5didbs12dke: faker.random.word(),
+            cmauzgw8o008r5kt6e51m8jz5: faker.random.word(),
           },
+          expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+            () => ({
+              key: faker.random.word(),
+              operator: faker.random.word(),
+              values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+                faker.random.word(),
+              ),
+            }),
+          ),
           fieldSelectors: {
-            clfp8d9jv008sv5di53zc8lt6: faker.random.word(),
+            cmauzgw8o008s5kt69cmhewlx: faker.random.word(),
           },
           labelSelectors: {
-            clfp8d9jv008tv5di4bwra2uo: faker.random.word(),
+            cmauzgw8o008t5kt61ion2fpc: faker.random.word(),
           },
           namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           nodeSelectors: {
-            clfp8d9jv008uv5di04or9lct: faker.random.word(),
+            cmauzgw8o008u5kt65o012zmo: faker.random.word(),
           },
           nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-            () => faker.random.word()
+            () => faker.random.word(),
           ),
           pods: {
-            clfp8d9jv008vv5di8kn185wg: Array.from(
+            cmauzgw8o008v5kt66i3l0f5p: Array.from(
               { length: faker.datatype.number({ min: 1, max: 10 }) },
-              (_, i) => i + 1
+              (_, i) => i + 1,
             ).map(() => faker.random.word()),
           },
         },
@@ -5250,7 +5771,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     physicalmachineChaos: {
       action: faker.random.word(),
       address: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       clock: {
         'clock-ids-slice': faker.random.word(),
@@ -5297,7 +5818,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         path: faker.random.word(),
         port: faker.datatype.number({ min: undefined, max: undefined }),
         proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.datatype.number({ min: undefined, max: undefined })
+          faker.datatype.number({ min: undefined, max: undefined }),
         ),
         target: faker.random.word(),
       },
@@ -5309,7 +5830,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         path: faker.random.word(),
         port: faker.datatype.number({ min: undefined, max: undefined }),
         proxy_ports: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.datatype.number({ min: undefined, max: undefined })
+          faker.datatype.number({ min: undefined, max: undefined }),
         ),
         target: faker.random.word(),
       },
@@ -5503,34 +6024,43 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jw008wv5di7nzof32m: faker.random.word(),
+          cmauzgw8o008w5kt6esj76hhb: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jw008xv5dih2g35h7o: faker.random.word(),
+          cmauzgw8o008x5kt6fvinej8m: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jw008yv5dihhowbyl8: faker.random.word(),
+          cmauzgw8o008y5kt67nr24okl: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         physicalMachines: {
-          clfp8d9jw008zv5di3qd4g5jt: Array.from(
+          cmauzgw8o008z5kt63moi9apt: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
       'stress-cpu': {
         load: faker.datatype.number({ min: undefined, max: undefined }),
         options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         workers: faker.datatype.number({ min: undefined, max: undefined }),
       },
       'stress-mem': {
         options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         size: faker.random.word(),
       },
@@ -5541,7 +6071,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     podChaos: {
       action: faker.random.word(),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       gracePeriod: faker.datatype.number({ min: undefined, max: undefined }),
@@ -5549,30 +6079,39 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jw0090v5di0clnfm4t: faker.random.word(),
+          cmauzgw8o00905kt61bjy82eh: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jw0091v5di9ngr7801: faker.random.word(),
+          cmauzgw8o00915kt65plf95rm: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jw0092v5dicuqj7yi2: faker.random.word(),
+          cmauzgw8o00925kt6fkfq7o2c: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jw0093v5dia7xf7lf8: faker.random.word(),
+          cmauzgw8o00935kt661zf5j1i: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jw0094v5di3cttc4vh: Array.from(
+          cmauzgw8o00945kt69g031ki9: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5582,37 +6121,46 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     startingDeadlineSeconds: faker.datatype.number({ min: undefined, max: undefined }),
     stressChaos: {
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       mode: faker.random.word(),
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jw0095v5dih3uc65e3: faker.random.word(),
+          cmauzgw8o00955kt6gbw6g5mx: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jw0096v5diezml7z4p: faker.random.word(),
+          cmauzgw8o00965kt69wi11e44: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jw0097v5dibcgf3l4f: faker.random.word(),
+          cmauzgw8o00975kt6gp87d6tm: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jw0098v5di7dap51b2: faker.random.word(),
+          cmauzgw8o00985kt6adu04oy4: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jw0099v5dicrui84bp: Array.from(
+          cmauzgw8o00995kt69ovt337s: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5621,14 +6169,14 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         cpu: {
           load: faker.datatype.number({ min: undefined, max: undefined }),
           options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           workers: faker.datatype.number({ min: undefined, max: undefined }),
         },
         memory: {
           oomScoreAdj: faker.datatype.number({ min: undefined, max: undefined }),
           options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           size: faker.random.word(),
           workers: faker.datatype.number({ min: undefined, max: undefined }),
@@ -5638,40 +6186,49 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
     },
     timeChaos: {
       clockIds: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       duration: faker.random.word(),
       mode: faker.random.word(),
       remoteCluster: faker.random.word(),
       selector: {
         annotationSelectors: {
-          clfp8d9jw009av5dic642cd0f: faker.random.word(),
+          cmauzgw8o009a5kt66wr72d1x: faker.random.word(),
         },
+        expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+          () => ({
+            key: faker.random.word(),
+            operator: faker.random.word(),
+            values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+              faker.random.word(),
+            ),
+          }),
+        ),
         fieldSelectors: {
-          clfp8d9jw009bv5dihsggg5k9: faker.random.word(),
+          cmauzgw8o009b5kt6a1ym39c3: faker.random.word(),
         },
         labelSelectors: {
-          clfp8d9jw009cv5di0s5sgv7r: faker.random.word(),
+          cmauzgw8o009c5kt6edlehb3q: faker.random.word(),
         },
         namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         nodeSelectors: {
-          clfp8d9jw009dv5diesja0pjt: faker.random.word(),
+          cmauzgw8o009d5kt6adb26leu: faker.random.word(),
         },
         nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pods: {
-          clfp8d9jw009ev5di0tfx2p26: Array.from(
+          cmauzgw8o009e5kt66ka4d7rh: Array.from(
             { length: faker.datatype.number({ min: 1, max: 10 }) },
-            (_, i) => i + 1
+            (_, i) => i + 1,
           ).map(() => faker.random.word()),
         },
       },
@@ -5687,9 +6244,9 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       body: faker.random.word(),
       criteria: { statusCode: faker.random.word() },
       headers: {
-        clfp8d9jw009fv5di5xl0dc5x: Array.from(
+        cmauzgw8p009f5kt61jwu9x9z: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
       method: faker.random.word(),
@@ -5704,37 +6261,46 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   },
   stressChaos: {
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     duration: faker.random.word(),
     mode: faker.random.word(),
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9jw009gv5dib7y39h69: faker.random.word(),
+        cmauzgw8p009g5kt6f5pq77o8: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jw009hv5di1g9m3v36: faker.random.word(),
+        cmauzgw8p009h5kt677z39mos: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jw009iv5di9tis0myi: faker.random.word(),
+        cmauzgw8p009i5kt6clnp3ov9: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jw009jv5di2163h5u2: faker.random.word(),
+        cmauzgw8p009j5kt65cm18swz: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jx009kv5difj7a4vrq: Array.from(
+        cmauzgw8p009k5kt620j15zq1: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -5743,14 +6309,14 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       cpu: {
         load: faker.datatype.number({ min: undefined, max: undefined }),
         options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         workers: faker.datatype.number({ min: undefined, max: undefined }),
       },
       memory: {
         oomScoreAdj: faker.datatype.number({ min: undefined, max: undefined }),
         options: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         size: faker.random.word(),
         workers: faker.datatype.number({ min: undefined, max: undefined }),
@@ -5761,10 +6327,10 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   task: {
     container: {
       args: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       env: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
         name: faker.random.word(),
@@ -5791,13 +6357,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         postStart: {
           exec: {
             command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
           },
           httpGet: {
             host: faker.random.word(),
             httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({ name: faker.random.word(), value: faker.random.word() })
+              () => ({ name: faker.random.word(), value: faker.random.word() }),
             ),
             path: faker.random.word(),
             port: {
@@ -5819,13 +6385,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         preStop: {
           exec: {
             command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
           },
           httpGet: {
             host: faker.random.word(),
             httpHeaders: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
-              () => ({ name: faker.random.word(), value: faker.random.word() })
+              () => ({ name: faker.random.word(), value: faker.random.word() }),
             ),
             path: faker.random.word(),
             port: {
@@ -5848,7 +6414,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       livenessProbe: {
         exec: {
           command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
         },
         failureThreshold: faker.datatype.number({ min: undefined, max: undefined }),
@@ -5892,7 +6458,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       readinessProbe: {
         exec: {
           command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
         },
         failureThreshold: faker.datatype.number({ min: undefined, max: undefined }),
@@ -5925,25 +6491,30 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         terminationGracePeriodSeconds: faker.datatype.number({ min: undefined, max: undefined }),
         timeoutSeconds: faker.datatype.number({ min: undefined, max: undefined }),
       },
+      resizePolicy: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
+        resourceName: faker.random.word(),
+        restartPolicy: faker.random.word(),
+      })),
       resources: {
         claims: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
           name: faker.random.word(),
         })),
         limits: {
-          clfp8d9jx009lv5difcwraz30: { Format: faker.random.word() },
+          cmauzgw8p009l5kt6hswlcor5: { Format: faker.random.word() },
         },
         requests: {
-          clfp8d9jx009mv5dibhtd2tla: { Format: faker.random.word() },
+          cmauzgw8p009m5kt6cezw6zd8: { Format: faker.random.word() },
         },
       },
+      restartPolicy: faker.random.word(),
       securityContext: {
         allowPrivilegeEscalation: faker.datatype.boolean(),
         capabilities: {
           add: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           drop: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
         },
         privileged: faker.datatype.boolean(),
@@ -5969,7 +6540,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       startupProbe: {
         exec: {
           command: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
         },
         failureThreshold: faker.datatype.number({ min: undefined, max: undefined }),
@@ -6043,7 +6614,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       },
       cephfs: {
         monitors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         path: faker.random.word(),
         readOnly: faker.datatype.boolean(),
@@ -6073,7 +6644,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         nodePublishSecretRef: { name: faker.random.word() },
         readOnly: faker.datatype.boolean(),
         volumeAttributes: {
-          clfp8d9jx009nv5di1xyl7zd5: faker.random.word(),
+          cmauzgw8p009n5kt6h8lt9q59: faker.random.word(),
         },
       },
       downwardAPI: {
@@ -6093,18 +6664,18 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
       ephemeral: {
         volumeClaimTemplate: {
           annotations: {
-            clfp8d9jy009ov5di4jntb0kk: faker.random.word(),
+            cmauzgw8p009o5kt69jer7i6v: faker.random.word(),
           },
           creationTimestamp: faker.random.word(),
           deletionGracePeriodSeconds: faker.datatype.number({ min: undefined, max: undefined }),
           deletionTimestamp: faker.random.word(),
           finalizers: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-            faker.random.word()
+            faker.random.word(),
           ),
           generateName: faker.random.word(),
           generation: faker.datatype.number({ min: undefined, max: undefined }),
           labels: {
-            clfp8d9jy009pv5dihvhp46kf: faker.random.word(),
+            cmauzgw8p009p5kt61cvd2rhd: faker.random.word(),
           },
           managedFields: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
             () => ({
@@ -6115,7 +6686,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
               operation: faker.random.word(),
               subresource: faker.random.word(),
               time: faker.random.word(),
-            })
+            }),
           ),
           name: faker.random.word(),
           namespace: faker.random.word(),
@@ -6127,13 +6698,13 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
               kind: faker.random.word(),
               name: faker.random.word(),
               uid: faker.random.word(),
-            })
+            }),
           ),
           resourceVersion: faker.random.word(),
           selfLink: faker.random.word(),
           spec: {
             accessModes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-              faker.random.word()
+              faker.random.word(),
             ),
             dataSource: { apiGroup: faker.random.word(), kind: faker.random.word(), name: faker.random.word() },
             dataSourceRef: {
@@ -6147,10 +6718,10 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
                 name: faker.random.word(),
               })),
               limits: {
-                clfp8d9jy009qv5di8l0r3jhd: { Format: faker.random.word() },
+                cmauzgw8p009q5kt65epgc9um: { Format: faker.random.word() },
               },
               requests: {
-                clfp8d9jy009rv5di5nl6ewp4: { Format: faker.random.word() },
+                cmauzgw8p009r5kt65f7l32i8: { Format: faker.random.word() },
               },
             },
             selector: {
@@ -6159,12 +6730,12 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
                   key: faker.random.word(),
                   operator: faker.random.word(),
                   values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-                    faker.random.word()
+                    faker.random.word(),
                   ),
-                })
+                }),
               ),
               matchLabels: {
-                clfp8d9jy009sv5difd3bg3pu: faker.random.word(),
+                cmauzgw8p009s5kt6633523ud: faker.random.word(),
               },
             },
             storageClassName: faker.random.word(),
@@ -6179,17 +6750,17 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         lun: faker.datatype.number({ min: undefined, max: undefined }),
         readOnly: faker.datatype.boolean(),
         targetWWNs: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         wwids: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
       },
       flexVolume: {
         driver: faker.random.word(),
         fsType: faker.random.word(),
         options: {
-          clfp8d9jy009tv5di5ur7c7kh: faker.random.word(),
+          cmauzgw8p009t5kt62h1x281j: faker.random.word(),
         },
         readOnly: faker.datatype.boolean(),
         secretRef: { name: faker.random.word() },
@@ -6213,7 +6784,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         iscsiInterface: faker.random.word(),
         lun: faker.datatype.number({ min: undefined, max: undefined }),
         portals: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         readOnly: faker.datatype.boolean(),
         secretRef: { name: faker.random.word() },
@@ -6281,7 +6852,7 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
         image: faker.random.word(),
         keyring: faker.random.word(),
         monitors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-          faker.random.word()
+          faker.random.word(),
         ),
         pool: faker.random.word(),
         readOnly: faker.datatype.boolean(),
@@ -6328,40 +6899,49 @@ export const getPostWorkflowsRenderTaskHttpMock = () => ({
   templateType: faker.random.word(),
   timeChaos: {
     clockIds: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     containerNames: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-      faker.random.word()
+      faker.random.word(),
     ),
     duration: faker.random.word(),
     mode: faker.random.word(),
     remoteCluster: faker.random.word(),
     selector: {
       annotationSelectors: {
-        clfp8d9jy009uv5dictndbnnh: faker.random.word(),
+        cmauzgw8q009u5kt6dv0e0t4r: faker.random.word(),
       },
+      expressionSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(
+        () => ({
+          key: faker.random.word(),
+          operator: faker.random.word(),
+          values: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
+            faker.random.word(),
+          ),
+        }),
+      ),
       fieldSelectors: {
-        clfp8d9jy009vv5di5wwwey4z: faker.random.word(),
+        cmauzgw8q009v5kt6ayqy8h52: faker.random.word(),
       },
       labelSelectors: {
-        clfp8d9jy009wv5dift8e7y2w: faker.random.word(),
+        cmauzgw8q009w5kt69o0k8scv: faker.random.word(),
       },
       namespaces: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       nodeSelectors: {
-        clfp8d9jy009xv5diepnl9y1i: faker.random.word(),
+        cmauzgw8q009x5kt6ah7o90jo: faker.random.word(),
       },
       nodes: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       podPhaseSelectors: Array.from({ length: faker.datatype.number({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() =>
-        faker.random.word()
+        faker.random.word(),
       ),
       pods: {
-        clfp8d9jy009yv5di9ebo6st3: Array.from(
+        cmauzgw8q009y5kt6bpab2sed: Array.from(
           { length: faker.datatype.number({ min: 1, max: 10 }) },
-          (_, i) => i + 1
+          (_, i) => i + 1,
         ).map(() => faker.random.word()),
       },
     },
@@ -6506,7 +7086,7 @@ export const getChaosMeshDashboardAPIMSW = () => [
     return res(
       ctx.delay(0),
       ctx.status(200, 'Mocked status'),
-      ctx.json(getDeleteTemplatesStatuschecksStatuscheckMock())
+      ctx.json(getDeleteTemplatesStatuschecksStatuscheckMock()),
     )
   }),
   rest.get('*/templates/statuschecks/statuscheck', (_req, res, ctx) => {
