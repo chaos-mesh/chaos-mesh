@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Chaos Mesh Dashboard API
  * Swagger for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report.
- * OpenAPI spec version: 2.2
+ * OpenAPI spec version: 2.5
  */
 export type GetWorkflowsStatus = (typeof GetWorkflowsStatus)[keyof typeof GetWorkflowsStatus]
 
@@ -373,7 +373,7 @@ export interface V1alpha1WorkflowStatus {
  * Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
-More info: http://kubernetes.io/docs/user-guide/labels
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional
  */
 export type V1alpha1WorkflowLabels = { [key: string]: string }
@@ -382,7 +382,7 @@ export type V1alpha1WorkflowLabels = { [key: string]: string }
  * Annotations is an unstructured key value map stored with a resource that may be
 set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
-More info: http://kubernetes.io/docs/user-guide/annotations
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional
  */
 export type V1alpha1WorkflowAnnotations = { [key: string]: string }
@@ -391,7 +391,7 @@ export interface V1alpha1Workflow {
   /** Annotations is an unstructured key value map stored with a resource that may be
 set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
-More info: http://kubernetes.io/docs/user-guide/annotations
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional */
   annotations?: V1alpha1WorkflowAnnotations
   /** APIVersion defines the versioned schema of this representation of an object.
@@ -480,7 +480,7 @@ More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-
   /** Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
-More info: http://kubernetes.io/docs/user-guide/labels
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional */
   labels?: V1alpha1WorkflowLabels
   /** ManagedFields maps workflow-id and version to the set of fields
@@ -498,7 +498,7 @@ some resources may allow a client to request the generation of an appropriate na
 automatically. Name is primarily intended for creation idempotence and configuration
 definition.
 Cannot be updated.
-More info: http://kubernetes.io/docs/user-guide/identifiers#names
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names
 +optional */
   name?: string
   /** Namespace defines the space within which each name must be unique. An empty namespace is
@@ -508,7 +508,7 @@ those objects will be empty.
 
 Must be a DNS_LABEL.
 Cannot be updated.
-More info: http://kubernetes.io/docs/user-guide/namespaces
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces
 +optional */
   namespace?: string
   /** List of objects depended by this object. If ALL objects in the list have
@@ -542,7 +542,7 @@ operations.
 
 Populated by the system.
 Read-only.
-More info: http://kubernetes.io/docs/user-guide/identifiers#uids
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
 +optional */
   uid?: string
 }
@@ -604,40 +604,6 @@ export interface V1alpha1Task {
   volumes?: V1Volume[]
 }
 
-export interface V1alpha1Template {
-  /** AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
-Only used when Type is TypeStatusCheck.
-+optional */
-  abortWithStatusCheck?: boolean
-  awsChaos?: V1alpha1AWSChaosSpec
-  azureChaos?: V1alpha1AzureChaosSpec
-  blockChaos?: V1alpha1BlockChaosSpec
-  /** Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
-+optional */
-  children?: string[]
-  /** ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
-+optional */
-  conditionalBranches?: V1alpha1ConditionalBranch[]
-  /** +optional */
-  deadline?: string
-  dnsChaos?: V1alpha1DNSChaosSpec
-  gcpChaos?: V1alpha1GCPChaosSpec
-  httpChaos?: V1alpha1HTTPChaosSpec
-  ioChaos?: V1alpha1IOChaosSpec
-  jvmChaos?: V1alpha1JVMChaosSpec
-  kernelChaos?: V1alpha1KernelChaosSpec
-  name?: string
-  networkChaos?: V1alpha1NetworkChaosSpec
-  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec
-  podChaos?: V1alpha1PodChaosSpec
-  schedule?: V1alpha1ChaosOnlyScheduleSpec
-  statusCheck?: V1alpha1StatusCheckSpec
-  stressChaos?: V1alpha1StressChaosSpec
-  task?: V1alpha1Task
-  templateType?: string
-  timeChaos?: V1alpha1TimeChaosSpec
-}
-
 export interface V1alpha1Stressors {
   cpu?: V1alpha1CPUStressor
   memory?: V1alpha1MemoryStressor
@@ -684,6 +650,40 @@ IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max perce
   value?: string
 }
 
+export interface V1alpha1Template {
+  /** AbortWithStatusCheck describe whether to abort the workflow when the failure threshold of StatusCheck is exceeded.
+Only used when Type is TypeStatusCheck.
++optional */
+  abortWithStatusCheck?: boolean
+  awsChaos?: V1alpha1AWSChaosSpec
+  azureChaos?: V1alpha1AzureChaosSpec
+  blockChaos?: V1alpha1BlockChaosSpec
+  /** Children describes the children steps of serial or parallel node. Only used when Type is TypeSerial or TypeParallel.
++optional */
+  children?: string[]
+  /** ConditionalBranches describes the conditional branches of custom tasks. Only used when Type is TypeTask.
++optional */
+  conditionalBranches?: V1alpha1ConditionalBranch[]
+  /** +optional */
+  deadline?: string
+  dnsChaos?: V1alpha1DNSChaosSpec
+  gcpChaos?: V1alpha1GCPChaosSpec
+  httpChaos?: V1alpha1HTTPChaosSpec
+  ioChaos?: V1alpha1IOChaosSpec
+  jvmChaos?: V1alpha1JVMChaosSpec
+  kernelChaos?: V1alpha1KernelChaosSpec
+  name?: string
+  networkChaos?: V1alpha1NetworkChaosSpec
+  physicalmachineChaos?: V1alpha1PhysicalMachineChaosSpec
+  podChaos?: V1alpha1PodChaosSpec
+  schedule?: V1alpha1ChaosOnlyScheduleSpec
+  statusCheck?: V1alpha1StatusCheckSpec
+  stressChaos?: V1alpha1StressChaosSpec
+  task?: V1alpha1Task
+  templateType?: string
+  timeChaos?: V1alpha1TimeChaosSpec
+}
+
 export interface V1alpha1StressCPUSpec {
   /** specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100 is full loading. */
   load?: number
@@ -691,60 +691,6 @@ export interface V1alpha1StressCPUSpec {
   options?: string[]
   /** specifies N workers to apply the stressor. */
   workers?: number
-}
-
-export interface V1alpha1StatusCheckTemplate {
-  /** Duration defines the duration of the whole status check if the
-number of failed execution does not exceed the failure threshold.
-Duration is available to both `Synchronous` and `Continuous` mode.
-A duration string is a possibly signed sequence of
-decimal numbers, each with optional fraction and a unit suffix,
-such as "300ms", "-1.5h" or "2h45m".
-Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-+optional */
-  duration?: string
-  /** FailureThreshold defines the minimum consecutive failure
-for the status check to be considered failed.
-+optional
-+kubebuilder:default=3
-+kubebuilder:validation:Minimum=1 */
-  failureThreshold?: number
-  http?: V1alpha1HTTPStatusCheck
-  /** IntervalSeconds defines how often (in seconds) to perform
-an execution of status check.
-+optional
-+kubebuilder:default=10
-+kubebuilder:validation:Minimum=1 */
-  intervalSeconds?: number
-  /** Mode defines the execution mode of the status check.
-Support type: Synchronous / Continuous
-+optional
-+kubebuilder:validation:Enum=Synchronous;Continuous */
-  mode?: string
-  /** RecordsHistoryLimit defines the number of record to retain.
-+optional
-+kubebuilder:default=100
-+kubebuilder:validation:Minimum=1
-+kubebuilder:validation:Maximum=1000 */
-  recordsHistoryLimit?: number
-  /** SuccessThreshold defines the minimum consecutive successes
-for the status check to be considered successful.
-SuccessThreshold only works for `Synchronous` mode.
-+optional
-+kubebuilder:default=1
-+kubebuilder:validation:Minimum=1 */
-  successThreshold?: number
-  /** TimeoutSeconds defines the number of seconds after which
-an execution of status check times out.
-+optional
-+kubebuilder:default=1
-+kubebuilder:validation:Minimum=1 */
-  timeoutSeconds?: number
-  /** Type defines the specific status check type.
-Support type: HTTP
-+kubebuilder:default=HTTP
-+kubebuilder:validation:Enum=HTTP */
-  type?: string
 }
 
 export interface V1alpha1StatusCheckSpec {
@@ -837,7 +783,6 @@ export interface V1alpha1ScheduleSpec {
   startingDeadlineSeconds?: number
   stressChaos?: V1alpha1StressChaosSpec
   timeChaos?: V1alpha1TimeChaosSpec
-  /** TODO: use a custom type, as `TemplateType` contains other possible values */
   type?: string
   workflow?: V1alpha1WorkflowSpec
 }
@@ -846,7 +791,7 @@ export interface V1alpha1ScheduleSpec {
  * Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
-More info: http://kubernetes.io/docs/user-guide/labels
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional
  */
 export type V1alpha1ScheduleLabels = { [key: string]: string }
@@ -855,7 +800,7 @@ export type V1alpha1ScheduleLabels = { [key: string]: string }
  * Annotations is an unstructured key value map stored with a resource that may be
 set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
-More info: http://kubernetes.io/docs/user-guide/annotations
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional
  */
 export type V1alpha1ScheduleAnnotations = { [key: string]: string }
@@ -864,7 +809,7 @@ export interface V1alpha1Schedule {
   /** Annotations is an unstructured key value map stored with a resource that may be
 set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
-More info: http://kubernetes.io/docs/user-guide/annotations
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional */
   annotations?: V1alpha1ScheduleAnnotations
   /** APIVersion defines the versioned schema of this representation of an object.
@@ -953,7 +898,7 @@ More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-
   /** Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
-More info: http://kubernetes.io/docs/user-guide/labels
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional */
   labels?: V1alpha1ScheduleLabels
   /** ManagedFields maps workflow-id and version to the set of fields
@@ -971,7 +916,7 @@ some resources may allow a client to request the generation of an appropriate na
 automatically. Name is primarily intended for creation idempotence and configuration
 definition.
 Cannot be updated.
-More info: http://kubernetes.io/docs/user-guide/identifiers#names
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names
 +optional */
   name?: string
   /** Namespace defines the space within which each name must be unique. An empty namespace is
@@ -981,7 +926,7 @@ those objects will be empty.
 
 Must be a DNS_LABEL.
 Cannot be updated.
-More info: http://kubernetes.io/docs/user-guide/namespaces
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces
 +optional */
   namespace?: string
   /** List of objects depended by this object. If ALL objects in the list have
@@ -1015,7 +960,7 @@ operations.
 
 Populated by the system.
 Read-only.
-More info: http://kubernetes.io/docs/user-guide/identifiers#uids
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
 +optional */
   uid?: string
 }
@@ -1086,6 +1031,11 @@ export interface V1alpha1RedisCacheLimitSpec {
   percent?: string
 }
 
+export interface V1alpha1RateSpec {
+  /** Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second. */
+  rate?: string
+}
+
 export interface V1alpha1ProcessSpec {
   /** the process name or the process ID */
   process?: string
@@ -1137,6 +1087,11 @@ export interface V1alpha1PodSelectorSpec {
 A selector based on annotations.
 +optional */
   annotationSelectors?: V1alpha1PodSelectorSpecAnnotationSelectors
+  /** a slice of label selector expressions that can be used to select objects.
+A list of selectors based on set-based label expressions.
++ui:form:ignore
++optional */
+  expressionSelectors?: V1LabelSelectorRequirement[]
   /** Map of string keys and values that can be used to select objects.
 A selector based on fields.
 +optional */
@@ -1326,6 +1281,11 @@ export interface V1alpha1PhysicalMachineSelectorSpec {
 A selector based on annotations.
 +optional */
   annotationSelectors?: V1alpha1PhysicalMachineSelectorSpecAnnotationSelectors
+  /** a slice of label selector expressions that can be used to select objects.
+A list of selectors based on set-based label expressions.
++ui:form:ignore
++optional */
+  expressionSelectors?: V1LabelSelectorRequirement[]
   /** Map of string keys and values that can be used to select objects.
 A selector based on fields.
 +optional */
@@ -1358,8 +1318,8 @@ or the latency duration in action `mysql` */
   mysqlConnectorVersion?: string
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
   /** the match sql type
 default value is "", means match all SQL type.
@@ -1549,6 +1509,10 @@ Default action: delay
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
 +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent */
   mode?: string
+  /** Rate represents the detail about rate control action
++ui:form:ignore
++optional */
+  rate?: V1alpha1RateSpec
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
   remoteCluster?: string
@@ -1699,74 +1663,74 @@ export interface V1alpha1JVMStressSpec {
   'mem-type'?: string
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
 }
 
 export interface V1alpha1JVMRuleDataSpec {
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
   /** RuleData used to save the rule file's data, will use it when recover */
   'rule-data'?: string
 }
 
 export interface V1alpha1JVMReturnSpec {
-  /** +optional
-Java class */
+  /** Java class
++optional */
   class?: string
-  /** +optional
-the method in Java class */
+  /** the method in Java class
++optional */
   method?: string
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
   /** the return value for action 'return' */
   value?: string
 }
 
 export interface V1alpha1JVMLatencySpec {
-  /** +optional
-Java class */
+  /** Java class
++optional */
   class?: string
   /** the latency duration for action 'latency', unit ms */
   latency?: number
-  /** +optional
-the method in Java class */
+  /** the method in Java class
++optional */
   method?: string
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
 }
 
 export interface V1alpha1JVMGCSpec {
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
 }
 
 export interface V1alpha1JVMExceptionSpec {
-  /** +optional
-Java class */
+  /** Java class
++optional */
   class?: string
   /** the exception which needs to throw for action `exception` */
   exception?: string
-  /** +optional
-the method in Java class */
+  /** the method in Java class
++optional */
   method?: string
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
 }
 
@@ -1930,15 +1894,15 @@ export interface V1alpha1JVMChaosSpec {
 Supported action: latency;return;exception;stress;gc;ruleData
 +kubebuilder:validation:Enum=latency;return;exception;stress;gc;ruleData;mysql */
   action?: string
-  /** +optional
-Java class */
+  /** Java class
++optional */
   class?: string
   /** ContainerNames indicates list of the name of affected container.
 If not set, the first container will be injected
 +optional */
   containerNames?: string[]
-  /** +optional
-the CPU core number needs to use, only set it when action is stress */
+  /** the CPU core number needs to use, only set it when action is stress
++optional */
   cpuCount?: number
   /** the match database
 default value is "", means match all database */
@@ -1946,19 +1910,19 @@ default value is "", means match all database */
   /** Duration represents the duration of the chaos action
 +optional */
   duration?: string
-  /** +optional
-the exception which needs to throw for action `exception`
-or the exception message needs to throw in action `mysql` */
+  /** the exception which needs to throw for action `exception`
+or the exception message needs to throw in action `mysql`
++optional */
   exception?: string
-  /** +optional
-the latency duration for action 'latency', unit ms
-or the latency duration in action `mysql` */
+  /** the latency duration for action 'latency', unit ms
+or the latency duration in action `mysql`
++optional */
   latency?: number
-  /** +optional
-the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap' */
+  /** the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'
++optional */
   memType?: string
-  /** +optional
-the method in Java class */
+  /** the method in Java class
++optional */
   method?: string
   /** Mode defines the mode to run chaos action.
 Supported mode: one / all / fixed / fixed-percent / random-max-percent
@@ -1966,19 +1930,22 @@ Supported mode: one / all / fixed / fixed-percent / random-max-percent
   mode?: string
   /** the version of mysql-connector-java, only support 5.X.X(set to "5") and 8.X.X(set to "8") now */
   mysqlConnectorVersion?: string
-  /** +optional
-byteman rule name, should be unique, and will generate one if not set */
+  /** byteman rule name, should be unique, and will generate one if not set
++optional */
   name?: string
   /** the pid of Java process which needs to attach */
   pid?: number
-  /** +optional
-the port of agent server, default 9277 */
+  /** the port of agent server, default 9277
++optional */
   port?: number
   /** RemoteCluster represents the remote cluster where the chaos will be deployed
 +optional */
   remoteCluster?: string
-  /** +optional
-the byteman rule's data for action 'ruleData' */
+  /** the return value for action 'return'
++optional */
+  returnValue?: string
+  /** the byteman rule's data for action 'ruleData'
++optional */
   ruleData?: string
   selector?: V1alpha1PodSelectorSpec
   /** the match sql type
@@ -1988,8 +1955,11 @@ The value can be 'select', 'insert', 'update', 'delete', 'replace'. */
   /** the match table
 default value is "", means match all table */
   table?: string
-  /** +optional
-the return value for action 'return' */
+  /** Value is required when the mode is set to `FixedMode` / `FixedPercentMode` / `RandomMaxPercentMode`.
+If `FixedMode`, provide an integer of pods to do chaos action.
+If `FixedPercentMode`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+IF `RandomMaxPercentMode`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
++optional */
   value?: string
 }
 
@@ -2071,6 +2041,60 @@ export interface V1alpha1HTTPStatusCheck {
 +kubebuilder:default=GET */
   method?: string
   url?: string
+}
+
+export interface V1alpha1StatusCheckTemplate {
+  /** Duration defines the duration of the whole status check if the
+number of failed execution does not exceed the failure threshold.
+Duration is available to both `Synchronous` and `Continuous` mode.
+A duration string is a possibly signed sequence of
+decimal numbers, each with optional fraction and a unit suffix,
+such as "300ms", "-1.5h" or "2h45m".
+Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
++optional */
+  duration?: string
+  /** FailureThreshold defines the minimum consecutive failure
+for the status check to be considered failed.
++optional
++kubebuilder:default=3
++kubebuilder:validation:Minimum=1 */
+  failureThreshold?: number
+  http?: V1alpha1HTTPStatusCheck
+  /** IntervalSeconds defines how often (in seconds) to perform
+an execution of status check.
++optional
++kubebuilder:default=10
++kubebuilder:validation:Minimum=1 */
+  intervalSeconds?: number
+  /** Mode defines the execution mode of the status check.
+Support type: Synchronous / Continuous
++optional
++kubebuilder:validation:Enum=Synchronous;Continuous */
+  mode?: string
+  /** RecordsHistoryLimit defines the number of record to retain.
++optional
++kubebuilder:default=100
++kubebuilder:validation:Minimum=1
++kubebuilder:validation:Maximum=1000 */
+  recordsHistoryLimit?: number
+  /** SuccessThreshold defines the minimum consecutive successes
+for the status check to be considered successful.
+SuccessThreshold only works for `Synchronous` mode.
++optional
++kubebuilder:default=1
++kubebuilder:validation:Minimum=1 */
+  successThreshold?: number
+  /** TimeoutSeconds defines the number of seconds after which
+an execution of status check times out.
++optional
++kubebuilder:default=1
++kubebuilder:validation:Minimum=1 */
+  timeoutSeconds?: number
+  /** Type defines the specific status check type.
+Support type: HTTP
++kubebuilder:default=HTTP
++kubebuilder:validation:Enum=HTTP */
+  type?: string
 }
 
 export interface V1alpha1HTTPRequestSpec {
@@ -2357,8 +2381,10 @@ K=1024, MB=1000*1000, M=1024*1024, GB=1000*1000*1000, G=1024*1024*1024 BYTES. ex
 export interface V1alpha1DelaySpec {
   /** +optional */
   correlation?: string
-  /** +optional */
+  /** +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$"
++optional */
   jitter?: string
+  /** +kubebuilder:validation:Pattern="^[0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h)$" */
   latency?: string
   reorder?: V1alpha1ReorderSpec
 }
@@ -2451,7 +2477,6 @@ export interface V1alpha1ChaosOnlyScheduleSpec {
   startingDeadlineSeconds?: number
   stressChaos?: V1alpha1StressChaosSpec
   timeChaos?: V1alpha1TimeChaosSpec
-  /** TODO: use a custom type, as `TemplateType` contains other possible values */
   type?: string
 }
 
@@ -2531,7 +2556,7 @@ if perfect millisecond timescale shaping is required.
 +optional
 +kubebuilder:validation:Minimum=0 */
   peakrate?: number
-  /** Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second. */
+  /** Rate is the speed knob. Allows bit, kbit, mbit, gbit, tbit, bps, kbps, mbps, gbps, tbps unit. bps means bytes per second. */
   rate?: string
 }
 
@@ -2635,12 +2660,9 @@ GMSA credential spec named by the GMSACredentialSpecName field.
 +optional */
   gmsaCredentialSpecName?: string
   /** HostProcess determines if a container should be run as a 'Host Process' container.
-This field is alpha-level and will only be honored by components that enable the
-WindowsHostProcessContainers feature flag. Setting this field without the feature
-flag will result in errors when validating the Pod. All of a Pod's containers must
-have the same effective HostProcess value (it is not allowed to have a mix of HostProcess
-containers and non-HostProcess containers).  In addition, if HostProcess is true
-then HostNetwork must also be set to true.
+All of a Pod's containers must have the same effective HostProcess value
+(it is not allowed to have a mix of HostProcess containers and non-HostProcess containers).
+In addition, if HostProcess is true then HostNetwork must also be set to true.
 +optional */
   hostProcess?: boolean
   /** The UserName in Windows to run the entrypoint of the container process.
@@ -2958,7 +2980,7 @@ export interface V1SeccompProfile {
   /** localhostProfile indicates a profile defined in a file on the node should be used.
 The profile must be preconfigured on the node to work.
 Must be a descending path, relative to the kubelet's configured seccomp profile location.
-Must only be set if type is "Localhost".
+Must be set if type is "Localhost". Must NOT be set for any other type.
 +optional */
   localhostProfile?: string
   /** type indicates which kind of seccomp profile will be applied.
@@ -3031,7 +3053,7 @@ that are used by this container.
 This is an alpha field and requires enabling the
 DynamicResourceAllocation feature gate.
 
-This field is immutable.
+This field is immutable. It can only be set for containers.
 
 +listType=map
 +listMapKey=name
@@ -3210,7 +3232,7 @@ Default false.
  * Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
-More info: http://kubernetes.io/docs/user-guide/labels
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional
  */
 export type V1PersistentVolumeClaimTemplateLabels = { [key: string]: string }
@@ -3219,7 +3241,7 @@ export type V1PersistentVolumeClaimTemplateLabels = { [key: string]: string }
  * Annotations is an unstructured key value map stored with a resource that may be
 set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
-More info: http://kubernetes.io/docs/user-guide/annotations
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional
  */
 export type V1PersistentVolumeClaimTemplateAnnotations = { [key: string]: string }
@@ -3266,10 +3288,10 @@ otherwise 422 (Unprocessable Entity) will be returned.
 More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds */
   kind?: string
   /** Name of the referent.
-More info: http://kubernetes.io/docs/user-guide/identifiers#names */
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names */
   name?: string
   /** UID of the referent.
-More info: http://kubernetes.io/docs/user-guide/identifiers#uids */
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids */
   uid?: string
 }
 
@@ -3277,7 +3299,7 @@ export interface V1PersistentVolumeClaimTemplate {
   /** Annotations is an unstructured key value map stored with a resource that may be
 set by external tools to store and retrieve arbitrary metadata. They are not
 queryable and should be preserved when modifying objects.
-More info: http://kubernetes.io/docs/user-guide/annotations
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
 +optional */
   annotations?: V1PersistentVolumeClaimTemplateAnnotations
   /** CreationTimestamp is a timestamp representing the server time when this object was
@@ -3353,7 +3375,7 @@ Populated by the system. Read-only.
   /** Map of string keys and values that can be used to organize and categorize
 (scope and select) objects. May match selectors of replication controllers
 and services.
-More info: http://kubernetes.io/docs/user-guide/labels
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
 +optional */
   labels?: V1PersistentVolumeClaimTemplateLabels
   /** ManagedFields maps workflow-id and version to the set of fields
@@ -3371,7 +3393,7 @@ some resources may allow a client to request the generation of an appropriate na
 automatically. Name is primarily intended for creation idempotence and configuration
 definition.
 Cannot be updated.
-More info: http://kubernetes.io/docs/user-guide/identifiers#names
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#names
 +optional */
   name?: string
   /** Namespace defines the space within which each name must be unique. An empty namespace is
@@ -3381,7 +3403,7 @@ those objects will be empty.
 
 Must be a DNS_LABEL.
 Cannot be updated.
-More info: http://kubernetes.io/docs/user-guide/namespaces
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces
 +optional */
   namespace?: string
   /** List of objects depended by this object. If ALL objects in the list have
@@ -3414,7 +3436,7 @@ operations.
 
 Populated by the system.
 Read-only.
-More info: http://kubernetes.io/docs/user-guide/identifiers#uids
+More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names#uids
 +optional */
   uid?: string
 }
@@ -3529,9 +3551,7 @@ export interface V1Lifecycle {
 }
 
 export interface V1LabelSelectorRequirement {
-  /** key is the label key that the selector applies to.
-+patchMergeKey=key
-+patchStrategy=merge */
+  /** key is the label key that the selector applies to. */
   key?: string
   /** operator represents a key's relationship to a set of values.
 Valid operators are In, NotIn, Exists and DoesNotExist. */
@@ -3635,7 +3655,8 @@ More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath
 }
 
 export interface V1HTTPHeader {
-  /** The header field name */
+  /** The header field name.
+This will be canonicalized upon output, so case-variant names will be understood as the same header. */
   name?: string
   /** The header field value */
   value?: string
@@ -3878,6 +3899,15 @@ export interface V1DownwardAPIProjection {
   items?: V1DownwardAPIVolumeFile[]
 }
 
+export interface V1ContainerResizePolicy {
+  /** Name of the resource to which this resource resize policy applies.
+Supported values: cpu, memory. */
+  resourceName?: string
+  /** Restart policy to apply when specified resource is resized.
+If not specified, it defaults to NotRequired. */
+  restartPolicy?: string
+}
+
 export interface V1ContainerPort {
   /** Number of port to expose on the pod's IP address.
 This must be a valid port number, 0 < x < 65536. */
@@ -3972,7 +4002,30 @@ Cannot be updated.
 +listMapKey=protocol */
   ports?: V1ContainerPort[]
   readinessProbe?: V1Probe
+  /** Resources resize policy for the container.
++featureGate=InPlacePodVerticalScaling
++optional
++listType=atomic */
+  resizePolicy?: V1ContainerResizePolicy[]
   resources?: V1ResourceRequirements
+  /** RestartPolicy defines the restart behavior of individual containers in a pod.
+This field may only be set for init containers, and the only allowed value is "Always".
+For non-init containers or when this field is not specified,
+the restart behavior is defined by the Pod's restart policy and the container type.
+Setting the RestartPolicy as "Always" for the init container will have the following effect:
+this init container will be continually restarted on
+exit until all regular containers have terminated. Once all regular
+containers have completed, all init containers with restartPolicy "Always"
+will be shut down. This lifecycle differs from normal init containers and
+is often referred to as a "sidecar" container. Although this init
+container still starts in the init container sequence, it does not wait
+for the container to complete before proceeding to the next init
+container. Instead, the next init container starts immediately after this
+init container is started, or after any startupProbe has successfully
+completed.
++featureGate=SidecarContainers
++optional */
+  restartPolicy?: string
   securityContext?: V1SecurityContext
   startupProbe?: V1Probe
   /** Whether this container should allocate a buffer for stdin in the container runtime. If this
@@ -4481,22 +4534,17 @@ export interface CoreConditionalBranch {
 }
 
 export interface ConfigChaosDashboardConfig {
-  /** The Burst config for kubernetes client */
-  burst?: number
   /** ClusterScoped means control Chaos Object in cluster level(all namespace). */
   cluster_mode?: boolean
+  /** After v2.5, the DNS server is created by default. */
   dns_server_create?: boolean
   /** EnableFilterNamespace will filter namespace with annotation. Only the pods/containers in namespace
 annotated with `chaos-mesh.org/inject=enabled` will be injected. */
   enableFilterNamespace?: boolean
-  /** enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon */
-  enableProfiling?: boolean
   /** GcpSecurityMode will use the gcloud authentication to login to GKE user */
   gcp_security_mode?: boolean
   listen_host?: string
   listen_port?: number
-  /** The QPS config for kubernetes client */
-  qps?: number
   root_path?: string
   /** SecurityMode will use the token login by the user if set to true */
   security_mode?: boolean

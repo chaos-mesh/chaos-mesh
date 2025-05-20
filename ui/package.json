@@ -7,16 +7,16 @@
     "start": "pnpm -F @ui/app start:default",
     "build": "pnpm -F @ui/mui-extends build && pnpm -F @ui/app build",
     "test": "pnpm -F @ui/mui-extends build && pnpm -F @ui/mui-extends test && pnpm -F @ui/openapi test && pnpm -F @ui/app test",
-    "prepare": "cd ..; is-ci || husky install ./ui/.husky",
+    "prepare": "cd ..; is-ci || husky ./ui/.husky",
     "clean": "rimraf app/node_modules && rimraf packages/**/node_modules && rimraf node_modules"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "husky": "^9.1.7",
-    "is-ci": "^3.0.1",
-    "lint-staged": "^13.1.2",
-    "prettier": "^2.8.4",
-    "rimraf": "^3.0.2"
+    "is-ci": "^4.1.0",
+    "lint-staged": "^16.0.0",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1"
   },
   "resolutions": {
     "@types/react": "17.0.52",
