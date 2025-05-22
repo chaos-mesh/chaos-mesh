@@ -14,15 +14,6 @@
  * limitations under the License.
  *
  */
-import CloseIcon from '@mui/icons-material/Close'
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import FilterListIcon from '@mui/icons-material/FilterList'
-import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
-import TabContext from '@mui/lab/TabContext'
-import TabList from '@mui/lab/TabList'
-import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
-import Tab from '@mui/material/Tab'
-import _ from 'lodash'
 import {
   useDeleteArchives,
   useDeleteArchivesSchedules,
@@ -33,13 +24,23 @@ import {
   useGetArchives,
   useGetArchivesSchedules,
   useGetArchivesWorkflows,
-} from 'openapi'
+} from '@/openapi'
 import {
   DeleteArchivesWorkflowsParams,
   DeleteExperimentsParams,
   DeleteSchedulesParams,
   TypesArchive,
-} from 'openapi/index.schemas'
+} from '@/openapi/index.schemas'
+import { useStoreDispatch } from '@/store'
+import CloseIcon from '@mui/icons-material/Close'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
+import FilterListIcon from '@mui/icons-material/FilterList'
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
+import TabContext from '@mui/lab/TabContext'
+import TabList from '@mui/lab/TabList'
+import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
+import Tab from '@mui/material/Tab'
+import _ from 'lodash'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -48,16 +49,14 @@ import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponen
 import Loading from '@ui/mui-extends/esm/Loading'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch } from 'store'
+import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+import NotFound from '@/components/NotFound'
+import ObjectListItem from '@/components/ObjectListItem'
+import i18n from '@/components/T'
 
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
-import i18n from 'components/T'
-
-import { transByKind } from 'lib/byKind'
-import { useQuery } from 'lib/hooks'
+import { transByKind } from '@/lib/byKind'
+import { useQuery } from '@/lib/hooks'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -122,7 +121,7 @@ export default function Archives() {
         title: selected.title,
         description: selected.description,
         handle: handleAction(selected.action, selected.uuid),
-      })
+      }),
     )
 
   const handleAction = (action: string, uuid?: uuid) => () => {
@@ -182,7 +181,7 @@ export default function Archives() {
             setAlert({
               type: 'success',
               message: i18n(`confirm.success.${action}`, intl),
-            })
+            }),
           )
 
           refetchByKind()
@@ -201,7 +200,7 @@ export default function Archives() {
 
             return acc
           }, {})
-        : {}
+        : {},
     )
 
   const handleBatchDelete = () =>

@@ -23,7 +23,7 @@ import { Position } from 'react-flow-renderer'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { iconByKind } from 'lib/byKind'
+import { iconByKind } from '@/lib/byKind'
 
 import StyledHandle from './StyleHandle'
 import { DropItem } from './Whiteboard'

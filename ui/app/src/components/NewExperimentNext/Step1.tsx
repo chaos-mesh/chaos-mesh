@@ -14,26 +14,25 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import { useGetCommonConfig } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import CheckIcon from '@mui/icons-material/Check'
 import RadioButtonCheckedOutlinedIcon from '@mui/icons-material/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined'
 import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Card, Divider, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
-import { Stale } from 'api/queryUtils'
 import clsx from 'clsx'
-import { useGetCommonConfig } from 'openapi'
 import React from 'react'
 
 import Paper from '@ui/mui-extends/esm/Paper'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { Env, setEnv, setKindAction, setSpec, setStep1 } from '@/slices/experiments'
 
-import { Env, setEnv, setKindAction, setSpec, setStep1 } from 'slices/experiments'
+import i18n from '@/components/T'
 
-import i18n from 'components/T'
-
-import { iconByKind, transByKind } from 'lib/byKind'
+import { iconByKind, transByKind } from '@/lib/byKind'
 
 import _typesData, { Definition, Kind, dataPhysic, schema } from './data/types'
 import Kernel from './form/Kernel'

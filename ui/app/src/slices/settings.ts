@@ -16,7 +16,7 @@
  */
 import { createSlice } from '@reduxjs/toolkit'
 
-import LS from 'lib/localStorage'
+import LS from '@/lib/localStorage'
 
 export type Theme = 'light' | 'dark'
 

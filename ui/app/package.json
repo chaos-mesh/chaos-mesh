@@ -2,14 +2,12 @@
   "name": "@ui/app",
   "version": "0.0.0",
   "private": true,
-  "homepage": ".",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "start:default": "cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.7.0",
@@ -21,8 +19,8 @@
     "@mui/material": "^5.10.16",
     "@mui/styles": "^5.10.16",
     "@mui/x-data-grid": "6.0.0",
-    "@nivo/core": "^0.80.0",
-    "@nivo/pie": "^0.80.0",
+    "@nivo/core": "^0.98.0",
+    "@nivo/pie": "^0.98.0",
     "@reactour/tour": "^3.3.0",
     "@reduxjs/toolkit": "^1.7.1",
     "@tanstack/react-query": "^4.28.0",
@@ -44,39 +42,23 @@
     "lodash": "^4.17.21",
     "luxon": "^1.28.1",
     "re-resizable": "^6.9.9",
-    "react": "^17.0.1",
+    "react": "^19.1.0",
     "react-ace": "^9.2.1",
     "react-dnd": "^15.1.1",
     "react-dnd-html5-backend": "^15.1.2",
-    "react-dom": "^17.0.1",
+    "react-dom": "^19.1.0",
     "react-flow-renderer": "^10.3.0",
     "react-helmet": "^6.1.0",
     "react-intl": "^5.22.0",
     "react-redux": "^7.2.2",
     "react-router-dom": "^6.13.0",
-    "react-scripts": "5.0.1",
     "react-window": "^1.8.6",
     "redux": "^4.0.5",
-    "typescript": "~4.5.2",
     "uuid": "^8.3.2",
     "yup": "^0.29.1"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
+    "@eslint/js": "^9.25.0",
     "@faker-js/faker": "^7.6.0",
     "@tanstack/react-query-devtools": "^4.28.0",
     "@testing-library/jest-dom": "^5.15.1",
@@ -100,11 +82,16 @@
     "@types/testing-library__jest-dom": "^5.14.5",
     "@types/uuid": "^8.3.4",
     "@types/yup": "^0.29.11",
-    "cross-env": "^7.0.3",
-    "http-proxy-middleware": "^2.0.1",
+    "@vitejs/plugin-react-swc": "^3.9.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
     "msw": "^1.2.1",
-    "redux-logger": "^3.0.6",
-    "source-map-explorer": "^2.5.2"
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5",
+    "vite-plugin-svgr": "^4.3.0"
   },
   "jest": {
     "resetMocks": false

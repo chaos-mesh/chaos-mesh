@@ -15,16 +15,20 @@
  *
  */
 import { Form, Formik } from 'formik'
-import { Submit, TextField } from 'components/FormField'
-import { Template, TemplateType } from 'slices/workflows'
-import { validateDeadline, validateName } from 'lib/formikhelpers'
+import { useIntl } from 'react-intl'
 
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
-import i18n from 'components/T'
+
+import { Template, TemplateType } from '@/slices/workflows'
+
+import { Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
+
+import { validateDeadline, validateName } from '@/lib/formikhelpers'
+
 import { schemaBasic } from './types'
-import { useIntl } from 'react-intl'
 
 export interface SuspendValues {
   name: string

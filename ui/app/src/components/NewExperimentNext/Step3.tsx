@@ -14,25 +14,24 @@
  * limitations under the License.
  *
  */
+import { usePostExperiments } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { Box, Typography } from '@mui/material'
-import { usePostExperiments } from 'openapi'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { resetNewExperiment } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
 
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
+import { Submit } from '@/components/FormField'
+import { ExperimentKind } from '@/components/NewExperiment/types'
+import i18n from '@/components/T'
 
-import { Submit } from 'components/FormField'
-import { ExperimentKind } from 'components/NewExperiment/types'
-import i18n from 'components/T'
-
-import { parseSubmit } from 'lib/formikhelpers'
+import { parseSubmit } from '@/lib/formikhelpers'
 
 interface Step3Props {
   onSubmit?: (parsedValues: any) => void
@@ -61,7 +60,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
           ...spec,
         },
       },
-      { inSchedule, useNewPhysicalMachine }
+      { inSchedule, useNewPhysicalMachine },
     )
 
     if (process.env.NODE_ENV === 'development' || debugMode) {
@@ -80,7 +79,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
               setAlert({
                 type: 'success',
                 message: i18n('confirm.success.create', intl),
-              })
+              }),
             )
 
             dispatch(resetNewExperiment())
@@ -96,7 +95,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
               setAlert({
                 type: 'error',
                 message: error.response.data.message,
-              })
+              }),
             )
           })
       }

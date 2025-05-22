@@ -16,7 +16,7 @@
  */
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import { Kind } from 'components/NewExperimentNext/data/types'
+import { Kind } from '@/components/NewExperimentNext/data/types'
 
 export type Env = 'k8s' | 'physic'
 

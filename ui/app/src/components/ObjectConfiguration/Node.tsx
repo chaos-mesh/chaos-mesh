@@ -16,10 +16,12 @@
  */
 import { Box, Table, TableBody, TableRow, Typography } from '@mui/material'
 
-import { Branch } from 'slices/workflows'
+import { Branch } from '@/slices/workflows'
+
+import i18n from '@/components/T'
+
 import ObjectConfiguration from '.'
 import { TableCell } from './common'
-import i18n from 'components/T'
 
 interface NodeConfigurationProps {
   template: any

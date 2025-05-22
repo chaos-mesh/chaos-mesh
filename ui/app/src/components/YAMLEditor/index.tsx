@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Box, Button } from '@mui/material'
@@ -32,11 +33,9 @@ import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { setConfirm } from '@/slices/globalStatus'
 
-import { setConfirm } from 'slices/globalStatus'
-
-import i18n from 'components/T'
+import i18n from '@/components/T'
 
 interface YAMLEditorProps {
   name?: string
@@ -66,7 +65,7 @@ const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpda
       setConfirm({
         title: `${i18n('common.update', intl)} ${name}`,
         handle: handleOnUpdate,
-      })
+      }),
     )
   }
 

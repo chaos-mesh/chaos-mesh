@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
+import { useStoreSelector } from '@/store'
 import { ThemeProvider as MuiThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import { useMemo } from 'react'
-import theme, { darkTheme } from 'theme'
 
-import { useStoreSelector } from 'store'
+import theme, { darkTheme } from './theme'
 
 const ThemeProvider: React.FC = ({ children }) => {
   const { theme: t } = useStoreSelector((state) => state.settings)

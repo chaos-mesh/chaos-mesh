@@ -1,4 +1,4 @@
-import { ExperimentKind } from 'components/NewExperiment/types'
+import { ExperimentKind } from '@/components/NewExperiment/types'
 
 const mapping = new Map<ExperimentKind, string>([
   ['AWSChaos', 'awsChaos'],

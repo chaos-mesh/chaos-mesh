@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2025 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,13 @@
  * limitations under the License.
  *
  */
-/// <reference types="react-scripts" />
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)

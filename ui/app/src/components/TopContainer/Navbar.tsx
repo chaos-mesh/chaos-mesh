@@ -20,7 +20,7 @@ import { AppBar, Box, IconButton, Toolbar } from '@mui/material'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import Search from 'components/Search'
+import Search from '@/components/Search'
 
 import Namespace from './Namespace'
 

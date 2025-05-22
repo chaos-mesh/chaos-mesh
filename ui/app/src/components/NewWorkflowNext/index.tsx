@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
 import TabUnstyled from '@mui/base/TabUnstyled'
 import TabsListUnstyled from '@mui/base/TabsListUnstyled'
@@ -27,11 +28,9 @@ import type { ReactFlowInstance } from 'react-flow-renderer'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { loadRecentlyUsedExperiments } from '@/slices/workflows'
 
-import { loadRecentlyUsedExperiments } from 'slices/workflows'
-
-import YAML from 'components/YAML'
+import YAML from '@/components/YAML'
 
 import FunctionalNodesElements from './Elements/FunctionalNodes'
 import KubernetesElements from './Elements/Kubernetes'
@@ -79,7 +78,7 @@ const Tab = styled(TabUnstyled)(
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
   }
-  `
+  `,
 )
 const TabPanel = styled(TabPanelUnstyled)`
   flex-grow: 1;

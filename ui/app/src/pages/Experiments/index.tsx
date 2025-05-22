@@ -14,6 +14,15 @@
  * limitations under the License.
  *
  */
+import {
+  useDeleteExperiments,
+  useDeleteExperimentsUid,
+  useGetExperiments,
+  usePutExperimentsPauseUid,
+  usePutExperimentsStartUid,
+} from '@/openapi'
+import { DeleteExperimentsParams } from '@/openapi/index.schemas'
+import { useStoreDispatch } from '@/store'
 import AddIcon from '@mui/icons-material/Add'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import CloseIcon from '@mui/icons-material/Close'
@@ -21,14 +30,6 @@ import FilterListIcon from '@mui/icons-material/FilterList'
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'
 import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
 import _ from 'lodash'
-import {
-  useDeleteExperiments,
-  useDeleteExperimentsUid,
-  useGetExperiments,
-  usePutExperimentsPauseUid,
-  usePutExperimentsStartUid,
-} from 'openapi'
-import { DeleteExperimentsParams } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -37,15 +38,13 @@ import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponen
 import Loading from '@ui/mui-extends/esm/Loading'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch } from 'store'
+import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
-import { Confirm, setAlert, setConfirm } from 'slices/globalStatus'
+import NotFound from '@/components/NotFound'
+import ObjectListItem from '@/components/ObjectListItem'
+import i18n from '@/components/T'
 
-import NotFound from 'components/NotFound'
-import ObjectListItem from 'components/ObjectListItem'
-import i18n from 'components/T'
-
-import { transByKind } from 'lib/byKind'
+import { transByKind } from '@/lib/byKind'
 
 const StyledCheckBox = styled(Checkbox)({
   position: 'relative',
@@ -79,7 +78,7 @@ export default function Experiments() {
         title: selected.title,
         description: selected.description,
         handle: handleAction(selected.action, selected.uuid),
-      })
+      }),
     )
 
   const handleAction = (action: string, uuid?: uuid) => () => {
@@ -118,7 +117,7 @@ export default function Experiments() {
             setAlert({
               type: 'success',
               message: i18n(`confirm.success.${action}`, intl),
-            })
+            }),
           )
 
           refetch()
@@ -137,7 +136,7 @@ export default function Experiments() {
 
             return acc
           }, {})
-        : {}
+        : {},
     )
 
   const handleBatchDelete = () =>

@@ -19,7 +19,7 @@ import { getIn, useFormikContext } from 'formik'
 import MuiExtendsAutocompleteField from '@ui/mui-extends/esm/AutocompleteField'
 import type { AutocompleteFieldProps as MuiExtendsAutocompleteFieldProps } from '@ui/mui-extends/esm/AutocompleteField'
 
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
 export interface AutocompleteFieldProps extends MuiExtendsAutocompleteFieldProps {
   name: string
@@ -42,7 +42,7 @@ const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ name, multiple, o
   const onDelete = (val: string) => () =>
     setFieldValue(
       name,
-      value.filter((d: string) => d !== val)
+      value.filter((d: string) => d !== val),
     )
 
   return (

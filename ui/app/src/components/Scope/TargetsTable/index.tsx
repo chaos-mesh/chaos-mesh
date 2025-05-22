@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
+import { useStoreDispatch } from '@/store'
 import { getIn, useFormikContext } from 'formik'
 import { useMemo } from 'react'
 
-import { useStoreDispatch } from 'store'
-
-import { Env } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
+import { Env } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
 
 import PhysicalMachinesTable from './PhysicalMachinesTable'
 import PodsTable from './PodsTable'
@@ -69,7 +68,7 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
         setAlert({
           type: 'warning',
           message: 'Please select at least one target.',
-        })
+        }),
       )
 
       return

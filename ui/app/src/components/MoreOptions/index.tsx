@@ -21,7 +21,7 @@ import { useState } from 'react'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
 interface MoreOptionsProps {
   isOpen?: boolean

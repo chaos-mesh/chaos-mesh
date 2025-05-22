@@ -14,14 +14,14 @@
  * limitations under the License.
  *
  */
+import { useGetEvents } from '@/openapi'
 import { Grow, Typography } from '@mui/material'
-import { useGetEvents } from 'openapi'
 
 import Loading from '@ui/mui-extends/esm/Loading'
 
-import EventsTable from 'components/EventsTable'
-import NotFound from 'components/NotFound'
-import i18n from 'components/T'
+import EventsTable from '@/components/EventsTable'
+import NotFound from '@/components/NotFound'
+import i18n from '@/components/T'
 
 export default function Events() {
   const { data: events, isLoading: loading } = useGetEvents()

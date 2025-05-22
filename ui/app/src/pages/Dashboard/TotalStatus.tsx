@@ -14,17 +14,17 @@
  * limitations under the License.
  *
  */
+import { useGetExperimentsState } from '@/openapi'
+import { StatusAllChaosStatus } from '@/openapi/index.schemas'
 import { Box, BoxProps } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { PropertyAccessor } from '@nivo/core'
 import { ComputedDatum, PieTooltipProps, ResponsivePie } from '@nivo/pie'
-import { useGetExperimentsState } from 'openapi'
-import { StatusAllChaosStatus } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import NotFound from 'components/NotFound'
-import i18n from 'components/T'
+import NotFound from '@/components/NotFound'
+import i18n from '@/components/T'
 
 interface SingleData {
   id: keyof StatusAllChaosStatus
@@ -61,7 +61,7 @@ const TotalStatus: React.FC<BoxProps> = (props) => {
             id: k,
             label: i18n(`status.${k}`, intl),
             value: v === 0 ? 0.01 : v,
-          }))
+          })),
         )
       },
     },

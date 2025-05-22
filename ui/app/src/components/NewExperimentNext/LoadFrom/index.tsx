@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import {
   useGetArchives,
   useGetArchivesSchedules,
@@ -24,8 +23,10 @@ import {
   useGetExperimentsUid,
   useGetSchedules,
   useGetSchedulesUid,
-} from 'openapi'
-import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from 'openapi/index.schemas'
+} from '@/openapi'
+import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from '@/openapi/index.schemas'
+import { useStoreDispatch } from '@/store'
+import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 
@@ -33,13 +34,11 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch } from 'store'
+import { setAlert } from '@/slices/globalStatus'
 
-import { setAlert } from 'slices/globalStatus'
+import i18n from '@/components/T'
 
-import i18n from 'components/T'
-
-import { PreDefinedValue, getDB } from 'lib/idb'
+import { PreDefinedValue, getDB } from '@/lib/idb'
 
 import RadioLabel from './RadioLabel'
 
@@ -72,7 +71,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
       setAlert({
         type: 'success',
         message: i18n('confirm.success.load', intl),
-      })
+      }),
     )
   }
   useGetSchedulesUid(scheduleUUID, {
@@ -142,7 +141,7 @@ const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow })
         setAlert({
           type: 'success',
           message: i18n('confirm.success.load', intl),
-        })
+        }),
       )
 
       return

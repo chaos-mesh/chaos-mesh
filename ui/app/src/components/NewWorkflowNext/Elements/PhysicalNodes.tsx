@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import _actions from 'formik/actions'
+import _actions from '@/formik/actions'
 
 import Space from '@ui/mui-extends/esm/Space'
 
