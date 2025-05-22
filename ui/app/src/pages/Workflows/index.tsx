@@ -30,7 +30,7 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 import _ from 'lodash'
 import React, { useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { v4 as uuidv4 } from 'uuid'
 
 import { setAlert, setConfirm } from '@/slices/globalStatus'

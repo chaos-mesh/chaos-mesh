@@ -23,7 +23,7 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Button, Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { useTour } from '@reactour/tour'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 
 import i18n from '@/components/T'
 

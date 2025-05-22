@@ -22,7 +22,7 @@ import { Box, Button } from '@mui/material'
 import Cookies from 'js-cookie'
 import _ from 'lodash'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { removeToken, setAuthOpen, setConfirm } from '@/slices/globalStatus'
 

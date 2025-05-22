@@ -21,7 +21,7 @@ import { useStoreDispatch, useStoreSelector } from '@/store'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { Box, Typography } from '@mui/material'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { resetNewExperiment } from '@/slices/experiments'
 import { setAlert } from '@/slices/globalStatus'

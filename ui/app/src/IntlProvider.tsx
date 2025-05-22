@@ -16,13 +16,13 @@
  */
 import messages from '@/i18n/messages'
 import { useStoreSelector } from '@/store'
-import flat from 'flat'
+import { flatten } from 'flat'
 import { useMemo } from 'react'
 import { IntlProvider as ReactIntlProvider } from 'react-intl'
 
 const IntlProvider: React.FC = ({ children }) => {
   const { lang } = useStoreSelector((state) => state.settings)
-  const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
+  const intlMessages = useMemo<Record<string, string>>(() => flatten(messages[lang]), [lang])
 
   return (
     <ReactIntlProvider messages={intlMessages} locale={lang} defaultLocale="en">

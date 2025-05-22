@@ -34,7 +34,7 @@ import Alert from '@mui/lab/Alert'
 import { Box, Button, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
 import { useIntl } from 'react-intl'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 
 import { setAlert, setConfirm } from '@/slices/globalStatus'
 
@@ -141,7 +141,7 @@ export default function Single() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {experiment && <Helmet title={`Experiment ${experiment.name}`} />}
+          {experiment && <title>{`Experiment ${experiment.name}`}</title>}
           <Space spacing={6}>
             <Space direction="row">
               <Button

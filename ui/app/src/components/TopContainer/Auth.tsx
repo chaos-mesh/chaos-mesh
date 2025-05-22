@@ -21,7 +21,7 @@ import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import RBACGenerator from '@/components/RBACGenerator'
 import i18n from '@/components/T'

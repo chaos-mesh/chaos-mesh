@@ -24,7 +24,7 @@ import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
 import Helmet from '@/components/Helmet'
@@ -82,7 +82,7 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {archive && <Helmet title={`Archive ${archive.name}`} />}
+          {archive && <title>{`Archive ${archive.name}`}</title>}
           {kind !== 'workflow' ? (
             <Space spacing={6}>
               {archive && (

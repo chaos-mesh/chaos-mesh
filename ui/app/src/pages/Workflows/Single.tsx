@@ -28,7 +28,7 @@ import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 
 import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
@@ -161,7 +161,7 @@ const Single = () => {
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
         <div style={{ height: '100%' }}>
-          {workflow && <Helmet title={`Workflow ${workflow.name}`} />}
+          {workflow && <title>{`Workflow ${workflow.name}`}</title>}
           <Space spacing={6} className={classes.root}>
             <Space direction="row">
               <Button

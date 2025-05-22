@@ -43,7 +43,7 @@ import { makeStyles } from '@mui/styles'
 import _ from 'lodash'
 import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import i18n from '@/components/T'
 

@@ -36,7 +36,7 @@ import {
 import { styled } from '@mui/material/styles'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router'
 
 import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
 

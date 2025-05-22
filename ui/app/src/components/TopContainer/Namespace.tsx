@@ -20,7 +20,7 @@ import Paper from '@/mui-extends/Paper'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import { Autocomplete, TextField } from '@mui/material'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router'
 
 import { setNameSpace } from '@/slices/globalStatus'
 
