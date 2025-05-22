@@ -15,8 +15,7 @@
  *
  */
 import _actions from '@/formik/actions'
-
-import Space from '@ui/mui-extends/esm/Space'
+import Space from '@/mui-extends/Space'
 
 import DraggableBareNode from './DraggableBareNode'
 import { ElementTypes, ElementsProps } from './types'

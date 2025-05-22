@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import { useStoreDispatch } from '@/store'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
@@ -21,8 +22,6 @@ import TabPanel from '@mui/lab/TabPanel'
 import { Box } from '@mui/material'
 import Tab from '@mui/material/Tab'
 import { forwardRef, useImperativeHandle, useState } from 'react'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setEnv, setExternalExperiment } from '@/slices/experiments'
 

@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
@@ -21,10 +24,6 @@ import { Button, Grid } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { useTour } from '@reactour/tour'
 import { Link } from 'react-router-dom'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import i18n from '@/components/T'
 

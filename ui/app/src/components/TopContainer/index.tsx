@@ -16,6 +16,8 @@
  */
 import { applyAPIAuthentication, applyNSParam } from '@/api/interceptors'
 import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Loading from '@/mui-extends/Loading'
 import { useGetCommonConfig } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import loadable from '@loadable/component'
@@ -35,9 +37,6 @@ import { styled } from '@mui/material/styles'
 import Cookies from 'js-cookie'
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Loading from '@ui/mui-extends/esm/Loading'
 
 import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
 

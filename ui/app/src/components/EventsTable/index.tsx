@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
 import { CoreEvent as Event } from '@/openapi/index.schemas'
 import FirstPageIcon from '@mui/icons-material/FirstPage'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
@@ -35,8 +36,6 @@ import {
 import _ from 'lodash'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import Paper from '@ui/mui-extends/esm/Paper'
 
 import i18n from '@/components/T'
 

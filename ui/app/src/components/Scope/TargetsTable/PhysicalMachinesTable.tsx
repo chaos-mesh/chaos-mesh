@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import PaperContainer from '@/mui-extends/PaperContainer'
 import { TypesPhysicalMachine } from '@/openapi/index.schemas'
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-
-import PaperContainer from '@ui/mui-extends/esm/PaperContainer'
 
 import { T } from '@/components/T'
 

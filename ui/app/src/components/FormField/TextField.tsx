@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import MuiExtendsTextField, { TextFieldProps } from '@/mui-extends/TextField'
 import { FastField, Field, FieldValidator } from 'formik'
 import { WheelEvent } from 'react'
-
-import MuiExtendsTextField, { TextFieldProps } from '@ui/mui-extends/esm/TextField'
 
 const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
   if (e.target instanceof HTMLInputElement) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import CloseIcon from '@mui/icons-material/Close'
@@ -22,8 +23,6 @@ import { makeStyles } from '@mui/styles'
 import { Formik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import { resetNewExperiment, setExternalExperiment } from '@/slices/experiments'
 import { setAlert } from '@/slices/globalStatus'

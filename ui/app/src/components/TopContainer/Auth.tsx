@@ -15,14 +15,13 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Space from '@/mui-extends/Space'
 import { useGetCommonConfig } from '@/openapi'
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button, Divider, IconButton, Link, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Space from '@ui/mui-extends/esm/Space'
 
 import RBACGenerator from '@/components/RBACGenerator'
 import i18n from '@/components/T'

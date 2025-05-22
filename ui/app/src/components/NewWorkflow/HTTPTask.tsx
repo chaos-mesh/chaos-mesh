@@ -16,16 +16,15 @@
  */
 import { parseHTTPTask, renderHTTPTask } from '@/api/workflows'
 import { RequestForm } from '@/api/workflows.type'
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { FormControlLabel, Switch } from '@mui/material'
 import { MenuItem, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Form, Formik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { Template, TemplateType } from '@/slices/workflows'
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import {
   useGetCommonAnnotations,
   useGetCommonLabels,
@@ -24,8 +25,6 @@ import { useStoreSelector } from '@/store'
 import { MenuItem, Typography } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 import { useEffect, useMemo } from 'react'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import { Env } from '@/slices/experiments'
 

@@ -15,10 +15,9 @@
  *
  */
 import _actions from '@/formik/actions'
+import Space from '@/mui-extends/Space'
 import { Typography } from '@mui/material'
 import _ from 'lodash'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import DraggableBareNode from './DraggableBareNode'
 import { ElementTypes, ElementsProps } from './types'

@@ -16,12 +16,11 @@
  */
 import { applyNSParam } from '@/api/interceptors'
 import { Stale } from '@/api/queryUtils'
+import Paper from '@/mui-extends/Paper'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import { Autocomplete, TextField } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
-
-import Paper from '@ui/mui-extends/esm/Paper'
 
 import { setNameSpace } from '@/slices/globalStatus'
 

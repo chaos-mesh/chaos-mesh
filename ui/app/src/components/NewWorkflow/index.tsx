@@ -15,6 +15,9 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import Menu from '@/mui-extends/Menu'
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import loadable from '@loadable/component'
@@ -43,10 +46,6 @@ import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-
-import Menu from '@ui/mui-extends/esm/Menu'
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { resetNewExperiment } from '@/slices/experiments'
 import { setAlert, setConfirm } from '@/slices/globalStatus'

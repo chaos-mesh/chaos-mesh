@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "start": "pnpm -F @ui/app dev",
-    "build": "pnpm -F @ui/mui-extends build && pnpm -F @ui/app build",
-    "test": "pnpm -F @ui/mui-extends build && pnpm -F @ui/mui-extends test && pnpm -F @ui/openapi test && pnpm -F @ui/app test",
+    "build": "pnpm -F @ui/app build",
+    "test": "pnpm -F @ui/openapi test && pnpm -F @ui/app test",
     "prepare": "cd ..; is-ci || husky ./ui/.husky"
   },
   "devDependencies": {

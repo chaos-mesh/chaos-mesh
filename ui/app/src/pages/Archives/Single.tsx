@@ -14,6 +14,10 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
 import { TypesArchiveDetail } from '@/openapi/index.schemas'
 import loadable from '@loadable/component'
@@ -21,11 +25,6 @@ import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-
-import Loading from '@ui/mui-extends/esm/Loading'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import EventsTimeline from '@/components/EventsTimeline'
 import Helmet from '@/components/Helmet'

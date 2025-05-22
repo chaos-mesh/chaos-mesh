@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined'
 import PublishIcon from '@mui/icons-material/Publish'
@@ -30,8 +31,6 @@ import { memo } from 'react'
 import { useState } from 'react'
 import AceEditor, { IAceEditorProps } from 'react-ace'
 import { useIntl } from 'react-intl'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setConfirm } from '@/slices/globalStatus'
 

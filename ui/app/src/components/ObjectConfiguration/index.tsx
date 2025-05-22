@@ -15,11 +15,10 @@
  *
  */
 import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
+import Space from '@/mui-extends/Space'
 import { TypesArchiveDetail, TypesExperimentDetail } from '@/openapi/index.schemas'
 import { useStoreSelector } from '@/store'
 import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import StatusLabel from '@/components/StatusLabel'
 import i18n from '@/components/T'

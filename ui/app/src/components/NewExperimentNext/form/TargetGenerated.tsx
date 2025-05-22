@@ -15,14 +15,13 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
 import { useStoreSelector } from '@/store'
 import { MenuItem } from '@mui/material'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
 import { useEffect, useState } from 'react'
 import { ObjectSchema } from 'yup'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import { Env } from '@/slices/experiments'
 

@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import { CircularProgress, Typography, styled, useTheme } from '@mui/material'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import { T } from '@/components/T'
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
 import TabUnstyled from '@mui/base/TabUnstyled'
@@ -24,9 +26,6 @@ import { styled } from '@mui/material/styles'
 import _ from 'lodash'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactFlowInstance } from 'react-flow-renderer'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { loadRecentlyUsedExperiments } from '@/slices/workflows'
 

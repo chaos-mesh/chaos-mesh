@@ -14,6 +14,10 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import {
   useDeleteSchedulesUid,
   useGetEvents,
@@ -30,11 +34,6 @@ import { Box, Button, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
-
-import Loading from '@ui/mui-extends/esm/Loading'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setAlert, setConfirm } from '@/slices/globalStatus'
 

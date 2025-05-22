@@ -15,6 +15,9 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import loadable from '@loadable/component'
@@ -24,10 +27,6 @@ import yaml from 'js-yaml'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
-
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { resetWorkflow } from '@/slices/workflows'
 
