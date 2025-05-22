@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { useStoreDispatch } from '@/store'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
@@ -22,10 +25,6 @@ import { Form, Formik } from 'formik'
 import { useRef, useState } from 'react'
 import React from 'react'
 import { useIntl } from 'react-intl'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { resetNewExperiment } from '@/slices/experiments'
 import { setAlert } from '@/slices/globalStatus'

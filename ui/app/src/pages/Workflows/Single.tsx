@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from '@/openapi'
 import { CoreWorkflowDetail } from '@/openapi/index.schemas'
 import { useStoreDispatch } from '@/store'
@@ -26,10 +29,6 @@ import yaml from 'js-yaml'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 

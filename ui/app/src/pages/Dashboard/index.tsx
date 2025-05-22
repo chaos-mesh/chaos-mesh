@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
 import { useGetEvents, useGetExperiments, useGetSchedules, useGetWorkflows } from '@/openapi'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
@@ -24,9 +26,6 @@ import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { TourProvider } from '@reactour/tour'
 import type { ReactChild } from 'react'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
 
 import EventsChart from '@/components/EventsChart'
 import EventsTimeline from '@/components/EventsTimeline'

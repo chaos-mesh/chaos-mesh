@@ -24,7 +24,7 @@ export interface AutocompleteFieldProps<
   T = string,
   Multiple extends boolean | undefined = boolean,
   DisableClearable extends boolean | undefined = boolean,
-  FreeSolo extends boolean | undefined = boolean
+  FreeSolo extends boolean | undefined = boolean,
 > extends Omit<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo>, 'renderInput'> {
   name?: string
   label?: TextFieldProps['label']

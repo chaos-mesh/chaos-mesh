@@ -15,6 +15,7 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import Paper from '@/mui-extends/Paper'
 import { useGetCommonConfig } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import CheckIcon from '@mui/icons-material/Check'
@@ -25,8 +26,6 @@ import { Box, Card, Divider, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import clsx from 'clsx'
 import React from 'react'
-
-import Paper from '@ui/mui-extends/esm/Paper'
 
 import { Env, setEnv, setKindAction, setSpec, setStep1 } from '@/slices/experiments'
 

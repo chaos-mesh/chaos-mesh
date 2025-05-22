@@ -15,6 +15,8 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import Checkbox from '@/mui-extends/Checkbox'
+import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
 import { useStoreSelector } from '@/store'
 import AddIcon from '@mui/icons-material/Add'
@@ -24,9 +26,6 @@ import { Form, Formik, FormikProps, getIn } from 'formik'
 import type { FormikConfig, FormikValues } from 'formik'
 import _ from 'lodash'
 import { Fragment, useEffect, useState } from 'react'
-
-import Checkbox from '@ui/mui-extends/esm/Checkbox'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from '@/components/FormField'
 import { SpecialTemplateType } from '@/components/NewWorkflowNext/utils/convert'

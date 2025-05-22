@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-
 import { Tooltip as MUITooltip, TooltipProps, styled } from '@mui/material'
 
 const Tooltip: React.FC<TooltipProps> = styled(MUITooltip)({

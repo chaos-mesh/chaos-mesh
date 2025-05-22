@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
 import MenuIcon from '@mui/icons-material/Menu'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import { AppBar, Box, IconButton, Toolbar } from '@mui/material'
-
-import Space from '@ui/mui-extends/esm/Space'
 
 import Search from '@/components/Search'
 

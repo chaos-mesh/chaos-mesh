@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { getWorkflowsUid, useDeleteWorkflowsUid, useGetWorkflows, usePostWorkflows } from '@/openapi'
 import { CoreWorkflowMeta } from '@/openapi/index.schemas'
 import { useStoreDispatch, useStoreSelector } from '@/store'
@@ -29,10 +32,6 @@ import React, { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
-
-import Loading from '@ui/mui-extends/esm/Loading'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setAlert, setConfirm } from '@/slices/globalStatus'
 

@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import SkeletonN from '@/mui-extends/SkeletonN'
+import Space from '@/mui-extends/Space'
 import {
   useGetArchives,
   useGetArchivesSchedules,
@@ -29,10 +32,6 @@ import { useStoreDispatch } from '@/store'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setAlert } from '@/slices/globalStatus'
 

@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import MuiExtendsAutocompleteField from '@/mui-extends/AutocompleteField'
+import type { AutocompleteFieldProps as MuiExtendsAutocompleteFieldProps } from '@/mui-extends/AutocompleteField'
 import { getIn, useFormikContext } from 'formik'
-
-import MuiExtendsAutocompleteField from '@ui/mui-extends/esm/AutocompleteField'
-import type { AutocompleteFieldProps as MuiExtendsAutocompleteFieldProps } from '@ui/mui-extends/esm/AutocompleteField'
 
 import { T } from '@/components/T'
 

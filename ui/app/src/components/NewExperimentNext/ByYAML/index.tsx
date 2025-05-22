@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
 import { useStoreDispatch } from '@/store'
 import loadable from '@loadable/component'
 import PublishIcon from '@mui/icons-material/Publish'
@@ -22,9 +24,6 @@ import { Ace } from 'ace-builds'
 import yaml from 'js-yaml'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setAlert } from '@/slices/globalStatus'
 

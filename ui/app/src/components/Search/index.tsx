@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Tooltip from '@/mui-extends/Tooltip'
 import {
   getArchives,
   getArchivesSchedules,
@@ -42,9 +44,6 @@ import _ from 'lodash'
 import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import Tooltip from '@ui/mui-extends/esm/Tooltip'
 
 import i18n from '@/components/T'
 

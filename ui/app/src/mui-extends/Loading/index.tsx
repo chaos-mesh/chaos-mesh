@@ -14,22 +14,23 @@
  * limitations under the License.
  *
  */
+import { Box, CircularProgress, styled } from '@mui/material'
 
-import Paper from '../Paper'
+const StyledBox = styled(Box)({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  height: '100%',
+})
 
-/**
- * PaperContainer usually be used to replace the default container.
- *
- * For example:
- *
- * <TableContainer component={PaperContainer}>
- * ...
- * </TableContainer>
- *
- * @param {React.ReactNode} { children }
- */
-const PaperContainer: React.FC = ({ children }) => (
-  <Paper sx={{ maxHeight: 768, p: 0, overflow: 'scroll' }}>{children}</Paper>
+const Loading = () => (
+  <StyledBox>
+    <CircularProgress size={25} />
+  </StyledBox>
 )
 
-export default PaperContainer
+export default Loading

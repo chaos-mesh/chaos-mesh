@@ -14,10 +14,9 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
 import { useGetEvents } from '@/openapi'
 import { Grow, Typography } from '@mui/material'
-
-import Loading from '@ui/mui-extends/esm/Loading'
 
 import EventsTable from '@/components/EventsTable'
 import NotFound from '@/components/NotFound'

@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import Space from '@/mui-extends/Space'
 import {
   useDeleteExperiments,
   useDeleteExperimentsUid,
@@ -34,9 +36,6 @@ import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-
-import Loading from '@ui/mui-extends/esm/Loading'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 

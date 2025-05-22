@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { postExperiments, postSchedules } from '@/openapi'
 import { useStoreDispatch } from '@/store'
 import loadable from '@loadable/component'
@@ -24,10 +27,6 @@ import clsx from 'clsx'
 import yaml from 'js-yaml'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setAlert, setConfirm } from '@/slices/globalStatus'
 

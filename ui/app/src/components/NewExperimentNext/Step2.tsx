@@ -15,6 +15,9 @@
  *
  */
 import { Stale } from '@/api/queryUtils'
+import Paper from '@/mui-extends/Paper'
+import SkeletonN from '@/mui-extends/SkeletonN'
+import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
 import CheckIcon from '@mui/icons-material/Check'
@@ -24,10 +27,6 @@ import { Box, Button, Divider, Grid, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
-import Space from '@ui/mui-extends/esm/Space'
 
 import { setBasic, setStep2 } from '@/slices/experiments'
 

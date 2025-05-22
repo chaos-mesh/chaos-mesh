@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
 import { TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
 import { useStoreSelector } from '@/store'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
@@ -24,9 +26,6 @@ import { Box, IconButton, Typography } from '@mui/material'
 import _ from 'lodash'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
 
 import StatusLabel from '@/components/StatusLabel'
 import i18n from '@/components/T'
