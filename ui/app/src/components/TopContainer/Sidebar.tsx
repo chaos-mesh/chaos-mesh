@@ -34,7 +34,7 @@ import {
   ListItemText as MuiListItemText,
 } from '@mui/material'
 import { Theme, styled } from '@mui/material/styles'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 
 import i18n from '@/components/T'
 

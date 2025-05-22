@@ -18,7 +18,7 @@ import { usePostSchedules } from '@/openapi'
 import { useStoreDispatch } from '@/store'
 import { Grid } from '@mui/material'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { resetNewExperiment } from '@/slices/experiments'
 import { setAlert } from '@/slices/globalStatus'

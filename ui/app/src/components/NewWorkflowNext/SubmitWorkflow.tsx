@@ -25,7 +25,7 @@ import { Box, Divider, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import * as Yup from 'yup'
 
 import { resetWorkflow } from '@/slices/workflows'

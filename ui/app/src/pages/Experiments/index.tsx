@@ -34,7 +34,7 @@ import { Box, Button, Checkbox, Typography, styled } from '@mui/material'
 import _ from 'lodash'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
 
 import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'

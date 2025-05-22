@@ -20,14 +20,13 @@ import type { FC } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Provider as StoreProvider } from 'react-redux'
-import { RouterProvider } from 'react-router-dom'
-
-import store from './store'
+import { RouterProvider } from 'react-router'
 
 import IntlProvider from './IntlProvider'
 import ThemeProvider from './ThemeProvider'
 import queryClient from './reactQueryClient'
 import router from './router'
+import store from './store'
 
 interface AppProps {
   forTesting?: boolean

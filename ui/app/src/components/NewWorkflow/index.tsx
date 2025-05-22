@@ -45,7 +45,7 @@ import yaml from 'js-yaml'
 import _ from 'lodash'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { resetNewExperiment } from '@/slices/experiments'
 import { setAlert, setConfirm } from '@/slices/globalStatus'
