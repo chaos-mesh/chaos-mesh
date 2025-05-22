@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import { useStoreSelector } from '@/store'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
@@ -35,14 +36,12 @@ import {
 import { Theme, styled } from '@mui/material/styles'
 import { NavLink } from 'react-router-dom'
 
-import { useStoreSelector } from 'store'
+import i18n from '@/components/T'
 
-import i18n from 'components/T'
-
-import logoMiniWhite from 'images/logo-mini-white.svg'
-import logoMini from 'images/logo-mini.svg'
-import logoWhite from 'images/logo-white.svg'
-import logo from 'images/logo.svg'
+import logoMiniWhite from '@/images/logo-mini-white.svg'
+import logoMini from '@/images/logo-mini.svg'
+import logoWhite from '@/images/logo-white.svg'
+import logo from '@/images/logo.svg'
 
 export const openedWidth = 256
 export const closedWidth = 64

@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  */
+import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
+import { TypesArchiveDetail } from '@/openapi/index.schemas'
 import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
-import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from 'openapi'
-import { TypesArchiveDetail } from 'openapi/index.schemas'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -27,14 +27,14 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
 
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import i18n from 'components/T'
+import EventsTimeline from '@/components/EventsTimeline'
+import Helmet from '@/components/Helmet'
+import ObjectConfiguration from '@/components/ObjectConfiguration'
+import i18n from '@/components/T'
 
-import { useQuery } from 'lib/hooks'
+import { useQuery } from '@/lib/hooks'
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 const Single = () => {
   const { uuid } = useParams()
@@ -44,8 +44,8 @@ const Single = () => {
     kind === 'workflow'
       ? useGetArchivesWorkflowsUid
       : kind === 'schedule'
-      ? useGetArchivesSchedulesUid
-      : useGetArchivesUid
+        ? useGetArchivesSchedulesUid
+        : useGetArchivesUid
 
   const [archive, setArchive] = useState<TypesArchiveDetail>()
 
@@ -57,7 +57,7 @@ const Single = () => {
       object_id: uuid,
       limit: 999,
     },
-    { query: { enabled: kind !== 'workflow' } }
+    { query: { enabled: kind !== 'workflow' } },
   )
   const loading = kind === 'workflow' ? loadingArchives : loadingArchives && loadingEvents
 

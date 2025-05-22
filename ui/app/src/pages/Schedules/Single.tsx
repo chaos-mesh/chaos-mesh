@@ -14,19 +14,20 @@
  * limitations under the License.
  *
  */
-import loadable from '@loadable/component'
-import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
-import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import { Box, Button, Grid, Grow } from '@mui/material'
-import yaml from 'js-yaml'
 import {
   useDeleteSchedulesUid,
   useGetEvents,
   useGetSchedulesUid,
   usePutSchedulesPauseUid,
   usePutSchedulesStartUid,
-} from 'openapi'
+} from '@/openapi'
+import { useStoreDispatch } from '@/store'
+import loadable from '@loadable/component'
+import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
+import { Box, Button, Grid, Grow } from '@mui/material'
+import yaml from 'js-yaml'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router-dom'
 
@@ -35,16 +36,14 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch } from 'store'
+import { setAlert, setConfirm } from '@/slices/globalStatus'
 
-import { setAlert, setConfirm } from 'slices/globalStatus'
+import EventsTimeline from '@/components/EventsTimeline'
+import Helmet from '@/components/Helmet'
+import ObjectConfiguration from '@/components/ObjectConfiguration'
+import i18n from '@/components/T'
 
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import i18n from 'components/T'
-
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 const Single = () => {
   const navigate = useNavigate()
@@ -69,7 +68,7 @@ const Single = () => {
             title: `${i18n('archives.single', intl)} ${schedule!.name}`,
             description: i18n('experiments.deleteDesc', intl),
             handle: handleAction('archive'),
-          })
+          }),
         )
 
         break
@@ -79,7 +78,7 @@ const Single = () => {
             title: `${i18n('common.pause', intl)} ${schedule!.name}`,
             description: i18n('experiments.pauseDesc', intl),
             handle: handleAction('pause'),
-          })
+          }),
         )
 
         break
@@ -89,7 +88,7 @@ const Single = () => {
             title: `${i18n('common.start', intl)} ${schedule!.name}`,
             description: i18n('experiments.startDesc', intl),
             handle: handleAction('start'),
-          })
+          }),
         )
 
         break
@@ -123,7 +122,7 @@ const Single = () => {
             setAlert({
               type: 'success',
               message: i18n(`confirm.success.${action}`, intl),
-            })
+            }),
           )
 
           if (action === 'archive') {

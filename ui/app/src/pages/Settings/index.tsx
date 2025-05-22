@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import messages from '@/i18n/messages'
+import { useGetCommonConfig } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
-import { Stale } from 'api/queryUtils'
-import messages from 'i18n/messages'
-import { useGetCommonConfig } from 'openapi'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import SelectField from '@ui/mui-extends/esm/SelectField'
 import Space from '@ui/mui-extends/esm/Space'
-
-import { useStoreDispatch, useStoreSelector } from 'store'
 
 import {
   setDebugMode,
@@ -34,12 +33,12 @@ import {
   setTheme,
   setUseNewPhysicalMachine,
   setUseNextWorkflowInterface,
-} from 'slices/settings'
+} from '@/slices/settings'
 
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
-import logoWhite from 'images/logo-white.svg'
-import logo from 'images/logo.svg'
+import logoWhite from '@/images/logo-white.svg'
+import logo from '@/images/logo.svg'
 
 import Token from './Token'
 

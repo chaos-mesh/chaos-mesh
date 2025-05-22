@@ -14,33 +14,32 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
+import { useStoreSelector } from '@/store'
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Chip, Divider, FormHelperText, MenuItem, Typography } from '@mui/material'
 import { eval as expEval, parse } from 'expression-eval'
 import { Form, Formik, FormikProps, getIn } from 'formik'
 import type { FormikConfig, FormikValues } from 'formik'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { Fragment, useEffect, useState } from 'react'
 
 import Checkbox from '@ui/mui-extends/esm/Checkbox'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreSelector } from 'store'
+import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from '@/components/FormField'
+import { SpecialTemplateType } from '@/components/NewWorkflowNext/utils/convert'
+import Scope from '@/components/Scope'
+import Mode from '@/components/Scope/Mode'
+import { T } from '@/components/T'
 
-import { AutocompleteField, SelectField, Submit, TextField, TextTextField } from 'components/FormField'
-import { SpecialTemplateType } from 'components/NewWorkflowNext/utils/convert'
-import Scope from 'components/Scope'
-import Mode from 'components/Scope/Mode'
-import { T } from 'components/T'
-
-import { concatKindAction } from 'lib/utils'
+import { concatKindAction } from '@/lib/utils'
 
 import Info from './Info'
 import Schedule from './Schedule'
 import { removeScheduleValues, scheduleInitialValues, scopeInitialValues, workflowNodeInfoInitialValues } from './data'
 import { chooseSchemaByBelong } from './validation'
-import { Stale } from 'api/queryUtils'
 
 export enum Belong {
   Experiment = 'Experiment',
@@ -153,7 +152,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
     form: AtomFormData[],
     props: FormikProps<FormikValues>,
     parent?: string,
-    index?: number
+    index?: number,
   ): any[] => {
     const { values, errors, touched, setFieldValue } = props
 
@@ -258,7 +257,7 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
                               onDelete={() => {
                                 setFieldValue(
                                   _label,
-                                  value.filter((_, i) => i !== index)
+                                  value.filter((_, i) => i !== index),
                                 )
                               }}
                             />

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
@@ -29,15 +30,13 @@ import { v4 as uuidv4 } from 'uuid'
 import Menu from '@ui/mui-extends/esm/Menu'
 import Paper from '@ui/mui-extends/esm/Paper'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { setConfirm } from '@/slices/globalStatus'
+import { importNodes, removeWorkflowNode, updateWorkflowNode } from '@/slices/workflows'
 
-import { setConfirm } from 'slices/globalStatus'
-import { importNodes, removeWorkflowNode, updateWorkflowNode } from 'slices/workflows'
+import AutoForm, { Belong } from '@/components/AutoForm'
+import i18n, { T } from '@/components/T'
 
-import AutoForm, { Belong } from 'components/AutoForm'
-import i18n, { T } from 'components/T'
-
-import { concatKindAction } from 'lib/utils'
+import { concatKindAction } from '@/lib/utils'
 
 import AdjustableEdge from './AdjustableEdge'
 import { ElementDragData } from './Elements/types'
@@ -93,7 +92,7 @@ const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
 
           onClose()
         },
-      })
+      }),
     )
   }
   return (
@@ -136,7 +135,7 @@ const EdgeControl = ({ id, onDelete }: ControlProps) => {
         title: `Delete edge ${id}`,
         description: <T id="common.deleteDesc" />,
         handle: () => onDelete(id),
-      })
+      }),
     )
   }
 
@@ -171,11 +170,11 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
             },
             markerEnd: commonMarkerEnd,
           },
-          eds
+          eds,
         )
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setEdges]
+    [setEdges],
   )
   const nodeTypes = useMemo(() => ({ flowNode: FlowNode, groupNode: GroupNode }), [])
   const edgeTypes = useMemo(() => ({ adjustableEdge: AdjustableEdge }), [])
@@ -306,7 +305,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         }
 
         return node
-      })
+      }),
     )
     dispatch(updateWorkflowNode(rest))
 
@@ -414,14 +413,14 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
           finished: true,
           ...addNodeControl(node.id, node.type as NodeControlProps['type']),
         },
-      }))
+      })),
     )
     setEdges(
       edges.map((edge) => ({
         ...edge,
         data: { ...edge.data, tooltipProps: { title: <EdgeControl id={edge.data.id} onDelete={deleteEdge} /> } },
         markerEnd: commonMarkerEnd,
-      }))
+      })),
     )
   }
 
@@ -436,7 +435,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         }
 
         return node
-      })
+      }),
     )
   }
 

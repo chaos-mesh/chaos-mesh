@@ -14,25 +14,24 @@
  * limitations under the License.
  *
  */
+import { TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
+import { useStoreSelector } from '@/store'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import { Box, IconButton, Typography } from '@mui/material'
 import _ from 'lodash'
-import { TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
 
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreSelector } from 'store'
+import StatusLabel from '@/components/StatusLabel'
+import i18n from '@/components/T'
 
-import StatusLabel from 'components/StatusLabel'
-import i18n from 'components/T'
-
-import DateTime, { format } from 'lib/luxon'
+import DateTime, { format } from '@/lib/luxon'
 
 interface ObjectListItemProps {
   type?: 'schedule' | 'experiment' | 'archive'

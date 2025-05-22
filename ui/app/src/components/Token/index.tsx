@@ -14,21 +14,20 @@
  * limitations under the License.
  *
  */
-import { applyAPIAuthentication, resetAPIAuthentication } from 'api/interceptors'
+import { applyAPIAuthentication, resetAPIAuthentication } from '@/api/interceptors'
+import { getExperimentsState } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import { Form, Formik, FormikHelpers } from 'formik'
-import { getExperimentsState } from 'openapi'
 import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { setAlert, setTokenName, setTokens } from '@/slices/globalStatus'
 
-import { setAlert, setTokenName, setTokens } from 'slices/globalStatus'
+import { Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
 
-import { Submit, TextField } from 'components/FormField'
-import i18n from 'components/T'
-
-import { validateName } from 'lib/formikhelpers'
+import { validateName } from '@/lib/formikhelpers'
 
 function validateToken(value: string) {
   let error
@@ -66,7 +65,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
         setAlert({
           type: 'warning',
           message: i18n('settings.addToken.duplicateDesc', intl),
-        })
+        }),
       )
 
       return

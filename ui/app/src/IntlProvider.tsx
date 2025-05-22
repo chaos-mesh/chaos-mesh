@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
+import messages from '@/i18n/messages'
+import { useStoreSelector } from '@/store'
 import flat from 'flat'
-import messages from 'i18n/messages'
 import { useMemo } from 'react'
 import { IntlProvider as ReactIntlProvider } from 'react-intl'
-
-import { useStoreSelector } from 'store'
 
 const IntlProvider: React.FC = ({ children }) => {
   const { lang } = useStoreSelector((state) => state.settings)

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import { useStoreSelector } from '@/store'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { Box, IconButton, InputAdornment, MenuItem, Typography } from '@mui/material'
@@ -23,9 +24,7 @@ import { useEffect, useState } from 'react'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreSelector } from 'store'
-
-import { LabelField, SelectField, Submit, TextField } from 'components/FormField'
+import { LabelField, SelectField, Submit, TextField } from '@/components/FormField'
 
 import typesData from '../data/types'
 
@@ -64,13 +63,13 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                 parameters: '',
                 predicate: '',
               },
-            ])
+            ]),
           )
 
         const removeFrame = (index: number) => () => {
           setFieldValue(
             'failKernRequest.callchain',
-            callchain.filter((_: any, i: number) => index !== i)
+            callchain.filter((_: any, i: number) => index !== i),
           )
         }
 

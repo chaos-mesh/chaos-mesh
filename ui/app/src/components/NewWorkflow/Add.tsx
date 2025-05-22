@@ -14,27 +14,31 @@
  * limitations under the License.
  *
  */
-import { Box, Button, MenuItem, StepLabel, Typography } from '@mui/material'
-import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
-import { SelectField, TextField } from 'components/FormField'
-import { Template, TemplateType, setTemplate, updateTemplate } from 'slices/workflows'
-import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
-import { useEffect, useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import CloseIcon from '@mui/icons-material/Close'
+import { Box, Button, MenuItem, StepLabel, Typography } from '@mui/material'
+import { makeStyles } from '@mui/styles'
 import { Formik } from 'formik'
+import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
+
+import Space from '@ui/mui-extends/esm/Space'
+
+import { resetNewExperiment, setExternalExperiment } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
+import { Template, TemplateType, setTemplate, updateTemplate } from '@/slices/workflows'
+
+import { SelectField, TextField } from '@/components/FormField'
+import NewExperimentNext, { NewExperimentHandles } from '@/components/NewExperimentNext'
+import i18n from '@/components/T'
+
+import { parseYAML } from '@/lib/formikhelpers'
+
 import HTTPTask from './HTTPTask'
 import SerialOrParallel from './SerailOrParallel'
-import Space from '@ui/mui-extends/esm/Space'
 import Suspend from './Suspend'
 import Task from './Task'
-import i18n from 'components/T'
-import { makeStyles } from '@mui/styles'
-import { parseYAML } from 'lib/formikhelpers'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
 
 const useStyles = makeStyles({
   field: {
@@ -115,7 +119,7 @@ const Add: React.FC<AddProps> = ({
         kindAction: [kind, spec.action ?? ''],
         spec,
         basic,
-      })
+      }),
     )
   }
 
@@ -225,7 +229,7 @@ const Add: React.FC<AddProps> = ({
         setAlert({
           type: 'warning',
           message: i18n('newW.messages.redundant', intl),
-        })
+        }),
       )
 
       return

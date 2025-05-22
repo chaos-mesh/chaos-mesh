@@ -17,8 +17,8 @@
 import { InputAdornment, MenuItem } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 
-import { SelectField, TextField } from 'components/FormField'
-import { T } from 'components/T'
+import { SelectField, TextField } from '@/components/FormField'
+import { T } from '@/components/T'
 
 const modes = [
   { name: 'Random One', value: 'one' },

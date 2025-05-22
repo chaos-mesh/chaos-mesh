@@ -14,22 +14,25 @@
  * limitations under the License.
  *
  */
-import { Form, Formik } from 'formik'
+import { parseHTTPTask, renderHTTPTask } from '@/api/workflows'
+import { RequestForm } from '@/api/workflows.type'
 import { FormControlLabel, Switch } from '@mui/material'
 import { MenuItem, Typography } from '@mui/material'
-import { SelectField, Submit, TextField } from 'components/FormField'
-import { Template, TemplateType } from 'slices/workflows'
-import { parseHTTPTask, renderHTTPTask } from 'api/workflows'
+import { makeStyles } from '@mui/styles'
+import { Form, Formik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
 
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import { RequestForm } from 'api/workflows.type'
 import Space from '@ui/mui-extends/esm/Space'
-import i18n from 'components/T'
-import { makeStyles } from '@mui/styles'
-import { useIntl } from 'react-intl'
-import { validateName } from 'lib/formikhelpers'
+
+import { Template, TemplateType } from '@/slices/workflows'
+
+import { SelectField, Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
+
+import { validateName } from '@/lib/formikhelpers'
 
 const useStyles = makeStyles({
   field: {

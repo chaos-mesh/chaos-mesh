@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import loadable from '@loadable/component'
 import CheckIcon from '@mui/icons-material/Check'
 import PublishIcon from '@mui/icons-material/Publish'
@@ -34,11 +37,9 @@ import {
 } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { Ace } from 'ace-builds'
-import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router-dom'
@@ -47,21 +48,19 @@ import Menu from '@ui/mui-extends/esm/Menu'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { resetNewExperiment } from '@/slices/experiments'
+import { setAlert, setConfirm } from '@/slices/globalStatus'
+import { Template, deleteTemplate, resetWorkflow } from '@/slices/workflows'
 
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
+import { SelectField, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
 
-import { SelectField, TextField } from 'components/FormField'
-import i18n from 'components/T'
-
-import { validateDeadline, validateName } from 'lib/formikhelpers'
-import { constructWorkflow } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from '@/lib/formikhelpers'
+import { constructWorkflow } from '@/lib/formikhelpers'
 
 import Add from './Add'
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
   leftSticky: {
@@ -147,7 +146,7 @@ const NewWorkflow = () => {
       setAlert({
         type: 'success',
         message: i18n('confirm.success.delete', intl) as string,
-      })
+      }),
     )
     resetRestore()
   }
@@ -161,7 +160,7 @@ const NewWorkflow = () => {
             title: `${i18n('common.delete', intl)} ${name}`,
             description: i18n('newW.node.deleteDesc', intl) as string,
             handle: handleAction(action, index),
-          })
+          }),
         )
         break
     }

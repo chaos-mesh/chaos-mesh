@@ -17,8 +17,8 @@
 import { Box, useTheme } from '@mui/material'
 import type { BoxProps } from '@mui/material'
 
-import EmptyStreetDark from 'images/assets/undraw_empty_street-dark.svg'
-import undrawNotFound from 'images/assets/undraw_not_found.svg'
+import EmptyStreetDark from '@/images/assets/undraw_empty_street-dark.svg'
+import undrawNotFound from '@/images/assets/undraw_not_found.svg'
 
 interface NotFoundProps extends BoxProps {
   illustrated?: boolean

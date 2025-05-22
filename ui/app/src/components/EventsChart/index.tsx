@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  */
+import { CoreEvent } from '@/openapi/index.schemas'
+import { useStoreSelector } from '@/store'
 import { Box, BoxProps } from '@mui/material'
-import { CoreEvent } from 'openapi/index.schemas'
 import { useEffect, useRef } from 'react'
 
-import { useStoreSelector } from 'store'
+import NotFound from '@/components/NotFound'
+import i18n from '@/components/T'
 
-import NotFound from 'components/NotFound'
-import i18n from 'components/T'
-
-import genEventsChart from 'lib/d3/eventsChart'
+import genEventsChart from '@/lib/d3/eventsChart'
 
 interface EventsChartProps extends BoxProps {
   events: CoreEvent[]

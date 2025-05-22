@@ -14,24 +14,23 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
+import { useStoreDispatch } from '@/store'
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from 'openapi'
 import { useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch } from 'store'
+import { setAlert } from '@/slices/globalStatus'
 
-import { setAlert } from 'slices/globalStatus'
-
-import { SelectField } from 'components/FormField'
-import i18n from 'components/T'
-import { Stale } from 'api/queryUtils'
+import { SelectField } from '@/components/FormField'
+import i18n from '@/components/T'
 
 const useStyles = makeStyles((theme) => ({
   pre: {
@@ -96,7 +95,7 @@ const RBACGenerator = () => {
       setAlert({
         type: 'success',
         message: i18n('common.copied', intl),
-      })
+      }),
     )
   }
 

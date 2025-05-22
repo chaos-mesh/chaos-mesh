@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  */
+import { useStoreSelector } from '@/store'
 import { Typography } from '@mui/material'
 import { Form, Formik, getIn } from 'formik'
 import { useEffect, useState } from 'react'
 
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreSelector } from 'store'
-
-import { LabelField, Submit, TextField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
+import { LabelField, Submit, TextField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
 
 import typesData from '../data/types'
 

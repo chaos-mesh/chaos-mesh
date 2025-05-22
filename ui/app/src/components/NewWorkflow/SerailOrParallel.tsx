@@ -14,25 +14,29 @@
  * limitations under the License.
  *
  */
-import { Box, IconButton, Typography } from '@mui/material'
-import { Form, Formik } from 'formik'
-import { Submit, TextField } from 'components/FormField'
-import { Template, TemplateType } from 'slices/workflows'
-import { useRef, useState } from 'react'
-import { validateDeadline, validateName } from 'lib/formikhelpers'
-
-import Add from './Add'
+import { useStoreDispatch } from '@/store'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
+import { Box, IconButton, Typography } from '@mui/material'
+import { Form, Formik } from 'formik'
+import { useRef, useState } from 'react'
+import React from 'react'
+import { useIntl } from 'react-intl'
+
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import React from 'react'
 import Space from '@ui/mui-extends/esm/Space'
-import i18n from 'components/T'
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
-import { useStoreDispatch } from 'store'
+
+import { resetNewExperiment } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
+import { Template, TemplateType } from '@/slices/workflows'
+
+import { Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
+
+import { validateDeadline, validateName } from '@/lib/formikhelpers'
+
+import Add from './Add'
 
 interface SerialOrParallelProps extends FormProps {
   childrenCount: number
@@ -85,7 +89,7 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
           type: 'warning',
           // Please fill in the current branch first
           message: i18n('newW.messages.m1', intl),
-        })
+        }),
       )
 
       return
@@ -98,7 +102,7 @@ const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
 
             return -1
           })()
-        : index
+        : index,
     )
   }
 

@@ -14,22 +14,24 @@
  * limitations under the License.
  *
  */
-import { Button, Typography } from '@mui/material'
-
-import { Ace } from 'ace-builds'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PublishIcon from '@mui/icons-material/Publish'
-import Space from '@ui/mui-extends/esm/Space'
-import YAML from 'components/YAML'
-import i18n from 'components/T'
+import { useStoreDispatch } from '@/store'
 import loadable from '@loadable/component'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
-import { useState } from 'react'
-import { useStoreDispatch } from 'store'
+import PublishIcon from '@mui/icons-material/Publish'
+import { Button, Typography } from '@mui/material'
+import { Ace } from 'ace-builds'
 import yaml from 'js-yaml'
+import { useState } from 'react'
+import { useIntl } from 'react-intl'
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+import Paper from '@ui/mui-extends/esm/Paper'
+import Space from '@ui/mui-extends/esm/Space'
+
+import { setAlert } from '@/slices/globalStatus'
+
+import i18n from '@/components/T'
+import YAML from '@/components/YAML'
+
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 interface ByYAMLProps {
   callback?: (data: any) => void
@@ -56,7 +58,7 @@ const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
       setAlert({
         type: 'success',
         message: i18n('confirm.success.load', intl),
-      })
+      }),
     )
   }
 

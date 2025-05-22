@@ -14,12 +14,12 @@
  * limitations under the License.
  *
  */
+import { TypesPhysicalMachine } from '@/openapi/index.schemas'
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import { TypesPhysicalMachine } from 'openapi/index.schemas'
 
 import PaperContainer from '@ui/mui-extends/esm/PaperContainer'
 
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
 import { TargetsTableActions } from '.'
 

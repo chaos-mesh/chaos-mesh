@@ -14,12 +14,13 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import loadable from '@loadable/component'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
-import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
@@ -28,15 +29,13 @@ import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
 import Paper from '@ui/mui-extends/esm/Paper'
 import Space from '@ui/mui-extends/esm/Space'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { resetWorkflow } from '@/slices/workflows'
 
-import { resetWorkflow } from 'slices/workflows'
+import { SelectField, Submit, TextField } from '@/components/FormField'
+import FormikEffect from '@/components/FormikEffect'
+import { T } from '@/components/T'
 
-import { SelectField, Submit, TextField } from 'components/FormField'
-import FormikEffect from 'components/FormikEffect'
-import { T } from 'components/T'
-
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 const validationSchema = Yup.object({
   name: Yup.string().trim().required(),

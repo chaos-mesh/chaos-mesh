@@ -14,26 +14,30 @@
  * limitations under the License.
  *
  */
-import { Autocomplete, Box, IconButton, TextField as MUITextField, Typography } from '@mui/material'
-import { Branch, Template, TemplateType } from 'slices/workflows'
-import { Form, Formik } from 'formik'
-import { LabelField, Submit, TextField } from 'components/FormField'
-import { useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-import { validateImage, validateName } from 'lib/formikhelpers'
-
-import Add from './Add'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowRightIcon from '@mui/icons-material/ArrowRight'
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
+import { Autocomplete, Box, IconButton, TextField as MUITextField, Typography } from '@mui/material'
+import { Form, Formik } from 'formik'
+import { useRef, useState } from 'react'
+import { useIntl } from 'react-intl'
+
 import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import Space from '@ui/mui-extends/esm/Space'
-import i18n from 'components/T'
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
-import { useIntl } from 'react-intl'
+
+import { resetNewExperiment } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
+import { Branch, Template, TemplateType } from '@/slices/workflows'
+
+import { LabelField, Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
+
+import { validateImage, validateName } from '@/lib/formikhelpers'
+
+import Add from './Add'
 
 interface TaskProps extends FormProps {
   childrenCount: number
@@ -89,7 +93,7 @@ const Task: React.FC<TaskProps> = (props) => {
           type: 'warning',
           // Please fill in the current branch first
           message: i18n('newW.messages.m1', intl),
-        })
+        }),
       )
 
       return
@@ -102,7 +106,7 @@ const Task: React.FC<TaskProps> = (props) => {
 
             return -1
           })()
-        : index
+        : index,
     )
   }
   return (
@@ -129,7 +133,7 @@ const Task: React.FC<TaskProps> = (props) => {
                 setAlert({
                   type: 'warning',
                   message: i18n('newW.messages.m2', intl),
-                })
+                }),
               )
 
               return
@@ -142,7 +146,7 @@ const Task: React.FC<TaskProps> = (props) => {
                   target: '',
                   expression: '',
                 },
-              ])
+              ]),
             )
             // setChildrenCount(childrenCount + 1)
           }
@@ -150,7 +154,7 @@ const Task: React.FC<TaskProps> = (props) => {
           const removeBranch = (index: number) => () => {
             setFieldValue(
               'conditionalBranches',
-              conditionalBranches.filter((_: any, i: number) => index !== i)
+              conditionalBranches.filter((_: any, i: number) => index !== i),
             )
             // setChildrenCount(childrenCount - 1)
             setTemplates(templates.filter((_: any, i: number) => index !== i))

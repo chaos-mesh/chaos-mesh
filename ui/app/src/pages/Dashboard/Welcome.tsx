@@ -26,7 +26,7 @@ import Paper from '@ui/mui-extends/esm/Paper'
 import PaperTop from '@ui/mui-extends/esm/PaperTop'
 import Space from '@ui/mui-extends/esm/Space'
 
-import i18n from 'components/T'
+import i18n from '@/components/T'
 
 const useStyles = makeStyles((theme) => ({
   space: {

@@ -30,7 +30,7 @@ func (it *FrontendCodeGenerator) AppendTypes(typeName string) {
 	it.chaosTypes = append(it.chaosTypes, typeName)
 }
 
-const typesTemplate = `import { ExperimentKind } from 'components/NewExperiment/types'
+const typesTemplate = `import { ExperimentKind } from '@/components/NewExperiment/types'
 
 const mapping = new Map<ExperimentKind, string>([
 %s])
