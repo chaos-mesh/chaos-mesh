@@ -27,7 +27,7 @@ import { resetNewExperiment } from '@/slices/experiments'
 import { setAlert } from '@/slices/globalStatus'
 
 import { Submit } from '@/components/FormField'
-import { ExperimentKind } from '@/components/NewExperiment/types'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
 import i18n from '@/components/T'
 
 import { parseSubmit } from '@/lib/formikhelpers'
@@ -37,7 +37,7 @@ interface Step3Props {
   inSchedule?: boolean
 }
 
-const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
+const Step3: ReactFCWithChildren<Step3Props> = ({ onSubmit, inSchedule }) => {
   const navigate = useNavigate()
   const intl = useIntl()
 
@@ -62,7 +62,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
       { inSchedule, useNewPhysicalMachine },
     )
 
-    if (process.env.NODE_ENV === 'development' || debugMode) {
+    if (import.meta.env.DEV || debugMode) {
       console.debug('Here is the experiment you are going to submit:', JSON.stringify(parsedValues, null, 2))
     }
 
@@ -86,7 +86,7 @@ const Step3: React.FC<Step3Props> = ({ onSubmit, inSchedule }) => {
             navigate('/experiments')
           })
           .catch((error) => {
-            if (process.env.NODE_ENV === 'development') {
+            if (import.meta.env.DEV) {
               console.error('Error submitting experiment:', error.response)
             }
 

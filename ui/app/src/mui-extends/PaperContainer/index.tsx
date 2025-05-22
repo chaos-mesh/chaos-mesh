@@ -27,7 +27,7 @@ import Paper from '../Paper'
  *
  * @param {React.ReactNode} { children }
  */
-const PaperContainer: React.FC = ({ children }) => (
+const PaperContainer: ReactFCWithChildren = ({ children }) => (
   <Paper sx={{ maxHeight: 768, p: 0, overflow: 'scroll' }}>{children}</Paper>
 )
 

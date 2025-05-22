@@ -37,7 +37,7 @@ interface ObjectConfigurationProps {
   vertical?: boolean
 }
 
-const ObjectConfiguration: React.FC<ObjectConfigurationProps> = ({
+const ObjectConfiguration: ReactFCWithChildren<ObjectConfigurationProps> = ({
   config,
   inNode,
   inSchedule,

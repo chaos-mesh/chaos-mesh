@@ -72,7 +72,7 @@ export default function Archives() {
   const navigate = useNavigate()
   const intl = useIntl()
   const query = useQuery()
-  let kind = query.get('kind') || 'experiment'
+  const kind = query.get('kind') || 'experiment'
 
   const dispatch = useStoreDispatch()
 

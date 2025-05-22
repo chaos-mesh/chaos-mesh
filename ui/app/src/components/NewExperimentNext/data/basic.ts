@@ -44,7 +44,7 @@ const data = {
 }
 
 export const schema = (options: { env: Env; scopeDisabled: boolean; scheduled?: boolean; needDeadline?: boolean }) => {
-  let result = Yup.object({
+  const result = Yup.object({
     metadata: Yup.object({
       name: Yup.string().trim().required('The name is required'),
     }),

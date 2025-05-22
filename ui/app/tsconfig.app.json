@@ -13,7 +13,7 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false, // FIXME: set to true.
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
@@ -32,6 +32,7 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "eslint.config.js"
   ]
 }

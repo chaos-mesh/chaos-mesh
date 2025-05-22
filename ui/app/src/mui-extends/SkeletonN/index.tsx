@@ -16,7 +16,7 @@
  */
 import { Skeleton } from '@mui/material'
 
-const SkeletonN: React.FC<{ n: number }> = ({ n }) => (
+const SkeletonN: ReactFCWithChildren<{ n: number }> = ({ n }) => (
   <>
     {n > 0 &&
       Array(n)

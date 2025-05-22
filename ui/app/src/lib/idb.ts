@@ -16,7 +16,7 @@
  */
 import { DBSchema, IDBPDatabase, openDB } from 'idb'
 
-import { ExperimentKind } from '@/components/NewExperiment/types'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
 
 export interface PreDefinedValue {
   name: string

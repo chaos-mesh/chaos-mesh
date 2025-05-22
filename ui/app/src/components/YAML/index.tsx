@@ -28,7 +28,7 @@ interface YAMLProps {
   ButtonProps?: LoadingButtonProps<'label'>
 }
 
-const YAML: React.FC<YAMLProps> = ({ children, callback, ButtonProps }) => {
+const YAML: ReactFCWithChildren<YAMLProps> = ({ children, callback, ButtonProps }) => {
   const [loading, setLoading] = useState(false)
 
   const dispatch = useStoreDispatch()

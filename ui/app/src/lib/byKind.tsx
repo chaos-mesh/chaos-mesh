@@ -18,7 +18,7 @@ import LinearScaleIcon from '@mui/icons-material/LinearScale'
 import TimelapseIcon from '@mui/icons-material/Timelapse'
 import { SvgIcon } from '@mui/material'
 
-import { ExperimentKind } from '@/components/NewExperiment/types'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
 import i18n from '@/components/T'
 
 import AWSIcon from '@/images/chaos/aws.svg?react'

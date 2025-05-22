@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
 type OptionCategory = CoreWorkflowMeta | TypesSchedule | TypesExperiment | TypesArchive
 type Option = OptionCategory & { is?: string }
 
-const Search: React.FC = () => {
+const Search: ReactFCWithChildren = () => {
   const classes = useStyles()
   const navigate = useNavigate()
   const intl = useIntl()
@@ -92,7 +92,7 @@ const Search: React.FC = () => {
         const [workflows, schedules, experiments, archives, archivedWorkflows, archivedSchedules] = [
           (await getWorkflows()).map((d) => ({
             ...d,
-            is: 'workflow' as 'workflow',
+            is: 'workflow' as const,
             kind: 'Workflow',
           })),
           (await getSchedules()).map((d) => ({ ...d, is: 'schedule' })),

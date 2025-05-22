@@ -32,7 +32,7 @@ interface SingleData {
   value: number
 }
 
-const TotalStatus: React.FC<BoxProps> = (props) => {
+const TotalStatus: ReactFCWithChildren<BoxProps> = (props) => {
   const intl = useIntl()
   const theme = useTheme()
 

@@ -20,7 +20,7 @@ import { flatten } from 'flat'
 import { useMemo } from 'react'
 import { IntlProvider as ReactIntlProvider } from 'react-intl'
 
-const IntlProvider: React.FC = ({ children }) => {
+const IntlProvider: ReactFCWithChildren = ({ children }) => {
   const { lang } = useStoreSelector((state) => state.settings)
   const intlMessages = useMemo<Record<string, string>>(() => flatten(messages[lang]), [lang])
 

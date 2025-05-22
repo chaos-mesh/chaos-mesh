@@ -20,7 +20,7 @@ import { useMemo } from 'react'
 
 import theme, { darkTheme } from './theme'
 
-const ThemeProvider: React.FC = ({ children }) => {
+const ThemeProvider: ReactFCWithChildren = ({ children }) => {
   const { theme: t } = useStoreSelector((state) => state.settings)
   const globalTheme = useMemo(() => (t === 'light' ? theme : darkTheme), [t])
 

@@ -62,7 +62,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
           store.dispatch(setAuthOpen(true))
         }
         break
-      // eslint-disable-next-line no-fallthrough
+
       case 'no_cluster_privilege':
       case 'no_namespace_privilege':
       default:

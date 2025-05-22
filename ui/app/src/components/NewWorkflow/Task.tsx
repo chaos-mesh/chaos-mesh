@@ -57,7 +57,7 @@ interface Container {
   command: string[]
 }
 
-const Task: React.FC<TaskProps> = (props) => {
+const Task: ReactFCWithChildren<TaskProps> = (props) => {
   const intl = useIntl()
   const dispatch = useStoreDispatch()
   const formRef = useRef<any>()

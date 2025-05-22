@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react'
 import { FormattedMessage } from 'react-intl'
 
 import { TextField } from '@/components/FormField'
-import { ExperimentKind } from '@/components/NewExperiment/types'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
 import i18n from '@/components/T'
 
 import { validateDuration, validateSchedule } from '@/lib/formikhelpers'
@@ -40,7 +40,7 @@ interface SchedulerProps {
   inSchedule?: boolean
 }
 
-const Scheduler: React.FC<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
+const Scheduler: ReactFCWithChildren<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
   const { fromExternal, kindAction, basic } = useStoreSelector((state) => state.experiments)
   const { values, setFieldValue } = useFormikContext()
   const [kind, action] = kindAction

@@ -31,7 +31,7 @@ interface KernelProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
-const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
+const Kernel: ReactFCWithChildren<KernelProps> = ({ onSubmit }) => {
   const { spec } = useStoreSelector((state) => state.experiments)
 
   const initialValues = typesData.KernelChaos.spec!

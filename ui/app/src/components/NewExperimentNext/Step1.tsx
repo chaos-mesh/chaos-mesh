@@ -72,7 +72,7 @@ interface TypeCardProp {
   env: Env
 }
 
-const TypeCard: React.FC<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
+const TypeCard: ReactFCWithChildren<TypeCardProp> = ({ name, handleSwitchEnv, env }) => {
   const classes = useStyles()
   const title = name === 'k8s' ? 'k8s.title' : 'physics.single'
   return (
@@ -137,7 +137,7 @@ const Step1 = () => {
         }
       : values
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.debug('Debug handleSubmitStep1:', result)
     }
 

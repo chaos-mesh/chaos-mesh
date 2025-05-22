@@ -39,7 +39,7 @@ interface SuspendProps {
   submit: (template: Template) => void
 }
 
-const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
+const Suspend: ReactFCWithChildren<SuspendProps> = ({ initialValues, submit }) => {
   const intl = useIntl()
 
   const onSubmit = ({ name, deadline }: SuspendValues) => {

@@ -28,7 +28,7 @@ interface EventsChartProps extends BoxProps {
   events: CoreEvent[]
 }
 
-const EventsChart: React.FC<EventsChartProps> = ({ events, ...rest }) => {
+const EventsChart: ReactFCWithChildren<EventsChartProps> = ({ events, ...rest }) => {
   const { theme } = useStoreSelector((state) => state.settings)
 
   const chartRef = useRef<any>(null)

@@ -52,7 +52,7 @@ interface StressProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
-const Stress: React.FC<StressProps> = ({ onSubmit }) => {
+const Stress: ReactFCWithChildren<StressProps> = ({ onSubmit }) => {
   const { spec } = useStoreSelector((state) => state.experiments)
 
   const initialValues = typesData.StressChaos.spec!

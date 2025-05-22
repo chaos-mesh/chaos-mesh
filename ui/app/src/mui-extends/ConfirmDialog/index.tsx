@@ -35,7 +35,7 @@ interface ConfirmDialogProps {
   dialogProps?: Omit<DialogProps, 'open'>
 }
 
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+const ConfirmDialog: ReactFCWithChildren<ConfirmDialogProps> = ({
   open,
   close,
   title,

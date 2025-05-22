@@ -45,7 +45,14 @@ interface YAMLEditorProps {
   aceProps?: IAceEditorProps
 }
 
-const YAMLEditor: React.FC<YAMLEditorProps> = ({ name, data, mountEditor, onUpdate, download, aceProps }) => {
+const YAMLEditor: ReactFCWithChildren<YAMLEditorProps> = ({
+  name,
+  data,
+  mountEditor,
+  onUpdate,
+  download,
+  aceProps,
+}) => {
   const intl = useIntl()
 
   const { theme } = useStoreSelector((state) => state.settings)

@@ -31,7 +31,7 @@ interface AuthProps {
   open: boolean
 }
 
-const Auth: React.FC<AuthProps> = ({ open }) => {
+const Auth: ReactFCWithChildren<AuthProps> = ({ open }) => {
   const navigate = useNavigate()
 
   const { data: config } = useGetCommonConfig({

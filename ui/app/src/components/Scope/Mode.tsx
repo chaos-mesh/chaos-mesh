@@ -33,7 +33,7 @@ interface ModeProps {
   scope: string
 }
 
-const Mode: React.FC<ModeProps> = ({ modeScope, scope }) => {
+const Mode: ReactFCWithChildren<ModeProps> = ({ modeScope, scope }) => {
   const { values } = useFormikContext()
 
   return (

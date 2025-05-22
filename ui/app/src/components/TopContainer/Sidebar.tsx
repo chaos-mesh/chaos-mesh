@@ -144,7 +144,7 @@ interface SidebarProps {
   open: boolean
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ open }) => {
+const Sidebar: ReactFCWithChildren<SidebarProps> = ({ open }) => {
   const { theme } = useStoreSelector((state) => state.settings)
 
   return (

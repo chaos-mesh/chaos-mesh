@@ -27,7 +27,7 @@ interface PaperTopProps {
   boxProps?: BoxProps
 }
 
-const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, h1, divider, boxProps, children }) => (
+const PaperTop: ReactFCWithChildren<PaperTopProps> = ({ title, subtitle, h1, divider, boxProps, children }) => (
   <Space width="100%">
     <Box {...boxProps} display="flex" justifyContent="space-between" alignItems="center">
       <Box flex={1}>

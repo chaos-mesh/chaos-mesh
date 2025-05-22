@@ -154,7 +154,6 @@ function generateWorkflowEdges(
             classes: 'connection',
           }
 
-          // eslint-disable-next-line no-loop-func
           ;(target[1] as NodeDefinition[]).forEach((d) => {
             generateWorkflowEdges(result, connections, [source, d])
             generateWorkflowEdges(result, connections, [d, c1])
@@ -266,7 +265,7 @@ export const constructWorkflowTopology = (
 
   const animateOptions = (style: any) => ({
     style,
-    easing: 'ease-in-out' as 'ease-in-out',
+    easing: 'ease-in-out' as const,
   })
 
   const cy = cytoscape({
