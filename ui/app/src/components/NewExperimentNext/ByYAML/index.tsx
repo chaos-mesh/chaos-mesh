@@ -36,7 +36,7 @@ interface ByYAMLProps {
   callback?: (data: any) => void
 }
 
-const ByYAML: React.FC<ByYAMLProps> = ({ callback }) => {
+const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()

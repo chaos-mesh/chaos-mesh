@@ -16,7 +16,7 @@
  */
 import { Tooltip as MUITooltip, TooltipProps, styled } from '@mui/material'
 
-const Tooltip: React.FC<TooltipProps> = styled(MUITooltip)({
+const Tooltip: ReactFCWithChildren<TooltipProps> = styled(MUITooltip)({
   padding: 3,
   bgcolor: 'background.default',
   color: 'text.primary',

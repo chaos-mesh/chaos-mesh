@@ -47,7 +47,7 @@ interface TokenProps {
   onSubmitCallback?: (values: TokenFormValues) => void
 }
 
-const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
+const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
   const intl = useIntl()
 
   const { tokens } = useStoreSelector((state) => state.globalStatus)

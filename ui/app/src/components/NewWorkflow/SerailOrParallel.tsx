@@ -52,7 +52,7 @@ interface FormProps {
  * @param props SerialOrParallelProps
  * @returns
  */
-const SerialOrParallel: React.FC<SerialOrParallelProps> = (props) => {
+const SerialOrParallel: ReactFCWithChildren<SerialOrParallelProps> = (props) => {
   const intl = useIntl()
   const dispatch = useStoreDispatch()
 

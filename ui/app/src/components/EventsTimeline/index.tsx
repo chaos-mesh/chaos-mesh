@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { CoreEvent } from '@/openapi/index.schemas'
+import { type CoreEvent } from '@/openapi/index.schemas'
 import { useStoreSelector } from '@/store'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
@@ -35,7 +35,7 @@ interface EventsTimelineProps {
   events: CoreEvent[]
 }
 
-const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
+const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events }) => {
   const { lang } = useStoreSelector((state) => state.settings)
 
   return events.length > 0 ? (

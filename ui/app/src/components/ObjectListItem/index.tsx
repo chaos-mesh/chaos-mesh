@@ -39,7 +39,7 @@ interface ObjectListItemProps {
   onSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
 }
 
-const ObjectListItem: React.FC<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
+const ObjectListItem: ReactFCWithChildren<ObjectListItemProps> = ({ data, type = 'experiment', archive, onSelect }) => {
   const navigate = useNavigate()
   const intl = useIntl()
 

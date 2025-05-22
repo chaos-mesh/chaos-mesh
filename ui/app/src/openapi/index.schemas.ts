@@ -7,7 +7,6 @@
  */
 export type GetWorkflowsStatus = (typeof GetWorkflowsStatus)[keyof typeof GetWorkflowsStatus]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetWorkflowsStatus = {
   Initializing: 'Initializing',
   Running: 'Running',
@@ -86,7 +85,6 @@ export type GetExperimentsStateParams = {
 
 export type DeleteExperimentsUidForce = (typeof DeleteExperimentsUidForce)[keyof typeof DeleteExperimentsUidForce]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const DeleteExperimentsUidForce = {
   true: 'true',
   false: 'false',
@@ -105,7 +103,6 @@ export type PostExperimentsBody = { [key: string]: any }
 
 export type GetExperimentsStatus = (typeof GetExperimentsStatus)[keyof typeof GetExperimentsStatus]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetExperimentsStatus = {
   Injecting: 'Injecting',
   Running: 'Running',
@@ -115,7 +112,6 @@ export const GetExperimentsStatus = {
 
 export type GetExperimentsKind = (typeof GetExperimentsKind)[keyof typeof GetExperimentsKind]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetExperimentsKind = {
   PodChaos: 'PodChaos',
   NetworkChaos: 'NetworkChaos',
@@ -151,7 +147,6 @@ export type GetExperimentsParams = {
 
 export type DeleteExperimentsForce = (typeof DeleteExperimentsForce)[keyof typeof DeleteExperimentsForce]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const DeleteExperimentsForce = {
   true: 'true',
   false: 'false',
@@ -181,7 +176,6 @@ export type GetEventsWorkflowUidParams = {
 
 export type GetEventsKind = (typeof GetEventsKind)[keyof typeof GetEventsKind]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetEventsKind = {
   PodChaos: 'PodChaos',
   IOChaos: 'IOChaos',
@@ -301,7 +295,6 @@ export type DeleteArchivesSchedulesParams = {
 
 export type GetArchivesKind = (typeof GetArchivesKind)[keyof typeof GetArchivesKind]
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const GetArchivesKind = {
   PodChaos: 'PodChaos',
   IOChaos: 'IOChaos',

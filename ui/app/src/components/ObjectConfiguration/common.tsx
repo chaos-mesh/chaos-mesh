@@ -27,7 +27,7 @@ import {
   Typography,
 } from '@mui/material'
 
-import { ExperimentKind } from '@/components/NewExperiment/types'
+import { type ExperimentKind } from '@/components/NewExperiment/types'
 import i18n from '@/components/T'
 
 import { objToArrBySep } from '@/lib/utils'

@@ -27,7 +27,6 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
-import Helmet from '@/components/Helmet'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
 import i18n from '@/components/T'
 
@@ -38,8 +37,8 @@ const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 const Single = () => {
   const { uuid } = useParams()
   const query = useQuery()
-  let kind = query.get('kind') || 'experiment'
-  let useGetArchives =
+  const kind = query.get('kind') || 'experiment'
+  const useGetArchives =
     kind === 'workflow'
       ? useGetArchivesWorkflowsUid
       : kind === 'schedule'

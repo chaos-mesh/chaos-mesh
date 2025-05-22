@@ -25,7 +25,7 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { TourProvider } from '@reactour/tour'
-import type { ReactChild } from 'react'
+import type { ReactNode } from 'react'
 
 import EventsChart from '@/components/EventsChart'
 import EventsTimeline from '@/components/EventsTimeline'
@@ -35,7 +35,7 @@ import Predefined from './Predefined'
 import TotalStatus from './TotalStatus'
 import Welcome from './Welcome'
 
-const NumPanel: React.FC<{ title: ReactChild; num?: number; background: ReactChild }> = ({
+const NumPanel: ReactFCWithChildren<{ title: ReactNode; num?: number; background: ReactNode }> = ({
   title,
   num,
   background,

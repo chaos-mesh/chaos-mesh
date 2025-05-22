@@ -65,7 +65,13 @@ export interface AtomFormData {
   when?: string
 }
 
-const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kind, act: action, formikProps }) => {
+const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
+  belong = Belong.Experiment,
+  id,
+  kind,
+  act: action,
+  formikProps,
+}) => {
   const kindAction = concatKindAction(kind, action)
 
   const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
@@ -155,7 +161,6 @@ const AutoForm: React.FC<AutoFormProps> = ({ belong = Belong.Experiment, id, kin
   ): any[] => {
     const { values, errors, touched, setFieldValue } = props
 
-    // eslint-disable-next-line array-callback-return
     return form.map(({ field, label, items, helperText, children, multiple }) => {
       const error = getIn(errors, label)
       const touch = getIn(touched, label)

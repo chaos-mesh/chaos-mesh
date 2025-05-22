@@ -25,7 +25,7 @@ const preventScrollChangingNumberInput = (e: WheelEvent<HTMLInputElement>) => {
   }
 }
 
-const TextField: React.FC<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
+const TextField: ReactFCWithChildren<TextFieldProps & { validate?: FieldValidator; fast?: boolean }> = ({
   fast = false, // https://formik.org/docs/api/fastfield
   ...rest
 }) => {

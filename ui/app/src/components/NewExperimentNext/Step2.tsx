@@ -44,7 +44,7 @@ interface Step2Props {
   inSchedule?: boolean
 }
 
-const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
+const Step2: ReactFCWithChildren<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
   const { step2, env, kindAction, basic } = useStoreSelector((state) => state.experiments)
   const [kind] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
@@ -94,7 +94,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const handleOnSubmitStep2 = (_values: Record<string, any>) => {
     const values = schema.cast(_values) as Record<string, any>
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.debug('Debug handleSubmitStep2:', values)
     }
 

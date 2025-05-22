@@ -41,7 +41,13 @@ interface TargetGeneratedProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
-const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, validationSchema, onSubmit }) => {
+const TargetGenerated: ReactFCWithChildren<TargetGeneratedProps> = ({
+  env,
+  kind,
+  data,
+  validationSchema,
+  onSubmit,
+}) => {
   const { spec } = useStoreSelector((state) => state.experiments)
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({

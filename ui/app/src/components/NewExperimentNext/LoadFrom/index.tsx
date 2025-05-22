@@ -47,7 +47,7 @@ interface LoadFromProps {
   inWorkflow?: boolean
 }
 
-const LoadFrom: React.FC<LoadFromProps> = ({ callback, inSchedule, inWorkflow }) => {
+const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, inWorkflow }) => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()

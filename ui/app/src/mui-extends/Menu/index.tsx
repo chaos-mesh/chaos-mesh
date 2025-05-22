@@ -30,7 +30,7 @@ const StyledMenu = styled((props: MenuProps) => <MuiMenu elevation={0} {...props
   },
 }))
 
-const Menu: React.FC<
+const Menu: ReactFCWithChildren<
   Omit<MenuProps, 'anchorEl' | 'open' | 'onClose'> & { IconButtonProps?: IconButtonProps; IconProps?: SvgIconProps }
 > = ({ IconButtonProps, IconProps, children, ...rest }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)

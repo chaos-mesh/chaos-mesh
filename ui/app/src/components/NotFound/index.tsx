@@ -24,7 +24,7 @@ interface NotFoundProps extends BoxProps {
   illustrated?: boolean
 }
 
-const NotFound: React.FC<NotFoundProps> = ({ illustrated = false, children, ...rest }) => {
+const NotFound: ReactFCWithChildren<NotFoundProps> = ({ illustrated = false, children, ...rest }) => {
   const theme = useTheme()
 
   return (

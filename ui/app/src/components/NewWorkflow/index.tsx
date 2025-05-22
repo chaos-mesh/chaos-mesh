@@ -183,7 +183,7 @@ const NewWorkflow = () => {
   const submitWorkflow = () => {
     const workflow = yamlEditor?.getValue()!
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.debug('Debug workflow:', workflow)
     }
 

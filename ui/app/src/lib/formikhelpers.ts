@@ -216,13 +216,13 @@ export function parseSubmit<K extends ExperimentKind>(
   })
 }
 
-function podSelectorsToArr(selector: Object) {
+function podSelectorsToArr(selector: object) {
   return Object.entries(selector)
     .map(([ns, pods]) => pods.map((p: string) => `${ns}: ${p}`))
     .flat()
 }
 
-function selectorsToArr(selectors: Object, separator: string) {
+function selectorsToArr(selectors: object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
@@ -251,7 +251,7 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     throw new Error('The required spec.selector field is missing.')
   }
 
-  let basic = {
+  const basic = {
     metadata: {
       ...metadata,
       labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],

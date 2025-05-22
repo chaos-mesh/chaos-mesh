@@ -144,7 +144,7 @@ const Custom = ({ template: t }: NodeConfigurationProps) => {
   )
 }
 
-const NodeConfiguration: React.FC<NodeConfigurationProps> = ({ template: t }) => {
+const NodeConfiguration: ReactFCWithChildren<NodeConfigurationProps> = ({ template: t }) => {
   const rendered = () => {
     switch (t.templateType) {
       case 'Suspend':

@@ -33,7 +33,6 @@ import { useNavigate, useParams } from 'react-router'
 import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
 import EventsTimeline from '@/components/EventsTimeline'
-import Helmet from '@/components/Helmet'
 import NodeConfiguration from '@/components/ObjectConfiguration/Node'
 import i18n from '@/components/T'
 

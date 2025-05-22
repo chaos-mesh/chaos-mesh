@@ -30,7 +30,7 @@ interface StatusLabelProps {
   status: string
 }
 
-const StatusLabel: React.FC<StatusLabelProps> = ({ status }) => {
+const StatusLabel: ReactFCWithChildren<StatusLabelProps> = ({ status }) => {
   const theme = useTheme()
 
   const label = <T id={`status.${status}`} />

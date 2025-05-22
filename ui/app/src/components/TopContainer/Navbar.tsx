@@ -28,7 +28,7 @@ interface HeaderProps {
   handleDrawerToggle: () => void
 }
 
-const Navbar: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle }) => (
+const Navbar: ReactFCWithChildren<HeaderProps> = ({ openDrawer, handleDrawerToggle }) => (
   <AppBar position="static" color="transparent" elevation={0} sx={{ pl: 5, pr: 8 }}>
     <Toolbar disableGutters>
       <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">

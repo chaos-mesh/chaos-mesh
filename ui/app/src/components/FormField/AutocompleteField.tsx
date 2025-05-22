@@ -24,7 +24,7 @@ export interface AutocompleteFieldProps extends MuiExtendsAutocompleteFieldProps
   name: string
 }
 
-const AutocompleteField: React.FC<AutocompleteFieldProps> = ({ name, multiple, options, ...props }) => {
+const AutocompleteField: ReactFCWithChildren<AutocompleteFieldProps> = ({ name, multiple, options, ...props }) => {
   const { values, setFieldValue } = useFormikContext()
   const value = getIn(values, name) || []
 

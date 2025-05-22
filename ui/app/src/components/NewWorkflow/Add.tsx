@@ -63,7 +63,7 @@ interface AddProps {
   updateCallback?: () => void
 }
 
-const Add: React.FC<AddProps> = ({
+const Add: ReactFCWithChildren<AddProps> = ({
   childIndex,
   parentTemplates,
   setParentTemplates,

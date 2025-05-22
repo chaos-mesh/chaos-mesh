@@ -15,7 +15,7 @@
  *
  */
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import rootReducer from './reducers'
 
@@ -27,7 +27,7 @@ const genStore = () => {
   const store = configureStore({
     reducer: rootReducer,
     middleware: middlewares,
-    devTools: process.env.NODE_ENV !== 'production',
+    devTools: import.meta.env.DEV,
   })
 
   return store

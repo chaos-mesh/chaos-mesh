@@ -99,7 +99,7 @@ interface EventsTableHeadProps {
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
 }
 
-const Head: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
+const Head: ReactFCWithChildren<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
   return (
@@ -125,7 +125,7 @@ interface EventsTableRowProps {
   event: SortedEventWithPods
 }
 
-const Row: React.FC<EventsTableRowProps> = ({ event: e }) => (
+const Row: ReactFCWithChildren<EventsTableRowProps> = ({ event: e }) => (
   <TableRow hover>
     <TableCell>{_.truncate(e.object_id!)}</TableCell>
     <TableCell>{e.namespace}</TableCell>
@@ -143,7 +143,12 @@ interface TablePaginationActionsProps {
   onPageChange: (e: React.MouseEvent<HTMLButtonElement>, newPage: number) => void
 }
 
-const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, page, rowsPerPage, onPageChange }) => {
+const TablePaginationActions: ReactFCWithChildren<TablePaginationActionsProps> = ({
+  count,
+  page,
+  rowsPerPage,
+  onPageChange,
+}) => {
   const handleFirstPageButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => onPageChange(event, 0)
   const handleBackButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => onPageChange(event, page - 1)
   const handleNextButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => onPageChange(event, page + 1)
@@ -180,7 +185,7 @@ interface EventsTableProps {
   events: Event[]
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ events: allEvents }) => {
+const EventsTable: ReactFCWithChildren<EventsTableProps> = ({ events: allEvents }) => {
   const intl = useIntl()
 
   const [events] = useState(allEvents)

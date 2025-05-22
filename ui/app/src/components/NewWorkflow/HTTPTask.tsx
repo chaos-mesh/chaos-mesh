@@ -54,7 +54,7 @@ interface CommonTemplateProps {
   externalTemplate?: Template
 }
 
-const HTTPTask: React.FC<HTTPTaskProps> = (props) => {
+const HTTPTask: ReactFCWithChildren<HTTPTaskProps> = (props) => {
   const intl = useIntl()
   const classes = useStyles()
 
