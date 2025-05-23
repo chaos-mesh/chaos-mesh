@@ -47,6 +47,8 @@ on:
       - "ui/.prettierrc"
       - "ui/pnpm-lock.yaml"
       - "ui/pnpm-workspace.yaml"
+      - "ui/app/eslint.config.js"
+      - "ui/app/index.html"
       - "ui/app/public/**"
       - "ui/app/src/api/zz_generated.frontend.chaos-mesh.ts"
       - "ui/app/src/formik/**"
