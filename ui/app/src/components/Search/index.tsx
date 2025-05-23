@@ -39,7 +39,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import _ from 'lodash'
 import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
@@ -50,17 +50,23 @@ import i18n from '@/components/T'
 import { format } from '@/lib/luxon'
 import search from '@/lib/search'
 
-const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
+const PREFIX = 'Search'
 
-const useStyles = makeStyles((theme) => ({
-  tooltip: {
+const classes = {
+  tooltip: `${PREFIX}-tooltip`,
+  chipContainer: `${PREFIX}-chipContainer`,
+}
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  [`& .${classes.tooltip}`]: {
     marginBottom: 0,
     paddingLeft: theme.spacing(3),
     '& > li': {
       marginTop: theme.spacing(1.5),
     },
   },
-  chipContainer: {
+
+  [`& .${classes.chipContainer}`]: {
     display: 'flex',
     flexWrap: 'wrap',
     '& > *': {
@@ -70,11 +76,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
+
 type OptionCategory = CoreWorkflowMeta | TypesSchedule | TypesExperiment | TypesArchive
 type Option = OptionCategory & { is?: string }
 
 const Search: ReactFCWithChildren = () => {
-  const classes = useStyles()
   const navigate = useNavigate()
   const intl = useIntl()
 
@@ -234,7 +241,7 @@ const Search: ReactFCWithChildren = () => {
           }}
         />
       )}
-      PaperComponent={(props) => <Paper {...props} sx={{ p: 0 }} />}
+      PaperComponent={(props) => <StyledPaper {...props} sx={{ p: 0 }} />}
       disableClearable
     />
   )

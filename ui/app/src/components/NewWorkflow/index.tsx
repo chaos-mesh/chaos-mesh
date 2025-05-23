@@ -38,7 +38,7 @@ import {
   Stepper,
   Typography,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { Ace } from 'ace-builds'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
@@ -59,15 +59,21 @@ import { constructWorkflow } from '@/lib/formikhelpers'
 
 import Add from './Add'
 
-const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+const PREFIX = 'NewWorkflow'
 
-const useStyles = makeStyles((theme) => ({
-  leftSticky: {
+const classes = {
+  leftSticky: `${PREFIX}-leftSticky`,
+  field: `${PREFIX}-field`,
+}
+
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  [`& .${classes.leftSticky}`]: {
     position: 'sticky',
     top: 0,
     height: `calc(100vh - 56px - ${theme.spacing(9)})`,
   },
-  field: {
+
+  [`& .${classes.field}`]: {
     width: 180,
     marginTop: 0,
     [theme.breakpoints.up('sm')]: {
@@ -83,6 +89,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+
 type IStep = Template
 
 export type WorkflowBasic = {
@@ -92,7 +100,6 @@ export type WorkflowBasic = {
 }
 
 const NewWorkflow = () => {
-  const classes = useStyles()
   const intl = useIntl()
   const navigate = useNavigate()
 
@@ -199,7 +206,7 @@ const NewWorkflow = () => {
   }
 
   return (
-    <Grid container spacing={9}>
+    <StyledGrid container spacing={9}>
       <Grid item xs={12} md={8}>
         <Space spacing={6}>
           <Typography>{i18n('common.process')}</Typography>
@@ -310,7 +317,7 @@ const NewWorkflow = () => {
           )}
         </Formik>
       </Grid>
-    </Grid>
+    </StyledGrid>
   )
 }
 
