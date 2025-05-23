@@ -27,7 +27,7 @@ export GOBIN=$PROJECT_DIR/bin
 export PATH=$GOBIN:$PATH
 
 echo "+ Preflight check"
-if [ ! -d "ui/app/build" ]; then
+if [ ! -d "ui/app/dist" ]; then
   echo "  - Error: UI assets must be built first"
   exit 1
 fi
@@ -35,7 +35,7 @@ fi
 echo "+ Embed UI assets"
 
 # OSX related
-DS_Store=ui/app/build/.DS_Store
+DS_Store=ui/app/dist/.DS_Store
 [ -f $DS_Store ] && rm $DS_Store
 
 go run tools/assets_generate/main.go ui_server

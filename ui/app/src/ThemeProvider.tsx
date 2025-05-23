@@ -15,7 +15,7 @@
  *
  */
 import { useStoreSelector } from '@/store'
-import { ThemeProvider as MuiThemeProvider, StyledEngineProvider } from '@mui/material/styles'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { useMemo } from 'react'
 
 import theme, { darkTheme } from './theme'
@@ -24,11 +24,7 @@ const ThemeProvider: ReactFCWithChildren = ({ children }) => {
   const { theme: t } = useStoreSelector((state) => state.settings)
   const globalTheme = useMemo(() => (t === 'light' ? theme : darkTheme), [t])
 
-  return (
-    <MuiThemeProvider theme={globalTheme}>
-      <StyledEngineProvider injectFirst>{children}</StyledEngineProvider>
-    </MuiThemeProvider>
-  )
+  return <MuiThemeProvider theme={globalTheme}>{children}</MuiThemeProvider>
 }
 
 export default ThemeProvider
