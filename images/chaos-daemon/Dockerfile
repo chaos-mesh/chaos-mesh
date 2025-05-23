@@ -47,7 +47,7 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
 
 RUN echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian bookworm-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
-    apt --allow-releaseinfo-change update && apt upgrade -y && \
+    apt update --allow-releaseinfo-change && apt upgrade -y && \
     apt install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-11-jre && \
     rm -rf /var/lib/apt/lists/*
 
