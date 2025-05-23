@@ -13,16 +13,16 @@
     "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
+    "orval": "^7.9.0",
     "rimraf": "^6.0.1",
     "signale": "^1.4.0",
-    "typescript": "^4.5.4",
+    "typescript": "^5.8.3",
     "yargs": "^17.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
     "babel-jest": "^29.7.0",
-    "jest": "^29.7.0",
-    "orval": "6.12.1"
+    "jest": "^29.7.0"
   }
 }

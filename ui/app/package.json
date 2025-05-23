@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -23,7 +23,7 @@
     "@nivo/pie": "^0.98.0",
     "@reactour/tour": "^3.3.0",
     "@reduxjs/toolkit": "^1.7.1",
-    "@tanstack/react-query": "^4.28.0",
+    "@tanstack/react-query": "^5.76.2",
     "ace-builds": "^1.4.12",
     "axios": "^0.24.0",
     "clsx": "^2.1.1",
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@faker-js/faker": "^7.6.0",
-    "@tanstack/react-query-devtools": "^4.28.0",
+    "@tanstack/react-query-devtools": "^5.76.2",
     "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^13.5.0",

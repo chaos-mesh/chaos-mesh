@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Chaos Mesh Authors.
+ * Copyright 2025 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  *
  */
+import { defineConfig } from 'orval'
 
-module.exports = {
+export default defineConfig({
   openapi: {
     input: './swagger.yaml',
     output: {
@@ -28,6 +29,7 @@ module.exports = {
           name: 'customInstance',
         },
         query: {
+          version: 5,
           options: {
             retry: 1,
             retryDelay: 3000,
@@ -41,4 +43,4 @@ module.exports = {
       mock: true,
     },
   },
-}
+})

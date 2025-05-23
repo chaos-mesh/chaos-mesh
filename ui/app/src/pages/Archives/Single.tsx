@@ -19,11 +19,9 @@ import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
-import { TypesArchiveDetail } from '@/openapi/index.schemas'
 import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
-import { useState } from 'react'
 import { useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
@@ -45,11 +43,7 @@ const Single = () => {
         ? useGetArchivesSchedulesUid
         : useGetArchivesUid
 
-  const [archive, setArchive] = useState<TypesArchiveDetail>()
-
-  const { isLoading: loadingArchives } = useGetArchives(uuid!, {
-    query: { onSuccess: setArchive },
-  })
+  const { data: archive, isLoading: loadingArchives } = useGetArchives(uuid!)
   const { data: events, isLoading: loadingEvents } = useGetEvents(
     {
       object_id: uuid,

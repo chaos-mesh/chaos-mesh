@@ -52,10 +52,13 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
 
   const dispatch = useStoreDispatch()
 
-  const [scheduleUUID, setScheduleUUID] = useState('')
-  const [experimentUUID, setExperimentUUID] = useState('')
-  const [archiveUUID, setArchiveUUID] = useState('')
-  const [scheduleArchiveUUID, setScheduleArchiveUUID] = useState('')
+  const [metaInfo, setMetaInfo] = useState<{
+    id: string
+    type: string
+  }>({
+    id: '',
+    type: '',
+  })
   const [predefined, setPredefined] = useState<PreDefinedValue[]>([])
   const [radio, setRadio] = useState('')
 
@@ -63,56 +66,63 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
   const { data: schedules, isLoading: loading2 } = useGetSchedules(undefined, { query: { enabled: inSchedule } })
   const { data: archives, isLoading: loading3 } = (inSchedule ? useGetArchivesSchedules : useGetArchives)()
   const loading = loading1 || loading2 || loading3
-  function afterLoad(data: TypesScheduleDetail | TypesExperimentDetail | TypesArchiveDetail) {
-    callback && callback(data.kube_object)
 
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: i18n('confirm.success.load', intl),
-      }),
-    )
-  }
-  useGetSchedulesUid(scheduleUUID, {
+  const { data: scheduleData } = useGetSchedulesUid(metaInfo.id, {
     query: {
-      enabled: !!scheduleUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setScheduleUUID('')
-      },
+      enabled: metaInfo.type === 'schedule',
     },
   })
-  useGetExperimentsUid(experimentUUID, {
+  const { data: experimentData } = useGetExperimentsUid(metaInfo.id, {
     query: {
-      enabled: !!experimentUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setExperimentUUID('')
-      },
+      enabled: metaInfo.type === 'experiment',
     },
   })
-  useGetArchivesSchedulesUid(scheduleArchiveUUID, {
+  const { data: scheduleArchiveData } = useGetArchivesSchedulesUid(metaInfo.id, {
     query: {
-      enabled: !!scheduleArchiveUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setScheduleArchiveUUID('')
-      },
+      enabled: metaInfo.type === 'scheduleArchive',
     },
   })
-  useGetArchivesUid(archiveUUID, {
+  const { data: archiveData } = useGetArchivesUid(metaInfo.id, {
     query: {
-      enabled: !!archiveUUID,
-      onSuccess(data) {
-        afterLoad(data)
-
-        setArchiveUUID('')
-      },
+      enabled: metaInfo.type === 'archive',
     },
   })
+
+  useEffect(() => {
+    function afterLoad(data: TypesScheduleDetail | TypesExperimentDetail | TypesArchiveDetail) {
+      if (callback) {
+        callback(data.kube_object)
+      }
+
+      dispatch(
+        setAlert({
+          type: 'success',
+          message: i18n('confirm.success.load', intl),
+        }),
+      )
+    }
+
+    if (scheduleData) {
+      afterLoad(scheduleData)
+    }
+
+    if (experimentData) {
+      afterLoad(experimentData)
+    }
+
+    if (scheduleArchiveData) {
+      afterLoad(scheduleArchiveData)
+    }
+
+    if (archiveData) {
+      afterLoad(archiveData)
+    }
+
+    setMetaInfo({
+      id: '',
+      type: '',
+    })
+  }, [scheduleData, experimentData, scheduleArchiveData, archiveData])
 
   useEffect(() => {
     const fetchPredefined = async () => {
@@ -134,7 +144,9 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
     if (type === 'p') {
       const experiment = predefined?.filter((p) => p.name === uuid)[0].yaml
 
-      callback && callback(experiment)
+      if (callback) {
+        callback(experiment)
+      }
 
       dispatch(
         setAlert({
@@ -148,18 +160,30 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
 
     switch (type) {
       case 's':
-        setScheduleUUID(uuid)
+        setMetaInfo({
+          id: uuid,
+          type: 'schedule',
+        })
 
         break
       case 'e':
-        setExperimentUUID(uuid)
+        setMetaInfo({
+          id: uuid,
+          type: 'experiment',
+        })
 
         break
       case 'a':
         if (inSchedule) {
-          setScheduleArchiveUUID(uuid)
+          setMetaInfo({
+            id: uuid,
+            type: 'scheduleArchive',
+          })
         } else {
-          setArchiveUUID(uuid)
+          setMetaInfo({
+            id: uuid,
+            type: 'archive',
+          })
         }
 
         break

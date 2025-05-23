@@ -27,12 +27,6 @@ import {
   useGetArchivesSchedules,
   useGetArchivesWorkflows,
 } from '@/openapi'
-import {
-  DeleteArchivesWorkflowsParams,
-  DeleteExperimentsParams,
-  DeleteSchedulesParams,
-  TypesArchive,
-} from '@/openapi/index.schemas'
 import { useStoreDispatch } from '@/store'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
@@ -68,6 +62,39 @@ const StyledCheckBox = styled(Checkbox)({
 
 type PanelType = 'workflow' | 'schedule' | 'experiment'
 
+const useGetArchivesWrap = (kind: string) => {
+  switch (kind) {
+    case 'workflow':
+      return useGetArchivesWorkflows
+    case 'schedule':
+      return useGetArchivesSchedules
+    default:
+      return useGetArchives
+  }
+}
+
+const useDeleteArchivesWrap = (kind: string) => {
+  switch (kind) {
+    case 'workflow':
+      return useDeleteArchivesWorkflows
+    case 'schedule':
+      return useDeleteArchivesSchedules
+    default:
+      return useDeleteArchives
+  }
+}
+
+const useDeleteArchiveWrap = (kind: string) => {
+  switch (kind) {
+    case 'workflow':
+      return useDeleteArchivesWorkflowsUid
+    case 'schedule':
+      return useDeleteArchivesSchedulesUid
+    default:
+      return useDeleteArchivesUid
+  }
+}
+
 export default function Archives() {
   const navigate = useNavigate()
   const intl = useIntl()
@@ -77,41 +104,13 @@ export default function Archives() {
   const dispatch = useStoreDispatch()
 
   const [panel, setPanel] = useState<PanelType>(kind as PanelType)
-  const [archives, setArchives] = useState<TypesArchive[]>([])
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
   const isBatchEmpty = batchLength === 0
 
-  const { isLoading: loading1, refetch: refetchWorkflows } = useGetArchivesWorkflows(undefined, {
-    query: { enabled: kind === 'workflow', onSuccess: setArchives },
-  })
-  const { isLoading: loading2, refetch: refetchSchedules } = useGetArchivesSchedules(undefined, {
-    query: { enabled: kind === 'schedule', onSuccess: setArchives },
-  })
-  const { isLoading: loading3, refetch: refetchExperiments } = useGetArchives(undefined, {
-    query: { enabled: kind === 'experiment', onSuccess: setArchives },
-  })
-  const loading = kind === 'workflow' ? loading1 : kind === 'schedule' ? loading2 : loading3
-  function refetchByKind() {
-    switch (kind) {
-      case 'workflow':
-        refetchWorkflows()
-
-        break
-      case 'schedule':
-        refetchSchedules()
-
-        break
-      default:
-        refetchExperiments()
-    }
-  }
-  const { mutateAsync: deleteWorkflows } = useDeleteArchivesWorkflows()
-  const { mutateAsync: deleteSchedules } = useDeleteArchivesSchedules()
-  const { mutateAsync: deleteExperiments } = useDeleteArchives()
-  const { mutateAsync: deleteWorkflowsByUUID } = useDeleteArchivesWorkflowsUid()
-  const { mutateAsync: deleteSchedulesByUUID } = useDeleteArchivesSchedulesUid()
-  const { mutateAsync: deleteExperimentsByUUID } = useDeleteArchivesUid()
+  const { data: archives, isLoading: loading, refetch } = useGetArchivesWrap(kind)(undefined)
+  const { mutateAsync: deleteArchives } = useDeleteArchivesWrap(kind)()
+  const { mutateAsync: deleteArchive } = useDeleteArchiveWrap(kind)()
 
   const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
@@ -123,84 +122,61 @@ export default function Archives() {
       }),
     )
 
-  const handleAction = (action: string, uuid?: uuid) => () => {
-    let actionFunc
-    let arg:
-      | { uid: string }
-      | { params: DeleteArchivesWorkflowsParams | DeleteExperimentsParams | DeleteSchedulesParams }
-      | undefined
+  const handleActionSuccess = (action: string) => {
+    dispatch(
+      setAlert({
+        type: 'success',
+        message: i18n(`confirm.success.${action}`, intl),
+      }),
+    )
+  }
 
+  const handleAction = (action: string, uuid?: uuid) => () => {
     switch (action) {
       case 'delete':
-        switch (kind) {
-          case 'workflow':
-            actionFunc = deleteWorkflowsByUUID
-            break
-          case 'schedule':
-            actionFunc = deleteSchedulesByUUID
-            break
-          case 'experiment':
-          default:
-            actionFunc = deleteExperimentsByUUID
-            break
-        }
-        arg = { uid: uuid! }
+        deleteArchive({ uid: uuid! })
+          .then(() => handleActionSuccess(action))
+          .catch(console.error)
 
         break
       case 'deleteMulti':
-        action = 'delete'
-        switch (kind) {
-          case 'workflow':
-            actionFunc = deleteWorkflows
-            break
-          case 'schedule':
-            actionFunc = deleteSchedules
-            break
-          case 'experiment':
-          default:
-            actionFunc = deleteExperiments
-            break
-        }
-        arg = {
+        deleteArchives({
           params: {
             uids: Object.keys(batch)
               .filter((d) => batch[d] === true)
               .join(','),
           },
-        }
+        })
+          .then(() => handleActionSuccess(action))
+          .catch(console.error)
+
         setBatch({})
 
         break
     }
 
-    if (actionFunc) {
-      actionFunc(arg as any)
-        .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n(`confirm.success.${action}`, intl),
-            }),
-          )
+    refetch()
+  }
 
-          refetchByKind()
-        })
-        .catch(console.error)
+  const handleBatchSelect = () => {
+    if (archives) {
+      setBatch(isBatchEmpty ? { [archives[0].uid!]: true } : {})
     }
   }
 
-  const handleBatchSelect = () => setBatch(isBatchEmpty ? { [archives[0].uid!]: true } : {})
+  const handleBatchSelectAll = () => {
+    if (archives) {
+      setBatch(
+        batchLength <= archives.length
+          ? archives.reduce<Record<uuid, boolean>>((acc, d) => {
+              acc[d.uid!] = true
 
-  const handleBatchSelectAll = () =>
-    setBatch(
-      batchLength <= archives.length
-        ? archives.reduce<Record<uuid, boolean>>((acc, d) => {
-            acc[d.uid!] = true
-
-            return acc
-          }, {})
-        : {},
-    )
+              return acc
+            }, {})
+          : {},
+      )
+    }
+  }
 
   const handleBatchDelete = () =>
     handleSelect({
@@ -252,7 +228,7 @@ export default function Archives() {
           variant="outlined"
           startIcon={isBatchEmpty ? <FilterListIcon /> : <CloseIcon />}
           onClick={handleBatchSelect}
-          disabled={archives.length === 0}
+          disabled={archives?.length === 0}
         >
           {i18n(`common.${isBatchEmpty ? 'batchOperation' : 'cancel'}`)}
         </Button>
@@ -268,7 +244,7 @@ export default function Archives() {
         )}
       </Space>
 
-      {archives.length > 0 &&
+      {archives &&
         Object.entries(_.groupBy(archives, 'kind')).map(([kind, archivesByKind]) => (
           <Box key={kind} mb={6}>
             <Typography variant="overline">{transByKind(kind as any)}</Typography>
@@ -284,7 +260,7 @@ export default function Archives() {
           </Box>
         ))}
 
-      {!loading && archives.length === 0 && (
+      {!loading && archives && (
         <NotFound illustrated textAlign="center">
           <Typography>{i18n('archives.notFound')}</Typography>
         </NotFound>
