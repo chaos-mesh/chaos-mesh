@@ -19,7 +19,7 @@ import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
 import { useStoreDispatch } from '@/store'
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
@@ -31,14 +31,22 @@ import { setAlert } from '@/slices/globalStatus'
 import { SelectField } from '@/components/FormField'
 import i18n from '@/components/T'
 
-const useStyles = makeStyles((theme) => ({
-  pre: {
+const PREFIX = 'RBACGenerator'
+
+const classes = {
+  pre: `${PREFIX}-pre`,
+  copy: `${PREFIX}-copy`,
+}
+
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.pre}`]: {
     padding: theme.spacing(3),
     background: theme.palette.background.default,
     borderRadius: 4,
     whiteSpace: 'pre-wrap',
   },
-  copy: {
+
+  [`& .${classes.copy}`]: {
     position: 'absolute',
     top: theme.spacing(6),
     right: theme.spacing(3),
@@ -48,8 +56,6 @@ const useStyles = makeStyles((theme) => ({
 const initialValues = { namespace: 'default', role: 'viewer', clustered: false }
 
 const RBACGenerator = () => {
-  const classes = useStyles()
-
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -104,7 +110,7 @@ const RBACGenerator = () => {
   }
 
   return (
-    <div ref={containerRef}>
+    <Root ref={containerRef}>
       <Space>
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper')}
@@ -176,7 +182,7 @@ const RBACGenerator = () => {
           <pre className={classes.pre}>{rbac.getSecret}</pre>
         </Box>
       </Space>
-    </div>
+    </Root>
   )
 }
 

@@ -17,7 +17,6 @@
     "@mui/icons-material": "^5.10.16",
     "@mui/lab": "5.0.0-alpha.122",
     "@mui/material": "^5.10.16",
-    "@mui/styles": "^5.10.16",
     "@mui/x-data-grid": "6.0.0",
     "@nivo/core": "^0.98.0",
     "@nivo/pie": "^0.98.0",

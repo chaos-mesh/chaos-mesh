@@ -21,7 +21,7 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    // "erasableSyntaxOnly": true, // TODO: Research this option further.
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     // Custom

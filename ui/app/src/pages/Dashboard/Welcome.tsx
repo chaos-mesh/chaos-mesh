@@ -21,14 +21,20 @@ import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Button, Grid } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { useTour } from '@reactour/tour'
 import { Link } from 'react-router'
 
 import i18n from '@/components/T'
 
-const useStyles = makeStyles((theme) => ({
-  space: {
+const PREFIX = 'Welcome'
+
+const classes = {
+  space: `${PREFIX}-space`,
+}
+
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  [`& .${classes.space}`]: {
     width: '75%',
     [theme.breakpoints.down('md')]: {
       width: 'unset',
@@ -37,12 +43,10 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Welcome = () => {
-  const classes = useStyles()
-
   const { setIsOpen } = useTour()
 
   return (
-    <Grid container spacing={6}>
+    <StyledGrid container spacing={6}>
       <Grid item xs={6}>
         <Paper style={{ height: '100%' }}>
           <Space className={classes.space}>
@@ -101,7 +105,7 @@ const Welcome = () => {
           </Space>
         </Paper>
       </Grid>
-    </Grid>
+    </StyledGrid>
   )
 }
 

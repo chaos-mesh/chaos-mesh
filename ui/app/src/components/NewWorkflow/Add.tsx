@@ -19,7 +19,7 @@ import { useStoreDispatch, useStoreSelector } from '@/store'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import CloseIcon from '@mui/icons-material/Close'
 import { Box, Button, MenuItem, StepLabel, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { Formik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
@@ -39,8 +39,15 @@ import SerialOrParallel from './SerailOrParallel'
 import Suspend from './Suspend'
 import Task from './Task'
 
-const useStyles = makeStyles({
-  field: {
+const PREFIX = 'Add'
+
+const classes = {
+  field: `${PREFIX}-field`,
+}
+
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled('div')({
+  [`& .${classes.field}`]: {
     width: 180,
   },
 })
@@ -72,7 +79,6 @@ const Add: ReactFCWithChildren<AddProps> = ({
   update,
   updateCallback,
 }) => {
-  const classes = useStyles()
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -287,7 +293,7 @@ const Add: ReactFCWithChildren<AddProps> = ({
   }
 
   return (
-    <>
+    <Root>
       <Formik
         innerRef={formRef}
         initialValues={initialValues}
@@ -365,7 +371,6 @@ const Add: ReactFCWithChildren<AddProps> = ({
           )
         }}
       </Formik>
-
       {num < 0 && (
         <Box ml={8}>
           {typeOfTemplate === 'suspend' && (
@@ -381,7 +386,7 @@ const Add: ReactFCWithChildren<AddProps> = ({
           )}
         </Box>
       )}
-    </>
+    </Root>
   )
 }
 

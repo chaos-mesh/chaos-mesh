@@ -21,7 +21,7 @@ import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { FormControlLabel, Switch } from '@mui/material'
 import { MenuItem, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { Form, Formik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
@@ -33,8 +33,14 @@ import i18n from '@/components/T'
 
 import { validateName } from '@/lib/formikhelpers'
 
-const useStyles = makeStyles({
-  field: {
+const PREFIX = 'HTTPTask'
+
+const classes = {
+  field: `${PREFIX}-field`,
+}
+
+const StyledPaper = styled(Paper)({
+  [`& .${classes.field}`]: {
     width: 180,
   },
 })
@@ -56,7 +62,6 @@ interface CommonTemplateProps {
 
 const HTTPTask: ReactFCWithChildren<HTTPTaskProps> = (props) => {
   const intl = useIntl()
-  const classes = useStyles()
 
   const { submitTemplate } = props
   const onSubmit = (form: RequestForm) => {
@@ -115,7 +120,7 @@ const HTTPTask: ReactFCWithChildren<HTTPTaskProps> = (props) => {
   }, [props.externalTemplate])
 
   return (
-    <Paper>
+    <StyledPaper>
       <Space>
         <PaperTop title={i18n('newW.httpTitle')} />
         <Formik
@@ -190,7 +195,7 @@ const HTTPTask: ReactFCWithChildren<HTTPTaskProps> = (props) => {
           }}
         </Formik>
       </Space>
-    </Paper>
+    </StyledPaper>
   )
 }
 
