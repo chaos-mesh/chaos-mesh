@@ -28,7 +28,7 @@ import type { ButtonProps } from '@mui/material'
 import type { GridColDef, GridRenderCellParams, GridRowParams } from '@mui/x-data-grid'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 import _ from 'lodash'
-import React, { useState } from 'react'
+import { type SyntheticEvent } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 import { v4 as uuidv4 } from 'uuid'
@@ -55,17 +55,16 @@ const Workflows = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const [loading, setLoading] = useState(true)
-
   const { useNextWorkflowInterface } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
-  const { data: workflows, refetch } = useGetWorkflows(undefined, {
+  const {
+    data: workflows,
+    isLoading,
+    refetch,
+  } = useGetWorkflows(undefined, {
     query: {
       select: transformWorkflows,
-      onSettled() {
-        setLoading(false)
-      },
     },
   })
   const { mutateAsync: deleteWorkflows } = useDeleteWorkflowsUid()
@@ -113,7 +112,7 @@ const Workflows = () => {
 
   const handleDelete =
     ({ uid, name }: CoreWorkflowMeta) =>
-    (e: React.SyntheticEvent) => {
+    (e: SyntheticEvent) => {
       e.stopPropagation()
 
       dispatch(
@@ -125,7 +124,7 @@ const Workflows = () => {
       )
     }
 
-  const handleReRun = (uid: uuid) => async (e: React.SyntheticEvent) => {
+  const handleReRun = (uid: uuid) => async (e: SyntheticEvent) => {
     e.stopPropagation()
 
     const { name, kube_object } = await getWorkflowsUid(uid)
@@ -194,7 +193,7 @@ const Workflows = () => {
 
   return (
     <>
-      <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
+      <Grow in={!isLoading} style={{ transformOrigin: '0 0 0' }}>
         <div style={{ height: '100%' }}>
           {workflows && workflows.length > 0 ? (
             <Space>
@@ -216,7 +215,7 @@ const Workflows = () => {
         </div>
       </Grow>
 
-      {loading && <Loading />}
+      {isLoading && <Loading />}
     </>
   )
 }

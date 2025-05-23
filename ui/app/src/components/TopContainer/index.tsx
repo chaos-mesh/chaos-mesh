@@ -86,59 +86,61 @@ const TopContainer = () => {
 
   const [loading, setLoading] = useState(true)
 
-  /**
-   * Set authorization (RBAC token / GCP) for API use.
-   *
-   */
-  function setAuth() {
-    // GCP
-    const accessToken = Cookies.get('access_token')
-    const expiry = Cookies.get('expiry')
-
-    if (accessToken && expiry) {
-      const token = {
-        accessToken,
-        expiry,
-      }
-
-      applyAPIAuthentication(token as any)
-      dispatch(setTokenName('gcp'))
-
-      return
-    }
-
-    const token = LS.get('token')
-    const tokenName = LS.get('token-name')
-    const globalNamespace = LS.get('global-namespace')
-
-    if (token && tokenName) {
-      const tokens: TokenFormValues[] = JSON.parse(token)
-
-      applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
-      dispatch(setTokens(tokens))
-      dispatch(setTokenName(tokenName))
-    } else {
-      dispatch(setAuthOpen(true))
-    }
-
-    if (globalNamespace) {
-      applyNSParam(globalNamespace)
-      dispatch(setNameSpace(globalNamespace))
-    }
-  }
-
-  useGetCommonConfig({
+  const { data } = useGetCommonConfig({
     query: {
       staleTime: Stale.DAY,
-      onSuccess(data) {
-        if (data.security_mode) {
-          setAuth()
-        }
-
-        setLoading(false)
-      },
     },
   })
+
+  useEffect(() => {
+    /**
+     * Set authorization (RBAC token / GCP) for API use.
+     */
+    function setAuth() {
+      // GCP
+      const accessToken = Cookies.get('access_token')
+      const expiry = Cookies.get('expiry')
+
+      if (accessToken && expiry) {
+        const token = {
+          accessToken,
+          expiry,
+        }
+
+        applyAPIAuthentication(token)
+        dispatch(setTokenName('gcp'))
+
+        return
+      }
+
+      const token = LS.get('token')
+      const tokenName = LS.get('token-name')
+      const globalNamespace = LS.get('global-namespace')
+
+      if (token && tokenName) {
+        const tokens: TokenFormValues[] = JSON.parse(token)
+
+        applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
+        dispatch(setTokens(tokens))
+        dispatch(setTokenName(tokenName))
+      } else {
+        dispatch(setAuthOpen(true))
+      }
+
+      if (globalNamespace) {
+        applyNSParam(globalNamespace)
+        dispatch(setNameSpace(globalNamespace))
+      }
+    }
+
+    if (data) {
+      if (data.security_mode) {
+        setAuth()
+      }
+
+      setLoading(false)
+    }
+  }, [data, dispatch])
 
   useEffect(() => {
     insertCommonStyle()

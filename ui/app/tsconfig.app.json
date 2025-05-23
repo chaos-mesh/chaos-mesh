@@ -34,5 +34,8 @@
   "include": [
     "src",
     "eslint.config.js"
+  ],
+  "exclude": [
+    "src/openapi"
   ]
 }
