@@ -263,10 +263,6 @@
       "title": "Use new PhysicalMachine CRD",
       "choose": "When creating PhysicalMachineChaos, retrieve the available PhysicalMachines instead of providing the address field."
     },
-    "useNextWorkflowInterface": {
-      "title": "Use the next generation of workflow interface",
-      "choose": "Over the past period of time, we have refactored the interface related to workflows. Now you can create workflows more easily in the form of the flowchart. (Note: This improvement is still under active development and the interface is still subject to change until it is stable.)"
-    },
     "theme": {
       "title": "Theme",
       "choose": "Choose a theme.",

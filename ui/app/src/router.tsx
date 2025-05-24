@@ -29,8 +29,7 @@ import Workflows from '@/pages/Workflows'
 import Workflow from '@/pages/Workflows/Single'
 import { Navigate, createHashRouter } from 'react-router'
 
-import NewWorkflow from '@/components/NewWorkflow'
-import NewWorkflowNext from '@/components/NewWorkflowNext'
+import NewWorkflow from '@/components/NewWorkflowNext'
 import TopContainer from '@/components/TopContainer'
 
 const router = createHashRouter([
@@ -49,10 +48,6 @@ const router = createHashRouter([
       {
         path: 'workflows/new',
         Component: NewWorkflow,
-      },
-      {
-        path: 'workflows/new/next',
-        Component: NewWorkflowNext,
       },
       {
         path: 'workflows',
