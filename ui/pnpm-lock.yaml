@@ -32,9 +32,6 @@ importers:
       '@emotion/styled':
         specifier: ^11.3.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@19.1.5)(react@19.1.0))(@types/react@19.1.5)(react@19.1.0)
-      '@loadable/component':
-        specifier: ^5.14.1
-        version: 5.16.7(react@19.1.0)
       '@mui/base':
         specifier: 5.0.0-alpha.120
         version: 5.0.0-alpha.120(@types/react@19.1.5)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1320,12 +1317,6 @@ packages:
     engines: {node: '>= 10.16.0'}
     peerDependencies:
       jsep: ^0.4.0||^1.0.0
-
-  '@loadable/component@5.16.7':
-    resolution: {integrity: sha512-XvkFixLUOTEaj8lI7uwc4nf8Wmq3IulYG7SZHCWcPm/Li5gjJDFfIkgWOLPnD7jqPJVtAG9bEz4SCek+SpHYYg==}
-    engines: {node: '>=8'}
-    peerDependencies:
-      react: ^16.3.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   '@mswjs/cookies@0.2.2':
     resolution: {integrity: sha512-mlN83YSrcFgk7Dm1Mys40DLssI1KdJji2CMKN8eOlBqsTADYzj2+jWzsANsUTFbxDMWPD5e9bfA1RGqBpS3O1g==}
@@ -6581,13 +6572,6 @@ snapshots:
   '@jsep-plugin/ternary@1.1.4(jsep@1.4.0)':
     dependencies:
       jsep: 1.4.0
-
-  '@loadable/component@5.16.7(react@19.1.0)':
-    dependencies:
-      '@babel/runtime': 7.27.1
-      hoist-non-react-statics: 3.3.2
-      react: 19.1.0
-      react-is: 16.13.1
 
   '@mswjs/cookies@0.2.2':
     dependencies:
