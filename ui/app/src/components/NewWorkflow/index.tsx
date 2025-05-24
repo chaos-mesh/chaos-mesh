@@ -20,7 +20,6 @@ import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
-import loadable from '@loadable/component'
 import CheckIcon from '@mui/icons-material/Check'
 import PublishIcon from '@mui/icons-material/Publish'
 import RemoveIcon from '@mui/icons-material/Remove'
@@ -43,7 +42,7 @@ import { Ace } from 'ace-builds'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
-import { useEffect, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
@@ -89,7 +88,7 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   },
 }))
 
-const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 type IStep = Template
 
