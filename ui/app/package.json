@@ -12,7 +12,6 @@
   "dependencies": {
     "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.3.0",
-    "@loadable/component": "^5.14.1",
     "@mui/base": "5.0.0-alpha.120",
     "@mui/icons-material": "^5.10.16",
     "@mui/lab": "5.0.0-alpha.122",

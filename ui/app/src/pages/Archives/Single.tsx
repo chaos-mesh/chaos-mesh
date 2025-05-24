@@ -19,9 +19,9 @@ import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
-import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
+import { lazy } from 'react'
 import { useParams } from 'react-router'
 
 import EventsTimeline from '@/components/EventsTimeline'
@@ -30,7 +30,7 @@ import i18n from '@/components/T'
 
 import { useQuery } from '@/lib/hooks'
 
-const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 const Single = () => {
   const { uuid } = useParams()
