@@ -18,6 +18,7 @@ package schedule
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sort"
 	"strings"
@@ -25,7 +26,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -194,7 +195,7 @@ func (s *Service) get(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrBadRequest.New("Schedule "+uid+"not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -314,7 +315,7 @@ func (s *Service) delete(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Schedule "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -372,7 +373,7 @@ func (s *Service) batchDelete(c *gin.Context) {
 
 	for _, uid := range uidSlice {
 		if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-			if gorm.IsRecordNotFoundError(err) {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 			} else {
 				u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -430,7 +431,7 @@ func (s *Service) pauseSchedule(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
@@ -472,7 +473,7 @@ func (s *Service) startSchedule(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if sch, err = s.schedule.FindByUID(context.Background(), uid); err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
