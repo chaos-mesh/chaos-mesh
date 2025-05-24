@@ -14,30 +14,40 @@
  * limitations under the License.
  *
  */
-import { Box, Button, MenuItem, StepLabel, Typography } from '@mui/material'
-import NewExperimentNext, { NewExperimentHandles } from 'components/NewExperimentNext'
-import { SelectField, TextField } from 'components/FormField'
-import { Template, TemplateType, setTemplate, updateTemplate } from 'slices/workflows'
-import { resetNewExperiment, setExternalExperiment } from 'slices/experiments'
-import { useEffect, useRef, useState } from 'react'
-import { useStoreDispatch, useStoreSelector } from 'store'
-
+import Space from '@/mui-extends/Space'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import CloseIcon from '@mui/icons-material/Close'
+import { Box, Button, MenuItem, StepLabel, Typography } from '@mui/material'
+import { styled } from '@mui/material/styles'
 import { Formik } from 'formik'
-import HTTPTask from './HTTPTask'
-import SerialOrParallel from './SerailOrParallel'
-import Space from '@ui/mui-extends/esm/Space'
-import Suspend from './Suspend'
-import Task from './Task'
-import i18n from 'components/T'
-import { makeStyles } from '@mui/styles'
-import { parseYAML } from 'lib/formikhelpers'
-import { setAlert } from 'slices/globalStatus'
+import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-const useStyles = makeStyles({
-  field: {
+import { resetNewExperiment, setExternalExperiment } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
+import { Template, TemplateType, setTemplate, updateTemplate } from '@/slices/workflows'
+
+import { SelectField, TextField } from '@/components/FormField'
+import NewExperimentNext, { NewExperimentHandles } from '@/components/NewExperimentNext'
+import i18n from '@/components/T'
+
+import { parseYAML } from '@/lib/formikhelpers'
+
+import HTTPTask from './HTTPTask'
+import SerialOrParallel from './SerailOrParallel'
+import Suspend from './Suspend'
+import Task from './Task'
+
+const PREFIX = 'Add'
+
+const classes = {
+  field: `${PREFIX}-field`,
+}
+
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled('div')({
+  [`& .${classes.field}`]: {
     width: 180,
   },
 })
@@ -60,7 +70,7 @@ interface AddProps {
   updateCallback?: () => void
 }
 
-const Add: React.FC<AddProps> = ({
+const Add: ReactFCWithChildren<AddProps> = ({
   childIndex,
   parentTemplates,
   setParentTemplates,
@@ -69,7 +79,6 @@ const Add: React.FC<AddProps> = ({
   update,
   updateCallback,
 }) => {
-  const classes = useStyles()
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -115,7 +124,7 @@ const Add: React.FC<AddProps> = ({
         kindAction: [kind, spec.action ?? ''],
         spec,
         basic,
-      })
+      }),
     )
   }
 
@@ -225,7 +234,7 @@ const Add: React.FC<AddProps> = ({
         setAlert({
           type: 'warning',
           message: i18n('newW.messages.redundant', intl),
-        })
+        }),
       )
 
       return
@@ -284,7 +293,7 @@ const Add: React.FC<AddProps> = ({
   }
 
   return (
-    <>
+    <Root>
       <Formik
         innerRef={formRef}
         initialValues={initialValues}
@@ -362,7 +371,6 @@ const Add: React.FC<AddProps> = ({
           )
         }}
       </Formik>
-
       {num < 0 && (
         <Box ml={8}>
           {typeOfTemplate === 'suspend' && (
@@ -378,7 +386,7 @@ const Add: React.FC<AddProps> = ({
           )}
         </Box>
       )}
-    </>
+    </Root>
   )
 }
 

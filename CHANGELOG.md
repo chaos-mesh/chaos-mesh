@@ -15,6 +15,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 ### Changed
 
 - Update byteman-helper to v4.0.24 [#4681](https://github.com/chaos-mesh/chaos-mesh/pull/4681)
+- Adopt vite and swc in UI
 
 ### Deprecated
 

@@ -14,39 +14,37 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import Paper from '@/mui-extends/Paper'
+import SkeletonN from '@/mui-extends/SkeletonN'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import CheckIcon from '@mui/icons-material/Check'
 import PublishIcon from '@mui/icons-material/Publish'
 import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Button, Divider, Grid, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { useEffect, useMemo, useState } from 'react'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import SkeletonN from '@ui/mui-extends/esm/SkeletonN'
-import Space from '@ui/mui-extends/esm/Space'
+import { setBasic, setStep2 } from '@/slices/experiments'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
-
-import { setBasic, setStep2 } from 'slices/experiments'
-
-import { LabelField, SelectField, TextField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
-import { Fields as ScheduleSpecificFields, data as scheduleSpecificData } from 'components/Schedule/types'
-import Scope from 'components/Scope'
-import i18n from 'components/T'
+import { LabelField, SelectField, TextField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
+import { Fields as ScheduleSpecificFields, data as scheduleSpecificData } from '@/components/Schedule/types'
+import Scope from '@/components/Scope'
+import i18n from '@/components/T'
 
 import basicData, { schema as basicSchema } from './data/basic'
 import Scheduler from './form/Scheduler'
-import { Stale } from 'api/queryUtils'
 
 interface Step2Props {
   inWorkflow?: boolean
   inSchedule?: boolean
 }
 
-const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
+const Step2: ReactFCWithChildren<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
   const { step2, env, kindAction, basic } = useStoreSelector((state) => state.experiments)
   const [kind] = kindAction
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
@@ -63,7 +61,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
             },
           }
         : basicData,
-    [inSchedule]
+    [inSchedule],
   )
   const [init, setInit] = useState(originalInit)
 
@@ -96,7 +94,7 @@ const Step2: React.FC<Step2Props> = ({ inWorkflow = false, inSchedule = false })
   const handleOnSubmitStep2 = (_values: Record<string, any>) => {
     const values = schema.cast(_values) as Record<string, any>
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.debug('Debug handleSubmitStep2:', values)
     }
 

@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  */
-import flat from 'flat'
-import messages from 'i18n/messages'
+import messages from '@/i18n/messages'
+import { useStoreSelector } from '@/store'
+import { flatten } from 'flat'
 import { useMemo } from 'react'
 import { IntlProvider as ReactIntlProvider } from 'react-intl'
 
-import { useStoreSelector } from 'store'
-
-const IntlProvider: React.FC = ({ children }) => {
+const IntlProvider: ReactFCWithChildren = ({ children }) => {
   const { lang } = useStoreSelector((state) => state.settings)
-  const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
+  const intlMessages = useMemo<Record<string, string>>(() => flatten(messages[lang]), [lang])
 
   return (
     <ReactIntlProvider messages={intlMessages} locale={lang} defaultLocale="en">

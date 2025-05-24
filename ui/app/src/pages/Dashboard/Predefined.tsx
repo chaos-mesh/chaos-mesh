@@ -14,44 +14,51 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
+import { postExperiments, postSchedules } from '@/openapi'
+import { useStoreDispatch } from '@/store'
 import loadable from '@loadable/component'
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { Ace } from 'ace-builds'
 import clsx from 'clsx'
 import yaml from 'js-yaml'
-import { postExperiments, postSchedules } from 'openapi'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
+import { setAlert, setConfirm } from '@/slices/globalStatus'
 
-import { useStoreDispatch } from 'store'
+import i18n from '@/components/T'
+import YAML from '@/components/YAML'
 
-import { setAlert, setConfirm } from 'slices/globalStatus'
+import { iconByKind } from '@/lib/byKind'
+import { PreDefinedValue, getDB } from '@/lib/idb'
 
-import i18n from 'components/T'
-import YAML from 'components/YAML'
+const PREFIX = 'Predefined'
 
-import { iconByKind } from 'lib/byKind'
-import { PreDefinedValue, getDB } from 'lib/idb'
+const classes = {
+  card: `${PREFIX}-card`,
+  addCard: `${PREFIX}-addCard`,
+  editorPaperWrapper: `${PREFIX}-editorPaperWrapper`,
+}
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
-
-const useStyles = makeStyles((theme) => ({
-  card: {
+// TODO jss-to-styled codemod: The Fragment root was replaced by div. Change the tag if needed.
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.card}`]: {
     flex: '0 0 240px',
     cursor: 'pointer',
     '&:hover': {
       background: theme.palette.action.hover,
     },
   },
-  addCard: {
+
+  [`& .${classes.addCard}`]: {
     width: 210,
   },
-  editorPaperWrapper: {
+
+  [`& .${classes.editorPaperWrapper}`]: {
     position: 'absolute',
     top: '50%',
     left: '50%',
@@ -65,9 +72,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const Predefined = () => {
-  const classes = useStyles()
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
+const Predefined = () => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -120,7 +127,7 @@ const Predefined = () => {
           setAlert({
             type: 'success',
             message: i18n('confirm.success.create', intl),
-          })
+          }),
         )
       })
       .catch(console.error)
@@ -132,7 +139,7 @@ const Predefined = () => {
         title: `${i18n('common.delete', intl)} ${experiment!.name}`,
         description: i18n('common.deleteDesc', intl),
         handle: handleDeleteExperiment,
-      })
+      }),
     )
   }
 
@@ -147,12 +154,12 @@ const Predefined = () => {
       setAlert({
         type: 'success',
         message: i18n('confirm.success.delete', intl),
-      })
+      }),
     )
   }
 
   return (
-    <>
+    <Root>
       <Space direction="row" sx={{ height: 88, overflowX: 'scroll' }}>
         <YAML
           callback={saveExperiment}
@@ -196,7 +203,7 @@ const Predefined = () => {
           </Paper>
         </div>
       </Modal>
-    </>
+    </Root>
   )
 }
 

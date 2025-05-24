@@ -16,7 +16,7 @@
  */
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-import LS from 'lib/localStorage'
+import LS from '@/lib/localStorage'
 
 export type TemplateExperiment = any
 

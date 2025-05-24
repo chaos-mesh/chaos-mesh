@@ -17,11 +17,11 @@
 // Ref: https://testing-library.com/docs/react-testing-library/setup
 import { render } from '@testing-library/react'
 import type { RenderOptions } from '@testing-library/react'
-import type { FC, ReactElement } from 'react'
+import type { ReactElement } from 'react'
 
 import App from './App'
 
-const AllTheProviders: FC = ({ children }) => <App forTesting>{children}</App>
+const AllTheProviders: ReactFCWithChildren = ({ children }) => <App forTesting>{children}</App>
 
 const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
   render(ui, { wrapper: AllTheProviders, ...options })

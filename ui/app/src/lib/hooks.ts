@@ -15,7 +15,7 @@
  *
  */
 import { useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 export function usePrevious<T>(value: T) {
   const ref = useRef<T>()

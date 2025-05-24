@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
+import { TemplateCustom } from '@/slices/workflows'
 
-import { RequestForm } from './workflows.type'
-import { TemplateCustom } from 'slices/workflows'
 import http from './http'
+import { RequestForm } from './workflows.type'
 
 // TODO: refactor this interface, use the union type from golang struct
 export interface APITemplate {

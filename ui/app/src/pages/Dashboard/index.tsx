@@ -14,6 +14,9 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import { useGetEvents, useGetExperiments, useGetSchedules, useGetWorkflows } from '@/openapi'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined'
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined'
@@ -22,21 +25,17 @@ import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 import { Box, Grid, Grow, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { TourProvider } from '@reactour/tour'
-import { useGetEvents, useGetExperiments, useGetSchedules, useGetWorkflows } from 'openapi'
-import type { ReactChild } from 'react'
+import type { ReactNode } from 'react'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-
-import EventsChart from 'components/EventsChart'
-import EventsTimeline from 'components/EventsTimeline'
-import i18n from 'components/T'
+import EventsChart from '@/components/EventsChart'
+import EventsTimeline from '@/components/EventsTimeline'
+import i18n from '@/components/T'
 
 import Predefined from './Predefined'
 import TotalStatus from './TotalStatus'
 import Welcome from './Welcome'
 
-const NumPanel: React.FC<{ title: ReactChild; num?: number; background: ReactChild }> = ({
+const NumPanel: ReactFCWithChildren<{ title: ReactNode; num?: number; background: ReactNode }> = ({
   title,
   num,
   background,

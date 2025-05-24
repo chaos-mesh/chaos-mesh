@@ -16,19 +16,12 @@
  */
 import fs from 'fs'
 import { generate as orval } from 'orval'
-import rimraf from 'rimraf'
-import sig from 'signale'
+import { rimraf } from 'rimraf'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { appPath } from './constants.js'
 import { genForms, swaggerRefToAllOf } from './index.js'
-
-const rimrafCallback = (err) => {
-  if (err) {
-    sig.error(err)
-  }
-}
 
 const argv = yargs(hideBin(process.argv))
   .command('all', 'generate API client and Formik form data')
@@ -59,11 +52,11 @@ async function runClient() {
   fs.copyFileSync('../../../pkg/dashboard/swaggerdocs/swagger.yaml', './swagger.yaml')
   swaggerRefToAllOf('./swagger.yaml')
   await callOrval()
-  rimraf('./swagger.yaml', rimrafCallback)
+  rimraf('./swagger.yaml')
 }
 
 function callOrval() {
-  return orval('./orval.config.cjs')
+  return orval('./orval.config.ts')
 }
 
 function runFormik() {

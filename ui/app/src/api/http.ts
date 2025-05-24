@@ -14,11 +14,10 @@
  * limitations under the License.
  *
  */
+import store from '@/store'
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 
-import store from 'store'
-
-import { removeToken, setAlert, setAuthOpen } from 'slices/globalStatus'
+import { removeToken, setAlert, setAuthOpen } from '@/slices/globalStatus'
 
 import { resetAPIAuthentication } from './interceptors'
 
@@ -45,7 +44,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
             setAlert({
               type: 'error',
               message: 'Please check the validity of the token',
-            })
+            }),
           )
         }
         break
@@ -55,7 +54,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
             setAlert({
               type: 'error',
               message: 'Unauthorized. Please check the validity of the token',
-            })
+            }),
           )
 
           resetAPIAuthentication()
@@ -63,7 +62,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
           store.dispatch(setAuthOpen(true))
         }
         break
-      // eslint-disable-next-line no-fallthrough
+
       case 'no_cluster_privilege':
       case 'no_namespace_privilege':
       default:
@@ -71,7 +70,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
           setAlert({
             type: 'error',
             message: data.message || 'An unknown error occurred',
-          })
+          }),
         )
 
         break
