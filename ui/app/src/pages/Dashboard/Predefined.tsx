@@ -21,7 +21,7 @@ import { postExperiments, postSchedules } from '@/openapi'
 import { useStoreDispatch } from '@/store'
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { Ace } from 'ace-builds'
+import { type Editor } from 'ace-builds'
 import clsx from 'clsx'
 import yaml from 'js-yaml'
 import { lazy, useEffect, useRef, useState } from 'react'
@@ -80,7 +80,7 @@ const Predefined = () => {
 
   const idb = useRef(getDB())
 
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [yamlEditor, setYAMLEditor] = useState<Editor>()
   const [editorOpen, seteditorOpen] = useState(false)
   const [experiment, setExperiment] = useState<PreDefinedValue>()
   const [experiments, setExperiments] = useState<PreDefinedValue[]>([])
