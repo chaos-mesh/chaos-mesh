@@ -19,13 +19,12 @@ import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { postExperiments, postSchedules } from '@/openapi'
 import { useStoreDispatch } from '@/store'
-import loadable from '@loadable/component'
 import { Box, Button, Card, Modal, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { Ace } from 'ace-builds'
 import clsx from 'clsx'
 import yaml from 'js-yaml'
-import { useEffect, useRef, useState } from 'react'
+import { lazy, useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import { setAlert, setConfirm } from '@/slices/globalStatus'
@@ -72,7 +71,7 @@ const Root = styled('div')(({ theme }) => ({
   },
 }))
 
-const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 const Predefined = () => {
   const intl = useIntl()

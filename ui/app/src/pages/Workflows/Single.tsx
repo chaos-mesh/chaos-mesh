@@ -20,13 +20,12 @@ import Space from '@/mui-extends/Space'
 import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from '@/openapi'
 import { CoreWorkflowDetail } from '@/openapi/index.schemas'
 import { useStoreDispatch } from '@/store'
-import loadable from '@loadable/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { EventHandler } from 'cytoscape'
 import yaml from 'js-yaml'
-import { useEffect, useRef, useState } from 'react'
+import { lazy, useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
 
@@ -63,7 +62,7 @@ const Root = styled('div')(({ theme }) => ({
   },
 }))
 
-const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 function transformWorkflow(data: CoreWorkflowDetail) {
   // TODO: remove noise in API

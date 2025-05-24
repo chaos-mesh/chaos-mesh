@@ -17,12 +17,11 @@
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { useStoreDispatch } from '@/store'
-import loadable from '@loadable/component'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Button, Typography } from '@mui/material'
 import { Ace } from 'ace-builds'
 import yaml from 'js-yaml'
-import { useState } from 'react'
+import { lazy, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import { setAlert } from '@/slices/globalStatus'
@@ -30,7 +29,7 @@ import { setAlert } from '@/slices/globalStatus'
 import i18n from '@/components/T'
 import YAML from '@/components/YAML'
 
-const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 interface ByYAMLProps {
   callback?: (data: any) => void

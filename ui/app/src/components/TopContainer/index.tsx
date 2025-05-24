@@ -20,7 +20,6 @@ import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Loading from '@/mui-extends/Loading'
 import { useGetCommonConfig } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
-import loadable from '@loadable/component'
 import {
   Alert,
   Box,
@@ -35,7 +34,7 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Cookies from 'js-cookie'
-import { useEffect, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
 
 import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
@@ -49,7 +48,7 @@ import Navbar from './Navbar'
 import { closedWidth, openedWidth } from './Sidebar'
 import Sidebar from './Sidebar'
 
-const Auth = loadable(() => import('./Auth'))
+const Auth = lazy(() => import('./Auth'))
 
 const Root = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'open',
