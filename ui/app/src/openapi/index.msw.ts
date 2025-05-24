@@ -130,6 +130,7 @@ export const getGetCommonConfigMock = () => ({
   dns_server_create: faker.datatype.boolean(),
   enableFilterNamespace: faker.datatype.boolean(),
   gcp_security_mode: faker.datatype.boolean(),
+  oidc_security_mode: faker.datatype.boolean(),
   listen_host: faker.random.word(),
   listen_port: faker.datatype.number({ min: undefined, max: undefined }),
   root_path: faker.random.word(),
