@@ -38,7 +38,7 @@ import {
   Typography,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { Ace } from 'ace-builds'
+import { type Editor } from 'ace-builds'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
@@ -113,7 +113,7 @@ const NewWorkflow = () => {
     namespace: '',
     deadline: '',
   })
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [yamlEditor, setYAMLEditor] = useState<Editor>()
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
