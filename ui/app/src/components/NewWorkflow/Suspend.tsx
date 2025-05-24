@@ -14,17 +14,20 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
 import { Form, Formik } from 'formik'
-import { Submit, TextField } from 'components/FormField'
-import { Template, TemplateType } from 'slices/workflows'
-import { validateDeadline, validateName } from 'lib/formikhelpers'
-
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
-import i18n from 'components/T'
-import { schemaBasic } from './types'
 import { useIntl } from 'react-intl'
+
+import { Template, TemplateType } from '@/slices/workflows'
+
+import { Submit, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
+
+import { validateDeadline, validateName } from '@/lib/formikhelpers'
+
+import { schemaBasic } from './types'
 
 export interface SuspendValues {
   name: string
@@ -36,7 +39,7 @@ interface SuspendProps {
   submit: (template: Template) => void
 }
 
-const Suspend: React.FC<SuspendProps> = ({ initialValues, submit }) => {
+const Suspend: ReactFCWithChildren<SuspendProps> = ({ initialValues, submit }) => {
   const intl = useIntl()
 
   const onSubmit = ({ name, deadline }: SuspendValues) => {

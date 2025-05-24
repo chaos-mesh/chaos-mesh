@@ -14,16 +14,15 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
 import { Box, Typography } from '@mui/material'
 import { Resizable } from 're-resizable'
 import { DropTargetMonitor, XYCoord, useDrop } from 'react-dnd'
 import type { NodeProps } from 'react-flow-renderer'
 import { Position } from 'react-flow-renderer'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
-
-import { iconByKind } from 'lib/byKind'
+import { iconByKind } from '@/lib/byKind'
 
 import StyledHandle from './StyleHandle'
 import { DropItem } from './Whiteboard'

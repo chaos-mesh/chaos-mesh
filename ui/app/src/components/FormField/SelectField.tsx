@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
+import MuiExtendsSelectField, { SelectFieldProps } from '@/mui-extends/SelectField'
 import { Field, getIn, useFormikContext } from 'formik'
-
-import MuiExtendsSelectField, { SelectFieldProps } from '@ui/mui-extends/esm/SelectField'
 
 function SelectField<T>(props: SelectFieldProps<T>) {
   const { values, setFieldValue } = useFormikContext()
@@ -24,7 +23,7 @@ function SelectField<T>(props: SelectFieldProps<T>) {
   const onDelete = (val: string) => () =>
     setFieldValue(
       props.name!,
-      (getIn(values, props.name!) as string[]).filter((d) => d !== val)
+      (getIn(values, props.name!) as string[]).filter((d) => d !== val),
     )
 
   return <Field {...props} as={MuiExtendsSelectField} onRenderValueDelete={onDelete} />

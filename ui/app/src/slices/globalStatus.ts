@@ -17,9 +17,9 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import React from 'react'
 
-import { TokenFormValues } from 'components/Token'
+import { TokenFormValues } from '@/components/Token'
 
-import LS from 'lib/localStorage'
+import LS from '@/lib/localStorage'
 
 export interface Alert {
   type: 'success' | 'warning' | 'error'

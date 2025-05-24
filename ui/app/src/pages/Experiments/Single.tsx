@@ -14,6 +14,18 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
+import {
+  useDeleteExperimentsUid,
+  useGetEvents,
+  useGetExperimentsUid,
+  usePutExperimentsPauseUid,
+  usePutExperimentsStartUid,
+} from '@/openapi'
+import { useStoreDispatch } from '@/store'
 import loadable from '@loadable/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
@@ -21,31 +33,16 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import Alert from '@mui/lab/Alert'
 import { Box, Button, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
-import {
-  useDeleteExperimentsUid,
-  useGetEvents,
-  useGetExperimentsUid,
-  usePutExperimentsPauseUid,
-  usePutExperimentsStartUid,
-} from 'openapi'
 import { useIntl } from 'react-intl'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 
-import Loading from '@ui/mui-extends/esm/Loading'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
+import { setAlert, setConfirm } from '@/slices/globalStatus'
 
-import { useStoreDispatch } from 'store'
+import EventsTimeline from '@/components/EventsTimeline'
+import ObjectConfiguration from '@/components/ObjectConfiguration'
+import i18n from '@/components/T'
 
-import { setAlert, setConfirm } from 'slices/globalStatus'
-
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import i18n from 'components/T'
-
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 export default function Single() {
   const navigate = useNavigate()
@@ -70,7 +67,7 @@ export default function Single() {
             title: `${i18n('archives.single', intl)} ${experiment!.name}`,
             description: i18n('experiments.deleteDesc', intl),
             handle: handleAction('archive'),
-          })
+          }),
         )
 
         break
@@ -80,7 +77,7 @@ export default function Single() {
             title: `${i18n('common.pause', intl)} ${experiment!.name}`,
             description: i18n('experiments.pauseDesc', intl),
             handle: handleAction('pause'),
-          })
+          }),
         )
 
         break
@@ -90,7 +87,7 @@ export default function Single() {
             title: `${i18n('common.start', intl)} ${experiment!.name}`,
             description: i18n('experiments.startDesc', intl),
             handle: handleAction('start'),
-          })
+          }),
         )
 
         break
@@ -124,7 +121,7 @@ export default function Single() {
             setAlert({
               type: 'success',
               message: i18n(`confirm.success.${action}`, intl),
-            })
+            }),
           )
 
           if (action === 'archive') {
@@ -143,7 +140,7 @@ export default function Single() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {experiment && <Helmet title={`Experiment ${experiment.name}`} />}
+          {experiment && <title>{`Experiment ${experiment.name}`}</title>}
           <Space spacing={6}>
             <Space direction="row">
               <Button

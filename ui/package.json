@@ -4,23 +4,17 @@
   "author": "Yue Yang <g1enyy0ung@gmail.com>",
   "private": true,
   "scripts": {
-    "start": "pnpm -F @ui/app start:default",
-    "build": "pnpm -F @ui/mui-extends build && pnpm -F @ui/app build",
-    "test": "pnpm -F @ui/mui-extends build && pnpm -F @ui/mui-extends test && pnpm -F @ui/openapi test && pnpm -F @ui/app test",
-    "prepare": "cd ..; is-ci || husky ./ui/.husky",
-    "clean": "rimraf app/node_modules && rimraf packages/**/node_modules && rimraf node_modules"
+    "start": "pnpm -F @ui/app dev",
+    "build": "pnpm -F @ui/app build",
+    "test": "pnpm -F @ui/openapi test && pnpm -F @ui/app test",
+    "prepare": "cd ..; is-ci || husky ./ui/.husky"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "husky": "^9.1.7",
     "is-ci": "^4.1.0",
     "lint-staged": "^16.0.0",
-    "prettier": "^3.5.3",
-    "rimraf": "^6.0.1"
-  },
-  "resolutions": {
-    "@types/react": "17.0.52",
-    "@types/react-dom": "17.0.18"
+    "prettier": "^3.5.3"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"

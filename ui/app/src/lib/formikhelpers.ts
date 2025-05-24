@@ -14,33 +14,36 @@
  * limitations under the License.
  *
  */
-import { templateTypeToFieldName } from 'api/zz_generated.frontend.chaos-mesh'
+import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
 import yaml from 'js-yaml'
 import _ from 'lodash'
 
-import { Env } from 'slices/experiments'
-import { Template } from 'slices/workflows'
+import { Env } from '@/slices/experiments'
+import { Template } from '@/slices/workflows'
 
-import { podPhases } from 'components/AutoForm/data'
-import { Experiment, ExperimentKind, Frame, Scope } from 'components/NewExperiment/types'
-import basicData from 'components/NewExperimentNext/data/basic'
-import { WorkflowBasic } from 'components/NewWorkflow'
-import { ScheduleSpecific } from 'components/Schedule/types'
+import { podPhases } from '@/components/AutoForm/data'
+import { Experiment, ExperimentKind, Frame, Scope } from '@/components/NewExperiment/types'
+import basicData from '@/components/NewExperimentNext/data/basic'
+import { WorkflowBasic } from '@/components/NewWorkflow'
+import { ScheduleSpecific } from '@/components/Schedule/types'
 
 import { arrToObjBySep, sanitize } from './utils'
 
 export function parsePodsOrPhysicalMachines(data: string[]) {
-  return data.reduce((acc, d) => {
-    const [namespace, name] = d.split(':')
+  return data.reduce(
+    (acc, d) => {
+      const [namespace, name] = d.split(':')
 
-    if (acc.hasOwnProperty(namespace)) {
-      acc[namespace].push(name)
-    } else {
-      acc[namespace] = [name]
-    }
+      if (acc.hasOwnProperty(namespace)) {
+        acc[namespace].push(name)
+      } else {
+        acc[namespace] = [name]
+      }
 
-    return acc
-  }, {} as Record<string, string[]>)
+      return acc
+    },
+    {} as Record<string, string[]>,
+  )
 }
 
 export function parseSubmit<K extends ExperimentKind>(
@@ -50,7 +53,7 @@ export function parseSubmit<K extends ExperimentKind>(
   options: {
     useNewPhysicalMachine: boolean
     inSchedule?: boolean
-  }
+  },
 ) {
   const kind = env === 'k8s' ? _kind : 'PhysicalMachineChaos'
   const values: typeof e = JSON.parse(JSON.stringify(e))
@@ -213,13 +216,13 @@ export function parseSubmit<K extends ExperimentKind>(
   })
 }
 
-function podSelectorsToArr(selector: Object) {
+function podSelectorsToArr(selector: object) {
   return Object.entries(selector)
     .map(([ns, pods]) => pods.map((p: string) => `${ns}: ${p}`))
     .flat()
 }
 
-function selectorsToArr(selectors: Object, separator: string) {
+function selectorsToArr(selectors: object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
@@ -248,7 +251,7 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     throw new Error('The required spec.selector field is missing.')
   }
 
-  let basic = {
+  const basic = {
     metadata: {
       ...metadata,
       labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
@@ -531,6 +534,6 @@ export function constructWorkflow(basic: WorkflowBasic, templates: Template[]) {
             return value
         }
       },
-    }
+    },
   )
 }

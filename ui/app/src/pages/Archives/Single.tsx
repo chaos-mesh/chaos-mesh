@@ -14,50 +14,42 @@
  * limitations under the License.
  *
  */
+import Loading from '@/mui-extends/Loading'
+import Paper from '@/mui-extends/Paper'
+import PaperTop from '@/mui-extends/PaperTop'
+import Space from '@/mui-extends/Space'
+import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from '@/openapi'
 import loadable from '@loadable/component'
 import { Box, Grid, Grow } from '@mui/material'
 import yaml from 'js-yaml'
-import { useGetArchivesSchedulesUid, useGetArchivesUid, useGetArchivesWorkflowsUid, useGetEvents } from 'openapi'
-import { TypesArchiveDetail } from 'openapi/index.schemas'
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
-import Loading from '@ui/mui-extends/esm/Loading'
-import Paper from '@ui/mui-extends/esm/Paper'
-import PaperTop from '@ui/mui-extends/esm/PaperTop'
-import Space from '@ui/mui-extends/esm/Space'
+import EventsTimeline from '@/components/EventsTimeline'
+import ObjectConfiguration from '@/components/ObjectConfiguration'
+import i18n from '@/components/T'
 
-import EventsTimeline from 'components/EventsTimeline'
-import Helmet from 'components/Helmet'
-import ObjectConfiguration from 'components/ObjectConfiguration'
-import i18n from 'components/T'
+import { useQuery } from '@/lib/hooks'
 
-import { useQuery } from 'lib/hooks'
-
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
 
 const Single = () => {
   const { uuid } = useParams()
   const query = useQuery()
-  let kind = query.get('kind') || 'experiment'
-  let useGetArchives =
+  const kind = query.get('kind') || 'experiment'
+  const useGetArchives =
     kind === 'workflow'
       ? useGetArchivesWorkflowsUid
       : kind === 'schedule'
-      ? useGetArchivesSchedulesUid
-      : useGetArchivesUid
+        ? useGetArchivesSchedulesUid
+        : useGetArchivesUid
 
-  const [archive, setArchive] = useState<TypesArchiveDetail>()
-
-  const { isLoading: loadingArchives } = useGetArchives(uuid!, {
-    query: { onSuccess: setArchive },
-  })
+  const { data: archive, isLoading: loadingArchives } = useGetArchives(uuid!)
   const { data: events, isLoading: loadingEvents } = useGetEvents(
     {
       object_id: uuid,
       limit: 999,
     },
-    { query: { enabled: kind !== 'workflow' } }
+    { query: { enabled: kind !== 'workflow' } },
   )
   const loading = kind === 'workflow' ? loadingArchives : loadingArchives && loadingEvents
 
@@ -83,7 +75,7 @@ const Single = () => {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <div>
-          {archive && <Helmet title={`Archive ${archive.name}`} />}
+          {archive && <title>{`Archive ${archive.name}`}</title>}
           {kind !== 'workflow' ? (
             <Space spacing={6}>
               {archive && (

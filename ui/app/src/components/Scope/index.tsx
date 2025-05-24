@@ -14,23 +14,26 @@
  * limitations under the License.
  *
  */
+import Space from '@/mui-extends/Space'
+import {
+  useGetCommonAnnotations,
+  useGetCommonLabels,
+  usePostCommonPhysicalmachines,
+  usePostCommonPods,
+} from '@/openapi'
+import { useStoreSelector } from '@/store'
 import { MenuItem, Typography } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
-import { useGetCommonAnnotations, useGetCommonLabels, usePostCommonPhysicalmachines, usePostCommonPods } from 'openapi'
 import { useEffect, useMemo } from 'react'
 
-import Space from '@ui/mui-extends/esm/Space'
+import { Env } from '@/slices/experiments'
 
-import { useStoreSelector } from 'store'
+import { podPhases } from '@/components/AutoForm/data'
+import { AutocompleteField, SelectField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
+import { T } from '@/components/T'
 
-import { Env } from 'slices/experiments'
-
-import { podPhases } from 'components/AutoForm/data'
-import { AutocompleteField, SelectField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
-import { T } from 'components/T'
-
-import { arrToObjBySep, objToArrBySep } from 'lib/utils'
+import { arrToObjBySep, objToArrBySep } from '@/lib/utils'
 
 import DeprecatedAddress from './DeprecatedAddress'
 import Mode from './Mode'
@@ -64,7 +67,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         enabled: currentNamespaces.length > 0,
         initialData: {},
       },
-    }
+    },
   )
   const { data: annotations } = useGetCommonAnnotations(
     {
@@ -75,7 +78,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
         enabled: currentNamespaces.length > 0,
         initialData: {},
       },
-    }
+    },
   )
   const kvSeparator = ': '
   const labelKVs = useMemo(() => objToArrBySep(labels!, kvSeparator), [labels])

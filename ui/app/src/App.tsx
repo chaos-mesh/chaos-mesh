@@ -16,26 +16,26 @@
  */
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import type { FC } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Provider as StoreProvider } from 'react-redux'
-import { RouterProvider } from 'react-router-dom'
-
-import store from './store'
+import { RouterProvider } from 'react-router'
 
 import IntlProvider from './IntlProvider'
 import ThemeProvider from './ThemeProvider'
 import queryClient from './reactQueryClient'
 import router from './router'
+import store from './store'
 
 interface AppProps {
   forTesting?: boolean
 }
 
-const App: FC<AppProps> = ({ forTesting, children }) => {
+const App: ReactFCWithChildren<AppProps> = ({ forTesting, children }) => {
   const rendered = children || <RouterProvider router={router} />
-  const RealWorldOnlyProviders: FC = ({ children }) => <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+  const RealWorldOnlyProviders: ReactFCWithChildren = ({ children }) => (
+    <DndProvider backend={HTML5Backend}>{children}</DndProvider>
+  )
 
   return (
     <StoreProvider store={store}>

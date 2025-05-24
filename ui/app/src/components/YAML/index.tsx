@@ -14,22 +14,21 @@
  * limitations under the License.
  *
  */
+import { useStoreDispatch } from '@/store'
 import FileOpenIcon from '@mui/icons-material/FileOpen'
 import LoadingButton, { LoadingButtonProps } from '@mui/lab/LoadingButton'
 import { useState } from 'react'
 
-import { useStoreDispatch } from 'store'
+import { setAlert } from '@/slices/globalStatus'
 
-import { setAlert } from 'slices/globalStatus'
-
-import { T } from 'components/T'
+import { T } from '@/components/T'
 
 interface YAMLProps {
   callback: (y: any) => void
   ButtonProps?: LoadingButtonProps<'label'>
 }
 
-const YAML: React.FC<YAMLProps> = ({ children, callback, ButtonProps }) => {
+const YAML: ReactFCWithChildren<YAMLProps> = ({ children, callback, ButtonProps }) => {
   const [loading, setLoading] = useState(false)
 
   const dispatch = useStoreDispatch()
@@ -49,7 +48,7 @@ const YAML: React.FC<YAMLProps> = ({ children, callback, ButtonProps }) => {
         setAlert({
           type: 'success',
           message: <T id="confirm.success.load" />,
-        })
+        }),
       )
 
       setLoading(false)

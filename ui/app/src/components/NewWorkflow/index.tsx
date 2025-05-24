@@ -14,6 +14,12 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import Menu from '@/mui-extends/Menu'
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import loadable from '@loadable/component'
 import CheckIcon from '@mui/icons-material/Check'
 import PublishIcon from '@mui/icons-material/Publish'
@@ -32,44 +38,42 @@ import {
   Stepper,
   Typography,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import { Ace } from 'ace-builds'
-import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
-import Menu from '@ui/mui-extends/esm/Menu'
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
+import { resetNewExperiment } from '@/slices/experiments'
+import { setAlert, setConfirm } from '@/slices/globalStatus'
+import { Template, deleteTemplate, resetWorkflow } from '@/slices/workflows'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { SelectField, TextField } from '@/components/FormField'
+import i18n from '@/components/T'
 
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert, setConfirm } from 'slices/globalStatus'
-import { Template, deleteTemplate, resetWorkflow } from 'slices/workflows'
-
-import { SelectField, TextField } from 'components/FormField'
-import i18n from 'components/T'
-
-import { validateDeadline, validateName } from 'lib/formikhelpers'
-import { constructWorkflow } from 'lib/formikhelpers'
+import { validateDeadline, validateName } from '@/lib/formikhelpers'
+import { constructWorkflow } from '@/lib/formikhelpers'
 
 import Add from './Add'
 
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const PREFIX = 'NewWorkflow'
 
-const useStyles = makeStyles((theme) => ({
-  leftSticky: {
+const classes = {
+  leftSticky: `${PREFIX}-leftSticky`,
+  field: `${PREFIX}-field`,
+}
+
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  [`& .${classes.leftSticky}`]: {
     position: 'sticky',
     top: 0,
     height: `calc(100vh - 56px - ${theme.spacing(9)})`,
   },
-  field: {
+
+  [`& .${classes.field}`]: {
     width: 180,
     marginTop: 0,
     [theme.breakpoints.up('sm')]: {
@@ -85,6 +89,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const YAMLEditor = loadable(() => import('@/components/YAMLEditor'))
+
 type IStep = Template
 
 export type WorkflowBasic = {
@@ -94,7 +100,6 @@ export type WorkflowBasic = {
 }
 
 const NewWorkflow = () => {
-  const classes = useStyles()
   const intl = useIntl()
   const navigate = useNavigate()
 
@@ -147,7 +152,7 @@ const NewWorkflow = () => {
       setAlert({
         type: 'success',
         message: i18n('confirm.success.delete', intl) as string,
-      })
+      }),
     )
     resetRestore()
   }
@@ -161,7 +166,7 @@ const NewWorkflow = () => {
             title: `${i18n('common.delete', intl)} ${name}`,
             description: i18n('newW.node.deleteDesc', intl) as string,
             handle: handleAction(action, index),
-          })
+          }),
         )
         break
     }
@@ -185,7 +190,7 @@ const NewWorkflow = () => {
   const submitWorkflow = () => {
     const workflow = yamlEditor?.getValue()!
 
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.debug('Debug workflow:', workflow)
     }
 
@@ -201,7 +206,7 @@ const NewWorkflow = () => {
   }
 
   return (
-    <Grid container spacing={9}>
+    <StyledGrid container spacing={9}>
       <Grid item xs={12} md={8}>
         <Space spacing={6}>
           <Typography>{i18n('common.process')}</Typography>
@@ -312,7 +317,7 @@ const NewWorkflow = () => {
           )}
         </Formik>
       </Grid>
-    </Grid>
+    </StyledGrid>
   )
 }
 
