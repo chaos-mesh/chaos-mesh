@@ -19,7 +19,7 @@ import Space from '@/mui-extends/Space'
 import { useStoreDispatch } from '@/store'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Button, Typography } from '@mui/material'
-import { Ace } from 'ace-builds'
+import { type Editor } from 'ace-builds'
 import yaml from 'js-yaml'
 import { lazy, useState } from 'react'
 import { useIntl } from 'react-intl'
@@ -41,7 +41,7 @@ const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
   const dispatch = useStoreDispatch()
 
   const [empty, setEmpty] = useState(true)
-  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [yamlEditor, setYAMLEditor] = useState<Editor>()
 
   const onChange = (value: string) => setEmpty(value === '')
 
