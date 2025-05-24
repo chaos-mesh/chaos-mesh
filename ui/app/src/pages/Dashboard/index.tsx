@@ -31,7 +31,6 @@ import EventsChart from '@/components/EventsChart'
 import EventsTimeline from '@/components/EventsTimeline'
 import i18n from '@/components/T'
 
-import Predefined from './Predefined'
 import TotalStatus from './TotalStatus'
 import Welcome from './Welcome'
 
@@ -101,10 +100,6 @@ export default function Dashboard() {
       content: i18n('dashboard.tutorial.steps.namespace'),
     },
     {
-      selector: '.tutorial-predefined',
-      content: i18n('dashboard.tutorial.steps.predefined'),
-    },
-    {
       selector: '.tutorial-end',
       content: i18n('dashboard.tutorial.steps.end'),
     },
@@ -164,16 +159,6 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12}>
               <Welcome />
-            </Grid>
-            <Grid item xs={12}>
-              <Paper>
-                <PaperTop
-                  title={i18n('dashboard.predefined')}
-                  subtitle={i18n('dashboard.predefinedDesc')}
-                  boxProps={{ mb: 3 }}
-                />
-                <Predefined />
-              </Paper>
             </Grid>
             <Grid item xs={12}>
               <Paper>
