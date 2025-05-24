@@ -26,7 +26,6 @@ const initialState = {
   debugMode: LS.get('debug-mode') === 'true',
   enableKubeSystemNS: LS.get('enable-kube-system-ns') === 'true',
   useNewPhysicalMachine: LS.get('use-new-physical-machine') === 'true',
-  useNextWorkflowInterface: (LS.get('use-next-workflow-interface') || 'true') === 'true',
 }
 
 const settingsSlice = createSlice({
@@ -58,21 +57,10 @@ const settingsSlice = createSlice({
 
       LS.set('use-new-physical-machine', action.payload)
     },
-    setUseNextWorkflowInterface(state, action) {
-      state.useNextWorkflowInterface = action.payload
-
-      LS.set('use-next-workflow-interface', action.payload)
-    },
   },
 })
 
-export const {
-  setTheme,
-  setLang,
-  setDebugMode,
-  setEnableKubeSystemNS,
-  setUseNewPhysicalMachine,
-  setUseNextWorkflowInterface,
-} = settingsSlice.actions
+export const { setTheme, setLang, setDebugMode, setEnableKubeSystemNS, setUseNewPhysicalMachine } =
+  settingsSlice.actions
 
 export default settingsSlice.reducer
