@@ -55,7 +55,6 @@ const Workflows = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const { useNextWorkflowInterface } = useStoreSelector((state) => state.settings)
   const dispatch = useStoreDispatch()
 
   const {
@@ -75,7 +74,7 @@ const Workflows = () => {
       variant="contained"
       size="small"
       startIcon={<AddIcon />}
-      onClick={() => navigate(useNextWorkflowInterface ? '/workflows/new/next' : '/workflows/new')}
+      onClick={() => navigate('/workflows/new')}
       {...props}
     >
       <T id="newW.title" />

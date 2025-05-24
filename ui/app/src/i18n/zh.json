@@ -264,10 +264,6 @@
       "title": "使用新的 PhysicalMachine CRD",
       "choose": "创建 PhysicalMachineChaos 时，检索可用的 PhysicalMachines 而不是提供地址字段。"
     },
-    "useNextWorkflowInterface": {
-      "title": "使用全新的工作流界面",
-      "choose": "在过去的一段时间里，我们将工作流的相关界面进行了重构。现在你可以通过流程图的形式来更加方便地创建工作流。（注意：这项改进仍处于活跃地开发状态中，在它稳定前界面仍有可能会发生变动。）"
-    },
     "theme": {
       "title": "主题",
       "choose": "选择主题。",

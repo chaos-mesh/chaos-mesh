@@ -122,11 +122,9 @@ export default function NewWorkflow() {
         <Space sx={{ height: '100%' }}>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box>
-              <Badge badgeContent="Preview" color="primary">
-                <Typography variant="h5" component="h1" fontWeight="bold">
-                  New Workflow
-                </Typography>
-              </Badge>
+              <Typography variant="h5" component="h1" fontWeight="bold">
+                New Workflow
+              </Typography>
               <Typography variant="body2">Use flowchart to create a new workflow.</Typography>
             </Box>
             <Space direction="row">
