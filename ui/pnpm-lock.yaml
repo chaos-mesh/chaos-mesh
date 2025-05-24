@@ -92,9 +92,6 @@ importers:
       formik:
         specifier: ^2.2.6
         version: 2.4.6(react@19.1.0)
-      idb:
-        specifier: ^7.0.0
-        version: 7.1.1
       js-cookie:
         specifier: ^3.0.1
         version: 3.0.5
@@ -189,9 +186,6 @@ importers:
       '@types/js-yaml':
         specifier: ^4.0.5
         version: 4.0.9
-      '@types/loadable__component':
-        specifier: ^5.13.1
-        version: 5.13.9
       '@types/lodash':
         specifier: ^4.14.181
         version: 4.17.17
@@ -2278,9 +2272,6 @@ packages:
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
-  '@types/loadable__component@5.13.9':
-    resolution: {integrity: sha512-QWOtIkwZqHNdQj3nixQ8oyihQiTMKZLk/DNuvNxMSbTfxf47w+kqcbnxlUeBgAxdOtW0Dh48dTAIp83iJKtnrQ==}
-
   '@types/lodash@4.17.17':
     resolution: {integrity: sha512-RRVJ+J3J+WmyOTqnz3PiBLA501eKwXl2noseKOrNo/6+XEHjTAxO4xHvxQB6QuNm+s4WRbn6rSiap8+EA+ykFQ==}
 
@@ -3538,9 +3529,6 @@ packages:
   iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
-
-  idb@7.1.1:
-    resolution: {integrity: sha512-gchesWBzyvGHRO9W8tzUWFDycow5gwjvFKfyV9FF32Y7F50yZMp7mP+T2mJIWFx49zicqyC4uefHM17o6xKIVQ==}
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -7785,10 +7773,6 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
-  '@types/loadable__component@5.13.9':
-    dependencies:
-      '@types/react': 19.1.5
-
   '@types/lodash@4.17.17': {}
 
   '@types/luxon@1.27.1': {}
@@ -9250,8 +9234,6 @@ snapshots:
   iconv-lite@0.4.24:
     dependencies:
       safer-buffer: 2.1.2
-
-  idb@7.1.1: {}
 
   ieee754@1.2.1: {}
 

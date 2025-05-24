@@ -37,8 +37,6 @@ import { setAlert } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 
-import { PreDefinedValue, getDB } from '@/lib/idb'
-
 import RadioLabel from './RadioLabel'
 
 interface LoadFromProps {
@@ -59,7 +57,6 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
     id: '',
     type: '',
   })
-  const [predefined, setPredefined] = useState<PreDefinedValue[]>([])
   const [radio, setRadio] = useState('')
 
   const { data: experiments, isLoading: loading1 } = useGetExperiments()
@@ -124,39 +121,8 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
     })
   }, [scheduleData, experimentData, scheduleArchiveData, archiveData])
 
-  useEffect(() => {
-    const fetchPredefined = async () => {
-      let _predefined = await (await getDB()).getAll('predefined')
-
-      if (!inSchedule) {
-        _predefined = _predefined.filter((d) => d.kind !== 'Schedule')
-      }
-
-      setPredefined(_predefined)
-    }
-
-    fetchPredefined()
-  }, [inSchedule, inWorkflow])
-
   const onRadioChange = (e: any) => {
     const [type, uuid] = e.target.value.split('+')
-
-    if (type === 'p') {
-      const experiment = predefined?.filter((p) => p.name === uuid)[0].yaml
-
-      if (callback) {
-        callback(experiment)
-      }
-
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: i18n('confirm.success.load', intl),
-        }),
-      )
-
-      return
-    }
 
     switch (type) {
       case 's':
@@ -268,29 +234,6 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
           ) : (
             <Typography variant="body2" color="textSecondary">
               {i18n('archives.notFound')}
-            </Typography>
-          )}
-
-          <Divider />
-
-          <Typography>{i18n('dashboard.predefined')}</Typography>
-
-          {loading ? (
-            <SkeletonN n={3} />
-          ) : predefined.length > 0 ? (
-            <Box display="flex" flexWrap="wrap">
-              {predefined.map((d) => (
-                <FormControlLabel
-                  key={d.name}
-                  value={`p+${d.name}`}
-                  control={<Radio color="primary" />}
-                  label={RadioLabel(d.name)}
-                />
-              ))}
-            </Box>
-          ) : (
-            <Typography variant="body2" color="textSecondary">
-              {i18n('dashboard.noPredefinedFound')}
             </Typography>
           )}
         </Space>
