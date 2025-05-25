@@ -388,6 +388,20 @@ const data: Record<Kind, Definition> = {
           ...dnsCommon,
         },
       },
+      {
+        name: 'Static',
+        key: 'static',
+        spec: {
+          action: 'static' as any,
+          domainIpMapping: {
+            field: 'label',
+            label: 'Domain name -IP mapping',
+            value: [],
+            helperText: 'the corresponding IP address, for example: google.com=1.2.3.4',
+          },
+          containerNames,
+        },
+      },
     ],
   },
   // GCP

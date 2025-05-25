@@ -307,16 +307,23 @@ spec:
                   action:
                     description: |-
                       Action defines the specific DNS chaos action.
-                      Supported action: error, random
+                      Supported action: error, random,static
                       Default action: error
                     enum:
                     - error
                     - random
+                    - static
                     type: string
                   containerNames:
                     description: |-
                       ContainerNames indicates list of the name of affected container.
                       If not set, the first container will be injected
+                    items:
+                      type: string
+                    type: array
+                  domainIpMapping:
+                    description: DomainIpMappingList represents the domain ip mapping
+                      list
                     items:
                       type: string
                     type: array
@@ -3677,16 +3684,23 @@ spec:
                             action:
                               description: |-
                                 Action defines the specific DNS chaos action.
-                                Supported action: error, random
+                                Supported action: error, random,static
                                 Default action: error
                               enum:
                               - error
                               - random
+                              - static
                               type: string
                             containerNames:
                               description: |-
                                 ContainerNames indicates list of the name of affected container.
                                 If not set, the first container will be injected
+                              items:
+                                type: string
+                              type: array
+                            domainIpMapping:
+                              description: DomainIpMappingList represents the domain
+                                ip mapping list
                               items:
                                 type: string
                               type: array
@@ -6717,16 +6731,23 @@ spec:
                                 action:
                                   description: |-
                                     Action defines the specific DNS chaos action.
-                                    Supported action: error, random
+                                    Supported action: error, random,static
                                     Default action: error
                                   enum:
                                   - error
                                   - random
+                                  - static
                                   type: string
                                 containerNames:
                                   description: |-
                                     ContainerNames indicates list of the name of affected container.
                                     If not set, the first container will be injected
+                                  items:
+                                    type: string
+                                  type: array
+                                domainIpMapping:
+                                  description: DomainIpMappingList represents the
+                                    domain ip mapping list
                                   items:
                                     type: string
                                   type: array
