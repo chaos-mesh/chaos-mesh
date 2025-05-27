@@ -27,6 +27,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `images.registry` | The global container registry for the images, you could replace it with your self-hosted container registry. | `ghcr.io` |
 | `images.tag` | The global image tag (for example, semiVer with prefix v, or latest). | `latest` |
 | `imagePullSecrets` | Global Docker registry secret names as an array | [] (does not add image pull secrets to deployed pods) |
+| `extraObjects` | Extra Kubernetes objects to deploy with the helm chart | [] |
 | `controllerManager.securityContext` | Pod securityContext if needed | `{}` |
 | `controllerManager.hostNetwork` | Running chaos-controller-manager on host network | `false` |
 | `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
