@@ -11,9 +11,9 @@ ENV https_proxy $HTTPS_PROXY
 ARG TARGET_PLATFORM=amd64
 
 RUN mkdir -p /tmp/bin && \
-    curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.22-0.12.tar.gz -o /usr/local/byteman.tar.gz && \
+    curl -L https://mirrors.chaos-mesh.org/byteman-chaos-mesh-download-v4.0.24-0.12.tar.gz -o /usr/local/byteman.tar.gz && \
     tar xvf /usr/local/byteman.tar.gz -C /usr/local && \
-    mv /usr/local/byteman-chaos-mesh-download-v4.0.22-0.12 /tmp/byteman && \
+    mv /usr/local/byteman-chaos-mesh-download-v4.0.24-0.12 /tmp/byteman && \
     rm /usr/local/byteman.tar.gz
 
 # toda doesn't support arm64 yet
@@ -35,7 +35,7 @@ RUN case "$TARGET_PLATFORM" in \
 
 
 # ---
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
@@ -43,13 +43,10 @@ ARG HTTP_PROXY
 ENV http_proxy $HTTP_PROXY
 ENV https_proxy $HTTPS_PROXY
 
-RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2
-
-RUN apt-get update && \
-    echo "deb http://security.debian.org/debian-security bullseye-security main contrib non-free" >> /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bullseye-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
-    apt --allow-releaseinfo-change update && apt upgrade -y && \
-    apt-get install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-11-jre && \
+RUN echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bookworm-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
+    apt update --allow-releaseinfo-change && apt upgrade -y && \
+    apt install -y tzdata iptables ebtables net-tools ipset stress-ng iproute2 fuse util-linux procps openjdk-17-jre && \
     rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \
@@ -58,7 +55,7 @@ RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \
 ENV RUST_BACKTRACE 1
 ENV BYTEMAN_HOME /usr/local/byteman
 ENV PATH $PATH:/usr/local/byteman/bin
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH $PATH:/usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon

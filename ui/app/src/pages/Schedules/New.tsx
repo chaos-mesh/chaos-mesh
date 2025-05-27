@@ -14,18 +14,17 @@
  * limitations under the License.
  *
  */
+import { usePostSchedules } from '@/openapi'
+import { useStoreDispatch } from '@/store'
 import { Grid } from '@mui/material'
-import { usePostSchedules } from 'openapi'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
-import { useStoreDispatch } from 'store'
+import { resetNewExperiment } from '@/slices/experiments'
+import { setAlert } from '@/slices/globalStatus'
 
-import { resetNewExperiment } from 'slices/experiments'
-import { setAlert } from 'slices/globalStatus'
-
-import NewExperiment from 'components/NewExperimentNext'
-import i18n from 'components/T'
+import NewExperiment from '@/components/NewExperimentNext'
+import i18n from '@/components/T'
 
 const New = () => {
   const navigate = useNavigate()
@@ -42,7 +41,7 @@ const New = () => {
           setAlert({
             type: 'success',
             message: i18n('confirm.success.create', intl),
-          })
+          }),
         )
 
         dispatch(resetNewExperiment())

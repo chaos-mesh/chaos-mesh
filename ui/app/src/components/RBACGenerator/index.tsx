@@ -14,33 +14,39 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
+import { useStoreDispatch } from '@/store'
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import copy from 'copy-text-to-clipboard'
 import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
-import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from 'openapi'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import Space from '@ui/mui-extends/esm/Space'
+import { setAlert } from '@/slices/globalStatus'
 
-import { useStoreDispatch } from 'store'
+import { SelectField } from '@/components/FormField'
+import i18n from '@/components/T'
 
-import { setAlert } from 'slices/globalStatus'
+const PREFIX = 'RBACGenerator'
 
-import { SelectField } from 'components/FormField'
-import i18n from 'components/T'
-import { Stale } from 'api/queryUtils'
+const classes = {
+  pre: `${PREFIX}-pre`,
+  copy: `${PREFIX}-copy`,
+}
 
-const useStyles = makeStyles((theme) => ({
-  pre: {
+const Root = styled('div')(({ theme }) => ({
+  [`& .${classes.pre}`]: {
     padding: theme.spacing(3),
     background: theme.palette.background.default,
     borderRadius: 4,
     whiteSpace: 'pre-wrap',
   },
-  copy: {
+
+  [`& .${classes.copy}`]: {
     position: 'absolute',
     top: theme.spacing(6),
     right: theme.spacing(3),
@@ -50,16 +56,16 @@ const useStyles = makeStyles((theme) => ({
 const initialValues = { namespace: 'default', role: 'viewer', clustered: false }
 
 const RBACGenerator = () => {
-  const classes = useStyles()
-
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
 
   const [params, setParams] = useState(initialValues)
-  const [rbac, setRBAC] = useState('')
-  const [getSecret, setGetSecret] = useState('')
-  const [generateToken, setGenerateToken] = useState('')
+  const [rbac, setRBAC] = useState({
+    yaml: '',
+    getSecret: '',
+    generateToken: '',
+  })
   const containerRef = useRef(null)
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
@@ -68,18 +74,19 @@ const RBACGenerator = () => {
       staleTime: Stale.DAY,
     },
   })
-  useGetCommonRbacConfig(params, {
-    query: {
-      onSuccess(data) {
-        const entries = Object.entries(data)
-        const [name, yaml] = entries[0]
+  const { data: rbacConfig } = useGetCommonRbacConfig(params)
 
-        setRBAC(yaml)
-        setGetSecret(`kubectl describe${name.includes('cluster') ? '' : ` -n ${params.namespace}`} secrets ${name}`)
-        setGenerateToken(`kubectl create token ${name}`)
-      },
-    },
-  })
+  useEffect(() => {
+    if (rbacConfig) {
+      const [name, yaml] = Object.entries(rbacConfig)[0]
+
+      setRBAC({
+        yaml,
+        getSecret: `kubectl describe${name.includes('cluster') ? '' : ` -n ${params.namespace}`} secrets ${name}`,
+        generateToken: `kubectl create token ${name}`,
+      })
+    }
+  }, [rbacConfig, params])
 
   const onValidate = ({ namespace, role, clustered }: typeof params) => {
     setParams({
@@ -90,18 +97,20 @@ const RBACGenerator = () => {
   }
 
   const copyRBAC = () => {
-    copy(rbac, { target: containerRef.current! })
+    if (rbacConfig?.yaml) {
+      copy(rbacConfig.yaml, { target: containerRef.current! })
 
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: i18n('common.copied', intl),
-      })
-    )
+      dispatch(
+        setAlert({
+          type: 'success',
+          message: i18n('common.copied', intl),
+        }),
+      )
+    }
   }
 
   return (
-    <div ref={containerRef}>
+    <Root ref={containerRef}>
       <Space>
         <Typography variant="body2" color="textSecondary">
           {i18n('settings.addToken.generatorHelper')}
@@ -148,7 +157,7 @@ const RBACGenerator = () => {
         </Typography>
         <Box position="relative">
           <pre className={classes.pre} style={{ height: 300, overflow: 'auto' }}>
-            {rbac}
+            {rbac.yaml}
           </pre>
           <Box className={classes.copy}>
             <Button onClick={copyRBAC}>{i18n('common.copy')}</Button>
@@ -166,14 +175,14 @@ const RBACGenerator = () => {
           <Typography variant="body2" color="textSecondary">
             {i18n('settings.addToken.generatorHelperGetTokenCase1')}
           </Typography>
-          <pre className={classes.pre}>{generateToken}</pre>
+          <pre className={classes.pre}>{rbac.generateToken}</pre>
           <Typography variant="body2" color="textSecondary">
             {i18n('settings.addToken.generatorHelperGetTokenCase2')}
           </Typography>
-          <pre className={classes.pre}>{getSecret}</pre>
+          <pre className={classes.pre}>{rbac.getSecret}</pre>
         </Box>
       </Space>
-    </div>
+    </Root>
   )
 }
 

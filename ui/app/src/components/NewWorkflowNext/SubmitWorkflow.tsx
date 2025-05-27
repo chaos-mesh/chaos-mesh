@@ -14,29 +14,26 @@
  * limitations under the License.
  *
  */
-import loadable from '@loadable/component'
+import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Paper from '@/mui-extends/Paper'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
-import { Stale } from 'api/queryUtils'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
-import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from 'openapi'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { lazy, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import * as Yup from 'yup'
 
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Paper from '@ui/mui-extends/esm/Paper'
-import Space from '@ui/mui-extends/esm/Space'
+import { resetWorkflow } from '@/slices/workflows'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { SelectField, Submit, TextField } from '@/components/FormField'
+import FormikEffect from '@/components/FormikEffect'
+import { T } from '@/components/T'
 
-import { resetWorkflow } from 'slices/workflows'
-
-import { SelectField, Submit, TextField } from 'components/FormField'
-import FormikEffect from 'components/FormikEffect'
-import { T } from 'components/T'
-
-const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+const YAMLEditor = lazy(() => import('@/components/YAMLEditor'))
 
 const validationSchema = Yup.object({
   name: Yup.string().trim().required(),

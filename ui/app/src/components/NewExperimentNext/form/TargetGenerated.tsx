@@ -14,23 +14,21 @@
  * limitations under the License.
  *
  */
+import { Stale } from '@/api/queryUtils'
+import Space from '@/mui-extends/Space'
+import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
+import { useStoreSelector } from '@/store'
 import { MenuItem } from '@mui/material'
-import { Stale } from 'api/queryUtils'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
-import { useGetCommonChaosAvailableNamespaces } from 'openapi'
 import { useEffect, useState } from 'react'
 import { ObjectSchema } from 'yup'
 
-import Space from '@ui/mui-extends/esm/Space'
+import { Env } from '@/slices/experiments'
 
-import { useStoreSelector } from 'store'
-
-import { Env } from 'slices/experiments'
-
-import { AutocompleteField, LabelField, SelectField, Submit, TextField } from 'components/FormField'
-import MoreOptions from 'components/MoreOptions'
-import Scope from 'components/Scope'
-import i18n from 'components/T'
+import { AutocompleteField, LabelField, SelectField, Submit, TextField } from '@/components/FormField'
+import MoreOptions from '@/components/MoreOptions'
+import Scope from '@/components/Scope'
+import i18n from '@/components/T'
 
 import basicData from '../data/basic'
 import { Kind, Spec } from '../data/types'
@@ -43,7 +41,13 @@ interface TargetGeneratedProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
-const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, validationSchema, onSubmit }) => {
+const TargetGenerated: ReactFCWithChildren<TargetGeneratedProps> = ({
+  env,
+  kind,
+  data,
+  validationSchema,
+  onSubmit,
+}) => {
   const { spec } = useStoreSelector((state) => state.experiments)
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
@@ -53,15 +57,18 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
     },
   })
 
-  let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
-    if (v instanceof Object && v.field) {
-      acc = setIn(acc, k, v.value)
-    } else {
-      acc[k] = v
-    }
+  let initialValues = Object.entries(data).reduce(
+    (acc, [k, v]) => {
+      if (v instanceof Object && v.field) {
+        acc = setIn(acc, k, v.value)
+      } else {
+        acc[k] = v
+      }
 
-    return acc
-  }, {} as Record<string, any>)
+      return acc
+    },
+    {} as Record<string, any>,
+  )
 
   if (env === 'k8s' && kind === 'NetworkChaos') {
     const action = initialValues.action
@@ -91,7 +98,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
 
   const parseDataToFormFields = (
     errors: FormikErrors<Record<string, any>>,
-    touched: FormikTouched<Record<string, any>>
+    touched: FormikTouched<Record<string, any>>,
   ) => {
     const rendered = Object.entries(data)
       .filter(([_, v]) => v && v instanceof Object && v.field)
@@ -159,7 +166,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ env, kind, data, vali
                     <MenuItem key={option} value={option}>
                       {option}
                     </MenuItem>
-                  )
+                  ),
                 )}
               </SelectField>
             )

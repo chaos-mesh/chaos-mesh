@@ -14,6 +14,17 @@
  * limitations under the License.
  *
  */
+import Paper from '@/mui-extends/Paper'
+import Tooltip from '@/mui-extends/Tooltip'
+import {
+  getArchives,
+  getArchivesSchedules,
+  getArchivesWorkflows,
+  getExperiments,
+  getSchedules,
+  getWorkflows,
+} from '@/openapi'
+import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
 import FingerprintIcon from '@mui/icons-material/Fingerprint'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import ScheduleIcon from '@mui/icons-material/Schedule'
@@ -28,40 +39,34 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { makeStyles } from '@mui/styles'
+import { styled } from '@mui/material/styles'
 import _ from 'lodash'
-import {
-  getArchives,
-  getArchivesSchedules,
-  getArchivesWorkflows,
-  getExperiments,
-  getSchedules,
-  getWorkflows,
-} from 'openapi'
-import { CoreWorkflowMeta, TypesArchive, TypesExperiment, TypesSchedule } from 'openapi/index.schemas'
 import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
-import Paper from '@ui/mui-extends/esm/Paper'
-import Tooltip from '@ui/mui-extends/esm/Tooltip'
+import i18n from '@/components/T'
 
-import i18n from 'components/T'
+import { format } from '@/lib/luxon'
+import search from '@/lib/search'
 
-import { format } from 'lib/luxon'
-import search from 'lib/search'
+const PREFIX = 'Search'
 
-const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
+const classes = {
+  tooltip: `${PREFIX}-tooltip`,
+  chipContainer: `${PREFIX}-chipContainer`,
+}
 
-const useStyles = makeStyles((theme) => ({
-  tooltip: {
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  [`& .${classes.tooltip}`]: {
     marginBottom: 0,
     paddingLeft: theme.spacing(3),
     '& > li': {
       marginTop: theme.spacing(1.5),
     },
   },
-  chipContainer: {
+
+  [`& .${classes.chipContainer}`]: {
     display: 'flex',
     flexWrap: 'wrap',
     '& > *': {
@@ -71,11 +76,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const Chip = (props: ChipProps) => <MUIChip {...props} variant="outlined" size="small" />
+
 type OptionCategory = CoreWorkflowMeta | TypesSchedule | TypesExperiment | TypesArchive
 type Option = OptionCategory & { is?: string }
 
-const Search: React.FC = () => {
-  const classes = useStyles()
+const Search: ReactFCWithChildren = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
@@ -93,7 +99,7 @@ const Search: React.FC = () => {
         const [workflows, schedules, experiments, archives, archivedWorkflows, archivedSchedules] = [
           (await getWorkflows()).map((d) => ({
             ...d,
-            is: 'workflow' as 'workflow',
+            is: 'workflow' as const,
             kind: 'Workflow',
           })),
           (await getSchedules()).map((d) => ({ ...d, is: 'schedule' })),
@@ -105,7 +111,7 @@ const Search: React.FC = () => {
 
         const result = search(
           { workflows, schedules, experiments, archives: [...archives, ...archivedWorkflows, ...archivedSchedules] },
-          s
+          s,
         )
         const newOptions = [...result.workflows, ...result.schedules, ...result.experiments, ...result.archives]
 
@@ -114,7 +120,7 @@ const Search: React.FC = () => {
           setNoResult(true)
         }
       }, 500),
-    []
+    [],
   )
 
   const groupBy = (option: Option) => i18n(`${option.is}s.title`, intl)
@@ -235,7 +241,7 @@ const Search: React.FC = () => {
           }}
         />
       )}
-      PaperComponent={(props) => <Paper {...props} sx={{ p: 0 }} />}
+      PaperComponent={(props) => <StyledPaper {...props} sx={{ p: 0 }} />}
       disableClearable
     />
   )

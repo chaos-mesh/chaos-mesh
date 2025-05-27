@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  */
+import { type CoreEvent } from '@/openapi/index.schemas'
+import { useStoreSelector } from '@/store'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
 import TimelineContent from '@mui/lab/TimelineContent'
@@ -22,21 +24,18 @@ import TimelineItem from '@mui/lab/TimelineItem'
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent'
 import TimelineSeparator from '@mui/lab/TimelineSeparator'
 import { Box, Typography } from '@mui/material'
-import { CoreEvent } from 'openapi/index.schemas'
 
-import { useStoreSelector } from 'store'
+import NotFound from '@/components/NotFound'
+import i18n from '@/components/T'
 
-import NotFound from 'components/NotFound'
-import i18n from 'components/T'
-
-import { iconByKind } from 'lib/byKind'
-import DateTime, { format } from 'lib/luxon'
+import { iconByKind } from '@/lib/byKind'
+import DateTime, { format } from '@/lib/luxon'
 
 interface EventsTimelineProps {
   events: CoreEvent[]
 }
 
-const EventsTimeline: React.FC<EventsTimelineProps> = ({ events }) => {
+const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events }) => {
   const { lang } = useStoreSelector((state) => state.settings)
 
   return events.length > 0 ? (

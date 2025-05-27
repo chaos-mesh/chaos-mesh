@@ -47,17 +47,14 @@ on:
       - "ui/.prettierrc"
       - "ui/pnpm-lock.yaml"
       - "ui/pnpm-workspace.yaml"
+      - "ui/app/eslint.config.js"
+      - "ui/app/index.html"
       - "ui/app/public/**"
       - "ui/app/src/api/zz_generated.frontend.chaos-mesh.ts"
       - "ui/app/src/formik/**"
       - "ui/app/src/openapi/**"
-      - "ui/app/src/setupProxy.js"
       - "ui/**/*.svg"
       - "**/__mocks__/**"
-      - "**/__snapshots__/**"
-      - "ui/packages/mui-extends/.storybook/**"
-      - "ui/packages/mui-extends/stories/**"
-      - "ui/packages/mui-extends/test/storyshots.test.js"
 
 permissions: read-all
 
@@ -68,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@v46
 
       - name: Check license header for changed files
         env:

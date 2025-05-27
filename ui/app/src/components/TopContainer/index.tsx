@@ -14,7 +14,12 @@
  * limitations under the License.
  *
  */
-import loadable from '@loadable/component'
+import { applyAPIAuthentication, applyNSParam } from '@/api/interceptors'
+import { Stale } from '@/api/queryUtils'
+import ConfirmDialog from '@/mui-extends/ConfirmDialog'
+import Loading from '@/mui-extends/Loading'
+import { useGetCommonConfig } from '@/openapi'
+import { useStoreDispatch, useStoreSelector } from '@/store'
 import {
   Alert,
   Box,
@@ -28,30 +33,22 @@ import {
   useTheme,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { applyAPIAuthentication, applyNSParam } from 'api/interceptors'
-import { Stale } from 'api/queryUtils'
 import Cookies from 'js-cookie'
-import { useGetCommonConfig } from 'openapi'
-import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { lazy, useEffect, useState } from 'react'
+import { Outlet } from 'react-router'
 
-import ConfirmDialog from '@ui/mui-extends/esm/ConfirmDialog'
-import Loading from '@ui/mui-extends/esm/Loading'
+import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
 
-import { useStoreDispatch, useStoreSelector } from 'store'
+import { TokenFormValues } from '@/components/Token'
 
-import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
-
-import { TokenFormValues } from 'components/Token'
-
-import insertCommonStyle from 'lib/d3/insertCommonStyle'
-import LS from 'lib/localStorage'
+import insertCommonStyle from '@/lib/d3/insertCommonStyle'
+import LS from '@/lib/localStorage'
 
 import Navbar from './Navbar'
 import { closedWidth, openedWidth } from './Sidebar'
 import Sidebar from './Sidebar'
 
-const Auth = loadable(() => import('./Auth'))
+const Auth = lazy(() => import('./Auth'))
 
 const Root = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -88,59 +85,61 @@ const TopContainer = () => {
 
   const [loading, setLoading] = useState(true)
 
-  /**
-   * Set authorization (RBAC token / GCP) for API use.
-   *
-   */
-  function setAuth() {
-    // GCP
-    const accessToken = Cookies.get('access_token')
-    const expiry = Cookies.get('expiry')
-
-    if (accessToken && expiry) {
-      const token = {
-        accessToken,
-        expiry,
-      }
-
-      applyAPIAuthentication(token as any)
-      dispatch(setTokenName('gcp'))
-
-      return
-    }
-
-    const token = LS.get('token')
-    const tokenName = LS.get('token-name')
-    const globalNamespace = LS.get('global-namespace')
-
-    if (token && tokenName) {
-      const tokens: TokenFormValues[] = JSON.parse(token)
-
-      applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
-      dispatch(setTokens(tokens))
-      dispatch(setTokenName(tokenName))
-    } else {
-      dispatch(setAuthOpen(true))
-    }
-
-    if (globalNamespace) {
-      applyNSParam(globalNamespace)
-      dispatch(setNameSpace(globalNamespace))
-    }
-  }
-
-  useGetCommonConfig({
+  const { data } = useGetCommonConfig({
     query: {
       staleTime: Stale.DAY,
-      onSuccess(data) {
-        if (data.security_mode) {
-          setAuth()
-        }
-
-        setLoading(false)
-      },
     },
   })
+
+  useEffect(() => {
+    /**
+     * Set authorization (RBAC token / GCP) for API use.
+     */
+    function setAuth() {
+      // GCP
+      const accessToken = Cookies.get('access_token')
+      const expiry = Cookies.get('expiry')
+
+      if (accessToken && expiry) {
+        const token = {
+          accessToken,
+          expiry,
+        }
+
+        applyAPIAuthentication(token)
+        dispatch(setTokenName('gcp'))
+
+        return
+      }
+
+      const token = LS.get('token')
+      const tokenName = LS.get('token-name')
+      const globalNamespace = LS.get('global-namespace')
+
+      if (token && tokenName) {
+        const tokens: TokenFormValues[] = JSON.parse(token)
+
+        applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
+        dispatch(setTokens(tokens))
+        dispatch(setTokenName(tokenName))
+      } else {
+        dispatch(setAuthOpen(true))
+      }
+
+      if (globalNamespace) {
+        applyNSParam(globalNamespace)
+        dispatch(setNameSpace(globalNamespace))
+      }
+    }
+
+    if (data) {
+      if (data.security_mode) {
+        setAuth()
+      }
+
+      setLoading(false)
+    }
+  }, [data, dispatch])
 
   useEffect(() => {
     insertCommonStyle()

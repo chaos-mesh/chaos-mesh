@@ -5925,7 +5925,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "containerNames": {
@@ -5936,7 +5936,7 @@ const docTemplate = `{
                     }
                 },
                 "cpuCount": {
-                    "description": "+optional\nthe CPU core number needs to use, only set it when action is stress",
+                    "description": "the CPU core number needs to use, only set it when action is stress\n+optional",
                     "type": "integer"
                 },
                 "database": {
@@ -5948,19 +5948,19 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "exception": {
-                    "description": "+optional\nthe exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `",
+                    "description": "the exception which needs to throw for action ` + "`" + `exception` + "`" + `\nor the exception message needs to throw in action ` + "`" + `mysql` + "`" + `\n+optional",
                     "type": "string"
                 },
                 "latency": {
-                    "description": "+optional\nthe latency duration for action 'latency', unit ms\nor the latency duration in action ` + "`" + `mysql` + "`" + `",
+                    "description": "the latency duration for action 'latency', unit ms\nor the latency duration in action ` + "`" + `mysql` + "`" + `\n+optional",
                     "type": "integer"
                 },
                 "memType": {
-                    "description": "+optional\nthe memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'",
+                    "description": "the memory type needs to locate, only set it when action is stress, the value can be 'stack' or 'heap'\n+optional",
                     "type": "string"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "mode": {
@@ -5972,7 +5972,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "+optional\nbyteman rule name, should be unique, and will generate one if not set",
+                    "description": "byteman rule name, should be unique, and will generate one if not set\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -5980,7 +5980,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "remoteCluster": {
@@ -5988,11 +5988,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "returnValue": {
-                    "description": "+optional\nthe return value for action 'return'",
+                    "description": "the return value for action 'return'\n+optional",
                     "type": "string"
                 },
                 "ruleData": {
-                    "description": "+optional\nthe byteman rule's data for action 'ruleData'",
+                    "description": "the byteman rule's data for action 'ruleData'\n+optional",
                     "type": "string"
                 },
                 "selector": {
@@ -6017,7 +6017,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "exception": {
@@ -6025,7 +6025,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -6033,7 +6033,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -6046,7 +6046,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -6055,7 +6055,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "latency": {
@@ -6063,7 +6063,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -6071,7 +6071,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -6080,11 +6080,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "class": {
-                    "description": "+optional\nJava class",
+                    "description": "Java class\n+optional",
                     "type": "string"
                 },
                 "method": {
-                    "description": "+optional\nthe method in Java class",
+                    "description": "the method in Java class\n+optional",
                     "type": "string"
                 },
                 "pid": {
@@ -6092,7 +6092,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "value": {
@@ -6109,7 +6109,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "rule-data": {
@@ -6134,7 +6134,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 }
             }
@@ -6402,7 +6402,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "rate": {
-                    "description": "Rate represents the detail about rate control action\n+ui:form:when=action=='rate'\n+optional",
+                    "description": "Rate represents the detail about rate control action\n+ui:form:ignore\n+optional",
                     "$ref": "#/definitions/v1alpha1.RateSpec"
                 },
                 "remoteCluster": {
@@ -6691,7 +6691,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "port": {
-                    "description": "+optional\nthe port of agent server, default 9277",
+                    "description": "the port of agent server, default 9277\n+optional",
                     "type": "integer"
                 },
                 "sqlType": {
@@ -6922,6 +6922,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+ui:form:ignore\n+optional",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.LabelSelectorRequirement"
+                    }
+                },
                 "fieldSelectors": {
                     "description": "Map of string keys and values that can be used to select objects.\nA selector based on fields.\n+optional",
                     "type": "object",
@@ -7125,6 +7132,13 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
+                    }
+                },
+                "expressionSelectors": {
+                    "description": "a slice of label selector expressions that can be used to select objects.\nA list of selectors based on set-based label expressions.\n+ui:form:ignore\n+optional",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.LabelSelectorRequirement"
                     }
                 },
                 "fieldSelectors": {

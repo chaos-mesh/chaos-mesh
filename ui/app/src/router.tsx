@@ -14,24 +14,23 @@
  * limitations under the License.
  *
  */
-import Archives from 'pages/Archives'
-import Archive from 'pages/Archives/Single'
-import Dashboard from 'pages/Dashboard'
-import Events from 'pages/Events'
-import Experiments from 'pages/Experiments'
-import NewExperiment from 'pages/Experiments/New'
-import Experiment from 'pages/Experiments/Single'
-import Schedules from 'pages/Schedules'
-import NewSchedule from 'pages/Schedules/New'
-import Schedule from 'pages/Schedules/Single'
-import Settings from 'pages/Settings'
-import Workflows from 'pages/Workflows'
-import Workflow from 'pages/Workflows/Single'
-import { Navigate, createHashRouter } from 'react-router-dom'
+import Archives from '@/pages/Archives'
+import Archive from '@/pages/Archives/Single'
+import Dashboard from '@/pages/Dashboard'
+import Events from '@/pages/Events'
+import Experiments from '@/pages/Experiments'
+import NewExperiment from '@/pages/Experiments/New'
+import Experiment from '@/pages/Experiments/Single'
+import Schedules from '@/pages/Schedules'
+import NewSchedule from '@/pages/Schedules/New'
+import Schedule from '@/pages/Schedules/Single'
+import Settings from '@/pages/Settings'
+import Workflows from '@/pages/Workflows'
+import Workflow from '@/pages/Workflows/Single'
+import { Navigate, createHashRouter } from 'react-router'
 
-import NewWorkflow from 'components/NewWorkflow'
-import NewWorkflowNext from 'components/NewWorkflowNext'
-import TopContainer from 'components/TopContainer'
+import NewWorkflow from '@/components/NewWorkflowNext'
+import TopContainer from '@/components/TopContainer'
 
 const router = createHashRouter([
   {
@@ -49,10 +48,6 @@ const router = createHashRouter([
       {
         path: 'workflows/new',
         Component: NewWorkflow,
-      },
-      {
-        path: 'workflows/new/next',
-        Component: NewWorkflowNext,
       },
       {
         path: 'workflows',

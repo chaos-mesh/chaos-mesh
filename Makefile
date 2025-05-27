@@ -55,9 +55,9 @@ BASIC_IMAGE_ENV=IMAGE_DEV_ENV_TAG=$(IMAGE_DEV_ENV_TAG) \
 	IMAGE_TAG=$(IMAGE_TAG) TARGET_PLATFORM=$(TARGET_PLATFORM) \
 	GO_BUILD_CACHE=$(GO_BUILD_CACHE)
 
-RUN_IN_DEV_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+RUN_IN_DEV_SHELL:=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py dev-env)
-RUN_IN_BUILD_SHELL=$(shell $(BASIC_IMAGE_ENV)\
+RUN_IN_BUILD_SHELL:=$(shell $(BASIC_IMAGE_ENV)\
 	$(ROOT)/build/get_env_shell.py build-env)
 
 # See https://github.com/chaos-mesh/chaos-mesh/pull/4004 for more details.
@@ -243,17 +243,6 @@ endif
 watchmaker: pkg/time/fakeclock/fake_clock_gettime.o pkg/time/fakeclock/fake_gettimeofday.o
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
-# Build schedule-migration
-schedule-migration:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/schedule-migration ./tools/schedule-migration/*.go
-
-schedule-migration.tar.gz: schedule-migration
-	cp ./bin/schedule-migration ./schedule-migration
-	cp ./tools/schedule-migration/migrate.sh ./migrate.sh
-	tar -czvf schedule-migration.tar.gz schedule-migration migrate.sh
-	rm ./migrate.sh
-	rm ./schedule-migration
-
 e2e-image: image-e2e-helper ## Build e2e test helper image
 
 enter-buildenv: SHELL:=$(shell $(BASIC_IMAGE_ENV) $(ROOT)/build/get_env_shell.py --interactive build-env)
@@ -306,7 +295,7 @@ bin/chaos-builder: images/dev-env/.dockerbuilt
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -buildvcs=false -o bin/chaos-builder ./cmd/chaos-builder/...
 
 .PHONY: all image clean test manifests manifests/crd.yaml \
-	boilerplate tidy fmt vet lint install.sh schedule-migration \
+	boilerplate tidy fmt vet lint install.sh \
 	config proto \
 	generate generate-deepcopy swagger_spec bin/chaos-builder \
 	gosec-scan \
