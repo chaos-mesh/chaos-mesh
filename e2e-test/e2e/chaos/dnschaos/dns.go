@@ -52,7 +52,7 @@ func TestcaseDNSRandom(
 	// get IP of a non exists host, and will get error
 	for _, domainName := range effectDomainNames {
 		_, err = testDNSServer(c, port, domainName)
-		gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("test DNS server failed")))
+		gomega.Expect(err).Should(gomega.HaveOccurred(), "test DNS server failed")
 	}
 
 	dnsChaos := &v1alpha1.DNSChaos{

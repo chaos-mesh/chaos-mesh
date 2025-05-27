@@ -201,7 +201,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		}
 		return false, err
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("one-shot chaos shouldn't enter stopped phase")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "one-shot chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and check whether nginx container will be killed or not
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
@@ -212,7 +212,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		framework.ExpectNoError(err, "get nginx pods error")
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait container not killed failed")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait container not killed failed")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	// resume experiment
@@ -239,5 +239,5 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		framework.ExpectNoError(err, "get nginx pods error")
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("container shouldn't be killed")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "container shouldn't be killed")
 }

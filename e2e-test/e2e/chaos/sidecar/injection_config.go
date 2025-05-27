@@ -67,7 +67,7 @@ selector:
 		}
 		return false, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait chaos mesh not dies")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	err = enableWebhook(ns)
@@ -120,7 +120,7 @@ selector:
 		}
 		return false, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait chaos mesh not dies")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	err = enableWebhook(ns)

@@ -155,7 +155,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		}
 		return false, err
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("chaos shouldn't enter stopped phase")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and no pod is killed
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
@@ -165,7 +165,7 @@ func TestcasePodKillPauseThenUnPause(ns string, kubeCli kubernetes.Interface, cl
 		framework.ExpectNoError(err, "get nginx pods error")
 		return !fixture.HaveSameUIDs(pods.Items, newPods.Items), nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait pod not killed failed")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait pod not killed failed")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 }

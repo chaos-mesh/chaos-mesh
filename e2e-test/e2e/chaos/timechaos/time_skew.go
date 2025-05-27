@@ -101,7 +101,7 @@ func TestcaseTimeSkewOnceThenRecover(
 		}
 		return false, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait no timechaos error")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait no timechaos error")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 	By("success to perform time chaos")
 }
@@ -190,7 +190,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 		}
 		return false, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait time chaos paused error")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait time chaos paused error")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	By("resume time skew chaos experiment")
@@ -293,7 +293,7 @@ func TestcaseTimeSkewShouldAlsoAffectChildProces(
 		}
 		return false, nil
 	})
-	gomega.Expect(err).To(gomega.MatchError(gomega.ContainSubstring("wait no timechaos error")))
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait no timechaos error")
 	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 	By("success to perform time chaos")
 }
