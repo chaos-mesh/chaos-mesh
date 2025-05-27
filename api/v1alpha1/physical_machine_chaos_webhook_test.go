@@ -44,7 +44,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 					},
 				},
 			}
-			physicalMachineChaos.Default(context.Background(), nil)
+			physicalMachineChaos.Default(context.Background(), physicalMachineChaos)
 			Expect(physicalMachineChaos.Spec.UID).ToNot(Equal(""))
 			Expect(physicalMachineChaos.Spec.Address).To(BeEquivalentTo([]string{
 				"http://123.123.123.123:123",
@@ -76,7 +76,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.chaos.ValidateCreate(context.Background(), nil)
+				_, err := testCase.chaos.ValidateCreate(context.Background(), &testCase.chaos)
 				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
 			}
 		})
@@ -174,7 +174,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.chaos.ValidateCreate(context.Background(), nil)
+				_, err := testCase.chaos.ValidateCreate(context.Background(), &testCase.chaos)
 				if len(testCase.err) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
@@ -1044,7 +1044,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 						ExpInfo: testCase.expInfo,
 					},
 				}
-				_, err := chaos.ValidateCreate(context.Background(), nil)
+				_, err := chaos.ValidateCreate(context.Background(), &chaos)
 				if len(testCase.err) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
@@ -1084,7 +1084,7 @@ var _ = Describe("physicalmachinechaos_webhook", func() {
 			}
 
 			for _, testCase := range testCases {
-				_, err := testCase.chaos.ValidateCreate(context.Background(), nil)
+				_, err := testCase.chaos.ValidateCreate(context.Background(), &testCase.chaos)
 				Expect(strings.Contains(err.Error(), testCase.err)).To(BeTrue())
 			}
 		})

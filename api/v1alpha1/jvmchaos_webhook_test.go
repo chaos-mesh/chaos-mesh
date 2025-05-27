@@ -29,7 +29,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 			jvmchaos := &JVMChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			jvmchaos.Default(context.Background(), nil)
+			jvmchaos.Default(context.Background(), jvmchaos)
 			Expect(jvmchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
@@ -63,7 +63,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -87,7 +87,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, chaos)
 						return err
 					},
 					expect: "",
@@ -111,7 +111,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateDelete(context.Background(), nil)
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -134,7 +134,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -157,7 +157,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -180,7 +180,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -203,7 +203,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -226,7 +226,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -243,7 +243,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -260,7 +260,7 @@ var _ = Describe("jvmchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *JVMChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",

@@ -29,7 +29,7 @@ var _ = Describe("iochaos_webhook", func() {
 			iochaos := &IOChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			iochaos.Default(context.Background(), nil)
+			iochaos.Default(context.Background(), iochaos)
 			Expect(iochaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
@@ -54,7 +54,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -68,7 +68,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, chaos)
 						return err
 					},
 					expect: "",
@@ -82,7 +82,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateDelete(context.Background(), nil)
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -99,7 +99,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -121,7 +121,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -143,7 +143,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -165,7 +165,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -187,7 +187,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -209,7 +209,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -227,7 +227,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *IOChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",

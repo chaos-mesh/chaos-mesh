@@ -87,6 +87,6 @@ func (in *StatusCheckTemplate) Default() {
 	statusCheck := &StatusCheck{
 		Spec: in.StatusCheckSpec,
 	}
-	statusCheck.Default(context.Background(), nil)
+	statusCheck.Default(context.Background(), statusCheck)
 	in.StatusCheckSpec = *statusCheck.Spec.DeepCopy()
 }

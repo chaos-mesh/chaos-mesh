@@ -29,7 +29,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			stresschaos := &StressChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			stresschaos.Default(context.Background(), nil)
+			stresschaos.Default(context.Background(), stresschaos)
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
@@ -60,7 +60,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -77,7 +77,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, chaos)
 						return err
 					},
 					expect: "",
@@ -94,7 +94,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateDelete(context.Background(), nil)
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -108,7 +108,7 @@ var _ = Describe("stresschaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *StressChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",

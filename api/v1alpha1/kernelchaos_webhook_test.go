@@ -29,7 +29,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 			kernelchaos := &KernelChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			kernelchaos.Default(context.Background(), nil)
+			kernelchaos.Default(context.Background(), kernelchaos)
 			Expect(kernelchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
@@ -52,7 +52,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *KernelChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -66,7 +66,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *KernelChaos) error {
-						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, chaos)
 						return err
 					},
 					expect: "",
@@ -80,7 +80,7 @@ var _ = Describe("kernelchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *KernelChaos) error {
-						_, err := chaos.ValidateDelete(context.Background(), nil)
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",

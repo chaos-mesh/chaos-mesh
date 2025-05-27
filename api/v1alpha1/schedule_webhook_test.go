@@ -137,7 +137,7 @@ var _ = Describe("schedule_webhook", func() {
 				Schedule:     "*/1 * * * * *",
 			},
 		}
-		s.Default(context.Background(), nil)
+		s.Default(context.Background(), &s)
 		Expect(s.Spec.ConcurrencyPolicy).To(Equal(ForbidConcurrent))
 	})
 })

@@ -27,7 +27,7 @@ var _ = Describe("statuscheck_webhook", func() {
 	Context("webhook.Defaultor of statuscheck", func() {
 		It("Default", func() {
 			statusCheck := &StatusCheck{}
-			statusCheck.Default(context.Background(), nil)
+			statusCheck.Default(context.Background(), statusCheck)
 			Expect(statusCheck.Spec.Mode).To(Equal(StatusCheckSynchronous))
 		})
 	})
@@ -136,7 +136,7 @@ var _ = Describe("statuscheck_webhook", func() {
 			}
 
 			for _, tc := range tcs {
-				_, err := tc.statusCheck.ValidateCreate(context.Background(), nil)
+				_, err := tc.statusCheck.ValidateCreate(context.Background(), &tc.statusCheck)
 				if len(tc.expect) != 0 {
 					Expect(err).To(HaveOccurred())
 					Expect(strings.Contains(err.Error(), tc.expect)).To(BeTrue(), "expected error: %s, got: %s", tc.expect, err.Error())

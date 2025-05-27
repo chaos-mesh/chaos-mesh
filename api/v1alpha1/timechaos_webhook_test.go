@@ -29,7 +29,7 @@ var _ = Describe("timechaos_webhook", func() {
 			timechaos := &TimeChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			timechaos.Default(context.Background(), nil)
+			timechaos.Default(context.Background(), timechaos)
 			Expect(timechaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 			Expect(timechaos.Spec.ClockIds[0]).To(Equal("CLOCK_REALTIME"))
 		})
@@ -54,7 +54,7 @@ var _ = Describe("timechaos_webhook", func() {
 						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -69,7 +69,7 @@ var _ = Describe("timechaos_webhook", func() {
 						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateUpdate(context.Background(), chaos, nil)
+						_, err := chaos.ValidateUpdate(context.Background(), chaos, chaos)
 						return err
 					},
 					expect: "",
@@ -84,7 +84,7 @@ var _ = Describe("timechaos_webhook", func() {
 						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateDelete(context.Background(), nil)
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -101,7 +101,7 @@ var _ = Describe("timechaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *TimeChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",

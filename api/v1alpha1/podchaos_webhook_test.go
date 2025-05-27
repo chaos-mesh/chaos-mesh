@@ -29,7 +29,7 @@ var _ = Describe("podchaos_webhook", func() {
 			podchaos := &PodChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 			}
-			podchaos.Default(context.Background(), nil)
+			podchaos.Default(context.Background(), podchaos)
 			Expect(podchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
@@ -55,7 +55,7 @@ var _ = Describe("podchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *PodChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
@@ -69,7 +69,7 @@ var _ = Describe("podchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *PodChaos) error {
-						_, err := chaos.ValidateDelete(context.Background(), nil)
+						_, err := chaos.ValidateDelete(context.Background(), chaos)
 						return err
 					},
 					expect: "",
@@ -86,7 +86,7 @@ var _ = Describe("podchaos_webhook", func() {
 						},
 					},
 					execute: func(chaos *PodChaos) error {
-						_, err := chaos.ValidateCreate(context.Background(), nil)
+						_, err := chaos.ValidateCreate(context.Background(), chaos)
 						return err
 					},
 					expect: "error",
