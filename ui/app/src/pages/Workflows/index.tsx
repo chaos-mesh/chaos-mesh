@@ -19,7 +19,6 @@ import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { getWorkflowsUid, useDeleteWorkflowsUid, useGetWorkflows, usePostWorkflows } from '@/openapi'
 import { CoreWorkflowMeta } from '@/openapi/index.schemas'
-import { useStoreDispatch } from '@/store'
 import { useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
@@ -55,7 +54,6 @@ const Workflows = () => {
   const intl = useIntl()
 
   const { setAlert, setConfirm } = useComponentActions()
-  const dispatch = useStoreDispatch()
 
   const {
     data: workflows,
@@ -96,12 +94,10 @@ const Workflows = () => {
     if (actionFunc) {
       actionFunc({ uid: uuid })
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: <T id={`confirm.success.${action}`} />,
-            }),
-          )
+          setAlert({
+            type: 'success',
+            message: <T id={`confirm.success.${action}`} />,
+          })
 
           refetch()
         })
@@ -114,13 +110,11 @@ const Workflows = () => {
     (e: SyntheticEvent) => {
       e.stopPropagation()
 
-      dispatch(
-        setConfirm({
-          title: `${i18n('archives.single', intl)} ${name}`,
-          description: <T id="workflows.deleteDesc" />,
-          handle: handleAction('archive', uid!),
-        }),
-      )
+      setConfirm({
+        title: `${i18n('archives.single', intl)} ${name}`,
+        description: <T id="workflows.deleteDesc" />,
+        handle: handleAction('archive', uid!),
+      })
     }
 
   const handleReRun = (uid: uuid) => async (e: SyntheticEvent) => {
@@ -144,12 +138,10 @@ const Workflows = () => {
           } as any,
         })
           .then(() => {
-            dispatch(
-              setAlert({
-                type: 'success',
-                message: <T id="confirm.success.create" />,
-              }),
-            )
+            setAlert({
+              type: 'success',
+              message: <T id="confirm.success.create" />,
+            })
 
             refetch()
           })

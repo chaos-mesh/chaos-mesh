@@ -17,7 +17,6 @@
 import { Stale } from '@/api/queryUtils'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
-import { useStoreDispatch } from '@/store'
 import { useComponentActions } from '@/zustand/component'
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
@@ -58,7 +57,6 @@ const RBACGenerator = () => {
   const intl = useIntl()
 
   const { setAlert } = useComponentActions()
-  const dispatch = useStoreDispatch()
 
   const [params, setParams] = useState(initialValues)
   const [rbac, setRBAC] = useState({
@@ -100,12 +98,10 @@ const RBACGenerator = () => {
     if (rbacConfig?.yaml) {
       copy(rbacConfig.yaml, { target: containerRef.current! })
 
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: i18n('common.copied', intl),
-        }),
-      )
+      setAlert({
+        type: 'success',
+        message: i18n('common.copied', intl),
+      })
     }
   }
 

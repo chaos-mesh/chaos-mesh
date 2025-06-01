@@ -28,7 +28,6 @@ import {
   useGetSchedulesUid,
 } from '@/openapi'
 import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from '@/openapi/index.schemas'
-import { useStoreDispatch } from '@/store'
 import { useComponentActions } from '@/zustand/component'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
@@ -48,7 +47,6 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
   const intl = useIntl()
 
   const { setAlert } = useComponentActions()
-  const dispatch = useStoreDispatch()
 
   const [metaInfo, setMetaInfo] = useState<{
     id: string
@@ -91,12 +89,10 @@ const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, in
         callback(data.kube_object)
       }
 
-      dispatch(
-        setAlert({
-          type: 'success',
-          message: i18n('confirm.success.load', intl),
-        }),
-      )
+      setAlert({
+        type: 'success',
+        message: i18n('confirm.success.load', intl),
+      })
     }
 
     if (scheduleData) {

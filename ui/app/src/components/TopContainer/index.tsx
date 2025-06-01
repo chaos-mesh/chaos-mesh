@@ -74,7 +74,7 @@ const TopContainer = () => {
   const confirmOpen = useComponentStore((state) => state.confirmOpen)
   const { setAlert, setAlertOpen, setConfirmOpen } = useComponentActions()
   const authOpen = useAuthStore((state) => state.authOpen)
-  const { setAuthOpen, setNameSpace, setTokenName, setTokens } = useAuthActions()
+  const { setAuthOpen, setNameSpace, setTokenName, setTokens, removeToken } = useAuthActions()
 
   // Sidebar related
   const miniSidebar = LS.get('mini-sidebar') === 'y'
@@ -143,7 +143,7 @@ const TopContainer = () => {
   }, [data])
 
   useEffect(() => {
-    applyErrorHandling({ openAlert: setAlert })
+    applyErrorHandling({ openAlert: setAlert, removeToken })
     insertCommonStyle()
   }, [])
 

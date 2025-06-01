@@ -15,7 +15,7 @@
  *
  */
 import Space from '@/mui-extends/Space'
-import { useStoreSelector } from '@/store'
+import { useExperimentStore } from '@/zustand/experiment'
 import { Typography } from '@mui/material'
 import { Form, Formik, getIn } from 'formik'
 import { useEffect, useState } from 'react'
@@ -53,7 +53,7 @@ interface StressProps {
 }
 
 const Stress: ReactFCWithChildren<StressProps> = ({ onSubmit }) => {
-  const { spec } = useStoreSelector((state) => state.experiments)
+  const spec = useExperimentStore((state) => state.spec)
 
   const initialValues = typesData.StressChaos.spec!
 

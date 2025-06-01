@@ -15,7 +15,6 @@
  *
  */
 import { configureStore } from '@reduxjs/toolkit'
-import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import rootReducer from './reducers'
 
@@ -28,9 +27,6 @@ const genStore = () => {
 }
 
 export type RootState = ReturnType<typeof rootReducer>
-export const useStoreSelector: TypedUseSelectorHook<RootState> = useSelector
-type StoreDispatch = typeof store.dispatch
-export const useStoreDispatch = () => useDispatch<StoreDispatch>()
 
 const store = genStore()
 
