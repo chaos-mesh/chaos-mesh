@@ -15,11 +15,10 @@
  *
  */
 import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
+import type { Env } from '@/zustand/experiment'
+import { Template } from '@/zustand/workflow'
 import yaml from 'js-yaml'
 import _ from 'lodash'
-
-import { Env } from '@/slices/experiments'
-import { Template } from '@/slices/workflows'
 
 import { podPhases } from '@/components/AutoForm/data'
 import { Experiment, ExperimentKind, Frame, Scope } from '@/components/NewExperiment/types'

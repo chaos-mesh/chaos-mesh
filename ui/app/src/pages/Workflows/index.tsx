@@ -19,7 +19,7 @@ import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { getWorkflowsUid, useDeleteWorkflowsUid, useGetWorkflows, usePostWorkflows } from '@/openapi'
 import { CoreWorkflowMeta } from '@/openapi/index.schemas'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline'
 import ReplayIcon from '@mui/icons-material/Replay'
@@ -32,8 +32,6 @@ import { type SyntheticEvent } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 import { v4 as uuidv4 } from 'uuid'
-
-import { setAlert, setConfirm } from '@/slices/globalStatus'
 
 import DataTable from '@/components/DataTable'
 import NotFound from '@/components/NotFound'
@@ -55,7 +53,7 @@ const Workflows = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert, setConfirm } = useComponentActions()
 
   const {
     data: workflows,
@@ -96,12 +94,10 @@ const Workflows = () => {
     if (actionFunc) {
       actionFunc({ uid: uuid })
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: <T id={`confirm.success.${action}`} />,
-            }),
-          )
+          setAlert({
+            type: 'success',
+            message: <T id={`confirm.success.${action}`} />,
+          })
 
           refetch()
         })
@@ -114,13 +110,11 @@ const Workflows = () => {
     (e: SyntheticEvent) => {
       e.stopPropagation()
 
-      dispatch(
-        setConfirm({
-          title: `${i18n('archives.single', intl)} ${name}`,
-          description: <T id="workflows.deleteDesc" />,
-          handle: handleAction('archive', uid!),
-        }),
-      )
+      setConfirm({
+        title: `${i18n('archives.single', intl)} ${name}`,
+        description: <T id="workflows.deleteDesc" />,
+        handle: handleAction('archive', uid!),
+      })
     }
 
   const handleReRun = (uid: uuid) => async (e: SyntheticEvent) => {
@@ -128,36 +122,32 @@ const Workflows = () => {
 
     const { name, kube_object } = await getWorkflowsUid(uid)
 
-    dispatch(
-      setConfirm({
-        title: `Re-run ${name}`,
-        description: 'This will re-create a new workflow with the same configuration.',
-        handle: () => {
-          createWorkflows({
-            data: {
-              apiVersion: 'chaos-mesh.org/v1alpha1',
-              kind: 'Workflow',
-              metadata: {
-                ...kube_object!.metadata,
-                name: `${name}-${uuidv4()}`,
-              },
-              spec: kube_object!.spec,
-            } as any,
-          })
-            .then(() => {
-              dispatch(
-                setAlert({
-                  type: 'success',
-                  message: <T id="confirm.success.create" />,
-                }),
-              )
-
-              refetch()
+    setConfirm({
+      title: `Re-run ${name}`,
+      description: 'This will re-create a new workflow with the same configuration.',
+      handle: () => {
+        createWorkflows({
+          data: {
+            apiVersion: 'chaos-mesh.org/v1alpha1',
+            kind: 'Workflow',
+            metadata: {
+              ...kube_object!.metadata,
+              name: `${name}-${uuidv4()}`,
+            },
+            spec: kube_object!.spec,
+          } as any,
+        })
+          .then(() => {
+            setAlert({
+              type: 'success',
+              message: <T id="confirm.success.create" />,
             })
-            .catch(console.error)
-        },
-      }),
-    )
+
+            refetch()
+          })
+          .catch(console.error)
+      },
+    })
   }
 
   const jumpToSingleWorkflow = ({ row }: GridRowParams) => navigate(`/workflows/${row.uid}`)

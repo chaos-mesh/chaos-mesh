@@ -14,12 +14,13 @@
  * limitations under the License.
  *
  */
-import { applyAPIAuthentication, applyNSParam } from '@/api/interceptors'
+import { applyAPIAuthentication, applyErrorHandling, applyNSParam } from '@/api/interceptors'
 import { Stale } from '@/api/queryUtils'
 import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Loading from '@/mui-extends/Loading'
 import { useGetCommonConfig } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useAuthActions, useAuthStore } from '@/zustand/auth'
+import { useComponentActions, useComponentStore } from '@/zustand/component'
 import {
   Alert,
   Box,
@@ -36,8 +37,6 @@ import { styled } from '@mui/material/styles'
 import Cookies from 'js-cookie'
 import { lazy, useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
-
-import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
 
 import { TokenFormValues } from '@/components/Token'
 
@@ -69,11 +68,13 @@ const Root = styled(Box, {
 const TopContainer = () => {
   const theme = useTheme()
 
-  const { alert, alertOpen, confirm, confirmOpen, authOpen } = useStoreSelector((state) => state.globalStatus)
-
-  const dispatch = useStoreDispatch()
-  const handleSnackClose = () => dispatch(setAlertOpen(false))
-  const handleConfirmClose = () => dispatch(setConfirmOpen(false))
+  const alert = useComponentStore((state) => state.alert)
+  const alertOpen = useComponentStore((state) => state.alertOpen)
+  const confirm = useComponentStore((state) => state.confirm)
+  const confirmOpen = useComponentStore((state) => state.confirmOpen)
+  const { setAlert, setAlertOpen, setConfirmOpen } = useComponentActions()
+  const authOpen = useAuthStore((state) => state.authOpen)
+  const { setAuthOpen, setNameSpace, setTokenName, setTokens, removeToken } = useAuthActions()
 
   // Sidebar related
   const miniSidebar = LS.get('mini-sidebar') === 'y'
@@ -107,7 +108,7 @@ const TopContainer = () => {
         }
 
         applyAPIAuthentication(token)
-        dispatch(setTokenName('gcp'))
+        setTokenName('gcp')
 
         return
       }
@@ -120,15 +121,15 @@ const TopContainer = () => {
         const tokens: TokenFormValues[] = JSON.parse(token)
 
         applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
-        dispatch(setTokens(tokens))
-        dispatch(setTokenName(tokenName))
+        setTokens(tokens)
+        setTokenName(tokenName)
       } else {
-        dispatch(setAuthOpen(true))
+        setAuthOpen(true)
       }
 
       if (globalNamespace) {
         applyNSParam(globalNamespace)
-        dispatch(setNameSpace(globalNamespace))
+        setNameSpace(globalNamespace)
       }
     }
 
@@ -139,9 +140,10 @@ const TopContainer = () => {
 
       setLoading(false)
     }
-  }, [data, dispatch])
+  }, [data])
 
   useEffect(() => {
+    applyErrorHandling({ openAlert: setAlert, removeToken })
     insertCommonStyle()
   }, [])
 
@@ -177,9 +179,9 @@ const TopContainer = () => {
           }}
           autoHideDuration={6000}
           open={alertOpen}
-          onClose={handleSnackClose}
+          onClose={() => setAlertOpen(false)}
         >
-          <Alert severity={alert.type} onClose={handleSnackClose}>
+          <Alert severity={alert.type} onClose={() => setAlertOpen(false)}>
             {alert.message}
           </Alert>
         </Snackbar>
@@ -188,7 +190,7 @@ const TopContainer = () => {
       <Portal>
         <ConfirmDialog
           open={confirmOpen}
-          close={handleConfirmClose}
+          close={() => setConfirmOpen(false)}
           title={confirm.title}
           description={confirm.description}
           onConfirm={confirm.handle}

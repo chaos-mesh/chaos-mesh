@@ -16,15 +16,13 @@
  */
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
-import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Button, Typography } from '@mui/material'
 import { type Editor } from 'ace-builds'
 import yaml from 'js-yaml'
 import { lazy, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import { setAlert } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 import YAML from '@/components/YAML'
@@ -38,7 +36,7 @@ interface ByYAMLProps {
 const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
 
   const [empty, setEmpty] = useState(true)
   const [yamlEditor, setYAMLEditor] = useState<Editor>()
@@ -52,12 +50,10 @@ const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
 
     callback && callback(data)
 
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: i18n('confirm.success.load', intl),
-      }),
-    )
+    setAlert({
+      type: 'success',
+      message: i18n('confirm.success.load', intl),
+    })
   }
 
   return (

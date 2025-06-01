@@ -17,13 +17,11 @@
 import { Stale } from '@/api/queryUtils'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
-import { useStoreSelector } from '@/store'
+import { type Env, useExperimentStore } from '@/zustand/experiment'
 import { MenuItem } from '@mui/material'
 import { Form, Formik, FormikErrors, FormikTouched, getIn, setIn } from 'formik'
 import { useEffect, useState } from 'react'
 import { ObjectSchema } from 'yup'
-
-import { Env } from '@/slices/experiments'
 
 import { AutocompleteField, LabelField, SelectField, Submit, TextField } from '@/components/FormField'
 import MoreOptions from '@/components/MoreOptions'
@@ -48,7 +46,7 @@ const TargetGenerated: ReactFCWithChildren<TargetGeneratedProps> = ({
   validationSchema,
   onSubmit,
 }) => {
-  const { spec } = useStoreSelector((state) => state.experiments)
+  const spec = useExperimentStore((state) => state.spec)
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
