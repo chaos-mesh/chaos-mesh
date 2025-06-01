@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { useStoreSelector } from '@/store'
+import { useExperimentStore } from '@/zustand/experiment'
 import { Box, FormControlLabel, Link, Switch, Typography } from '@mui/material'
 import { FormikErrors, FormikTouched, getIn, useFormikContext } from 'formik'
 import { useEffect, useState } from 'react'
@@ -41,7 +41,7 @@ interface SchedulerProps {
 }
 
 const Scheduler: ReactFCWithChildren<SchedulerProps> = ({ errors, touched, inSchedule = false }) => {
-  const { fromExternal, kindAction, basic } = useStoreSelector((state) => state.experiments)
+  const { fromExternal, kindAction, basic } = useExperimentStore()
   const { values, setFieldValue } = useFormikContext()
   const [kind, action] = kindAction
   const instant = isInstant(kind, action)

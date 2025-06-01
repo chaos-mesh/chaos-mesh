@@ -45,7 +45,7 @@ export const useAuthStore = create(
           LS.set('token-name', tokenName)
         },
         removeToken: () => {
-          set({ tokens: [], tokenName: '' })
+          set({ authOpen: true, tokens: [], tokenName: '' })
           LS.remove('token')
           LS.remove('token-name')
         },

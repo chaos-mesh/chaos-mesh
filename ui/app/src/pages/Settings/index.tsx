@@ -21,7 +21,7 @@ import PaperTop from '@/mui-extends/PaperTop'
 import SelectField from '@/mui-extends/SelectField'
 import Space from '@/mui-extends/Space'
 import { useGetCommonConfig } from '@/openapi'
-import { useStoreSelector } from '@/store'
+import { useAuthStore } from '@/zustand/auth'
 import { useSettingActions, useSettingStore } from '@/zustand/setting'
 import { type SystemTheme, useSystemActions, useSystemStore } from '@/zustand/system'
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
@@ -35,9 +35,6 @@ import logo from '@/images/logo.svg'
 import Token from './Token'
 
 const Settings = () => {
-  const state = useStoreSelector((state) => state)
-  const { tokenName } = state.globalStatus
-
   const theme = useSystemStore((state) => state.theme)
   const lang = useSystemStore((state) => state.lang)
   const { setTheme, setLang } = useSystemActions()
@@ -45,6 +42,7 @@ const Settings = () => {
   const enableKubeSystemNS = useSettingStore((state) => state.enableKubeSystemNS)
   const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
   const { setDebugMode, setEnableKubeSystemNS, setUseNewPhysicalMachine } = useSettingActions()
+  const tokenName = useAuthStore((state) => state.tokenName)
 
   const { data: config } = useGetCommonConfig({
     query: {

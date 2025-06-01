@@ -16,7 +16,7 @@
  */
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
-import { useStoreSelector } from '@/store'
+import { useWorkflowStore } from '@/zustand/workflow'
 import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
 import TabUnstyled from '@mui/base/TabUnstyled'
 import TabsListUnstyled from '@mui/base/TabsListUnstyled'
@@ -87,7 +87,7 @@ export default function NewWorkflow() {
   const [openSubmitDialog, setOpenSubmitDialog] = useState(false)
   const [workflow, setWorkflow] = useState('')
 
-  const { nodes, recentUse } = useStoreSelector((state) => state.workflows)
+  const nodes = useWorkflowStore((state) => state.nodes)
 
   const flowRef = useRef<ReactFlowInstance>()
 
@@ -134,14 +134,6 @@ export default function NewWorkflow() {
               <Typography variant="h6" component="div" fontWeight="bold">
                 Elements
               </Typography>
-              {recentUse.length > 0 && (
-                <Box>
-                  <Typography fontWeight="medium">Recently Used</Typography>
-                  <Typography variant="body2" color="secondary" fontSize={12}>
-                    Recently used experiments
-                  </Typography>
-                </Box>
-              )}
               <Box>
                 <Typography fontWeight="medium">Functional Nodes</Typography>
                 <Typography variant="body2" color="secondary" fontSize={12}>

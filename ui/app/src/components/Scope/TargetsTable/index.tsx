@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  */
-import { useStoreDispatch } from '@/store'
 import { useComponentActions } from '@/zustand/component'
 import type { Env } from '@/zustand/experiment'
 import { getIn, useFormikContext } from 'formik'
@@ -47,7 +46,6 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
     setFieldValue(`${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`, newVal)
 
   const { setAlert } = useComponentActions()
-  const dispatch = useStoreDispatch()
 
   const handleSelect = (name: string) => () => {
     const selectedIndex = selected.indexOf(name)
@@ -63,16 +61,13 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
       newSelected = [...selected.slice(0, selectedIndex), ...selected.slice(selectedIndex + 1)]
     }
 
-    if (newSelected.length === 0) {
-      dispatch(
-        setAlert({
-          type: 'warning',
-          message: 'Please select at least one target.',
-        }),
-      )
+    if (newSelected.length === 0)
+      setAlert({
+        type: 'warning',
+        message: 'Please select at least one target.',
+      })
 
-      return
-    }
+    return
 
     setSelected(newSelected.length === targetsCount ? [] : newSelected)
   }

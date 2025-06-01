@@ -32,7 +32,7 @@ const Token = () => {
   const intl = useIntl()
 
   const { setConfirm } = useComponentActions()
-  const { removeToken, setAuthOpen } = useAuthActions()
+  const { removeToken } = useAuthActions()
   const { tokens, tokenName } = useAuthStore()
 
   const tokenDesc =
@@ -60,7 +60,6 @@ const Token = () => {
     } else {
       resetAPIAuthentication()
       removeToken()
-      setAuthOpen(true)
     }
 
     navigate('/dashboard')

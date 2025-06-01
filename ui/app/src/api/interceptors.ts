@@ -26,7 +26,13 @@ interface ErrorData {
   full_text: string
 }
 
-export const applyErrorHandling = ({ openAlert }: { openAlert: (alert: Alert) => void }) => {
+export const applyErrorHandling = ({
+  openAlert,
+  removeToken,
+}: {
+  openAlert: (alert: Alert) => void
+  removeToken: () => void
+}) => {
   http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
     const data = error.response?.data
 
@@ -52,8 +58,7 @@ export const applyErrorHandling = ({ openAlert }: { openAlert: (alert: Alert) =>
             })
 
             resetAPIAuthentication()
-            // store.dispatch(removeToken())
-            // store.dispatch(setAuthOpen(true))
+            removeToken()
           }
 
           break
