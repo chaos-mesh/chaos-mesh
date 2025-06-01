@@ -16,18 +16,16 @@
  */
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useStoreSelector } from '@/store'
 import TabPanelUnstyled from '@mui/base/TabPanelUnstyled'
 import TabUnstyled from '@mui/base/TabUnstyled'
 import TabsListUnstyled from '@mui/base/TabsListUnstyled'
 import TabsUnstyled from '@mui/base/TabsUnstyled'
-import { Badge, Box, Button, Grow, Typography } from '@mui/material'
+import { Box, Button, Grow, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import _ from 'lodash'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ReactFlowInstance } from 'react-flow-renderer'
-
-import { loadRecentlyUsedExperiments } from '@/slices/workflows'
 
 import YAML from '@/components/YAML'
 
@@ -90,11 +88,6 @@ export default function NewWorkflow() {
   const [workflow, setWorkflow] = useState('')
 
   const { nodes, recentUse } = useStoreSelector((state) => state.workflows)
-  const dispatch = useStoreDispatch()
-
-  useEffect(() => {
-    dispatch(loadRecentlyUsedExperiments())
-  }, [dispatch])
 
   const flowRef = useRef<ReactFlowInstance>()
 

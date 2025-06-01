@@ -16,8 +16,4 @@
  */
 import { combineReducers } from 'redux'
 
-import workflows from '@/slices/workflows'
-
-export default combineReducers({
-  workflows,
-})
+export default combineReducers({})
