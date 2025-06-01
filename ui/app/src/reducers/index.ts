@@ -17,11 +17,9 @@
 import { combineReducers } from 'redux'
 
 import experiments from '@/slices/experiments'
-import globalStatus from '@/slices/globalStatus'
 import workflows from '@/slices/workflows'
 
 export default combineReducers({
-  globalStatus,
   experiments,
   workflows,
 })

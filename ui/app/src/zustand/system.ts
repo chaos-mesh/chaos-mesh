@@ -24,8 +24,14 @@ export type SystemTheme = 'light' | 'dark'
 export const useSystemStore = create(
   combine({ theme: (LS.get('theme') || 'light') as SystemTheme, lang: LS.get('lang') || 'en' }, (set) => ({
     actions: {
-      setTheme: (theme: SystemTheme) => set({ theme }),
-      setLang: (lang: string) => set({ lang }),
+      setTheme: (theme: SystemTheme) => {
+        set({ theme })
+        LS.set('theme', theme)
+      },
+      setLang: (lang: string) => {
+        set({ lang })
+        LS.set('lang', lang)
+      },
     },
   })),
 )
