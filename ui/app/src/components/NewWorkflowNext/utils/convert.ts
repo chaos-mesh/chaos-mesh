@@ -14,12 +14,11 @@
  * limitations under the License.
  *
  */
+import type { NodeExperiment } from '@/zustand/workflow'
 import yaml from 'js-yaml'
 import _ from 'lodash'
 import { Edge, Node, XYPosition, getIncomers } from 'react-flow-renderer'
 import { v4 as uuidv4 } from 'uuid'
-
-import type { NodeExperiment } from '@/slices/workflows'
 
 import { Schedule, scheduleInitialValues } from '@/components/AutoForm/data'
 

@@ -19,16 +19,14 @@ import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
-import { useStoreDispatch } from '@/store'
 import { useSettingStore } from '@/zustand/setting'
+import { useWorkflowActions } from '@/zustand/workflow'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
 import { lazy, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import * as Yup from 'yup'
-
-import { resetWorkflow } from '@/slices/workflows'
 
 import { SelectField, Submit, TextField } from '@/components/FormField'
 import FormikEffect from '@/components/FormikEffect'
@@ -65,6 +63,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
   })
 
   const debugMode = useSettingStore((state) => state.debugMode)
+  const resetWorkflow = useWorkflowActions().resetWorkflow
 
   useEffect(() => {
     setData(workflow)
@@ -83,8 +82,6 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
       return yaml.dump({ ...rest, metadata, spec })
     })
   }, [workflowBasic])
-
-  const dispatch = useStoreDispatch()
 
   const { data: namespaces } = useGetCommonChaosAvailableNamespaces({
     query: {
@@ -107,7 +104,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
       data: payload,
     })
       .then(() => {
-        dispatch(resetWorkflow())
+        resetWorkflow()
 
         navigate('/workflows')
       })
