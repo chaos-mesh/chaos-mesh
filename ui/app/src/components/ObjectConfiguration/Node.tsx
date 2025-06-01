@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
+import { Branch } from '@/zustand/workflow'
 import { Box, Table, TableBody, TableRow, Typography } from '@mui/material'
-
-import { Branch } from '@/slices/workflows'
 
 import i18n from '@/components/T'
 

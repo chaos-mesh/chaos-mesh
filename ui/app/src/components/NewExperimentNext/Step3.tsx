@@ -17,14 +17,13 @@
 import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
 import { usePostExperiments } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
+import { useExperimentActions, useExperimentStore } from '@/zustand/experiment'
+import { useSettingStore } from '@/zustand/setting'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { Box, Typography } from '@mui/material'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
-
-import { resetNewExperiment } from '@/slices/experiments'
-import { setAlert } from '@/slices/globalStatus'
 
 import { Submit } from '@/components/FormField'
 import { type ExperimentKind } from '@/components/NewExperiment/types'
@@ -41,10 +40,11 @@ const Step3: ReactFCWithChildren<Step3Props> = ({ onSubmit, inSchedule }) => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const state = useStoreSelector((state) => state)
-  const { step1, step2, kindAction, env, basic, spec } = state.experiments
-  const { debugMode, useNewPhysicalMachine } = state.settings
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
+
+  const { step1, step2, kindAction, env, basic, spec } = useExperimentStore()
+  const { debugMode, useNewPhysicalMachine } = useSettingStore()
+  const reset = useExperimentActions().reset
 
   const { mutateAsync } = usePostExperiments()
 
@@ -74,14 +74,12 @@ const Step3: ReactFCWithChildren<Step3Props> = ({ onSubmit, inSchedule }) => {
           data: parsedValues,
         })
           .then(() => {
-            dispatch(
-              setAlert({
-                type: 'success',
-                message: i18n('confirm.success.create', intl),
-              }),
-            )
+            setAlert({
+              type: 'success',
+              message: i18n('confirm.success.create', intl),
+            })
 
-            dispatch(resetNewExperiment())
+            reset()
 
             navigate('/experiments')
           })
@@ -90,12 +88,10 @@ const Step3: ReactFCWithChildren<Step3Props> = ({ onSubmit, inSchedule }) => {
               console.error('Error submitting experiment:', error.response)
             }
 
-            dispatch(
-              setAlert({
-                type: 'error',
-                message: error.response.data.message,
-              }),
-            )
+            setAlert({
+              type: 'error',
+              message: error.response.data.message,
+            })
           })
       }
     }

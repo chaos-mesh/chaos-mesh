@@ -15,7 +15,7 @@
  *
  */
 import { type CoreEvent } from '@/openapi/index.schemas'
-import { useStoreSelector } from '@/store'
+import { useSystemStore } from '@/zustand/system'
 import Timeline from '@mui/lab/Timeline'
 import TimelineConnector from '@mui/lab/TimelineConnector'
 import TimelineContent from '@mui/lab/TimelineContent'
@@ -36,7 +36,7 @@ interface EventsTimelineProps {
 }
 
 const EventsTimeline: ReactFCWithChildren<EventsTimelineProps> = ({ events }) => {
-  const { lang } = useStoreSelector((state) => state.settings)
+  const lang = useSystemStore((state) => state.lang)
 
   return events.length > 0 ? (
     <Timeline sx={{ m: 0, p: 0 }}>

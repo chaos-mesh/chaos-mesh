@@ -15,13 +15,11 @@
  *
  */
 import { usePostSchedules } from '@/openapi'
-import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
+import { useExperimentActions } from '@/zustand/experiment'
 import { Grid } from '@mui/material'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
-
-import { resetNewExperiment } from '@/slices/experiments'
-import { setAlert } from '@/slices/globalStatus'
 
 import NewExperiment from '@/components/NewExperimentNext'
 import i18n from '@/components/T'
@@ -30,21 +28,20 @@ const New = () => {
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
+  const reset = useExperimentActions().reset
 
   const { mutateAsync } = usePostSchedules()
 
   const onSubmit = (parsedValues: any) => {
     mutateAsync({ data: parsedValues })
       .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: i18n('confirm.success.create', intl),
-          }),
-        )
+        setAlert({
+          type: 'success',
+          message: i18n('confirm.success.create', intl),
+        })
 
-        dispatch(resetNewExperiment())
+        reset()
 
         navigate('/schedules')
       })

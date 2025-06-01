@@ -16,7 +16,7 @@
  */
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
-import { useStoreSelector } from '@/store'
+import { useExperimentStore } from '@/zustand/experiment'
 import AddCircleIcon from '@mui/icons-material/AddCircle'
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle'
 import { Box, IconButton, InputAdornment, MenuItem, Typography } from '@mui/material'
@@ -32,7 +32,7 @@ interface KernelProps {
 }
 
 const Kernel: ReactFCWithChildren<KernelProps> = ({ onSubmit }) => {
-  const { spec } = useStoreSelector((state) => state.experiments)
+  const spec = useExperimentStore((state) => state.spec)
 
   const initialValues = typesData.KernelChaos.spec!
 

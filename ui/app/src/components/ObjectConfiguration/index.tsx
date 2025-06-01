@@ -17,7 +17,8 @@
 import { templateTypeToFieldName } from '@/api/zz_generated.frontend.chaos-mesh'
 import Space from '@/mui-extends/Space'
 import { TypesArchiveDetail, TypesExperimentDetail } from '@/openapi/index.schemas'
-import { useStoreSelector } from '@/store'
+import { useSettingStore } from '@/zustand/setting'
+import { useSystemStore } from '@/zustand/system'
 import { Grid, Table, TableBody, TableRow, Typography } from '@mui/material'
 
 import StatusLabel from '@/components/StatusLabel'
@@ -44,7 +45,8 @@ const ObjectConfiguration: ReactFCWithChildren<ObjectConfigurationProps> = ({
   inArchive,
   vertical,
 }) => {
-  const { lang, useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const lang = useSystemStore((state) => state.lang)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
 
   const spec: any = inNode ? config : config.kube_object?.spec
   const experiment =
