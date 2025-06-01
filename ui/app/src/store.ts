@@ -14,20 +14,14 @@
  * limitations under the License.
  *
  */
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { configureStore } from '@reduxjs/toolkit'
 import { type TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import rootReducer from './reducers'
 
-const middlewares = getDefaultMiddleware({
-  serializableCheck: false, // warn: in order to use the global ConfirmDialog, disable the serializableCheck check
-})
-
 const genStore = () => {
   const store = configureStore({
     reducer: rootReducer,
-    middleware: middlewares,
-    devTools: import.meta.env.DEV,
   })
 
   return store

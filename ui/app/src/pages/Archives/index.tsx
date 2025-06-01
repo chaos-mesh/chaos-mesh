@@ -27,7 +27,7 @@ import {
   useGetArchivesSchedules,
   useGetArchivesWorkflows,
 } from '@/openapi'
-import { useStoreDispatch } from '@/store'
+import { Confirm, useComponentActions } from '@/zustand/component'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import FilterListIcon from '@mui/icons-material/FilterList'
@@ -41,8 +41,6 @@ import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-
-import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
 import NotFound from '@/components/NotFound'
 import ObjectListItem from '@/components/ObjectListItem'
@@ -101,7 +99,7 @@ export default function Archives() {
   const query = useQuery()
   const kind = query.get('kind') || 'experiment'
 
-  const dispatch = useStoreDispatch()
+  const { setAlert, setConfirm } = useComponentActions()
 
   const [panel, setPanel] = useState<PanelType>(kind as PanelType)
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
@@ -112,23 +110,18 @@ export default function Archives() {
   const { mutateAsync: deleteArchives } = useDeleteArchivesWrap(kind)()
   const { mutateAsync: deleteArchive } = useDeleteArchiveWrap(kind)()
 
-  const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
-    dispatch(
-      setConfirm({
-        title: selected.title,
-        description: selected.description,
-        handle: handleAction(selected.action, selected.uuid),
-      }),
-    )
+    setConfirm({
+      title: selected.title,
+      description: selected.description,
+      handle: handleAction(selected.action, selected.uuid),
+    })
 
   const handleActionSuccess = (action: string) => {
-    dispatch(
-      setAlert({
-        type: 'success',
-        message: i18n(`confirm.success.${action}`, intl),
-      }),
-    )
+    setAlert({
+      type: 'success',
+      message: i18n(`confirm.success.${action}`, intl),
+    })
   }
 
   const handleAction = (action: string, uuid?: uuid) => () => {
@@ -179,7 +172,7 @@ export default function Archives() {
   }
 
   const handleBatchDelete = () =>
-    handleSelect({
+    setConfirm({
       title: i18n('archives.deleteMulti', intl),
       description: i18n('archives.deleteDesc', intl),
       handle: handleAction('deleteMulti'),

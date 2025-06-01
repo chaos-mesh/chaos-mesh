@@ -15,45 +15,18 @@
  *
  */
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import React from 'react'
 
 import { TokenFormValues } from '@/components/Token'
 
 import LS from '@/lib/localStorage'
 
-export interface Alert {
-  type: 'success' | 'warning' | 'error'
-  message: React.ReactNode
-}
-
-export interface Confirm {
-  title: string
-  description?: React.ReactNode
-  handle?: () => void
-  [key: string]: any
-}
-
 const initialState: {
-  alert: Alert
-  alertOpen: boolean
-  confirm: Confirm
-  confirmOpen: boolean // control global confirm dialog
   authOpen: boolean
   namespace: string
   tokens: TokenFormValues[]
   tokenName: string
 } = {
-  alert: {
-    type: 'success',
-    message: '',
-  },
-  alertOpen: false,
-  confirm: {
-    title: '',
-    description: '',
-  },
   authOpen: false,
-  confirmOpen: false,
   namespace: 'All',
   tokens: [],
   tokenName: '',
@@ -63,20 +36,6 @@ const globalStatusSlice = createSlice({
   name: 'globalStatus',
   initialState,
   reducers: {
-    setAlert(state, action: PayloadAction<Alert>) {
-      state.alert = action.payload
-      state.alertOpen = true
-    },
-    setAlertOpen(state, action: PayloadAction<boolean>) {
-      state.alertOpen = action.payload
-    },
-    setConfirm(state, action: PayloadAction<Confirm>) {
-      state.confirm = action.payload
-      state.confirmOpen = true
-    },
-    setConfirmOpen(state, action: PayloadAction<boolean>) {
-      state.confirmOpen = action.payload
-    },
     setAuthOpen(state, action: PayloadAction<boolean>) {
       state.authOpen = action.payload
     },
@@ -111,16 +70,6 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const {
-  setAlert,
-  setAlertOpen,
-  setConfirm,
-  setConfirmOpen,
-  setAuthOpen,
-  setNameSpace,
-  setTokens,
-  setTokenName,
-  removeToken,
-} = globalStatusSlice.actions
+export const { setAuthOpen, setNameSpace, setTokens, setTokenName, removeToken } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

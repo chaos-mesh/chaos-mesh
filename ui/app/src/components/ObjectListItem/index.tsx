@@ -17,7 +17,7 @@
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { TypesArchive, TypesExperiment, TypesSchedule } from '@/openapi/index.schemas'
-import { useStoreSelector } from '@/store'
+import { useSystemStore } from '@/zustand/system'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
@@ -43,7 +43,7 @@ const ObjectListItem: ReactFCWithChildren<ObjectListItemProps> = ({ data, type =
   const navigate = useNavigate()
   const intl = useIntl()
 
-  const { lang } = useStoreSelector((state) => state.settings)
+  const lang = useSystemStore((state) => state.lang)
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()

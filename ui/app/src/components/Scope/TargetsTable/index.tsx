@@ -15,11 +15,11 @@
  *
  */
 import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import { getIn, useFormikContext } from 'formik'
 import { useMemo } from 'react'
 
 import { Env } from '@/slices/experiments'
-import { setAlert } from '@/slices/globalStatus'
 
 import PhysicalMachinesTable from './PhysicalMachinesTable'
 import PodsTable from './PodsTable'
@@ -47,6 +47,7 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
   const setSelected = (newVal: string[]) =>
     setFieldValue(`${scope}.${env === 'k8s' ? 'pods' : 'physicalMachines'}`, newVal)
 
+  const { setAlert } = useComponentActions()
   const dispatch = useStoreDispatch()
 
   const handleSelect = (name: string) => () => {

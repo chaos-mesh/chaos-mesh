@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Chaos Mesh Authors.
+ * Copyright 2025 Chaos Mesh Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@
  * limitations under the License.
  *
  */
-import { combineReducers } from 'redux'
+import { create } from 'zustand'
+import { combine } from 'zustand/middleware'
 
-import experiments from '@/slices/experiments'
-import globalStatus from '@/slices/globalStatus'
-import workflows from '@/slices/workflows'
+import LS from '@/lib/localStorage'
 
-export default combineReducers({
-  globalStatus,
-  experiments,
-  workflows,
-})
+export type SystemTheme = 'light' | 'dark'
+
+export const useSystemStore = create(
+  combine({ theme: (LS.get('theme') || 'light') as SystemTheme, lang: LS.get('lang') || 'en' }, (set) => ({
+    actions: {
+      setTheme: (theme: SystemTheme) => set({ theme }),
+      setLang: (lang: string) => set({ lang }),
+    },
+  })),
+)
+
+export const useSystemActions = () => useSystemStore((state) => state.actions)

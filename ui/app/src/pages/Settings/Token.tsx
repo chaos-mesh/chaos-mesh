@@ -17,6 +17,7 @@
 import { resetAPIAuthentication } from '@/api/interceptors'
 import PaperTop from '@/mui-extends/PaperTop'
 import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button } from '@mui/material'
 import Cookies from 'js-cookie'
@@ -24,13 +25,15 @@ import _ from 'lodash'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
-import { removeToken, setAuthOpen, setConfirm } from '@/slices/globalStatus'
+import { removeToken, setAuthOpen } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 
 const Token = () => {
   const navigate = useNavigate()
   const intl = useIntl()
+
+  const { setConfirm } = useComponentActions()
 
   const { tokens, tokenName } = useStoreSelector((state) => state.globalStatus)
   const tokenDesc =
@@ -45,13 +48,11 @@ const Token = () => {
   const dispatch = useStoreDispatch()
 
   const handleRemoveToken = () =>
-    dispatch(
-      setConfirm({
-        title: i18n('common.logout', intl),
-        description: i18n('common.logoutDesc', intl),
-        handle: handleRemoveTokenConfirm,
-      }),
-    )
+    setConfirm({
+      title: i18n('common.logout', intl),
+      description: i18n('common.logoutDesc', intl),
+      handle: handleRemoveTokenConfirm,
+    })
 
   const handleRemoveTokenConfirm = () => {
     if (tokenName === 'gcp') {

@@ -17,6 +17,7 @@
 import Menu from '@/mui-extends/Menu'
 import Paper from '@/mui-extends/Paper'
 import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
@@ -29,7 +30,6 @@ import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNo
 import { useIntl } from 'react-intl'
 import { v4 as uuidv4 } from 'uuid'
 
-import { setConfirm } from '@/slices/globalStatus'
 import { importNodes, removeWorkflowNode, updateWorkflowNode } from '@/slices/workflows'
 
 import AutoForm, { Belong } from '@/components/AutoForm'
@@ -65,7 +65,7 @@ interface NodeControlProps extends ControlProps {
 
 const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
   const intl = useIntl()
-  const dispatch = useStoreDispatch()
+  const { setConfirm } = useComponentActions()
 
   const onNode = (type: 'copy' | 'delete', onClose: any) => (e: React.SyntheticEvent) => {
     e.stopPropagation()
@@ -82,17 +82,15 @@ const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
         break
     }
 
-    dispatch(
-      setConfirm({
-        title: `${i18n(`common.${type}`, intl)} node ${id}`,
-        description: <T id="common.deleteDesc" />,
-        handle: () => {
-          action(id)
+    setConfirm({
+      title: `${i18n(`common.${type}`, intl)} node ${id}`,
+      description: <T id="common.deleteDesc" />,
+      handle: () => {
+        action(id)
 
-          onClose()
-        },
-      }),
-    )
+        onClose()
+      },
+    })
   }
   return (
     <Menu
@@ -126,16 +124,14 @@ const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
 
 const EdgeControl = ({ id, onDelete }: ControlProps) => {
   const intl = useIntl()
-  const dispatch = useStoreDispatch()
+  const { setConfirm } = useComponentActions()
 
   const onEdgeDelete = () => {
-    dispatch(
-      setConfirm({
-        title: `Delete edge ${id}`,
-        description: <T id="common.deleteDesc" />,
-        handle: () => onDelete(id),
-      }),
-    )
+    setConfirm({
+      title: `Delete edge ${id}`,
+      description: <T id="common.deleteDesc" />,
+      handle: () => onDelete(id),
+    })
   }
 
   return (

@@ -14,71 +14,9 @@
  * limitations under the License.
  *
  */
-import store from '@/store'
-import axios, { AxiosError, AxiosRequestConfig } from 'axios'
-
-import { removeToken, setAlert, setAuthOpen } from '@/slices/globalStatus'
-
-import { resetAPIAuthentication } from './interceptors'
-
-interface ErrorData {
-  code: number
-  type: string
-  message: string
-  full_text: string
-}
+import axios, { type AxiosRequestConfig } from 'axios'
 
 const http = axios.create({ baseURL: 'api' })
-
-http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
-  const data = error.response?.data
-
-  if (data) {
-    // slice(10): error.api.xxx => xxx
-    const type = data.type.slice(10)
-
-    switch (type) {
-      case 'invalid_request':
-        if (data.message.includes('Unauthorized')) {
-          store.dispatch(
-            setAlert({
-              type: 'error',
-              message: 'Please check the validity of the token',
-            }),
-          )
-        }
-        break
-      case 'internal_server_error':
-        if (data.message.includes('Unauthorized')) {
-          store.dispatch(
-            setAlert({
-              type: 'error',
-              message: 'Unauthorized. Please check the validity of the token',
-            }),
-          )
-
-          resetAPIAuthentication()
-          store.dispatch(removeToken())
-          store.dispatch(setAuthOpen(true))
-        }
-        break
-
-      case 'no_cluster_privilege':
-      case 'no_namespace_privilege':
-      default:
-        store.dispatch(
-          setAlert({
-            type: 'error',
-            message: data.message || 'An unknown error occurred',
-          }),
-        )
-
-        break
-    }
-  }
-
-  return Promise.reject(error)
-})
 
 export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
   const promise = http(config).then(({ data }) => data)

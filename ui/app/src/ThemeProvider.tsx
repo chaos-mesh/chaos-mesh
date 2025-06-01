@@ -14,14 +14,14 @@
  * limitations under the License.
  *
  */
-import { useStoreSelector } from '@/store'
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
 import { useMemo } from 'react'
 
 import theme, { darkTheme } from './theme'
+import { useSystemStore } from './zustand/system'
 
 const ThemeProvider: ReactFCWithChildren = ({ children }) => {
-  const { theme: t } = useStoreSelector((state) => state.settings)
+  const t = useSystemStore((state) => state.theme)
   const globalTheme = useMemo(() => (t === 'light' ? theme : darkTheme), [t])
 
   return <MuiThemeProvider theme={globalTheme}>{children}</MuiThemeProvider>
