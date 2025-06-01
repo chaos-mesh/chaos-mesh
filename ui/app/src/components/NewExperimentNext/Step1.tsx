@@ -17,7 +17,7 @@
 import { Stale } from '@/api/queryUtils'
 import Paper from '@/mui-extends/Paper'
 import { useGetCommonConfig } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { Env, useExperimentActions, useExperimentStore } from '@/zustand/experiment'
 import CheckIcon from '@mui/icons-material/Check'
 import RadioButtonCheckedOutlinedIcon from '@mui/icons-material/RadioButtonCheckedOutlined'
 import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined'
@@ -25,8 +25,6 @@ import UndoIcon from '@mui/icons-material/Undo'
 import { Box, Card, Divider, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import clsx from 'clsx'
-
-import { Env, setEnv, setKindAction, setSpec, setStep1 } from '@/slices/experiments'
 
 import i18n from '@/components/T'
 
@@ -102,13 +100,12 @@ const TypeCard: ReactFCWithChildren<TypeCardProp> = ({ name, handleSwitchEnv, en
 }
 
 const Step1 = () => {
-  const state = useStoreSelector((state) => state)
   const {
     env,
     kindAction: [kind, action],
     step1,
-  } = state.experiments
-  const dispatch = useStoreDispatch()
+  } = useExperimentStore()
+  const { setEnv, setKindAction, setSpec, setStep1 } = useExperimentActions()
 
   const { data: config } = useGetCommonConfig({
     query: {
@@ -124,11 +121,11 @@ const Step1 = () => {
   }
 
   const handleSelectTarget = (key: Kind) => () => {
-    dispatch(setKindAction([key, '']))
+    setKindAction([key, ''])
   }
 
   const handleSelectAction = (newAction: string) => () => {
-    dispatch(setKindAction([kind, newAction]))
+    setKindAction([kind, newAction])
 
     if (submitDirectly.includes(newAction)) {
       handleSubmitStep1({ action: newAction })
@@ -147,15 +144,15 @@ const Step1 = () => {
       console.debug('Debug handleSubmitStep1:', result)
     }
 
-    dispatch(setSpec(result))
-    dispatch(setStep1(true))
+    setSpec(result)
+    setStep1(true)
   }
 
-  const handleUndo = () => dispatch(setStep1(false))
+  const handleUndo = () => setStep1(false)
 
   const handleSwitchEnv = (env: Env) => () => {
-    dispatch(setKindAction(['', '']))
-    dispatch(setEnv(env))
+    setKindAction(['', ''])
+    setEnv(env)
   }
 
   return (

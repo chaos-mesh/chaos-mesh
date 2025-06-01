@@ -14,9 +14,8 @@
  * limitations under the License.
  *
  */
+import type { Env } from '@/zustand/experiment'
 import * as Yup from 'yup'
-
-import { Env } from '@/slices/experiments'
 
 import { schema as scheduleSchema } from '@/components/Schedule/types'
 

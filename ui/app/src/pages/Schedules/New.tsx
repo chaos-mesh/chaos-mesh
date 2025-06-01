@@ -15,13 +15,11 @@
  *
  */
 import { usePostSchedules } from '@/openapi'
-import { useStoreDispatch } from '@/store'
 import { useComponentActions } from '@/zustand/component'
+import { useExperimentActions } from '@/zustand/experiment'
 import { Grid } from '@mui/material'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
-
-import { resetNewExperiment } from '@/slices/experiments'
 
 import NewExperiment from '@/components/NewExperimentNext'
 import i18n from '@/components/T'
@@ -31,7 +29,7 @@ const New = () => {
   const intl = useIntl()
 
   const { setAlert } = useComponentActions()
-  const dispatch = useStoreDispatch()
+  const reset = useExperimentActions().reset
 
   const { mutateAsync } = usePostSchedules()
 
@@ -43,7 +41,7 @@ const New = () => {
           message: i18n('confirm.success.create', intl),
         })
 
-        dispatch(resetNewExperiment())
+        reset()
 
         navigate('/schedules')
       })
