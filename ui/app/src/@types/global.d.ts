@@ -17,4 +17,4 @@
 
 type uuid = string
 
-type ReactFCWithChildren<T = {}> = React.FC<React.PropsWithChildren<T>>
+type ReactFCWithChildren<T> = React.FC<React.PropsWithChildren<T>>

@@ -18,11 +18,9 @@ import { applyNSParam } from '@/api/interceptors'
 import { Stale } from '@/api/queryUtils'
 import Paper from '@/mui-extends/Paper'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useAuthStore } from '@/zustand/auth'
 import { Autocomplete, TextField } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router'
-
-import { setNameSpace } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 
@@ -36,14 +34,14 @@ const Namespace = () => {
     },
   })
 
-  const { namespace } = useStoreSelector((state) => state.globalStatus)
-  const dispatch = useStoreDispatch()
+  const namespace = useAuthStore((state) => state.namespace)
+  const setNameSpace = useAuthStore((state) => state.actions.setNameSpace)
 
   const handleSelectGlobalNamespace = (_: any, newVal: any) => {
     const ns = newVal
 
     applyNSParam(ns)
-    dispatch(setNameSpace(ns))
+    setNameSpace(ns)
 
     navigate('/namespaceSetted', { replace: true })
     setTimeout(() => navigate(pathname, { replace: true }))

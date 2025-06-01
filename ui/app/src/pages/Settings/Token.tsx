@@ -16,7 +16,7 @@
  */
 import { resetAPIAuthentication } from '@/api/interceptors'
 import PaperTop from '@/mui-extends/PaperTop'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useAuthActions, useAuthStore } from '@/zustand/auth'
 import { useComponentActions } from '@/zustand/component'
 import GoogleIcon from '@mui/icons-material/Google'
 import { Box, Button } from '@mui/material'
@@ -25,8 +25,6 @@ import _ from 'lodash'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
-import { removeToken, setAuthOpen } from '@/slices/globalStatus'
-
 import i18n from '@/components/T'
 
 const Token = () => {
@@ -34,8 +32,9 @@ const Token = () => {
   const intl = useIntl()
 
   const { setConfirm } = useComponentActions()
+  const { removeToken, setAuthOpen } = useAuthActions()
+  const { tokens, tokenName } = useAuthStore()
 
-  const { tokens, tokenName } = useStoreSelector((state) => state.globalStatus)
   const tokenDesc =
     tokenName === 'gcp' ? (
       <Box display="flex" alignItems="center">
@@ -45,7 +44,6 @@ const Token = () => {
     ) : (
       tokenName + ': ' + _.truncate(tokens[0].token)
     )
-  const dispatch = useStoreDispatch()
 
   const handleRemoveToken = () =>
     setConfirm({
@@ -61,8 +59,8 @@ const Token = () => {
       Cookies.remove('expiry')
     } else {
       resetAPIAuthentication()
-      dispatch(removeToken())
-      dispatch(setAuthOpen(true))
+      removeToken()
+      setAuthOpen(true)
     }
 
     navigate('/dashboard')

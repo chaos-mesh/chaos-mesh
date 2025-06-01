@@ -19,7 +19,7 @@ import { Stale } from '@/api/queryUtils'
 import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Loading from '@/mui-extends/Loading'
 import { useGetCommonConfig } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useAuthActions, useAuthStore } from '@/zustand/auth'
 import { useComponentActions, useComponentStore } from '@/zustand/component'
 import {
   Alert,
@@ -37,8 +37,6 @@ import { styled } from '@mui/material/styles'
 import Cookies from 'js-cookie'
 import { lazy, useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
-
-import { setAuthOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
 
 import { TokenFormValues } from '@/components/Token'
 
@@ -75,10 +73,8 @@ const TopContainer = () => {
   const confirm = useComponentStore((state) => state.confirm)
   const confirmOpen = useComponentStore((state) => state.confirmOpen)
   const { setAlert, setAlertOpen, setConfirmOpen } = useComponentActions()
-
-  const { authOpen } = useStoreSelector((state) => state.globalStatus)
-
-  const dispatch = useStoreDispatch()
+  const authOpen = useAuthStore((state) => state.authOpen)
+  const { setAuthOpen, setNameSpace, setTokenName, setTokens } = useAuthActions()
 
   // Sidebar related
   const miniSidebar = LS.get('mini-sidebar') === 'y'
@@ -112,7 +108,7 @@ const TopContainer = () => {
         }
 
         applyAPIAuthentication(token)
-        dispatch(setTokenName('gcp'))
+        setTokenName('gcp')
 
         return
       }
@@ -125,15 +121,15 @@ const TopContainer = () => {
         const tokens: TokenFormValues[] = JSON.parse(token)
 
         applyAPIAuthentication(tokens.find(({ name }) => name === tokenName)!.token)
-        dispatch(setTokens(tokens))
-        dispatch(setTokenName(tokenName))
+        setTokens(tokens)
+        setTokenName(tokenName)
       } else {
-        dispatch(setAuthOpen(true))
+        setAuthOpen(true)
       }
 
       if (globalNamespace) {
         applyNSParam(globalNamespace)
-        dispatch(setNameSpace(globalNamespace))
+        setNameSpace(globalNamespace)
       }
     }
 
@@ -144,7 +140,7 @@ const TopContainer = () => {
 
       setLoading(false)
     }
-  }, [data, dispatch])
+  }, [data])
 
   useEffect(() => {
     applyErrorHandling({ openAlert: setAlert })

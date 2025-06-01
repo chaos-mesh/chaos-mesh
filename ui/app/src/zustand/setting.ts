@@ -28,9 +28,18 @@ export const useSettingStore = create(
     },
     (set) => ({
       actions: {
-        setDebugMode: (debugMode: boolean) => set({ debugMode }),
-        setEnableKubeSystemNS: (enableKubeSystemNS: boolean) => set({ enableKubeSystemNS }),
-        setUseNewPhysicalMachine: (useNewPhysicalMachine: boolean) => set({ useNewPhysicalMachine }),
+        setDebugMode: (debugMode: boolean) => {
+          set({ debugMode })
+          LS.set('debug-mode', debugMode ? 'true' : 'false')
+        },
+        setEnableKubeSystemNS: (enableKubeSystemNS: boolean) => {
+          set({ enableKubeSystemNS })
+          LS.set('enable-kube-system-ns', enableKubeSystemNS ? 'true' : 'false')
+        },
+        setUseNewPhysicalMachine: (useNewPhysicalMachine: boolean) => {
+          set({ useNewPhysicalMachine })
+          LS.set('use-new-physical-machine', useNewPhysicalMachine ? 'true' : 'false')
+        },
       },
     }),
   ),
