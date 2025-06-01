@@ -15,15 +15,13 @@
  *
  */
 import Space from '@/mui-extends/Space'
-import { useStoreDispatch } from '@/store'
+import { useExperimentActions } from '@/zustand/experiment'
 import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import { Box } from '@mui/material'
 import Tab from '@mui/material/Tab'
 import { forwardRef, useImperativeHandle, useState } from 'react'
-
-import { setEnv, setExternalExperiment } from '@/slices/experiments'
 
 import i18n from '@/components/T'
 
@@ -52,7 +50,7 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   { onSubmit, loadFrom = true, inWorkflow, inSchedule },
   ref,
 ) => {
-  const dispatch = useStoreDispatch()
+  const { setExternalExp } = useExperimentActions()
 
   const [panel, setPanel] = useState<PanelType>('initial')
 
@@ -69,14 +67,12 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
     const env = kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'
     const action = spec.action ?? ''
 
-    dispatch(setEnv(env))
-    dispatch(
-      setExternalExperiment({
-        kindAction: [kind, action],
-        spec,
-        basic,
-      }),
-    )
+    setExternalExp({
+      env,
+      kindAction: [kind, action],
+      spec,
+      basic,
+    })
 
     setPanel('initial')
   }

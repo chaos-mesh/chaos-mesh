@@ -16,10 +16,8 @@
  */
 import { combineReducers } from 'redux'
 
-import experiments from '@/slices/experiments'
 import workflows from '@/slices/workflows'
 
 export default combineReducers({
-  experiments,
   workflows,
 })

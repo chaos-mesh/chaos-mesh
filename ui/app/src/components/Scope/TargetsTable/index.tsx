@@ -16,10 +16,9 @@
  */
 import { useStoreDispatch } from '@/store'
 import { useComponentActions } from '@/zustand/component'
+import type { Env } from '@/zustand/experiment'
 import { getIn, useFormikContext } from 'formik'
 import { useMemo } from 'react'
-
-import { Env } from '@/slices/experiments'
 
 import PhysicalMachinesTable from './PhysicalMachinesTable'
 import PodsTable from './PodsTable'

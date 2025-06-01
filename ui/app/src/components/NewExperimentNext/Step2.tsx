@@ -19,7 +19,7 @@ import Paper from '@/mui-extends/Paper'
 import SkeletonN from '@/mui-extends/SkeletonN'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useExperimentActions, useExperimentStore } from '@/zustand/experiment'
 import CheckIcon from '@mui/icons-material/Check'
 import PublishIcon from '@mui/icons-material/Publish'
 import UndoIcon from '@mui/icons-material/Undo'
@@ -27,8 +27,6 @@ import { Box, Button, Divider, Grid, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import _ from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
-
-import { setBasic, setStep2 } from '@/slices/experiments'
 
 import { LabelField, SelectField, TextField } from '@/components/FormField'
 import MoreOptions from '@/components/MoreOptions'
@@ -45,11 +43,15 @@ interface Step2Props {
 }
 
 const Step2: ReactFCWithChildren<Step2Props> = ({ inWorkflow = false, inSchedule = false }) => {
-  const { step2, env, kindAction, basic } = useStoreSelector((state) => state.experiments)
-  const [kind] = kindAction
+  const {
+    step2,
+    env,
+    kindAction: [kind],
+    basic,
+  } = useExperimentStore()
+  const { setBasic, setStep2 } = useExperimentActions()
   const scopeDisabled = kind === 'AWSChaos' || kind === 'GCPChaos'
   const schema = basicSchema({ env, scopeDisabled, scheduled: inSchedule, needDeadline: inWorkflow })
-  const dispatch = useStoreDispatch()
   const originalInit = useMemo(
     () =>
       inSchedule
@@ -98,11 +100,11 @@ const Step2: ReactFCWithChildren<Step2Props> = ({ inWorkflow = false, inSchedule
       console.debug('Debug handleSubmitStep2:', values)
     }
 
-    dispatch(setBasic(values))
-    dispatch(setStep2(true))
+    setBasic(values)
+    setStep2(true)
   }
 
-  const handleUndo = () => dispatch(setStep2(false))
+  const handleUndo = () => setStep2(false)
 
   return (
     <Paper sx={{ borderColor: step2 ? 'success.main' : undefined }}>
