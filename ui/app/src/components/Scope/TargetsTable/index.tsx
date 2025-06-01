@@ -61,13 +61,14 @@ const TargetsTable = ({ env, scope = 'scope', data }: TargetsTableProps) => {
       newSelected = [...selected.slice(0, selectedIndex), ...selected.slice(selectedIndex + 1)]
     }
 
-    if (newSelected.length === 0)
+    if (newSelected.length === 0) {
       setAlert({
         type: 'warning',
         message: 'Please select at least one target.',
       })
 
-    return
+      return
+    }
 
     setSelected(newSelected.length === targetsCount ? [] : newSelected)
   }
