@@ -19,7 +19,8 @@ import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, usePostWorkflows } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useStoreDispatch } from '@/store'
+import { useSettingStore } from '@/zustand/setting'
 import { Box, Divider, MenuItem, Typography } from '@mui/material'
 import { Form, Formik } from 'formik'
 import yaml from 'js-yaml'
@@ -63,7 +64,7 @@ export default function SubmitWorkflow({ open, setOpen, workflow }: SubmitWorkfl
     deadline: '',
   })
 
-  const { debugMode } = useStoreSelector((state) => state.settings)
+  const debugMode = useSettingStore((state) => state.debugMode)
 
   useEffect(() => {
     setData(workflow)

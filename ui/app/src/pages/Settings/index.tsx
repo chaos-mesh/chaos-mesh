@@ -21,11 +21,11 @@ import PaperTop from '@/mui-extends/PaperTop'
 import SelectField from '@/mui-extends/SelectField'
 import Space from '@/mui-extends/Space'
 import { useGetCommonConfig } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useStoreSelector } from '@/store'
+import { useSettingActions, useSettingStore } from '@/zustand/setting'
+import { type SystemTheme, useSystemActions, useSystemStore } from '@/zustand/system'
 import { Box, Chip, Grow, MenuItem, Typography } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
-
-import { setDebugMode, setEnableKubeSystemNS, setLang, setTheme, setUseNewPhysicalMachine } from '@/slices/settings'
 
 import { T } from '@/components/T'
 
@@ -37,8 +37,14 @@ import Token from './Token'
 const Settings = () => {
   const state = useStoreSelector((state) => state)
   const { tokenName } = state.globalStatus
-  const { debugMode, enableKubeSystemNS, useNewPhysicalMachine, theme, lang } = state.settings
-  const dispatch = useStoreDispatch()
+
+  const theme = useSystemStore((state) => state.theme)
+  const lang = useSystemStore((state) => state.lang)
+  const { setTheme, setLang } = useSystemActions()
+  const debugMode = useSettingStore((state) => state.debugMode)
+  const enableKubeSystemNS = useSettingStore((state) => state.enableKubeSystemNS)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
+  const { setDebugMode, setEnableKubeSystemNS, setUseNewPhysicalMachine } = useSettingActions()
 
   const { data: config } = useGetCommonConfig({
     query: {
@@ -47,11 +53,11 @@ const Settings = () => {
     },
   })
 
-  const handleChangeDebugMode = () => dispatch(setDebugMode(!debugMode))
-  const handleChangeEnableKubeSystemNS = () => dispatch(setEnableKubeSystemNS(!enableKubeSystemNS))
-  const handleChangeUseNewPhysicalMachine = () => dispatch(setUseNewPhysicalMachine(!useNewPhysicalMachine))
-  const handleChangeTheme = (e: SelectChangeEvent) => dispatch(setTheme(e.target.value))
-  const handleChangeLang = (e: SelectChangeEvent) => dispatch(setLang(e.target.value))
+  const handleChangeDebugMode = () => setDebugMode(!debugMode)
+  const handleChangeEnableKubeSystemNS = () => setEnableKubeSystemNS(!enableKubeSystemNS)
+  const handleChangeUseNewPhysicalMachine = () => setUseNewPhysicalMachine(!useNewPhysicalMachine)
+  const handleChangeTheme = (e: SelectChangeEvent) => setTheme(e.target.value as SystemTheme)
+  const handleChangeLang = (e: SelectChangeEvent) => setLang(e.target.value)
 
   return (
     <Grow in={true} style={{ transformOrigin: '0 0 0' }}>

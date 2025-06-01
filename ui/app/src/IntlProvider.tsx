@@ -15,13 +15,14 @@
  *
  */
 import messages from '@/i18n/messages'
-import { useStoreSelector } from '@/store'
 import { flatten } from 'flat'
 import { useMemo } from 'react'
 import { IntlProvider as ReactIntlProvider } from 'react-intl'
 
+import { useSystemStore } from './zustand/system'
+
 const IntlProvider: ReactFCWithChildren = ({ children }) => {
-  const { lang } = useStoreSelector((state) => state.settings)
+  const lang = useSystemStore((state) => state.lang)
   const intlMessages = useMemo<Record<string, string>>(() => flatten(messages[lang]), [lang])
 
   return (

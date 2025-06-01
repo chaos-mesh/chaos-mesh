@@ -18,13 +18,13 @@ import Paper from '@/mui-extends/Paper'
 import PaperTop from '@/mui-extends/PaperTop'
 import { usePostExperiments } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import { Box, Typography } from '@mui/material'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
 import { resetNewExperiment } from '@/slices/experiments'
-import { setAlert } from '@/slices/globalStatus'
 
 import { Submit } from '@/components/FormField'
 import { type ExperimentKind } from '@/components/NewExperiment/types'
@@ -40,6 +40,8 @@ interface Step3Props {
 const Step3: ReactFCWithChildren<Step3Props> = ({ onSubmit, inSchedule }) => {
   const navigate = useNavigate()
   const intl = useIntl()
+
+  const { setAlert } = useComponentActions()
 
   const state = useStoreSelector((state) => state)
   const { step1, step2, kindAction, env, basic, spec } = state.experiments

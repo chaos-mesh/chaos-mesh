@@ -19,7 +19,7 @@ import PaperTop from '@/mui-extends/PaperTop'
 import Space from '@/mui-extends/Space'
 import { useDeleteWorkflowsUid, useGetEventsWorkflowUid, useGetWorkflowsUid } from '@/openapi'
 import { CoreWorkflowDetail } from '@/openapi/index.schemas'
-import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import { Box, Button, Grid, Grow, Modal, useTheme } from '@mui/material'
 import { styled } from '@mui/material/styles'
@@ -28,8 +28,6 @@ import yaml from 'js-yaml'
 import { lazy, useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
-
-import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
 import EventsTimeline from '@/components/EventsTimeline'
 import NodeConfiguration from '@/components/ObjectConfiguration/Node'
@@ -78,7 +76,7 @@ const Single = () => {
   const theme = useTheme()
   const { uuid } = useParams()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert, setConfirm } = useComponentActions()
 
   const [data, setData] = useState<any>()
   const [selected, setSelected] = useState<'workflow' | 'node'>('workflow')
@@ -120,8 +118,6 @@ const Single = () => {
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
 
-  const handleSelect = (selected: Confirm) => () => dispatch(setConfirm(selected))
-
   const handleAction = (action: string) => () => {
     let actionFunc
 
@@ -137,12 +133,10 @@ const Single = () => {
     if (actionFunc) {
       actionFunc({ uid: uuid! })
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n(`confirm.success.${action}`, intl),
-            }),
-          )
+          setAlert({
+            type: 'success',
+            message: i18n(`confirm.success.${action}`, intl),
+          })
 
           if (action === 'archive') {
             navigate('/workflows')
@@ -174,11 +168,13 @@ const Single = () => {
                 variant="outlined"
                 size="small"
                 startIcon={<ArchiveOutlinedIcon />}
-                onClick={handleSelect({
-                  title: `${i18n('archives.single', intl)} ${workflow?.name}`,
-                  description: i18n('workflows.deleteDesc', intl),
-                  handle: handleAction('archive'),
-                })}
+                onClick={() =>
+                  setConfirm({
+                    title: `${i18n('archives.single', intl)} ${workflow?.name}`,
+                    description: i18n('workflows.deleteDesc', intl),
+                    handle: handleAction('archive'),
+                  })
+                }
               >
                 {i18n('archives.single')}
               </Button>

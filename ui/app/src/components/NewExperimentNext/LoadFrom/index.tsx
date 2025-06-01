@@ -29,11 +29,10 @@ import {
 } from '@/openapi'
 import { TypesArchiveDetail, TypesExperimentDetail, TypesScheduleDetail } from '@/openapi/index.schemas'
 import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import { setAlert } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 
@@ -48,6 +47,7 @@ interface LoadFromProps {
 const LoadFrom: ReactFCWithChildren<LoadFromProps> = ({ callback, inSchedule, inWorkflow }) => {
   const intl = useIntl()
 
+  const { setAlert } = useComponentActions()
   const dispatch = useStoreDispatch()
 
   const [metaInfo, setMetaInfo] = useState<{

@@ -15,7 +15,7 @@
  *
  */
 import { CoreEvent } from '@/openapi/index.schemas'
-import { useStoreSelector } from '@/store'
+import { useSystemStore } from '@/zustand/system'
 import { Box, BoxProps } from '@mui/material'
 import { useEffect, useRef } from 'react'
 
@@ -29,7 +29,7 @@ interface EventsChartProps extends BoxProps {
 }
 
 const EventsChart: ReactFCWithChildren<EventsChartProps> = ({ events, ...rest }) => {
-  const { theme } = useStoreSelector((state) => state.settings)
+  const theme = useSystemStore((state) => state.theme)
 
   const chartRef = useRef<any>(null)
 

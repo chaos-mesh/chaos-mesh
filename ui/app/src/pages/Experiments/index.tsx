@@ -24,7 +24,7 @@ import {
   usePutExperimentsStartUid,
 } from '@/openapi'
 import { DeleteExperimentsParams } from '@/openapi/index.schemas'
-import { useStoreDispatch } from '@/store'
+import { Confirm, useComponentActions } from '@/zustand/component'
 import AddIcon from '@mui/icons-material/Add'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import CloseIcon from '@mui/icons-material/Close'
@@ -36,8 +36,6 @@ import { useState } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 import { FixedSizeList as RWList, ListChildComponentProps as RWListChildComponentProps } from 'react-window'
-
-import { Confirm, setAlert, setConfirm } from '@/slices/globalStatus'
 
 import NotFound from '@/components/NotFound'
 import ObjectListItem from '@/components/ObjectListItem'
@@ -58,7 +56,7 @@ export default function Experiments() {
   const intl = useIntl()
   const navigate = useNavigate()
 
-  const dispatch = useStoreDispatch()
+  const { setAlert, setConfirm } = useComponentActions()
 
   const [batch, setBatch] = useState<Record<uuid, boolean>>({})
   const batchLength = Object.keys(batch).length
@@ -70,15 +68,12 @@ export default function Experiments() {
   const { mutateAsync: pauseExperiments } = usePutExperimentsPauseUid()
   const { mutateAsync: startExperiments } = usePutExperimentsStartUid()
 
-  const handleSelect = (selected: Confirm) => dispatch(setConfirm(selected))
   const onSelect = (selected: Confirm) =>
-    dispatch(
-      setConfirm({
-        title: selected.title,
-        description: selected.description,
-        handle: handleAction(selected.action, selected.uuid),
-      }),
-    )
+    setConfirm({
+      title: selected.title,
+      description: selected.description,
+      handle: handleAction(selected.action, selected.uuid),
+    })
 
   const handleAction = (action: string, uuid?: uuid) => () => {
     let actionFunc
@@ -112,12 +107,10 @@ export default function Experiments() {
     if (actionFunc) {
       actionFunc(arg as any)
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n(`confirm.success.${action}`, intl),
-            }),
-          )
+          setAlert({
+            type: 'success',
+            message: i18n(`confirm.success.${action}`, intl),
+          })
 
           refetch()
         })
@@ -139,7 +132,7 @@ export default function Experiments() {
     )
 
   const handleBatchDelete = () =>
-    handleSelect({
+    setConfirm({
       title: i18n('experiments.deleteMulti', intl),
       description: i18n('experiments.deleteDesc', intl),
       handle: handleAction('archiveMulti'),

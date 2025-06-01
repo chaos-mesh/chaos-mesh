@@ -14,12 +14,13 @@
  * limitations under the License.
  *
  */
-import { applyAPIAuthentication, applyNSParam } from '@/api/interceptors'
+import { applyAPIAuthentication, applyErrorHandling, applyNSParam } from '@/api/interceptors'
 import { Stale } from '@/api/queryUtils'
 import ConfirmDialog from '@/mui-extends/ConfirmDialog'
 import Loading from '@/mui-extends/Loading'
 import { useGetCommonConfig } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions, useComponentStore } from '@/zustand/component'
 import {
   Alert,
   Box,
@@ -37,7 +38,7 @@ import Cookies from 'js-cookie'
 import { lazy, useEffect, useState } from 'react'
 import { Outlet } from 'react-router'
 
-import { setAlertOpen, setAuthOpen, setConfirmOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
+import { setAuthOpen, setNameSpace, setTokenName, setTokens } from '@/slices/globalStatus'
 
 import { TokenFormValues } from '@/components/Token'
 
@@ -69,11 +70,15 @@ const Root = styled(Box, {
 const TopContainer = () => {
   const theme = useTheme()
 
-  const { alert, alertOpen, confirm, confirmOpen, authOpen } = useStoreSelector((state) => state.globalStatus)
+  const alert = useComponentStore((state) => state.alert)
+  const alertOpen = useComponentStore((state) => state.alertOpen)
+  const confirm = useComponentStore((state) => state.confirm)
+  const confirmOpen = useComponentStore((state) => state.confirmOpen)
+  const { setAlert, setAlertOpen, setConfirmOpen } = useComponentActions()
+
+  const { authOpen } = useStoreSelector((state) => state.globalStatus)
 
   const dispatch = useStoreDispatch()
-  const handleSnackClose = () => dispatch(setAlertOpen(false))
-  const handleConfirmClose = () => dispatch(setConfirmOpen(false))
 
   // Sidebar related
   const miniSidebar = LS.get('mini-sidebar') === 'y'
@@ -142,6 +147,7 @@ const TopContainer = () => {
   }, [data, dispatch])
 
   useEffect(() => {
+    applyErrorHandling({ openAlert: setAlert })
     insertCommonStyle()
   }, [])
 
@@ -177,9 +183,9 @@ const TopContainer = () => {
           }}
           autoHideDuration={6000}
           open={alertOpen}
-          onClose={handleSnackClose}
+          onClose={() => setAlertOpen(false)}
         >
-          <Alert severity={alert.type} onClose={handleSnackClose}>
+          <Alert severity={alert.type} onClose={() => setAlertOpen(false)}>
             {alert.message}
           </Alert>
         </Snackbar>
@@ -188,7 +194,7 @@ const TopContainer = () => {
       <Portal>
         <ConfirmDialog
           open={confirmOpen}
-          close={handleConfirmClose}
+          close={() => setConfirmOpen(false)}
           title={confirm.title}
           description={confirm.description}
           onConfirm={confirm.handle}

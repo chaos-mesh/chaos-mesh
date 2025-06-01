@@ -25,7 +25,7 @@ import {
   usePutExperimentsPauseUid,
   usePutExperimentsStartUid,
 } from '@/openapi'
-import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
@@ -35,8 +35,6 @@ import yaml from 'js-yaml'
 import { lazy } from 'react'
 import { useIntl } from 'react-intl'
 import { useNavigate, useParams } from 'react-router'
-
-import { setAlert, setConfirm } from '@/slices/globalStatus'
 
 import EventsTimeline from '@/components/EventsTimeline'
 import ObjectConfiguration from '@/components/ObjectConfiguration'
@@ -50,7 +48,7 @@ export default function Single() {
 
   const intl = useIntl()
 
-  const dispatch = useStoreDispatch()
+  const { setConfirm, setAlert } = useComponentActions()
 
   const { data: experiment, isLoading: isLoading1, refetch } = useGetExperimentsUid(uuid!)
   const { data: events, isLoading: isLoading2 } = useGetEvents({ object_id: uuid, limit: 999 })
@@ -62,33 +60,27 @@ export default function Single() {
   const handleSelect = (action: string) => () => {
     switch (action) {
       case 'archive':
-        dispatch(
-          setConfirm({
-            title: `${i18n('archives.single', intl)} ${experiment!.name}`,
-            description: i18n('experiments.deleteDesc', intl),
-            handle: handleAction('archive'),
-          }),
-        )
+        setConfirm({
+          title: `${i18n('archives.single', intl)} ${experiment!.name}`,
+          description: i18n('experiments.deleteDesc', intl),
+          handle: handleAction('archive'),
+        })
 
         break
       case 'pause':
-        dispatch(
-          setConfirm({
-            title: `${i18n('common.pause', intl)} ${experiment!.name}`,
-            description: i18n('experiments.pauseDesc', intl),
-            handle: handleAction('pause'),
-          }),
-        )
+        setConfirm({
+          title: `${i18n('common.pause', intl)} ${experiment!.name}`,
+          description: i18n('experiments.pauseDesc', intl),
+          handle: handleAction('pause'),
+        })
 
         break
       case 'start':
-        dispatch(
-          setConfirm({
-            title: `${i18n('common.start', intl)} ${experiment!.name}`,
-            description: i18n('experiments.startDesc', intl),
-            handle: handleAction('start'),
-          }),
-        )
+        setConfirm({
+          title: `${i18n('common.start', intl)} ${experiment!.name}`,
+          description: i18n('experiments.startDesc', intl),
+          handle: handleAction('start'),
+        })
 
         break
     }
@@ -117,12 +109,10 @@ export default function Single() {
     if (actionFunc) {
       actionFunc({ uid: uuid! })
         .then(() => {
-          dispatch(
-            setAlert({
-              type: 'success',
-              message: i18n(`confirm.success.${action}`, intl),
-            }),
-          )
+          setAlert({
+            type: 'success',
+            message: i18n(`confirm.success.${action}`, intl),
+          })
 
           if (action === 'archive') {
             navigate('/experiments')

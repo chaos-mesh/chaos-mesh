@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { useStoreSelector } from '@/store'
+import { useSystemStore } from '@/zustand/system'
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
 import ArchiveOutlinedIcon from '@mui/icons-material/ArchiveOutlined'
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
@@ -145,7 +145,7 @@ interface SidebarProps {
 }
 
 const Sidebar: ReactFCWithChildren<SidebarProps> = ({ open }) => {
-  const { theme } = useStoreSelector((state) => state.settings)
+  const theme = useSystemStore((state) => state.theme)
 
   return (
     <Drawer variant="permanent" open={open}>

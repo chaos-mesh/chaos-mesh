@@ -18,6 +18,7 @@ import { Stale } from '@/api/queryUtils'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces, useGetCommonRbacConfig } from '@/openapi'
 import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import copy from 'copy-text-to-clipboard'
@@ -25,8 +26,6 @@ import { Field, Form, Formik } from 'formik'
 import _ from 'lodash'
 import { useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import { setAlert } from '@/slices/globalStatus'
 
 import { SelectField } from '@/components/FormField'
 import i18n from '@/components/T'
@@ -58,6 +57,7 @@ const initialValues = { namespace: 'default', role: 'viewer', clustered: false }
 const RBACGenerator = () => {
   const intl = useIntl()
 
+  const { setAlert } = useComponentActions()
   const dispatch = useStoreDispatch()
 
   const [params, setParams] = useState(initialValues)

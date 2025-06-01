@@ -17,14 +17,13 @@
 import Paper from '@/mui-extends/Paper'
 import Space from '@/mui-extends/Space'
 import { useStoreDispatch } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Button, Typography } from '@mui/material'
 import { type Editor } from 'ace-builds'
 import yaml from 'js-yaml'
 import { lazy, useState } from 'react'
 import { useIntl } from 'react-intl'
-
-import { setAlert } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 import YAML from '@/components/YAML'
@@ -38,6 +37,7 @@ interface ByYAMLProps {
 const ByYAML: ReactFCWithChildren<ByYAMLProps> = ({ callback }) => {
   const intl = useIntl()
 
+  const { setAlert } = useComponentActions()
   const dispatch = useStoreDispatch()
 
   const [empty, setEmpty] = useState(true)

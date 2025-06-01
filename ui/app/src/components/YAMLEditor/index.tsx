@@ -15,7 +15,7 @@
  *
  */
 import Space from '@/mui-extends/Space'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined'
 import PublishIcon from '@mui/icons-material/Publish'
 import { Box, Button } from '@mui/material'
@@ -29,8 +29,6 @@ import yaml from 'js-yaml'
 import { memo, useState } from 'react'
 import AceEditor, { IAceEditorProps } from 'react-ace'
 import { useIntl } from 'react-intl'
-
-import { setConfirm } from '@/slices/globalStatus'
 
 import i18n from '@/components/T'
 
@@ -53,8 +51,8 @@ const YAMLEditor: ReactFCWithChildren<YAMLEditorProps> = ({
 }) => {
   const intl = useIntl()
 
-  const { theme } = useStoreSelector((state) => state.settings)
-  const dispatch = useStoreDispatch()
+  const theme = useSystemStore((state) => state.theme)
+  const { setConfirm } = useComponentActions()
 
   const [editor, setEditor] = useState<Editor>()
 
@@ -65,12 +63,10 @@ const YAMLEditor: ReactFCWithChildren<YAMLEditorProps> = ({
   }
 
   const handleSelect = () => {
-    dispatch(
-      setConfirm({
-        title: `${i18n('common.update', intl)} ${name}`,
-        handle: handleOnUpdate,
-      }),
-    )
+    setConfirm({
+      title: `${i18n('common.update', intl)} ${name}`,
+      handle: handleOnUpdate,
+    })
   }
 
   const handleOnUpdate = () => {

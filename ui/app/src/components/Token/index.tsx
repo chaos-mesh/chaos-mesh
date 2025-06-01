@@ -18,10 +18,11 @@ import { applyAPIAuthentication, resetAPIAuthentication } from '@/api/intercepto
 import Space from '@/mui-extends/Space'
 import { getExperimentsState } from '@/openapi'
 import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useIntl } from 'react-intl'
 
-import { setAlert, setTokenName, setTokens } from '@/slices/globalStatus'
+import { setTokenName, setTokens } from '@/slices/globalStatus'
 
 import { Submit, TextField } from '@/components/FormField'
 import i18n from '@/components/T'
@@ -50,6 +51,7 @@ interface TokenProps {
 const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
   const intl = useIntl()
 
+  const { setAlert } = useComponentActions()
   const { tokens } = useStoreSelector((state) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
@@ -60,12 +62,10 @@ const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
 
   const submitToken = (values: TokenFormValues, { setFieldError, resetForm }: FormikHelpers<TokenFormValues>) => {
     if (tokens.some((token) => token.name === values.name)) {
-      dispatch(
-        setAlert({
-          type: 'warning',
-          message: i18n('settings.addToken.duplicateDesc', intl),
-        }),
-      )
+      setAlert({
+        type: 'warning',
+        message: i18n('settings.addToken.duplicateDesc', intl),
+      })
 
       return
     }

@@ -14,7 +14,64 @@
  * limitations under the License.
  *
  */
+import { type Alert } from '@/zustand/component'
+import type { AxiosError } from 'axios'
+
 import http from './http'
+
+interface ErrorData {
+  code: number
+  type: string
+  message: string
+  full_text: string
+}
+
+export const applyErrorHandling = ({ openAlert }: { openAlert: (alert: Alert) => void }) => {
+  http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
+    const data = error.response?.data
+
+    if (data) {
+      // slice(10): error.api.xxx => xxx
+      const type = data.type.slice(10)
+
+      switch (type) {
+        case 'invalid_request':
+          if (data.message.includes('Unauthorized')) {
+            openAlert({
+              type: 'error',
+              message: 'Please check the validity of the token',
+            })
+          }
+
+          break
+        case 'internal_server_error':
+          if (data.message.includes('Unauthorized')) {
+            openAlert({
+              type: 'error',
+              message: 'Unauthorized. Please check the validity of the token',
+            })
+
+            resetAPIAuthentication()
+            // store.dispatch(removeToken())
+            // store.dispatch(setAuthOpen(true))
+          }
+
+          break
+        case 'no_cluster_privilege':
+        case 'no_namespace_privilege':
+        default:
+          openAlert({
+            type: 'error',
+            message: data.message || 'An unknown error occurred',
+          })
+
+          break
+      }
+    }
+
+    return Promise.reject(error)
+  })
+}
 
 let tokenInterceptorId: number
 
