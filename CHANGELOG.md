@@ -28,7 +28,8 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 
 - Remove schedule migration [#4686](https://github.com/chaos-mesh/chaos-mesh/pull/4686)
 - Remove the Predefined component in the Dashboard UI [#4696](https://github.com/chaos-mesh/chaos-mesh/pull/4696)
-- Remove old `New Workflow` UI
+- Remove old `New Workflow` UI [#4698](https://github.com/chaos-mesh/chaos-mesh/pull/4698)
+- Replace Redux with Zustand in the Dashboard UI
 
 ### Removed
 
