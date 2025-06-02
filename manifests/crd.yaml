@@ -39725,6 +39725,9 @@ spec:
                   node's current state.
                 items:
                   properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
                     reason:
                       type: string
                     status:
@@ -39732,6 +39735,7 @@ spec:
                     type:
                       type: string
                   required:
+                  - lastTransitionTime
                   - reason
                   - status
                   - type
@@ -49710,6 +49714,9 @@ spec:
                   current state.
                 items:
                   properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
                     reason:
                       type: string
                     startTime:
@@ -49720,6 +49727,7 @@ spec:
                     type:
                       type: string
                   required:
+                  - lastTransitionTime
                   - reason
                   - status
                   - type
