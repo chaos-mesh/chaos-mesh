@@ -76,7 +76,7 @@ jobs:
         run: |
           helm install --wait --create-namespace chaos-mesh helm/chaos-mesh \
             -n=chaos-mesh --set images.tag=latest --set chaosDaemon.env.DOCKER_API_VERSION=1.41 \
-            --set controllerManager.chaosdSecurityMode=false
+            --set controllerManager.chaosdSecurityMode=false,enableCtrlServer=true
           kubectl port-forward -n chaos-mesh svc/chaos-dashboard 2333:2333 &
 
       - uses: actions/setup-go@v5
