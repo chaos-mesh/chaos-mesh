@@ -24,11 +24,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/dashboard/core"
@@ -52,7 +52,7 @@ func (m *MockEventService) ListByUID(context.Context, string) ([]*core.Event, er
 	panic("implement me")
 }
 
-func (m *MockEventService) ListByUIDs(context.Context, []string) ([]*core.Event, error) {
+func (m *MockEventService) ListByUIDList(context.Context, []string) ([]*core.Event, error) {
 	panic("implement me")
 }
 
@@ -107,7 +107,7 @@ func (m *MockEventService) Create(context.Context, *core.Event) error {
 	panic("implement me")
 }
 
-func (m *MockEventService) DeleteByUIDs(context.Context, []string) error {
+func (m *MockEventService) DeleteByUIDList(context.Context, []string) error {
 	panic("implement me")
 }
 
@@ -116,10 +116,6 @@ func (m *MockEventService) DeleteByCreateTime(context.Context, time.Duration) er
 }
 
 func (m *MockEventService) DeleteByUID(context.Context, string) error {
-	panic("implement me")
-}
-
-func (m *MockEventService) DeleteByTime(context.Context, string, string) error {
 	panic("implement me")
 }
 
