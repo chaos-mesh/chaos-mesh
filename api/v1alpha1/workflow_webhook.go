@@ -37,11 +37,17 @@ var workflowlog = logf.Log.WithName("workflow-resource")
 
 var _ webhook.CustomValidator = &Workflow{}
 
-func (in *Workflow) ValidateCreate(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
+func (in *Workflow) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", obj)
+	}
+	workflowlog.Info("validate create", "name", typedObj.GetName())
+
 	var allErrs field.ErrorList
 	specPath := field.NewPath("spec")
-	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), in.Spec.Entry, in.Spec.Templates)...)
-	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), in.Spec.Templates)...)
+	allErrs = append(allErrs, entryMustExists(specPath.Child("entry"), typedObj.Spec.Entry, typedObj.Spec.Templates)...)
+	allErrs = append(allErrs, validateTemplates(specPath.Child("templates"), typedObj.Spec.Templates)...)
 	if len(allErrs) > 0 {
 		return nil, errors.New(allErrs.ToAggregate().Error())
 	}
@@ -49,10 +55,27 @@ func (in *Workflow) ValidateCreate(_ context.Context, _ runtime.Object) (admissi
 }
 
 func (in *Workflow) ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (admission.Warnings, error) {
-	return in.ValidateCreate(ctx, newObj)
+	typedOldObj, ok := oldObj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", oldObj)
+	}
+
+	typedNewObj, ok := newObj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", newObj)
+	}
+
+	workflowlog.Info("validate update", "name", typedOldObj.GetName())
+	return in.ValidateCreate(ctx, typedNewObj)
 }
 
-func (in *Workflow) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
+func (in *Workflow) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	typedObj, ok := obj.(*Workflow)
+	if !ok {
+		return nil, errors.Errorf("expected type *Workflow, got %T", obj)
+	}
+
+	workflowlog.Info("validate delete", "name", typedObj.GetName())
 	return nil, nil
 }
 
