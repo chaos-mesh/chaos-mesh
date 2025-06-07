@@ -1,16 +1,16 @@
 # syntax=docker/dockerfile:experimental
 
-FROM golang:1.23 AS go_install
+FROM golang:1.24 AS go_install
 
-ENV GOPATH /go
-ENV CGO_ENABLED 0
+ENV GOPATH=/go
+ENV CGO_ENABLED=0
 
 RUN go install golang.org/x/tools/cmd/goimports@v0.30.0
-RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.17.2
+RUN go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.18.0
 RUN go install github.com/mgechev/revive@v1.2.4
 RUN go install github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 RUN go install github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
-RUN go install github.com/99designs/gqlgen@v0.17.66
+RUN go install github.com/99designs/gqlgen@v0.17.74
 RUN go install github.com/golang/protobuf/protoc-gen-go@v1.4.2
 RUN go install github.com/axw/gocov/gocov@v1.1.0
 RUN go install github.com/AlekSi/gocov-xml@v1.1.0
@@ -20,13 +20,13 @@ RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.12.0
 
 FROM debian:bookworm-slim
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
 
-ENV http_proxy $HTTP_PROXY
-ENV https_proxy $HTTPS_PROXY
+ENV http_proxy=$HTTP_PROXY
+ENV https_proxy=$HTTPS_PROXY
 
 RUN apt update && \
     apt install unzip git build-essential curl musl musl-dev ebtables -y && \
@@ -59,9 +59,9 @@ COPY --from=go_install /usr/local/go /usr/local/go
 COPY --from=go_install /go/bin /go/bin
 
 # The `gqlgen` depends on the plugin in it
-COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.66 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.66
+COPY --from=go_install /go/pkg/mod/github.com/99designs/gqlgen@v0.17.74 /go/pkg/mod/github.com/99designs/gqlgen@v0.17.74
 
-ENV PATH "/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
+ENV PATH="/usr/local/go/bin:${PATH}:/tmp/go/bin:/go/bin"
 
 RUN curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.3.0/kustomize_v4.3.0_$(go env GOOS)_$(go env GOARCH).tar.gz | tar -xz -C /usr/local/bin/
 
@@ -80,8 +80,8 @@ RUN helm plugin install https://github.com/losisin/helm-values-schema-json.git
 RUN mkdir /.cache
 RUN chmod -R 777 /.cache
 
-ENV GOCACHE /tmp/go-build
-ENV GOPATH /tmp/go
-ENV CGO_ENABLED 0
+ENV GOCACHE=/tmp/go-build
+ENV GOPATH=/tmp/go
+ENV CGO_ENABLED=0
 
-LABEL org.opencontainers.image.source https://github.com/chaos-mesh/chaos-mesh
+LABEL org.opencontainers.image.source=https://github.com/chaos-mesh/chaos-mesh

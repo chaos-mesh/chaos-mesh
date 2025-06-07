@@ -21,7 +21,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Bump go to 1.22 [#4578](https://github.com/chaos-mesh/chaos-mesh/pull/4578)
 - Upgrade GitHub CI runners to Ubuntu 22.04 [#4516](https://github.com/chaos-mesh/chaos-mesh/pull/4516)
 - Upgrade k8s versions in e2e tests [#4648](https://github.com/chaos-mesh/chaos-mesh/pull/4648)
-- Update kubernetes dependencies to 1.32.2 and bump go to 1.23 [#4644](https://github.com/chaos-mesh/chaos-mesh/pull/4644)
+- Update kubernetes dependencies to 1.33.1 and bump go to 1.24 [#4644](https://github.com/chaos-mesh/chaos-mesh/pull/4644)
 - Update byteman-helper to v4.0.24 [#4681](https://github.com/chaos-mesh/chaos-mesh/pull/4681)
 - Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
 
