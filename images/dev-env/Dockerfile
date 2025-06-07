@@ -16,7 +16,7 @@ RUN go install github.com/axw/gocov/gocov@v1.1.0
 RUN go install github.com/AlekSi/gocov-xml@v1.1.0
 RUN go install github.com/matm/gocov-html@v0.0.0-20200509184451-71874e2e203b
 RUN go install github.com/swaggo/swag/cmd/swag@v1.8.7
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.12.0
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.23.4
 
 FROM debian:bookworm-slim
 
