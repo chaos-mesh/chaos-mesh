@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import { TemplateCustom } from '@/slices/workflows'
+import { TemplateCustom } from '@/zustand/workflow'
 
 import http from './http'
 import { RequestForm } from './workflows.type'

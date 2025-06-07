@@ -18,7 +18,7 @@ import { Stale } from '@/api/queryUtils'
 import Checkbox from '@/mui-extends/Checkbox'
 import Space from '@/mui-extends/Space'
 import { useGetCommonChaosAvailableNamespaces } from '@/openapi'
-import { useStoreSelector } from '@/store'
+import { useSettingStore } from '@/zustand/setting'
 import AddIcon from '@mui/icons-material/Add'
 import { Box, Button, Chip, Divider, FormHelperText, MenuItem, Typography } from '@mui/material'
 import { eval as expEval, parse } from 'expression-eval'
@@ -74,7 +74,7 @@ const AutoForm: ReactFCWithChildren<AutoFormProps> = ({
 }) => {
   const kindAction = concatKindAction(kind, action)
 
-  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
   const noScope =
     kind === SpecialTemplateType.Suspend || kind === SpecialTemplateType.Serial || kind === SpecialTemplateType.Parallel
 

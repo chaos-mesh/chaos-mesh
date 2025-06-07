@@ -16,12 +16,11 @@
  */
 import { applyAPIAuthentication, resetAPIAuthentication } from '@/api/interceptors'
 import Space from '@/mui-extends/Space'
-import { getExperimentsState } from '@/openapi'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import type { getExperimentsState } from '@/openapi'
+import { useAuthActions, useAuthStore } from '@/zustand/auth'
+import { useComponentActions } from '@/zustand/component'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useIntl } from 'react-intl'
-
-import { setAlert, setTokenName, setTokens } from '@/slices/globalStatus'
 
 import { Submit, TextField } from '@/components/FormField'
 import i18n from '@/components/T'
@@ -50,22 +49,21 @@ interface TokenProps {
 const Token: ReactFCWithChildren<TokenProps> = ({ onSubmitCallback }) => {
   const intl = useIntl()
 
-  const { tokens } = useStoreSelector((state) => state.globalStatus)
-  const dispatch = useStoreDispatch()
+  const { setAlert } = useComponentActions()
+  const tokens = useAuthStore((state) => state.tokens)
+  const { setTokens, setTokenName } = useAuthActions()
 
   const saveToken = (values: TokenFormValues) => {
-    dispatch(setTokens([...tokens, values]))
-    dispatch(setTokenName(values.name))
+    setTokens([...tokens, values])
+    setTokenName(values.name)
   }
 
   const submitToken = (values: TokenFormValues, { setFieldError, resetForm }: FormikHelpers<TokenFormValues>) => {
     if (tokens.some((token) => token.name === values.name)) {
-      dispatch(
-        setAlert({
-          type: 'warning',
-          message: i18n('settings.addToken.duplicateDesc', intl),
-        }),
-      )
+      setAlert({
+        type: 'warning',
+        message: i18n('settings.addToken.duplicateDesc', intl),
+      })
 
       return
     }

@@ -16,7 +16,8 @@
  */
 import Menu from '@/mui-extends/Menu'
 import Paper from '@/mui-extends/Paper'
-import { useStoreDispatch, useStoreSelector } from '@/store'
+import { useComponentActions } from '@/zustand/component'
+import { useWorkflowActions, useWorkflowStore } from '@/zustand/workflow'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Drawer, IconButton, ListItemIcon, ListItemText, MenuItem } from '@mui/material'
@@ -28,9 +29,6 @@ import { MarkerType, Node, ReactFlowInstance, XYPosition } from 'react-flow-rend
 import ReactFlow, { Background, Controls, MiniMap, addEdge, useEdgesState, useNodesState } from 'react-flow-renderer'
 import { useIntl } from 'react-intl'
 import { v4 as uuidv4 } from 'uuid'
-
-import { setConfirm } from '@/slices/globalStatus'
-import { importNodes, removeWorkflowNode, updateWorkflowNode } from '@/slices/workflows'
 
 import AutoForm, { Belong } from '@/components/AutoForm'
 import i18n, { T } from '@/components/T'
@@ -65,7 +63,7 @@ interface NodeControlProps extends ControlProps {
 
 const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
   const intl = useIntl()
-  const dispatch = useStoreDispatch()
+  const { setConfirm } = useComponentActions()
 
   const onNode = (type: 'copy' | 'delete', onClose: any) => (e: React.SyntheticEvent) => {
     e.stopPropagation()
@@ -82,17 +80,15 @@ const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
         break
     }
 
-    dispatch(
-      setConfirm({
-        title: `${i18n(`common.${type}`, intl)} node ${id}`,
-        description: <T id="common.deleteDesc" />,
-        handle: () => {
-          action(id)
+    setConfirm({
+      title: `${i18n(`common.${type}`, intl)} node ${id}`,
+      description: <T id="common.deleteDesc" />,
+      handle: () => {
+        action(id)
 
-          onClose()
-        },
-      }),
-    )
+        onClose()
+      },
+    })
   }
   return (
     <Menu
@@ -126,16 +122,14 @@ const NodeControl = ({ id, type, onDelete, onCopy }: NodeControlProps) => {
 
 const EdgeControl = ({ id, onDelete }: ControlProps) => {
   const intl = useIntl()
-  const dispatch = useStoreDispatch()
+  const { setConfirm } = useComponentActions()
 
   const onEdgeDelete = () => {
-    dispatch(
-      setConfirm({
-        title: `Delete edge ${id}`,
-        description: <T id="common.deleteDesc" />,
-        handle: () => onDelete(id),
-      }),
-    )
+    setConfirm({
+      title: `Delete edge ${id}`,
+      description: <T id="common.deleteDesc" />,
+      handle: () => onDelete(id),
+    })
   }
 
   return (
@@ -178,8 +172,8 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   const nodeTypes = useMemo(() => ({ flowNode: FlowNode, groupNode: GroupNode }), [])
   const edgeTypes = useMemo(() => ({ adjustableEdge: AdjustableEdge }), [])
 
-  const store = useStoreSelector((state) => state.workflows)
-  const dispatch = useStoreDispatch()
+  const nodesInStore = useWorkflowStore((state) => state.nodes)
+  const { importNodes, removeWorkflowNode, updateWorkflowNode } = useWorkflowActions()
 
   const [openDrawer, setOpenDrawer] = useState(false)
   const [identifier, setIdentifier] = useState<Identifier | null>(null)
@@ -261,7 +255,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
       return
     }
 
-    const workflowNode = store.nodes[data.name]
+    const workflowNode = nodesInStore[data.name]
 
     formInitialValues.current = workflowNode
 
@@ -306,7 +300,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
         return node
       }),
     )
-    dispatch(updateWorkflowNode(rest))
+    updateWorkflowNode(rest)
 
     cleanup()
   }
@@ -367,7 +361,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
       // Remove templates if they are not used by other nodes.
       templates.forEach((template) => {
         if (!restNodes.some((n) => n.data.name === template)) {
-          dispatch(removeWorkflowNode(template))
+          removeWorkflowNode(template)
         }
       })
 
@@ -403,7 +397,7 @@ export default function Whiteboard({ flowRef }: WhiteboardProps) {
   const importWorkflow = (workflow: string) => {
     const { store, nodes, edges } = workflowToFlow(workflow)
 
-    dispatch(importNodes(store))
+    importNodes(store)
     setNodes(
       nodes.map((node) => ({
         ...node,

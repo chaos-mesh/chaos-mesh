@@ -21,12 +21,11 @@ import {
   usePostCommonPhysicalmachines,
   usePostCommonPods,
 } from '@/openapi'
-import { useStoreSelector } from '@/store'
+import type { Env } from '@/zustand/experiment'
+import { useSettingStore } from '@/zustand/setting'
 import { MenuItem, Typography } from '@mui/material'
 import { getIn, useFormikContext } from 'formik'
 import { useEffect, useMemo } from 'react'
-
-import { Env } from '@/slices/experiments'
 
 import { podPhases } from '@/components/AutoForm/data'
 import { AutocompleteField, SelectField } from '@/components/FormField'
@@ -55,8 +54,7 @@ const Scope = ({ env, namespaces, scope = 'selector', modeScope = '', previewTit
     annotationSelectors: currentAnnotations,
   } = getIn(values, scope)
 
-  const { settings } = useStoreSelector((state) => state)
-  const { enableKubeSystemNS } = settings
+  const enableKubeSystemNS = useSettingStore((state) => state.enableKubeSystemNS)
 
   const { data: labels } = useGetCommonLabels(
     {
@@ -205,7 +203,7 @@ interface ConditionalScopeProps extends ScopeProps {
 const ConditionalScope = ({ kind, ...rest }: ConditionalScopeProps) => {
   const disabled = kind === 'AWSChaos' || kind === 'GCPChaos'
 
-  const { useNewPhysicalMachine } = useStoreSelector((state) => state.settings)
+  const useNewPhysicalMachine = useSettingStore((state) => state.useNewPhysicalMachine)
 
   if (disabled) {
     return (
