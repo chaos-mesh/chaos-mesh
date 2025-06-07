@@ -276,6 +276,9 @@ func shouldBeNoSchedule(path *field.Path, template Template) field.ErrorList {
 	return nil
 }
 
-func (in *Workflow) Default() {
-	gw.Default(in)
+var _ webhook.CustomDefaulter = &Workflow{}
+
+func (in *Workflow) Default(_ context.Context, obj runtime.Object) error {
+	gw.Default(obj)
+	return nil
 }

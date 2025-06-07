@@ -172,6 +172,7 @@ func Run(params RunParams) error {
 		err = ctrl.NewWebhookManagedBy(mgr).
 			For(&v1alpha1.Workflow{}).
 			WithValidator(&v1alpha1.Workflow{}).
+			WithDefaulter(&v1alpha1.Workflow{}).
 			Complete()
 		if err != nil {
 			return err
