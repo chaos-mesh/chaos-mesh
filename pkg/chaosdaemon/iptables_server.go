@@ -161,9 +161,6 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		iptables.ensureRule(&iptablesChain{
 			Name: "CHAOS-OUTPUT",
 		}, "-A CHAOS-OUTPUT -j "+chain.Name)
-		if err != nil {
-			return err
-		}
 	} else {
 		return errors.Errorf("unknown direction %d", chain.Direction)
 	}

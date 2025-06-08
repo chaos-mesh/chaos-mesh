@@ -138,7 +138,7 @@ func (s *Service) get(c *gin.Context) {
 	exp, err := s.archive.FindByUID(context.Background(), uid)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			u.SetAPIError(c, u.ErrNotFound.New("Experiment "+uid+" not found"))
+			u.SetAPIError(c, u.ErrNotFound.New("Experiment %s not found", uid))
 		} else {
 			u.SetAPIError(c, u.ErrInternalServer.WrapWithNoMessage(err))
 		}
