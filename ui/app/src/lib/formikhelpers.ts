@@ -239,8 +239,9 @@ function shouldHasSelector(kind: ExperimentKind | 'Schedule') {
   )
 }
 
-export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spec: any } {
+export function parseYAML(yamlObj: any) {
   let { kind, metadata, spec }: { kind: ExperimentKind; metadata: any; spec: any } = yamlObj
+  const env: Env = kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
@@ -385,11 +386,14 @@ export function parseYAML(yamlObj: any): { kind: ExperimentKind; basic: any; spe
     spec = rest
   }
 
-  return sanitize({
-    kind,
-    basic,
-    spec,
-  })
+  return {
+    env,
+    data: sanitize({
+      kind,
+      basic,
+      spec,
+    }),
+  }
 }
 
 function validate(defaultI18n: string, i18n?: string) {
