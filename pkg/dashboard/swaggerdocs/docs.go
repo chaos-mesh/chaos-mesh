@@ -7621,6 +7621,12 @@ const docTemplate = `{
                     "description": "Container is the main container image to run in the pod",
                     "$ref": "#/definitions/v1.Container"
                 },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "volumes": {
                     "description": "Volumes is a list of volumes that can be mounted by containers in a template.\n+patchStrategy=merge\n+patchMergeKey=name",
                     "type": "array",

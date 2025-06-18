@@ -6059,6 +6059,10 @@ definitions:
       container:
         $ref: '#/definitions/v1.Container'
         description: Container is the main container image to run in the pod
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       volumes:
         description: |-
           Volumes is a list of volumes that can be mounted by containers in a template.
