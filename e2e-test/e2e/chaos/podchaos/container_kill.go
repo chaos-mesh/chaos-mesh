@@ -20,6 +20,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -27,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -153,8 +153,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Action:   v1alpha1.ContainerKillAction,
-			Duration: pointer.String("9m"),
+			Action: v1alpha1.ContainerKillAction,
 			ContainerSelector: v1alpha1.ContainerSelector{
 				PodSelector: v1alpha1.PodSelector{
 					Selector: v1alpha1.PodSelectorSpec{
@@ -202,7 +201,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		}
 		return false, err
 	})
-	framework.ExpectError(err, "one-shot chaos shouldn't enter stopped phase")
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "one-shot chaos shouldn't enter stopped phase")
 
 	// wait for 1 minutes and check whether nginx container will be killed or not
 	pods, err = kubeCli.CoreV1().Pods(ns).List(context.TODO(), listOption)
@@ -213,8 +212,8 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		framework.ExpectNoError(err, "get nginx pods error")
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	framework.ExpectError(err, "wait container not killed failed")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait container not killed failed")
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	// resume experiment
 	err = util.UnPauseChaos(ctx, cli, containerKillChaos)
@@ -240,6 +239,5 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 		framework.ExpectNoError(err, "get nginx pods error")
 		return containerID != newPods.Items[0].Status.ContainerStatuses[0].ContainerID, nil
 	})
-	framework.ExpectError(err, "container shouldn't be killed")
-
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "container shouldn't be killed")
 }

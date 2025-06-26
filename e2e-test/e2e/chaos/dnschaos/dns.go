@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -51,7 +52,7 @@ func TestcaseDNSRandom(
 	// get IP of a non exists host, and will get error
 	for _, domainName := range effectDomainNames {
 		_, err = testDNSServer(c, port, domainName)
-		framework.ExpectError(err, "test DNS server failed")
+		gomega.Expect(err).Should(gomega.HaveOccurred(), "test DNS server failed")
 	}
 
 	dnsChaos := &v1alpha1.DNSChaos{

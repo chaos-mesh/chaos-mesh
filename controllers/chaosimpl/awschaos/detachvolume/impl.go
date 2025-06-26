@@ -75,10 +75,11 @@ func (impl *Impl) Apply(ctx context.Context, index int, records []*v1alpha1.Reco
 		return v1alpha1.NotInjected, err
 	}
 
+	force := true
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
 		VolumeId:   selected.EbsVolume,
 		Device:     selected.DeviceName,
-		Force:      true,
+		Force:      &force,
 		InstanceId: &selected.Ec2Instance,
 	})
 

@@ -51,7 +51,7 @@ Examples:
 
   # Recover network chaos from certain pods in certain namespace
   chaosctl recover networkchaos pod1 pod2 pod3 -n NAMESPACE
-  
+
   # Recover network chaos from pods with label key=value
   chaosctl recover networkchaos -l key=value`,
 		ValidArgsFunction: noCompletions,

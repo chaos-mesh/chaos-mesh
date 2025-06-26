@@ -150,24 +150,18 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		return err
 	}
 
-	if chain.Direction == pb.Chain_INPUT {
-		err := iptables.ensureRule(&iptablesChain{
+	switch chain.Direction {
+	case pb.Chain_INPUT:
+		return iptables.ensureRule(&iptablesChain{
 			Name: "CHAOS-INPUT",
 		}, "-A CHAOS-INPUT -j "+chain.Name)
-		if err != nil {
-			return err
-		}
-	} else if chain.Direction == pb.Chain_OUTPUT {
-		iptables.ensureRule(&iptablesChain{
+	case pb.Chain_OUTPUT:
+		return iptables.ensureRule(&iptablesChain{
 			Name: "CHAOS-OUTPUT",
 		}, "-A CHAOS-OUTPUT -j "+chain.Name)
-		if err != nil {
-			return err
-		}
-	} else {
+	default:
 		return errors.Errorf("unknown direction %d", chain.Direction)
 	}
-	return nil
 }
 
 func (iptables *iptablesClient) initializeEnv() error {
