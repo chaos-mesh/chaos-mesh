@@ -63,8 +63,9 @@ const NewExperiment: React.ForwardRefRenderFunction<NewExperimentHandles, NewExp
   }
 
   const fillExperiment = (original: any) => {
-    const { kind, basic, spec } = parseYAML(original)
-    const env = kind === 'PhysicalMachineChaos' ? 'physic' : 'k8s'
+    const { env, data } = parseYAML(original)
+    const { kind, basic, spec } = data
+
     const action = spec.action ?? ''
 
     setExternalExp({
