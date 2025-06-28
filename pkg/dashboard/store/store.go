@@ -17,10 +17,15 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlserver"
+	"gorm.io/gorm"
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	config "github.com/chaos-mesh/chaos-mesh/pkg/config"
@@ -45,32 +50,38 @@ var (
 		fx.Invoke(experiment.DeleteIncompleteExperiments),
 		fx.Invoke(schedule.DeleteIncompleteSchedules),
 	)
-	sqliteDriver = "sqlite3"
 )
 
 // NewDBStore returns a new gorm.DB
 func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig, logger logr.Logger) (*gorm.DB, error) {
-	ds := conf.Database.Datasource
+	var dialector gorm.Dialector
 
-	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
-	if conf.Database.Driver == sqliteDriver {
-		ds += "?cache=shared"
+	switch conf.Database.Driver {
+	case "mysql":
+		dialector = mysql.Open(conf.Database.Datasource)
+	case "postgres":
+		dialector = postgres.Open(conf.Database.Datasource)
+	case "sqlite3":
+		dialector = sqlite.Open(conf.Database.Datasource)
+	case "sqlserver", "mssql":
+		dialector = sqlserver.Open(conf.Database.Datasource)
+	default:
+		return nil, fmt.Errorf("unsupported database driver: %s", conf.Database.Driver)
 	}
 
-	gormDB, err := gorm.Open(conf.Database.Driver, ds)
+	gormDB, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {
-		logger.Error(err, "Failed to open DB: ", "driver => ", conf.Database.Driver)
+		logger.Error(err, "Failed to open DB: ", "driver", conf.Database.Driver)
 		return nil, err
-	}
-
-	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
-	if conf.Database.Driver == sqliteDriver {
-		gormDB.DB().SetMaxOpenConns(1)
 	}
 
 	lc.Append(fx.Hook{
 		OnStop: func(context.Context) error {
-			return gormDB.Close()
+			sqlDB, err := gormDB.DB()
+			if err != nil {
+				return err
+			}
+			return sqlDB.Close()
 		},
 	})
 

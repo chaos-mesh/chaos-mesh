@@ -17,9 +17,10 @@ package experiment
 
 import (
 	"context"
+	"errors"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -38,7 +39,7 @@ func NewStore(db *gorm.DB) core.ExperimentStore {
 
 // DeleteIncompleteExperiments call core.ExperimentStore.DeleteIncompleteExperiments to deletes all incomplete experiments.
 func DeleteIncompleteExperiments(es core.ExperimentStore, _ core.EventStore) {
-	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Error(err, "failed to delete all incomplete experiments")
 	}
 }
@@ -53,7 +54,7 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name stri
 	experiments := make([]*core.ExperimentMeta, 0)
 	query, args := constructQueryArgs(kind, namespace, name, "")
 
-	if err := db.Where(query, args).Where("archived = ?", archived).Find(&experiments).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+	if err := db.Where(query, args).Where("archived = ?", archived).Find(&experiments).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
@@ -119,7 +120,7 @@ func (e *experimentStore) Set(_ context.Context, experiment *core.Experiment) er
 func (e *experimentStore) Archive(_ context.Context, namespace, name string) error {
 	if err := e.db.Model(core.Experiment{}).
 		Where("namespace = ? AND name = ? AND archived = ?", namespace, name, false).
-		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 
