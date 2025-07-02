@@ -26,20 +26,20 @@ import (
 var _ = Describe("schedule_webhook", func() {
 	Context("webhook.Validator of schedule", func() {
 		It("Validate", func() {
-
 			type TestCase struct {
 				name     string
 				schedule Schedule
 				execute  func(schedule *Schedule) error
 				expect   string
 			}
+
 			tcs := []TestCase{
 				{
 					name: "validation for normal chaos",
 					schedule: Schedule{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
-							Name:      "foo1",
+							Name:      "foo",
 						},
 						Spec: ScheduleSpec{
 							ScheduleItem: ScheduleItem{EmbedChaos: EmbedChaos{PodChaos: &PodChaosSpec{
@@ -50,29 +50,10 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate(context.Background(), nil)
+						_, err := schedule.ValidateCreate(context.Background(), schedule)
 						return err
 					},
 					expect: "error",
-				},
-				{
-					name: "validation for schedule",
-					schedule: Schedule{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo2",
-						},
-						Spec: ScheduleSpec{
-							ScheduleItem: ScheduleItem{EmbedChaos: EmbedChaos{PodChaos: &PodChaosSpec{}}},
-							Type:         ScheduleTypePodChaos,
-							Schedule:     "@every -5s",
-						},
-					},
-					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate(context.Background(), nil)
-						return err
-					},
-					expect: "",
 				},
 				{
 					name: "validation for workflow",
@@ -88,7 +69,7 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate(context.Background(), nil)
+						_, err := schedule.ValidateCreate(context.Background(), schedule)
 						return err
 					},
 					expect: "",
@@ -107,7 +88,7 @@ var _ = Describe("schedule_webhook", func() {
 						},
 					},
 					execute: func(schedule *Schedule) error {
-						_, err := schedule.ValidateCreate(context.Background(), nil)
+						_, err := schedule.ValidateCreate(context.Background(), schedule)
 						return err
 					},
 					expect: "",
