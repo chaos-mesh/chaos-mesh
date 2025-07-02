@@ -48,48 +48,76 @@ func (in *ConcurrencyPolicy) Default() {
 var _ webhook.CustomValidator = &Schedule{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateCreate(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
-	schedulelog.Info("validate create", "name", in.Name)
-	return in.Validate()
+func (in *Schedule) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	schedule, ok := obj.(*Schedule)
+	if !ok {
+		return nil, errors.Errorf("expected type *Schedule, got %T", obj)
+	}
+
+	schedulelog.Info("validate create", "name", schedule.Name)
+
+	return in.Validate(schedule)
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateUpdate(_ context.Context, _ runtime.Object, _ runtime.Object) (admission.Warnings, error) {
-	schedulelog.Info("validate update", "name", in.Name)
-	return in.Validate()
+func (in *Schedule) ValidateUpdate(_ context.Context, _, newObj runtime.Object) (admission.Warnings, error) {
+	newSchedule, ok := newObj.(*Schedule)
+	if !ok {
+		return nil, errors.Errorf("expected type *Schedule, got %T", newObj)
+	}
+
+	schedulelog.Info("validate update", "name", newSchedule.Name)
+
+	return in.Validate(newSchedule)
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (in *Schedule) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
-	schedulelog.Info("validate delete", "name", in.Name)
+func (in *Schedule) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	schedule, ok := obj.(*Schedule)
+	if !ok {
+		return nil, errors.Errorf("expected type *Schedule, got %T", obj)
+	}
+
+	schedulelog.Info("validate delete", "name", schedule.Name)
+
 	return nil, nil
 }
 
 // Validate validates chaos object
-func (in *Schedule) Validate() ([]string, error) {
-	allErrs := in.Spec.Validate()
+func (in *Schedule) Validate(obj *Schedule) ([]string, error) {
+	allErrs := in.Spec.Validate(&obj.Spec)
+
 	if len(allErrs) > 0 {
 		return nil, errors.New(allErrs.ToAggregate().Error())
 	}
+
 	return nil, nil
 }
 
-func (in *ScheduleSpec) Validate() field.ErrorList {
+func (in *ScheduleSpec) Validate(spec *ScheduleSpec) field.ErrorList {
 	specField := field.NewPath("spec")
 	allErrs := field.ErrorList{}
-	allErrs = append(allErrs, in.validateSchedule(specField.Child("schedule"))...)
-	allErrs = append(allErrs, in.validateChaos(specField)...)
+
+	allErrs = append(allErrs, spec.validateSchedule(specField.Child("schedule"))...)
+	allErrs = append(allErrs, spec.validateChaos(specField)...)
+
 	return allErrs
 }
 
 // validateSchedule validates the cron
 func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
+
 	_, err := StandardCronParser.Parse(in.Schedule)
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(schedule,
-			in.Schedule,
-			fmt.Sprintf("parse schedule field error:%s", err)))
+		allErrs = append(
+			allErrs,
+			field.Invalid(
+				schedule,
+				in.Schedule,
+				fmt.Sprintf("parse schedule field error:%s", err),
+			),
+		)
 	}
 
 	return allErrs
@@ -98,8 +126,10 @@ func (in *ScheduleSpec) validateSchedule(schedule *field.Path) field.ErrorList {
 // validateChaos validates the chaos
 func (in *ScheduleSpec) validateChaos(chaos *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
+
 	if in.Type != ScheduleTypeWorkflow {
 		allErrs = append(allErrs, in.EmbedChaos.Validate(chaos, string(in.Type))...)
 	}
+
 	return allErrs
 }
