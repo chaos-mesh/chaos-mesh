@@ -97,7 +97,7 @@ const Step2: ReactFCWithChildren<Step2Props> = ({ inWorkflow = false, inSchedule
     const values = schema.cast(_values) as Record<string, any>
 
     if (import.meta.env.DEV) {
-      console.debug('Debug handleSubmitStep2:', values)
+      console.info('Debug handleSubmitStep2:', values)
     }
 
     setBasic(values)
