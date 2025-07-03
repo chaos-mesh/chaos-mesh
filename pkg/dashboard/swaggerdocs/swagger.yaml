@@ -6763,6 +6763,8 @@ definitions:
     type: object
   v1alpha1.WorkflowCondition:
     properties:
+      lastTransitionTime:
+        type: string
       reason:
         type: string
       startTime:
