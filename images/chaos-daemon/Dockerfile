@@ -1,12 +1,12 @@
-FROM curlimages/curl:7.88.1 as binaryimage
+FROM curlimages/curl:7.88.1 AS binaryimage
 
 USER root
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
 
-ENV http_proxy $HTTP_PROXY
-ENV https_proxy $HTTPS_PROXY
+ENV http_proxy=$HTTP_PROXY
+ENV https_proxy=$HTTPS_PROXY
 
 ARG TARGET_PLATFORM=amd64
 
@@ -31,17 +31,14 @@ RUN case "$TARGET_PLATFORM" in \
     curl -L https://github.com/chaos-mesh/chaos-tproxy/releases/download/v0.5.3/tproxy-$NSEXEC_ARCH.tar.gz | tar xz -C /tmp/bin; \
     curl -L https://github.com/chaos-mesh/memStress/releases/download/v0.3/memStress_v0.3-$NSEXEC_ARCH-linux-gnu.tar.gz | tar xz -C /tmp/bin
 
-
-
-
 # ---
 FROM debian:bookworm-slim
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
 
-ENV http_proxy $HTTP_PROXY
-ENV https_proxy $HTTPS_PROXY
+ENV http_proxy=$HTTP_PROXY
+ENV https_proxy=$HTTPS_PROXY
 
 RUN echo "deb http://security.debian.org/debian-security bookworm-security main contrib non-free" >> /etc/apt/sources.list && \
     echo "deb http://deb.debian.org/debian bookworm-proposed-updates main contrib non-free" >> /etc/apt/sources.list && \
@@ -52,15 +49,16 @@ RUN echo "deb http://security.debian.org/debian-security bookworm-security main 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy && \
     update-alternatives --set ebtables /usr/sbin/ebtables-legacy
 
-ENV RUST_BACKTRACE 1
-ENV BYTEMAN_HOME /usr/local/byteman
-ENV PATH $PATH:/usr/local/byteman/bin
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH $PATH:/usr/local/bin
+ENV RUST_BACKTRACE=1
+ENV BYTEMAN_HOME=/usr/local/byteman
+ENV PATH=$PATH:/usr/local/byteman/bin
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV PATH=$PATH:/usr/local/bin
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause
 COPY bin/cdh /usr/local/bin/cdh
 COPY --from=binaryimage /tmp/byteman /usr/local/byteman
 COPY --from=binaryimage /tmp/bin/* /usr/local/bin/
+
 RUN mv /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so

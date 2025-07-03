@@ -19,6 +19,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -66,8 +67,8 @@ selector:
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait chaos mesh not dies")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")
@@ -119,8 +120,8 @@ selector:
 		}
 		return false, nil
 	})
-	framework.ExpectError(err, "wait chaos mesh not dies")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	gomega.Expect(err).Should(gomega.HaveOccurred(), "wait chaos mesh not dies")
+	gomega.Expect(err).To(gomega.MatchError(wait.ErrWaitTimeout))
 
 	err = enableWebhook(ns)
 	framework.ExpectNoError(err, "enable webhook on ns error")

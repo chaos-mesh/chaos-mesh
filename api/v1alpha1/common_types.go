@@ -16,12 +16,15 @@
 package v1alpha1
 
 import (
+	"context"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 const (
@@ -146,6 +149,14 @@ type InnerObject interface {
 	IsPaused() bool
 	DurationExceeded(time.Time) (bool, time.Duration, error)
 	IsOneShot() bool
+
+	// For implementing `webhook.CustomValidator` and `webhook.CustomDefaulter`.
+	// See https://github.com/chaos-mesh/chaos-mesh/pull/4644 for more details.
+	// TODO: can we use another struct to implement? For example `PodChaosCustomValidator`?
+	ValidateCreate(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error)
+	ValidateDelete(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error)
+	ValidateUpdate(ctx context.Context, oldObj runtime.Object, newObj runtime.Object) (warnings admission.Warnings, err error)
+	Default(ctx context.Context, obj runtime.Object) error
 }
 
 // +kubebuilder:object:generate=false
@@ -172,10 +183,11 @@ type InnerObjectWithSelector interface {
 
 // +kubebuilder:object:generate=false
 
-// WebhookObject is basic Object which implement `webhook.Validator` and `webhook.Defaulter`
+// WebhookObject is basic Object which implement `webhook.CustomValidator` and `webhook.CustomDefaulter`
 type WebhookObject interface {
-	webhook.Validator
-	webhook.Defaulter
+	webhook.CustomValidator
+	webhook.CustomDefaulter
+	runtime.Object
 }
 
 // +kubebuilder:object:generate=false
