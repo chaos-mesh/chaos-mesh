@@ -14,7 +14,6 @@ RUN curl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VER
     rm -rf linux-amd64 && \
     rm helm-${HELM_VERSION}-linux-amd64.tar.gz
 
-
 ADD chaos-mesh /charts/e2e/chaos-mesh
 ADD manifests /manifests/e2e
 

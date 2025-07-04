@@ -50,6 +50,7 @@ RUN case "$TARGET_PLATFORM" in \
     curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.12.2/protoc-3.12.2-linux-$PROTOC_ARCH.zip > /protoc.zip && \
     unzip /protoc.zip -d /usr/local && \
     rm /protoc.zip
+
 RUN chmod +rx -R /usr/local/include
 RUN chmod +x /usr/local/bin/protoc
 

@@ -21,7 +21,6 @@ import (
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
@@ -29,15 +28,15 @@ import (
 
 type MockClient struct{}
 
-func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error) {
+func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (container.InspectResponse, error) {
 	if err := mock.On("ContainerInspectError"); err != nil {
-		return types.ContainerJSON{}, err.(error)
+		return container.InspectResponse{}, err.(error)
 	}
 
-	containerJSON := types.ContainerJSON{}
+	containerJSON := container.InspectResponse{}
 	if pid := mock.On("pid"); pid != nil {
-		containerJSON.ContainerJSONBase = &types.ContainerJSONBase{
-			State: &types.ContainerState{
+		containerJSON.ContainerJSONBase = &container.ContainerJSONBase{
+			State: &container.State{
 				Pid: pid.(int),
 			},
 		}
@@ -67,17 +66,17 @@ func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.C
 	return &MockContainer{}, nil
 }
 
-func (m *MockClient) ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error) {
+func (m *MockClient) ContainerList(ctx context.Context, options container.ListOptions) ([]container.Summary, error) {
 	if err := mock.On("ContainerListError"); err != nil {
 		return nil, err.(error)
 	}
 
-	c := types.Container{}
+	c := container.Summary{}
 	if id := mock.On("containerID"); id != nil {
 		c.ID = id.(string)
 	}
 
-	return []types.Container{c}, nil
+	return []container.Summary{c}, nil
 }
 
 func (m *MockClient) Containers(ctx context.Context, filters ...string) ([]containerd.Container, error) {
