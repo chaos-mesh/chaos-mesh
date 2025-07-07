@@ -444,7 +444,7 @@ func (it *TaskReconciler) SpawnTaskPod(ctx context.Context, node *v1alpha1.Workf
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", node.Name),
 			Namespace:    node.Namespace,
-			Labels:          labels,
+			Labels:       labels,
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion:         ApiVersion,
