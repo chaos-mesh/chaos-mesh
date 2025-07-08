@@ -28,7 +28,7 @@ import (
 var (
 	isController       = true
 	blockOwnerDeletion = true
-	ApiVersion         = v1alpha1.GroupVersion.String()
+	ApiVersion         = v1alpha1.SchemeGroupVersion.String()
 	KindWorkflow       = "Workflow"
 	KindWorkflowNode   = "WorkflowNode"
 )
