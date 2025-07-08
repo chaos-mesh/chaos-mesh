@@ -24,6 +24,7 @@ For more information and how-to, see [RFC: Keep A Changelog](https://github.com/
 - Update kubernetes dependencies to 1.33.1 and bump go to 1.24 [#4644](https://github.com/chaos-mesh/chaos-mesh/pull/4644)
 - Update byteman-helper to v4.0.24 [#4681](https://github.com/chaos-mesh/chaos-mesh/pull/4681)
 - Adopt vite and swc in the Dashboard UI [#4688](https://github.com/chaos-mesh/chaos-mesh/pull/4688)
+- Update usage about helm-values-schema-json [#4719](https://github.com/chaos-mesh/chaos-mesh/pull/4719)
 
 ### Deprecated
 
