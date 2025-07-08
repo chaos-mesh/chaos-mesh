@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	dockerclient "github.com/docker/docker/client"
 	"github.com/pkg/errors"
@@ -39,9 +39,9 @@ const (
 
 // DockerClientInterface represents the DockerClient, it's used to simply unit test
 type DockerClientInterface interface {
-	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
+	ContainerInspect(ctx context.Context, containerID string) (container.InspectResponse, error)
 	ContainerKill(ctx context.Context, containerID, signal string) error
-	ContainerList(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error)
+	ContainerList(ctx context.Context, options container.ListOptions) ([]container.Summary, error)
 }
 
 // DockerClient can get information from docker
@@ -93,7 +93,7 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 func (c DockerClient) ListContainerIDs(ctx context.Context) ([]string, error) {
 	// filter sandbox containers
 	filterArg := filters.Arg("label", fmt.Sprintf("%s=%s", containerKindLabel, containerKindContainer))
-	containers, err := c.client.ContainerList(ctx, types.ContainerListOptions{
+	containers, err := c.client.ContainerList(ctx, container.ListOptions{
 		Filters: filters.NewArgs(filterArg),
 	})
 	if err != nil {
