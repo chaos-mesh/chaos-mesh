@@ -685,11 +685,13 @@ var _ = Describe("Workflow", func() {
 					if err != nil {
 						return err
 					}
+					latestTransitionTime := metav1.NewTime(time.Now())
 					deadlineExceedNode.Status.Conditions = []v1alpha1.WorkflowNodeCondition{
 						{
-							Type:   v1alpha1.ConditionDeadlineExceed,
-							Status: corev1.ConditionTrue,
-							Reason: v1alpha1.ParentNodeDeadlineExceed,
+							Type:               v1alpha1.ConditionDeadlineExceed,
+							Status:             corev1.ConditionTrue,
+							Reason:             v1alpha1.ParentNodeDeadlineExceed,
+							LastTransitionTime: &latestTransitionTime,
 						},
 					}
 					err = kubeClient.Status().Update(ctx, &deadlineExceedNode)
@@ -771,11 +773,13 @@ var _ = Describe("Workflow", func() {
 					if err != nil {
 						return err
 					}
+					latestTransitionTime := metav1.NewTime(time.Now())
 					deadlineExceedNode.Status.Conditions = []v1alpha1.WorkflowNodeCondition{
 						{
-							Type:   v1alpha1.ConditionDeadlineExceed,
-							Status: corev1.ConditionTrue,
-							Reason: v1alpha1.NodeDeadlineExceed,
+							Type:               v1alpha1.ConditionDeadlineExceed,
+							Status:             corev1.ConditionTrue,
+							Reason:             v1alpha1.NodeDeadlineExceed,
+							LastTransitionTime: &latestTransitionTime,
 						},
 					}
 					err = kubeClient.Status().Update(ctx, &deadlineExceedNode)

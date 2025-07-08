@@ -18,10 +18,12 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -108,10 +110,12 @@ func (it *AbortNodeReconciler) propagateAbortToChildren(ctx context.Context, par
 					)
 					return nil
 				}
+				now := metav1.NewTime(time.Now())
 				SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-					Type:   v1alpha1.ConditionAborted,
-					Status: corev1.ConditionTrue,
-					Reason: v1alpha1.ParentNodeAborted,
+					Type:               v1alpha1.ConditionAborted,
+					Status:             corev1.ConditionTrue,
+					Reason:             v1alpha1.ParentNodeAborted,
+					LastTransitionTime: &now,
 				})
 				it.eventRecorder.Event(&nodeNeedUpdate, recorder.ParentNodeAborted{ParentNodeName: parent.Name})
 				return it.kubeClient.Status().Update(ctx, &nodeNeedUpdate)

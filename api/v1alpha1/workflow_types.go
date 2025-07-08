@@ -71,10 +71,11 @@ const (
 )
 
 type WorkflowCondition struct {
-	Type      WorkflowConditionType  `json:"type"`
-	Status    corev1.ConditionStatus `json:"status"`
-	Reason    string                 `json:"reason"`
-	StartTime *metav1.Time           `json:"startTime,omitempty"`
+	Type               WorkflowConditionType  `json:"type"`
+	Status             corev1.ConditionStatus `json:"status"`
+	Reason             string                 `json:"reason"`
+	StartTime          *metav1.Time           `json:"startTime,omitempty"`
+	LastTransitionTime *metav1.Time           `json:"lastTransitionTime"`
 }
 
 type TemplateType string

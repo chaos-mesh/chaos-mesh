@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -125,22 +126,24 @@ func (it *SerialNodeReconciler) Reconcile(ctx context.Context, request reconcile
 		if len(activeChildren) > 1 {
 			it.logger.Info("warning: serial node has more than 1 active children", "namespace", nodeNeedUpdate.Namespace, "name", nodeNeedUpdate.Name, "children", nodeNeedUpdate.Status.ActiveChildren)
 		}
-
+		now := metav1.NewTime(time.Now())
 		// TODO: also check the consistent between spec in task and the spec in child node
 		if len(finishedChildren) == len(nodeNeedUpdate.Spec.Children) {
 			if !WorkflowNodeFinished(nodeNeedUpdate.Status) {
 				it.eventRecorder.Event(&nodeNeedUpdate, recorder.NodeAccomplished{})
 			}
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionTrue,
-				Reason: "",
+				Type:               v1alpha1.ConditionAccomplished,
+				Status:             corev1.ConditionTrue,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 		} else {
 			SetCondition(&nodeNeedUpdate.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:               v1alpha1.ConditionAccomplished,
+				Status:             corev1.ConditionFalse,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 		}
 

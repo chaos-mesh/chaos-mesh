@@ -157,33 +157,37 @@ func (it *StatusCheckReconciler) updateNodeStatus(ctx context.Context, request r
 			)
 			return nil
 		}
-
+		now := metav1.NewTime(time.Now())
 		statusCheck := statusChecks[0]
 		if statusCheck.IsCompleted() {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.StatusCheckCompleted,
+				Type:               v1alpha1.ConditionAccomplished,
+				Status:             corev1.ConditionTrue,
+				Reason:             v1alpha1.StatusCheckCompleted,
+				LastTransitionTime: &now,
 			})
 		} else {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAccomplished,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:               v1alpha1.ConditionAccomplished,
+				Status:             corev1.ConditionFalse,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 		}
 
 		if node.Spec.AbortWithStatusCheck && needToAbort(statusCheck) {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAborted,
-				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.StatusCheckNotExceedSuccessThreshold,
+				Type:               v1alpha1.ConditionAborted,
+				Status:             corev1.ConditionTrue,
+				Reason:             v1alpha1.StatusCheckNotExceedSuccessThreshold,
+				LastTransitionTime: &now,
 			})
 		} else {
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.ConditionAborted,
-				Status: corev1.ConditionFalse,
-				Reason: "",
+				Type:               v1alpha1.ConditionAborted,
+				Status:             corev1.ConditionFalse,
+				Reason:             "",
+				LastTransitionTime: &now,
 			})
 		}
 
